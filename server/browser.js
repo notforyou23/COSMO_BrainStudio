@@ -13,7 +13,7 @@ const fsSync = require('fs');
 const path = require('path');
 const zlib = require('zlib');
 const { promisify } = require('util');
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
 
 const gunzip = promisify(zlib.gunzip);
 
@@ -60,6 +60,16 @@ class BrainScanner {
           uniqueRuns.push(run);
         }
       }
+
+      // Cross-link brains and runs to show lineage
+      brainPackages.forEach(brain => {
+        const sourceRunName = brain.lineage?.publishedFrom || brain.name;
+        const matchingRun = uniqueRuns.find(r => r.name === sourceRunName);
+        if (matchingRun) {
+          brain.sourceRun = matchingRun.name;
+          matchingRun.exportedTo = brain.name;
+        }
+      });
       
       return {
         brainPackages,
@@ -98,7 +108,7 @@ class BrainScanner {
     } catch (error) {
       console.error(`[SCANNER] Failed to scan brains in ${dir}:`, error.message);
     }
-    return brains;
+    return brains.sort((a, b) => new Date(b.created) - new Date(a.created));
   }
 
   async scanRunsFromDir(dir) {
@@ -152,7 +162,8 @@ class BrainScanner {
         size,
         hasOutputs: fsSync.existsSync(path.join(brainPath, 'outputs')),
         hasCoordinator: fsSync.existsSync(path.join(brainPath, 'coordinator')),
-        topics: manifest?.topics?.slice(0, 5) || []
+        topics: manifest?.topics?.slice(0, 5) || [],
+        lineage: manifest?.lineage || null
       };
     } catch (e) { return null; }
   }
@@ -254,6 +265,9 @@ function getHTML() {
     .loading { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-radius: 50%; border-top-color: var(--accent); animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     .empty-state { text-align: center; padding: 80px; color: var(--text-muted); width: 100%; grid-column: 1 / -1; }
+    .lineage-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; }
+    .lineage-badge.linked { background: rgba(88, 166, 255, 0.1); color: var(--accent); border: 1px solid rgba(88, 166, 255, 0.2); }
+    .lineage-badge.published { background: rgba(63, 185, 80, 0.1); color: var(--success); border: 1px solid rgba(63, 185, 80, 0.2); }
   </style>
 </head>
 <body>
@@ -314,11 +328,24 @@ function getHTML() {
         <div class="brain-card">
           <div class="brain-type \${b.type}">\${b.type === 'brain' ? '📚 Published' : '🛠️ Workspace'}</div>
           <div class="brain-name">\${escapeHtml(b.displayName)}</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); margin-bottom: 12px; opacity: 0.7;">Run: \${escapeHtml(b.name)}</div>
+          
+          \${b.type === 'brain' && b.sourceRun ? \`
+            <div class="lineage-badge linked">🔗 Linked to Research Workspace</div>
+          \` : ''}
+          \${b.type === 'run' && b.exportedTo ? \`
+            <div class="lineage-badge published">✅ Published to Library</div>
+          \` : ''}
+
           <div class="brain-domain">\${escapeHtml(b.domain) || 'No description available'}</div>
           <div class="brain-stats">
             <div class="stat"><span class="stat-value">\${(b.nodes || 0).toLocaleString()}</span><span class="stat-label">Nodes</span></div>
             <div class="stat"><span class="stat-value">\${(b.edges || 0).toLocaleString()}</span><span class="stat-label">Edges</span></div>
             <div class="stat"><span class="stat-value">\${b.cycles || 0}</span><span class="stat-label">Cycles</span></div>
+          </div>
+          <div class="brain-meta">
+            <span>📅 \${new Date(b.created).toLocaleDateString()}</span>
+            <span>💾 \${(b.size / (1024 * 1024)).toFixed(1)} MB</span>
           </div>
           <div class="brain-actions">
             <button class="btn btn-view" onclick="launch('\${b.relativePath.replace(/'/g, "\\\\'")}')">👁️ Explore</button>
@@ -455,6 +482,18 @@ async function startServer() {
         
         if (!fsSync.existsSync(fullPath)) {
           throw new Error('Brain path not found: ' + brainPath);
+        }
+
+        // Kill any existing studio process on the target port
+        try {
+          console.log(`[BROWSER] Ensuring port ${STUDIO_PORT} is free...`);
+          if (process.platform === 'win32') {
+            execSync(`for /f "tokens=5" %a in ('netstat -aon ^| findstr :${STUDIO_PORT}') do taskkill /f /pid %a`, { stdio: 'ignore' });
+          } else {
+            execSync(`lsof -ti:${STUDIO_PORT} | xargs kill -9`, { stdio: 'ignore' });
+          }
+        } catch (e) {
+          // Port was likely not in use, which is fine
         }
 
         console.log(`[BROWSER] Launching Studio for: ${fullPath}`);

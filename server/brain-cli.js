@@ -232,7 +232,10 @@ async function exportBrain(runName, options = {}) {
     topics: topics.slice(0, 20),  // Top 20 topics
     license: 'proprietary',  // Default, can be overridden
     visibility: 'private',   // Default
-    lineage: buildLineage(mergeReport),
+    lineage: {
+      ...buildLineage(mergeReport),
+      publishedFrom: baseName,
+    },
     checksums: {
       'state.json.gz': stateChecksum,
     },
