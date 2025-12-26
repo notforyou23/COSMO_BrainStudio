@@ -28,63 +28,56 @@ const PLATFORM_ROOT = path.join(SERVER_DIR, '..');
 class BrainScanner {
   constructor(platformRoot) {
     this.platformRoot = platformRoot;
-    // Strictly local paths - no connection to external COSMO system
+    // Local brains are always scanned
     this.brainsDir = path.join(platformRoot, 'brains');
-    this.runsDir = path.join(platformRoot, 'runs');
+    
+    // External runs path (optional, from .env)
+    // This connects the standalone player to the COSMO research engine
+    this.externalRunsDir = process.env.COSMO_RUNS_PATH ? 
+      path.resolve(platformRoot, process.env.COSMO_RUNS_PATH) : 
+      null;
+      
+    // Local runs folder within this repo (fallback staging area)
+    this.localRunsDir = path.join(platformRoot, 'runs');
   }
 
   async scanAll() {
-    // Scan local brains and local runs
     const brainPackages = await this.scanDirectory(this.brainsDir);
-    const runs = await this.scanRuns();
+    
+    // Scan runs from both local and external sources
+    const externalRuns = this.externalRunsDir ? await this.scanRunsFromDir(this.externalRunsDir) : [];
+    const localRuns = await this.scanRunsFromDir(this.localRunsDir);
+    
+    // Combine and deduplicate runs by name
+    const allRuns = [...localRuns, ...externalRuns];
+    const uniqueRuns = [];
+    const seenRunNames = new Set();
+    
+    for (const run of allRuns) {
+      if (!seenRunNames.has(run.name)) {
+        seenRunNames.add(run.name);
+        uniqueRuns.push(run);
+      }
+    }
     
     return {
       brainPackages,
-      runs,
-      total: brainPackages.length + runs.length
+      runs: uniqueRuns,
+      total: brainPackages.length + uniqueRuns.length
     };
   }
 
-  async scanDirectory(dir) {
-    const brains = [];
-    if (!fsSync.existsSync(dir)) return brains;
+  // Generic run scanner
+  async scanRunsFromDir(dir) {
+    const runs = [];
+    if (!fsSync.existsSync(dir)) return runs;
     
     try {
       const entries = await fs.readdir(dir, { withFileTypes: true });
       
       for (const entry of entries) {
-        if (entry.isDirectory() && entry.name.endsWith('.brain')) {
-          const brainPath = path.join(dir, entry.name);
-          const metadata = await this.loadBrainMetadata(brainPath);
-          
-          if (metadata) {
-            brains.push({
-              type: 'brain',
-              name: entry.name.replace('.brain', ''),
-              path: brainPath,
-              // Calculate relative path from platform root if possible, otherwise use full path
-              relativePath: path.relative(this.platformRoot, brainPath),
-              ...metadata
-            });
-          }
-        }
-      }
-    } catch (error) {
-      console.error(`[SCANNER] Failed to scan directory ${dir}:`, error.message);
-    }
-    return brains;
-  }
-
-  async scanRuns() {
-    const runs = [];
-    if (!fsSync.existsSync(this.runsDir)) return runs;
-    
-    try {
-      const entries = await fs.readdir(this.runsDir, { withFileTypes: true });
-      
-      for (const entry of entries) {
         if (entry.isDirectory() && !entry.name.startsWith('_') && !entry.name.startsWith('.')) {
-          const runPath = path.join(this.runsDir, entry.name);
+          const runPath = path.join(dir, entry.name);
           const metadata = await this.loadRunMetadata(runPath);
           
           if (metadata) {
@@ -92,6 +85,7 @@ class BrainScanner {
               type: 'run',
               name: entry.name,
               path: runPath,
+              // Calculate relative path from platform root for the frontend
               relativePath: path.relative(this.platformRoot, runPath),
               ...metadata
             });
@@ -99,7 +93,7 @@ class BrainScanner {
         }
       }
     } catch (error) {
-      console.error('[SCANNER] Failed to scan runs:', error);
+      console.error(`[SCANNER] Failed to scan runs in ${dir}:`, error.message);
     }
     
     return runs.sort((a, b) => new Date(b.created) - new Date(a.created));
