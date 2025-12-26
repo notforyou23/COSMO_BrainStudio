@@ -269,13 +269,15 @@ function getHTML() {
   <main class="main">
     <section class="section">
       <div class="section-header">
-        <div class="section-title">📦 Crystallized Brain Packages <span class="section-count" id="brainCount">0</span></div>
+        <div class="section-title">💎 Crystallized Intelligence <span class="section-count" id="brainCount">0</span></div>
+        <div style="font-size: 12px; color: var(--text-muted);">Portable knowledge artifacts. Ready for distribution and compound research.</div>
       </div>
       <div id="brainPackagesGrid" class="brain-grid"><div class="loading"></div></div>
     </section>
     <section class="section">
       <div class="section-header">
-        <div class="section-title">🚀 Active Research Runs <span class="section-count" id="runCount">0</span></div>
+        <div class="section-title">🌊 Liquid Research <span class="section-count" id="runCount">0</span></div>
+        <div style="font-size: 12px; color: var(--text-muted);">Active staging area. High-entropy research data waiting to be crystallized.</div>
       </div>
       <div id="runsGrid" class="brain-grid"><div class="loading"></div></div>
     </section>
@@ -305,12 +307,12 @@ function getHTML() {
     function renderGrid(id, brains, isPackage) {
       const grid = document.getElementById(id);
       if (brains.length === 0) {
-        grid.innerHTML = '<div class="empty-state">No ' + (isPackage ? 'packages' : 'runs') + ' found.</div>';
+        grid.innerHTML = '<div class="empty-state">No ' + (isPackage ? 'crystallized brains' : 'liquid research runs') + ' found.</div>';
         return;
       }
       grid.innerHTML = brains.map(b => \`
         <div class="brain-card">
-          <div class="brain-type \${b.type}">\${b.type === 'brain' ? '📦 Brain' : '🚀 Run'}</div>
+          <div class="brain-type \${b.type}">\${b.type === 'brain' ? '💎 Crystallized' : '🌊 Liquid'}</div>
           <div class="brain-name">\${escapeHtml(b.displayName)}</div>
           <div class="brain-domain">\${escapeHtml(b.domain) || 'No description available'}</div>
           <div class="brain-stats">
@@ -319,8 +321,8 @@ function getHTML() {
             <div class="stat"><span class="stat-value">\${b.cycles || 0}</span><span class="stat-label">Cycles</span></div>
           </div>
           <div class="brain-actions">
-            <button class="btn btn-view" onclick="launch('\${b.relativePath.replace(/'/g, "\\\\'")}')">👁️ Open</button>
-            \${b.type === 'run' ? \`<button class="btn btn-export" onclick="exportRun('\${b.name}')">📤 Export</button>\` : ''}
+            <button class="btn btn-view" onclick="launch('\${b.relativePath.replace(/'/g, "\\\\'")}')">👁️ Explore</button>
+            \${b.type === 'run' ? \`<button class="btn btn-export" onclick="exportRun('\${b.name}')" title="Distill this research into a portable, high-density knowledge artifact.">✨ Crystallize</button>\` : ''}
           </div>
         </div>
       \`).join('');
@@ -341,18 +343,18 @@ function getHTML() {
     }
 
     async function exportRun(name) {
-      if (!confirm('Export "' + name + '" as a portable .brain package?')) return;
-      showToast('📤 Exporting run...');
+      if (!confirm('Crystallize "' + name + '"? This will distill the raw research into a portable .brain artifact.')) return;
+      showToast('✨ Crystallizing knowledge...');
       const res = await fetch('/api/export-run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ runName: name })
       }).then(r => r.json());
       if (res.success) {
-        alert('✅ Export complete! Created: ' + res.output);
+        alert('✅ Crystallization complete! Created in brains/ folder.');
         location.reload();
       } else {
-        alert('❌ Export failed: ' + res.error);
+        alert('❌ Crystallization failed: ' + res.error);
       }
     }
 
