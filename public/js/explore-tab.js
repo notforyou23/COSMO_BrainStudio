@@ -474,6 +474,20 @@ function showDetail(node) {
         <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">${node.tag || 'unknown'}</div>
       </div>
     </div>
+
+    <!-- Metadata & Provenance Row -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+      <div style="background: var(--bg-tertiary); padding: 10px; border-radius: 4px;">
+        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">Domain</div>
+        <div style="font-size: 12px; font-weight: 600; color: var(--accent-primary);">${node.domain || 'unknown'}</div>
+      </div>
+      <div style="background: var(--bg-tertiary); padding: 10px; border-radius: 4px;">
+        <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">Provenance</div>
+        <div style="font-size: 11px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${(node.sourceRuns || []).join(', ')}">
+          ${node.sourceRuns ? node.sourceRuns.join(', ') : (node.sourceRun || 'unknown')}
+        </div>
+      </div>
+    </div>
     
     ${total > 0 ? `
       <div>
@@ -503,7 +517,7 @@ function showDetail(node) {
 }
 
 async function selectNodeById(nodeId) {
-  const node = allNodes.find(n => n.id === nodeId);
+  const node = allNodes.find(n => n.id === nodeId || String(n.id) === String(nodeId));
   if (node) {
     await selectNode(node);
   }

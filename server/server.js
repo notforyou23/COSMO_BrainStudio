@@ -1277,8 +1277,10 @@ app.get('/api/nodes/:id', (req, res) => {
   const loader = getBrainLoader();
   if (!loader) return res.status(404).json({ error: 'No brain loaded' });
   
-  const nodeId = parseInt(req.params.id);
-  const node = loader.nodes.find(n => n.id === nodeId);
+  // Try string ID first (V2 style), fallback to number if it's purely numeric
+  const paramId = req.params.id;
+  const nodeId = isNaN(paramId) ? paramId : parseInt(paramId);
+  const node = loader.nodes.find(n => n.id === nodeId || String(n.id) === String(paramId));
   
   if (!node) {
     return res.status(404).json({ error: 'Node not found' });
@@ -1289,8 +1291,9 @@ app.get('/api/nodes/:id', (req, res) => {
   const incomingConnections = [];
   
   loader.edges.forEach(edge => {
-    if (edge.source === nodeId) {
-      const targetNode = loader.nodes.find(n => n.id === edge.target);
+    // Compare source/target with both numeric and string IDs for maximum compatibility
+    if (edge.source === nodeId || String(edge.source) === String(nodeId)) {
+      const targetNode = loader.nodes.find(n => n.id === edge.target || String(n.id) === String(edge.target));
       outgoingConnections.push({
         nodeId: edge.target,
         weight: edge.weight || 0,
@@ -1302,8 +1305,8 @@ app.get('/api/nodes/:id', (req, res) => {
         accessed: edge.accessed
       });
     }
-    if (edge.target === nodeId) {
-      const sourceNode = loader.nodes.find(n => n.id === edge.source);
+    if (edge.target === nodeId || String(edge.target) === String(nodeId)) {
+      const sourceNode = loader.nodes.find(n => n.id === edge.source || String(n.id) === String(edge.source));
       incomingConnections.push({
         nodeId: edge.source,
         weight: edge.weight || 0,
