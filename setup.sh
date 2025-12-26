@@ -28,12 +28,19 @@ else
     echo "✅ .env already exists."
 fi
 
-# 4. Create brains directory
+# 4. Create brains and runs directory
 if [ ! -d brains ]; then
     echo "📁 Creating 'brains' directory..."
     mkdir brains
 else
     echo "✅ 'brains' directory exists."
+fi
+
+if [ ! -d runs ]; then
+    echo "📁 Creating 'runs' directory..."
+    mkdir runs
+else
+    echo "✅ 'runs' directory exists."
 fi
 
 echo ""

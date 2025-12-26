@@ -28,44 +28,20 @@ const PLATFORM_ROOT = path.join(SERVER_DIR, '..');
 class BrainScanner {
   constructor(platformRoot) {
     this.platformRoot = platformRoot;
-    // Default to a 'brains' folder in the platform root
+    // Strictly local paths - no connection to external COSMO system
     this.brainsDir = path.join(platformRoot, 'brains');
-    
-    // Fallback: If we're inside the COSMO repo, also scan the COSMO root
-    this.cosmoRoot = path.join(platformRoot, '..');
-    this.runsDir = path.join(this.cosmoRoot, 'runs');
+    this.runsDir = path.join(platformRoot, 'runs');
   }
 
   async scanAll() {
+    // Scan local brains and local runs
     const brainPackages = await this.scanDirectory(this.brainsDir);
-    
-    // Also scan platform root for .brain folders
-    const rootBrains = await this.scanDirectory(this.platformRoot);
-    
-    // If inside COSMO, scan runs and cosmo root
-    let cosmoBrains = [];
-    let runs = [];
-    if (fsSync.existsSync(this.runsDir)) {
-      cosmoBrains = await this.scanDirectory(this.cosmoRoot);
-      runs = await this.scanRuns();
-    }
-    
-    // Merge and deduplicate by path
-    const allBrainPackages = [...brainPackages, ...rootBrains, ...cosmoBrains];
-    const uniqueBrains = [];
-    const seenPaths = new Set();
-    
-    for (const b of allBrainPackages) {
-      if (!seenPaths.has(b.path)) {
-        seenPaths.add(b.path);
-        uniqueBrains.push(b);
-      }
-    }
+    const runs = await this.scanRuns();
     
     return {
-      brainPackages: uniqueBrains,
+      brainPackages,
       runs,
-      total: uniqueBrains.length + runs.length
+      total: brainPackages.length + runs.length
     };
   }
 
@@ -327,16 +303,47 @@ async function startServer() {
         return;
       }
 
+      if (pathname === '/api/export-run' && req.method === 'POST') {
+        let body = '';
+        for await (const chunk of req) body += chunk;
+        const { runName } = JSON.parse(body);
+
+        try {
+          const cliPath = path.join(SERVER_DIR, 'brain-cli.js');
+          const outputPath = path.join(PLATFORM_ROOT, 'brains', `${runName}.brain`);
+          const sourceRunPath = path.join(PLATFORM_ROOT, 'runs', runName);
+          
+          if (!fsSync.existsSync(path.join(PLATFORM_ROOT, 'brains'))) {
+            await fs.mkdir(path.join(PLATFORM_ROOT, 'brains'));
+          }
+
+          const args = ['export', sourceRunPath, '--output', outputPath, '--with-outputs'];
+          const proc = spawn('node', [cliPath, ...args], {
+            cwd: PLATFORM_ROOT,
+            stdio: 'pipe'
+          });
+
+          await new Promise((resolve, reject) => {
+            proc.on('close', code => code === 0 ? resolve() : reject(new Error(`Exit code ${code}`)));
+          });
+
+          res.end(JSON.stringify({ success: true, output: `${runName}.brain` }));
+        } catch (error) {
+          res.end(JSON.stringify({ success: false, error: error.message }));
+        }
+        return;
+      }
+
       if (pathname === '/api/launch' && req.method === 'POST') {
         let body = '';
         for await (const chunk of req) body += chunk;
         const { brainPath } = JSON.parse(body);
 
-        // Resolve path: check relative to platform root first
-        let fullPath = path.resolve(PLATFORM_ROOT, brainPath);
+        // Resolve path: check relative to platform root only
+        const fullPath = path.resolve(PLATFORM_ROOT, brainPath);
+        
         if (!fsSync.existsSync(fullPath)) {
-          // If not found, try absolute path (as fallback for COSMO-internal testing)
-          fullPath = path.resolve(brainPath);
+          throw new Error('Brain path not found within platform: ' + brainPath);
         }
 
         console.log(`[BROWSER] Launching Studio for: ${fullPath}`);
