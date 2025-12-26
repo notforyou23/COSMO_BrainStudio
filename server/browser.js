@@ -4,7 +4,7 @@
  * COSMO Brain Browser (Portable)
  * 
  * Landing page for discovering and managing local brains.
- * Refactored for standalone use.
+ * Refactored for standalone use with full features (Scan, Export, Launch).
  */
 
 const http = require('http');
@@ -42,32 +42,65 @@ class BrainScanner {
   }
 
   async scanAll() {
-    const brainPackages = await this.scanDirectory(this.brainsDir);
-    
-    // Scan runs from both local and external sources
-    const externalRuns = this.externalRunsDir ? await this.scanRunsFromDir(this.externalRunsDir) : [];
-    const localRuns = await this.scanRunsFromDir(this.localRunsDir);
-    
-    // Combine and deduplicate runs by name
-    const allRuns = [...localRuns, ...externalRuns];
-    const uniqueRuns = [];
-    const seenRunNames = new Set();
-    
-    for (const run of allRuns) {
-      if (!seenRunNames.has(run.name)) {
-        seenRunNames.add(run.name);
-        uniqueRuns.push(run);
+    try {
+      const brainPackages = await this.scanBrainsFromDir(this.brainsDir);
+      
+      // Scan runs from both local and external sources
+      const externalRuns = this.externalRunsDir ? await this.scanRunsFromDir(this.externalRunsDir) : [];
+      const localRuns = await this.scanRunsFromDir(this.localRunsDir);
+      
+      // Combine and deduplicate runs by name
+      const allRuns = [...localRuns, ...externalRuns];
+      const uniqueRuns = [];
+      const seenRunNames = new Set();
+      
+      for (const run of allRuns) {
+        if (!seenRunNames.has(run.name)) {
+          seenRunNames.add(run.name);
+          uniqueRuns.push(run);
+        }
       }
+      
+      return {
+        brainPackages,
+        runs: uniqueRuns,
+        total: brainPackages.length + uniqueRuns.length
+      };
+    } catch (error) {
+      console.error('[SCANNER] Fatal error during scan:', error);
+      return { brainPackages: [], runs: [], total: 0, error: error.message };
     }
-    
-    return {
-      brainPackages,
-      runs: uniqueRuns,
-      total: brainPackages.length + uniqueRuns.length
-    };
   }
 
-  // Generic run scanner
+  async scanBrainsFromDir(dir) {
+    const brains = [];
+    if (!fsSync.existsSync(dir)) return brains;
+    
+    try {
+      const entries = await fs.readdir(dir, { withFileTypes: true });
+      
+      for (const entry of entries) {
+        if (entry.isDirectory() && entry.name.endsWith('.brain')) {
+          const brainPath = path.join(dir, entry.name);
+          const metadata = await this.loadBrainMetadata(brainPath);
+          
+          if (metadata) {
+            brains.push({
+              type: 'brain',
+              name: entry.name.replace('.brain', ''),
+              path: brainPath,
+              relativePath: path.relative(this.platformRoot, brainPath),
+              ...metadata
+            });
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`[SCANNER] Failed to scan brains in ${dir}:`, error.message);
+    }
+    return brains;
+  }
+
   async scanRunsFromDir(dir) {
     const runs = [];
     if (!fsSync.existsSync(dir)) return runs;
@@ -85,7 +118,6 @@ class BrainScanner {
               type: 'run',
               name: entry.name,
               path: runPath,
-              // Calculate relative path from platform root for the frontend
               relativePath: path.relative(this.platformRoot, runPath),
               ...metadata
             });
@@ -103,52 +135,41 @@ class BrainScanner {
     try {
       const manifestPath = path.join(brainPath, 'manifest.json');
       const statePath = path.join(brainPath, 'state.json.gz');
-      
       if (!fsSync.existsSync(statePath)) return null;
-
       let manifest = null;
       if (fsSync.existsSync(manifestPath)) {
         manifest = JSON.parse(await fs.readFile(manifestPath, 'utf8'));
       }
-
-      const stat = await fs.stat(statePath);
-      const totalSize = await this.getDirectorySize(brainPath);
-
+      const size = await this.getDirectorySize(brainPath);
       return {
         displayName: manifest?.brain?.displayName || manifest?.brain?.name || path.basename(brainPath).replace('.brain', ''),
         domain: manifest?.brain?.description || '',
-        created: manifest?.brain?.created || stat.birthtime,
+        created: manifest?.brain?.created || (await fs.stat(statePath)).birthtime,
         exported: manifest?.brain?.exported,
         nodes: manifest?.content?.nodeCount || 0,
         edges: manifest?.content?.edgeCount || 0,
         cycles: manifest?.cosmo?.cycles || 0,
-        size: totalSize,
+        size,
         hasOutputs: fsSync.existsSync(path.join(brainPath, 'outputs')),
         hasCoordinator: fsSync.existsSync(path.join(brainPath, 'coordinator')),
         topics: manifest?.topics?.slice(0, 5) || []
       };
-    } catch (error) {
-      return null;
-    }
+    } catch (e) { return null; }
   }
 
   async loadRunMetadata(runPath) {
     try {
       const statePath = path.join(runPath, 'state.json.gz');
       const metadataPath = path.join(runPath, 'run-metadata.json');
-      
       if (!fsSync.existsSync(statePath)) return null;
-
       let runMetadata = {};
       if (fsSync.existsSync(metadataPath)) {
         runMetadata = JSON.parse(await fs.readFile(metadataPath, 'utf8'));
       }
-
       const compressed = await fs.readFile(statePath);
       const decompressed = await gunzip(compressed);
       const state = JSON.parse(decompressed.toString());
-      const totalSize = await this.getDirectorySize(runPath);
-
+      const size = await this.getDirectorySize(runPath);
       return {
         displayName: runMetadata.domain || path.basename(runPath),
         domain: runMetadata.context || '',
@@ -157,14 +178,12 @@ class BrainScanner {
         edges: state.memory?.edges?.length || 0,
         cycles: state.cycleCount || 0,
         mode: runMetadata.explorationMode || 'unknown',
-        size: totalSize,
+        size,
         hasOutputs: fsSync.existsSync(path.join(runPath, 'outputs')),
         hasCoordinator: fsSync.existsSync(path.join(runPath, 'coordinator')),
         isActive: fsSync.existsSync(path.join(runPath, 'runtime'))
       };
-    } catch (error) {
-      return null;
-    }
+    } catch (e) { return null; }
   }
 
   async getDirectorySize(dirPath) {
@@ -180,16 +199,12 @@ class BrainScanner {
           totalSize += stat.size;
         }
       }
-    } catch (error) {}
+    } catch (e) {}
     return totalSize;
   }
 }
 
-// HTML Template (embedded for portability)
-function getHTML(port) {
-  // Reuse the beautiful HTML from original brain-browser.js but update the API calls
-  // (Truncated for brevity in this call, but I will provide the full implementation)
-  // ... (Full HTML from scripts/brain-browser.js will be here)
+function getHTML() {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -207,59 +222,112 @@ function getHTML(port) {
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', sans-serif; background: var(--bg-primary); color: var(--text-primary); }
-    .header { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 20px 40px; }
+    .header { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 20px 40px; position: sticky; top: 0; z-index: 100; }
     .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
     .logo { display: flex; align-items: center; gap: 12px; }
     .logo-icon { font-size: 32px; }
     .logo-text h1 { font-size: 24px; font-weight: 700; background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .main { max-width: 1400px; margin: 0 auto; padding: 40px; }
+    .section { margin-bottom: 48px; }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .section-title { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 12px; }
+    .section-count { background: var(--bg-tertiary); padding: 4px 12px; border-radius: 20px; font-size: 13px; color: var(--text-secondary); }
     .brain-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 24px; }
     .brain-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 24px; cursor: pointer; transition: all 0.3s; position: relative; overflow: hidden; }
-    .brain-card:hover { border-color: var(--accent); transform: translateY(-4px); }
+    .brain-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3); }
+    .brain-type { position: absolute; top: 16px; right: 16px; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+    .brain-type.brain { background: rgba(88, 166, 255, 0.15); color: var(--accent); }
+    .brain-type.run { background: rgba(63, 185, 80, 0.15); color: var(--success); }
     .brain-name { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .brain-domain { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5; height: 40px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
     .brain-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 20px 0; }
     .stat { text-align: center; padding: 12px; background: var(--bg-tertiary); border-radius: 8px; }
-    .stat-value { font-size: 18px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--accent); }
-    .stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; }
-    .btn { padding: 10px 20px; border-radius: 8px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-    .btn-primary { background: var(--accent); color: white; }
-    .btn-small { width: 100%; padding: 8px; margin-top: 12px; }
-    .empty-state { text-align: center; padding: 80px; color: var(--text-muted); }
+    .stat-value { font-size: 18px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--accent); display: block; }
+    .stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; margin-top: 4px; }
+    .brain-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text-muted); margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .brain-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .btn { flex: 1; padding: 10px; border-radius: 8px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+    .btn-view { background: var(--accent); color: white; }
+    .btn-view:hover { background: var(--accent-hover); transform: translateY(-1px); }
+    .btn-export { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); }
+    .btn-export:hover { background: var(--bg-hover); }
+    .loading { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-radius: 50%; border-top-color: var(--accent); animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .empty-state { text-align: center; padding: 80px; color: var(--text-muted); width: 100%; grid-column: 1 / -1; }
   </style>
 </head>
 <body>
   <header class="header">
     <div class="header-content">
       <div class="logo"><div class="logo-icon">🧠</div><div class="logo-text"><h1>COSMO Brain Browser</h1></div></div>
-      <button class="btn btn-primary" onclick="location.reload()">🔄 Refresh</button>
+      <div style="display:flex; gap:12px;">
+        <button class="btn btn-export" style="flex:none;" onclick="location.reload()">🔄 Refresh</button>
+        <button class="btn btn-view" style="flex:none;" onclick="window.open('https://cosmo.evobrew.com', '_blank')">🌐 Vision</button>
+      </div>
     </div>
   </header>
   <main class="main">
-    <div id="brainGrid" class="brain-grid"></div>
+    <section class="section">
+      <div class="section-header">
+        <div class="section-title">📦 Crystallized Brain Packages <span class="section-count" id="brainCount">0</span></div>
+      </div>
+      <div id="brainPackagesGrid" class="brain-grid"><div class="loading"></div></div>
+    </section>
+    <section class="section">
+      <div class="section-header">
+        <div class="section-title">🚀 Active Research Runs <span class="section-count" id="runCount">0</span></div>
+      </div>
+      <div id="runsGrid" class="brain-grid"><div class="loading"></div></div>
+    </section>
   </main>
   <script>
     async function init() {
-      const data = await fetch('/api/scan').then(r => r.json());
-      const grid = document.getElementById('brainGrid');
-      const all = [...data.brainPackages, ...data.runs];
-      if (all.length === 0) {
-        grid.innerHTML = '<div class="empty-state">No brains found. Add some .brain folders to the "brains" directory.</div>';
+      try {
+        const response = await fetch('/api/scan');
+        const data = await response.json();
+        
+        if (data.error) {
+          showToast('❌ Scan Error: ' + data.error);
+          return;
+        }
+
+        document.getElementById('brainCount').textContent = (data.brainPackages || []).length;
+        document.getElementById('runCount').textContent = (data.runs || []).length;
+
+        renderGrid('brainPackagesGrid', data.brainPackages || [], true);
+        renderGrid('runsGrid', data.runs || [], false);
+      } catch (e) {
+        showToast('❌ Failed to connect to server');
+        console.error(e);
+      }
+    }
+
+    function renderGrid(id, brains, isPackage) {
+      const grid = document.getElementById(id);
+      if (brains.length === 0) {
+        grid.innerHTML = '<div class="empty-state">No ' + (isPackage ? 'packages' : 'runs') + ' found.</div>';
         return;
       }
-      grid.innerHTML = all.map(b => \`
+      grid.innerHTML = brains.map(b => \`
         <div class="brain-card">
-          <div class="brain-name">\${b.displayName}</div>
-          <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">\${b.domain || 'Portable Brain Package'}</div>
+          <div class="brain-type \${b.type}">\${b.type === 'brain' ? '📦 Brain' : '🚀 Run'}</div>
+          <div class="brain-name">\${escapeHtml(b.displayName)}</div>
+          <div class="brain-domain">\${escapeHtml(b.domain) || 'No description available'}</div>
           <div class="brain-stats">
-            <div class="stat"><div class="stat-value">\${b.nodes}</div><div class="stat-label">Nodes</div></div>
-            <div class="stat"><div class="stat-value">\${b.edges}</div><div class="stat-label">Edges</div></div>
-            <div class="stat"><div class="stat-value">\${b.cycles}</div><div class="stat-label">Cycles</div></div>
+            <div class="stat"><span class="stat-value">\${(b.nodes || 0).toLocaleString()}</span><span class="stat-label">Nodes</span></div>
+            <div class="stat"><span class="stat-value">\${(b.edges || 0).toLocaleString()}</span><span class="stat-label">Edges</span></div>
+            <div class="stat"><span class="stat-value">\${b.cycles || 0}</span><span class="stat-label">Cycles</span></div>
           </div>
-          <button class="btn btn-primary btn-small" onclick="launch('\${b.relativePath.replace(/'/g, "\\\\'")}')">🚀 Open in Studio</button>
+          <div class="brain-actions">
+            <button class="btn btn-view" onclick="launch('\${b.relativePath.replace(/'/g, "\\\\'")}')">👁️ Open</button>
+            \${b.type === 'run' ? \`<button class="btn btn-export" onclick="exportRun('\${b.name}')">📤 Export</button>\` : ''}
+          </div>
         </div>
       \`).join('');
     }
+
     async function launch(path) {
+      showToast('🚀 Launching Brain Studio...');
       const res = await fetch('/api/launch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -267,7 +335,39 @@ function getHTML(port) {
       }).then(r => r.json());
       if (res.success) {
         setTimeout(() => window.open('http://localhost:' + res.port, '_blank'), 1500);
+      } else {
+        alert('❌ Launch failed: ' + res.error);
       }
+    }
+
+    async function exportRun(name) {
+      if (!confirm('Export "' + name + '" as a portable .brain package?')) return;
+      showToast('📤 Exporting run...');
+      const res = await fetch('/api/export-run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ runName: name })
+      }).then(r => r.json());
+      if (res.success) {
+        alert('✅ Export complete! Created: ' + res.output);
+        location.reload();
+      } else {
+        alert('❌ Export failed: ' + res.error);
+      }
+    }
+
+    function showToast(msg) {
+      const t = document.createElement('div');
+      t.style.cssText = 'position:fixed; bottom:20px; right:20px; background:#21262d; color:white; padding:12px 24px; border-radius:8px; border:1px solid #30363d; z-index:1000; box-shadow: 0 4px 12px rgba(0,0,0,0.5);';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 3000);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text || '';
+      return div.innerHTML;
     }
     init();
   </script>
@@ -287,12 +387,13 @@ async function startServer() {
     try {
       if (pathname === '/') {
         res.setHeader('Content-Type', 'text/html');
-        res.end(getHTML(PORT));
+        res.end(getHTML());
         return;
       }
 
       if (pathname === '/api/scan') {
         const data = await scanner.scanAll();
+        res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify(data));
         return;
       }
@@ -305,8 +406,17 @@ async function startServer() {
         try {
           const cliPath = path.join(SERVER_DIR, 'brain-cli.js');
           const outputPath = path.join(PLATFORM_ROOT, 'brains', `${runName}.brain`);
-          const sourceRunPath = path.join(PLATFORM_ROOT, 'runs', runName);
           
+          // Check local runs first, then external runs
+          let sourceRunPath = path.join(PLATFORM_ROOT, 'runs', runName);
+          if (!fsSync.existsSync(sourceRunPath) && scanner.externalRunsDir) {
+            sourceRunPath = path.join(scanner.externalRunsDir, runName);
+          }
+          
+          if (!fsSync.existsSync(sourceRunPath)) {
+            throw new Error('Run not found: ' + runName);
+          }
+
           if (!fsSync.existsSync(path.join(PLATFORM_ROOT, 'brains'))) {
             await fs.mkdir(path.join(PLATFORM_ROOT, 'brains'));
           }
@@ -321,8 +431,10 @@ async function startServer() {
             proc.on('close', code => code === 0 ? resolve() : reject(new Error(`Exit code ${code}`)));
           });
 
+          res.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify({ success: true, output: `${runName}.brain` }));
         } catch (error) {
+          res.setHeader('Content-Type', 'application/json');
           res.end(JSON.stringify({ success: false, error: error.message }));
         }
         return;
@@ -333,11 +445,14 @@ async function startServer() {
         for await (const chunk of req) body += chunk;
         const { brainPath } = JSON.parse(body);
 
-        // Resolve path: check relative to platform root only
-        const fullPath = path.resolve(PLATFORM_ROOT, brainPath);
+        let fullPath = path.resolve(PLATFORM_ROOT, brainPath);
+        if (!fsSync.existsSync(fullPath) && scanner.externalRunsDir) {
+          // Fallback for external runs
+          fullPath = path.resolve(scanner.externalRunsDir, path.basename(brainPath));
+        }
         
         if (!fsSync.existsSync(fullPath)) {
-          throw new Error('Brain path not found within platform: ' + brainPath);
+          throw new Error('Brain path not found: ' + brainPath);
         }
 
         console.log(`[BROWSER] Launching Studio for: ${fullPath}`);
@@ -351,7 +466,7 @@ async function startServer() {
         });
         
         proc.unref();
-        
+        res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify({ success: true, port: STUDIO_PORT }));
         return;
       }
@@ -360,6 +475,7 @@ async function startServer() {
       res.end('Not found');
     } catch (error) {
       res.statusCode = 500;
+      res.setHeader('Content-Type', 'application/json');
       res.end(JSON.stringify({ error: error.message }));
     }
   });
@@ -374,8 +490,8 @@ async function startServer() {
 ║  👁️  Studio:  http://localhost:${STUDIO_PORT}                           ║
 ║                                                              ║
 ║  Scanning:                                                   ║
-║   📁 ${path.relative(process.cwd(), path.join(PLATFORM_ROOT, 'brains'))}                                         ║
-║   📁 ${path.relative(process.cwd(), PLATFORM_ROOT)}                                                ║
+║   📁 ./brains (Local packages)                               ║
+║   📁 ${scanner.externalRunsDir ? scanner.externalRunsDir : './runs (Local runs only)'} ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
 `);
@@ -387,4 +503,3 @@ if (require.main === module) {
 }
 
 module.exports = { startServer, BrainScanner };
-

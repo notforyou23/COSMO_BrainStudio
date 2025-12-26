@@ -32,15 +32,22 @@ npm start
 ```
 Browser available at: `http://localhost:3398`
 
-## 📁 Repository Structure
+## 📁 Repository Structure & Philosophy
+
+This platform is built on the concept of **Knowledge Crystallization**. 
+
+*   **`brains/`**: Your permanent, tracked knowledge library. These are distilled research artifacts.
+*   **`runs/`**: A local staging area (ignored by Git) where you can drop raw research for review or export.
+
+For a deep dive into our vision, see:
+*   [The Crystallization Concept](docs/CRYSTALLIZATION_CONCEPT.md) — Why we separate "Runs" from "Brains."
+*   [COSMO Platform Vision](docs/BRAIN_PLATFORM_VISION.md) — The roadmap for the "GitHub for AI Knowledge."
 
 ```
 COSMO_BrainStudio/
 ├── index.js            # Unified Launcher (npm start)
-├── README.md           # Documentation & Security Guide
-├── .env.example        # Template for API keys
-├── .gitignore          # Protection for sensitive files
-├── brains/             # Included example .brain packages
+├── README.md           # This guide
+├── docs/               # Architecture and Vision documents
 ├── server/             # Refactored Browser and Studio servers
 ├── lib/                # Standalone AI and Query logic
 └── public/             # Full IDE and Browser frontend
