@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/lib/plotting.py` with lightweight matplotlib helpers to apply a consistent project-wide style, create standardized figures, add panel labels, and save plots deterministically across multiple formats.",
+  "reasoning": "",
+  "responseId": "resp_03f3d5f8c5eda2d80069499fae1fbc81969bb9f43bd377e836",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3051,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1581,
+    "output_tokens_details": {
+      "reasoning_tokens": 148
+    },
+    "total_tokens": 4632
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_03f3d5f8c5eda2d80069499faed2f08196b2789ae9f5bcc0f6",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_03f3d5f8c5eda2d80069499fb1bff08196a60b8fde66440aeb",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/lib/plotting.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\nr'''\"\"\"\nPlotting helpers for consistent styling and deterministic figure saving.\n\nDesign goals\n------------\n- Provide a small, dependency-light wrapper around matplotlib.\n- Centralize rcParams so all toy experiments share consistent aesthetics.\n- Make saving figures reproducible (tight layout, fixed dpi, deterministic metadata).\n\nExample\n-------\nfrom pathlib import Path\nimport numpy as np\nfrom src.lib.plotting import apply_style, new_fig, save_fig\n\napply_style()\nfig, ax = new_fig()\nx = np.linspace(0, 1, 200)\nax.plot(x, np.sin(2*np.pi*x), label=\"signal\")\nax.set(xlabel=\"x\", ylabel=\"y\", title=\"Demo\")\nax.legend()\nsave_fig(fig, Path(\"out/demo\"), formats=(\"png\",\"pdf\"))\n\"\"\"\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Iterable, Optional, Sequence, Tuple\n\nimport matplotlib as mpl\nimport matplotlib.pyplot as plt\n\n\n_DEFAULT_STYLE = {\n    # Typography\n    \"font.size\": 11,\n    \"axes.titlesize\": 12,\n    \"axes.labelsize\": 11,\n    \"legend.fontsize\": 10,\n    \"xtick.labelsize\": 10,\n    \"ytick.labelsize\": 10,\n    # Lines\n    \"lines.linewidth\": 1.6,\n    \"lines.markersize\": 5,\n    # Layout / look\n    \"figure.dpi\": 120,\n    \"savefig.dpi\": 200,\n    \"figure.facecolor\": \"white\",\n    \"axes.facecolor\": \"white\",\n    \"axes.grid\": True,\n    \"grid.alpha\": 0.25,\n    \"grid.linestyle\": \"-\",\n    \"axes.spines.top\": False,\n    \"axes.spines.right\": False,\n    \"legend.frameon\": False,\n    \"axes.prop_cycle\": mpl.cycler(color=[\n        \"#1f77b4\", \"#ff7f0e\", \"#2ca02c\", \"#d62728\", \"#9467bd\",\n        \"#8c564b\", \"#e377c2\", \"#7f7f7f\", \"#bcbd22\", \"#17becf\",\n    ]),\n    # Deterministic output: embed minimal metadata where possible\n    \"svg.hashsalt\": \"reproducible-toy-experiments\",\n}''',\nr'''@dataclass(frozen=True)\nclass FigSpec:\n    \"\"\"Convenience bundle for consistent figure creation.\"\"\"\n    figsize: Tuple[float, float] = (5.2, 3.4)\n    constrained_layout: bool = True\n    sharex: bool = False\n    sharey: bool = False\n\n\n_STYLE_APPLIED = False\n\n\ndef apply_style(extra: Optional[dict] = None) -> None:\n    \"\"\"\n    Apply project-wide matplotlib rcParams.\n\n    Parameters\n    ----------\n    extra:\n        Optional dict of rcParams to override the defaults.\n    \"\"\"\n    global _STYLE_APPLIED\n    params = dict(_DEFAULT_STYLE)\n    if extra:\n        params.update(extra)\n    mpl.rcParams.update(params)\n    _STYLE_APPLIED = True\n\n\ndef new_fig(\n    spec: FigSpec = FigSpec(),\n    nrows: int = 1,\n    ncols: int = 1,\n) -> Tuple[plt.Figure, plt.Axes]:\n    \"\"\"Create a styled figure/axes pair (or axes array if nrows*ncols>1).\"\"\"\n    if not _STYLE_APPLIED:\n        apply_style()\n    fig, axes = plt.subplots(\n        nrows=nrows,\n        ncols=ncols,\n        figsize=spec.figsize,\n        constrained_layout=spec.constrained_layout,\n        sharex=spec.sharex,\n        sharey=spec.sharey,\n    )\n    return fig, axes''',\nr'''def _ensure_parent(path: Path) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n\n\ndef save_fig(\n    fig: plt.Figure,\n    basepath: Path,\n    *,\n    formats: Sequence[str] = (\"png\",),\n    dpi: Optional[int] = None,\n    transparent: bool = False,\n    close: bool = True,\n) -> Iterable[Path]:\n    \"\"\"\n    Save a figure to one or more formats.\n\n    Parameters\n    ----------\n    fig:\n        Matplotlib figure.\n    basepath:\n        Output path without suffix (e.g., Path(\"out/figure_01\")).\n    formats:\n        File extensions to write (e.g., (\"png\",\"pdf\",\"svg\")).\n    dpi:\n        Override dpi; if None, uses rcParams[\"savefig.dpi\"].\n    transparent:\n        Forwarded to savefig; defaults False for paper-like backgrounds.\n    close:\n        If True, closes the figure after saving to reduce memory usage.\n\n    Returns\n    -------\n    Iterable[Path]:\n        Paths written.\n    \"\"\"\n    if not _STYLE_APPLIED:\n        apply_style()\n\n    written = []\n    for fmt in formats:\n        fmt = fmt.lstrip(\".\").lower()\n        out = basepath.with_suffix(f\".{fmt}\")\n        _ensure_parent(out)\n        metadata = None\n        # Keep metadata minimal/deterministic where supported.\n        if fmt in {\"png\", \"pdf\", \"svg\"}:\n            metadata = {\"Creator\": \"generated_script_1766432556417\", \"Title\": out.stem}\n        fig.savefig(\n            out,\n            dpi=dpi,\n            bbox_inches=\"tight\",\n            pad_inches=0.02,\n            transparent=transparent,\n            metadata=metadata,\n        )\n        written.append(out)\n\n    if close:\n        plt.close(fig)\n    return written\n\n\ndef add_panel_label(ax: plt.Axes, label: str, *, x: float = 0.0, y: float = 1.02) -> None:\n    \"\"\"Add a panel label like '(a)' in axes coordinates.\"\"\"\n    ax.text(\n        x, y, label,\n        transform=ax.transAxes,\n        ha=\"left\", va=\"bottom\",\n        fontweight=\"bold\",\n    )'''\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/lib/plotting.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/lib/plotting.py\nDIR_STATE:[\"src/lib/io.py\", \"src/lib/plotting.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_03f3d5f8c5eda2d80069499fc7f0348196821cdc928d144058",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/lib/plotting.py` with lightweight matplotlib helpers to apply a consistent project-wide style, create standardized figures, add panel labels, and save plots deterministically across multiple formats."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

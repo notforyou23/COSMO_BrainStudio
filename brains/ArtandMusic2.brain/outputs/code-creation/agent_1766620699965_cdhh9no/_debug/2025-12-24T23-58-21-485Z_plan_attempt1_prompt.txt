@@ -1,0 +1,32 @@
+You are planning a python cli_tool implementation for the following mission:
+Create a canonical-path enforcement + migration step: ensure that artifacts currently generated under runtime/outputs/ (e.g., generated reports, schemas, tools) are copied/synced into the canonical /outputs/ tree, and update references accordingly. Emit a /outputs/qa/path_canonicalization_report.md listing what moved and what remains duplicated.
+
+Relevant context:
+- [INTROSPECTION] 2025-12-24T23-41-08-888Z_runtime_outputs_CANONICALIZATION_REPORT_md_stage1_attempt1_prompt.txt from code-creation agent agen
+- [CONSOLIDATED] Establish a deterministic scaffold-to-artifact pipeline where a single command generates the project’s report structure and t
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [INTROSPECTION] 2025-12-24T23-48-14-959Z_src_cli_add_case_study_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766620093681_9
+- [FORK:fork_23] Bold aesthetic innovation can treat tradition as a scaffold rather than a shackle: by reworking time-tested forms and techniq
+- [AGENT: agent_1766614627655_4lrkb6s] Across perspectives, “genius vs. craft/process” narratives operate less as attitudes and more as instit
+- [INTROSPECTION] 2025-12-24T23-41-08-888Z_runtime_outputs_CANONICALIZATION_REPORT_md_stage1_attempt2_prompt.txt from code-creation agent agen
+- [INTROSPECTION] 2025-12-24T23-48-14-959Z_src_cli_add_case_study_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766620093681_9
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

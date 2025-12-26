@@ -1,0 +1,56 @@
+{
+  "content": "Created a pytest smoke test that runs the evidence-pack pipeline (via import or subprocess) and asserts the required artifacts are produced and minimally valid in either a temp outputs directory or the repo’s default `/outputs`.",
+  "reasoning": "",
+  "responseId": "resp_0a96827308e13e7f00694b4b3274808196a01d59483afdb185",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2890,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1403,
+    "output_tokens_details": {
+      "reasoning_tokens": 456
+    },
+    "total_tokens": 4293
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0a96827308e13e7f00694b4b33273c81969fab1c04dd105620",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a96827308e13e7f00694b4b39d4bc81968225a837f0014745",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, sys, textwrap, inspect, subprocess, os, re\ntarget_path = Path('/mnt/data').joinpath('tests/test_pipeline_smoke.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(r\"\"\"\nimport json\nimport os\nimport subprocess\nimport sys\nfrom pathlib import Path\nimport inspect\n\n\nREQUIRED_FILES = [\n    \"results.json\",\n    \"figure.png\",\n    \"run.log\",\n    \"test.log\",\n    \"STATUS.md\",\n]\n\n\ndef _try_call_module(output_dir: Path) -> bool:\n    try:\n        import scripts.run_evidence_pack as m  # type: ignore\n    except Exception:\n        return False\n    main = getattr(m, \"main\", None)\n    if not callable(main):\n        return False\n\n    try:\n        sig = inspect.signature(main)\n    except Exception:\n        sig = None\n\n    try:\n        if sig and len(sig.parameters) == 0:\n            main()\n        elif sig and list(sig.parameters)[0] in {\"argv\", \"args\"}:\n            main([\"--output-dir\", str(output_dir)])\n        elif sig and \"output_dir\" in sig.parameters:\n            main(output_dir=str(output_dir))\n        else:\n            main([\"--output-dir\", str(output_dir)])\n        return True\n    except Exception:\n        return False\n\n\ndef _run_subprocess(output_dir: Path) -> bool:\n    cmds = [\n        [sys.executable, \"-m\", \"scripts.run_evidence_pack\", \"--output-dir\", str(output_dir)],\n        [sys.executable, \"scripts/run_evidence_pack.py\", \"--output-dir\", str(output_dir)],\n        [sys.executable, \"-m\", \"scripts.run_evidence_pack\"],\n        [sys.executable, \"scripts/run_evidence_pack.py\"],\n    ]\n    for cmd in cmds:\n        p = subprocess.run(cmd, cwd=Path(__file__).resolve().parents[1], capture_output=True, text=True)\n        if p.returncode == 0:\n            return True\n    return False\n\n\ndef _pick_outputs_dir(preferred: Path) -> Path:\n    if all((preferred / f).exists() for f in REQUIRED_FILES):\n        return preferred\n    repo_outputs = Path(__file__).resolve().parents[1] / \"outputs\"\n    if all((repo_outputs / f).exists() for f in REQUIRED_FILES):\n        return repo_outputs\n    return preferred\n\n\ndef test_pipeline_smoke_creates_evidence_pack(tmp_path):\n    outdir = tmp_path / \"outputs\"\n    outdir.mkdir(parents=True, exist_ok=True)\n\n    ran = _try_call_module(outdir) or _run_subprocess(outdir)\n    assert ran, \"Could not run pipeline via module import or subprocess invocation.\"\n\n    outputs = _pick_outputs_dir(outdir)\n    missing = [f for f in REQUIRED_FILES if not (outputs / f).is_file()]\n    assert not missing, f\"Missing required artifacts in {outputs}: {missing}\"\n\n    results_path = outputs / \"results.json\"\n    data = json.loads(results_path.read_text(encoding=\"utf-8\"))\n    assert isinstance(data, dict) and data, \"results.json must be a non-empty JSON object\"\n\n    fig = outputs / \"figure.png\"\n    assert fig.stat().st_size > 100, \"figure.png looks too small to be a real image\"\n\n    for log_name in [\"run.log\", \"test.log\"]:\n        lp = outputs / log_name\n        txt = lp.read_text(encoding=\"utf-8\", errors=\"ignore\")\n        assert len(txt.strip()) > 0, f\"{log_name} must be non-empty\"\n\n    status = (outputs / \"STATUS.md\").read_text(encoding=\"utf-8\", errors=\"ignore\")\n    assert \"outputs\" in status.lower() or \"results.json\" in status.lower(), \"STATUS.md should describe outputs\"\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tests/test_pipeline_smoke.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4aec1e8081909daf775a3b668d2c0adc623df7df482c",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_pipeline_smoke.py\nDIR_STATE:[\"tests/test_pipeline_smoke.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0a96827308e13e7f00694b4b431c988196a0f51a30a140f06f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a pytest smoke test that runs the evidence-pack pipeline (via import or subprocess) and asserts the required artifacts are produced and minimally valid in either a temp outputs directory or the repo’s default `/outputs`."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

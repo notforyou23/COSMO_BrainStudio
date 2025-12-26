@@ -1,0 +1,56 @@
+{
+  "content": "Created a reusable E2E configuration documentation section describing config file layout, minimum required keys, env var overrides, validation expectations, and concrete JSON/.env examples at `docs/e2e/README_e2e_sections/20_configuration.md`.",
+  "reasoning": "",
+  "responseId": "resp_0fb91d5fa8c639c8006949c8df0db48194a1d7d78848431410",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2783,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1251,
+    "output_tokens_details": {
+      "reasoning_tokens": 59
+    },
+    "total_tokens": 4034
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0fb91d5fa8c639c8006949c8e0165c8194a7aacc660434b6bb",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0fb91d5fa8c639c8006949c8e91f448194a645213507ee5872",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('docs/e2e/README_e2e_sections/20_configuration.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"## Configuration\n\nThis E2E workflow is configured via a small set of human-editable config files plus environment variables for secrets/CI overrides. The goals are:\n- **Reproducibility**: configs are committed (except secrets) and can be reviewed.\n- **Portability**: local and CI runs use the same schema.\n- **Early failure**: configs are validated before long-running steps start.\"\"\",\n\"\"\"### Configuration files (recommended layout)\n\nPlace E2E configuration under the repository’s `docs/e2e/` or project root (either works as long as you pass the path consistently):\n\n- `e2e.config.json` (or `e2e.config.yaml`): primary runtime configuration\n- `.env` (optional): local-only environment variables (do not commit secrets)\n\nIf your run scripts accept a `--config` flag, prefer it; otherwise, use the default file name expected by the scripts in this repo.\"\"\",\n\"\"\"### Required keys (minimum schema)\n\nThe exact structure may vary by project, but E2E runs generally require the following **minimum** configuration fields:\n\n- `project.name` (string): human-readable name for logs/artifacts.\n- `run.mode` (string): e.g. `local` or `ci` (used to select defaults).\n- `paths.work_dir` (string): writable directory for temporary files.\n- `paths.artifacts_dir` (string): directory where outputs (logs/results) are stored.\n- `data.input_uri` (string): path/URI to input data (local path, `s3://…`, etc.).\n- `outputs.report_name` (string): name/prefix for final report artifacts.\n\nIf your pipeline talks to external services, include:\n- `remote.endpoint` (string) and `remote.timeout_s` (number) for API-backed runs.\n- `auth.*` fields **must not** contain secrets in committed files; use environment variables instead.\"\"\",\n\"\"\"### Environment variables (secrets & overrides)\n\nUse environment variables for secrets and for small runtime tweaks in CI. Common patterns:\n- `E2E_CONFIG_PATH`: points to the config file to load.\n- `E2E_WORK_DIR`, `E2E_ARTIFACTS_DIR`: override `paths.*` without editing configs.\n- `E2E_LOG_LEVEL`: e.g. `DEBUG`, `INFO`, `WARNING`.\n- `E2E_API_KEY`, `E2E_TOKEN`, etc.: credentials injected by your shell/CI.\n\nPrecedence recommendation (highest to lowest):\n1. CLI flags (if supported)\n2. Environment variables\n3. Config file values\n4. Script defaults\"\"\",\n\"\"\"### Validation expectations\n\nBefore executing any heavy steps, the runner should validate:\n- **File existence & readability**: config file loads cleanly (JSON/YAML parse).\n- **Type checks**: strings vs numbers vs booleans match expected types.\n- **Path checks**: `paths.work_dir` is writable; `paths.artifacts_dir` is creatable.\n- **Required fields**: all minimum schema keys are present and non-empty.\n- **Cross-field consistency**: e.g. if `remote.endpoint` is set, required `auth` env vars are present.\n- **Fail fast**: invalid configuration should exit non-zero with actionable errors.\n\nIn CI, prefer printing the **effective (redacted)** configuration to logs to aid debugging (never print secrets).\"\"\",\n\"\"\"### Example: `e2e.config.json`\n\n```json\n{\n  \"project\": { \"name\": \"generated_script_1766443139257\" },\n  \"run\": { \"mode\": \"local\" },\n  \"paths\": {\n    \"work_dir\": \".e2e/work\",\n    \"artifacts_dir\": \".e2e/artifacts\"\n  },\n  \"data\": { \"input_uri\": \"data/sample_input.jsonl\" },\n  \"outputs\": { \"report_name\": \"e2e_report\" },\n  \"remote\": { \"endpoint\": \"http://localhost:8080\", \"timeout_s\": 30 }\n}\n```\"\"\",\n\"\"\"### Example: `.env` for local development (do not commit)\n\n```bash\n# Optional: point to a non-default config file\nexport E2E_CONFIG_PATH=./e2e.config.json\n\n# Secrets / credentials (local only)\nexport E2E_API_KEY=\"replace-with-real-key\"\n\n# Overrides\nexport E2E_LOG_LEVEL=INFO\nexport E2E_WORK_DIR=.e2e/work\nexport E2E_ARTIFACTS_DIR=.e2e/artifacts\n```\"\"\",\n\"\"\"### Tips\n\n- Keep config files **small** and **stable**; push frequently changing values into env vars.\n- Use relative paths in configs where possible so runs work from a clean checkout.\n- Store large generated outputs only under `paths.artifacts_dir` to simplify cleanup and CI artifact collection.\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:docs/e2e/README_e2e_sections/20_configuration.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949c882be7c819088c3caf5ad10e5ac0ab56cad82a1639c",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:docs/e2e/README_e2e_sections/20_configuration.md\nDIR_STATE:[\"docs/e2e/README_e2e_sections/00_overview.md\", \"docs/e2e/README_e2e_sections/10_prerequisites.md\", \"docs/e2e/README_e2e_sections/20_configuration.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0fb91d5fa8c639c8006949c90590708194b401707122ac77cc",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a reusable E2E configuration documentation section describing config file layout, minimum required keys, env var overrides, validation expectations, and concrete JSON/.env examples at `docs/e2e/README_e2e_sections/20_configuration.md`."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

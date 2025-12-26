@@ -1,0 +1,51 @@
+{
+  "content": "FILE_EXPORT:{\"path\":\"tests/test_syntax_imports.py\",\"size\":1113,\"encoding\":\"base64\",\"sha256\":\"6bc5aec8623d2f438d6969f30fcb3447f54fdee4f89ba1ae424e2562da488522\",\"content\":\"IiIiUmVncmVzc2lvbiB0ZXN0czogaW1wb3J0aW5nIGtleSBtb2R1bGVzIG11c3Qgbm90IHJhaXNlIFN5bnRheEVycm9yLgoKVGhlc2UgdGVzdHMgcHJvdGVjdCBhZ2FpbnN0IGFjY2lkZW50YWwgYnJva2VuIHN5bnRheCBvciBpbXBvcnQtdGltZSBjcmFzaGVzIGluCm1vZHVsZXMgdGhhdCBhcmUgdXNlZCBieSB0aGUgQ0xJIGFuZCBwYWNrYWdlIGhlbHBlcnMuCiIiIgoKZnJvbSBfX2Z1dHVyZV9fIGltcG9ydCBhbm5vdGF0aW9ucwoKaW1wb3J0IGltcG9ydGxpYgppbXBvcnQgc3lzCmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aAoKaW1wb3J0IHB5dGVzdAoKCmRlZiBfZW5zdXJlX2ltcG9ydF9wYXRocygpIC0+IE5vbmU6CiAgICAiIiJFbnN1cmUgcmVwbyByb290IGFuZCBzcmMvIGFyZSBpbXBvcnRhYmxlIHdoZW4gcnVubmluZyB0ZXN0cy4iIiIKICAgIHJlcG9fcm9vdCA9IFBhdGgoX19maWxlX18pLnJlc29sdmUoKS5wYXJlbnRzWzFdCiAgICBzcmNfZGlyID0gcmVwb19yb290IC8gInNyYyIKICAgIGZvciBwIGluIChzdHIocmVwb19yb290KSwgc3RyKHNyY19kaXIpKToKICAgICAgICBpZiBwIG5vdCBpbiBzeXMucGF0aDoKICAgICAgICAgICAgc3lzLnBhdGguaW5zZXJ0KDAsIHApCgoKQHB5dGVzdC5tYXJrLnBhcmFtZXRyaXplKAogICAgIm1vZHVsZV9uYW1lIiwKICAgIFsKICAgICAgICAicWdfYmVuY2guY2xpIiwKICAgICAgICAiY29zbW9fY29udHJhY3RzLm1hcmtkb3duIiwKICAgIF0sCikKZGVmIHRlc3RfaW1wb3J0X21vZHVsZXNfbm9fc3ludGF4ZXJyb3IobW9kdWxlX25hbWU6IHN0cikgLT4gTm9uZToKICAgIF9lbnN1cmVfaW1wb3J0X3BhdGhzKCkKICAgIHRyeToKICAgICAgICBpbXBvcnRsaWIuaW1wb3J0X21vZHVsZShtb2R1bGVfbmFtZSkKICAgIGV4Y2VwdCBTeW50YXhFcnJvciBhcyBlOgogICAgICAgIHB5dGVzdC5mYWlsKGYiU3ludGF4RXJyb3IgaW1wb3J0aW5nIHttb2R1bGVfbmFtZX06IHtlfSIsIHB5dHJhY2U9VHJ1ZSkKICAgIGV4Y2VwdCBFeGNlcHRpb24gYXMgZToKICAgICAgICBweXRlc3QuZmFpbChmIkltcG9ydGluZyB7bW9kdWxlX25hbWV9IHJhaXNlZCB7dHlwZShlKS5fX25hbWVfX306IHtlfSIsIHB5dHJhY2U9VHJ1ZSkK\"}\nDIR_STATE:[\"tests/test_cli_smoke.py\",\"tests/test_syntax_imports.py\"]",
+  "reasoning": "",
+  "responseId": "resp_02ac646abad80353006949be216ac48190877020dd3ca82cfd",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2291,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1265,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 3556
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "ci_02ac646abad80353006949be227a588190937767fda7e38a41",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport base64, json, hashlib, gzip\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_syntax_imports.py')\nassert target_path.is_file(), 'Expected tests/test_syntax_imports.py to exist before export'\ndata = target_path.read_bytes()\npayload = {\n   'path': 'tests/test_syntax_imports.py',\n   'size': len(data),\n   'encoding': 'base64',\n   'sha256': hashlib.sha256(data).hexdigest(),\n   'content': None\n}\nif len(data) > 20000:\n    compressed = gzip.compress(data)\n    payload['encoding'] = 'gzip+base64'\n    payload['content'] = base64.b64encode(compressed).decode('ascii')\nelse:\n    payload['content'] = base64.b64encode(data).decode('ascii')\n\nprint('FILE_EXPORT:' + json.dumps(payload, separators=(',', ':')))\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949bd3ad3008190ae5a8c57bd6f39a6057985b8d7003fbc",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_EXPORT:{\"path\":\"tests/test_syntax_imports.py\",\"size\":1113,\"encoding\":\"base64\",\"sha256\":\"6bc5aec8623d2f438d6969f30fcb3447f54fdee4f89ba1ae424e2562da488522\",\"content\":\"IiIiUmVncmVzc2lvbiB0ZXN0czogaW1wb3J0aW5nIGtleSBtb2R1bGVzIG11c3Qgbm90IHJhaXNlIFN5bnRheEVycm9yLgoKVGhlc2UgdGVzdHMgcHJvdGVjdCBhZ2FpbnN0IGFjY2lkZW50YWwgYnJva2VuIHN5bnRheCBvciBpbXBvcnQtdGltZSBjcmFzaGVzIGluCm1vZHVsZXMgdGhhdCBhcmUgdXNlZCBieSB0aGUgQ0xJIGFuZCBwYWNrYWdlIGhlbHBlcnMuCiIiIgoKZnJvbSBfX2Z1dHVyZV9fIGltcG9ydCBhbm5vdGF0aW9ucwoKaW1wb3J0IGltcG9ydGxpYgppbXBvcnQgc3lzCmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aAoKaW1wb3J0IHB5dGVzdAoKCmRlZiBfZW5zdXJlX2ltcG9ydF9wYXRocygpIC0+IE5vbmU6CiAgICAiIiJFbnN1cmUgcmVwbyByb290IGFuZCBzcmMvIGFyZSBpbXBvcnRhYmxlIHdoZW4gcnVubmluZyB0ZXN0cy4iIiIKICAgIHJlcG9fcm9vdCA9IFBhdGgoX19maWxlX18pLnJlc29sdmUoKS5wYXJlbnRzWzFdCiAgICBzcmNfZGlyID0gcmVwb19yb290IC8gInNyYyIKICAgIGZvciBwIGluIChzdHIocmVwb19yb290KSwgc3RyKHNyY19kaXIpKToKICAgICAgICBpZiBwIG5vdCBpbiBzeXMucGF0aDoKICAgICAgICAgICAgc3lzLnBhdGguaW5zZXJ0KDAsIHApCgoKQHB5dGVzdC5tYXJrLnBhcmFtZXRyaXplKAogICAgIm1vZHVsZV9uYW1lIiwKICAgIFsKICAgICAgICAicWdfYmVuY2guY2xpIiwKICAgICAgICAiY29zbW9fY29udHJhY3RzLm1hcmtkb3duIiwKICAgIF0sCikKZGVmIHRlc3RfaW1wb3J0X21vZHVsZXNfbm9fc3ludGF4ZXJyb3IobW9kdWxlX25hbWU6IHN0cikgLT4gTm9uZToKICAgIF9lbnN1cmVfaW1wb3J0X3BhdGhzKCkKICAgIHRyeToKICAgICAgICBpbXBvcnRsaWIuaW1wb3J0X21vZHVsZShtb2R1bGVfbmFtZSkKICAgIGV4Y2VwdCBTeW50YXhFcnJvciBhcyBlOgogICAgICAgIHB5dGVzdC5mYWlsKGYiU3ludGF4RXJyb3IgaW1wb3J0aW5nIHttb2R1bGVfbmFtZX06IHtlfSIsIHB5dHJhY2U9VHJ1ZSkKICAgIGV4Y2VwdCBFeGNlcHRpb24gYXMgZToKICAgICAgICBweXRlc3QuZmFpbChmIkltcG9ydGluZyB7bW9kdWxlX25hbWV9IHJhaXNlZCB7dHlwZShlKS5fX25hbWVfX306IHtlfSIsIHB5dHJhY2U9VHJ1ZSkK\"}\nDIR_STATE:[\"tests/test_cli_smoke.py\", \"tests/test_syntax_imports.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_02ac646abad80353006949be27b18c81908063832237920d12",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_EXPORT:{\"path\":\"tests/test_syntax_imports.py\",\"size\":1113,\"encoding\":\"base64\",\"sha256\":\"6bc5aec8623d2f438d6969f30fcb3447f54fdee4f89ba1ae424e2562da488522\",\"content\":\"IiIiUmVncmVzc2lvbiB0ZXN0czogaW1wb3J0aW5nIGtleSBtb2R1bGVzIG11c3Qgbm90IHJhaXNlIFN5bnRheEVycm9yLgoKVGhlc2UgdGVzdHMgcHJvdGVjdCBhZ2FpbnN0IGFjY2lkZW50YWwgYnJva2VuIHN5bnRheCBvciBpbXBvcnQtdGltZSBjcmFzaGVzIGluCm1vZHVsZXMgdGhhdCBhcmUgdXNlZCBieSB0aGUgQ0xJIGFuZCBwYWNrYWdlIGhlbHBlcnMuCiIiIgoKZnJvbSBfX2Z1dHVyZV9fIGltcG9ydCBhbm5vdGF0aW9ucwoKaW1wb3J0IGltcG9ydGxpYgppbXBvcnQgc3lzCmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aAoKaW1wb3J0IHB5dGVzdAoKCmRlZiBfZW5zdXJlX2ltcG9ydF9wYXRocygpIC0+IE5vbmU6CiAgICAiIiJFbnN1cmUgcmVwbyByb290IGFuZCBzcmMvIGFyZSBpbXBvcnRhYmxlIHdoZW4gcnVubmluZyB0ZXN0cy4iIiIKICAgIHJlcG9fcm9vdCA9IFBhdGgoX19maWxlX18pLnJlc29sdmUoKS5wYXJlbnRzWzFdCiAgICBzcmNfZGlyID0gcmVwb19yb290IC8gInNyYyIKICAgIGZvciBwIGluIChzdHIocmVwb19yb290KSwgc3RyKHNyY19kaXIpKToKICAgICAgICBpZiBwIG5vdCBpbiBzeXMucGF0aDoKICAgICAgICAgICAgc3lzLnBhdGguaW5zZXJ0KDAsIHApCgoKQHB5dGVzdC5tYXJrLnBhcmFtZXRyaXplKAogICAgIm1vZHVsZV9uYW1lIiwKICAgIFsKICAgICAgICAicWdfYmVuY2guY2xpIiwKICAgICAgICAiY29zbW9fY29udHJhY3RzLm1hcmtkb3duIiwKICAgIF0sCikKZGVmIHRlc3RfaW1wb3J0X21vZHVsZXNfbm9fc3ludGF4ZXJyb3IobW9kdWxlX25hbWU6IHN0cikgLT4gTm9uZToKICAgIF9lbnN1cmVfaW1wb3J0X3BhdGhzKCkKICAgIHRyeToKICAgICAgICBpbXBvcnRsaWIuaW1wb3J0X21vZHVsZShtb2R1bGVfbmFtZSkKICAgIGV4Y2VwdCBTeW50YXhFcnJvciBhcyBlOgogICAgICAgIHB5dGVzdC5mYWlsKGYiU3ludGF4RXJyb3IgaW1wb3J0aW5nIHttb2R1bGVfbmFtZX06IHtlfSIsIHB5dHJhY2U9VHJ1ZSkKICAgIGV4Y2VwdCBFeGNlcHRpb24gYXMgZToKICAgICAgICBweXRlc3QuZmFpbChmIkltcG9ydGluZyB7bW9kdWxlX25hbWV9IHJhaXNlZCB7dHlwZShlKS5fX25hbWVfX306IHtlfSIsIHB5dHJhY2U9VHJ1ZSkK\"}\nDIR_STATE:[\"tests/test_cli_smoke.py\",\"tests/test_syntax_imports.py\"]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

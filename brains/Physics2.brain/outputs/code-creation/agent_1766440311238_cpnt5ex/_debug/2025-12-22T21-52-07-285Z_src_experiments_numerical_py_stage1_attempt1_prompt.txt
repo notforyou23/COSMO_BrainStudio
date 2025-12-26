@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: BLOCKED TASK: "Implement prototype numerical / symbolic experiments that illustrate the behavior or consequences of" failed because agents produced no output. Definition-of-Done failed: Field missing. Investigate and resolve blocking issues before retrying.
+Project: generated_script_1766440325922 (python script)
+
+Target file details:
+- Path: src/experiments/numerical.py
+- Purpose: Numerical experiment implementations (NumPy/SciPy-based) illustrating behavioral consequences via simulation, sweeps, and stability checks.
+- Category: source
+
+Other planned files (for context only):
+- README.md: Project overview and quickstart instructions for running prototype numerical/symbolic experiments and generating figures/tables.
+- examples/expected_outputs.md: Concrete examples of command invocations with expected stdout summaries and generated artifact filenames to satisfy Definition-of-Done expectations.
+- pyproject.toml: Python project configuration including minimal dependencies, entry points, and formatting/linting defaults.
+- requirements.txt: Pinned runtime dependencies for numerical and symbolic computations and optional plotting support.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-22T19-42-37-971Z_examples_expected_outputs_md_stage1_attempt1_prompt.txt from code-creation agent agent_176643255213
+- [AGENT: agent_1766432552135_37yovma] {"agentId":"agent_1766432552135_37yovma","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766430411939_w8zvs5v] {"agentId":"agent_1766430411939_w8zvs5v","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766438283976_puyw9gc] {"agentId":"agent_1766438283976_puyw9gc","goalId":"routing_code_1766438283975_nh5nje8","containerId":"c
+- [AGENT: agent_1766438409884_82yeh6g] {"agentId":"agent_1766438409884_82yeh6g","goalId":"goal_7","containerId":"cntr_6949b60f62d4819083834ab5
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Numerical experiment implementations (NumPy/SciPy-based) illustrating behavioral consequences via simulation, sweeps, and stability checks.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/experiments/numerical.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/experiments/numerical.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/experiments/numerical.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

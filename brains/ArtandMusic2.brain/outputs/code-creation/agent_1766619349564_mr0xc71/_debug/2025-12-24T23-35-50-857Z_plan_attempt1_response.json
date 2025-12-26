@@ -1,0 +1,37 @@
+{
+  "content": "[\n  {\n    \"path\": \"config/claim_card.schema.json\",\n    \"description\": \"Defines the machine-readable JSON Schema for Claim Cards including required metadata, versioning, provenance, and correction history fields.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"outputs/CLAIM_CARD_TEMPLATE.md\",\n    \"description\": \"Provides the human-friendly Markdown Claim Card template with embedded YAML front matter aligned to the schema and containing all mandatory fields.\",\n    \"category\": \"documentation\"\n  },\n  {\n    \"path\": \"docs/CLAIM_CARD_WORKFLOW.md\",\n    \"description\": \"Documents the end-to-end workflow for creating Claim Cards, validating them, running the 3-claim pilot, and logging failure modes and corrections.\",\n    \"category\": \"documentation\"\n  },\n  {\n    \"path\": \"src/claim_card/validate.py\",\n    \"description\": \"Implements a CLI-capable validator that loads Claim Card YAML/JSON, validates against the schema, and emits structured failure-mode logs (missing metadata, version ambiguity, correction history issues).\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claim_card/parse_md.py\",\n    \"description\": \"Parses Markdown Claim Cards with YAML front matter into normalized JSON objects suitable for schema validation and pilot logging.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claim_card/run_pilot.py\",\n    \"description\": \"Runs the 3-claim pilot by validating three sample Claim Cards, capturing validation outcomes, and writing a consolidated failure-mode report.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claim_card/failure_modes.py\",\n    \"description\": \"Defines canonical failure-mode codes, detection rules, and helper routines to aggregate and summarize pilot issues consistently.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"outputs/pilot/claim_001.md\",\n    \"description\": \"Sample Claim Card #1 used in the 3-claim pilot containing a realistic claim and metadata to exercise validation and provenance requirements.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"outputs/pilot/claim_002.md\",\n    \"description\": \"Sample Claim Card #2 used in the 3-claim pilot intentionally containing version/provenance ambiguity to validate detection and logging.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"outputs/pilot/claim_003.md\",\n    \"description\": \"Sample Claim Card #3 used in the 3-claim pilot intentionally containing correction history gaps to validate detection and logging.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"outputs/pilot/FAILURE_MODES_LOG.jsonl\",\n    \"description\": \"Stores the machine-readable pilot run log as JSON Lines capturing per-claim validation results, detected failure modes, and suggested remediations.\",\n    \"category\": \"support\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_0683e180b9c0ee1300694c78d6f6e88194a2af8b3ed3c5c421",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 622,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 618,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 1240
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "msg_0683e180b9c0ee1300694c78d740d88194b12b356716dbd09c",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"config/claim_card.schema.json\",\n    \"description\": \"Defines the machine-readable JSON Schema for Claim Cards including required metadata, versioning, provenance, and correction history fields.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"outputs/CLAIM_CARD_TEMPLATE.md\",\n    \"description\": \"Provides the human-friendly Markdown Claim Card template with embedded YAML front matter aligned to the schema and containing all mandatory fields.\",\n    \"category\": \"documentation\"\n  },\n  {\n    \"path\": \"docs/CLAIM_CARD_WORKFLOW.md\",\n    \"description\": \"Documents the end-to-end workflow for creating Claim Cards, validating them, running the 3-claim pilot, and logging failure modes and corrections.\",\n    \"category\": \"documentation\"\n  },\n  {\n    \"path\": \"src/claim_card/validate.py\",\n    \"description\": \"Implements a CLI-capable validator that loads Claim Card YAML/JSON, validates against the schema, and emits structured failure-mode logs (missing metadata, version ambiguity, correction history issues).\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claim_card/parse_md.py\",\n    \"description\": \"Parses Markdown Claim Cards with YAML front matter into normalized JSON objects suitable for schema validation and pilot logging.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claim_card/run_pilot.py\",\n    \"description\": \"Runs the 3-claim pilot by validating three sample Claim Cards, capturing validation outcomes, and writing a consolidated failure-mode report.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claim_card/failure_modes.py\",\n    \"description\": \"Defines canonical failure-mode codes, detection rules, and helper routines to aggregate and summarize pilot issues consistently.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"outputs/pilot/claim_001.md\",\n    \"description\": \"Sample Claim Card #1 used in the 3-claim pilot containing a realistic claim and metadata to exercise validation and provenance requirements.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"outputs/pilot/claim_002.md\",\n    \"description\": \"Sample Claim Card #2 used in the 3-claim pilot intentionally containing version/provenance ambiguity to validate detection and logging.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"outputs/pilot/claim_003.md\",\n    \"description\": \"Sample Claim Card #3 used in the 3-claim pilot intentionally containing correction history gaps to validate detection and logging.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"outputs/pilot/FAILURE_MODES_LOG.jsonl\",\n    \"description\": \"Stores the machine-readable pilot run log as JSON Lines capturing per-claim validation results, detected failure modes, and suggested remediations.\",\n    \"category\": \"support\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "content": "[\n  {\n    \"path\": \"src/results_schema.py\",\n    \"description\": \"Defines the versioned results schema, provides runtime validation/coercion helpers, and exposes a single function to build a compliant /outputs/results.json payload.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/determinism.py\",\n    \"description\": \"Implements seed pinning across Python/numpy/random/torch (if present) and centralizes deterministic matplotlib plotting defaults to ensure reproducible figures.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/results_io.py\",\n    \"description\": \"Writes validated results.json and deterministic figure files to /outputs, embedding schema_version, run metadata, and content hashes for regression testing.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/run_pipeline.py\",\n    \"description\": \"End-to-end runnable pipeline entrypoint that applies determinism settings, executes the experiment(s), generates deterministic plots, and emits a schema-compliant outputs/results.json.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"schemas/results.schema.v1.json\",\n    \"description\": \"JSON Schema document for results.json v1 used for validation in code and tests.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"tests/test_results_schema_validation.py\",\n    \"description\": \"Pytest suite verifying results.json payloads validate against v1 schema and reject missing/incorrect fields while preserving schema_version behavior.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \"tests/test_determinism_seed_and_plotting.py\",\n    \"description\": \"Pytest suite asserting fixed seeds and pinned matplotlib rcParams produce byte-stable or hash-stable figure outputs across repeated runs.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \"docs/RESULTS_SCHEMA.md\",\n    \"description\": \"Documents the results.json stable schema, versioning policy, required fields, and determinism guarantees (seed + plotting parameters) for reproducible outputs.\",\n    \"category\": \"documentation\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_056857234bf9ab6900694b6084bdec8193b12483d0912f1184",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 670,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 586,
+    "output_tokens_details": {
+      "reasoning_tokens": 145
+    },
+    "total_tokens": 1256
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_056857234bf9ab6900694b6084f9bc8193900aea583cae41ce",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_056857234bf9ab6900694b608799f48193a9233b71be1bec41",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"src/results_schema.py\",\n    \"description\": \"Defines the versioned results schema, provides runtime validation/coercion helpers, and exposes a single function to build a compliant /outputs/results.json payload.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/determinism.py\",\n    \"description\": \"Implements seed pinning across Python/numpy/random/torch (if present) and centralizes deterministic matplotlib plotting defaults to ensure reproducible figures.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/results_io.py\",\n    \"description\": \"Writes validated results.json and deterministic figure files to /outputs, embedding schema_version, run metadata, and content hashes for regression testing.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/run_pipeline.py\",\n    \"description\": \"End-to-end runnable pipeline entrypoint that applies determinism settings, executes the experiment(s), generates deterministic plots, and emits a schema-compliant outputs/results.json.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"schemas/results.schema.v1.json\",\n    \"description\": \"JSON Schema document for results.json v1 used for validation in code and tests.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"tests/test_results_schema_validation.py\",\n    \"description\": \"Pytest suite verifying results.json payloads validate against v1 schema and reject missing/incorrect fields while preserving schema_version behavior.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \"tests/test_determinism_seed_and_plotting.py\",\n    \"description\": \"Pytest suite asserting fixed seeds and pinned matplotlib rcParams produce byte-stable or hash-stable figure outputs across repeated runs.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \"docs/RESULTS_SCHEMA.md\",\n    \"description\": \"Documents the results.json stable schema, versioning policy, required fields, and determinism guarantees (seed + plotting parameters) for reproducible outputs.\",\n    \"category\": \"documentation\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

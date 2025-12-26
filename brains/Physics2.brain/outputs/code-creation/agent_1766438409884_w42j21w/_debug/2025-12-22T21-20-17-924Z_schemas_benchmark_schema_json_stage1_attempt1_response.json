@@ -1,0 +1,56 @@
+{
+  "content": "Created a minimal Draft 2020-12 JSON Schema at `schemas/benchmark.schema.json` defining the required structure for a benchmark run (metadata, system info, and per-case results with basic validation rules).",
+  "reasoning": "",
+  "responseId": "resp_0412498f5d856411006949b6e1e29481949b3c35f49b84e4af",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2848,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1414,
+    "output_tokens_details": {
+      "reasoning_tokens": 1368
+    },
+    "total_tokens": 4262
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0412498f5d856411006949b6e2afa88194b38aaf62aae32a17",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0412498f5d856411006949b6e4c40481948ce30c215a1b136f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re, datetime\ntarget_path = Path('/mnt/data').joinpath('schemas/benchmark.schema.json')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nschema = {\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"$id\": \"https://example.org/schemas/benchmark.schema.json\",\n  \"title\": \"Minimal Benchmark Run Schema\",\n  \"type\": \"object\",\n  \"additionalProperties\": False,\n  \"required\": [\"schema_version\", \"run_id\", \"timestamp\", \"benchmark\", \"system\", \"results\"],\n  \"properties\": {\n    \"schema_version\": {\n      \"type\": \"string\",\n      \"description\": \"Version of this benchmark schema.\",\n      \"pattern\": r\"^\\d+\\.\\d+\\.\\d+$\",\n      \"examples\": [\"1.0.0\"]\n    },\n    \"run_id\": {\n      \"type\": \"string\",\n      \"description\": \"Client-chosen identifier for this run (unique within a project).\",\n      \"minLength\": 1\n    },\n    \"timestamp\": {\n      \"type\": \"string\",\n      \"description\": \"ISO 8601 timestamp when the run started (UTC recommended).\",\n      \"format\": \"date-time\"\n    },\n    \"benchmark\": {\n      \"type\": \"object\",\n      \"additionalProperties\": False,\n      \"required\": [\"name\", \"version\"],\n      \"properties\": {\n        \"name\": {\"type\": \"string\", \"minLength\": 1},\n        \"version\": {\"type\": \"string\", \"minLength\": 1},\n        \"description\": {\"type\": \"string\"}\n      }\n    },\n    \"system\": {\n      \"type\": \"object\",\n      \"additionalProperties\": False,\n      \"required\": [\"model\", \"runner\"],\n      \"properties\": {\n        \"model\": {\n          \"type\": \"object\",\n          \"additionalProperties\": False,\n          \"required\": [\"name\"],\n          \"properties\": {\n            \"name\": {\"type\": \"string\", \"minLength\": 1},\n            \"provider\": {\"type\": \"string\"},\n            \"version\": {\"type\": \"string\"},\n            \"parameters\": {\"type\": \"object\", \"additionalProperties\": True}\n          }\n        },\n        \"runner\": {\n          \"type\": \"object\",\n          \"additionalProperties\": False,\n          \"required\": [\"name\", \"version\"],\n          \"properties\": {\n            \"name\": {\"type\": \"string\", \"minLength\": 1},\n            \"version\": {\"type\": \"string\", \"minLength\": 1},\n            \"commit\": {\"type\": \"string\"}\n          }\n        },\n        \"hardware\": {\n          \"type\": \"object\",\n          \"additionalProperties\": True,\n          \"properties\": {\n            \"cpu\": {\"type\": \"string\"},\n            \"gpu\": {\"type\": \"string\"},\n            \"ram_gb\": {\"type\": \"number\", \"minimum\": 0}\n          }\n        },\n        \"os\": {\"type\": \"string\"}\n      }\n    },\n    \"config\": {\n      \"type\": \"object\",\n      \"description\": \"Benchmark configuration used for the run; intentionally open-ended.\",\n      \"additionalProperties\": True\n    },\n    \"results\": {\n      \"type\": \"array\",\n      \"minItems\": 1,\n      \"items\": {\"$ref\": \"#/$defs/result\"}\n    },\n    \"summary\": {\n      \"type\": \"object\",\n      \"description\": \"Optional aggregated metrics for the whole run.\",\n      \"additionalProperties\": True\n    },\n    \"notes\": {\"type\": \"string\"}\n  },\n  \"$defs\": {\n    \"result\": {\n      \"type\": \"object\",\n      \"additionalProperties\": False,\n      \"required\": [\"case_id\", \"status\", \"metrics\"],\n      \"properties\": {\n        \"case_id\": {\"type\": \"string\", \"minLength\": 1},\n        \"status\": {\n          \"type\": \"string\",\n          \"description\": \"Outcome for this case.\",\n          \"enum\": [\"pass\", \"fail\", \"error\", \"skip\"]\n        },\n        \"metrics\": {\n          \"type\": \"object\",\n          \"description\": \"Case-level metrics (scores, latencies, etc.).\",\n          \"additionalProperties\": {\n            \"anyOf\": [\n              {\"type\": \"number\"},\n              {\"type\": \"integer\"},\n              {\"type\": \"string\"},\n              {\"type\": \"boolean\"},\n              {\"type\": \"null\"}\n            ]\n          }\n        },\n        \"output\": {\n          \"type\": [\"object\", \"string\", \"null\"],\n          \"description\": \"Optional raw model output for the case.\",\n          \"additionalProperties\": True\n        },\n        \"error\": {\n          \"type\": \"object\",\n          \"description\": \"Present when status=error.\",\n          \"additionalProperties\": False,\n          \"required\": [\"message\"],\n          \"properties\": {\n            \"message\": {\"type\": \"string\"},\n            \"type\": {\"type\": \"string\"},\n            \"traceback\": {\"type\": \"string\"}\n          }\n        },\n        \"started_at\": {\"type\": \"string\", \"format\": \"date-time\"},\n        \"ended_at\": {\"type\": \"string\", \"format\": \"date-time\"}\n      },\n      \"allOf\": [\n        {\n          \"if\": {\"properties\": {\"status\": {\"const\": \"error\"}}},\n          \"then\": {\"required\": [\"error\"]}\n        }\n      ]\n    }\n  }\n}\n\n# build chunks as required: list of multiline strings (no leading/trailing blank lines)\ntext = json.dumps(schema, indent=2, ensure_ascii=False) + \"\\n\"\nchunks = [text.strip(\"\\n\")]\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:schemas/benchmark.schema.json')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:schemas/benchmark.schema.json\nDIR_STATE:[\"schemas/benchmark.schema.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0412498f5d856411006949b6f912908194ab6b90f078c9aa66",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a minimal Draft 2020-12 JSON Schema at `schemas/benchmark.schema.json` defining the required structure for a benchmark run (metadata, system info, and per-case results with basic validation rules)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,56 @@
+{
+  "content": "Created a pytest regression test (`tests/test_syntax_imports.py`) that imports `qg_bench.cli` and `cosmo_contracts.markdown` (with robust path setup) and fails if any SyntaxError or import-time exception occurs.",
+  "reasoning": "",
+  "responseId": "resp_0700779684b214c9006949bd8ae6b081938d563abe8975878d",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2088,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 629,
+    "output_tokens_details": {
+      "reasoning_tokens": 165
+    },
+    "total_tokens": 2717
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0700779684b214c9006949bd92c8748193a5b8dc529d3d878d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0700779684b214c9006949bd96f3e48193b94ee0686f5eef1e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_syntax_imports.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Regression tests: importing key modules must not raise SyntaxError.\n\nThese tests protect against accidental broken syntax or import-time crashes in\nmodules that are used by the CLI and package helpers.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport importlib\nimport sys\nfrom pathlib import Path\n\nimport pytest\n\n\ndef _ensure_import_paths() -> None:\n    \\\"\\\"\\\"Ensure repo root and src/ are importable when running tests.\\\"\\\"\\\"\n    repo_root = Path(__file__).resolve().parents[1]\n    src_dir = repo_root / \"src\"\n    for p in (str(repo_root), str(src_dir)):\n        if p not in sys.path:\n            sys.path.insert(0, p)\n\n\n@pytest.mark.parametrize(\n    \"module_name\",\n    [\n        \"qg_bench.cli\",\n        \"cosmo_contracts.markdown\",\n    ],\n)\ndef test_import_modules_no_syntaxerror(module_name: str) -> None:\n    _ensure_import_paths()\n    try:\n        importlib.import_module(module_name)\n    except SyntaxError as e:\n        pytest.fail(f\"SyntaxError importing {module_name}: {e}\", pytrace=True)\n    except Exception as e:\n        pytest.fail(f\"Importing {module_name} raised {type(e).__name__}: {e}\", pytrace=True)\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:tests/test_syntax_imports.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd3ad3008190ae5a8c57bd6f39a6057985b8d7003fbc",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_syntax_imports.py\nDIR_STATE:[\"tests/test_syntax_imports.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0700779684b214c9006949bd9e316c8193b0f47c9ba2fbd1c7",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a pytest regression test (`tests/test_syntax_imports.py`) that imports `qg_bench.cli` and `cosmo_contracts.markdown` (with robust path setup) and fails if any SyntaxError or import-time exception occurs."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

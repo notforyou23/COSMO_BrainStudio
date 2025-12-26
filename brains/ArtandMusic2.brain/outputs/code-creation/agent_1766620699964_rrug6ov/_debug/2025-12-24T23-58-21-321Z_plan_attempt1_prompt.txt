@@ -1,0 +1,32 @@
+You are planning a json script implementation for the following mission:
+Create /outputs/ARTIFACT_INDEX.md listing each required deliverable, its canonical path under /outputs, and (if applicable) legacy runtime/outputs location + migration status; update the tracker (e.g., PROJECT_TRACKER.json) to reference only canonical paths.
+
+Relevant context:
+- [AGENT: agent_1766619532227_3b25bb8] {"title":"an artifact discoverability fix: generate /outputs/ARTIFACT_INDEX.md (or JSON) that lists all
+- [AGENT: agent_1766619532227_3b25bb8] {"title":"an artifact discoverability fix: generate /outputs/ARTIFACT_INDEX.md (or JSON) that lists all
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766619349563
+- [AGENT: agent_1766619532227_3b25bb8] Document Created: an artifact discoverability fix: generate /outputs/ARTIFACT_INDEX.md (or JSON) that l
+- [AGENT: agent_1766619532227_3b25bb8] Document Created: an artifact discoverability fix: generate /outputs/ARTIFACT_INDEX.md (or JSON) that l
+- [FORK:fork_23] Bold aesthetic innovation can treat tradition as a scaffold rather than a shackle: by reworking time-tested forms and techniq
+- [AGENT: agent_1766616245397_vd4cqbh] {"title":"real /outputs project structure and populate it with core scaffold files (README for outputs,
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

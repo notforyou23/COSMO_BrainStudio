@@ -1,0 +1,56 @@
+{
+  "content": "Created a GitHub Actions workflow at `.github/workflows/e2e.yml` that runs `make e2e`, uploads logs/artifacts on every run, and automatically creates/updates a GitHub issue when the pipeline fails (while still failing the job for CI signal).",
+  "reasoning": "",
+  "responseId": "resp_069ba3e699ce2d7e006949be5b9c5481979ef7b92c0e677701",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2833,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1292,
+    "output_tokens_details": {
+      "reasoning_tokens": 396
+    },
+    "total_tokens": 4125
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_069ba3e699ce2d7e006949be5c4e848197acbea80e1ca90ad6",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_069ba3e699ce2d7e006949be63a3b08197b5a5de363405d3b8",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('.github/workflows/e2e.yml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"name: e2e\n\non:\n  push:\n    branches: [main]\n  pull_request:\n  workflow_dispatch:\n\npermissions:\n  contents: read\n  issues: write\n\nconcurrency:\n  group: e2e-${{ github.ref }}\n  cancel-in-progress: true\n\njobs:\n  e2e:\n    runs-on: ubuntu-latest\n    timeout-minutes: 60\n    env:\n      E2E_ARTIFACT_DIR: artifacts\n      E2E_FAILURE_SUMMARY: artifacts/failure_summary.json\n    steps:\n      - uses: actions/checkout@v4\n\n      - name: Set up Python\n        uses: actions/setup-python@v5\n        with:\n          python-version: \"3.11\"\n          cache: pip\n\n      - name: Install dependencies (if present)\n        shell: bash\n        run: |\n          python -m pip install --upgrade pip\n          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi\n          if [ -f pyproject.toml ]; then pip install -e .; fi\n\n      - name: Run full pipeline (make e2e)\n        id: e2e\n        continue-on-error: true\n        shell: bash\n        run: |\n          mkdir -p \"$E2E_ARTIFACT_DIR\"\n          set -o pipefail\n          make e2e 2>&1 | tee \"$E2E_ARTIFACT_DIR/e2e.log\"\n\n      - name: Upload logs/artifacts\n        if: always()\n        uses: actions/upload-artifact@v4\n        with:\n          name: e2e-${{ github.run_id }}-${{ github.run_attempt }}\n          path: |\n            artifacts/**\n            logs/**\n          if-no-files-found: warn\n          retention-days: 14\n\n      - name: Create/update issue on failure\n        if: steps.e2e.outcome == 'failure' && github.event_name != 'pull_request'\n        env:\n          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}\n        shell: bash\n        run: |\n          if [ -f \"$E2E_FAILURE_SUMMARY\" ]; then\n            python scripts/issue_on_failure.py \"$E2E_FAILURE_SUMMARY\"\n          else\n            python - <<'PY'\n            import json, os, pathlib, sys\n            p = pathlib.Path(os.environ.get(\"E2E_FAILURE_SUMMARY\", \"artifacts/failure_summary.json\"))\n            p.parent.mkdir(parents=True, exist_ok=True)\n            p.write_text(json.dumps({\n              \"workflow\": os.environ.get(\"GITHUB_WORKFLOW\"),\n              \"run_id\": os.environ.get(\"GITHUB_RUN_ID\"),\n              \"run_url\": f\"{os.environ.get('GITHUB_SERVER_URL')}/{os.environ.get('GITHUB_REPOSITORY')}/actions/runs/{os.environ.get('GITHUB_RUN_ID')}\",\n              \"status\": \"failed\",\n              \"notes\": \"Failure summary missing; see uploaded e2e.log artifact.\"\n            }, indent=2), encoding=\"utf-8\")\n            print(f\"Wrote fallback failure summary to {p}\")\n            PY\n            python scripts/issue_on_failure.py \"$E2E_FAILURE_SUMMARY\"\n          fi\n\n      - name: Fail job if pipeline failed\n        if: steps.e2e.outcome == 'failure'\n        run: exit 1\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:.github/workflows/e2e.yml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949be2f5f848190a4b8106bfdfa0c4704094e1617bbf644",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:.github/workflows/e2e.yml\nDIR_STATE:[\".github/workflows/e2e.yml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_069ba3e699ce2d7e006949be6fb4c481978120abcd95a42c7c",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a GitHub Actions workflow at `.github/workflows/e2e.yml` that runs `make e2e`, uploads logs/artifacts on every run, and automatically creates/updates a GitHub issue when the pipeline fails (while still failing the job for CI signal)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

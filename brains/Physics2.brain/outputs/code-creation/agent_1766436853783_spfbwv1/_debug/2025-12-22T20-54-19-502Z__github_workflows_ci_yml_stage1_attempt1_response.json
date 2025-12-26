@@ -1,0 +1,56 @@
+{
+  "content": "Created a GitHub Actions CI workflow that runs on pushes and pull requests, installs the package, performs Ruff lint/format checks, executes pytest, and runs a minimal CLI smoke test across Python 3.10–3.12.",
+  "reasoning": "",
+  "responseId": "resp_0cdb6e74fa18862e006949b02ee958819082b2dd16059b3996",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2256,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 723,
+    "output_tokens_details": {
+      "reasoning_tokens": 226
+    },
+    "total_tokens": 2979
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0cdb6e74fa18862e006949b02f95a08190a9c947bfe85e683e",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0cdb6e74fa18862e006949b034d354819081167afba959a405",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('.github/workflows/ci.yml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"name: CI\n\non:\n  push:\n    branches: [\"**\"]\n  pull_request:\"\"\",\n\"\"\"jobs:\n  lint-test-smoke:\n    runs-on: ubuntu-latest\n    strategy:\n      fail-fast: false\n      matrix:\n        python-version: [\"3.10\", \"3.11\", \"3.12\"]\n    steps:\n      - uses: actions/checkout@v4\n\n      - name: Set up Python\n        uses: actions/setup-python@v5\n        with:\n          python-version: ${{ matrix.python-version }}\n          cache: pip\n\n      - name: Install package + tooling\n        run: |\n          python -m pip install --upgrade pip\n          python -m pip install -e .\n          python -m pip install ruff pytest\n\n      - name: Lint (ruff)\n        run: |\n          ruff --version\n          ruff check .\n\n      - name: Format check (ruff)\n        run: |\n          ruff format --check .\n\n      - name: Unit tests (pytest)\n        run: |\n          pytest -q\n\n      - name: CLI smoke test\n        shell: bash\n        run: |\n          set -euo pipefail\n          python -m dgpipe --help >/dev/null 2>&1 || dgpipe --help >/dev/null 2>&1\n          (python -m dgpipe --version >/dev/null 2>&1 || dgpipe --version >/dev/null 2>&1 || true)\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:.github/workflows/ci.yml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949aff88f24819097f165c497ce475e074f2320f5d510c4",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0cdb6e74fa18862e006949b03ebcc08190ac2326743a2f4688",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a GitHub Actions CI workflow that runs on pushes and pull requests, installs the package, performs Ruff lint/format checks, executes pytest, and runs a minimal CLI smoke test across Python 3.10–3.12."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

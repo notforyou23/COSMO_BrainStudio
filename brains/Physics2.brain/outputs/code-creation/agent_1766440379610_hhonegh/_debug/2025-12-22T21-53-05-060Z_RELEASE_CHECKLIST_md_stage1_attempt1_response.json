@@ -1,0 +1,56 @@
+{
+  "content": "Created `RELEASE/CHECKLIST.md` with a minimal, command-by-command checklist for preparing a clean environment, running CI-equivalent checks, verifying GitHub Actions success, and tagging/pushing `v0.1`.",
+  "reasoning": "",
+  "responseId": "resp_0c02ef5cd9f7fcf9006949be6b260481968a9138f1e2ceed74",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2516,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 981,
+    "output_tokens_details": {
+      "reasoning_tokens": 244
+    },
+    "total_tokens": 3497
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0c02ef5cd9f7fcf9006949be6c09948196914bfd0b36805d99",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c02ef5cd9f7fcf9006949be70c2d081968c5800c964382c0e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('RELEASE/CHECKLIST.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"# Release checklist (v0.1)\n\nThis checklist documents the exact, minimal steps to prepare and tag the `v0.1` release.\n\n## 0) Preconditions\n\n- You have push access to the canonical repository remote (assumed `origin`).\n- Your local clone is up to date and on the release branch (typically `main`).\n- Working tree is clean: `git status` shows no pending changes.\n\n## 1) Prepare a clean, reproducible local environment\n\nFrom the repo root:\n\n```bash\npython -m venv .venv\n. .venv/bin/activate  # Windows: .venv\\\\Scripts\\\\activate\npython -m pip install --upgrade pip\n```\n\nInstall *pinned* dependencies (use the repo’s pinned requirement files):\n\n```bash\npython -m pip install -r requirements.txt\n# If present in this repo, also install dev/test pins:\npython -m pip install -r requirements-dev.txt 2>/dev/null || true\n```\n\n## 2) Integrate agent-generated outputs into the canonical layout (if applicable)\n\nIf this repo includes the integration tooling:\n\n```bash\npython tools/integrate_agent_outputs.py --dry-run\npython tools/integrate_agent_outputs.py\n```\n\nThen review and commit any resulting changes:\n\n```bash\ngit status\ngit diff\ngit commit -am \"Integrate agent outputs for v0.1\"\n```\n\n## 3) Run the same checks as CI (locally)\n\nRun formatting/lint hooks (mirrors CI via pre-commit if configured):\n\n```bash\npython -m pip install pre-commit\npre-commit run --all-files\n```\n\nRun the test suite:\n\n```bash\npython -m pip install pytest\npytest -q\n```\n\n## 4) Verify GitHub Actions CI is green for the release commit\n\n1. Push the release commit to the branch used by CI (usually `main`):\n\n```bash\ngit push origin HEAD:main\n```\n\n2. Confirm the workflow in `.github/workflows/ci.yml` completed successfully for that commit in GitHub Actions.\n\n## 5) Tag and push v0.1\n\nEnsure you are tagging the exact commit that passed CI:\n\n```bash\ngit rev-parse --short HEAD\ngit tag -a v0.1 -m \"v0.1\"\ngit push origin v0.1\n```\n\n## 6) Final verification\n\n- Confirm GitHub Actions CI also ran (and is green) for the `v0.1` tag.\n- Confirm `git describe --tags --exact-match` returns `v0.1` on the release commit.\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:RELEASE/CHECKLIST.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949bdbf39a88190b86a048e7404ddf605f34b41479c985e",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:RELEASE/CHECKLIST.md\nDIR_STATE:[\"RELEASE/CHECKLIST.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0c02ef5cd9f7fcf9006949be7b07748196b6d1cd3c37e39f23",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `RELEASE/CHECKLIST.md` with a minimal, command-by-command checklist for preparing a clean environment, running CI-equivalent checks, verifying GitHub Actions success, and tagging/pushing `v0.1`."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

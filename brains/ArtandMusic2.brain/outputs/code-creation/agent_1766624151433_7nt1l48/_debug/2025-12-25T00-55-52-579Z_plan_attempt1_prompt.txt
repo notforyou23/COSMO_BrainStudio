@@ -1,0 +1,32 @@
+You are planning a python script implementation for the following mission:
+Update the intake checklist to hard-require dataset identifier (name + DOI/link) for the dataset-verification pilot claim; add a validation rule that blocks work if only a vague “research area” is provided.
+
+Relevant context:
+- [INTROSPECTION] 2025-12-25T00-21-55-842Z_scripts_qa_run_sh_stage1_attempt1_prompt.txt from code-creation agent agent_1766622114110_412seks: 
+- [AGENT: agent_1766612249730_02kggt6] Finding 2: For primary-source verification (2019–2025), the agent identified the minimum viable inputs 
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+- [AGENT: agent_1766614627655_4lrkb6s] Across perspectives, “genius vs. craft/process” narratives operate less as attitudes and more as instit
+- [INTROSPECTION] 2025-12-25T00-21-55-842Z_scripts_qa_run_sh_stage1_attempt2_prompt.txt from code-creation agent agent_1766622114110_412seks: 
+- [INTROSPECTION] 2025-12-25T00-21-55-842Z_qa_run_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766622114110_412seks: You are 
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

@@ -1,0 +1,47 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create ./outputs/bibliography_system.md (workflow: required fields, tagging, dedup) and ./outputs/references.bib with 10–20 seed entries tagged by type (seminal/survey/textbook) and topic.
+Project: ./outputs/bibliography_system.md (workflow: required fields, tagging, dedup) and ./outputs/references.bib with 10–20 seed entries tagged by type (seminal/survey/textbook) and topic. (python script)
+
+Target file details:
+- Path: outputs/references.bib
+- Purpose: Canonical BibTeX bibliography generated from the seed dataset containing 10–20 tagged entries with deterministic formatting and ordering.
+- Category: support
+
+Other planned files (for context only):
+- scripts/build_bibliography.py: Deterministic CLI script that loads seed reference data, enforces required fields and tagging rules, performs deduplication, and writes canonical outputs/bibliography_system.md and outputs/references.bib.
+- data/seed_references.yaml: Seed bibliography dataset (10–20 entries) with required fields plus type tags (seminal/survey/textbook) and topic tags used by the build script.
+- outputs/bibliography_system.md: Canonical markdown specification of the bibliography workflow including required fields, tagging schema, deterministic ordering, and deduplication policy.
+
+Reference insights:
+- [AGENT: agent_1766550068050_i6l3ed7] {"title":"bibliography system deliverables in canonical outputs: `./outputs/bibliography_system.md` and
+- [CONSOLIDATED] Design a reproducible, standardized bibliography workflow that deterministically produces canonical, well-organized, and audi
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_scripts_run_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766539771836_cun
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+- [AGENT: agent_1766550068050_i6l3ed7] Document Created: bibliography system deliverables in canonical outputs: `./outputs/bibliography_system
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Canonical BibTeX bibliography generated from the seed dataset containing 10–20 tagged entries with deterministic formatting and ordering.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/references.bib')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/references.bib')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/references.bib.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

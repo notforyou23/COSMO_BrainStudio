@@ -1,0 +1,32 @@
+You are planning a python script implementation for the following mission:
+Implement and run an ultra-minimal smoke test (e.g., `python -c "import sys; print(sys.version)"` + key imports) and persist combined stdout/stderr to `/outputs/qa/logs/<timestamp>_smoke_test.log`; treat this as a gating pre-check before any larger QA/validation runs.
+
+Relevant context:
+- [INTROSPECTION] 2025-12-25T01-35-23-905Z_outputs_qa_logs_baseline_smoke_test_log_stage1_attempt1_prompt.txt from code-creation agent agent_1
+- [AGENT: agent_1766619476801_dj6dsxw] {"agentId":"agent_1766619476801_dj6dsxw","timestamp":"2025-12-24T23:43:43.594Z","files":[{"filename":"v
+- [AGENT: agent_1766614627657_h1iraii] {"agentId":"agent_1766614627657_h1iraii","timestamp":"2025-12-24T22:18:53.796Z","files":[{"filename":"v
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [INTROSPECTION] 2025-12-25T01-35-23-905Z_outputs_qa_logs_baseline_smoke_test_log_stage1_attempt2_prompt.txt from code-creation agent agent_1
+- [INTROSPECTION] 2025-12-25T01-35-23-905Z_scripts_qa_smoke_test_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766626522274_f1
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `scripts/e2e/validate_config.py`, a small CLI utility that checks expected e2e module file paths exist, verifies composite-action `inputs` stay consistent with workflow `with:` usage (including required inputs), and confirms essential CI env vars are present when running under GitHub Actions.",
+  "reasoning": "",
+  "responseId": "resp_0a49aa04ebef4bb9006949c32a73a0819090a64cc4b9ca5cbe",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3956,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2381,
+    "output_tokens_details": {
+      "reasoning_tokens": 709
+    },
+    "total_tokens": 6337
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0a49aa04ebef4bb9006949c32b38488190a1c8e32a020d58fa",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a49aa04ebef4bb9006949c33bd6d88190af2e230cb5c6deb8",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('scripts/e2e/validate_config.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\nr\"\"\"#!/usr/bin/env python3\n\\\"\\\"\\\"Validate that modularized e2e workflow components stay in sync.\n\nChecks:\n- Expected workflow/action/doc paths exist.\n- Composite action inputs match workflow `with:` usage (no unknown keys; required keys present).\n- Basic CI env vars are present when running in GitHub Actions.\n\nUsage:\n  python scripts/e2e/validate_config.py [--repo-root PATH] [--strict]\n\\\"\\\"\\\"\"\"\",\nr\"\"\"from __future__ import annotations\n\nimport argparse\nimport os\nimport re\nimport sys\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Tuple\"\"\",\nr\"\"\"try:\n    import yaml  # type: ignore\nexcept Exception:  # pragma: no cover\n    yaml = None\"\"\",\nr\"\"\"EXPECTED_PATHS = [\n    \".github/workflows/e2e_failure.yml\",\n    \".github/actions/e2e-common/action.yml\",\n    \".github/actions/e2e-on-failure/action.yml\",\n    \"docs/e2e/README_e2e.md\",\n]\n\nCI_REQUIRED_ENV = [\"GITHUB_ACTIONS\", \"GITHUB_WORKSPACE\", \"GITHUB_RUN_ID\", \"GITHUB_SHA\"]\"\"\",\nr\"\"\"def _find_repo_root(start: Path) -> Path:\n    for p in [start, *start.parents]:\n        if (p / \".github\").is_dir() or (p / \".git\").exists():\n            return p\n    return start\n\n\ndef _load_yaml(path: Path) -> Dict[str, Any]:\n    if yaml is None:\n        raise SystemExit(\"PyYAML is required for validate_config.py (missing dependency 'yaml').\")\n    data = yaml.safe_load(path.read_text(encoding=\"utf-8\")) or {}\n    if not isinstance(data, dict):\n        raise ValueError(f\"{path} did not parse to a mapping.\")\n    return data\"\"\",\nr\"\"\"def _action_inputs(action_yml: Path) -> Tuple[Dict[str, Any], List[str]]:\n    data = _load_yaml(action_yml)\n    inputs = data.get(\"inputs\") or {}\n    if not isinstance(inputs, dict):\n        raise ValueError(f\"{action_yml}: 'inputs' must be a mapping.\")\n    required = []\n    for k, v in inputs.items():\n        if isinstance(v, dict) and v.get(\"required\") is True:\n            required.append(str(k))\n    return {str(k): v for k, v in inputs.items()}, required\n\n\ndef _workflow_with_keys(workflow_yml: Path, uses_suffix: str) -> List[Tuple[int, str]]:\n    \\\"\\\"\\\"Extract `with:` keys for steps that use a given action path suffix.\n\n    This uses YAML when available; as a fallback it uses a conservative regex scan.\n    \\\"\\\"\\\"\n    try:\n        data = _load_yaml(workflow_yml)\n        jobs = data.get(\"jobs\") or {}\n        keys: List[Tuple[int, str]] = []\n        for job in (jobs.values() if isinstance(jobs, dict) else []):\n            steps = (job or {}).get(\"steps\") if isinstance(job, dict) else None\n            if not isinstance(steps, list):\n                continue\n            for i, step in enumerate(steps):\n                if not isinstance(step, dict):\n                    continue\n                uses = str(step.get(\"uses\") or \"\")\n                if uses.endswith(uses_suffix):\n                    with_map = step.get(\"with\") or {}\n                    if isinstance(with_map, dict):\n                        keys.extend((i, str(k)) for k in with_map.keys())\n        return keys\n    except Exception:\n        txt = workflow_yml.read_text(encoding=\"utf-8\")\n        pattern = re.compile(rf\\\"uses:\\\\s*{re.escape(uses_suffix)}\\\\s*\\\\n\\\\s*with:\\\\s*\\\\n(?P<body>(\\\\s+\\\\w[^\\\\n]*\\\\n)+)\\\")\n        keys = []\n        for m in pattern.finditer(txt):\n            for line in m.group(\\\"body\\\").splitlines():\n                if \\\":\\\" in line:\n                    keys.append((0, line.strip().split(\\\":\\\", 1)[0]))\n        return keys\"\"\",\nr\"\"\"def _check_paths(repo_root: Path) -> List[str]:\n    problems = []\n    for rel in EXPECTED_PATHS:\n        p = repo_root / rel\n        if not p.exists():\n            problems.append(f\\\"Missing expected path: {rel}\\\")\n    return problems\n\n\ndef _check_ci_env() -> List[str]:\n    if os.environ.get(\\\"GITHUB_ACTIONS\\\", \\\"\\\").lower() != \\\"true\\\":\n        return []\n    missing = [k for k in CI_REQUIRED_ENV if not os.environ.get(k)]\n    return [f\\\"Missing required CI env var: {k}\\\" for k in missing]\"\"\",\nr\"\"\"def _check_action_vs_workflow(repo_root: Path) -> List[str]:\n    problems: List[str] = []\n    wf = repo_root / \\\".github/workflows/e2e_failure.yml\\\"\n    common = repo_root / \\\".github/actions/e2e-common/action.yml\\\"\n    failure = repo_root / \\\".github/actions/e2e-on-failure/action.yml\\\"\n    if not (wf.exists() and common.exists() and failure.exists()):\n        return problems\n\n    def validate(action_yml: Path, uses_suffix: str) -> None:\n        inputs, required = _action_inputs(action_yml)\n        used_keys = [k for _, k in _workflow_with_keys(wf, uses_suffix)]\n        for k in used_keys:\n            if k not in inputs:\n                problems.append(f\\\"{wf.name}: unknown input '{k}' for action {uses_suffix}\\\")\n        for k in required:\n            if k not in used_keys:\n                problems.append(f\\\"{wf.name}: missing required input '{k}' for action {uses_suffix}\\\")\n\n    validate(common, \\\"./.github/actions/e2e-common\\\")\n    validate(failure, \\\"./.github/actions/e2e-on-failure\\\")\n    return problems\"\"\",\nr\"\"\"def main(argv: Iterable[str] | None = None) -> int:\n    ap = argparse.ArgumentParser(description=__doc__)\n    ap.add_argument(\\\"--repo-root\\\", type=Path, default=None, help=\\\"Override repository root.\\\")\n    ap.add_argument(\\\"--strict\\\", action=\\\"store_true\\\", help=\\\"Treat warnings as errors.\\\")\n    ns = ap.parse_args(list(argv) if argv is not None else None)\n\n    repo_root = ns.repo_root.resolve() if ns.repo_root else _find_repo_root(Path(__file__).resolve())\n    problems = []\n    problems += _check_paths(repo_root)\n    problems += _check_ci_env()\n    problems += _check_action_vs_workflow(repo_root)\n\n    if problems:\n        for p in problems:\n            print(f\\\"CONFIG_VALIDATE_ERROR: {p}\\\", file=sys.stderr)\n        return 2\n    print(\\\"CONFIG_VALIDATE_OK\\\")\n    return 0\n\n\nif __name__ == \\\"__main__\\\":\n    raise SystemExit(main())\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:scripts/e2e/validate_config.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949c289d32c81909670b17a73e06bb5058924e5a7d358e0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:scripts/e2e/validate_config.py\nDIR_STATE:[\"scripts/e2e/validate_config.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0a49aa04ebef4bb9006949c3555b8c81908be582c013950141",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `scripts/e2e/validate_config.py`, a small CLI utility that checks expected e2e module file paths exist, verifies composite-action `inputs` stay consistent with workflow `with:` usage (including required inputs), and confirms essential CI env vars are present when running under GitHub Actions."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

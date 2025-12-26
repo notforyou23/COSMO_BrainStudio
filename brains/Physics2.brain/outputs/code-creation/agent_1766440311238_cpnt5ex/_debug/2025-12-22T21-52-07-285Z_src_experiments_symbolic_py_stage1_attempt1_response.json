@@ -1,0 +1,56 @@
+{
+  "content": "Implemented SymPy-based symbolic experiments in `src/experiments/symbolic.py`, including JSON-friendly expression export plus verified identities for a quadratic form’s gradient/Hessian and the softmax Jacobian/log-sum-exp gradient relationship.",
+  "reasoning": "",
+  "responseId": "resp_0eb441c7fa94b4aa006949be38f68c8197bab2f0983374d348",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3398,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1899,
+    "output_tokens_details": {
+      "reasoning_tokens": 488
+    },
+    "total_tokens": 5297
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0eb441c7fa94b4aa006949be39b6ec8197976a9162843cfe2e",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0eb441c7fa94b4aa006949be4378d481979c762fa686b16fa1",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/symbolic.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"SymPy-based symbolic experiments.\n\nThis module provides small, self-contained derivations/checks that can be used\nas \"analytical consequences\" prototypes (gradient/Hessian identities, Jacobians,\netc.) and exports simplified expressions in JSON-friendly form.\n\\\"\\\"\\\"\"\"\",\n\"\"\"from __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Any, Dict, Iterable, Tuple\n\nimport sympy as sp\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass PackedExpr:\n    \\\"\\\"\\\"A JSON-friendly bundle of representations for a SymPy expression.\\\"\\\"\\\"\n\n    srepr: str\n    str: str\n    latex: str\n\n    @staticmethod\n    def of(expr: sp.Expr) -> \"PackedExpr\":\n        e = sp.simplify(expr)\n        return PackedExpr(srepr=sp.srepr(e), str=str(e), latex=sp.latex(e))\"\"\",\n\"\"\"def check_equivalent(a: sp.Expr, b: sp.Expr) -> bool:\n    \\\"\\\"\\\"Return True if SymPy can simplify (a - b) to 0.\\\"\\\"\\\"\n    return sp.simplify(a - b) == 0\"\"\",\n\"\"\"def experiment_quadratic_form(n: int = 2) -> Dict[str, Any]:\n    \\\"\\\"\\\"Verify gradient/Hessian identities for f(x)=x^T A x (explicit small n).\n\n    For general (possibly non-symmetric) A:\n      ∇f = (A + Aᵀ) x\n      H  = A + Aᵀ\n    \\\"\\\"\\\"\n    if n != 2:\n        raise ValueError(\"This prototype uses n=2 to keep expressions compact.\")\n\n    x1, x2 = sp.symbols(\"x1 x2\")\n    a11, a12, a21, a22 = sp.symbols(\"a11 a12 a21 a22\")\n    x = sp.Matrix([x1, x2])\n    A = sp.Matrix([[a11, a12], [a21, a22]])\n\n    f = (x.T * A * x)[0]\n    grad = sp.Matrix([sp.diff(f, x1), sp.diff(f, x2)])\n    H = sp.hessian(f, (x1, x2))\n    rhs_grad = (A + A.T) * x\n    rhs_H = A + A.T\n\n    return {\n        \"name\": \"quadratic_form\",\n        \"inputs\": {\"n\": n},\n        \"expressions\": {\n            \"f\": PackedExpr.of(f).__dict__,\n            \"grad\": PackedExpr.of(grad).__dict__,\n            \"hessian\": PackedExpr.of(H).__dict__,\n            \"rhs_grad\": PackedExpr.of(rhs_grad).__dict__,\n            \"rhs_hessian\": PackedExpr.of(rhs_H).__dict__,\n        },\n        \"checks\": {\n            \"grad_identity\": bool(sp.simplify(grad - rhs_grad) == sp.zeros(2, 1)),\n            \"hessian_identity\": bool(sp.simplify(H - rhs_H) == sp.zeros(2)),\n        },\n    }\"\"\",\n\"\"\"def experiment_softmax_jacobian(k: int = 3) -> Dict[str, Any]:\n    \\\"\\\"\\\"Derive Jacobian of softmax and link it to log-sum-exp.\n\n    softmax(z)_i = exp(z_i)/sum_j exp(z_j)\n    J = diag(s) - s s^T\n    Also: ∇ logsumexp(z) = softmax(z)\n    \\\"\\\"\\\"\n    if k != 3:\n        raise ValueError(\"This prototype uses k=3 to keep expressions compact.\")\n\n    z1, z2, z3 = sp.symbols(\"z1 z2 z3\")\n    z = sp.Matrix([z1, z2, z3])\n    exps = sp.Matrix([sp.exp(z1), sp.exp(z2), sp.exp(z3)])\n    Z = sp.simplify(sum(exps))\n    s = sp.simplify(exps / Z)\n\n    J = s.jacobian((z1, z2, z3))\n    J_rhs = sp.diag(*list(s)) - s * s.T\n\n    lse = sp.log(sum(sp.exp(zi) for zi in (z1, z2, z3)))\n    grad_lse = sp.Matrix([sp.diff(lse, zi) for zi in (z1, z2, z3)])\n\n    return {\n        \"name\": \"softmax_jacobian\",\n        \"inputs\": {\"k\": k},\n        \"expressions\": {\n            \"softmax\": PackedExpr.of(s).__dict__,\n            \"jacobian\": PackedExpr.of(J).__dict__,\n            \"jacobian_rhs\": PackedExpr.of(J_rhs).__dict__,\n            \"logsumexp\": PackedExpr.of(lse).__dict__,\n            \"grad_logsumexp\": PackedExpr.of(grad_lse).__dict__,\n        },\n        \"checks\": {\n            \"jacobian_identity\": bool(sp.simplify(J - J_rhs) == sp.zeros(3)),\n            \"grad_logsumexp_is_softmax\": bool(sp.simplify(grad_lse - s) == sp.zeros(3, 1)),\n        },\n    }\"\"\",\n\"\"\"def run_all() -> Dict[str, Any]:\n    \\\"\\\"\\\"Run all symbolic experiments and return a JSON-serializable dict.\\\"\\\"\\\"\n    experiments = [experiment_quadratic_form(), experiment_softmax_jacobian()]\n    return {\"ok\": all(all(e[\"checks\"].values()) for e in experiments), \"experiments\": experiments}\"\"\",\n\"\"\"def main() -> None:\n    \\\"\\\"\\\"CLI entrypoint: print a compact JSON summary to stdout.\\\"\\\"\\\"\n    import json\n\n    print(json.dumps(run_all(), indent=2, sort_keys=True))\n\n\nif __name__ == \"__main__\":\n    main()\n\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/experiments/symbolic.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd84af8481908e931e87d628d2450d02f5accc7ac937",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/symbolic.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/registry.py\", \"src/experiments/symbolic.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0eb441c7fa94b4aa006949be56a44081979e325cfca1d0127e",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented SymPy-based symbolic experiments in `src/experiments/symbolic.py`, including JSON-friendly expression export plus verified identities for a quadratic form’s gradient/Hessian and the softmax Jacobian/log-sum-exp gradient relationship."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

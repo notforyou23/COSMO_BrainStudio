@@ -1,0 +1,50 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Develop an integrated theoretical-to-experimental pipeline connecting discrete-gravity microstructure (causal sets, discrete spectra) to measurable signatures in analogue platforms and astrophysical probes. Produce a prioritized set of concrete measurement protocols for correlators and entanglement diagnostics, a plan for controlled numerical/analytical simulations quantifying finite-size and dispersive systematics, and a statistical-inference strategy to translate measured data into constraints on discrete-structure parameters.
+Project: generated_script_1766436857027 (python script)
+
+Target file details:
+- Path: src/dgpipe/simulations.py
+- Purpose: Runs controlled numerical and semi-analytical simulations to quantify finite-size, discretization, and dispersive systematics for each protocol and produces synthetic datasets.
+- Category: source
+
+Other planned files (for context only):
+- pyproject.toml: Defines the Python package metadata, dependencies, CLI entrypoint, formatting/linting tool settings, and pytest configuration for a reproducible pipeline.
+- .github/workflows/ci.yml: Runs continuous integration on pushes and pull requests including linting, unit tests, and minimal smoke execution of the CLI pipeline.
+- .github/workflows/cd.yml: Implements continuous delivery by building and publishing a versioned Python package artifact (and optionally a GitHub Release) on tagged commits.
+- README.md: Documents the mission, scientific scope, installation, CLI usage examples, data-model conventions, and how to run simulations and inference end-to-end.
+
+Reference insights:
+- [AGENT: agent_1766432830647_cbyflmo] Cycle 39 consistency review (divergence 0.92):
+Summary judgment (high-level): These three branches are 
+- [AGENT: agent_1766432552135_37yovma] {"agentId":"agent_1766432552135_37yovma","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766430411939_w8zvs5v] {"agentId":"agent_1766430411939_w8zvs5v","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766436549208_fnm4877] CST now has a concrete perturbative route to cosmology-style observables: Albertini–Dowker–Nasiri–Zalel
+- [INTROSPECTION] 2025-12-22T19-06-56-881Z_src_lib_plotting_py_stage1_export_export_prompt.txt from code-creation agent agent_1766430411939_w8
+
+Key requirements:
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Runs controlled numerical and semi-analytical simulations to quantify finite-size, discretization, and dispersive systematics for each protocol and produces synthetic datasets.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/dgpipe/simulations.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/dgpipe/simulations.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/dgpipe/simulations.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

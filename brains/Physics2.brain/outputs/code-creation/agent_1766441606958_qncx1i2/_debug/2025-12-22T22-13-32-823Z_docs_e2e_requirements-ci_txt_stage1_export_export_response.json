@@ -1,0 +1,74 @@
+{
+  "content": "FILE_EXPORT:{\"path\":\"docs/e2e/requirements-ci.txt\",\"size\":1109,\"encoding\":\"base64\",\"sha256\":\"09c0ae9967213caa1c8c42ee10b22c3aa17f74a391fb2205ee60d5fb20110a87\",\"content\":\"IyBDSS1vbmx5IFB5dGhvbiBkZXBlbmRlbmNpZXMgZm9yIGVuZC10by1lbmQgKGUyZSkgdGVzdCBydW5zLgojIC0gUGlubmVkIHZlcnNpb25zIGtlZXAgQ0kgcmVwcm9kdWNpYmxlLgojIC0gS2VlcCB0aGlzIGZpbGUgc21hbGw6IG9ubHkgd2hhdCBDSSBuZWVkcyAobm90IGZ1bGwgZGV2IGRlcHMpLgojIC0gQ29tbWVudHMgZGVzY3JpYmUgdGhlIGZlYXR1cmUvbW9kdWxlIHRoYXQgcmVxdWlyZXMgZWFjaCBkZXBlbmRlbmN5LgojIENvcmUgdGVzdCBydW5uZXIKcHl0ZXN0PT04LjMuNApweXRlc3QteGRpc3Q9PTMuNi4xICAgICAgICAgICMgcGFyYWxsZWwgZTJlIGV4ZWN1dGlvbiBpbiBDSQpweXRlc3QtdGltZW91dD09Mi4zLjEgICAgICAgICMgaGFyZC1zdG9wIGh1bmcgdGVzdHMKcHl0ZXN0LXJlcnVuZmFpbHVyZXM9PTE0LjAgICAjIHJlcnVuIGZsYWt5IHRlc3RzIHdoZW4gZW5hYmxlZApweXRlc3QtaHRtbD09NC4xLjEgICAgICAgICAgICMgb3B0aW9uYWwgSFRNTCByZXBvcnQgYXJ0aWZhY3QKcHl0ZXN0LW1ldGFkYXRhPT0zLjEuMSAgICAgICAjIGV4dHJhIGNvbnRleHQgaW4gcmVwb3J0cyAoYnVpbGQsIHBsYXRmb3JtLCBldGMuKQojIEhUVFAgLyBBUEkgaGVscGVycyBjb21tb25seSB1c2VkIGluIGUyZSBzdWl0ZXMKcmVxdWVzdHM9PTIuMzIuMwp0ZW5hY2l0eT09OS4wLjAgICAgICAgICAgICAgICMgcmV0cnkvYmFja29mZiBmb3IgZXZlbnR1YWxseS1jb25zaXN0ZW50IHN5c3RlbXMKIyBDb25maWd1cmF0aW9uICYgc3RydWN0dXJlZCBvdXRwdXQKUHlZQU1MPT02LjAuMiAgICAgICAgICAgICAgICAjIHBhcnNlIHdvcmtmbG93L3Rlc3QgY29uZmlnIGZpbGVzCnB5dGhvbi1kb3RlbnY9PTEuMC4xICAgICAgICAgIyBsb2FkIENJLXByb3ZpZGVkIC5lbnYgZmlsZXMgd2hlbiBwcmVzZW50CnJpY2g9PTEzLjkuNCAgICAgICAgICAgICAgICAgIyByZWFkYWJsZSBDTEkgbG9ncyBpbiBDSSBvdXRwdXQKIyBCcm93c2VyLWRyaXZlbiBlMmUgKGluc3RhbGwgYnJvd3NlciBiaW5hcmllcyBzZXBhcmF0ZWx5IGluIENJKQpwbGF5d3JpZ2h0PT0xLjQ5LjEgICAgICAgICAgICMgVUkgZTJlIGF1dG9tYXRpb24gKENocm9taXVtL0ZpcmVmb3gvV2ViS2l0KQo=\"}\nDIR_STATE:[\"docs/e2e/README_e2e.md\",\"docs/e2e/requirements-ci.txt\"]",
+  "reasoning": "",
+  "responseId": "resp_0e7788bdb647a8bb006949c41c038881909bf1f074020bc2be",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2507,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1401,
+    "output_tokens_details": {
+      "reasoning_tokens": 389
+    },
+    "total_tokens": 3908
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0e7788bdb647a8bb006949c41cb7e08190bb7ae99a2e8c8be8",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0e7788bdb647a8bb006949c41f9c648190bd7a57a48b654b61",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport base64, json, hashlib, gzip\n\ntarget_path = Path('/mnt/data').joinpath('docs/e2e/requirements-ci.txt')\nassert target_path.is_file(), 'Expected docs/e2e/requirements-ci.txt to exist before export'\ndata = target_path.read_bytes()\npayload = {\n   'path': 'docs/e2e/requirements-ci.txt',\n   'size': len(data),\n   'encoding': 'base64',\n   'sha256': hashlib.sha256(data).hexdigest(),\n   'content': None\n}\nif len(data) > 20000:\n    compressed = gzip.compress(data)\n    payload['encoding'] = 'gzip+base64'\n    payload['content'] = base64.b64encode(compressed).decode('ascii')\nelse:\n    payload['content'] = base64.b64encode(data).decode('ascii')\n\nfile_export_line = 'FILE_EXPORT:' + json.dumps(payload, separators=(',', ':'))\ndir_state_line = 'DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file()))\nfile_export_line[:100], dir_state_line\n",
+      "container_id": "cntr_6949c289d32c81909670b17a73e06bb5058924e5a7d358e0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "('FILE_EXPORT:{\"path\":\"docs/e2e/requirements-ci.txt\",\"size\":1109,\"encoding\":\"base64\",\"sha256\":\"09c0ae9',\n 'DIR_STATE:[\"docs/e2e/README_e2e.md\", \"docs/e2e/requirements-ci.txt\"]')"
+        }
+      ]
+    },
+    {
+      "id": "rs_0e7788bdb647a8bb006949c423d8f48190b69c896576b967a3",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0e7788bdb647a8bb006949c4240968819081f8e894ccd813cd",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "file_export_line, dir_state_line\n",
+      "container_id": "cntr_6949c289d32c81909670b17a73e06bb5058924e5a7d358e0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "('FILE_EXPORT:{\"path\":\"docs/e2e/requirements-ci.txt\",\"size\":1109,\"encoding\":\"base64\",\"sha256\":\"09c0ae9967213caa1c8c42ee10b22c3aa17f74a391fb2205ee60d5fb20110a87\",\"content\":\"IyBDSS1vbmx5IFB5dGhvbiBkZXBlbmRlbmNpZXMgZm9yIGVuZC10by1lbmQgKGUyZSkgdGVzdCBydW5zLgojIC0gUGlubmVkIHZlcnNpb25zIGtlZXAgQ0kgcmVwcm9kdWNpYmxlLgojIC0gS2VlcCB0aGlzIGZpbGUgc21hbGw6IG9ubHkgd2hhdCBDSSBuZWVkcyAobm90IGZ1bGwgZGV2IGRlcHMpLgojIC0gQ29tbWVudHMgZGVzY3JpYmUgdGhlIGZlYXR1cmUvbW9kdWxlIHRoYXQgcmVxdWlyZXMgZWFjaCBkZXBlbmRlbmN5LgojIENvcmUgdGVzdCBydW5uZXIKcHl0ZXN0PT04LjMuNApweXRlc3QteGRpc3Q9PTMuNi4xICAgICAgICAgICMgcGFyYWxsZWwgZTJlIGV4ZWN1dGlvbiBpbiBDSQpweXRlc3QtdGltZW91dD09Mi4zLjEgICAgICAgICMgaGFyZC1zdG9wIGh1bmcgdGVzdHMKcHl0ZXN0LXJlcnVuZmFpbHVyZXM9PTE0LjAgICAjIHJlcnVuIGZsYWt5IHRlc3RzIHdoZW4gZW5hYmxlZApweXRlc3QtaHRtbD09NC4xLjEgICAgICAgICAgICMgb3B0aW9uYWwgSFRNTCByZXBvcnQgYXJ0aWZhY3QKcHl0ZXN0LW1ldGFkYXRhPT0zLjEuMSAgICAgICAjIGV4dHJhIGNvbnRleHQgaW4gcmVwb3J0cyAoYnVpbGQsIHBsYXRmb3JtLCBldGMuKQojIEhUVFAgLyBBUEkgaGVscGVycyBjb21tb25seSB1c2VkIGluIGUyZSBzdWl0ZXMKcmVxdWVzdHM9PTIuMzIuMwp0ZW5hY2l0eT09OS4wLjAgICAgICAgICAgICAgICMgcmV0cnkvYmFja29mZiBmb3IgZXZlbnR1YWxseS1jb25zaXN0ZW50IHN5c3RlbXMKIyBDb25maWd1cmF0aW9uICYgc3RydWN0dXJlZCBvdXRwdXQKUHlZQU1MPT02LjAuMiAgICAgICAgICAgICAgICAjIHBhcnNlIHdvcmtmbG93L3Rlc3QgY29uZmlnIGZpbGVzCnB5dGhvbi1kb3RlbnY9PTEuMC4xICAgICAgICAgIyBsb2FkIENJLXByb3ZpZGVkIC5lbnYgZmlsZXMgd2hlbiBwcmVzZW50CnJpY2g9PTEzLjkuNCAgICAgICAgICAgICAgICAgIyByZWFkYWJsZSBDTEkgbG9ncyBpbiBDSSBvdXRwdXQKIyBCcm93c2VyLWRyaXZlbiBlMmUgKGluc3RhbGwgYnJvd3NlciBiaW5hcmllcyBzZXBhcmF0ZWx5IGluIENJKQpwbGF5d3JpZ2h0PT0xLjQ5LjEgICAgICAgICAgICMgVUkgZTJlIGF1dG9tYXRpb24gKENocm9taXVtL0ZpcmVmb3gvV2ViS2l0KQo=\"}',\n 'DIR_STATE:[\"docs/e2e/README_e2e.md\", \"docs/e2e/requirements-ci.txt\"]')"
+        }
+      ]
+    },
+    {
+      "id": "msg_0e7788bdb647a8bb006949c426079881909c13baf482a5406d",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_EXPORT:{\"path\":\"docs/e2e/requirements-ci.txt\",\"size\":1109,\"encoding\":\"base64\",\"sha256\":\"09c0ae9967213caa1c8c42ee10b22c3aa17f74a391fb2205ee60d5fb20110a87\",\"content\":\"IyBDSS1vbmx5IFB5dGhvbiBkZXBlbmRlbmNpZXMgZm9yIGVuZC10by1lbmQgKGUyZSkgdGVzdCBydW5zLgojIC0gUGlubmVkIHZlcnNpb25zIGtlZXAgQ0kgcmVwcm9kdWNpYmxlLgojIC0gS2VlcCB0aGlzIGZpbGUgc21hbGw6IG9ubHkgd2hhdCBDSSBuZWVkcyAobm90IGZ1bGwgZGV2IGRlcHMpLgojIC0gQ29tbWVudHMgZGVzY3JpYmUgdGhlIGZlYXR1cmUvbW9kdWxlIHRoYXQgcmVxdWlyZXMgZWFjaCBkZXBlbmRlbmN5LgojIENvcmUgdGVzdCBydW5uZXIKcHl0ZXN0PT04LjMuNApweXRlc3QteGRpc3Q9PTMuNi4xICAgICAgICAgICMgcGFyYWxsZWwgZTJlIGV4ZWN1dGlvbiBpbiBDSQpweXRlc3QtdGltZW91dD09Mi4zLjEgICAgICAgICMgaGFyZC1zdG9wIGh1bmcgdGVzdHMKcHl0ZXN0LXJlcnVuZmFpbHVyZXM9PTE0LjAgICAjIHJlcnVuIGZsYWt5IHRlc3RzIHdoZW4gZW5hYmxlZApweXRlc3QtaHRtbD09NC4xLjEgICAgICAgICAgICMgb3B0aW9uYWwgSFRNTCByZXBvcnQgYXJ0aWZhY3QKcHl0ZXN0LW1ldGFkYXRhPT0zLjEuMSAgICAgICAjIGV4dHJhIGNvbnRleHQgaW4gcmVwb3J0cyAoYnVpbGQsIHBsYXRmb3JtLCBldGMuKQojIEhUVFAgLyBBUEkgaGVscGVycyBjb21tb25seSB1c2VkIGluIGUyZSBzdWl0ZXMKcmVxdWVzdHM9PTIuMzIuMwp0ZW5hY2l0eT09OS4wLjAgICAgICAgICAgICAgICMgcmV0cnkvYmFja29mZiBmb3IgZXZlbnR1YWxseS1jb25zaXN0ZW50IHN5c3RlbXMKIyBDb25maWd1cmF0aW9uICYgc3RydWN0dXJlZCBvdXRwdXQKUHlZQU1MPT02LjAuMiAgICAgICAgICAgICAgICAjIHBhcnNlIHdvcmtmbG93L3Rlc3QgY29uZmlnIGZpbGVzCnB5dGhvbi1kb3RlbnY9PTEuMC4xICAgICAgICAgIyBsb2FkIENJLXByb3ZpZGVkIC5lbnYgZmlsZXMgd2hlbiBwcmVzZW50CnJpY2g9PTEzLjkuNCAgICAgICAgICAgICAgICAgIyByZWFkYWJsZSBDTEkgbG9ncyBpbiBDSSBvdXRwdXQKIyBCcm93c2VyLWRyaXZlbiBlMmUgKGluc3RhbGwgYnJvd3NlciBiaW5hcmllcyBzZXBhcmF0ZWx5IGluIENJKQpwbGF5d3JpZ2h0PT0xLjQ5LjEgICAgICAgICAgICMgVUkgZTJlIGF1dG9tYXRpb24gKENocm9taXVtL0ZpcmVmb3gvV2ViS2l0KQo=\"}\nDIR_STATE:[\"docs/e2e/README_e2e.md\",\"docs/e2e/requirements-ci.txt\"]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

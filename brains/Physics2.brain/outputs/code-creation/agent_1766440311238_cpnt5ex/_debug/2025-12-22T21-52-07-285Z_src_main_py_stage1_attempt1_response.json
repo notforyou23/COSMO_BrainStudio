@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/main.py` as a self-contained CLI that runs built-in experiments (`logistic_map`, `sympy_series`), writes per-experiment artifacts plus a `run.json` manifest under a hashed run directory, and prints a concise reproducibility-oriented stdout summary.",
+  "reasoning": "",
+  "responseId": "resp_053a9f4e0305fcf9006949bde5b41c81958c8b54d1cac9e2b8",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3551,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2100,
+    "output_tokens_details": {
+      "reasoning_tokens": 282
+    },
+    "total_tokens": 5651
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_053a9f4e0305fcf9006949bde670a48195b45f22ffb3032423",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_053a9f4e0305fcf9006949bdebcb5c819598a2fca87c983208",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, hashlib, sys, platform, csv, math, random, time\n\ntarget_path = Path('/mnt/data').joinpath('src/main.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\\\n#!/usr/bin/env python3\n\\\"\\\"\\\"CLI entry point for small numerical/symbolic prototype experiments.\n\nRuns one or more built-in experiments, writes artifacts under --outdir, and prints a\nshort summary suitable for reproducing results.\n\\\"\\\"\\\"\nfrom __future__ import annotations\n\nimport argparse\nimport csv\nimport hashlib\nimport json\nimport math\nimport os\nimport platform\nimport random\nimport sys\nimport time\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Tuple\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef _sha256_text(s: str) -> str:\n    return hashlib.sha256(s.encode(\"utf-8\")).hexdigest()[:12]\n\n\ndef _write_json(path: Path, obj: Any) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    path.write_text(json.dumps(obj, indent=2, sort_keys=True) + \"\\\\n\", encoding=\"utf-8\")\n\n\ndef _write_csv(path: Path, header: Iterable[str], rows: Iterable[Iterable[Any]]) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    with path.open(\"w\", newline=\"\", encoding=\"utf-8\") as f:\n        w = csv.writer(f)\n        w.writerow(list(header))\n        for r in rows:\n            w.writerow(list(r))\n\n\ndef _env_info() -> Dict[str, Any]:\n    return {\n        \"python\": sys.version.split()[0],\n        \"platform\": platform.platform(),\n        \"executable\": sys.executable,\n        \"cwd\": os.getcwd(),\n    }\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef exp_logistic_map(outdir: Path, seed: int, steps: int, r: float) -> Dict[str, Any]:\n    \\\"\\\"\\\"Chaotic map x_{n+1} = r x_n (1-x_n); illustrates sensitivity to initial conditions.\\\"\\\"\\\"\n    random.seed(seed)\n    x0 = 0.123456 + (random.random() - 0.5) * 1e-6\n    x = x0\n    xs: List[float] = []\n    for _ in range(steps):\n        x = r * x * (1.0 - x)\n        xs.append(float(x))\n    burn = min(100, len(xs))\n    tail = xs[burn:] if burn < len(xs) else xs\n    mean = sum(tail) / max(1, len(tail))\n    var = sum((v - mean) ** 2 for v in tail) / max(1, len(tail))\n    csv_path = outdir / \"logistic_map.csv\"\n    _write_csv(csv_path, [\"n\", \"x\"], ((i, v) for i, v in enumerate(xs)))\n    meta = {\"x0\": x0, \"r\": r, \"steps\": steps, \"tail_mean\": mean, \"tail_std\": math.sqrt(var)}\n    _write_json(outdir / \"logistic_map.json\", meta)\n    return {\"name\": \"logistic_map\", \"artifacts\": [str(csv_path.name), \"logistic_map.json\"], \"metrics\": meta}\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef exp_sympy_series(outdir: Path, order: int) -> Dict[str, Any]:\n    \\\"\\\"\\\"Symbolic Taylor series + simplification to show exact vs numeric agreement.\\\"\\\"\\\"\n    try:\n        import sympy as sp\n    except Exception as e:  # pragma: no cover\n        raise SystemExit(f\"sympy is required for 'sympy_series' experiment: {e}\") from e\n    x = sp.Symbol(\"x\")\n    expr = sp.sin(x) / (1 + x)\n    series = sp.series(expr, x, 0, order).removeO()\n    simplified = sp.simplify(series)\n    poly = sp.Poly(simplified, x)\n    coeffs = [float(poly.nth(i)) for i in range(order)]\n    rows = [(i, str(poly.nth(i)), coeffs[i]) for i in range(order)]\n    _write_csv(outdir / \"sympy_series.csv\", [\"power\", \"exact_coeff\", \"float_coeff\"], rows)\n    _write_json(outdir / \"sympy_series.json\", {\"expr\": str(expr), \"order\": order, \"series\": str(simplified)})\n    return {\"name\": \"sympy_series\", \"artifacts\": [\"sympy_series.csv\", \"sympy_series.json\"], \"metrics\": {\"order\": order}}\n\"\"\")\n\nchunks.append(\"\"\"\\\nEXPERIMENTS = {\n    \"logistic_map\": exp_logistic_map,\n    \"sympy_series\": exp_sympy_series,\n}\n\n\ndef _parse_args(argv: List[str]) -> argparse.Namespace:\n    p = argparse.ArgumentParser(prog=\"experiments\", description=__doc__)\n    p.add_argument(\"-e\", \"--experiment\", action=\"append\", choices=sorted(EXPERIMENTS), help=\"Experiment to run (repeatable).\")\n    p.add_argument(\"--outdir\", default=\"runs\", help=\"Base output directory.\")\n    p.add_argument(\"--seed\", type=int, default=0, help=\"Random seed (when applicable).\")\n    p.add_argument(\"--steps\", type=int, default=2000, help=\"Steps for logistic_map.\")\n    p.add_argument(\"--r\", type=float, default=3.99, help=\"Parameter r for logistic_map.\")\n    p.add_argument(\"--order\", type=int, default=10, help=\"Series order for sympy_series.\")\n    return p.parse_args(argv)\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef main(argv: List[str] | None = None) -> int:\n    ns = _parse_args(sys.argv[1:] if argv is None else argv)\n    chosen = ns.experiment or [\"logistic_map\"]\n    config = {\n        \"experiments\": chosen,\n        \"seed\": ns.seed,\n        \"steps\": ns.steps,\n        \"r\": ns.r,\n        \"order\": ns.order,\n    }\n    run_key = _sha256_text(json.dumps(config, sort_keys=True))\n    ts = time.strftime(\"%Y%m%d-%H%M%S\", time.gmtime())\n    run_dir = Path(ns.outdir) / f\"{ts}-{run_key}\"\n    run_dir.mkdir(parents=True, exist_ok=True)\n\n    results: Dict[str, Any] = {\"config\": config, \"env\": _env_info(), \"run_dir\": str(run_dir), \"results\": []}\n    for name in chosen:\n        exp_out = run_dir / name\n        if name == \"logistic_map\":\n            r = exp_logistic_map(exp_out, seed=ns.seed, steps=ns.steps, r=ns.r)\n        elif name == \"sympy_series\":\n            r = exp_sympy_series(exp_out, order=ns.order)\n        else:  # pragma: no cover\n            raise SystemExit(f\"Unknown experiment: {name}\")\n        results[\"results\"].append(r)\n\n    _write_json(run_dir / \"run.json\", results)\n\n    # Concise stdout summary\n    print(f\"RUN_DIR:{run_dir}\")\n    for r in results[\"results\"]:\n        m = r.get(\"metrics\", {})\n        if r[\"name\"] == \"logistic_map\":\n            print(f\\\"EXP:{r['name']} r={m['r']} steps={m['steps']} tail_std={m['tail_std']:.6g} artifacts={','.join(r['artifacts'])}\\\")\n        else:\n            print(f\\\"EXP:{r['name']} order={m.get('order')} artifacts={','.join(r['artifacts'])}\\\")\n    print(\"MANIFEST:run.json\")\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/main.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd84af8481908e931e87d628d2450d02f5accc7ac937",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/main.py\nDIR_STATE:[\"src/main.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_053a9f4e0305fcf9006949be01231c819597bc7252f64e19c5",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/main.py` as a self-contained CLI that runs built-in experiments (`logistic_map`, `sympy_series`), writes per-experiment artifacts plus a `run.json` manifest under a hashed run directory, and prints a concise reproducibility-oriented stdout summary."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

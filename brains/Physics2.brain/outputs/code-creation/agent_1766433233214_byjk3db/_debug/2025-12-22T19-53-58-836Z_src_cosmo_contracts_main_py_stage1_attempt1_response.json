@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/cosmo_contracts/__main__.py` as a compact argparse-based CLI entry point supporting `inject`, `validate`, and `compliance` subcommands (with JSON/text output) so `python -m cosmo_contracts ...` can drive contract injection and compliance checking.",
+  "reasoning": "",
+  "responseId": "resp_017290c3e635bf35006949a32018308193ba365c17c105cb53",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3157,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1599,
+    "output_tokens_details": {
+      "reasoning_tokens": 357
+    },
+    "total_tokens": 4756
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_017290c3e635bf35006949a3210cc08193b8a395c00f28336a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_017290c3e635bf35006949a3282abc8193873fecae25093b32",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/cosmo_contracts/__main__.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"cosmo_contracts package entry point.\n\nEnables: python -m cosmo_contracts <command> ...\n\nCommands focus on:\n- injecting/updating standardized Contract sections into v0.1 benchmarks markdown\n- validating contracts and reporting implementation compliance\n\\\"\\\"\\\"\"\"\",\n\"\"\"from __future__ import annotations\n\nimport argparse\nimport json\nimport sys\nfrom pathlib import Path\nfrom typing import Any, Dict, Optional\"\"\",\n\"\"\"def _json_dump(obj: Any) -> None:\n    json.dump(obj, sys.stdout, indent=2, sort_keys=True)\n    sys.stdout.write(\"\\\\n\")\"\"\",\n\"\"\"def _import(name: str):\n    try:\n        module = __import__(name, fromlist=[\"*\"])\n    except Exception as e:  # pragma: no cover\n        raise SystemExit(\n            f\"Failed to import {name!r}. The package installation may be incomplete.\\\\n{e}\"\n        )\n    return module\"\"\",\n\"\"\"def cmd_inject(args: argparse.Namespace) -> int:\n    md = _import(\"cosmo_contracts.markdown\")\n    in_path = Path(args.benchmarks).expanduser()\n    out_path = Path(args.out).expanduser() if args.out else None\n    res = md.inject_contract_sections(\n        in_path=in_path,\n        out_path=out_path,\n        strict=args.strict,\n    )\n    if args.format == \"json\":\n        _json_dump(res)\n    else:\n        sys.stdout.write(res.get(\"summary\", \"ok\") + \"\\\\n\")\n    return 0\"\"\",\n\"\"\"def cmd_validate(args: argparse.Namespace) -> int:\n    schema = _import(\"cosmo_contracts.schema\")\n    contract_path = Path(args.contract).expanduser()\n    data = json.loads(contract_path.read_text(encoding=\"utf-8\"))\n    ok, diag = schema.validate_contract(data)\n    out = {\"ok\": bool(ok), \"diagnostics\": diag}\n    if args.format == \"json\":\n        _json_dump(out)\n    else:\n        sys.stdout.write((\"PASS\" if ok else \"FAIL\") + \"\\\\n\")\n        if diag:\n            sys.stdout.write(str(diag) + \"\\\\n\")\n    return 0 if ok else 2\"\"\",\n\"\"\"def cmd_compliance(args: argparse.Namespace) -> int:\n    api = _import(\"cosmo_contracts\")\n    if not hasattr(api, \"check_compliance\"):\n        raise SystemExit(\n            \"cosmo_contracts.check_compliance is not available; update the package.\"\n        )\n    impl_path = Path(args.implementation).expanduser() if args.implementation else None\n    contract_path = Path(args.contract).expanduser() if args.contract else None\n    report = api.check_compliance(\n        contract_path=contract_path,\n        implementation_path=impl_path,\n        implementation_id=args.implementation_id,\n        run=args.run,\n        timeout_s=args.timeout_s,\n    )\n    if args.format == \"json\":\n        _json_dump(report)\n    else:\n        sys.stdout.write(report.get(\"summary\", \"ok\") + \"\\\\n\")\n    return 0 if report.get(\"pass\", False) else 2\"\"\",\n\"\"\"def build_parser() -> argparse.ArgumentParser:\n    p = argparse.ArgumentParser(prog=\"cosmo_contracts\", add_help=True)\n    p.add_argument(\"--format\", choices=[\"json\", \"text\"], default=\"json\")\n    sub = p.add_subparsers(dest=\"cmd\", required=True)\n\n    inj = sub.add_parser(\"inject\", help=\"Inject/update Contract sections in benchmarks_v0_1.md\")\n    inj.add_argument(\"benchmarks\", help=\"Path to benchmarks_v0_1.md\")\n    inj.add_argument(\"--out\", help=\"Optional output path; default edits in-place\")\n    inj.add_argument(\"--strict\", action=\"store_true\", help=\"Fail if parsing is ambiguous\")\n    inj.set_defaults(func=cmd_inject)\n\n    val = sub.add_parser(\"validate\", help=\"Validate a contract JSON file against the schema\")\n    val.add_argument(\"contract\", help=\"Path to a contract JSON file\")\n    val.set_defaults(func=cmd_validate)\n\n    comp = sub.add_parser(\"compliance\", help=\"Check implementation compliance with a contract\")\n    comp.add_argument(\"--contract\", required=True, help=\"Contract JSON file\")\n    comp.add_argument(\"--implementation\", help=\"Implementation file or module path\")\n    comp.add_argument(\"--implementation-id\", help=\"Implementation identifier to report\")\n    comp.add_argument(\n        \"--run\",\n        action=\"store_true\",\n        help=\"Actually execute implementation (otherwise just structural checks if supported)\",\n    )\n    comp.add_argument(\"--timeout-s\", type=float, default=30.0)\n    comp.set_defaults(func=cmd_compliance)\n\n    return p\"\"\",\n\"\"\"def main(argv: Optional[list[str]] = None) -> int:\n    parser = build_parser()\n    ns = parser.parse_args(argv)\n    return int(ns.func(ns))\n\n\nif __name__ == \"__main__\":  # pragma: no cover\n    raise SystemExit(main())\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/cosmo_contracts/__main__.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/cosmo_contracts/__main__.py\nDIR_STATE:[\"src/cosmo_contracts/__init__.py\", \"src/cosmo_contracts/__main__.py\", \"src/cosmo_contracts/cli.py\", \"src/cosmo_contracts/contracts.py\", \"src/cosmo_contracts/markdown.py\", \"src/cosmo_contracts/runner.py\", \"src/cosmo_contracts/schema.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_017290c3e635bf35006949a3390af0819391c33aba582e2110",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/cosmo_contracts/__main__.py` as a compact argparse-based CLI entry point supporting `inject`, `validate`, and `compliance` subcommands (with JSON/text output) so `python -m cosmo_contracts ...` can drive contract injection and compliance checking."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,96 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766554350955_uc0h68a",
+  "agentType": "code-creation",
+  "goalId": "goal_202",
+  "missionId": "strategic_goal_202_1766554350955",
+  "spawnCycle": 149,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T05:32:35.039Z",
+  "completedAt": "2025-12-24T05:34:50.605Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "src/utils/repro.py",
+      "description": "Provide a single helper module to set Python/NumPy/PyTorch seeds, enable deterministic settings where available, and expose utilities for hashing artifacts to support reproducibility checks.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/utils/repro.py\nDIR_STATE:[\"src/utils/output_path.py\", \"src/utils/output_paths.py\", \"src/utils/outputs_dir.py\", \"src/utils/paths.py\", \"src/utils/repro.py\"]\nAdded reproducibility utilities for deterministic seeding (Python/NumPy/PyTorch) and stable artifact hashing to support end-to-end determinism tests.\n",
+          "timestamp": "2025-12-24T05:33:00.552Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/utils/repro.py\nDIR_STATE:[\"src/utils/output_path.py\", \"src/utils/output_paths.py\", \"src/utils/outputs_dir.py\", \"src/utils/paths.py\", \"src/utils/repro.py\"]\nSummary: Added a reproducibility helper module for global seeding, deterministic settings, and stable artifact hashing utilities.\n",
+          "timestamp": "2025-12-24T05:33:28.328Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:32:35.039Z",
+      "failedAt": "2025-12-24T05:33:28.328Z"
+    },
+    {
+      "path": "tests/test_determinism.py",
+      "description": "Run the project entrypoint twice under deterministic settings and compare produced artifact hashes to assert end-to-end determinism.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "peline_outputs.py\", \"tests/test_pipeline_outputs_schema.py\", \"tests/test_pipeline_runnable.py\", \"tests/test_repro_json_pipeline_import_and_run.py\", \"tests/test_results_schema.py\", \"tests/test_results_schema_validation.py\", \"tests/test_stability.py\"]\nSUMMARY: Added an end-to-end determinism pytest that runs the project entrypoint twice under deterministic env settings and compares artifact hashes.\n",
+          "timestamp": "2025-12-24T05:33:58.728Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": ", \"tests/test_pipeline_outputs_schema.py\", \"tests/test_pipeline_runnable.py\", \"tests/test_repro_json_pipeline_import_and_run.py\", \"tests/test_reproducibility.py\", \"tests/test_results_schema.py\", \"tests/test_results_schema_validation.py\", \"tests/test_stability.py\"]\nSummary: Added an end-to-end determinism test that runs the entry script twice in isolated working dirs and compares hashed artifacts.\n",
+          "timestamp": "2025-12-24T05:34:50.605Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:32:35.039Z",
+      "failedAt": "2025-12-24T05:34:50.605Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Add a `src/utils/repro.py` helper to set seeds (python/numpy/torch if used), force deterministic settings where applicable, and add a determinism test that runs the entrypoint twice and compares artifact hashes.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Introduces deterministic artifact requirements (`results.json`, `figure.png`) plus a determinism check, directly enabling the merge gate and making pipeline behavior auditable. Promotes reusable seedi..."
+  ],
+  "projectName": "generated_script_1766554351425",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-24T05:34:50.605Z",
+  "summary": {
+    "completed": 0,
+    "failed": 2,
+    "total": 2
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/experiments/io.py` as a small, dependency-light sweep artifact I/O module with consistent schemas, atomic writes, and clear error handling for configs (`config.json`), results tables (`results.csv`), and metadata (`metadata.json`), plus convenience `load_run`/`save_run` helpers.",
+  "reasoning": "",
+  "responseId": "resp_084b0e1425db778700694b4dd30d0c8197aa6145df52ff002a",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4047,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2430,
+    "output_tokens_details": {
+      "reasoning_tokens": 270
+    },
+    "total_tokens": 6477
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_084b0e1425db778700694b4dd3ab888197b41d248d60542f48",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_084b0e1425db778700694b4dd7d48c8197a220d34aa1b6df95",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, csv, tempfile\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/io.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\\\n\\\"\\\"\\\"I/O helpers for experiment sweeps.\n\nThis module provides small, reusable functions to read/write sweep artifacts with\nconsistent schemas and friendly errors. It is intentionally dependency-light\n(only stdlib) to keep it usable in scripts and tests.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Mapping, MutableMapping, Optional, Sequence, Tuple\nimport csv\nimport json\nimport os\nimport tempfile\n\"\"\")\n\nchunks.append(\"\"\"\\\nclass SweepIOError(RuntimeError):\n    \\\"\\\"\\\"Raised when a sweep artifact cannot be read/written or validated.\\\"\\\"\\\"\n\n@dataclass(frozen=True)\nclass SweepPaths:\n    \\\"\\\"\\\"Conventional file layout for a single sweep run directory.\\\"\\\"\\\"\n\n    run_dir: Path\n    config_name: str = \"config.json\"\n    results_name: str = \"results.csv\"\n    metadata_name: str = \"metadata.json\"\n\n    @property\n    def config_path(self) -> Path:\n        return self.run_dir / self.config_name\n\n    @property\n    def results_path(self) -> Path:\n        return self.run_dir / self.results_name\n\n    @property\n    def metadata_path(self) -> Path:\n        return self.run_dir / self.metadata_name\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef _ensure_parent(path: Path) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n\ndef _atomic_write_text(path: Path, text: str, encoding: str = \"utf-8\") -> None:\n    \\\"\\\"\\\"Write text atomically (best-effort) to avoid partially-written files.\\\"\\\"\\\"\n    _ensure_parent(path)\n    fd, tmp = tempfile.mkstemp(prefix=path.name + \".\", dir=str(path.parent))\n    try:\n        with os.fdopen(fd, \"w\", encoding=encoding, newline=\"\") as f:\n            f.write(text)\n        os.replace(tmp, path)\n    except Exception as e:  # pragma: no cover (cleanup path)\n        try:\n            os.unlink(tmp)\n        except OSError:\n            pass\n        raise SweepIOError(f\"Failed writing {path}: {e}\") from e\n\ndef _require_mapping(obj: Any, *, context: str) -> Mapping[str, Any]:\n    if not isinstance(obj, Mapping):\n        raise SweepIOError(f\"{context} must be a JSON object (mapping), got {type(obj).__name__}\")\n    return obj\n\ndef _require_keys(d: Mapping[str, Any], keys: Sequence[str], *, context: str) -> None:\n    missing = [k for k in keys if k not in d]\n    if missing:\n        raise SweepIOError(f\"{context} missing required keys: {missing}\")\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef read_json(path: Path) -> Any:\n    \\\"\\\"\\\"Read JSON from *path* with consistent error messages.\\\"\\\"\\\"\n    try:\n        text = Path(path).read_text(encoding=\"utf-8\")\n        return json.loads(text)\n    except FileNotFoundError as e:\n        raise SweepIOError(f\"JSON file not found: {path}\") from e\n    except json.JSONDecodeError as e:\n        raise SweepIOError(f\"Invalid JSON in {path}: {e}\") from e\n    except OSError as e:\n        raise SweepIOError(f\"Failed reading {path}: {e}\") from e\n\ndef write_json(path: Path, obj: Any, *, indent: int = 2, sort_keys: bool = True) -> None:\n    \\\"\\\"\\\"Write JSON to *path* atomically.\\\"\\\"\\\"\n    try:\n        text = json.dumps(obj, indent=indent, sort_keys=sort_keys, ensure_ascii=False) + \"\\\\n\"\n    except TypeError as e:\n        raise SweepIOError(f\"Object not JSON-serializable for {path}: {e}\") from e\n    _atomic_write_text(Path(path), text)\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef read_config(path: Path) -> Dict[str, Any]:\n    \\\"\\\"\\\"Read an experiment/sweep config JSON object.\\\"\\\"\\\"\n    obj = read_json(path)\n    cfg = dict(_require_mapping(obj, context=f\"Config {path}\"))\n    # Convention: allow 'params' for sweep parameters; optional.\n    if \"params\" in cfg:\n        _require_mapping(cfg[\"params\"], context=f\"Config {path}['params']\")\n        cfg[\"params\"] = dict(cfg[\"params\"])\n    return cfg\n\ndef write_config(path: Path, config: Mapping[str, Any]) -> None:\n    _require_mapping(config, context=\"config\")\n    write_json(path, dict(config))\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef _coerce_scalar(s: str) -> Any:\n    \\\"\\\"\\\"Best-effort parse for CSV cells written from python scalars.\\\"\\\"\\\"\n    if s == \"\":\n        return \"\"\n    sl = s.lower()\n    if sl == \"null\" or sl == \"none\":\n        return None\n    if sl == \"true\":\n        return True\n    if sl == \"false\":\n        return False\n    try:\n        if \".\" in s or \"e\" in sl:\n            return float(s)\n        return int(s)\n    except ValueError:\n        return s\n\ndef read_results_csv(path: Path) -> List[Dict[str, Any]]:\n    \\\"\\\"\\\"Read a results table from CSV as a list of dict rows.\\\"\\\"\\\"\n    try:\n        with Path(path).open(\"r\", encoding=\"utf-8\", newline=\"\") as f:\n            reader = csv.DictReader(f)\n            if reader.fieldnames is None:\n                return []\n            rows: List[Dict[str, Any]] = []\n            for r in reader:\n                rows.append({k: _coerce_scalar(v) for k, v in r.items()})\n            return rows\n    except FileNotFoundError as e:\n        raise SweepIOError(f\"Results CSV not found: {path}\") from e\n    except csv.Error as e:\n        raise SweepIOError(f\"Invalid CSV in {path}: {e}\") from e\n    except OSError as e:\n        raise SweepIOError(f\"Failed reading {path}: {e}\") from e\n\ndef write_results_csv(path: Path, rows: Iterable[Mapping[str, Any]]) -> None:\n    \\\"\\\"\\\"Write a results table to CSV atomically.\n\n    Fieldnames are the union of keys across rows (stable order by first occurrence).\n    \\\"\\\"\\\"\n    rows_l = [dict(r) for r in rows]\n    fieldnames: List[str] = []\n    seen = set()\n    for r in rows_l:\n        for k in r.keys():\n            if k not in seen:\n                seen.add(k)\n                fieldnames.append(k)\n    text_io: List[str] = []\n    try:\n        import io\n        buf = io.StringIO()\n        w = csv.DictWriter(buf, fieldnames=fieldnames, extrasaction=\"ignore\")\n        w.writeheader()\n        for r in rows_l:\n            w.writerow({k: json.dumps(v, ensure_ascii=False) if isinstance(v, (dict, list)) else v for k, v in r.items()})\n        text = buf.getvalue()\n    except Exception as e:\n        raise SweepIOError(f\"Failed serializing results for {path}: {e}\") from e\n    _atomic_write_text(Path(path), text)\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef read_metadata(path: Path) -> Dict[str, Any]:\n    \\\"\\\"\\\"Read metadata JSON object (e.g., timing, git sha, host info).\\\"\\\"\\\"\n    meta = dict(_require_mapping(read_json(path), context=f\"Metadata {path}\"))\n    return meta\n\ndef write_metadata(path: Path, metadata: Mapping[str, Any]) -> None:\n    _require_mapping(metadata, context=\"metadata\")\n    write_json(path, dict(metadata))\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef load_run(run_dir: Path, *, required: Tuple[str, ...] = (\"config\", \"results\", \"metadata\")) -> Dict[str, Any]:\n    \\\"\\\"\\\"Load a conventional run directory into a dict with keys: config/results/metadata.\\\"\\\"\\\"\n    sp = SweepPaths(Path(run_dir))\n    out: Dict[str, Any] = {}\n    if \"config\" in required or sp.config_path.exists():\n        out[\"config\"] = read_config(sp.config_path)\n    if \"results\" in required or sp.results_path.exists():\n        out[\"results\"] = read_results_csv(sp.results_path)\n    if \"metadata\" in required or sp.metadata_path.exists():\n        out[\"metadata\"] = read_metadata(sp.metadata_path)\n    for k in required:\n        if k not in out:\n            raise SweepIOError(f\"Run {run_dir} missing required artifact: {k}\")\n    return out\n\ndef save_run(run_dir: Path, *, config: Mapping[str, Any], results: Iterable[Mapping[str, Any]], metadata: Mapping[str, Any]) -> SweepPaths:\n    \\\"\\\"\\\"Save config/results/metadata to the conventional files within *run_dir*.\\\"\\\"\\\"\n    sp = SweepPaths(Path(run_dir))\n    sp.run_dir.mkdir(parents=True, exist_ok=True)\n    write_config(sp.config_path, config)\n    write_results_csv(sp.results_path, results)\n    write_metadata(sp.metadata_path, metadata)\n    return sp\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/experiments/io.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4d8e36dc8190b33c31668379700e0f2b66b245dabab1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/io.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/_common.py\", \"src/experiments/io.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_084b0e1425db778700694b4de90e9c8197a9d0d7fc70d3cef2",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/experiments/io.py` as a small, dependency-light sweep artifact I/O module with consistent schemas, atomic writes, and clear error handling for configs (`config.json`), results tables (`results.csv`), and metadata (`metadata.json`), plus convenience `load_run`/`save_run` helpers."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

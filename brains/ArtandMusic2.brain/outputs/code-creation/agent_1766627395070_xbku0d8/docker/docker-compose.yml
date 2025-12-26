@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  smoke-test:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: container-health-smoketest:local
+    working_dir: /work
+    init: true
+    environment:
+      PYTHONUNBUFFERED: "1"
+      TZ: ${TZ:-UTC}
+      ARTIFACT_DIR: ${ARTIFACT_DIR:-/artifacts}
+      EXPECTATIONS_FILE: ${EXPECTATIONS_FILE:-/work/scripts/artifact_expectations.json}
+      TARGET_SCRIPT: ${TARGET_SCRIPT:-/work/scripts/minimal_failing_case.py}
+      RETRIES: ${RETRIES:-3}
+      BACKOFF_BASE_SECONDS: ${BACKOFF_BASE_SECONDS:-2}
+      BACKOFF_MAX_SECONDS: ${BACKOFF_MAX_SECONDS:-30}
+      HARD_TIMEOUT_SECONDS: ${HARD_TIMEOUT_SECONDS:-300}
+      SOFT_TIMEOUT_SECONDS: ${SOFT_TIMEOUT_SECONDS:-240}
+      ARTIFACTS_REQUIRED: ${ARTIFACTS_REQUIRED:-1}
+    volumes:
+      - ../scripts:/work/scripts:ro
+      - ../artifacts:/artifacts
+    command: ["python", "-u", "/work/scripts/container_health_smoketest.py"]
+    healthcheck:
+      test: ["CMD-SHELL", "python -c "import os,sys; p=os.environ.get('ARTIFACT_DIR','/artifacts'); sys.exit(0 if os.path.isdir(p) else 1)""]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: "no"
+    stop_grace_period: 10s
+    shm_size: ${SHM_SIZE:-256m}
+    cpus: ${CPUS:-1.0}
+    mem_limit: ${MEM_LIMIT:-1024m}
+    pids_limit: ${PIDS_LIMIT:-256}
+    ulimits:
+      nofile:
+        soft: 65535
+        hard: 65535
+    deploy:
+      resources:
+        limits:
+          cpus: "${DEPLOY_CPUS:-1.0}"
+          memory: "${DEPLOY_MEMORY:-1024M}"
+        reservations:
+          cpus: "${RESERVE_CPUS:-0.25}"
+          memory: "${RESERVE_MEMORY:-256M}"
+
+networks:
+  default:
+    name: ${COMPOSE_NETWORK_NAME:-container-health-smoketest-net}

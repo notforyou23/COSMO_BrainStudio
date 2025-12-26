@@ -1,0 +1,146 @@
+{
+  "content": "Created `tests/conftest.py` with session-scoped fixtures for repository path discovery, schema/example/benchmark file location, JSON loading, numeric tolerances (env-configurable), and a deterministic CI/local output directory (`tests/ci_outputs` by default, override via `CI_OUTPUT_DIR`).",
+  "reasoning": "",
+  "responseId": "resp_0bbee0f1a3b5c112006949a27c5d8c8196b68adc1fcd2526c1",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 5432,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2001,
+    "output_tokens_details": {
+      "reasoning_tokens": 1938
+    },
+    "total_tokens": 7433
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0bbee0f1a3b5c112006949a27d10c8819687f2aa840fa2366b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0bbee0f1a3b5c112006949a282ac2481968887b9b47fb4b017",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nroot=Path(\"/mnt/data\")\nsorted([p.relative_to(root).as_posix() for p in root.glob(\"**/*\") if p.is_file()][:50]), len(list(root.glob(\"**/*\")))\n",
+      "container_id": "cntr_6949a1f4d2c881908a8c0b7968ab83a502e1863ff81ebb71",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(['.github/workflows/ci.yml',\n  'tests/test_benchmark_case_001.py',\n  'tests/test_schema_conformance.py'],\n 6)"
+        }
+      ]
+    },
+    {
+      "id": "rs_0bbee0f1a3b5c112006949a28515908196b7c5a4cc3407818b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0bbee0f1a3b5c112006949a28777088196b209970697764a2a",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nroot=Path(\"/mnt/data\")\nfiles=sorted([p.relative_to(root).as_posix() for p in root.glob(\"**/*\") if p.is_file()])\nfiles\n",
+      "container_id": "cntr_6949a1f4d2c881908a8c0b7968ab83a502e1863ff81ebb71",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "['.github/workflows/ci.yml',\n 'tests/test_benchmark_case_001.py',\n 'tests/test_schema_conformance.py']"
+        }
+      ]
+    },
+    {
+      "id": "rs_0bbee0f1a3b5c112006949a289dfd481968397d38bae7dab87",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0bbee0f1a3b5c112006949a2911ce48196a09f8325129179ae",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nprint(Path(\"/mnt/data/tests/test_schema_conformance.py\").read_text()[:4000])\n",
+      "container_id": "cntr_6949a1f4d2c881908a8c0b7968ab83a502e1863ff81ebb71",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "from __future__ import annotations\n\nimport json\nfrom pathlib import Path\n\nimport pytest\nfrom jsonschema import Draft202012Validator\n\n\ndef _repo_root() -> Path:\n    return Path(__file__).resolve().parents[1]\n\n\ndef _schema_path(root: Path) -> Path | None:\n    candidates = [\n        root / \"outputs\" / \"schemas\" / \"benchmark_schema.json\",\n        root / \"schemas\" / \"benchmark_schema.json\",\n        root / \"schema\" / \"benchmark_schema.json\",\n        root / \"benchmark_schema.json\",\n        root / \"benchmark_schema.schema.json\",\n    ]\n    for p in candidates:\n        if p.is_file():\n            return p\n    # Fallback: first match anywhere under outputs/schemas or schemas.\n    for base in [root / \"outputs\" / \"schemas\", root / \"schemas\"]:\n        if base.is_dir():\n            matches = sorted(base.rglob(\"*benchmark*schema*.json\"))\n            if matches:\n                return matches[0]\n    return None\n\n\ndef _example_json_files(root: Path) -> list[Path]:\n    examples_dir = root / \"examples\"\n    if not examples_dir.is_dir():\n        return []\n    files = sorted(p for p in examples_dir.rglob(\"*.json\") if p.is_file())\n    # Exclude any schema files that might be co-located in examples.\n    return [p for p in files if \"schema\" not in p.name.lower()]\n\n\ndef _load_json(path: Path):\n    try:\n        return json.loads(path.read_text(encoding=\"utf-8\"))\n    except Exception as e:  # pragma: no cover\n        raise AssertionError(f\"Failed to parse JSON: {path}: {e}\") from e\n\n\n@pytest.mark.parametrize(\"example_path\", _example_json_files(_repo_root()))\ndef test_examples_conform_to_benchmark_input_schema(example_path: Path) -> None:\n    root = _repo_root()\n    schema_file = _schema_path(root)\n\n    if not (root / \"examples\").is_dir():\n        pytest.skip(\"No examples/ directory present.\")\n    if not _example_json_files(root):\n        pytest.skip(\"No example JSON files found under examples/.\")\n\n    assert schema_file is not None and schema_file.is_file(), (\n        \"Example JSON files exist, but benchmark input schema was not found. \"\n        \"Looked for outputs/schemas/benchmark_schema.json (and common alternatives).\"\n    )\n\n    schema = _load_json(schema_file)\n    instance = _load_json(example_path)\n\n    validator = Draft202012Validator(schema)\n    errors = sorted(validator.iter_errors(instance), key=lambda e: list(e.absolute_path))\n    if errors:\n        formatted = \"\\n\".join(\n            f\"- {example_path}: {list(err.absolute_path)}: {err.message}\" for err in errors\n        )\n        raise AssertionError(f\"Schema validation failed:\\n{formatted}\")\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0bbee0f1a3b5c112006949a29403bc819683b54a9279fdc814",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0bbee0f1a3b5c112006949a2957060819684b0480cbf63a945",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path(\"/mnt/data/tests/test_benchmark_case_001.py\").read_text()[:4000])\n",
+      "container_id": "cntr_6949a1f4d2c881908a8c0b7968ab83a502e1863ff81ebb71",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "import json\nimport os\nimport re\nimport shutil\nimport subprocess\nimport sys\nfrom pathlib import Path\n\nimport pytest\ndef _repo_root() -> Path:\n    return Path(__file__).resolve().parents[1]\n\n\ndef _find_file(patterns):\n    root = _repo_root()\n    for pat in patterns:\n        hits = list(root.rglob(pat))\n        if hits:\n            return sorted(hits)[0]\n    return None\n\n\ndef _find_expected_files():\n    root = _repo_root()\n    cands = sorted(\n        p for p in root.rglob(\"*.json\")\n        if re.search(r\"benchmark_case_001.*expected\", p.name)\n    )\n    if cands:\n        return cands\n    # fallback: dedicated expected directory\n    expected_dir = _find_file([\"**/expected/**/benchmark_case_001*.json\", \"**/expected*benchmark_case_001*.json\"])\n    return [expected_dir] if expected_dir else []\n\n\ndef _find_input_file():\n    return _find_file([\n        \"**/examples/**/benchmark_case_001*.json\",\n        \"**/example/**/benchmark_case_001*.json\",\n        \"**/inputs/**/benchmark_case_001*.json\",\n        \"**/benchmark_case_001*.json\",\n    ])\ndef _json_load(path: Path):\n    with path.open(\"r\", encoding=\"utf-8\") as f:\n        return json.load(f)\n\n\ndef _is_number(x):\n    return isinstance(x, (int, float)) and not isinstance(x, bool)\n\n\ndef _compare(a, b, *, atol=1e-6, rtol=1e-6, path=\"root\"):\n    if _is_number(a) and _is_number(b):\n        diff = abs(a - b)\n        tol = atol + rtol * abs(b)\n        if diff <= tol:\n            return\n        raise AssertionError(f\"{path}: {a} != {b} (diff={diff}, tol={tol})\")\n    if type(a) != type(b):\n        raise AssertionError(f\"{path}: type {type(a).__name__} != {type(b).__name__}\")\n    if isinstance(a, dict):\n        if set(a) != set(b):\n            missing = sorted(set(b) - set(a))\n            extra = sorted(set(a) - set(b))\n            raise AssertionError(f\"{path}: key mismatch missing={missing} extra={extra}\")\n        for k in a:\n            _compare(a[k], b[k], atol=atol, rtol=rtol, path=f\"{path}.{k}\")\n        return\n    if isinstance(a, list):\n        if len(a) != len(b):\n            raise AssertionError(f\"{path}: len {len(a)} != {len(b)}\")\n        for i, (ai, bi) in enumerate(zip(a, b)):\n            _compare(ai, bi, atol=atol, rtol=rtol, path=f\"{path}[{i}]\")\n        return\n    if a != b:\n        raise AssertionError(f\"{path}: {a!r} != {b!r}\")\ndef _run_reference(input_path: Path, output_dir: Path):\n    root = _repo_root()\n\n    # Prefer an explicit CLI module if present; fall back to a generated_script_*.py.\n    script = _find_file([\"generated_script_*.py\", \"src/**/main.py\", \"main.py\", \"run.py\"])\n    if script is None:\n        raise FileNotFoundError(\"Could not locate reference implementation script (e.g., generated_script_*.py).\")\n\n    cmd = [sys.executable, str(script), \"--input\", str(input_path), \"--output\", str(output_dir)]\n    env = os.environ.copy()\n    env.setdefault(\"PYTHONUTF8\", \"1\")\n    proc = subprocess.run(cmd, cwd=str(root), env=env, capture_output=True, text=True)\n    if proc.returncode != 0:\n        raise RuntimeError(\n            \"Reference run failed.\\n\"\n            f\"CMD: {' '.join(cmd)}\\n\"\n            f\"STDOUT:\\n{proc.stdout}\\nSTDERR:\\n{proc.stderr}\"\n        )\n@pytest.mark.benchmark\ndef test_benchmark_case_001_reference_matches_expected():\n    input_path = _find_input_file()\n    if input_path is None:\n        pytest.skip(\"benchmark_case_001 input JSON not found in repository.\")\n\n    expected_files = _find_expected_files()\n    if not expected_files:\n        pytest.skip(\"benchmark_case_001 expected output JSON not found in repository.\")\n\n    out_dir = _repo_root() / \"tests\" / \"ci_outputs\" / \"benchmark_case_001\"\n    if out_dir.exists():\n        shutil.rmtree(out_dir)\n    out_dir.mkdir(parents=True, exist_ok=True)\n\n    _run_reference(input_path, out_dir)\n\n    produced = sorted(out_dir.rglob(\"*.json\"))\n    assert produced, f\"No JSON outputs produced under {out_dir}\"\n\n    if len(expected_files) == 1 and len(produced) == 1:\n        exp, act = expected_files[0], produced[0]\n        _compare\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0bbee0f1a3b5c112006949a2978ce08196aee82a4ef29dc030",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0bbee0f1a3b5c112006949a297b2f0819683d2e8695371b2a1",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path(\"/mnt/data/tests/test_benchmark_case_001.py\").read_text()[4000:8000])\n",
+      "container_id": "cntr_6949a1f4d2c881908a8c0b7968ab83a502e1863ff81ebb71",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(_json_load(act), _json_load(exp), atol=1e-6, rtol=1e-6)\n        return\n\n    produced_by_name = {p.name: p for p in produced}\n    for exp in expected_files:\n        # Match either exact name or name with '_expected' removed.\n        act = produced_by_name.get(exp.name)\n        if act is None:\n            alt = re.sub(r\"(_|-)?expected\", \"\", exp.name, flags=re.IGNORECASE)\n            act = produced_by_name.get(alt)\n        assert act is not None, f\"Missing produced output for expected file {exp.name}\"\n        _compare(_json_load(act), _json_load(exp), atol=1e-6, rtol=1e-6)\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0bbee0f1a3b5c112006949a299dcb48196a80a0a10eba1db1f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0bbee0f1a3b5c112006949a29c7c748196aee6fc134b9770d0",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, os, textwrap\ntarget_path = Path('/mnt/data').joinpath('tests/conftest.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"from __future__ import annotations\n\nimport json\nimport os\nfrom pathlib import Path\nfrom typing import Any, Callable, Iterable\n\nimport pytest\"\"\")\n\nchunks.append(\"\"\"def _repo_root() -> Path:\n    # tests/ -> repo root\n    return Path(__file__).resolve().parents[1]\n\n\ndef _first_existing(paths: Iterable[Path]) -> Path | None:\n    for p in paths:\n        if p.is_file():\n            return p\n    return None\n\n\ndef _load_json(path: Path) -> Any:\n    try:\n        return json.loads(path.read_text(encoding=\"utf-8\"))\n    except Exception as e:  # pragma: no cover\n        raise AssertionError(f\"Failed to parse JSON: {path}: {e}\") from e\"\"\")\n\nchunks.append(\"\"\"@pytest.fixture(scope=\"session\")\ndef repo_root() -> Path:\n    return _repo_root()\n\n\n@pytest.fixture(scope=\"session\")\ndef examples_dir(repo_root: Path) -> Path:\n    return repo_root / \"examples\"\n\n\n@pytest.fixture(scope=\"session\")\ndef schema_path(repo_root: Path) -> Path:\n    candidates = [\n        repo_root / \"outputs\" / \"schemas\" / \"benchmark_schema.json\",\n        repo_root / \"schemas\" / \"benchmark_schema.json\",\n        repo_root / \"schema\" / \"benchmark_schema.json\",\n        repo_root / \"benchmark_schema.json\",\n        repo_root / \"benchmark_schema.schema.json\",\n    ]\n    found = _first_existing(candidates)\n    if found is not None:\n        return found\n    # Fallback: search common schema directories.\n    for base in [repo_root / \"outputs\" / \"schemas\", repo_root / \"schemas\", repo_root]:\n        if base.is_dir():\n            matches = sorted(base.rglob(\"*benchmark*schema*.json\"))\n            if matches:\n                return matches[0]\n    raise FileNotFoundError(\n        \"Benchmark input schema JSON not found. \"\n        \"Expected e.g. outputs/schemas/benchmark_schema.json.\"\n    )\"\"\")\n\nchunks.append(\"\"\"@pytest.fixture(scope=\"session\")\ndef json_load() -> Callable[[Path], Any]:\n    return _load_json\n\n\n@pytest.fixture(scope=\"session\")\ndef tolerances() -> dict[str, float]:\n    # Configure via env for CI/local tweaking.\n    atol = float(os.environ.get(\"ATOL\", \"1e-6\"))\n    rtol = float(os.environ.get(\"RTOL\", \"1e-6\"))\n    return {\"atol\": atol, \"rtol\": rtol}\"\"\")\n\nchunks.append(\"\"\"@pytest.fixture(scope=\"session\")\ndef output_root(repo_root: Path) -> Path:\n    # Deterministic output location for both local runs and CI artifacts upload.\n    # CI can override via CI_OUTPUT_DIR.\n    out = Path(os.environ.get(\"CI_OUTPUT_DIR\", repo_root / \"tests\" / \"ci_outputs\"))\n    out.mkdir(parents=True, exist_ok=True)\n    return out\n\n\n@pytest.fixture()\ndef run_output_dir(output_root: Path, request: pytest.FixtureRequest) -> Path:\n    # Per-test directory (stable name, easy to upload/inspect).\n    name = request.node.name.replace(os.sep, \"_\")\n    p = output_root / name\n    p.mkdir(parents=True, exist_ok=True)\n    return p\"\"\")\n\nchunks.append(\"\"\"@pytest.fixture(scope=\"session\")\ndef benchmark_case_001_input(repo_root: Path) -> Path | None:\n    candidates = [\n        repo_root / \"examples\" / \"benchmark_case_001.json\",\n        repo_root / \"examples\" / \"benchmark_case_001\" / \"input.json\",\n    ]\n    found = _first_existing(candidates)\n    if found is not None:\n        return found\n    hits = sorted(\n        p for p in repo_root.rglob(\"benchmark_case_001*.json\")\n        if \"expected\" not in p.name.lower()\n    )\n    return hits[0] if hits else None\n\n\n@pytest.fixture(scope=\"session\")\ndef benchmark_case_001_expected(repo_root: Path) -> list[Path]:\n    hits = sorted(\n        p for p in repo_root.rglob(\"benchmark_case_001*expected*.json\")\n        if p.is_file()\n    )\n    if hits:\n        return hits\n    expected_dir = repo_root / \"outputs\" / \"expected\"\n    if expected_dir.is_dir():\n        return sorted(expected_dir.rglob(\"benchmark_case_001*.json\"))\n    return []\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tests/conftest.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949a1f4d2c881908a8c0b7968ab83a502e1863ff81ebb71",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/conftest.py\nDIR_STATE:[\"tests/conftest.py\", \"tests/test_benchmark_case_001.py\", \"tests/test_schema_conformance.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0bbee0f1a3b5c112006949a2aa63208196a4273492b036bd61",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/conftest.py` with session-scoped fixtures for repository path discovery, schema/example/benchmark file location, JSON loading, numeric tolerances (env-configurable), and a deterministic CI/local output directory (`tests/ci_outputs` by default, override via `CI_OUTPUT_DIR`)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

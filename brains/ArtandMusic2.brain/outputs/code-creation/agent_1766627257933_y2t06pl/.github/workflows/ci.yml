@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  smoke:
+    name: Smoke (docker compose)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Docker versions
+        run: |
+          docker version
+          docker compose version
+
+      - name: Prepare host output mount
+        run: |
+          mkdir -p out
+          echo "host_out_dir=$(pwd)/out" >> $GITHUB_ENV
+
+      - name: Build smoke image/service
+        run: |
+          docker compose build smoke
+
+      - name: Run smoke test (gate)
+        run: |
+          docker compose run --rm -T smoke
+
+      - name: Upload smoke log bundle artifact (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-log-bundle-${{ github.run_id }}-${{ github.run_attempt }}
+          path: out
+          if-no-files-found: warn
+          retention-days: 14
+  tests:
+    name: Longer runs (gated)
+    runs-on: ubuntu-latest
+    needs: [smoke]
+    steps:
+      - name: Placeholder
+        run: echo "Smoke gate passed; add longer CI jobs here."

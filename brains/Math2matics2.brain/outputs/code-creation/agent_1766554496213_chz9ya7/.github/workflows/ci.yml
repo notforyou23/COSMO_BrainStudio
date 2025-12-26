@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip wheel
+          if [ -f pyproject.toml ]; then
+            python -m pip install -e ".[dev]" || python -m pip install -e .
+          elif [ -f requirements.txt ]; then
+            python -m pip install -r requirements.txt
+          fi
+          python -m pip install pytest
+
+      - name: Formatting checks (if configured)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if python -c "import ruff" >/dev/null 2>&1; then
+            ruff check .
+          elif [ -f pyproject.toml ] && grep -q "\[tool.ruff\]" pyproject.toml; then
+            python -m pip install ruff
+            ruff check .
+          fi
+          if python -c "import black" >/dev/null 2>&1; then
+            black --check .
+          elif [ -f pyproject.toml ] && grep -q "\[tool.black\]" pyproject.toml; then
+            python -m pip install black
+            black --check .
+          fi
+
+      - name: Reproducibility test
+        shell: bash
+        run: |
+          set -euo pipefail
+          pytest -q -k reproducib

@@ -1,0 +1,37 @@
+{
+  "content": "[\n  {\n    \"path\": \"scripts/qa/diagnostic_run.py\",\n    \"description\": \"Implements a Docker-based diagnostic QA run mode that captures maximal telemetry (resource limits, exit codes, container lifecycle events), iteratively remediates common failures (timeouts/memory, mounts, reduced discovery), and ensures a minimal test completes and logs are written under outputs/qa/logs/.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa/docker_runner.py\",\n    \"description\": \"Provides a robust Docker wrapper used by diagnostic_run to create/start/monitor containers, stream logs, capture inspect/state/events, enforce timeouts, and write structured telemetry artifacts to outputs/qa/logs/.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa/telemetry.py\",\n    \"description\": \"Collects and normalizes environment and runtime telemetry (CPU/memory/ulimits, disk, cgroups, process tree snapshots) and serializes it as JSON plus human-readable summaries into outputs/qa/logs/.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa/remediation.py\",\n    \"description\": \"Encapsulates remediation strategies and heuristics to adjust Docker resource flags, bind mounts, working directory, and test execution parameters until a minimal passing test run is achieved.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa/minimal_test.py\",\n    \"description\": \"Defines an ultra-lightweight minimal test command and fallback probes (e.g., python -c, pytest single test) designed to validate container execution and log writing with minimal discovery overhead.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa/common.py\",\n    \"description\": \"Shared constants, path canonicalization helpers, and safe file/log writing utilities used by all QA diagnostic components.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa/__init__.py\",\n    \"description\": \"Marks the scripts.qa package and exposes the diagnostic entrypoints for direct execution.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"scripts/qa_run.py\",\n    \"description\": \"CLI entrypoint that adds a --diagnostic mode to run the Docker-based diagnostic workflow and route outputs to outputs/qa/logs/ while preserving existing QA run behavior.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa/log_schema.json\",\n    \"description\": \"Defines a machine-validated JSON schema for diagnostic telemetry and run artifacts (events, container inspect, resource limits, remediation steps, and final outcome).\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"scripts/qa/README.md\",\n    \"description\": \"Documents how to run the diagnostic mode, what artifacts are produced under outputs/qa/logs/, and how remediation steps are selected and applied.\",\n    \"category\": \"documentation\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_0f6d52317a0f752f00694c9913229481968932fa50ca54ebc1",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 665,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 630,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 1295
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "msg_0f6d52317a0f752f00694c9913762081969002ca3a79cce7d7",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"scripts/qa/diagnostic_run.py\",\n    \"description\": \"Implements a Docker-based diagnostic QA run mode that captures maximal telemetry (resource limits, exit codes, container lifecycle events), iteratively remediates common failures (timeouts/memory, mounts, reduced discovery), and ensures a minimal test completes and logs are written under outputs/qa/logs/.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa/docker_runner.py\",\n    \"description\": \"Provides a robust Docker wrapper used by diagnostic_run to create/start/monitor containers, stream logs, capture inspect/state/events, enforce timeouts, and write structured telemetry artifacts to outputs/qa/logs/.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa/telemetry.py\",\n    \"description\": \"Collects and normalizes environment and runtime telemetry (CPU/memory/ulimits, disk, cgroups, process tree snapshots) and serializes it as JSON plus human-readable summaries into outputs/qa/logs/.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa/remediation.py\",\n    \"description\": \"Encapsulates remediation strategies and heuristics to adjust Docker resource flags, bind mounts, working directory, and test execution parameters until a minimal passing test run is achieved.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa/minimal_test.py\",\n    \"description\": \"Defines an ultra-lightweight minimal test command and fallback probes (e.g., python -c, pytest single test) designed to validate container execution and log writing with minimal discovery overhead.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa/common.py\",\n    \"description\": \"Shared constants, path canonicalization helpers, and safe file/log writing utilities used by all QA diagnostic components.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa/__init__.py\",\n    \"description\": \"Marks the scripts.qa package and exposes the diagnostic entrypoints for direct execution.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"scripts/qa_run.py\",\n    \"description\": \"CLI entrypoint that adds a --diagnostic mode to run the Docker-based diagnostic workflow and route outputs to outputs/qa/logs/ while preserving existing QA run behavior.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa/log_schema.json\",\n    \"description\": \"Defines a machine-validated JSON schema for diagnostic telemetry and run artifacts (events, container inspect, resource limits, remediation steps, and final outcome).\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"scripts/qa/README.md\",\n    \"description\": \"Documents how to run the diagnostic mode, what artifacts are produced under outputs/qa/logs/, and how remediation steps are selected and applied.\",\n    \"category\": \"documentation\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

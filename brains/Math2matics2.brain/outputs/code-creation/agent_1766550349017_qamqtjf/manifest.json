@@ -1,0 +1,96 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766550349017_qamqtjf",
+  "agentType": "code-creation",
+  "goalId": "goal_167",
+  "missionId": "strategic_goal_167_1766550349017",
+  "spawnCycle": 116,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T04:25:53.759Z",
+  "completedAt": "2025-12-24T04:26:45.036Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "src/utils/paths.py",
+      "description": "Provide a shared outputs_path() helper that resolves a writable outputs directory from the repo root and an optional OUTPUT_DIR environment variable.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/utils/paths.py\nDIR_STATE:[\"src/utils/output_paths.py\", \"src/utils/paths.py\"]\nSummary: Added a shared outputs_path() utility that resolves a writable outputs directory from the repo root with optional OUTPUT_DIR override.\n",
+          "timestamp": "2025-12-24T04:26:02.613Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/utils/paths.py\nDIR_STATE:[\"src/utils/output_paths.py\", \"src/utils/paths.py\"]\nSUMMARY: Implemented a shared outputs_path() helper that resolves a writable outputs directory from repo root with optional OUTPUT_DIR override.\n",
+          "timestamp": "2025-12-24T04:26:15.385Z"
+        }
+      ],
+      "createdAt": "2025-12-24T04:25:53.759Z",
+      "failedAt": "2025-12-24T04:26:15.385Z"
+    },
+    {
+      "path": "tests/test_outputs_path.py",
+      "description": "Test outputs_path() behavior for default location, OUTPUT_DIR override, directory creation, and failure modes when the target is unwritable.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "test_outputs_path.py\", \"tests/test_outputs_smoke.py\", \"tests/test_pipeline.py\", \"tests/test_pipeline_outputs.py\", \"tests/test_pipeline_outputs_schema.py\", \"tests/test_pipeline_runnable.py\", \"tests/test_results_schema_validation.py\", \"tests/test_stability.py\"]\nSUMMARY: Added pytest coverage for outputs_path default behavior, OUTPUT_DIR overrides, directory creation, and unwritable/invalid targets.\n",
+          "timestamp": "2025-12-24T04:26:33.502Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "sts/test_outputs_path.py\", \"tests/test_outputs_smoke.py\", \"tests/test_pipeline.py\", \"tests/test_pipeline_outputs.py\", \"tests/test_pipeline_outputs_schema.py\", \"tests/test_pipeline_runnable.py\", \"tests/test_results_schema_validation.py\", \"tests/test_stability.py\"]\nSummary: Added pytest coverage for outputs_path() defaults, OUTPUT_DIR override, auto-creation, and unwritable/invalid target failures.\n",
+          "timestamp": "2025-12-24T04:26:45.035Z"
+        }
+      ],
+      "createdAt": "2025-12-24T04:25:53.759Z",
+      "failedAt": "2025-12-24T04:26:45.035Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Add a small shared helper (e.g., outputs_path() using repo root + optional OUTPUT_DIR env var) and update all writers (run_experiment, future matrix/bib generators) to use it.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Prevents a known failure mode (permission/absolute-path issues) by standardizing output writing to repo-relative ./outputs/, increasing the likelihood that all artifact-producing goals (script, matrix..."
+  ],
+  "projectName": "generated_script_1766550349420",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-24T04:26:45.036Z",
+  "summary": {
+    "completed": 0,
+    "failed": 2,
+    "total": 2
+  }
+}

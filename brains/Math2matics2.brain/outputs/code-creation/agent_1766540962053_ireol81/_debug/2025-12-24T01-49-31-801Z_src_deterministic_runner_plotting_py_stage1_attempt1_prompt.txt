@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a deterministic entrypoint (seed RNGs; avoid time-dependent filenames) that writes /outputs/results.json (fixed keys) and /outputs/figure.png, plus a small metadata block (git hash if available, python version, package versions).
+Project: generated_library_1766540970187 (python library)
+
+Target file details:
+- Path: src/deterministic_runner/plotting.py
+- Purpose: Generates a deterministic matplotlib figure saved to /outputs/figure.png with fixed styling and content derived from the run results.
+- Category: source
+
+Other planned files (for context only):
+- pyproject.toml: Defines the Python package metadata, dependencies (e.g., numpy, matplotlib), and console script entrypoint for a deterministic run that writes fixed outputs.
+- README.md: Documents how to install and run the deterministic entrypoint, describes the fixed output files and the metadata captured.
+- src/deterministic_runner/__init__.py: Exposes the public package API and version information for the deterministic runner library.
+- src/deterministic_runner/cli.py: Implements the deterministic command-line entrypoint that seeds RNGs, runs the computation, and writes /outputs/results.json and /outputs/figure.png with stable filenames.
+
+Reference insights:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [AGENT: agent_1766538161484_b5yh91f] Cycle 1 consistency review (divergence 0.97):
+Summary (high-level): The three branches are about differ
+- [AGENT: agent_1766539771836_cunrzw4] {"agentId":"agent_1766539771836_cunrzw4","goalId":"goal_50","containerId":"cntr_694b4200ed708190b1f3a92
+- [INTROSPECTION] 2025-12-24T01-20-07-747Z_outputs_README_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766539198393_s2saqmc: 
+- [AGENT: agent_1766539198393_s2saqmc] File validation complete: 3 valid, 0 invalid.
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Generates a deterministic matplotlib figure saved to /outputs/figure.png with fixed styling and content derived from the run results.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/deterministic_runner/plotting.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/deterministic_runner/plotting.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/deterministic_runner/plotting.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

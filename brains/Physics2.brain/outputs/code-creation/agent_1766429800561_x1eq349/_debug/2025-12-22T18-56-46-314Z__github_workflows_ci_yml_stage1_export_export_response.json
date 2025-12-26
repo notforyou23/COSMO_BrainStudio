@@ -1,0 +1,56 @@
+{
+  "content": "FILE_EXPORT:{\"path\":\".github/workflows/ci.yml\",\"size\":880,\"encoding\":\"base64\",\"sha256\":\"3e087087c748a5d4183ae0b52c1edf3a61c7bfbcf4ab79d13eb4075a8f3c2a17\",\"content\":\"bmFtZTogQ0kKCm9uOgogIHB1c2g6CiAgICBicmFuY2hlczogWyAiKioiIF0KICBwdWxsX3JlcXVlc3Q6CmpvYnM6CiAgdGVzdDoKICAgIHJ1bnMtb246IHVidW50dS1sYXRlc3QKICAgIHN0cmF0ZWd5OgogICAgICBmYWlsLWZhc3Q6IGZhbHNlCiAgICAgIG1hdHJpeDoKICAgICAgICBweXRob24tdmVyc2lvbjogWyIzLjExIl0KICAgIHN0ZXBzOgogICAgICAtIG5hbWU6IENoZWNrb3V0CiAgICAgICAgdXNlczogYWN0aW9ucy9jaGVja291dEB2NAoKICAgICAgLSBuYW1lOiBTZXQgdXAgUHl0aG9uCiAgICAgICAgdXNlczogYWN0aW9ucy9zZXR1cC1weXRob25AdjUKICAgICAgICB3aXRoOgogICAgICAgICAgcHl0aG9uLXZlcnNpb246ICR7eyBtYXRyaXgucHl0aG9uLXZlcnNpb24gfX0KICAgICAgICAgIGNhY2hlOiBwaXAKCiAgICAgIC0gbmFtZTogSW5zdGFsbCBkZXBlbmRlbmNpZXMKICAgICAgICBzaGVsbDogYmFzaAogICAgICAgIHJ1bjogfAogICAgICAgICAgcHl0aG9uIC1tIHBpcCBpbnN0YWxsIC0tdXBncmFkZSBwaXAKICAgICAgICAgICMgSW5zdGFsbCB0ZXN0IHRvb2xpbmcgZXhwbGljaXRseSBmb3IgcmVwcm9kdWNpYmxlIENJCiAgICAgICAgICBweXRob24gLW0gcGlwIGluc3RhbGwgcHl0ZXN0IGpzb25zY2hlbWEKICAgICAgICAgICMgSW5zdGFsbCBwcm9qZWN0IGlmIGl0IGlzIGEgcGFja2FnZSAob3B0aW9uYWwpCiAgICAgICAgICBpZiBbIC1mIHB5cHJvamVjdC50b21sIF0gfHwgWyAtZiBzZXR1cC5weSBdIHx8IFsgLWYgc2V0dXAuY2ZnIF07IHRoZW4KICAgICAgICAgICAgcHl0aG9uIC1tIHBpcCBpbnN0YWxsIC1lIC4KICAgICAgICAgIGZpCgogICAgICAtIG5hbWU6IFJ1biB0ZXN0cwogICAgICAgIHJ1bjogcHl0ZXN0IC1xCg==\"}\nDIR_STATE:[\".github/workflows/ci.yml\"]",
+  "reasoning": "",
+  "responseId": "resp_0a43c0af0abdc65f00694996a50b54819592a339c30673f26d",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2065,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1037,
+    "output_tokens_details": {
+      "reasoning_tokens": 37
+    },
+    "total_tokens": 3102
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0a43c0af0abdc65f00694996a5d0c88195a817f01e5f268cd9",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a43c0af0abdc65f00694996a694608195a1cf59fd1ef7d498",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport base64, json, hashlib, gzip\n\ntarget_path = Path('/mnt/data').joinpath('.github/workflows/ci.yml')\nassert target_path.is_file(), 'Expected .github/workflows/ci.yml to exist before export'\ndata = target_path.read_bytes()\n\npayload = {\n    'path': '.github/workflows/ci.yml',\n    'size': len(data),\n    'encoding': 'base64',\n    'sha256': hashlib.sha256(data).hexdigest(),\n    'content': None\n}\n\nif len(data) > 20000:\n    compressed = gzip.compress(data)\n    payload['encoding'] = 'gzip+base64'\n    payload['content'] = base64.b64encode(compressed).decode('ascii')\nelse:\n    payload['content'] = base64.b64encode(data).decode('ascii')\n\nprint('FILE_EXPORT:' + json.dumps(payload, separators=(',', ':')))\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_EXPORT:{\"path\":\".github/workflows/ci.yml\",\"size\":880,\"encoding\":\"base64\",\"sha256\":\"3e087087c748a5d4183ae0b52c1edf3a61c7bfbcf4ab79d13eb4075a8f3c2a17\",\"content\":\"bmFtZTogQ0kKCm9uOgogIHB1c2g6CiAgICBicmFuY2hlczogWyAiKioiIF0KICBwdWxsX3JlcXVlc3Q6CmpvYnM6CiAgdGVzdDoKICAgIHJ1bnMtb246IHVidW50dS1sYXRlc3QKICAgIHN0cmF0ZWd5OgogICAgICBmYWlsLWZhc3Q6IGZhbHNlCiAgICAgIG1hdHJpeDoKICAgICAgICBweXRob24tdmVyc2lvbjogWyIzLjExIl0KICAgIHN0ZXBzOgogICAgICAtIG5hbWU6IENoZWNrb3V0CiAgICAgICAgdXNlczogYWN0aW9ucy9jaGVja291dEB2NAoKICAgICAgLSBuYW1lOiBTZXQgdXAgUHl0aG9uCiAgICAgICAgdXNlczogYWN0aW9ucy9zZXR1cC1weXRob25AdjUKICAgICAgICB3aXRoOgogICAgICAgICAgcHl0aG9uLXZlcnNpb246ICR7eyBtYXRyaXgucHl0aG9uLXZlcnNpb24gfX0KICAgICAgICAgIGNhY2hlOiBwaXAKCiAgICAgIC0gbmFtZTogSW5zdGFsbCBkZXBlbmRlbmNpZXMKICAgICAgICBzaGVsbDogYmFzaAogICAgICAgIHJ1bjogfAogICAgICAgICAgcHl0aG9uIC1tIHBpcCBpbnN0YWxsIC0tdXBncmFkZSBwaXAKICAgICAgICAgICMgSW5zdGFsbCB0ZXN0IHRvb2xpbmcgZXhwbGljaXRseSBmb3IgcmVwcm9kdWNpYmxlIENJCiAgICAgICAgICBweXRob24gLW0gcGlwIGluc3RhbGwgcHl0ZXN0IGpzb25zY2hlbWEKICAgICAgICAgICMgSW5zdGFsbCBwcm9qZWN0IGlmIGl0IGlzIGEgcGFja2FnZSAob3B0aW9uYWwpCiAgICAgICAgICBpZiBbIC1mIHB5cHJvamVjdC50b21sIF0gfHwgWyAtZiBzZXR1cC5weSBdIHx8IFsgLWYgc2V0dXAuY2ZnIF07IHRoZW4KICAgICAgICAgICAgcHl0aG9uIC1tIHBpcCBpbnN0YWxsIC1lIC4KICAgICAgICAgIGZpCgogICAgICAtIG5hbWU6IFJ1biB0ZXN0cwogICAgICAgIHJ1bjogcHl0ZXN0IC1xCg==\"}\nDIR_STATE:[\".github/workflows/ci.yml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0a43c0af0abdc65f00694996aaec648195ba1e517dd953d4d9",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_EXPORT:{\"path\":\".github/workflows/ci.yml\",\"size\":880,\"encoding\":\"base64\",\"sha256\":\"3e087087c748a5d4183ae0b52c1edf3a61c7bfbcf4ab79d13eb4075a8f3c2a17\",\"content\":\"bmFtZTogQ0kKCm9uOgogIHB1c2g6CiAgICBicmFuY2hlczogWyAiKioiIF0KICBwdWxsX3JlcXVlc3Q6CmpvYnM6CiAgdGVzdDoKICAgIHJ1bnMtb246IHVidW50dS1sYXRlc3QKICAgIHN0cmF0ZWd5OgogICAgICBmYWlsLWZhc3Q6IGZhbHNlCiAgICAgIG1hdHJpeDoKICAgICAgICBweXRob24tdmVyc2lvbjogWyIzLjExIl0KICAgIHN0ZXBzOgogICAgICAtIG5hbWU6IENoZWNrb3V0CiAgICAgICAgdXNlczogYWN0aW9ucy9jaGVja291dEB2NAoKICAgICAgLSBuYW1lOiBTZXQgdXAgUHl0aG9uCiAgICAgICAgdXNlczogYWN0aW9ucy9zZXR1cC1weXRob25AdjUKICAgICAgICB3aXRoOgogICAgICAgICAgcHl0aG9uLXZlcnNpb246ICR7eyBtYXRyaXgucHl0aG9uLXZlcnNpb24gfX0KICAgICAgICAgIGNhY2hlOiBwaXAKCiAgICAgIC0gbmFtZTogSW5zdGFsbCBkZXBlbmRlbmNpZXMKICAgICAgICBzaGVsbDogYmFzaAogICAgICAgIHJ1bjogfAogICAgICAgICAgcHl0aG9uIC1tIHBpcCBpbnN0YWxsIC0tdXBncmFkZSBwaXAKICAgICAgICAgICMgSW5zdGFsbCB0ZXN0IHRvb2xpbmcgZXhwbGljaXRseSBmb3IgcmVwcm9kdWNpYmxlIENJCiAgICAgICAgICBweXRob24gLW0gcGlwIGluc3RhbGwgcHl0ZXN0IGpzb25zY2hlbWEKICAgICAgICAgICMgSW5zdGFsbCBwcm9qZWN0IGlmIGl0IGlzIGEgcGFja2FnZSAob3B0aW9uYWwpCiAgICAgICAgICBpZiBbIC1mIHB5cHJvamVjdC50b21sIF0gfHwgWyAtZiBzZXR1cC5weSBdIHx8IFsgLWYgc2V0dXAuY2ZnIF07IHRoZW4KICAgICAgICAgICAgcHl0aG9uIC1tIHBpcCBpbnN0YWxsIC1lIC4KICAgICAgICAgIGZpCgogICAgICAtIG5hbWU6IFJ1biB0ZXN0cwogICAgICAgIHJ1bjogcHl0ZXN0IC1xCg==\"}\nDIR_STATE:[\".github/workflows/ci.yml\"]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,63 @@
+name: e2e-common
+description: Reusable e2e setup (Python, caching, env normalization, dependency install)
+inputs:
+  python-version:
+    description: Python version passed to actions/setup-python
+    required: false
+    default: "3.11"
+  working-directory:
+    description: Directory to run install commands from
+    required: false
+    default: "."
+  requirements-file:
+    description: Path to pip requirements file (relative to repository root)
+    required: false
+    default: "docs/e2e/requirements-ci.txt"
+  extra-pip-args:
+    description: Extra arguments appended to pip install (e.g. --pre)
+    required: false
+    default: ""
+  cache-dependency-path:
+    description: Path(s) used by setup-python to key pip cache
+    required: false
+    default: "docs/e2e/requirements-ci.txt"
+  install:
+    description: Whether to install dependencies (set to false for diagnostics-only jobs)
+    required: false
+    default: "true"
+outputs:
+  python-version:
+    description: Resolved Python version from setup-python
+    value: ${{ steps.py.outputs.python-version }}
+runs:
+  using: composite
+  steps:
+    - name: Normalize CI environment
+      shell: bash
+      run: |
+        set -euo pipefail
+        echo "TZ=UTC" >> "$GITHUB_ENV"
+        echo "PIP_DISABLE_PIP_VERSION_CHECK=1" >> "$GITHUB_ENV"
+        echo "PIP_NO_PYTHON_VERSION_WARNING=1" >> "$GITHUB_ENV"
+        echo "PYTHONDONTWRITEBYTECODE=1" >> "$GITHUB_ENV"
+        echo "PYTHONUNBUFFERED=1" >> "$GITHUB_ENV"
+        echo "FORCE_COLOR=1" >> "$GITHUB_ENV"
+        echo "CI=true" >> "$GITHUB_ENV"
+
+    - name: Set up Python
+      id: py
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: pip
+        cache-dependency-path: ${{ inputs.cache-dependency-path }}
+
+    - name: Install e2e dependencies
+      if: ${{ inputs.install == 'true' }}
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: |
+        set -euo pipefail
+        python -m pip install --upgrade pip setuptools wheel
+        python -m pip install -r "${{ github.workspace }}/${{ inputs.requirements-file }}" ${{ inputs.extra-pip-args }}
+        python -c "import sys; print('Python:', sys.version)"

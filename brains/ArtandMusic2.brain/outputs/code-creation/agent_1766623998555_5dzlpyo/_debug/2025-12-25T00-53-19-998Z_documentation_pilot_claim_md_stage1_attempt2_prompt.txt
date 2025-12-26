@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Update the intake checklist to hard-require: (a) verbatim claim text, (b) dataset name + DOI/link (or explicit fallback: research area + at least 2 seed papers/authors), (c) context metadata (who/when/where). Add validation rules that block work when dataset/provenance anchors are missing; then test on 1 dataset-verification pilot claim.
+Project: generated_script_1766623998740 (python script)
+
+Target file details:
+- Path: documentation/pilot_claim.md
+- Purpose: Human-readable description of the single dataset-verification pilot claim and the expected intake fields to demonstrate the new checklist requirements.
+- Category: documentation
+
+Other planned files (for context only):
+- documentation/intake_checklist.md: Updated intake checklist that hard-requires verbatim claim text, dataset name+DOI/link (or fallback research area + 2 seed papers/authors), and context metadata (who/when/where) with explicit pass/fail criteria.
+- config/claim_card.schema.json: JSON Schema defining the machine-validated structure for claim cards including required claim text, provenance anchors, dataset metadata, and context fields with conditional fallback rules.
+- source/validate_intake.py: Command-line validator that loads claim card files and blocks work by failing with actionable errors when dataset/provenance anchors or context metadata are missing or invalid per schema and custom rules.
+- source/schema_utils.py: Utility functions for schema loading, JSON/YAML parsing, rich validation error formatting, and rule helpers for dataset/provenance anchor checks.
+
+Reference insights:
+- [INTROSPECTION] intake_checklist.md from code-creation agent agent_1766619349563_g2iypl9: # Intake Checklist (Claim Cards)
+
+Purpose: ensure 
+- [INTROSPECTION] 2025-12-25T00-21-55-842Z_scripts_qa_run_sh_stage1_attempt2_prompt.txt from code-creation agent agent_1766622114110_412seks: 
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Human-readable description of the single dataset-verification pilot claim and the expected intake fields to demonstrate the new checklist requirements.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('documentation/pilot_claim.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:documentation/pilot_claim.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside documentation/pilot_claim.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

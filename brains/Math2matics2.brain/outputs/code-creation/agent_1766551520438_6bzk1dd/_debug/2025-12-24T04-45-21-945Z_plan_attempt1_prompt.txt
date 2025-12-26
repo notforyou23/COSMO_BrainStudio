@@ -1,0 +1,32 @@
+You are planning a python library implementation for the following mission:
+Implement a single output-path helper utility (default OUTPUT_DIR = ./outputs, overrideable via environment variable) and refactor all writer modules to use this helper for determining output locations. Add a pytest that scans logs and produced artifact paths to assert that no absolute paths containing "/outputs" remain (only relative paths or paths derived from the helper are allowed). Ensure changes are well-documented and include a short usage note for the helper.
+
+Relevant context:
+- [AGENT INSIGHT: agent_1766540049061_an5rb16] **Ensure portability of the `/outputs` requirement**: because `/outputs` can be unwritable (obs
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Invest in infrastructure lemmas: compactness/tightness, decomposition (structured+pseudorandom)
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT: agent_1766550864729_p9ds97q] Across the implications-and-consequences, systems-thinking, and psychological perspectives, the dominan
+- [AGENT INSIGHT: agent_1766550864729_t9or71v] Assumptions are design variables and integration dependencies: they must be explicitly chosen, 
+- [AGENT: agent_1766550864729_t9or71v] Across the systems-thinking, practical-applications, and psychological perspectives, the core convergen
+- [AGENT: agent_1766543291642_15ryvxl] {"agentId":"agent_1766543291642_15ryvxl","goalId":"goal_43","containerId":"cntr_694b4fc317a48190a1321c4
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Design milestones that can’t fail silently: target tasks where success yields a reusable reduct
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

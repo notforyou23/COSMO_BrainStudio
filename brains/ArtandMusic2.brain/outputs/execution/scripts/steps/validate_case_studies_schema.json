@@ -1,0 +1,32 @@
+{
+  "id": "validate_case_studies_schema",
+  "name": "Validate case studies against METADATA_SCHEMA.json",
+  "type": "python",
+  "entrypoint": "scripts/validate_case_studies_schema.py",
+  "args": [],
+  "cwd": ".",
+  "inputs": [
+    {
+      "path": "runtime/outputs/METADATA_SCHEMA.json",
+      "required": true
+    },
+    {
+      "glob": "runtime/outputs/case_studies/*.json",
+      "required": true
+    }
+  ],
+  "outputs": [
+    {
+      "path": "runtime/outputs/qa/schema_validation.json"
+    },
+    {
+      "path": "runtime/outputs/qa/schema_validation.md"
+    }
+  ],
+  "success_criteria": [
+    "runtime/outputs/qa/schema_validation.json exists",
+    "runtime/outputs/qa/schema_validation.md exists",
+    "schema_validation.json reports all files valid (or contains per-file errors if invalid)"
+  ],
+  "description": "Runs a JSON Schema validation over all runtime/outputs/case_studies/*.json using runtime/outputs/METADATA_SCHEMA.json and writes a QA summary to runtime/outputs/qa/schema_validation.{json,md}."
+}

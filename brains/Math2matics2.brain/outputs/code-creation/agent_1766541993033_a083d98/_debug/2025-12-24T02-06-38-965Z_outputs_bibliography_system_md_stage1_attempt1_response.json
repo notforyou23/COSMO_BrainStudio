@@ -1,0 +1,56 @@
+{
+  "content": "Created `outputs/bibliography_system.md`, defining an end-to-end bibliography workflow, required BibTeX fields by entry type, a structured tagging taxonomy for cross-domain consistency, and a practical intake checklist for QA and deduplication.",
+  "reasoning": "",
+  "responseId": "resp_08cb53169089212d00694b4ab0e46881969adb7c99cea20663",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3458,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2045,
+    "output_tokens_details": {
+      "reasoning_tokens": 1994
+    },
+    "total_tokens": 5503
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_08cb53169089212d00694b4ab1944c8196b54bec3e72ce6427",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_08cb53169089212d00694b4ab41e5c819697375a1e3f2b0f33",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap\n\ntarget_path = Path('/mnt/data').joinpath('outputs/bibliography_system.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"# Bibliography System (Workflow + BibTeX Requirements + Tags + Intake Checklist)\n\nThis document standardizes how we collect, tag, and maintain references across target domains (LLMs/ML, software engineering, bibliometrics/IR, research methods, and ethics/policy).\n\n## 1) Workflow (source → curated BibTeX)\n\n1. **Discover**: identify candidate sources (papers, standards, datasets, tools, blog posts only if authoritative).\n2. **Verify**: confirm canonical metadata (title, authors, venue, year, DOI/URL); prefer publisher/DOI landing pages.\n3. **Ingest**:\n   - Create/append a BibTeX entry in `outputs/references.bib`.\n   - Attach tags via `keywords = {…}` (see taxonomy below).\n   - Add persistent identifiers: `doi`, `url`, and (if available) `eprint`/`arxivId`.\n4. **Normalize**:\n   - Use consistent citekeys (see §2.4).\n   - Use `title = {...}` with proper capitalization protected by braces for acronyms/proper nouns (e.g., `{LLM}`, `{BERT}`).\n   - Prefer `doi` over long URLs; keep `url` as the access route.\n5. **Quality check**:\n   - Required fields present (see §2).\n   - `year` matches publication; `month` optional.\n   - `keywords` contains at least: one `domain:*` + one `method:*` or `topic:*`.\n6. **Use**: cite via citekey; never cite raw URLs in manuscripts when a citable artifact exists.\n7. **Maintain**:\n   - Deduplicate by DOI/arXiv.\n   - Update `note` only for curation remarks (e.g., “survey”, “replication package available”).\n   - Record access date only for web resources (`urldate`).\"\"\")\n\nchunks.append(\"\"\"## 2) BibTeX Requirements\n\n### 2.1 Core required fields (all entries)\n- `title`\n- `author` (or `editor` when appropriate)\n- `year`\n- `keywords` (tag list; see §3)\n- One stable locator: `doi` **or** `url` (prefer both when available)\n\nRecommended whenever available: `abstract`, `publisher`, `month`, `note`, `language`.\n\n### 2.2 Entry-type specific required fields\n| Type | Required fields (in addition to core) |\n|---|---|\n| `@article` | `journal`, `volume` (if known), `number` (if known), `pages` (or `eid`) |\n| `@inproceedings` | `booktitle`, `pages` (or `eid`), `organization`/`publisher` (if known) |\n| `@proceedings` | `title`, `year`, `editor` (if applicable), `publisher`/`organization` |\n| `@book` | `publisher`, `address` (optional), `edition` (if relevant) |\n| `@incollection` | `booktitle`, `publisher`, `editor` (if applicable), `pages` |\n| `@techreport` | `institution`, `number` (if available) |\n| `@phdthesis` / `@mastersthesis` | `school` |\n| `@misc` / `@online` | `url`, `urldate` (ISO date), `howpublished` (optional) |\n| `@dataset` (BibLaTeX-style) | `publisher`/`institution`, `version` (if any), `url`/`doi` |\n\n### 2.3 Identifier fields (use when applicable)\n- DOI: `doi = {10.xxxx/…}`\n- arXiv: `eprint = {YYYY.NNNNN}`, `archivePrefix = {arXiv}`, `primaryClass = {cs.CL}`\n- PubMed: `pmid`, `pmcid` (optional)\n- Software: `version`, `commit`, `repository` (in `url` or `howpublished`), `license` (in `note` if needed)\n\n### 2.4 Citekey convention\nFormat: `FirstAuthorYYYY_ShortTitle` (ASCII, no spaces).\n- Example: `Vaswani2017_Attention`\n- Use `EtAl` only if needed to avoid collisions: `Smith2020EtAl_Method`.\n- If multiple same-year same-author: append `a`, `b`, … (e.g., `Smith2020a_…`).\"\"\")\n\nchunks.append(\"\"\"## 3) Tagging Taxonomy (use in `keywords = {...}`)\n\n### 3.1 Syntax rules\n- Comma-separated list; lowercase; no spaces around colons.\n- Use 3–8 tags per entry.\n- Must include: **one** `domain:*` + **one** `topic:*` or `method:*`.\n\n### 3.2 Domain tags (pick ≥1)\n- `domain:llm` (LLMs, prompting, alignment)\n- `domain:ml` (general ML, representation learning)\n- `domain:nlp`\n- `domain:software-engineering`\n- `domain:information-retrieval`\n- `domain:bibliometrics` (citation analysis, science of science)\n- `domain:research-methods` (study design, validity, reproducibility)\n- `domain:ethics-policy` (governance, fairness, privacy)\n\n### 3.3 Topic tags (pick as needed)\n- `topic:transformers`, `topic:retrieval-augmented-generation`, `topic:evaluation`\n- `topic:replication`, `topic:reproducibility`, `topic:benchmarking`\n- `topic:code-search`, `topic:static-analysis`, `topic:testing`\n- `topic:systematic-review`, `topic:metadata`, `topic:citation-networks`\n- `topic:privacy`, `topic:bias`, `topic:security`\n\n### 3.4 Method/Artifact tags\n- Methods: `method:survey`, `method:systematic-review`, `method:experiment`, `method:case-study`, `method:theory`\n- Artifacts: `artifact:dataset`, `artifact:software`, `artifact:standard`, `artifact:benchmark`\n\n### 3.5 Status/Quality tags (optional but useful)\n- `status:seminal`, `status:review`, `status:replication`, `status:negative-results`\n- `quality:peer-reviewed`, `quality:preprint`, `quality:standard`, `quality:blog-authoritative`\"\"\")\n\nchunks.append(\"\"\"## 4) Intake Checklist (for every new reference)\n\n### Metadata\n- [ ] Correct entry type chosen (`@article`, `@inproceedings`, `@techreport`, …)\n- [ ] Title matches canonical source; acronyms/proper nouns braced\n- [ ] Author list complete and ordered; no “and others” unless source uses it explicitly\n- [ ] Venue fields correct (`journal` or `booktitle`), plus volume/issue/pages/eid when available\n- [ ] Year correct; month optional\n\n### Identifiers & access\n- [ ] DOI added when available\n- [ ] URL added (landing page preferred); `urldate` added for web-only items\n- [ ] arXiv fields added for preprints (`eprint`, `archivePrefix`, `primaryClass`)\n\n### Tagging & curation\n- [ ] `keywords` includes ≥1 `domain:*` and ≥1 `topic:*` or `method:*`\n- [ ] Add `artifact:*` when the source introduces a dataset/tool/standard\n- [ ] Add `status:*` only when justified (e.g., widely cited or explicitly a survey)\n- [ ] Optional: short curation `note` (one sentence max; no subjective language)\n\n### Hygiene\n- [ ] Citekey conforms to §2.4 and is unique\n- [ ] No duplicate entries (check DOI/arXiv/title)\n- [ ] BibTeX compiles (balanced braces; no stray commas)\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:outputs/bibliography_system.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4aad24708190936d1e42723ec06c03dce4a414302d3c",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:outputs/bibliography_system.md\nDIR_STATE:[\"outputs/bibliography_system.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_08cb53169089212d00694b4aceb2888196a798d26b3c725bb7",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `outputs/bibliography_system.md`, defining an end-to-end bibliography workflow, required BibTeX fields by entry type, a structured tagging taxonomy for cross-domain consistency, and a practical intake checklist for QA and deduplication."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

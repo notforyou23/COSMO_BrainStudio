@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/artifacts.py` with small dataclass-based artifact metadata plus deterministic `/outputs` paths and JSON writers for the outputs index, per-run evidence, and a domain artifact stub.",
+  "reasoning": "",
+  "responseId": "resp_0323832efe240ff000694b433413b481979ca4d1e7c21a7ab6",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3074,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1564,
+    "output_tokens_details": {
+      "reasoning_tokens": 339
+    },
+    "total_tokens": 4638
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0323832efe240ff000694b4334bae881978171dfbbf50d7f58",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0323832efe240ff000694b43395c488197885605956d73b753",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/artifacts.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Canonical artifact models and writers for /outputs.\n\nThis module defines deterministic paths and minimal metadata for:\n- outputs index (outputs/index.json)\n- run evidence (outputs/runs/<run_id>/run_evidence.json)\n- a domain artifact stub (outputs/runs/<run_id>/domain_artifact_stub.json)\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, asdict\nfrom datetime import datetime, timezone\nfrom pathlib import Path\nfrom typing import Any, Dict, List, Optional\n\n\nSCHEMA_VERSION = \"1.0\"\nOUTPUTS_DIRNAME = \"outputs\"\nRUNS_DIRNAME = \"runs\"\n\n\ndef now_utc_iso() -> str:\n    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace(\"+00:00\", \"Z\")\n\n\ndef _write_json(path: Path, payload: Dict[str, Any]) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    path.write_text(json_dumps(payload) + \"\\\\n\", encoding=\"utf-8\")\n\n\ndef json_dumps(obj: Any) -> str:\n    import json\n    return json.dumps(obj, indent=2, sort_keys=True, ensure_ascii=False)\n\n\n@dataclass(frozen=True)\nclass ArtifactMeta:\n    artifact_type: str\n    path: str\n    schema_version: str = SCHEMA_VERSION\n    created_at: str = \"\"\n\n    def to_dict(self) -> Dict[str, Any]:\n        d = asdict(self)\n        if not d[\"created_at\"]:\n            d[\"created_at\"] = now_utc_iso()\n        return d\n\n\n@dataclass(frozen=True)\nclass ArtifactPaths:\n    base_dir: Path\n\n    @property\n    def outputs_dir(self) -> Path:\n        return self.base_dir / OUTPUTS_DIRNAME\n\n    @property\n    def index_path(self) -> Path:\n        return self.outputs_dir / \"index.json\"\n\n    def run_dir(self, run_id: str) -> Path:\n        return self.outputs_dir / RUNS_DIRNAME / run_id\n\n    def run_evidence_path(self, run_id: str) -> Path:\n        return self.run_dir(run_id) / \"run_evidence.json\"\n\n    def domain_stub_path(self, run_id: str) -> Path:\n        return self.run_dir(run_id) / \"domain_artifact_stub.json\"\n\"\"\",\n\"\"\"def init_outputs_index(paths: ArtifactPaths) -> Dict[str, Any]:\n    if paths.index_path.exists():\n        import json\n        return json.loads(paths.index_path.read_text(encoding=\"utf-8\"))\n    return {\"schema_version\": SCHEMA_VERSION, \"created_at\": now_utc_iso(), \"runs\": {}}\n\n\ndef update_outputs_index(paths: ArtifactPaths, run_id: str, artifacts: List[Dict[str, Any]]) -> None:\n    idx = init_outputs_index(paths)\n    idx.setdefault(\"runs\", {})\n    idx[\"runs\"][run_id] = {\n        \"run_id\": run_id,\n        \"updated_at\": now_utc_iso(),\n        \"artifacts\": sorted(artifacts, key=lambda a: (a.get(\"artifact_type\", \"\"), a.get(\"path\", \"\"))),\n    }\n    _write_json(paths.index_path, idx)\n\n\ndef write_run_evidence(\n    paths: ArtifactPaths,\n    run_id: str,\n    status: str,\n    details: Optional[Dict[str, Any]] = None,\n    artifacts: Optional[List[Dict[str, Any]]] = None,\n) -> Dict[str, Any]:\n    payload: Dict[str, Any] = {\n        \"meta\": ArtifactMeta(\"run_evidence\", str(paths.run_evidence_path(run_id).relative_to(paths.base_dir))).to_dict(),\n        \"run_id\": run_id,\n        \"status\": status,\n        \"recorded_at\": now_utc_iso(),\n        \"details\": details or {},\n        \"artifacts\": artifacts or [],\n    }\n    _write_json(paths.run_evidence_path(run_id), payload)\n    return payload\n\n\ndef write_domain_artifact_stub(\n    paths: ArtifactPaths,\n    run_id: str,\n    name: str = \"survey_results_stub\",\n    payload: Optional[Dict[str, Any]] = None,\n) -> Dict[str, Any]:\n    body = {\n        \"meta\": ArtifactMeta(\"domain_artifact_stub\", str(paths.domain_stub_path(run_id).relative_to(paths.base_dir))).to_dict(),\n        \"run_id\": run_id,\n        \"name\": name,\n        \"payload\": payload or {\"note\": \"Domain artifact stub created by pipeline.\"},\n    }\n    _write_json(paths.domain_stub_path(run_id), body)\n    return body\n\n\ndef artifact_entry(meta: ArtifactMeta, extra: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:\n    d = {\"meta\": meta.to_dict()}\n    if extra:\n        d.update(extra)\n    return {\"artifact_type\": d[\"meta\"][\"artifact_type\"], \"path\": d[\"meta\"][\"path\"], \"meta\": d[\"meta\"], **({k: v for k, v in d.items() if k != \"meta\"})}\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/artifacts.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4314d77c819084b238f98e62933e01fe1adc72e44fe7",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/artifacts.py\nDIR_STATE:[\"src/artifacts.py\", \"src/pipeline.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0323832efe240ff000694b4343fe4881979d7ebbbafa3eeabe",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/artifacts.py` with small dataclass-based artifact metadata plus deterministic `/outputs` paths and JSON writers for the outputs index, per-run evidence, and a domain artifact stub."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

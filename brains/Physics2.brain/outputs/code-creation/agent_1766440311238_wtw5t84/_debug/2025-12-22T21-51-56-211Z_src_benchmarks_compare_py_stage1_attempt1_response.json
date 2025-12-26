@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/benchmarks/compare.py` with centralized, structured comparison utilities supporting absolute/relative tolerances, per-field overrides via dotted paths, configurable NaN/Inf equality policies, recursive comparison across dicts/sequences/NumPy arrays, and CI-friendly rich mismatch reporting with capped examples.",
+  "reasoning": "",
+  "responseId": "resp_0d118e0763305385006949bd84da3881938ce766d9d415260d",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3803,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2272,
+    "output_tokens_details": {
+      "reasoning_tokens": 258
+    },
+    "total_tokens": 6075
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0d118e0763305385006949bd85aad4819384fbb420f2c50438",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d118e0763305385006949bd8bc7c88193b3ce1e21c9728c00",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re, math\ntarget_path = Path('/mnt/data').joinpath('src/benchmarks/compare.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"Centralized comparison utilities for benchmark outputs.\n\nSupports absolute/relative tolerances, per-field overrides, NaN/Inf handling,\nstructured results, and mismatch reporting suitable for CI logs.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union\n\nimport math\n\ntry:  # optional\n    import numpy as _np  # type: ignore\nexcept Exception:  # pragma: no cover\n    _np = None\n\"\"\")\n\nchunks.append(\"\"\"\nNumber = Union[int, float]\n\n@dataclass(frozen=True)\nclass CompareSpec:\n    atol: float = 0.0\n    rtol: float = 0.0\n    nan_equal: bool = True\n    inf_equal: bool = True\n    per_field: Dict[str, \"CompareSpec\"] = field(default_factory=dict)\n\n    def for_path(self, path: str) -> \"CompareSpec\":\n        # Exact match on full dotted path, falling back to default spec.\n        return self.per_field.get(path, self)\n\n@dataclass(frozen=True)\nclass Mismatch:\n    path: str\n    reason: str\n    a: Any = None\n    b: Any = None\n    details: str = \"\"\n\n@dataclass(frozen=True)\nclass CompareResult:\n    ok: bool\n    mismatches: Tuple[Mismatch, ...] = ()\n\n    def raise_on_mismatch(self, prefix: str = \"Comparison failed\") -> None:\n        if self.ok:\n            return\n        lines = [prefix + \":\"]\n        for m in self.mismatches[:50]:\n            det = f\" ({m.details})\" if m.details else \"\"\n            lines.append(f\"- {m.path}: {m.reason}{det}; a={_short(m.a)} b={_short(m.b)}\")\n        if len(self.mismatches) > 50:\n            lines.append(f\"... and {len(self.mismatches) - 50} more mismatches\")\n        raise AssertionError(\"\\\\n\".join(lines))\n\"\"\")\n\nchunks.append(\"\"\"\ndef compare(a: Any, b: Any, spec: Optional[CompareSpec] = None) -> CompareResult:\n    \\\"\\\"\\\"Compare two benchmark outputs and return a structured result.\\\"\\\"\\\"\n    spec = spec or CompareSpec()\n    mism: List[Mismatch] = []\n    _cmp(a, b, spec, path=\"$\", mismatches=mism)\n    return CompareResult(ok=not mism, mismatches=tuple(mism))\n\n\ndef _cmp(a: Any, b: Any, spec: CompareSpec, path: str, mismatches: List[Mismatch]) -> None:\n    specp = spec.for_path(path)\n\n    # Fast path for exact identity / both None.\n    if a is b:\n        return\n    if a is None or b is None:\n        mismatches.append(Mismatch(path, \"one is None\", a, b))\n        return\n\n    # Numpy array handling (if available).\n    if _np is not None and isinstance(a, _np.ndarray) and isinstance(b, _np.ndarray):\n        if a.shape != b.shape:\n            mismatches.append(Mismatch(path, \"shape mismatch\", a.shape, b.shape))\n            return\n        if a.dtype != b.dtype and (a.dtype.kind in \"SUO\" or b.dtype.kind in \"SUO\"):\n            mismatches.append(Mismatch(path, \"dtype mismatch\", str(a.dtype), str(b.dtype)))\n            return\n        _cmp_array(a, b, specp, path, mismatches)\n        return\n\n    # Mappings.\n    if isinstance(a, dict) and isinstance(b, dict):\n        ka, kb = set(a.keys()), set(b.keys())\n        if ka != kb:\n            missing_a, missing_b = sorted(kb - ka), sorted(ka - kb)\n            mismatches.append(Mismatch(path, \"key mismatch\", missing_b, missing_a,\n                                       details=f\"missing_in_a={missing_a} missing_in_b={missing_b}\"))\n            return\n        for k in sorted(ka, key=str):\n            _cmp(a[k], b[k], spec, f\"{path}.{k}\", mismatches)\n        return\n\n    # Sequences (but not strings/bytes).\n    if _is_seq(a) and _is_seq(b):\n        if len(a) != len(b):\n            mismatches.append(Mismatch(path, \"length mismatch\", len(a), len(b)))\n            return\n        for i, (xa, xb) in enumerate(zip(a, b)):\n            _cmp(xa, xb, spec, f\"{path}[{i}]\", mismatches)\n        return\n\n    # Numbers.\n    if _is_number(a) and _is_number(b):\n        if not _close(float(a), float(b), specp):\n            mismatches.append(Mismatch(path, \"number mismatch\", a, b,\n                                       details=f\"atol={specp.atol} rtol={specp.rtol}\"))\n        return\n\n    # Fallback equality with type guard.\n    if type(a) != type(b):\n        mismatches.append(Mismatch(path, \"type mismatch\", type(a).__name__, type(b).__name__))\n        return\n    if a != b:\n        mismatches.append(Mismatch(path, \"value mismatch\", a, b))\n\"\"\")\n\nchunks.append(\"\"\"\ndef _cmp_array(a: Any, b: Any, spec: CompareSpec, path: str, mismatches: List[Mismatch]) -> None:\n    # Object/string arrays: compare elementwise via Python recursion.\n    if a.dtype.kind in \"OSU\" or b.dtype.kind in \"OSU\":\n        a_list, b_list = a.tolist(), b.tolist()\n        _cmp(a_list, b_list, spec, path, mismatches)\n        return\n    af, bf = a.astype(float, copy=False), b.astype(float, copy=False)\n    # Compute mask of mismatching entries.\n    if spec.nan_equal:\n        nanmask = _np.isnan(af) & _np.isnan(bf)\n    else:\n        nanmask = _np.zeros_like(af, dtype=bool)\n    if spec.inf_equal:\n        infmask = _np.isinf(af) & _np.isinf(bf) & (_np.sign(af) == _np.sign(bf))\n    else:\n        infmask = _np.zeros_like(af, dtype=bool)\n\n    finite = ~(nanmask | infmask | _np.isnan(af) | _np.isnan(bf) | _np.isinf(af) | _np.isinf(bf))\n    diff = _np.abs(af - bf)\n    tol = spec.atol + spec.rtol * _np.abs(bf)\n    ok = nanmask | infmask | (finite & (diff <= tol))\n    if bool(ok.all()):\n        return\n    # Report up to 10 mismatching indices with diffs.\n    bad = _np.argwhere(~ok)\n    for idx in bad[:10]:\n        idx_t = tuple(int(x) for x in idx)\n        va, vb = a[idx_t].item(), b[idx_t].item()\n        da = float(af[idx_t] - bf[idx_t]) if finite[idx_t] else float(\"nan\")\n        mismatches.append(Mismatch(f\"{path}{list(idx_t)}\", \"array element mismatch\", va, vb,\n                                   details=f\"diff={da} atol={spec.atol} rtol={spec.rtol}\"))\n    if bad.shape[0] > 10:\n        mismatches.append(Mismatch(path, \"array has more mismatches\", int(bad.shape[0]), \"\",\n                                   details=\"reported first 10\"))\n\"\"\")\n\nchunks.append(\"\"\"\ndef _close(a: float, b: float, spec: CompareSpec) -> bool:\n    if math.isnan(a) or math.isnan(b):\n        return spec.nan_equal and math.isnan(a) and math.isnan(b)\n    if math.isinf(a) or math.isinf(b):\n        return spec.inf_equal and (a == b)\n    return abs(a - b) <= (spec.atol + spec.rtol * abs(b))\n\n\ndef _is_seq(x: Any) -> bool:\n    return isinstance(x, (list, tuple)) and not isinstance(x, (str, bytes, bytearray))\n\n\ndef _is_number(x: Any) -> bool:\n    return isinstance(x, (int, float)) and not isinstance(x, bool)\n\n\ndef _short(x: Any, n: int = 200) -> str:\n    s = repr(x)\n    return s if len(s) <= n else s[: n - 3] + \"...\"\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/benchmarks/compare.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd7a484c8190a2c35d8222ddd72e01ed19761adadc33",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/benchmarks/compare.py\nDIR_STATE:[\"src/benchmarks/compare.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0d118e0763305385006949bda75624819388ef9947674e4a63",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/benchmarks/compare.py` with centralized, structured comparison utilities supporting absolute/relative tolerances, per-field overrides via dotted paths, configurable NaN/Inf equality policies, recursive comparison across dicts/sequences/NumPy arrays, and CI-friendly rich mismatch reporting with capped examples."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

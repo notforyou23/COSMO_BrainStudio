@@ -1,0 +1,56 @@
+{
+  "content": "Created a compact `pyproject.toml` using PEP 621 + Hatchling that pins core scientific/plotting/symbolic/CLI dependencies and includes optional `dev`/`notebooks` extras plus basic Ruff/Mypy/Pytest tool configuration for reproducible experiment runs.",
+  "reasoning": "",
+  "responseId": "resp_00590d2ac80cc68b006949aa62cce881909231015b67a9f849",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2111,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 649,
+    "output_tokens_details": {
+      "reasoning_tokens": 75
+    },
+    "total_tokens": 2760
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_00590d2ac80cc68b006949aa63a52c8190b583b8a747538369",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_00590d2ac80cc68b006949aa65a19c8190923003b418d3e1aa",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('pyproject.toml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"[build-system]\nrequires = [\"hatchling>=1.24\"]\nbuild-backend = \"hatchling.build\"\n\n[project]\nname = \"generated_script_1766435373331\"\nversion = \"0.1.0\"\ndescription = \"Reproducible toy numerical/symbolic experiments exploring candidate emergent-classicality frameworks.\"\nreadme = \"README.md\"\nrequires-python = \">=3.10\"\nlicense = {text = \"MIT\"}\nauthors = [{name = \"OpenAI Code Interpreter\"}]\ndependencies = [\n  \"numpy>=1.24\",\n  \"scipy>=1.10\",\n  \"sympy>=1.12\",\n  \"matplotlib>=3.7\",\n  \"networkx>=3.1\",\n  \"pandas>=2.0\",\n  \"tqdm>=4.66\",\n  \"typer>=0.12\",\n]\n\n[project.optional-dependencies]\ndev = [\n  \"pytest>=7.4\",\n  \"ruff>=0.4\",\n  \"mypy>=1.8\",\n]\nnotebooks = [\n  \"jupyter>=1.0\",\n  \"ipykernel>=6.29\",\n]\n\n[project.scripts]\nexperiments = \"experiments.registry:app\"\n\n[tool.hatch.build.targets.wheel]\npackages = [\"src/experiments\"]\n\n[tool.ruff]\nline-length = 100\ntarget-version = \"py310\"\nlint.select = [\"E\", \"F\", \"I\", \"B\", \"UP\"]\nlint.ignore = [\"E501\"]\n\n[tool.mypy]\npython_version = \"3.10\"\nwarn_return_any = true\nwarn_unused_configs = true\ndisallow_untyped_defs = false\nignore_missing_imports = true\n\n[tool.pytest.ini_options]\naddopts = \"-q\"\ntestpaths = [\"src\"]\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:pyproject.toml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949aa2cd9908190a540c44a4880beb40f550cedb5ceca86",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:pyproject.toml\nDIR_STATE:[\"README.md\", \"pyproject.toml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_00590d2ac80cc68b006949aa6ed2a48190a1591dececd2511c",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a compact `pyproject.toml` using PEP 621 + Hatchling that pins core scientific/plotting/symbolic/CLI dependencies and includes optional `dev`/`notebooks` extras plus basic Ruff/Mypy/Pytest tool configuration for reproducible experiment runs."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

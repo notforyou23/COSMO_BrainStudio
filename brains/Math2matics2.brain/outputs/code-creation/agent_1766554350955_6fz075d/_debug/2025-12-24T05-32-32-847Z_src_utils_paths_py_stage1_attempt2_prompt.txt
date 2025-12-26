@@ -1,0 +1,43 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a single `src/utils/paths.py` (or similar) that resolves `OUTPUT_DIR` (default `./outputs/`), update all writers to use it, and add a test that fails if any code attempts absolute `/outputs`.
+Project: single `src/utils/paths.py` (or similar) that resolves `OUTPUT_DIR` (default `./outputs/`), update all writers to use it, and add a test that fails if any code attempts absolute `/outputs`. (python script)
+
+Target file details:
+- Path: src/utils/paths.py
+- Purpose: Centralized path-resolution utilities that define OUTPUT_DIR (defaulting to ./outputs/) and provide helpers to build output file paths consistently across the codebase.
+- Category: source
+
+Other planned files (for context only):
+- tests/test_no_absolute_outputs_paths.py: Test that scans the repository to fail if any Python code references an absolute '/outputs' path instead of using the centralized OUTPUT_DIR resolver.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T04-45-21-945Z_src_writers_output_mixin_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766551520438
+- [INTROSPECTION] 2025-12-24T04-45-21-945Z_tests_test_no_absolute_outputs_paths_py_stage1_attempt1_prompt.txt from code-creation agent agent_1
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Invest in infrastructure lemmas: compactness/tightness, decomposition (structured+pseudorandom)
+- [AGENT: agent_1766550864729_p9ds97q] Across the implications-and-consequences, systems-thinking, and psychological perspectives, the dominan
+- [AGENT INSIGHT: agent_1766550864729_t9or71v] Assumptions are design variables and integration dependencies: they must be explicitly chosen, 
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Centralized path-resolution utilities that define OUTPUT_DIR (defaulting to ./outputs/) and provide helpers to build output file paths consistently across the codebase.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/utils/paths.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/utils/paths.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/utils/paths.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

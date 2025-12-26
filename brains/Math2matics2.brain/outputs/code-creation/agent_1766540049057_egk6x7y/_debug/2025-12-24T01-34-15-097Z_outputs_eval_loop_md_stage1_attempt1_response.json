@@ -1,0 +1,56 @@
+{
+  "content": "A complete 5-phase, 5-cycle evaluation cadence with per-cycle metrics (artifact count, cross-links, coverage gaps, and quality sampling) plus concrete produce/patch/retire/merge/defer decision rules has been written to `outputs/eval_loop.md`.",
+  "reasoning": "",
+  "responseId": "resp_04f6eec27de4c73a00694b43740c9881949a4a13fd3e63994a",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3496,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1991,
+    "output_tokens_details": {
+      "reasoning_tokens": 71
+    },
+    "total_tokens": 5487
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_04f6eec27de4c73a00694b4374c09c8194927a8f1cf745397c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_04f6eec27de4c73a00694b4375c040819497ece4d44caac642",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('outputs/eval_loop.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"# Evaluation Loop (5-cycle cadence)\n\nPurpose: Maintain a continuously improving Mathematics content set by reviewing coverage, connectivity, and quality on a fixed cadence and making explicit produce/retire decisions.\n\n## Definitions\n\n- **Domain**: Top-level Mathematics area (e.g., Algebra, Geometry).\n- **Subtopic**: A specific skill/concept within a domain (e.g., quadratic factoring).\n- **Artifact**: A tracked instructional/assessment unit (e.g., lesson note, worked example, quiz).\n- **Cross-link**: A documented dependency/reference from one artifact to another (prerequisite, extension, alternative method, related proof).\n- **Coverage gap**: A domain–subtopic row in the coverage matrix lacking required artifacts or having weak connectivity/quality.\n\n## Cadence overview (repeat every cycle)\n\nEach cycle is one review pass of all domains, executed in five sequential phases. The phases are designed so that every cycle ends with an actionable backlog and a commit to produce/retire items next cycle.\n\n1. **Inventory & snapshot (Day 1)**\n2. **Coverage audit (Day 2)**\n3. **Connectivity audit (Day 3)**\n4. **Quality sampling (Day 4)**\n5. **Decision & planning (Day 5)**\n\n## Metrics to record (every cycle)\n\nRecord these metrics once per cycle (global + per domain). The intent is to make drift and progress visible.\n\n### A. Artifact counts\n\n- `artifact_count_total`\n- `artifact_count_by_type` (e.g., note/example/problemset/quiz/proof/worksheet)\n- `artifact_count_by_domain`\n- `artifact_count_by_domain_subtopic` (optional if the matrix is granular)\n\n### B. Cross-link metrics\n\n- `crosslinks_total` (sum of all links)\n- `crosslinks_per_artifact_avg` = crosslinks_total / artifact_count_total\n- `crosslinks_bidirectional_rate` = (# pairs with A↔B) / (# linked pairs)\n- `isolated_artifacts_count` = artifacts with 0 cross-links\n- `orphan_subtopics_count` = subtopics whose artifacts have < 2 inbound/outbound links combined\n\n### C. Coverage gap metrics\n\n- `subtopics_total`\n- `subtopics_covered` (meeting minimum artifact requirements below)\n- `coverage_rate` = subtopics_covered / subtopics_total\n- `gap_count` = subtopics_total - subtopics_covered\n- `gaps_by_domain` (ranked list)\n\n### D. Quality sampling metrics (lightweight)\n\nSample at least 10% of artifacts per domain (minimum 3). Record:\n- `sample_size`\n- `clarity_score_avg` (1–5)\n- `correctness_issues_count`\n- `notation_consistency_issues_count`\n- `difficulty_alignment_issues_count`\n\n## Minimum coverage requirements (to mark a subtopic \"covered\")\n\nA subtopic is considered **covered** when it has, at minimum:\n- 1 **concept/lesson note** (definition, properties, common pitfalls)\n- 1 **worked example** (step-by-step)\n- 1 **practice set** (>= 5 problems or equivalent)\n- 1 **assessment item** (quiz question or check-for-understanding)\n\nPlus connectivity:\n- At least 1 prerequisite cross-link (inbound) and 1 extension/related cross-link (outbound), unless the subtopic is explicitly tagged as foundational or terminal.\n\n## Cycle phases (what to do and what to write down)\n\n### Phase 1 — Inventory & snapshot (Day 1)\n\nActions:\n- Export current coverage matrix snapshot (domains, subtopics, artifact types, status).\n- Enumerate artifacts and their metadata (domain, subtopic, type, difficulty, last_updated).\n- Extract cross-links graph (edges list).\n\nOutputs:\n- Cycle header in the review log (date, commit hash/version if applicable).\n- Metrics section populated for A and B (counts + cross-links).\n\n### Phase 2 — Coverage audit (Day 2)\n\nActions:\n- For each domain, compute coverage per subtopic against the minimum requirements.\n- Identify missing artifact types and missing subtopic rows.\n- Confirm that each domain has at least one example row fully populated (guard against empty domains).\n\nOutputs:\n- Metrics section populated for C (coverage + gaps).\n- Ranked gap list: top 10 missing/weak subtopics per domain.\n\n### Phase 3 — Connectivity audit (Day 3)\n\nActions:\n- Flag isolated artifacts and orphan subtopics.\n- Check for link hygiene: broken links, duplicate links, circular prereq chains.\n- Ensure each domain has at least one cross-domain link where appropriate (e.g., Algebra ↔ Functions).\n\nOutputs:\n- Updated B metrics (isolated/orphan counts, bidirectional rate).\n- A short \"connectivity fixes\" list (add/remove links).\n\n### Phase 4 — Quality sampling (Day 4)\n\nActions:\n- Randomly sample artifacts per domain (>=10% or min 3).\n- Evaluate clarity, correctness, notation, and difficulty alignment using a simple rubric.\n- Triage issues into: critical (blocks usage), major (misleading), minor (style).\n\nOutputs:\n- Metrics section populated for D.\n- Issue list with severity and recommended action (patch, rewrite, retire).\n\n### Phase 5 — Decision & planning (Day 5)\n\nActions:\n- Apply decision rules (below).\n- Produce next-cycle backlog with owners and expected artifact types.\n- Retire or merge redundant artifacts; update cross-links accordingly.\n\nOutputs:\n- \"Decisions\" table: Produce / Patch / Retire / Merge / Defer.\n- Next-cycle backlog (ordered by expected learning impact).\n\n## Decision rules (produce / patch / retire)\n\nApply in this order; stop when a rule triggers.\n\n### 1) Produce (create new artifacts) when any are true\n\n- A subtopic fails minimum coverage requirements (missing any required type).\n- `coverage_rate` < 0.90 globally or < 0.85 for any domain.\n- A high-prerequisite subtopic (many inbound links) has `clarity_score_avg` < 3.5.\n- A domain has `orphan_subtopics_count` > 10% of its subtopics.\n\n**What to produce next (priority order):**\n1. Fill missing required types for the largest prerequisite hubs.\n2. Create bridging artifacts that connect domains (reduce isolation).\n3. Add assessments for subtopics with high practice usage.\n\n### 2) Patch (edit existing artifacts) when any are true\n\n- Any correctness issue is found in sampling (`correctness_issues_count` > 0).\n- Notation inconsistency repeats across artifacts in a domain (>= 3 occurrences).\n- Difficulty alignment issues exceed 20% of sampled artifacts.\n\nPatch SLA:\n- Critical: fix within the same cycle before next release.\n- Major: fix within 1 cycle.\n- Minor: batch within 2 cycles.\n\n### 3) Retire (remove or archive) when any are true\n\n- Artifact is redundant (>= 80% overlap with a better artifact) AND has low linkage (<= 1 cross-link).\n- Artifact has recurring correctness issues (>= 2 cycles) and a rewrite is cheaper than patching.\n- Artifact is unreferenced for 2 consecutive cycles (no inbound links and not a root/foundational item).\n\nRetirement procedure:\n- Replace inbound links to the best remaining artifact.\n- Mark as archived with a retirement reason and date (do not silently delete if history matters).\n\n### 4) Merge (consolidate) when any are true\n\n- Two artifacts serve the same subtopic and type but differ only stylistically.\n- Cross-link graph shows a tight cluster where one canonical artifact would reduce confusion.\n\n### 5) Defer (explicitly postpone) only when all are true\n\n- The gap is in a low-traffic subtopic (few inbound links) AND\n- Quality scores are stable AND\n- There is a clear, dated rationale (e.g., awaiting upstream prerequisites rewrite).\n\n## End-of-cycle checklist\n\nA cycle is \"complete\" only if:\n- All metrics (A–D) are recorded.\n- A ranked gap list exists per domain.\n- At least one action is taken: produce/patch/retire/merge.\n- The next-cycle backlog is written with a top-5 priority list.\n\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:outputs/eval_loop.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4314fdec8190b56501a80ae3346b0e5138156ce3fb37",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:outputs/eval_loop.md\nDIR_STATE:[\"outputs/coverage_matrix.csv\", \"outputs/eval_loop.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_04f6eec27de4c73a00694b438e21b0819497d936db6e9952c3",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "A complete 5-phase, 5-cycle evaluation cadence with per-cycle metrics (artifact count, cross-links, coverage gaps, and quality sampling) plus concrete produce/patch/retire/merge/defer decision rules has been written to `outputs/eval_loop.md`."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

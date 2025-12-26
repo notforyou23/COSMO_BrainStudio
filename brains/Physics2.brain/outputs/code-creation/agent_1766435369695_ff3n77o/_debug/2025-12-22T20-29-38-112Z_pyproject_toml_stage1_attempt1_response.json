@@ -1,0 +1,56 @@
+{
+  "content": "Created `pyproject.toml` with package metadata, required dependencies (including `jsonschema`), and console script entry points for schema doc generation and benchmark output validation.",
+  "reasoning": "",
+  "responseId": "resp_0f7d8d8a9f11ad5d006949aba515ec819489c7a06a24945a06",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2151,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 646,
+    "output_tokens_details": {
+      "reasoning_tokens": 608
+    },
+    "total_tokens": 2797
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0f7d8d8a9f11ad5d006949aba5ec9c8194b73d336deb51509c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0f7d8d8a9f11ad5d006949aba957a48194ac1c4412e0010265",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os\n\ntarget_path = Path('/mnt/data').joinpath('pyproject.toml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"[build-system]\nrequires = [\"setuptools>=69\", \"wheel\"]\nbuild-backend = \"setuptools.build_meta\" \"\"\",\n\"\"\"[project]\nname = \"benchmark-output-tools\"\nversion = \"0.1.0\"\ndescription = \"Tools for generating schema docs and validating benchmark JSON outputs against JSON Schema.\"\nreadme = \"README.md\"\nrequires-python = \">=3.10\"\nlicense = {text = \"MIT\"}\nauthors = [{name = \"OpenAI (generated)\"}]\ndependencies = [\n  \"jsonschema>=4.21\",\n  \"referencing>=0.34\",\n]\"\"\",\n\"\"\"[project.scripts]\nschema-docs = \"tools.schema_docs:main\"\nvalidate-benchmark-outputs = \"tools.validate_benchmark_outputs:main\" \"\"\",\n\"\"\"[tool.setuptools]\npackage-dir = {\"\" = \".\"}\n\n[tool.setuptools.packages.find]\ninclude = [\"tools*\"]\"\"\",\n\"\"\"[tool.pytest.ini_options]\naddopts = \"-q\"\ntestpaths = [\"tests\"]\"\"\",\n\"\"\"[tool.ruff]\nline-length = 100\ntarget-version = \"py310\"\n\n[tool.ruff.lint]\nselect = [\"E\", \"F\", \"I\"]\"\"\",\n\"\"\"[tool.black]\nline-length = 100\ntarget-version = [\"py310\"]\"\"\",\n\"\"\"[tool.mypy]\npython_version = \"3.10\"\nwarn_unused_ignores = true\nwarn_redundant_casts = true\nwarn_unused_configs = true\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:pyproject.toml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:pyproject.toml\nDIR_STATE:[\".pre-commit-config.yaml\", \"pyproject.toml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0f7d8d8a9f11ad5d006949abb35d2481949fdf09d337989283",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `pyproject.toml` with package metadata, required dependencies (including `jsonschema`), and console script entry points for schema doc generation and benchmark output validation."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

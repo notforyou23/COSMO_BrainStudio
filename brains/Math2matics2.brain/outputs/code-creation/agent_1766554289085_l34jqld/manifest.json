@@ -1,0 +1,128 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766554289085_l34jqld",
+  "agentType": "code-creation",
+  "goalId": "goal_197",
+  "missionId": "strategic_goal_197_1766554289085",
+  "spawnCycle": 148,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T05:31:35.965Z",
+  "completedAt": "2025-12-24T05:32:59.714Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "README.md",
+      "description": "Project overview with a direct roadmap link and the exact run command `python scripts/run_pipeline.py` plus brief setup instructions.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-24T05:31:43.997Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:README.md\nDIR_STATE:[\".DS_Store\", \".gitignore\", \"README.md\", \"automation_script.json\", \"exec_1766554312220_pcrf71o.py\", \"pyproject.toml\", \"pytest.ini\", \"requirements-dev.txt\", \"requirements.lock.txt\", \"requirements.txt\", \"roadmap_v1.md\"]\nSummary: Added a concise README with a direct roadmap link, exact run command, setup steps, and CI/artifacts expectations.\n",
+          "timestamp": "2025-12-24T05:31:52.256Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:31:35.965Z",
+      "failedAt": "2025-12-24T05:31:52.256Z"
+    },
+    {
+      "path": "requirements.txt",
+      "description": "Pinned or minimally specified Python dependencies required to run `python scripts/run_pipeline.py` on a clean checkout.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "tore\", \".gitignore\", \"README.md\", \"automation_script.json\", \"exec_1766554332298_6jxb4ep.py\", \"pyproject.toml\", \"pytest.ini\", \"requirements-dev.txt\", \"requirements.lock.txt\", \"requirements.txt\", \"roadmap_v1.md\"]\nSUMMARY: Wrote requirements.txt based on imports found in scripts/run_pipeline.py (Derived 2 dependencies from /Users/jtr/_JTR23_/COSMO/runtime/outputs/execution/scripts/run_pipeline.py.).\n",
+          "timestamp": "2025-12-24T05:32:12.344Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:requirements.txt\nDIR_STATE:[\".DS_Store\", \".gitignore\", \"README.md\", \"automation_script.json\", \"exec_1766554359441_jgmmq5a.py\", \"pyproject.toml\", \"pytest.ini\", \"requirements-dev.txt\", \"requirements.lock.txt\", \"requirements.txt\", \"roadmap_v1.md\"]\nSummary: Wrote requirements.txt by statically extracting third-party imports needed to run scripts/run_pipeline.py on a clean checkout.\n",
+          "timestamp": "2025-12-24T05:32:39.590Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:31:35.965Z",
+      "failedAt": "2025-12-24T05:32:39.590Z"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "description": "GitHub Actions CI workflow that installs dependencies, runs `python scripts/run_pipeline.py` on a clean checkout, and uploads `outputs/` as build artifacts.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/pipeline-ci.yml\", \".github/workflows/tests-and-capture-artifacts.yml\"]\nSUMMARY: Added a GitHub Actions CI workflow that installs dependencies, runs `python scripts/run_pipeline.py` on a fresh checkout, and uploads `outputs/` as artifacts.\n",
+          "timestamp": "2025-12-24T05:32:50.382Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/pipeline-ci.yml\", \".github/workflows/tests-and-capture-artifacts.yml\"]\nSummary: Added a GitHub Actions workflow that installs dependencies, runs `python scripts/run_pipeline.py` on a clean checkout, and uploads `outputs/` as an artifact.\n",
+          "timestamp": "2025-12-24T05:32:59.714Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:31:35.965Z",
+      "failedAt": "2025-12-24T05:32:59.714Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Add a README/roadmap link to the exact command (python scripts/run_pipeline.py), ensure dependencies are declared, and add a CI job that runs it on a clean checkout and uploads ./outputs as artifacts.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Provides a crisp, testable success condition for the pipeline: a fresh clone can run a single command and deterministically populate ./outputs, aligning exactly with goal_55’s requirement to execute t..."
+  ],
+  "projectName": "generated_script_1766554289298",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [
+    "include_documentation",
+    "include_ci_cd"
+  ],
+  "lastSavedAt": "2025-12-24T05:32:59.714Z",
+  "summary": {
+    "completed": 0,
+    "failed": 3,
+    "total": 3
+  }
+}

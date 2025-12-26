@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "generated_script_1766430415667"
+version = "0.1.0"
+description = "Prototype numerical/symbolic experiments: toy Ising emergence and entanglement-graph geometry diagnostics."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "OpenAI Code Interpreter"}]
+dependencies = [
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "sympy>=1.12",
+  "networkx>=3.1",
+  "matplotlib>=3.7",
+  "pandas>=2.0",
+]
+
+[project.scripts]
+qemerge = "cli:main"
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = ["cli"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+exclude = ["outputs*", "tests*"]

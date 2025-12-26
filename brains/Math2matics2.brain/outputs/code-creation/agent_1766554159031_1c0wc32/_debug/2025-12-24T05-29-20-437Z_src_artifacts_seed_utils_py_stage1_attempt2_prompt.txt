@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Define a standard artifact schema (results.json keys, figure naming, metadata including git commit, seed, timestamps) and add a 'Determinism/Replay' subsection to /outputs/roadmap_v1.md DoD checklist.
+Project: generated_script_1766554159345 (json script)
+
+Target file details:
+- Path: src/artifacts/seed_utils.py
+- Purpose: Centralizes seed handling and reproducibility helpers to set and record seeds consistently across runs and in results.json metadata.
+- Category: support
+
+Other planned files (for context only):
+- src/artifacts/schema.py: Defines the standard artifact schema for results.json (required/optional keys), figure naming conventions, and metadata fields including git commit, seed, and timestamps with validation helpers.
+- src/artifacts/writer.py: Implements a complete artifact writer that assembles metadata (git commit/dirty state, seed, ISO timestamps), enforces the schema, and writes results.json plus provides helpers for deterministic figure/file naming.
+- src/artifacts/git_utils.py: Provides robust utilities for obtaining git commit hash, branch, and dirty status with safe fallbacks for non-git environments.
+- src/artifacts/time_utils.py: Provides timestamp utilities (UTC ISO8601) used consistently across artifact metadata for start/end times and creation time.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T04-22-12-374Z_README_md_stage1_attempt2_prompt.txt from code-creation agent agent_1766550130811_1cel847: You are 
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Invest in infrastructure lemmas: compactness/tightness, decomposition (structured+pseudorandom)
+- [AGENT: agent_1766550864729_p9ds97q] Across the implications-and-consequences, systems-thinking, and psychological perspectives, the dominan
+- [AGENT INSIGHT: agent_1766550864729_t9or71v] Assumptions are design variables and integration dependencies: they must be explicitly chosen, 
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Centralizes seed handling and reproducibility helpers to set and record seeds consistently across runs and in results.json metadata.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/artifacts/seed_utils.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/artifacts/seed_utils.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/artifacts/seed_utils.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "description": "Single source of truth for benchmark determinism (RNG seeding + stable serialization) and numeric tolerance rules used in local runs and CI.",
+  "determinism": {
+    "enabled": true,
+    "seed": 13371337,
+    "rng_seeds": {
+      "python_random": 13371337,
+      "numpy": 13371337,
+      "torch": 13371337,
+      "tensorflow": 13371337
+    },
+    "env": {
+      "PYTHONHASHSEED": "13371337",
+      "CUBLAS_WORKSPACE_CONFIG": ":4096:8"
+    },
+    "framework_flags": {
+      "torch": {
+        "use_deterministic_algorithms": true,
+        "cudnn_deterministic": true,
+        "cudnn_benchmark": false
+      },
+      "tensorflow": {
+        "enable_op_determinism": true
+      }
+    },
+    "validation": {
+      "require_seeded": true,
+      "fail_on_unseeded_rng_use": false
+    }
+  },
+  "stable_json": {
+    "enabled": true,
+    "sort_keys": true,
+    "ensure_ascii": false,
+    "indent": 2,
+    "separators": [",", ": "],
+    "newline": "\n",
+    "allow_nan": false,
+    "normalize_floats": {
+      "enabled": true,
+      "max_digits": 17,
+      "strip_trailing_zeros": false
+    }
+  },
+  "numeric_tolerance_diff": {
+    "enabled": true,
+    "defaults": {
+      "abs_tol": 1e-9,
+      "rel_tol": 1e-9,
+      "nan_equal": true,
+      "inf_equal": true,
+      "treat_int_as_float": true
+    },
+    "path_overrides": [
+      {
+        "path": "/metrics/**",
+        "abs_tol": 1e-7,
+        "rel_tol": 1e-7
+      },
+      {
+        "path": "/timing/**",
+        "abs_tol": 1e-6,
+        "rel_tol": 1e-6
+      }
+    ],
+    "report": {
+      "max_diffs": 50,
+      "include_unchanged": false,
+      "emit_json_report": true,
+      "emit_text_summary": true
+    }
+  },
+  "benchmark_compare": {
+    "expected_path": "expected/benchmark_case_001.expected.json",
+    "exit_codes": {
+      "success": 0,
+      "diff_failed": 2,
+      "error": 3
+    }
+  },
+  "ci": {
+    "enforce_same_config": true,
+    "config_path": "config/benchmark_determinism_and_tolerance.json"
+  }
+}

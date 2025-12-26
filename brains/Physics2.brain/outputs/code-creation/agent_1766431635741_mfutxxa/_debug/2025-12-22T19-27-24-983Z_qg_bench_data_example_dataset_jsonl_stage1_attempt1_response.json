@@ -1,0 +1,56 @@
+{
+  "content": "Created a small deterministic JSONL example dataset with five QA records including reference answers, model outputs, and per-record latency values for ingestion by the `run_benchmark` CLI.",
+  "reasoning": "",
+  "responseId": "resp_0ac01adac2660b740069499bc264608190a38d91d7c1fbebd4",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2065,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 541,
+    "output_tokens_details": {
+      "reasoning_tokens": 110
+    },
+    "total_tokens": 2606
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0ac01adac2660b740069499bc345688190877d3c2d75d67cd1",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ac01adac2660b740069499bc6b3ac81909a681047f0a6bc60",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('qg_bench/data/example_dataset.jsonl')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"{\"id\":\"ex-0001\",\"task\":\"qa\",\"input\":{\"question\":\"What is 2 + 2?\"},\"reference\":{\"answer\":\"4\"},\"output\":{\"answer\":\"4\"},\"metrics\":{\"latency_ms\":12.0}}\n{\"id\":\"ex-0002\",\"task\":\"qa\",\"input\":{\"question\":\"What color is the daytime sky on a clear day?\"},\"reference\":{\"answer\":\"blue\"},\"output\":{\"answer\":\"blue\"},\"metrics\":{\"latency_ms\":20.5}}\n{\"id\":\"ex-0003\",\"task\":\"qa\",\"input\":{\"question\":\"What is the capital of France?\"},\"reference\":{\"answer\":\"Paris\"},\"output\":{\"answer\":\"Lyon\"},\"metrics\":{\"latency_ms\":18.0}}\n{\"id\":\"ex-0004\",\"task\":\"qa\",\"input\":{\"question\":\"Spell the word 'benchmark'.\"},\"reference\":{\"answer\":\"benchmark\"},\"output\":{\"answer\":\"benchmark\"},\"metrics\":{\"latency_ms\":9.5}}\n{\"id\":\"ex-0005\",\"task\":\"qa\",\"input\":{\"question\":\"What is 10 / 2?\"},\"reference\":{\"answer\":\"5\"},\"output\":{\"answer\":\"5\"},\"metrics\":{\"latency_ms\":15.0}}\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:qg_bench/data/example_dataset.jsonl')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499b9ae2c081908ccd9fbfec7a37ba019f8e3dd8194ac9",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:qg_bench/data/example_dataset.jsonl\nDIR_STATE:[\"qg_bench/data/example_dataset.jsonl\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0ac01adac2660b740069499bcef2348190b49c47a352b3a674",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a small deterministic JSONL example dataset with five QA records including reference answers, model outputs, and per-record latency values for ingestion by the `run_benchmark` CLI."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

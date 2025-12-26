@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/deterministic_runner/cli.py` as a deterministic CLI entrypoint that seeds RNGs, runs a stable computation, and writes fixed outputs to `/outputs/results.json` and `/outputs/figure.png` including a metadata block (git hash if available, Python/platform info, and key package versions).",
+  "reasoning": "",
+  "responseId": "resp_02b1b2b5ca9f9be500694b46d3c010819683589df41a039d6b",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3193,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1710,
+    "output_tokens_details": {
+      "reasoning_tokens": 289
+    },
+    "total_tokens": 4903
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_02b1b2b5ca9f9be500694b46d464d48196beb11575da184955",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_02b1b2b5ca9f9be500694b46d88bdc81969a8eb99d338da312",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, platform, subprocess, sys\n\ntarget_path = Path('/mnt/data').joinpath('src/deterministic_runner/cli.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Deterministic command-line entrypoint.\n\nWrites fixed outputs:\n- /outputs/results.json\n- /outputs/figure.png\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport os\nimport platform\nimport random\nimport subprocess\nimport sys\nfrom pathlib import Path\n\ntry:\n    import numpy as np\nexcept Exception as e:  # pragma: no cover\n    np = None  # type: ignore\n\ntry:\n    import matplotlib\n    matplotlib.use(\"Agg\")\n    import matplotlib.pyplot as plt\nexcept Exception as e:  # pragma: no cover\n    plt = None  # type: ignore\n\ntry:\n    from importlib import metadata as importlib_metadata\nexcept Exception:  # pragma: no cover\n    import importlib_metadata  # type: ignore\n\"\"\",\n\"\"\"def _git_hash() -> str | None:\n    \\\"\\\"\\\"Return current git commit hash if available.\\\"\\\"\\\"\n    try:\n        out = subprocess.check_output(\n            [\"git\", \"rev-parse\", \"HEAD\"],\n            stderr=subprocess.DEVNULL,\n            cwd=os.getcwd(),\n            text=True,\n        ).strip()\n        return out or None\n    except Exception:\n        return None\n\n\ndef _pkg_version(name: str) -> str | None:\n    try:\n        return importlib_metadata.version(name)\n    except Exception:\n        return None\n\n\ndef _set_determinism(seed: int) -> None:\n    \\\"\\\"\\\"Best-effort determinism for common RNGs.\\\"\\\"\\\"\n    os.environ.setdefault(\"PYTHONHASHSEED\", str(seed))\n    random.seed(seed)\n    if np is not None:\n        np.random.seed(seed)\n\"\"\",\n\"\"\"def _compute(seed: int, n: int) -> tuple[list[float], dict]:\n    \\\"\\\"\\\"Deterministic computation producing data and summary stats.\\\"\\\"\\\"\n    _set_determinism(seed)\n    if np is None:\n        # Fallback: deterministic pure-Python random numbers.\n        data = [random.random() for _ in range(n)]\n        mean = sum(data) / n if n else 0.0\n        var = sum((x - mean) ** 2 for x in data) / n if n else 0.0\n        std = var ** 0.5\n    else:\n        arr = np.random.normal(loc=0.0, scale=1.0, size=int(n))\n        data = arr.astype(float).tolist()\n        mean = float(arr.mean()) if n else 0.0\n        std = float(arr.std()) if n else 0.0\n    stats = {\n        \"seed\": int(seed),\n        \"n\": int(n),\n        \"mean\": round(float(mean), 12),\n        \"std\": round(float(std), 12),\n        \"min\": round(float(min(data)) if data else 0.0, 12),\n        \"max\": round(float(max(data)) if data else 0.0, 12),\n    }\n    return data, stats\n\n\ndef _write_figure(data: list[float], path: Path) -> None:\n    \\\"\\\"\\\"Write a deterministic histogram figure.\\\"\\\"\\\"\n    if plt is None:\n        return\n    fig, ax = plt.subplots(figsize=(6, 4), dpi=150)\n    ax.hist(data, bins=30, range=(-4, 4), color=\"#4C72B0\", edgecolor=\"white\")\n    ax.set_title(\"Deterministic histogram\")\n    ax.set_xlabel(\"value\")\n    ax.set_ylabel(\"count\")\n    fig.tight_layout()\n    fig.savefig(path, format=\"png\")\n    plt.close(fig)\n\"\"\",\n\"\"\"def _metadata(seed: int) -> dict:\n    return {\n        \"git_hash\": _git_hash(),\n        \"python_version\": platform.python_version(),\n        \"platform\": platform.platform(),\n        \"seed\": int(seed),\n        \"env\": {\n            \"PYTHONHASHSEED\": os.environ.get(\"PYTHONHASHSEED\"),\n        },\n        \"packages\": {\n            \"numpy\": _pkg_version(\"numpy\"),\n            \"matplotlib\": _pkg_version(\"matplotlib\"),\n            \"deterministic-runner\": _pkg_version(\"deterministic-runner\"),\n        },\n    }\n\n\ndef run(seed: int = 0, n: int = 1000, outdir: str | Path = \"/outputs\") -> dict:\n    \\\"\\\"\\\"Run the deterministic job and write fixed outputs.\\\"\\\"\\\"\n    out = Path(outdir)\n    out.mkdir(parents=True, exist_ok=True)\n    data, stats = _compute(seed=seed, n=n)\n    fig_path = out / \"figure.png\"\n    _write_figure(data, fig_path)\n    results = {\n        \"status\": \"ok\",\n        \"summary\": stats,\n        \"outputs\": {\n            \"results_json\": str((out / \"results.json\").resolve()),\n            \"figure_png\": str(fig_path.resolve()),\n        },\n        \"metadata\": _metadata(seed),\n    }\n    (out / \"results.json\").write_text(\n        json.dumps(results, indent=2, sort_keys=True) + \"\\\\n\", encoding=\"utf-8\"\n    )\n    return results\n\n\ndef main(argv: list[str] | None = None) -> int:\n    p = argparse.ArgumentParser(prog=\"deterministic-runner\")\n    p.add_argument(\"--seed\", type=int, default=0)\n    p.add_argument(\"--n\", type=int, default=1000)\n    p.add_argument(\"--outdir\", type=str, default=\"/outputs\")\n    args = p.parse_args(argv)\n    run(seed=args.seed, n=args.n, outdir=args.outdir)\n    return 0\n\n\nif __name__ == \"__main__\":  # pragma: no cover\n    raise SystemExit(main())\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/deterministic_runner/cli.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b46a9b06081908ddabe8eda0d3a7007b40091a73fffb7",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/deterministic_runner/cli.py\nDIR_STATE:[\"src/deterministic_runner/__init__.py\", \"src/deterministic_runner/cli.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_02b1b2b5ca9f9be500694b46e3f2688196a971440dc19d4a05",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/deterministic_runner/cli.py` as a deterministic CLI entrypoint that seeds RNGs, runs a stable computation, and writes fixed outputs to `/outputs/results.json` and `/outputs/figure.png` including a metadata block (git hash if available, Python/platform info, and key package versions)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

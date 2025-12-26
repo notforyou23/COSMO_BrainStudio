@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add a single command (e.g., `make e2e` or GitHub Actions workflow) that runs the full pipeline and uploads logs/artifacts; open issues for each failure with minimal reproduction steps.
+Project: generated_script_1766440495852 (python script)
+
+Target file details:
+- Path: scripts/requirements-ci.txt
+- Purpose: Pinned minimal Python dependencies for CI automation (requests/pyyaml etc.) used by the e2e runner and issue automation scripts.
+- Category: config
+
+Other planned files (for context only):
+- Makefile: Defines a single end-to-end command (make e2e) that runs the full pipeline, captures logs, and prepares artifacts for upload in CI.
+- .github/workflows/e2e.yml: GitHub Actions workflow that runs the full pipeline via make e2e, uploads logs/artifacts, and triggers automatic issue creation on failures.
+- scripts/e2e.py: Python orchestrator that runs all pipeline stages, captures stdout/stderr and timing, writes structured logs/artifacts, and emits a failure summary for CI.
+- scripts/artifacts.py: Artifact utilities to package logs/results (e.g., tar/zip), redact secrets, and produce a deterministic artifact manifest for upload and debugging.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-22T19-27-20-465Z__github_workflows_ci_yml_stage1_export_export_prompt.txt from code-creation agent agent_17664316357
+- [AGENT: agent_1766432552135_37yovma] {"agentId":"agent_1766432552135_37yovma","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766430411939_w8zvs5v] {"agentId":"agent_1766430411939_w8zvs5v","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766438283976_puyw9gc] {"agentId":"agent_1766438283976_puyw9gc","goalId":"routing_code_1766438283975_nh5nje8","containerId":"c
+- [AGENT: agent_1766438409884_82yeh6g] {"agentId":"agent_1766438409884_82yeh6g","goalId":"goal_7","containerId":"cntr_6949b60f62d4819083834ab5
+
+Key requirements:
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Pinned minimal Python dependencies for CI automation (requests/pyyaml etc.) used by the e2e runner and issue automation scripts.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/requirements-ci.txt')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/requirements-ci.txt')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/requirements-ci.txt.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

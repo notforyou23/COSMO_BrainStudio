@@ -1,0 +1,172 @@
+{
+  "content": "Created `tests/test_numeric_tolerance_diff.py` with pytest coverage for abs/rel tolerance behavior (including failures), most-specific per-path tolerance overrides, NaN/inf equality rules, stable JSON serialization ordering/float normalization, and a deterministic structured diff report shape (including settings and stable paths).",
+  "reasoning": "",
+  "responseId": "resp_0ecd203940c66647006949be6e24a0819086cd22e964c8430a",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 6368,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2119,
+    "output_tokens_details": {
+      "reasoning_tokens": 877
+    },
+    "total_tokens": 8487
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0ecd203940c66647006949be6edbfc8190ba777f83b9995332",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ecd203940c66647006949be700f1081909473e3a048382ca0",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nsorted([str(p.relative_to(base)) for p in base.rglob(\"*\") if p.is_file()])[:50], len(list(base.rglob(\"*\")))\n",
+      "container_id": "cntr_6949bd39c7008190b2d314f911169a74060596b8e6d512ff",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(['.github/workflows/benchmark_ci.yml',\n  'config/benchmark_determinism_and_tolerance.json',\n  'scripts/run_benchmark_case_001.py',\n  'src/benchmark_compare.py',\n  'src/determinism.py',\n  'src/numeric_tolerance_diff.py',\n  'src/stable_json.py'],\n 12)"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ecd203940c66647006949be727be48190a3bc173230a2488a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ecd203940c66647006949be7318388190a1970b38a33a86b0",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nprint(Path(\"/mnt/data/src/numeric_tolerance_diff.py\").read_text()[:4000])\n",
+      "container_id": "cntr_6949bd39c7008190b2d314f911169a74060596b8e6d512ff",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Numeric-tolerance diff for expected-vs-actual JSON-like structures.\n\nSupports absolute/relative tolerances, per-path overrides (fnmatch), NaN/inf\nhandling, and produces a deterministic structured diff report.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom fnmatch import fnmatch\nfrom typing import Any, Dict, Iterable, List, Optional, Tuple\nimport math\n@dataclass(frozen=True)\nclass Tolerance:\n    abs: float = 0.0\n    rel: float = 0.0\n\n    def threshold(self, expected_mag: float) -> float:\n        return max(float(self.abs), float(self.rel) * float(expected_mag))\ndef _is_number(x: Any) -> bool:\n    return isinstance(x, (int, float)) and not isinstance(x, bool)\n\ndef _is_nan(x: Any) -> bool:\n    return isinstance(x, float) and math.isnan(x)\n\ndef _is_inf(x: Any) -> bool:\n    return isinstance(x, float) and math.isinf(x)\n\ndef _path_join(base: str, key: Any) -> str:\n    if isinstance(key, int):\n        return f\"{base}[{key}]\"\n    if base == \"$\":\n        return f\"$.{key}\"\n    return f\"{base}.{key}\"\n\ndef _resolve_tol(path: str, default: Tolerance, overrides: Optional[Dict[str, Tolerance]]) -> Tolerance:\n    if not overrides:\n        return default\n    best_pat, best = None, None\n    for pat, tol in overrides.items():\n        if fnmatch(path, pat) and (best_pat is None or len(pat) > len(best_pat)):\n            best_pat, best = pat, tol\n    return best if best is not None else default\ndef diff_json(\n    expected: Any,\n    actual: Any,\n    *,\n    abs_tol: float = 0.0,\n    rel_tol: float = 0.0,\n    path_tolerances: Optional[Dict[str, Tolerance]] = None,\n    allow_nan_equal: bool = True,\n    allow_inf_equal: bool = True,\n) -> Dict[str, Any]:\n    \"\"\"Return a structured diff report for JSON-like objects.\"\"\"\n    default_tol = Tolerance(abs=abs_tol, rel=rel_tol)\n    diffs: List[Dict[str, Any]] = []\n\n    def add(kind: str, path: str, e: Any, a: Any, msg: str, **extra: Any) -> None:\n        d = {\"kind\": kind, \"path\": path, \"expected\": e, \"actual\": a, \"message\": msg}\n        d.update(extra)\n        diffs.append(d)\n\n    def cmp(e: Any, a: Any, path: str) -> None:\n        # Numbers (incl. NaN/inf)\n        if _is_number(e) and _is_number(a):\n            if _is_nan(e) or _is_nan(a):\n                if allow_nan_equal and _is_nan(e) and _is_nan(a):\n                    return\n                add(\"nan_mismatch\", path, e, a, \"NaN mismatch\")\n                return\n            if _is_inf(e) or _is_inf(a):\n                if allow_inf_equal and _is_inf(e) and _is_inf(a) and (math.copysign(1.0, e) == math.copysign(1.0, a)):\n                    return\n                add(\"inf_mismatch\", path, e, a, \"Infinity mismatch\")\n                return\n            tol = _resolve_tol(path, default_tol, path_tolerances)\n            err_abs = abs(float(e) - float(a))\n            denom = max(abs(float(e)), 1e-300)\n            err_rel = err_abs / denom\n            thr = tol.threshold(abs(float(e)))\n            ok = err_abs <= thr or err_rel <= float(tol.rel)\n            if not ok:\n                add(\n                    \"number_mismatch\",\n                    path,\n                    e,\n                    a,\n                    \"Numeric difference exceeds tolerance\",\n                    abs_err=err_abs,\n                    rel_err=err_rel,\n                    tol_abs=tol.abs,\n                    tol_rel=tol.rel,\n                    threshold=thr,\n                )\n            return\n\n        # Dicts\n        if isinstance(e, dict) and isinstance(a, dict):\n            e_keys, a_keys = set(e.keys()), set(a.keys())\n            missing, extra = sorted(e_keys - a_keys), sorted(a_keys - e_keys)\n            for k in missing:\n                add(\"missing_key\", _path_join(path, k), e.get(k), None, \"Key missing in actual\")\n            for k in extra:\n                add(\"extra_key\", _path_join(path, k), None, a.get(k), \"Unexpected key in actual\")\n            for k in sorted(e_keys & a_keys):\n                cmp(e[k], a[k], _path_join(path, k))\n      \n"
+        }
+      ]
+    },
+    {
+      "id": "ci_0ecd203940c66647006949be750bd081909d6b46351bbe5075",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path(\"/mnt/data/src/numeric_tolerance_diff.py\").read_text()[4000:8000])\n",
+      "container_id": "cntr_6949bd39c7008190b2d314f911169a74060596b8e6d512ff",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "      return\n\n        # Lists\n        if isinstance(e, list) and isinstance(a, list):\n            if len(e) != len(a):\n                add(\"length_mismatch\", path, len(e), len(a), \"List length differs\")\n            for i, (ee, aa) in enumerate(zip(e, a)):\n                cmp(ee, aa, _path_join(path, i))\n            return\n\n        # Fallback: strict equality\n        if e != a:\n            add(\"value_mismatch\", path, e, a, \"Values differ\")\n\n    cmp(expected, actual, \"$\")\n\n    kinds: Dict[str, int] = {}\n    for d in diffs:\n        kinds[d[\"kind\"]] = kinds.get(d[\"kind\"], 0) + 1\n    return {\n        \"ok\": len(diffs) == 0,\n        \"diff_count\": len(diffs),\n        \"diffs\": diffs,\n        \"summary\": {\"by_kind\": kinds},\n        \"settings\": {\n            \"abs_tol\": abs_tol,\n            \"rel_tol\": rel_tol,\n            \"path_tolerances\": {k: {\"abs\": v.abs, \"rel\": v.rel} for k, v in (path_tolerances or {}).items()},\n            \"allow_nan_equal\": allow_nan_equal,\n            \"allow_inf_equal\": allow_inf_equal,\n        },\n    }\ndef assert_json_close(*args: Any, **kwargs: Any) -> Dict[str, Any]:\n    \"\"\"Convenience wrapper: raises AssertionError if diff_json is not ok.\"\"\"\n    report = diff_json(*args, **kwargs)\n    if not report[\"ok\"]:\n        first = report[\"diffs\"][0]\n        raise AssertionError(f\"JSON mismatch at {first['path']}: {first['message']}\")\n    return report\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ecd203940c66647006949be76f62c81909968e16b94f67a6f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ecd203940c66647006949be7765c48190a61073df99cac70b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nprint(Path(\"/mnt/data/src/stable_json.py\").read_text()[:2000])\n",
+      "container_id": "cntr_6949bd39c7008190b2d314f911169a74060596b8e6d512ff",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Stable, reproducible JSON serialization utilities.\n\nThis module aims for byte-for-byte identical JSON output across machines and CI by:\n- canonical key ordering (via sort_keys=True),\n- normalized float rendering (stable formatting, -0.0 -> 0.0),\n- consistent indentation and newline handling,\n- basic canonicalization for common non-JSON-native Python types.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import is_dataclass, asdict\nimport json\nimport math\nfrom pathlib import Path\nfrom typing import Any, Mapping, MutableMapping, Sequence\ndef canonicalize(obj: Any) -> Any:\n    \"\"\"Convert common Python objects into JSON-serializable, stable structures.\"\"\"\n    if obj is None or isinstance(obj, (str, int, bool)):\n        return obj\n    if isinstance(obj, float):\n        # Normalize negative zero; keep NaN/Infinity as-is (JSON module handles via allow_nan).\n        if obj == 0.0:\n            return 0.0\n        return obj\n    if isinstance(obj, (bytes, bytearray, memoryview)):\n        return obj.hex()\n    if isinstance(obj, Path):\n        return str(obj)\n    if is_dataclass(obj):\n        return canonicalize(asdict(obj))\n    if isinstance(obj, Mapping):\n        # Ensure plain dict values; keys must be str for JSON (convert defensively).\n        out: MutableMapping[str, Any] = {}\n        for k, v in obj.items():\n            out[str(k)] = canonicalize(v)\n        return out\n    if isinstance(obj, (list, tuple)):\n        return [canonicalize(v) for v in obj]\n    if isinstance(obj, set):\n        return sorted((canonicalize(v) for v in obj), key=lambda x: json.dumps(x, sort_keys=True))\n    # Common scalar-like objects (e.g., numpy scalars) expose item()\n    item = getattr(obj, \"item\", None)\n    if callable(item):\n        try:\n            return canonicalize(item())\n        except Exception:\n            pass\n    # Fallback: try __dict__ if it looks like a simple record.\n    d = getattr(obj, \"__dict__\", None)\n    if isinstance(d, dict) and d:\n        return canonicalize\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ecd203940c66647006949be7924d0819093269346ec0184a8",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ecd203940c66647006949be79bd8881908ee180f9478096ca",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path(\"/mnt/data/src/stable_json.py\").read_text()[2000:4000])\n",
+      "container_id": "cntr_6949bd39c7008190b2d314f911169a74060596b8e6d512ff",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(d)\n    return obj\ndef _float_to_str(x: float) -> str:\n    \"\"\"Stable float rendering for JSON (handles -0.0, NaN/inf).\"\"\"\n    if math.isnan(x):\n        return \"NaN\"\n    if math.isinf(x):\n        return \"Infinity\" if x > 0 else \"-Infinity\"\n    if x == 0.0:\n        x = 0.0  # removes negative zero\n    # 17 significant digits round-trips IEEE-754 double.\n    s = format(x, \".17g\")\n    # Ensure JSON-compliant exponent with lowercase 'e' (format already uses 'e').\n    return s\nclass StableJSONEncoder(json.JSONEncoder):\n    \"\"\"JSONEncoder with stable float formatting.\"\"\"\n\n    def iterencode(self, o: Any, _one_shot: bool = False):\n        # Adapted from Python's stdlib json.encoder, with custom float formatting.\n        if self.check_circular:\n            markers = {}\n        else:\n            markers = None\n        _encoder = json.encoder.encode_basestring_ascii if self.ensure_ascii else json.encoder.encode_basestring\n\n        def floatstr(\n            value,\n            allow_nan=self.allow_nan,\n            _inf=math.inf,\n            _neginf=-math.inf,\n        ):\n            if value != value:\n                text = \"NaN\"\n            elif value == _inf:\n                text = \"Infinity\"\n            elif value == _neginf:\n                text = \"-Infinity\"\n            else:\n                text = _float_to_str(value)\n            if not allow_nan and text in (\"NaN\", \"Infinity\", \"-Infinity\"):\n                raise ValueError(\"Out of range float values are not JSON compliant\")\n            return text\n\n        _iterencode = json.encoder._make_iterencode(\n            markers,\n            self.default,\n            _encoder,\n            self.indent,\n            floatstr,\n            self.key_separator,\n            self.item_separator,\n            self.sort_keys,\n            self.skipkeys,\n            _one_shot,\n        )\n        return _iterencode(o, 0)\ndef dumps(obj: Any, *, indent: int = 2, ensure_ascii: bool = False) -> str:\n    \"\"\"Deterministically serialize to JSON text (alw\n"
+        }
+      ]
+    },
+    {
+      "id": "ci_0ecd203940c66647006949be7b95ec81909c1709d850600563",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path(\"/mnt/data/src/stable_json.py\").read_text()[4000:8000])\n",
+      "container_id": "cntr_6949bd39c7008190b2d314f911169a74060596b8e6d512ff",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "ays ends with a single '\\n').\"\"\"\n    canon = canonicalize(obj)\n    text = json.dumps(\n        canon,\n        cls=StableJSONEncoder,\n        sort_keys=True,\n        ensure_ascii=ensure_ascii,\n        indent=indent,\n        separators=(\",\", \": \") if indent else (\",\", \":\"),\n        allow_nan=True,\n    )\n    return text + \"\\n\"\n\n\ndef dump(obj: Any, fp, *, indent: int = 2, ensure_ascii: bool = False) -> None:\n    \"\"\"Write stable JSON to a file-like object.\"\"\"\n    fp.write(dumps(obj, indent=indent, ensure_ascii=ensure_ascii))\n\n\ndef write_text(path: str | Path, obj: Any, *, indent: int = 2, ensure_ascii: bool = False) -> Path:\n    \"\"\"Write stable JSON to a filesystem path (UTF-8).\"\"\"\n    p = Path(path)\n    p.write_text(dumps(obj, indent=indent, ensure_ascii=ensure_ascii), encoding=\"utf-8\", newline=\"\\n\")\n    return p\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ecd203940c66647006949be7d63d08190bd4457b69596d716",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ecd203940c66647006949be7f7de08190813bf78f3a9f3383",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\ntests_dir=Path(\"/mnt/data/tests\")\nlist(tests_dir.glob(\"*\"))\n",
+      "container_id": "cntr_6949bd39c7008190b2d314f911169a74060596b8e6d512ff",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ecd203940c66647006949be8141e481909eac8d9e3f2a3a6b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ecd203940c66647006949be89c0d88190b4339c55e6fb37db",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, sys, os\ntarget_path = Path('/mnt/data').joinpath('tests/test_numeric_tolerance_diff.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"import math\nimport sys\nfrom pathlib import Path\n\nimport pytest\n\n# Ensure src/ is importable when project isn't installed as a package.\nROOT = Path(__file__).resolve().parents[1]\nsys.path.insert(0, str(ROOT / \"src\"))\n\nfrom numeric_tolerance_diff import Tolerance, diff_json, assert_json_close  # noqa: E402\nfrom stable_json import dumps  # noqa: E402\n\"\"\")\n\nchunks.append(\"\"\"def test_abs_and_rel_tolerance_pass_and_fail():\n    expected = {\"x\": 100.0, \"big\": 1_000_000.0}\n    actual_ok = {\"x\": 100.09, \"big\": 1_000_050.0}\n    assert diff_json(expected, actual_ok, abs_tol=0.1, rel_tol=1e-4)[\"ok\"]\n\n    actual_bad = {\"x\": 100.11, \"big\": 1_000_200.0}\n    rep = diff_json(expected, actual_bad, abs_tol=0.1, rel_tol=1e-4)\n    assert not rep[\"ok\"]\n    paths = {d[\"path\"] for d in rep[\"diffs\"]}\n    assert \"$.x\" in paths and \"$.big\" in paths\n\"\"\")\n\nchunks.append(\"\"\"def test_path_tolerance_override_uses_most_specific_match():\n    expected = {\"a\": {\"b\": 0.0, \"c\": 0.0}}\n    actual = {\"a\": {\"b\": 0.5, \"c\": 0.5}}\n    rep = diff_json(\n        expected,\n        actual,\n        abs_tol=0.0,\n        rel_tol=0.0,\n        path_tolerances={\"$.a.*\": Tolerance(abs=0.0, rel=0.0), \"$.a.b\": Tolerance(abs=1.0, rel=0.0)},\n    )\n    assert not rep[\"ok\"]  # $.a.c should still fail\n    by_path = {d[\"path\"]: d[\"kind\"] for d in rep[\"diffs\"]}\n    assert \"$.a.c\" in by_path and \"$.a.b\" not in by_path\n\"\"\")\n\nchunks.append(\"\"\"def test_nan_and_inf_rules():\n    nan = float(\"nan\")\n    inf = float(\"inf\")\n    ninf = float(\"-inf\")\n\n    assert diff_json({\"v\": nan}, {\"v\": nan})[\"ok\"]\n    assert not diff_json({\"v\": nan}, {\"v\": nan}, allow_nan_equal=False)[\"ok\"]\n\n    assert diff_json({\"v\": inf}, {\"v\": inf})[\"ok\"]\n    assert not diff_json({\"v\": inf}, {\"v\": ninf})[\"ok\"]\n    assert not diff_json({\"v\": inf}, {\"v\": inf}, allow_inf_equal=False)[\"ok\"]\n\"\"\")\n\nchunks.append(\"\"\"def test_stable_json_ordering_and_float_normalization():\n    obj = {\"b\": 1, \"a\": -0.0, \"c\": {\"z\": 2, \"y\": 1}}\n    text = dumps(obj, indent=2)\n    assert text.endswith(\"\\\\n\")\n    # Canonical key order at top level and nested.\n    assert text.index('\"a\"') < text.index('\"b\"') < text.index('\"c\"')\n    assert text.index('\"y\"') < text.index('\"z\"')\n    # Negative zero normalized.\n    assert \"-0\" not in text\n\"\"\")\n\nchunks.append(\"\"\"def test_structured_diff_report_is_deterministic_and_includes_settings():\n    expected = {\"a\": 1.0, \"b\": {\"x\": [1, 2, 3], \"y\": 0.0}}\n    actual = {\"b\": {\"x\": [1, 9], \"z\": 0}, \"c\": 0}\n    rep = diff_json(expected, actual, abs_tol=0.0, rel_tol=0.0)\n    assert not rep[\"ok\"]\n    assert rep[\"settings\"][\"abs_tol\"] == 0.0 and rep[\"settings\"][\"rel_tol\"] == 0.0\n\n    # Deterministic ordering: missing keys, extra keys, then common keys; paths sorted within.\n    got = [(d[\"kind\"], d[\"path\"]) for d in rep[\"diffs\"]]\n    assert got[0] == (\"missing_key\", \"$.a\")\n    assert (\"missing_key\", \"$.b.y\") in got\n    assert (\"extra_key\", \"$.c\") in got and (\"extra_key\", \"$.b.z\") in got\n    # List length mismatch and element mismatch are both reported at stable paths.\n    assert (\"length_mismatch\", \"$.b.x\") in got\n    assert (\"value_mismatch\", \"$.b.x[1]\") in got\n    # Wrapper raises a simple assertion at first diff.\n    with pytest.raises(AssertionError):\n        assert_json_close(expected, actual)\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tests/test_numeric_tolerance_diff.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd39c7008190b2d314f911169a74060596b8e6d512ff",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_numeric_tolerance_diff.py\nDIR_STATE:[\"tests/test_numeric_tolerance_diff.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0ecd203940c66647006949be99c0348190a652b7fdc1bf27e2",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/test_numeric_tolerance_diff.py` with pytest coverage for abs/rel tolerance behavior (including failures), most-specific per-path tolerance overrides, NaN/inf equality rules, stable JSON serialization ordering/float normalization, and a deterministic structured diff report shape (including settings and stable paths)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,45 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Select the canonical entry point (prefer existing validate_outputs.py + one runner) and create/standardize one command that produces only the canonical /outputs/qa/* artifacts; update docs/tracker to point exclusively to this command.
+Project: generated_script_1766624286042 (python script)
+
+Target file details:
+- Path: scripts/qa_run.py
+- Purpose: Canonical single-command QA runner CLI that executes the configured QA workflow and writes only the standardized /outputs/qa/<run_id>/ artifact tree (including an explicit index) and then invokes validate_outputs.py on the produced artifacts.
+- Category: source
+
+Other planned files (for context only):
+- scripts/qa_artifacts.py: Shared utilities for canonicalizing paths, generating run IDs, writing the /outputs/qa index/manifest files, and enforcing that no artifacts are written outside /outputs/qa during a run.
+- docs/qa.md: Documentation that defines the single canonical QA command (python scripts/qa_run.py ...) and describes the required /outputs/qa artifact structure and index files produced by that command.
+- docs/tracker.md: Tracker page updated to reference only the canonical QA command and to treat /outputs/qa/* as the sole supported artifact location for QA evidence and validation.
+
+Reference insights:
+- [CONSOLIDATED] Reliable QA and reproducible workflows require a single canonical `/outputs` artifact structure backed by an explicit index/t
+- [INTROSPECTION] 2025-12-25T00-21-55-842Z_scripts_qa_run_sh_stage1_attempt1_prompt.txt from code-creation agent agent_1766622114110_412seks: 
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Canonical single-command QA runner CLI that executes the configured QA workflow and writes only the standardized /outputs/qa/<run_id>/ artifact tree (including an explicit index) and then invokes validate_outputs.py on the produced artifacts.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/qa_run.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/qa_run.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/qa_run.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

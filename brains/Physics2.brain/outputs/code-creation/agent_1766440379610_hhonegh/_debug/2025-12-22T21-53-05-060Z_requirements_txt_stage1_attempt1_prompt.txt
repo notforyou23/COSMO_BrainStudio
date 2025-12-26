@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Integrate the agent-generated outputs into a single canonical repository layout (move/merge from code-creation output directories into the real repo), then verify GitHub Actions CI (ci.yml) runs successfully on a clean environment with pinned dependencies; produce a minimal RELEASE/CHECKLIST.md describing how to tag v0.1.
+Project: generated_script_1766440383729 (yaml script)
+
+Target file details:
+- Path: requirements.txt
+- Purpose: Pinned runtime Python dependencies used by CI and users to ensure deterministic installs on clean environments.
+- Category: config
+
+Other planned files (for context only):
+- tools/integration_map.yml: Defines the canonical repository layout and a deterministic set of move/merge rules for integrating agent output directories into the real repo.
+- tools/integrate_agent_outputs.py: Implements a reproducible integration tool that applies the integration_map.yml rules to move/merge agent-generated outputs into the canonical repository tree with safety checks and a dry-run mode.
+- .github/workflows/ci.yml: GitHub Actions CI workflow that runs on a clean environment, installs pinned dependencies, and executes linting/formatting checks plus the test suite.
+- .pre-commit-config.yaml: Pre-commit configuration mirroring the intended CI checks to ensure consistent local and CI lint/format behavior.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-22T18-56-46-314Z__github_workflows_ci_yml_stage1_attempt1_prompt.txt from code-creation agent agent_1766429800561_x1
+- [AGENT: agent_1766432552135_37yovma] {"agentId":"agent_1766432552135_37yovma","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766430411939_w8zvs5v] {"agentId":"agent_1766430411939_w8zvs5v","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [INTROSPECTION] 2025-12-22T20-29-38-112Z__pre-commit-config_yaml_stage1_attempt1_prompt.txt from code-creation agent agent_1766435369695_ff3
+- [AGENT: agent_1766438283976_puyw9gc] {"agentId":"agent_1766438283976_puyw9gc","goalId":"routing_code_1766438283975_nh5nje8","containerId":"c
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Pinned runtime Python dependencies used by CI and users to ensure deterministic installs on clean environments.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('requirements.txt')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:requirements.txt')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside requirements.txt.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

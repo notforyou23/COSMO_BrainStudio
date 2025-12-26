@@ -1,0 +1,151 @@
+{
+  "content": "Created a pytest suite that checks each experiment’s SymPy derivation via symbolic simplification/ODE residuals and validates numeric implementations against lambdified closed forms with randomized spot checks, edge-case branches, and a regression-style `reference_check` gate.",
+  "reasoning": "",
+  "responseId": "resp_061bd3e43cb7ef3600694b4cbc2cd881909ae32f511b59b343",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 6649,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1973,
+    "output_tokens_details": {
+      "reasoning_tokens": 1917
+    },
+    "total_tokens": 8622
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_061bd3e43cb7ef3600694b4cbd02a081908d6cfb54fb7e57a7",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_061bd3e43cb7ef3600694b4cbe3a8481908cbd54c5f72d964b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path('/mnt/data')\nsorted([str(p.relative_to(base)) for p in base.rglob('*') if p.is_file()])[:50], len(list(base.rglob('*')))\n",
+      "container_id": "cntr_694b4bd0381081909cae03b5047a4b910a942f49460a0d3d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(['notebooks/experiments.ipynb',\n  'src/experiments/__init__.py',\n  'src/experiments/__pycache__/symbolic.cpython-311.pyc',\n  'src/experiments/io.py',\n  'src/experiments/numeric.py',\n  'src/experiments/plotting.py',\n  'src/experiments/sweep.py',\n  'src/experiments/symbolic.py'],\n 12)"
+        }
+      ]
+    },
+    {
+      "id": "rs_061bd3e43cb7ef3600694b4cc07904819098be9eccefd23e30",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_061bd3e43cb7ef3600694b4cc0b80c8190b4e4bb42974bea57",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nprint(Path('/mnt/data/src/experiments/symbolic.py').read_text()[:4000])\n",
+      "container_id": "cntr_694b4bd0381081909cae03b5047a4b910a942f49460a0d3d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Symbolic derivations for three small reference experiments.\n\nThis module provides stepwise SymPy transformations that yield simplified\nclosed-form expressions suitable for lambdified numeric evaluation.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Callable, Iterable\n\nimport sympy as sp\n\n\n@dataclass(frozen=True)\nclass Derivation:\n    \"\"\"A lightweight container capturing symbolic steps and final form.\"\"\"\n\n    steps: tuple[tuple[str, sp.Expr], ...]\n    final: sp.Expr\n\n    def simplify(self) -> \"Derivation\":\n        simp_steps = tuple((d, sp.simplify(e)) for d, e in self.steps)\n        return Derivation(simp_steps, sp.simplify(self.final))\n\n\ndef _as_derivation(steps: Iterable[tuple[str, sp.Expr]], final: sp.Expr) -> Derivation:\n    return Derivation(tuple(steps), final)\n\n\ndef lambdify_expr(expr: sp.Expr, args: Iterable[sp.Symbol]) -> Callable:\n    \"\"\"Return a NumPy-ready callable for *expr*.\n\n    Numeric code uses this to evaluate symbolic closed forms.\n    \"\"\"\n\n    return sp.lambdify(tuple(args), expr, modules=[\"numpy\"])\n# ---- Experiment 1: finite geometric series (and stable ratio form) ----\n\n\ndef exp1_geometric_series() -> Derivation:\n    \"\"\"Derive S = sum_{k=0}^{n-1} r**k as a closed form.\"\"\"\n\n    r, n = sp.symbols(\"r n\")\n    k = sp.Symbol(\"k\", integer=True)\n    S = sp.summation(r**k, (k, 0, n - 1))\n    steps = [(\"definition\", S)]\n    closed = sp.simplify(S)\n    steps.append((\"sympy_summation\", closed))\n    # alternative stable form: expm1/log1p analog in ratio space\n    stable = sp.simplify((1 - r**n) / (1 - r))\n    steps.append((\"ratio_form\", stable))\n    return _as_derivation(steps, stable)\n\n\ndef exp1_closed_form_symbols():\n    r, n = sp.symbols(\"r n\")\n    return r, n, exp1_geometric_series().final\n# ---- Experiment 2: affine scalar ODE x' = a x + b ----\n\n\ndef exp2_affine_ode_solution() -> Derivation:\n    \"\"\"Solve x'(t) = a*x(t) + b with x(0)=x0 and simplify.\"\"\"\n\n    t = sp.symbols(\"t\", real=True)\n    a, b, x0 = sp.symbols(\"a b x0\")\n    x = sp.Function(\"x\")\n    ode = sp.Eq(sp.diff(x(t), t), a * x(t) + b)\n    steps = [(\"ode\", ode)]\n    sol = sp.dsolve(ode, ics={x(0): x0})\n    steps.append((\"dsolve\", sol.rhs))\n    rhs = sp.simplify(sol.rhs)\n    steps.append((\"simplify\", rhs))\n    # also provide the a->0 continuous limit (for numeric stability checks)\n    limit_a0 = sp.simplify(sp.limit(rhs, a, 0))\n    steps.append((\"limit_a_to_0\", limit_a0))\n    return _as_derivation(steps, rhs)\n\n\ndef exp2_closed_form_symbols():\n    t = sp.symbols(\"t\", real=True)\n    a, b, x0 = sp.symbols(\"a b x0\")\n    return t, a, b, x0, exp2_affine_ode_solution().final\n# ---- Experiment 3: Normal-Normal conjugate posterior mean/variance ----\n\n\ndef exp3_normal_normal_posterior() -> Derivation:\n    \"\"\"Derive posterior for Normal prior + Normal likelihood (known variance).\n\n    Prior:   mu ~ Normal(mu0, s0^2)\n    Data:    xi ~ Normal(mu, s^2), i=1..n\n    Returns posterior mean m_n and variance s_n^2.\n    \"\"\"\n\n    mu0, s0, s = sp.symbols(\"mu0 s0 s\", positive=True)\n    n = sp.Symbol(\"n\", integer=True, positive=True)\n    xbar = sp.symbols(\"xbar\", real=True)  # sufficient statistic\n    prec0 = 1 / s0**2\n    prec = n / s**2\n    steps = [(\"prior_precision\", prec0), (\"lik_precision\", prec)]\n    post_var = 1 / (prec0 + prec)\n    steps.append((\"posterior_variance\", post_var))\n    post_mean = sp.simplify(post_var * (prec0 * mu0 + prec * xbar))\n    steps.append((\"posterior_mean\", post_mean))\n    # common weighted-average form\n    w = sp.simplify(prec / (prec0 + prec))\n    mean_wa = sp.simplify((1 - w) * mu0 + w * xbar)\n    steps.append((\"weighted_average_form\", mean_wa))\n    final = sp.Matrix([mean_wa, sp.simplify(post_var)])\n    return _as_derivation(steps, final)\n\n\ndef exp3_closed_form_symbols():\n    mu0, s0, s = sp.symbols(\"mu0 s0 s\", positive=True)\n    n = sp.Symbol(\"n\", integer=True, positive=True)\n    xbar = sp.symbols(\"xbar\", real=True)\n    expr = exp3_normal_normal_posterior().final\n    return mu0, s0, s, n, xb\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_061bd3e43cb7ef3600694b4cc298f88190826ffb9826c8ea6c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_061bd3e43cb7ef3600694b4cc30314819086e676767cefd687",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "text=Path('/mnt/data/src/experiments/symbolic.py').read_text()\nprint(text[-400:])\n",
+      "container_id": "cntr_694b4bd0381081909cae03b5047a4b910a942f49460a0d3d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "((\"weighted_average_form\", mean_wa))\n    final = sp.Matrix([mean_wa, sp.simplify(post_var)])\n    return _as_derivation(steps, final)\n\n\ndef exp3_closed_form_symbols():\n    mu0, s0, s = sp.symbols(\"mu0 s0 s\", positive=True)\n    n = sp.Symbol(\"n\", integer=True, positive=True)\n    xbar = sp.symbols(\"xbar\", real=True)\n    expr = exp3_normal_normal_posterior().final\n    return mu0, s0, s, n, xbar, expr\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_061bd3e43cb7ef3600694b4cc4e9ec8190964516d3d31e9e1b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_061bd3e43cb7ef3600694b4cc54c9c8190828f226b8dc227d1",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path('/mnt/data/src/experiments/numeric.py').read_text()[:4000])\n",
+      "container_id": "cntr_694b4bd0381081909cae03b5047a4b910a942f49460a0d3d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Numeric implementations for the three reference experiments.\n\nFocus: stable evaluation (near-singular parameter regimes), NumPy vectorization,\nand optional reference checks against symbolic closed forms.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Any, Dict, Tuple\n\nimport numpy as np\n\ntry:  # optional, used only for reference checks\n    from . import symbolic as _sym\nexcept Exception:  # pragma: no cover\n    _sym = None  # type: ignore\n\nhelpers: Dict[str, Any] = {}\ndef exp1_geometric_sum(r: np.ndarray | float, n: np.ndarray | int) -> np.ndarray:\n    \"\"\"Return S=\\sum_{k=0}^{n-1} r**k with a stable form near r≈1.\n\n    Uses expm1/log1p to avoid catastrophic cancellation in (1-r**n)/(1-r).\n    Supports broadcasting across r and n.\n    \"\"\"\n    r = np.asarray(r, dtype=float)\n    n = np.asarray(n, dtype=float)\n    lr = np.log1p(r - 1.0)  # stable log(r) near r=1\n    num = np.expm1(n * lr)\n    den = np.expm1(lr)\n    out = np.divide(num, den, out=np.full(np.broadcast(num, den).shape, np.nan), where=den != 0)\n    return np.where(r == 1.0, n, out)\n\n\ndef exp2_affine_ode(t: np.ndarray | float, a: np.ndarray | float, b: np.ndarray | float, x0: np.ndarray | float) -> np.ndarray:\n    \"\"\"Solve x'(t)=a x + b, x(0)=x0 with stability near a≈0.\"\"\"\n    t, a, b, x0 = map(lambda z: np.asarray(z, dtype=float), (t, a, b, x0))\n    at = a * t\n    # x(t) = x0*exp(at) + b*(exp(at)-1)/a; use expm1 to stabilize.\n    incr = np.divide(np.expm1(at), a, out=np.zeros(np.broadcast(at, a).shape), where=a != 0)\n    out = x0 * np.exp(at) + b * incr\n    return np.where(a == 0.0, x0 + b * t, out)\n\n\ndef exp3_normal_normal(mu0: np.ndarray | float, s0: np.ndarray | float, s: np.ndarray | float, n: np.ndarray | int, xbar: np.ndarray | float) -> Tuple[np.ndarray, np.ndarray]:\n    \"\"\"Normal-Normal posterior (known sigma): return (mean, variance).\"\"\"\n    mu0, s0, s, xbar = map(lambda z: np.asarray(z, dtype=float), (mu0, s0, s, xbar))\n    n = np.asarray(n, dtype=float)\n    prec0 = 1.0 / (s0 * s0)\n    prec = n / (s * s)\n    post_var = 1.0 / (prec0 + prec)\n    w = prec / (prec0 + prec)\n    post_mean = (1.0 - w) * mu0 + w * xbar\n    return post_mean, post_var\ndef _sympy_refs():\n    if _sym is None:\n        return None\n    r, n, e1 = _sym.exp1_closed_form_symbols()\n    t, a, b, x0, e2 = _sym.exp2_closed_form_symbols()\n    mu0, s0, s, nn, xbar, e3 = _sym.exp3_closed_form_symbols()\n    f1 = _sym.lambdify_expr(e1, (r, n))\n    f2 = _sym.lambdify_expr(e2, (t, a, b, x0))\n    f3 = _sym.lambdify_expr(e3, (mu0, s0, s, nn, xbar))\n    return f1, f2, f3\n\n\ndef reference_check(seed: int = 0, atol: float = 1e-10, rtol: float = 1e-10) -> Dict[str, bool]:\n    \"\"\"Quick randomized numeric-vs-symbolic consistency checks.\"\"\"\n    refs = _sympy_refs()\n    if refs is None:\n        return {\"exp1\": True, \"exp2\": True, \"exp3\": True}\n    f1, f2, f3 = refs\n    rng = np.random.default_rng(seed)\n\n    r = rng.uniform(0.5, 1.5, size=1000)\n    n = rng.integers(1, 50, size=1000)\n    ok1 = np.allclose(exp1_geometric_sum(r, n), f1(r, n), atol=atol, rtol=rtol)\n\n    t = rng.uniform(0.0, 2.0, size=1000)\n    a = rng.uniform(-1e-6, 1e-6, size=1000)  # stress a≈0 regime\n    b = rng.normal(size=1000)\n    x0 = rng.normal(size=1000)\n    ok2 = np.allclose(exp2_affine_ode(t, a, b, x0), f2(t, a, b, x0), atol=1e-8, rtol=1e-8)\n\n    mu0 = rng.normal(size=1000)\n    s0 = rng.uniform(0.2, 2.0, size=1000)\n    s = rng.uniform(0.2, 2.0, size=1000)\n    nn = rng.integers(1, 200, size=1000)\n    xbar = rng.normal(size=1000)\n    mean, var = exp3_normal_normal(mu0, s0, s, nn, xbar)\n    sym = np.asarray(f3(mu0, s0, s, nn, xbar), dtype=float)  # shape (2,N)\n    ok3 = np.allclose(mean, sym[0], atol=atol, rtol=rtol) and np.allclose(var, sym[1], atol=atol, rtol=rtol)\n    return {\"exp1\": bool(ok1), \"exp2\": bool(ok2), \"exp3\": bool(ok3)}\n@dataclass(frozen=True)\nclass ExperimentResult:\n    name: str\n    inputs: Dict[str, Any]\n    outputs: Dict[str, Any]\n\n\ndef run_experiment_1(r: np.ndarray | float, n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_061bd3e43cb7ef3600694b4cc743d08190bae1fc6bc18831ec",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_061bd3e43cb7ef3600694b4cc761348190b2108213513b2433",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path('/mnt/data/src/experiments/numeric.py').read_text()[4000:8000])\n",
+      "container_id": "cntr_694b4bd0381081909cae03b5047a4b910a942f49460a0d3d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": ": np.ndarray | int) -> ExperimentResult:\n    s = exp1_geometric_sum(r, n)\n    return ExperimentResult(\"exp1_geometric_series\", {\"r\": r, \"n\": n}, {\"S\": s})\n\n\ndef run_experiment_2(t: np.ndarray | float, a: np.ndarray | float, b: np.ndarray | float, x0: np.ndarray | float) -> ExperimentResult:\n    x = exp2_affine_ode(t, a, b, x0)\n    return ExperimentResult(\"exp2_affine_ode\", {\"t\": t, \"a\": a, \"b\": b, \"x0\": x0}, {\"x\": x})\n\n\ndef run_experiment_3(mu0: np.ndarray | float, s0: np.ndarray | float, s: np.ndarray | float, n: np.ndarray | int, xbar: np.ndarray | float) -> ExperimentResult:\n    mean, var = exp3_normal_normal(mu0, s0, s, n, xbar)\n    return ExperimentResult(\"exp3_normal_normal\", {\"mu0\": mu0, \"s0\": s0, \"s\": s, \"n\": n, \"xbar\": xbar}, {\"post_mean\": mean, \"post_var\": var})\n\n\nhelpers.update(\n    exp1_geometric_sum=exp1_geometric_sum,\n    exp2_affine_ode=exp2_affine_ode,\n    exp3_normal_normal=exp3_normal_normal,\n    reference_check=reference_check,\n)\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_061bd3e43cb7ef3600694b4cc96a9481908d00e6f2356959d7",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_061bd3e43cb7ef3600694b4ccecd508190b5657765878cf573",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap\ntarget_path = Path('/mnt/data/tests/test_symbolic_numeric_consistency.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\\\nimport numpy as np\nimport pytest\nimport sympy as sp\n\nfrom experiments import numeric, symbolic\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef _allclose(a, b, atol=1e-10, rtol=1e-10):\n    a = np.asarray(a, dtype=float)\n    b = np.asarray(b, dtype=float)\n    return np.allclose(a, b, atol=atol, rtol=rtol)\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef test_exp1_symbolic_closed_form_matches_summation():\n    r, n = sp.symbols(\"r n\")\n    k = sp.Symbol(\"k\", integer=True)\n    summ = sp.summation(r**k, (k, 0, n - 1))\n    deriv = symbolic.exp1_geometric_series()\n    assert sp.simplify(summ - deriv.final) == 0\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef test_exp2_symbolic_solution_satisfies_ode_and_ic():\n    t, a, b, x0, x_expr = symbolic.exp2_closed_form_symbols()\n    xt = sp.simplify(x_expr.subs(t, 0))\n    assert sp.simplify(xt - x0) == 0\n    ode_residual = sp.simplify(sp.diff(x_expr, t) - (a * x_expr + b))\n    assert sp.simplify(ode_residual) == 0\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef test_exp3_symbolic_posterior_equivalences():\n    mu0, s0, s, n, xbar, mat = symbolic.exp3_closed_form_symbols()\n    mean_wa, post_var = map(sp.simplify, list(mat))\n    prec0 = 1 / s0**2\n    prec = n / s**2\n    mean_prec = sp.simplify((prec0 * mu0 + prec * xbar) / (prec0 + prec))\n    var_prec = sp.simplify(1 / (prec0 + prec))\n    assert sp.simplify(mean_wa - mean_prec) == 0\n    assert sp.simplify(post_var - var_prec) == 0\n\"\"\")\n\nchunks.append(\"\"\"\\\n@pytest.mark.parametrize(\"seed\", [0, 1])\ndef test_numeric_matches_symbolic_randomized(seed):\n    rng = np.random.default_rng(seed)\n\n    r = rng.uniform(0.5, 1.5, size=500)\n    n = rng.integers(1, 60, size=500)\n    r_sym, n_sym, e1 = symbolic.exp1_closed_form_symbols()\n    f1 = symbolic.lambdify_expr(e1, (r_sym, n_sym))\n    assert _allclose(numeric.exp1_geometric_sum(r, n), f1(r, n), atol=1e-10, rtol=1e-10)\n\n    t = rng.uniform(0.0, 3.0, size=500)\n    a = rng.uniform(-1e-8, 1e-8, size=500)\n    b = rng.normal(size=500)\n    x0 = rng.normal(size=500)\n    t_sym, a_sym, b_sym, x0_sym, e2 = symbolic.exp2_closed_form_symbols()\n    f2 = symbolic.lambdify_expr(e2, (t_sym, a_sym, b_sym, x0_sym))\n    assert _allclose(numeric.exp2_affine_ode(t, a, b, x0), f2(t, a, b, x0), atol=1e-8, rtol=1e-8)\n\n    mu0 = rng.normal(size=500)\n    s0 = rng.uniform(0.2, 3.0, size=500)\n    s = rng.uniform(0.2, 3.0, size=500)\n    nn = rng.integers(1, 200, size=500)\n    xbar = rng.normal(size=500)\n    mu0_s, s0_s, s_s, n_s, xbar_s, e3 = symbolic.exp3_closed_form_symbols()\n    f3 = symbolic.lambdify_expr(e3, (mu0_s, s0_s, s_s, n_s, xbar_s))\n    mean, var = numeric.exp3_normal_normal(mu0, s0, s, nn, xbar)\n    sym = np.asarray(f3(mu0, s0, s, nn, xbar), dtype=float)\n    assert _allclose(mean, sym[0])\n    assert _allclose(var, sym[1])\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef test_numeric_edge_cases_no_nan_and_exact_limits():\n    # exp1: r==1 => S==n\n    assert float(numeric.exp1_geometric_sum(1.0, 7)) == 7.0\n    assert np.all(np.isfinite(numeric.exp1_geometric_sum(np.array([1.0, 1.0]), np.array([3, 9]))))\n\n    # exp2: a==0 => x0 + b t (exact branch)\n    t = np.array([0.0, 0.5, 2.0])\n    out = numeric.exp2_affine_ode(t, 0.0, 3.0, -1.0)\n    assert _allclose(out, -1.0 + 3.0 * t, atol=0.0, rtol=0.0)\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef test_reference_check_regression_tolerances():\n    # quick end-to-end consistency gate\n    res = numeric.reference_check(seed=123, atol=1e-10, rtol=1e-10)\n    assert res == {\"exp1\": True, \"exp2\": True, \"exp3\": True}\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tests/test_symbolic_numeric_consistency.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4bd0381081909cae03b5047a4b910a942f49460a0d3d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_symbolic_numeric_consistency.py\nDIR_STATE:[\"tests/test_symbolic_numeric_consistency.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_061bd3e43cb7ef3600694b4ce1523c81909d2ecc6fb3bf8d96",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_061bd3e43cb7ef3600694b4ce17f80819084b340d8999df76a",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a pytest suite that checks each experiment’s SymPy derivation via symbolic simplification/ODE residuals and validates numeric implementations against lambdified closed forms with randomized spot checks, edge-case branches, and a regression-style `reference_check` gate."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

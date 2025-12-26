@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a Claim Card template (markdown + machine-readable YAML/JSON) and workflow doc, then use it to run the 3-claim pilot and log failure modes (missing metadata, version ambiguity, correction history).
+Project: Claim Card template (markdown + machine-readable YAML/JSON) and workflow doc, then use it to run the 3-claim pilot and log failure modes (missing metadata, version ambiguity, correction history). (json configuration)
+
+Target file details:
+- Path: outputs/CLAIM_CARD_TEMPLATE.md
+- Purpose: Provides the human-friendly Markdown Claim Card template with embedded YAML front matter aligned to the schema and containing all mandatory fields.
+- Category: documentation
+
+Other planned files (for context only):
+- config/claim_card.schema.json: Defines the machine-readable JSON Schema for Claim Cards including required metadata, versioning, provenance, and correction history fields.
+- docs/CLAIM_CARD_WORKFLOW.md: Documents the end-to-end workflow for creating Claim Cards, validating them, running the 3-claim pilot, and logging failure modes and corrections.
+- src/claim_card/validate.py: Implements a CLI-capable validator that loads Claim Card YAML/JSON, validates against the schema, and emits structured failure-mode logs (missing metadata, version ambiguity, correction history issues).
+- src/claim_card/parse_md.py: Parses Markdown Claim Cards with YAML front matter into normalized JSON objects suitable for schema validation and pilot logging.
+
+Reference insights:
+- [AGENT: agent_1766617727481_mjirwwx] Document Created: /outputs/CLAIM_CARD_TEMPLATE.md (or .json) with mandatory fields: verbatim claim, sou
+- [AGENT: agent_1766617727481_mjirwwx] Document Created: /outputs/CLAIM_CARD_TEMPLATE.md (or .json) with mandatory fields: verbatim claim, sou
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [INTROSPECTION] 2025-12-24T22-59-19-171Z_config_claim_card_schema_json_stage1_attempt1_prompt.txt from code-creation agent agent_17666171577
+- [INTROSPECTION] 2025-12-24T22-59-19-171Z_config_claim_card_schema_json_stage1_attempt1_prompt.txt from code-creation agent agent_17666171577
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Provides the human-friendly Markdown Claim Card template with embedded YAML front matter aligned to the schema and containing all mandatory fields.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/CLAIM_CARD_TEMPLATE.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/CLAIM_CARD_TEMPLATE.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/CLAIM_CARD_TEMPLATE.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

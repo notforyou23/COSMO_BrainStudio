@@ -1,0 +1,74 @@
+{
+  "content": "Implemented `src/refactor_modularize/export.py` with deterministic export utilities (stable slug/paths, normalized text/JSON, atomic writes, and a reproducible manifest) to emit refactored artifacts into predictable on-disk layouts.",
+  "reasoning": "",
+  "responseId": "resp_0fe2f10bc5ddc36400694b4894d25c8197a303f855afb015f1",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3556,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1839,
+    "output_tokens_details": {
+      "reasoning_tokens": 1787
+    },
+    "total_tokens": 5395
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0fe2f10bc5ddc36400694b48958fd48197a8074e0aa68d97b9",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0fe2f10bc5ddc36400694b489a529c8197beb00ecaaecff978",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re, hashlib\ntarget_path = Path('/mnt/data').joinpath('src/refactor_modularize/export.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\ncode = \"\"\"\n\\\"\\\"\\\"Export utilities for deterministic artifact emission.\n\nThis module writes refactored artifacts into stable on-disk layouts with\npredictable filenames and normalized file contents.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Union\nimport hashlib\nimport json\nimport os\nimport re\n\n\n_SLUG_RE = re.compile(r\\\"[^a-z0-9]+\\\")\n\n\ndef slugify(value: str) -> str:\n    \\\"\\\"\\\"Return a stable filesystem-friendly slug (lowercase, ascii-ish).\\\"\\\"\\\"\n    v = (value or \\\"\\\").strip().lower()\n    v = v.encode(\\\"utf-8\\\", \\\"ignore\\\").decode(\\\"utf-8\\\")\n    v = _SLUG_RE.sub(\\\"-\\\", v).strip(\\\"-\\\")\n    return v or \\\"artifact\\\"\n\n\ndef normalize_text(text: str) -> str:\n    \\\"\\\"\\\"Normalize newlines and ensure a trailing newline for text files.\\\"\\\"\\\"\n    t = text.replace(\\\"\\\\r\\\\n\\\", \\\"\\\\n\\\").replace(\\\"\\\\r\\\", \\\"\\\\n\\\")\n    return t if t.endswith(\\\"\\\\n\\\") else t + \\\"\\\\n\\\"\n\n\ndef dumps_json(obj: Any) -> str:\n    \\\"\\\"\\\"Deterministic JSON serialization (sorted keys, LF newline).\\\"\\\"\\\"\n    return normalize_text(\n        json.dumps(obj, ensure_ascii=False, sort_keys=True, indent=2)  # type: ignore[arg-type]\n    )\n\n\ndef _sha8(text: str) -> str:\n    return hashlib.sha256(text.encode(\\\"utf-8\\\")).hexdigest()[:8]\n\n\n@dataclass(frozen=True)\nclass ExportedFile:\n    \\\"\\\"\\\"A normalized file ready to be written.\\\"\\\"\\\"\n\n    relpath: str\n    content: str\n    mode: str = \\\"text\\\"  # \\\"text\\\" or \\\"json\\\"\n\n\ndef resolve_relpath(\n    artifact: Mapping[str, Any],\n    *,\n    layout: str = \\\"by_kind\\\",\n    default_suffix: str = \\\".txt\\\",\n) -> str:\n    \\\"\\\"\\\"Compute a stable relative path for an artifact mapping.\n\n    Supported keys: relpath, kind, name, suffix, text/content, id.\n    \\\"\\\"\\\"\n    if artifact.get(\\\"relpath\\\"):\n        return str(artifact[\\\"relpath\\\"]).replace(\\\"\\\\\\\\\\\", \\\"/\\\").lstrip(\\\"/\\\")\n    kind = slugify(str(artifact.get(\\\"kind\\\") or \\\"artifact\\\"))\n    name = slugify(str(artifact.get(\\\"name\\\") or artifact.get(\\\"id\\\") or kind))\n    suffix = str(artifact.get(\\\"suffix\\\") or default_suffix)\n    if not suffix.startswith(\\\".\\\"):\n        suffix = \\\".\\\" + suffix\n    subdir = kind if layout == \\\"by_kind\\\" else \\\"\\\"\n    filename = f\\\"{name}{suffix}\\\"\n    if layout == \\\"flat\\\":\n        return filename\n    if layout == \\\"by_kind\\\":\n        return f\\\"{subdir}/{filename}\\\"\n    raise ValueError(f\\\"Unknown layout: {layout!r}\\\")\n\n\ndef plan_exports(\n    artifacts: Iterable[Mapping[str, Any]],\n    *,\n    layout: str = \\\"by_kind\\\",\n) -> Tuple[List[ExportedFile], Dict[str, Any]]:\n    \\\"\\\"\\\"Convert artifacts into ExportedFile entries plus a manifest dict.\\\"\\\"\\\"\n    files: List[ExportedFile] = []\n    manifest_items: List[Dict[str, Any]] = []\n    for a in artifacts:\n        text = a.get(\\\"text\\\")\n        if text is None:\n            text = a.get(\\\"content\\\", \\\"\\\")\n        mode = str(a.get(\\\"mode\\\") or (\\\"json\\\" if a.get(\\\"is_json\\\") else \\\"text\\\"))\n        relpath = resolve_relpath(a, layout=layout, default_suffix=str(a.get(\\\"suffix\\\") or \\\".txt\\\"))\n        if mode == \\\"json\\\" and not isinstance(text, str):\n            content = dumps_json(text)\n        elif mode == \\\"json\\\":\n            content = dumps_json(json.loads(text)) if text.strip().startswith((\\\"{\\\", \\\"[\\\")) else dumps_json(text)\n        else:\n            content = normalize_text(str(text))\n        files.append(ExportedFile(relpath=relpath, content=content, mode=mode))\n        manifest_items.append(\n            {\n                \\\"relpath\\\": relpath,\n                \\\"kind\\\": a.get(\\\"kind\\\"),\n                \\\"name\\\": a.get(\\\"name\\\"),\n                \\\"sha256_8\\\": _sha8(content),\n                \\\"bytes\\\": len(content.encode(\\\"utf-8\\\")),\n            }\n        )\n    manifest = {\\\"version\\\": 1, \\\"layout\\\": layout, \\\"files\\\": sorted(manifest_items, key=lambda x: x[\\\"relpath\\\"])}\n    return sorted(files, key=lambda f: f.relpath), manifest\n\n\ndef _atomic_write_text(path: Path, content: str) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    tmp = path.with_name(path.name + \\\".tmp\\\")\n    tmp.write_text(content, encoding=\\\"utf-8\\\", newline=\\\"\\\\n\\\")\n    os.replace(tmp, path)\n\n\ndef export(\n    artifacts: Iterable[Mapping[str, Any]],\n    out_dir: Union[str, Path],\n    *,\n    layout: str = \\\"by_kind\\\",\n    write_manifest: bool = True,\n    manifest_name: str = \\\"manifest.json\\\",\n) -> List[Path]:\n    \\\"\\\"\\\"Write artifacts to disk deterministically and return written paths.\\\"\\\"\\\"\n    out = Path(out_dir)\n    files, manifest = plan_exports(artifacts, layout=layout)\n    written: List[Path] = []\n    for f in files:\n        p = out / f.relpath\n        _atomic_write_text(p, f.content)\n        written.append(p)\n    if write_manifest:\n        mp = out / manifest_name\n        _atomic_write_text(mp, dumps_json(manifest))\n        written.append(mp)\n    return sorted(written)\n\"\"\".strip(\"\\n\")\n\n# ensure <=150 lines\nlines = code.splitlines()\nlen(lines), lines[:5], lines[-5:]\n",
+      "container_id": "cntr_694b48372d7081909f70f3661941a95b001f3dc92161f15d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(142,\n ['\"\"\"Export utilities for deterministic artifact emission.',\n  '',\n  'This module writes refactored artifacts into stable on-disk layouts with',\n  'predictable filenames and normalized file contents.',\n  '\"\"\"'],\n ['    if write_manifest:',\n  '        mp = out / manifest_name',\n  '        _atomic_write_text(mp, dumps_json(manifest))',\n  '        written.append(mp)',\n  '    return sorted(written)'])"
+        }
+      ]
+    },
+    {
+      "id": "rs_0fe2f10bc5ddc36400694b48aa062481978e21aff9bc7a3cde",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0fe2f10bc5ddc36400694b48aa7a9c81978dd89d4e1ec79ba0",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\ntarget_path = Path('/mnt/data').joinpath('src/refactor_modularize/export.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [code]\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/refactor_modularize/export.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b48372d7081909f70f3661941a95b001f3dc92161f15d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/refactor_modularize/export.py\nDIR_STATE:[\"src/refactor_modularize/__init__.py\", \"src/refactor_modularize/artifacts.py\", \"src/refactor_modularize/cli.py\", \"src/refactor_modularize/export.py\", \"src/refactor_modularize/refactor.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0fe2f10bc5ddc36400694b48ad292c8197ae661e7ff40a5d8d",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/refactor_modularize/export.py` with deterministic export utilities (stable slug/paths, normalized text/JSON, atomic writes, and a reproducible manifest) to emit refactored artifacts into predictable on-disk layouts."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

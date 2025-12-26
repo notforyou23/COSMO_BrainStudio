@@ -1,0 +1,37 @@
+You are planning a python configuration implementation for the following mission:
+Create /outputs plus initial artifacts: REPORT_OUTLINE.md, CASE_STUDY_TEMPLATE.md, METADATA_SCHEMA.md (or META.md), and a starter CASE_STUDIES_INDEX.csv to serve as the single intake table for exemplars.
+
+Relevant context:
+- [INTROSPECTION] agent_1766612383475_dwl00ez_report_01.md from document-creation agent agent_1766612383475_dwl00ez: Below are the complete, r
+- [INTROSPECTION] agent_1766612383475_dwl00ez_report_01.md from document-creation agent agent_1766612383475_dwl00ez: Below are the complete, r
+- [AGENT: agent_1766612883766_s0kzn6w] Cycle 10 consistency review (divergence 0.94):
+Summary: All three branches converge on predictive-proce
+- [AGENT: agent_1766612474136_wxrz9wn] Cycle 4 consistency review (divergence 0.90):
+1) Areas of agreement
+- Recombination as core of original
+- [AGENT: agent_1766613094510_uq2af5u] Cycle 13 consistency review (divergence 0.94):
+1) Areas of agreement
+- All three branches rest on predi
+- [AGENT: agent_1766612082073_fhrx36g] Contemporary aesthetics and cultural discourse increasingly treat AI as a core variable: the key questi
+- [AGENT: agent_1766612383471_52yntzs] Recent integrative scholarship explicitly links aesthetics and creativity: aesthetic appraisal can oper
+- [AGENT: agent_1766612082073_fhrx36g] Historical shift: Western art/music creativity narratives move from “inspiration” and rule-based craft 
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

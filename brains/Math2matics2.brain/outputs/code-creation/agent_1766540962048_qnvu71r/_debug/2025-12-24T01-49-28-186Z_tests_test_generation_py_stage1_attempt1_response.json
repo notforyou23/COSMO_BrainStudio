@@ -1,0 +1,56 @@
+{
+  "content": "Created `tests/test_generation.py` with pytest-based end-to-end tests that run the Mathematics coverage CLI into a temp output directory and verify required files exist, CSV headers and taxonomy-derived row counts match expectations, and both artifacts are deterministic across repeated runs.",
+  "reasoning": "",
+  "responseId": "resp_0c9da2396d28974a00694b46f83e6c819093a039928c222836",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3612,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2068,
+    "output_tokens_details": {
+      "reasoning_tokens": 662
+    },
+    "total_tokens": 5680
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0c9da2396d28974a00694b46f8eacc819084e1eacbf5f9b648",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c9da2396d28974a00694b470286c0819095232a5d7531db4e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_generation.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\nimport csv\nimport importlib\nfrom pathlib import Path\n\nimport pytest\n\n\ndef _import_first(*names: str):\n    for name in names:\n        try:\n            return importlib.import_module(name)\n        except ModuleNotFoundError:\n            continue\n    raise ModuleNotFoundError(f\"Could not import any of: {names}\")\n\n\ndef _run_cli(output_dir: Path):\n    cli = _import_first(\"src.math_coverage_cli\", \"math_coverage_cli\")\n    output_dir.mkdir(parents=True, exist_ok=True)\n\n    args = [\"--output-dir\", str(output_dir)]\n    if hasattr(cli, \"main\") and callable(cli.main):\n        cli.main(args)\n    elif hasattr(cli, \"cli_main\") and callable(cli.cli_main):\n        cli.cli_main(args)\n    elif hasattr(cli, \"run\") and callable(cli.run):\n        cli.run(args)\n    else:\n        raise AssertionError(\"CLI module must expose main(argv) (or cli_main/run) callable\")\n\n\ndef _expected_row_count():\n    tax = _import_first(\"src.math_taxonomy\", \"math_taxonomy\")\n\n    artifact_types = getattr(tax, \"ARTIFACT_TYPES\", None) or getattr(tax, \"artifact_types\", None)\n    if artifact_types is None and hasattr(tax, \"get_artifact_types\"):\n        artifact_types = tax.get_artifact_types()\n    if not artifact_types:\n        raise AssertionError(\"math_taxonomy must define ARTIFACT_TYPES (or get_artifact_types())\")\n\n    # Domains/subtopics structure is intentionally flexible; tests compute count from taxonomy.\n    domains = None\n    if hasattr(tax, \"DOMAINS\"):\n        domains = tax.DOMAINS\n    elif hasattr(tax, \"TAXONOMY\"):\n        domains = tax.TAXONOMY\n    elif hasattr(tax, \"get_taxonomy\"):\n        domains = tax.get_taxonomy()\n    if not domains:\n        raise AssertionError(\"math_taxonomy must define DOMAINS/TAXONOMY (or get_taxonomy())\")\n\n    pairs = []\n    if isinstance(domains, dict):\n        # {domain: [subtopics] or {subtopic: ...}}\n        for d, subs in domains.items():\n            if isinstance(subs, dict):\n                subs = list(subs.keys())\n            for s in subs:\n                pairs.append((str(d), str(s)))\n    else:\n        for item in domains:\n            if isinstance(item, dict):\n                d = item.get(\"domain\") or item.get(\"name\")\n                subs = item.get(\"subtopics\") or item.get(\"topics\") or item.get(\"children\")\n                if isinstance(subs, dict):\n                    subs = list(subs.keys())\n            else:\n                raise AssertionError(\"Unsupported taxonomy element type\")\n            if not d or not subs:\n                raise AssertionError(\"Each taxonomy domain must have a name and non-empty subtopics\")\n            for s in subs:\n                pairs.append((str(d), str(s)))\n\n    return len(pairs) * len(list(artifact_types))\n\n\ndef _read_csv(path: Path):\n    with path.open(newline=\"\", encoding=\"utf-8\") as f:\n        reader = csv.DictReader(f)\n        rows = list(reader)\n    return reader.fieldnames, rows\n\"\"\")\n\nchunks.append(\"\"\"\ndef test_cli_generates_expected_outputs(tmp_path: Path):\n    out = tmp_path / \"outputs\"\n    _run_cli(out)\n\n    cov = out / \"coverage_matrix.csv\"\n    evl = out / \"eval_loop.md\"\n    assert cov.exists(), \"coverage_matrix.csv was not generated\"\n    assert evl.exists(), \"eval_loop.md was not generated\"\n    assert cov.stat().st_size > 0\n    assert evl.stat().st_size > 0\n\"\"\")\n\nchunks.append(\"\"\"\ndef test_coverage_matrix_headers_and_row_count(tmp_path: Path):\n    out = tmp_path / \"outputs\"\n    _run_cli(out)\n\n    cov = out / \"coverage_matrix.csv\"\n    fieldnames, rows = _read_csv(cov)\n\n    required = {\"domain\", \"subtopic\", \"artifact_type\", \"status\", \"cross_links\"}\n    assert fieldnames is not None\n    assert required.issubset(set(fieldnames)), f\"Missing required headers: {required - set(fieldnames)}\"\n\n    expected = _expected_row_count()\n    assert len(rows) == expected, f\"Expected {expected} rows from taxonomy, got {len(rows)}\"\n\n    # Ensure placeholders are present (not null-ish) to support downstream agents.\n    for r in rows[: min(10, len(rows))]:\n        assert (r.get(\"status\") or \"\").strip() != \"\"\n        assert r.get(\"cross_links\") is not None\n\"\"\")\n\nchunks.append(\"\"\"\ndef test_deterministic_output_across_runs(tmp_path: Path):\n    out1 = tmp_path / \"o1\"\n    out2 = tmp_path / \"o2\"\n    _run_cli(out1)\n    _run_cli(out2)\n\n    b1 = (out1 / \"coverage_matrix.csv\").read_bytes().replace(b\"\\\\r\\\\n\", b\"\\\\n\")\n    b2 = (out2 / \"coverage_matrix.csv\").read_bytes().replace(b\"\\\\r\\\\n\", b\"\\\\n\")\n    assert b1 == b2, \"coverage_matrix.csv should be byte-stable across runs\"\n\n    m1 = (out1 / \"eval_loop.md\").read_text(encoding=\"utf-8\").replace(\"\\\\r\\\\n\", \"\\\\n\")\n    m2 = (out2 / \"eval_loop.md\").read_text(encoding=\"utf-8\").replace(\"\\\\r\\\\n\", \"\\\\n\")\n    assert m1 == m2, \"eval_loop.md should be stable across runs\"\n    assert \"5-cycle\" in m1 or \"5 cycle\" in m1 or \"Cycle 5\" in m1\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:tests/test_generation.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b46a6881c81909c860794a76234b305db56a8985c57db",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_generation.py\nDIR_STATE:[\"tests/test_generation.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0c9da2396d28974a00694b470ef6988190af3694c7d2c4ff15",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/test_generation.py` with pytest-based end-to-end tests that run the Mathematics coverage CLI into a temp output directory and verify required files exist, CSV headers and taxonomy-derived row counts match expectations, and both artifacts are deterministic across repeated runs."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

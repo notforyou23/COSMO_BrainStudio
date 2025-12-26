@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/stable_json.py` with canonical, deterministic JSON serialization via recursive normalization (including strict finite-float handling, configurable float rounding, and stable key ordering) plus convenient `dumps/dump/loads/canonicalize` APIs for repeatable benchmark artifacts.",
+  "reasoning": "",
+  "responseId": "resp_0f06a9b9655aea55006949bdaabc848197a64ccaf7c7835621",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2864,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1346,
+    "output_tokens_details": {
+      "reasoning_tokens": 324
+    },
+    "total_tokens": 4210
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0f06a9b9655aea55006949bdab7908819786863caecb8203f9",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0f06a9b9655aea55006949bdb2af748197ba1fe77467988828",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, math\n\ntarget_path = Path('/mnt/data').joinpath('src/stable_json.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Stable, deterministic JSON serialization utilities.\n\nThis module is used by benchmarks to produce repeatable artifacts and to\nserialize results in a canonical form (stable key ordering, float\nnormalization, consistent formatting).\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport json\nimport math\nfrom typing import Any, Mapping, Sequence, Union, IO, Optional\n\n\nJsonLike = Union[None, bool, int, float, str, Sequence[\"JsonLike\"], Mapping[str, \"JsonLike\"]]\"\"\",\n\"\"\"def _normalize_float(x: float, precision: int) -> float:\n    \\\"\\\"\\\"Normalize floats for stable cross-run JSON output.\n\n    - Rounds to a configurable significant decimal precision.\n    - Converts -0.0 to 0.0.\n    - Disallows NaN/Infinity (JSON-incompatible in strict mode).\n    \\\"\\\"\\\"\n    if not math.isfinite(x):\n        raise ValueError(f\"Non-finite float is not JSON compatible: {x!r}\")\n    if precision is None:\n        y = float(x)\n    else:\n        y = round(float(x), int(precision))\n    # Avoid negative zero which can appear after rounding.\n    return 0.0 if y == 0.0 else y\"\"\",\n\"\"\"def normalize(obj: Any, *, float_precision: int = 15) -> Any:\n    \\\"\\\"\\\"Recursively normalize a JSON-like structure for canonical serialization.\\\"\\\"\\\"\n    if obj is None or isinstance(obj, (bool, int, str)):\n        return obj\n    if isinstance(obj, float):\n        return _normalize_float(obj, float_precision)\n    if isinstance(obj, (list, tuple)):\n        return [normalize(v, float_precision=float_precision) for v in obj]\n    if isinstance(obj, dict):\n        # JSON object keys must be strings; coerce for stability.\n        return {\n            str(k): normalize(v, float_precision=float_precision)\n            for k, v in obj.items()\n        }\n    # Allow callers to pass objects implementing __json__ or similar patterns.\n    to_json = getattr(obj, \"__json__\", None)\n    if callable(to_json):\n        return normalize(to_json(), float_precision=float_precision)\n    raise TypeError(f\"Object of type {type(obj).__name__} is not JSON serializable\")\"\"\",\n\"\"\"def dumps(\n    obj: Any,\n    *,\n    float_precision: int = 15,\n    indent: Optional[int] = None,\n    sort_keys: bool = True,\n) -> str:\n    \\\"\\\"\\\"Serialize to a stable JSON string.\n\n    Defaults:\n      - sort_keys=True for canonical key ordering\n      - ensure_ascii=False to preserve unicode deterministically\n      - compact separators when indent is None\n      - allow_nan=False for strict JSON\n    \\\"\\\"\\\"\n    norm = normalize(obj, float_precision=float_precision)\n    if indent is None:\n        separators = (\",\", \":\")\n    else:\n        separators = (\",\", \": \")\n    return json.dumps(\n        norm,\n        sort_keys=sort_keys,\n        indent=indent,\n        ensure_ascii=False,\n        allow_nan=False,\n        separators=separators,\n    )\"\"\",\n\"\"\"def dump(\n    obj: Any,\n    fp: IO[str],\n    *,\n    float_precision: int = 15,\n    indent: Optional[int] = None,\n    sort_keys: bool = True,\n) -> None:\n    \\\"\\\"\\\"Write stable JSON to a file-like object.\\\"\\\"\\\"\n    fp.write(\n        dumps(\n            obj,\n            float_precision=float_precision,\n            indent=indent,\n            sort_keys=sort_keys,\n        )\n    )\"\"\",\n\"\"\"def loads(s: str) -> Any:\n    \\\"\\\"\\\"Parse JSON (thin wrapper around json.loads).\\\"\\\"\\\"\n    return json.loads(s)\"\"\",\n\"\"\"def canonicalize(obj: Any, *, float_precision: int = 15) -> Any:\n    \\\"\\\"\\\"Return a normalized JSON-like structure suitable for stable comparison.\\\"\\\"\\\"\n    return normalize(obj, float_precision=float_precision)\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/stable_json.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949bd7c27f481909eaafa795397fda805ca11b7959e0da0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/stable_json.py\nDIR_STATE:[\"src/determinism_policy.py\", \"src/stable_json.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0f06a9b9655aea55006949bdc2524c8197b09af666efbd9cb0",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/stable_json.py` with canonical, deterministic JSON serialization via recursive normalization (including strict finite-float handling, configurable float rounding, and stable key ordering) plus convenient `dumps/dump/loads/canonicalize` APIs for repeatable benchmark artifacts."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

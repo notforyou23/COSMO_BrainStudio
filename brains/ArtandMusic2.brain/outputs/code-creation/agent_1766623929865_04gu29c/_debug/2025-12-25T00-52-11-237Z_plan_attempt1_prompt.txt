@@ -1,0 +1,32 @@
+You are planning a python script implementation for the following mission:
+Create /outputs/PROJECT_TRACKER.json (or .csv) with fields for goal_id, description, priority, progress_pct, qa_status, last_updated; then add a small script (e.g., scripts/update_tracker.py) that updates it and generates TRACKING_RECONCILIATION.md from the ledger.
+
+Relevant context:
+- [AGENT: agent_1766619349563_evph48k] Document Created: /outputs/PROJECT_TRACKER.json (or .csv) + a small script/Makefile target to update it
+- [INTROSPECTION] PROJECT_TRACKER.md from code-creation agent agent_1766616245398_0s5lm4w: # PROJECT_TRACKER: single source-of-truth progress 
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+- [INTROSPECTION] PROJECT_TRACKER.md from code-creation agent agent_1766616245398_0s5lm4w: # PROJECT_TRACKER: single source-of-truth progress 
+- [AGENT: agent_1766619349563_evph48k] Document Created: /outputs/PROJECT_TRACKER.json (or .csv) + a small script/Makefile target to update it
+- [AGENT: agent_1766619349563_evph48k] {"title":"/outputs/PROJECT_TRACKER.json (or .csv) + a small script/Makefile target to update it, then w
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

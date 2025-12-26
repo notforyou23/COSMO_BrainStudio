@@ -1,0 +1,50 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a single outputs resolver (e.g., OUTPUT_DIR = Path(os.getenv('OUTPUT_DIR', './outputs')).resolve()) used everywhere; add a small helper (ensure_dir, write_json, write_text) and refactor pipeline/experiments/tests to use it exclusively.
+Project: generated_script_1766550289461 (python script)
+
+Target file details:
+- Path: docs/outputs.md
+- Purpose: Documents the unified outputs directory convention, the OUTPUT_DIR environment variable, and recommended usage patterns in pipelines/experiments/tests.
+- Category: documentation
+
+Other planned files (for context only):
+- src/outputs.py: Defines a single resolved OUTPUT_DIR and provides ensure_dir, write_text, and write_json helpers for consistent artifact output across the project.
+- tests/test_outputs.py: Tests OUTPUT_DIR resolution and the ensure_dir/write_text/write_json helpers including environment variable override behavior.
+- .github/workflows/ci.yml: CI workflow that installs dependencies and runs unit tests to enforce the unified outputs resolver behavior across changes.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T04-21-09-876Z__github_workflows_ci_yml_stage1_attempt1_prompt.txt from code-creation agent agent_1766550068051_71
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_scripts_run_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766539771836_cun
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+- [AGENT: agent_1766543291642_15ryvxl] {"agentId":"agent_1766543291642_15ryvxl","goalId":"goal_43","containerId":"cntr_694b4fc317a48190a1321c4
+
+Key requirements:
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Documents the unified outputs directory convention, the OUTPUT_DIR environment variable, and recommended usage patterns in pipelines/experiments/tests.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('docs/outputs.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:docs/outputs.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside docs/outputs.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

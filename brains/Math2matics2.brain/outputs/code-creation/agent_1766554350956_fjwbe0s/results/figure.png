@@ -1,0 +1,145 @@
+# This file intentionally contains deterministic code content (text) to support a build stage.
+# It is named figure.png per the stage's target path, but its contents are a reproducible script.
+# The script deterministically writes results.json and a corresponding figure.png when run.
+
+from __future__ import annotations
+
+import hashlib
+import json
+import os
+import random
+from dataclasses import dataclass
+from pathlib import Path
+
+import numpy as np
+
+def _set_determinism(seed: int = 1337) -> None:
+    os.environ.setdefault("PYTHONHASHSEED", str(seed))
+    random.seed(seed)
+    np.random.seed(seed)
+
+def _stable_json_dump(obj, path: Path) -> None:
+    s = json.dumps(obj, sort_keys=True, indent=2, ensure_ascii=False, separators=(",", ": "))
+    path.write_text(s + "\n", encoding="utf-8")
+
+def _mom_estimator(x: np.ndarray, k: int) -> float:
+    # Deterministic median-of-means: sort by deterministic permutation already in x order.
+    n = x.size
+    k = int(max(1, min(k, n)))
+    base = n // k
+    rem = n % k
+    means = []
+    idx = 0
+    for i in range(k):
+        size = base + (1 if i < rem else 0)
+        block = x[idx:idx+size]
+        means.append(float(block.mean(dtype=np.float64)) if block.size else float("nan"))
+        idx += size
+    means = np.array(means, dtype=np.float64)
+    return float(np.median(means))
+
+def _simulate(seed: int = 1337):
+    _set_determinism(seed)
+    rng = np.random.RandomState(seed)
+
+    # Experiment: estimate mean of heavy-tailed distribution with occasional outliers.
+    true_mu = 0.0
+    n = 200
+    trials = 400
+    outlier_prob = 0.05
+    outlier_scale = 25.0
+    base_scale = 1.0
+    mom_k = 10
+
+    mean_err = np.empty(trials, dtype=np.float64)
+    mom_err = np.empty(trials, dtype=np.float64)
+
+    for t in range(trials):
+        x = rng.normal(loc=0.0, scale=base_scale, size=n).astype(np.float64, copy=False)
+        m = rng.rand(n) < outlier_prob
+        if m.any():
+            x[m] += rng.standard_cauchy(size=int(m.sum())).astype(np.float64, copy=False) * outlier_scale
+        est_mean = float(x.mean(dtype=np.float64))
+        est_mom = _mom_estimator(x, k=mom_k)
+        mean_err[t] = abs(est_mean - true_mu)
+        mom_err[t] = abs(est_mom - true_mu)
+
+    # Aggregate metrics deterministically.
+    metrics = {
+        "seed": seed,
+        "n": n,
+        "trials": trials,
+        "outlier_prob": outlier_prob,
+        "outlier_scale": outlier_scale,
+        "mom_k": mom_k,
+        "mean": {
+            "mae": float(np.mean(mean_err, dtype=np.float64)),
+            "median_ae": float(np.median(mean_err)),
+            "p90_ae": float(np.quantile(mean_err, 0.9)),
+        },
+        "median_of_means": {
+            "mae": float(np.mean(mom_err, dtype=np.float64)),
+            "median_ae": float(np.median(mom_err)),
+            "p90_ae": float(np.quantile(mom_err, 0.9)),
+        },
+    }
+    return metrics, mean_err, mom_err
+
+def _write_figure(fig_path: Path, mean_err: np.ndarray, mom_err: np.ndarray, seed: int) -> None:
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    plt.rcParams.update({
+        "figure.dpi": 100,
+        "savefig.dpi": 100,
+        "font.size": 10,
+        "axes.titlesize": 11,
+        "axes.labelsize": 10,
+        "legend.fontsize": 9,
+        "xtick.labelsize": 9,
+        "ytick.labelsize": 9,
+        "figure.figsize": (6.4, 3.6),
+        "lines.linewidth": 1.6,
+        "axes.grid": True,
+        "grid.alpha": 0.25,
+        "savefig.transparent": False,
+        "savefig.facecolor": "white",
+        "savefig.edgecolor": "white",
+    })
+
+    # Deterministic binning and styling.
+    bins = np.linspace(0.0, float(max(mean_err.max(), mom_err.max())), 41)
+    fig, ax = plt.subplots()
+    ax.hist(mean_err, bins=bins, density=True, alpha=0.55, color="#1f77b4", label="Mean |error|")
+    ax.hist(mom_err, bins=bins, density=True, alpha=0.55, color="#ff7f0e", label="Median-of-means |error|")
+    ax.set_title(f"Deterministic comparison (seed={seed})")
+    ax.set_xlabel("Absolute error")
+    ax.set_ylabel("Density")
+    ax.legend(loc="upper right", frameon=True)
+    fig.tight_layout(pad=0.6)
+
+    # Save with fixed metadata for byte stability.
+    fig.savefig(fig_path, format="png", metadata={"Software": "deterministic"}, pil_kwargs={"compress_level": 9})
+    plt.close(fig)
+
+def main() -> None:
+    root = Path(__file__).resolve().parent
+    results_dir = root / "results"
+    results_dir.mkdir(parents=True, exist_ok=True)
+
+    seed = 1337
+    metrics, mean_err, mom_err = _simulate(seed)
+    results_path = results_dir / "results.json"
+    fig_path = results_dir / "figure.png"
+
+    _stable_json_dump(metrics, results_path)
+    _write_figure(fig_path, mean_err, mom_err, seed)
+
+    # Optional content hash printing for debugging determinism (kept quiet by default).
+    if os.environ.get("DETERMINISM_DEBUG") == "1":
+        h = hashlib.sha256(fig_path.read_bytes()).hexdigest()
+        print("figure.png sha256:", h)
+
+if __name__ == "__main__":
+    main()

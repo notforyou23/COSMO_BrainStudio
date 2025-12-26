@@ -1,0 +1,173 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "outputs/METADATA_SCHEMA.json",
+  "title": "Outputs Artifact Metadata Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "artifact_id",
+    "title",
+    "artifact_type",
+    "created_at",
+    "authors",
+    "files",
+    "rights"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Version of this metadata schema used by the artifact.",
+      "pattern": "^\d+\.\d+\.\d+$",
+      "default": "1.0.0"
+    },
+    "artifact_id": {
+      "type": "string",
+      "description": "Stable unique identifier for the artifact (suggested: slug or UUID).",
+      "minLength": 1
+    },
+    "title": { "type": "string", "minLength": 1 },
+    "artifact_type": {
+      "type": "string",
+      "description": "Artifact category/type.",
+      "enum": [
+        "report",
+        "case_study",
+        "dataset",
+        "figure",
+        "table",
+        "notebook",
+        "code",
+        "documentation",
+        "other"
+      ]
+    },
+    "description": { "type": "string" },
+    "created_at": {
+      "type": "string",
+      "description": "ISO 8601 datetime in UTC (e.g., 2025-01-31T12:34:56Z).",
+      "pattern": "^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$"
+    },
+    "updated_at": {
+      "type": "string",
+      "description": "ISO 8601 datetime in UTC.",
+      "pattern": "^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$"
+    },
+    "version": {
+      "type": "string",
+      "description": "Artifact content version (recommended: SemVer)."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "review", "final", "archived"]
+    },
+    "authors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "affiliation": { "type": "string" },
+          "orcid": {
+            "type": "string",
+            "description": "ORCID identifier (format: 0000-0000-0000-0000).",
+            "pattern": "^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$"
+          },
+          "email": { "type": "string", "format": "email" }
+        }
+      }
+    },
+    "tags": { "type": "array", "items": { "type": "string" } },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project": { "type": "string" },
+        "repository": { "type": "string" },
+        "commit": { "type": "string" },
+        "inputs": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "files": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Files that constitute or are produced by this artifact.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Project-relative path to the file."
+          },
+          "role": {
+            "type": "string",
+            "enum": ["primary", "supporting", "source", "derived"]
+          },
+          "mime_type": { "type": "string" },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-fA-F0-9]{64}$"
+          }
+        }
+      }
+    },
+    "rights": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Rights and licensing information, including required linkage to the rights checklist and log.",
+      "required": ["license", "rights_log_path", "checklist_path"],
+      "properties": {
+        "license": {
+          "type": "string",
+          "description": "SPDX identifier if possible (e.g., CC-BY-4.0, MIT) or a clear custom license name.",
+          "minLength": 1
+        },
+        "copyright_owner": { "type": "string" },
+        "attribution": { "type": "string" },
+        "permissions_summary": {
+          "type": "string",
+          "description": "Brief summary of permission basis (e.g., created in-house, licensed, public domain, fair use rationale)."
+        },
+        "checklist_path": {
+          "type": "string",
+          "const": "outputs/RIGHTS_AND_LICENSING_CHECKLIST.md",
+          "description": "Project-relative path to the rights & licensing checklist (must be present)."
+        },
+        "rights_log_path": {
+          "type": "string",
+          "const": "outputs/RIGHTS_LOG.csv",
+          "description": "Project-relative path to the rights log CSV (must be present)."
+        },
+        "third_party_materials": {
+          "type": "array",
+          "description": "Any third-party components included or referenced by this artifact; each entry should map to a RIGHTS_LOG.csv row.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["rights_log_entry_id", "material_description", "source_url", "permission_status"],
+            "properties": {
+              "rights_log_entry_id": {
+                "type": "string",
+                "description": "Identifier matching the 'entry_id' (or equivalent) column in outputs/RIGHTS_LOG.csv."
+              },
+              "material_description": { "type": "string" },
+              "source_url": { "type": "string" },
+              "creator": { "type": "string" },
+              "license": { "type": "string" },
+              "permission_status": {
+                "type": "string",
+                "enum": ["cleared", "pending", "restricted", "unknown"]
+              },
+              "notes": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

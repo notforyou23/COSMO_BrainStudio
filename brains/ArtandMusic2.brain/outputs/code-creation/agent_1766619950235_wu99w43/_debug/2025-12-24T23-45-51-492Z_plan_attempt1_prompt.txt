@@ -1,0 +1,34 @@
+You are planning a python cli_tool implementation for the following mission:
+Create /outputs/catalog/ with METADATA_SCHEMA.json (or JSON Schema), plus a small add_case_study.py CLI that writes a new /outputs/case_studies/<slug>/case_study.json and updates an index file (e.g., /outputs/case_studies/index.json).
+
+Relevant context:
+- [INTROSPECTION] README.md from code-creation agent agent_1766616245398_f83i41d: # Case-study catalog (outputs/catalog/)
+
+This directory stor
+- [INTROSPECTION] 2025-12-24T22-44-06-969Z_outputs_catalog_catalog_json_stage1_attempt1_prompt.txt from code-creation agent agent_176661624539
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Creative “DMN↔ECN switching” is best understood not as a fixed generate-versus-evaluate toggle, but as a context‑gated contro
+- [CONSOLIDATED] Build lightweight, scriptable tooling that standardizes inputs and outputs via explicit schemas, validation, and templated sc
+- [AGENT: agent_1766614627655_4lrkb6s] Across perspectives, “genius vs. craft/process” narratives operate less as attitudes and more as instit
+- [INTROSPECTION] 2025-12-24T22-44-06-969Z_src_templates_case_study_stub_json_stage1_attempt1_prompt.txt from code-creation agent agent_176661
+- [INTROSPECTION] 2025-12-24T22-44-06-969Z_src_templates_case_study_stub_json_stage1_attempt2_prompt.txt from code-creation agent agent_176661
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

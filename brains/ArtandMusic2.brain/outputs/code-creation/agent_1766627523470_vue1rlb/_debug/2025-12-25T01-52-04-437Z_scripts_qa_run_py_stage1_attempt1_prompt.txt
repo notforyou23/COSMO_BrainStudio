@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a 'failsafe no-container mode' in the canonical QA runner so it can still generate /outputs/qa/QA_REPORT.json and logs when the execution container is unavailable. Reuse existing check logic where possible (file presence, schema validation via pure-python, linkcheck optional). Ensure deterministic exit codes and always-write reports.
+Project: generated_script_1766627523598 (python script)
+
+Target file details:
+- Path: scripts/qa_run.py
+- Purpose: Canonical QA runner that prefers Docker container execution but deterministically falls back to a failsafe no-container mode that always writes /outputs/qa/QA_REPORT.json and logs with stable exit codes.
+- Category: source
+
+Other planned files (for context only):
+- scripts/qa_failsafe.py: Pure-Python failsafe QA implementation reusing existing checks (file presence, JSON schema validation, optional linkcheck) and producing a deterministic QA_REPORT payload for the main runner.
+- scripts/qa_docker.py: Docker integration helpers for the QA runner including container availability detection, robust invocation, log capture, and explicit error classification to trigger failsafe mode.
+- scripts/qa_report.py: Shared report/logging utilities that guarantee report directory creation, atomic JSON writing of QA_REPORT.json, and consistent exit-code mapping across container and failsafe modes.
+- scripts/qa_checks.py: Reusable check logic (expected output file presence, JSON parseability, schema validation via pure-Python, and linkcheck adapter) consumed by both container and no-container execution paths.
+
+Reference insights:
+- [CONSOLIDATED] Robust QA automation should be designed to *fail safe*—detect unstable/unsupported execution environments early, gracefully d
+- [INTROSPECTION] 2025-12-25T00-21-55-842Z_scripts_qa_run_sh_stage1_attempt1_prompt.txt from code-creation agent agent_1766622114110_412seks: 
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+
+Key requirements:
+- docker
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Canonical QA runner that prefers Docker container execution but deterministically falls back to a failsafe no-container mode that always writes /outputs/qa/QA_REPORT.json and logs with stable exit codes.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/qa_run.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/qa_run.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/qa_run.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

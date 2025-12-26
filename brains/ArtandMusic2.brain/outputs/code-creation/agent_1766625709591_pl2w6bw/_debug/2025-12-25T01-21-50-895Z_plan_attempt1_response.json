@@ -1,0 +1,37 @@
+{
+  "content": "[\n  {\n    \"path\": \"scripts/container_health_smoketest.py\",\n    \"description\": \"Single-file smoke test runner that captures full stdout/stderr, logs runtime environment and resource stats, implements retries with backoff, and enforces hard escalation when expected execution artifacts are missing.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/minimal_failing_case.py\",\n    \"description\": \"Reproducible minimal failing case script that can deterministically simulate common failure modes (nonzero exit, timeout, missing artifacts) to validate instrumentation and escalation behavior.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/artifact_expectations.json\",\n    \"description\": \"Declarative list of required output artifacts and validation rules used by the smoke test to decide success versus hard escalation when files are missing.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"docker/Dockerfile\",\n    \"description\": \"Dockerfile for a minimal, reproducible execution environment that runs the smoke test and produces captured logs and artifacts for debugging container health issues.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"docker/docker-compose.yml\",\n    \"description\": \"Docker Compose configuration to run the smoke test in a controlled container with configurable resource limits, volumes for artifacts, and environment overrides.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"docker/entrypoint.sh\",\n    \"description\": \"Container entrypoint that initializes directories, invokes the smoke test with consistent defaults, and ensures logs/artifacts are persisted to mounted volumes.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"requirements.txt\",\n    \"description\": \"Pinned Python dependencies required for resource and environment instrumentation (and consistent behavior across runs).\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"README.md\",\n    \"description\": \"Documentation describing how to run the container-health smoke test locally and via Docker, interpret logs, configure retries/backoff, and reproduce the minimal failing case.\",\n    \"category\": \"documentation\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_0c043a023e91317400694c91aef7d48196840f648f94cf704e",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 681,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 440,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 1121
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "msg_0c043a023e91317400694c91af33288196ac631aa4ea32bcbd",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"scripts/container_health_smoketest.py\",\n    \"description\": \"Single-file smoke test runner that captures full stdout/stderr, logs runtime environment and resource stats, implements retries with backoff, and enforces hard escalation when expected execution artifacts are missing.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/minimal_failing_case.py\",\n    \"description\": \"Reproducible minimal failing case script that can deterministically simulate common failure modes (nonzero exit, timeout, missing artifacts) to validate instrumentation and escalation behavior.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/artifact_expectations.json\",\n    \"description\": \"Declarative list of required output artifacts and validation rules used by the smoke test to decide success versus hard escalation when files are missing.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"docker/Dockerfile\",\n    \"description\": \"Dockerfile for a minimal, reproducible execution environment that runs the smoke test and produces captured logs and artifacts for debugging container health issues.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"docker/docker-compose.yml\",\n    \"description\": \"Docker Compose configuration to run the smoke test in a controlled container with configurable resource limits, volumes for artifacts, and environment overrides.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"docker/entrypoint.sh\",\n    \"description\": \"Container entrypoint that initializes directories, invokes the smoke test with consistent defaults, and ensures logs/artifacts are persisted to mounted volumes.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"requirements.txt\",\n    \"description\": \"Pinned Python dependencies required for resource and environment instrumentation (and consistent behavior across runs).\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"README.md\",\n    \"description\": \"Documentation describing how to run the container-health smoke test locally and via Docker, interpret logs, configure retries/backoff, and reproduce the minimal failing case.\",\n    \"category\": \"documentation\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

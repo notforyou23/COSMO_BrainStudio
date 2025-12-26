@@ -1,0 +1,56 @@
+{
+  "content": "Created `docs/e2e/README_e2e_sections/70_faq.md` as a compact, reusable FAQ covering common E2E failure modes, practical fixes, and the rationale behind key documentation/workflow decisions for consistent referencing from `README_e2e.md`.",
+  "reasoning": "",
+  "responseId": "resp_0b2b7608df8a5913006949c99fa6e881968d353c800c1017b3",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3099,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1487,
+    "output_tokens_details": {
+      "reasoning_tokens": 126
+    },
+    "total_tokens": 4586
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0b2b7608df8a5913006949c9a0609c8196b5e0182cc6f430ea",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0b2b7608df8a5913006949c9a4365881969b35d555be0cb5f1",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('docs/e2e/README_e2e_sections/70_faq.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"# FAQ (E2E)\n\nThis section collects common end-to-end (E2E) run issues, quick fixes, and a few “why we do it this way” decisions used across the E2E docs.\n\n## Runs fail immediately with “missing configuration” / “key not found”\n**Cause:** Required config values are absent, misnamed, or loaded from the wrong location.\n\n**Fix:**\n- Re-check the expected config shape in `README_e2e_sections/20_configuration.md`.\n- Ensure you are running from the repository root (relative-path config discovery is common).\n- Prefer explicit config via environment variables or a single canonical config file to avoid “it works on my machine” drift.\n\n**Rationale:** E2E runs should fail fast on misconfiguration rather than producing partial/ambiguous results.\n\n## CI passes but local runs fail (or vice versa)\n**Cause:** Environment skew (Python version, OS packages, browser/drivers, CUDA, locale, file permissions).\n\n**Fix:**\n- Confirm you match the versions pinned/expected by `README_e2e_sections/10_prerequisites.md`.\n- If the project uses a lockfile/constraints, install from it exactly (don’t “pip install -U …”).\n- Compare environment variables and working directory between CI and local.\n\n**Rationale:** E2E is an integration contract; keeping environments aligned reduces non-actionable noise.\n\n## Tests are flaky (intermittent failures)\n**Cause:** Non-determinism (timing, concurrency, random seeds), shared state, external services, or unstable fixtures.\n\n**Fix:**\n- Ensure each test isolates state (unique temp dirs, no shared output paths).\n- Add deterministic seeds where applicable (random/ML pipelines).\n- Replace sleep-based waits with condition-based waits.\n- Prefer stubbed/local services for E2E when feasible; if real services are required, add retries with backoff only around *idempotent* calls.\n\n**Rationale:** Flaky E2E tests erode trust; stability is more valuable than maximal coverage.\n\n## “Address already in use” / port binding errors\n**Cause:** Previous run left a server/process running, or parallel jobs collide on the same port.\n\n**Fix:**\n- Stop leftover processes and re-run.\n- Use ephemeral ports (port=0) or allocate ports per worker/job.\n- If logs show a “finally/cleanup” was skipped, fix teardown to always execute.\n\n## “Permission denied” when writing artifacts\n**Cause:** Output directory is not writable in the current environment (common in CI containers).\n\n**Fix:**\n- Write outputs under a dedicated artifacts directory inside the workspace (and ensure it exists).\n- Avoid writing into system paths (e.g., `/var`, `/root`) unless explicitly configured.\n\n## E2E runs are slow\n**Cause:** Large downloads, cold caches, unoptimized fixtures, or overly broad scenario selection.\n\n**Fix:**\n- Cache dependencies/models/data between runs where safe and supported by CI.\n- Keep fixtures minimal; prefer generated synthetic data over large real datasets.\n- Run a smaller subset locally when iterating (smoke/sanity scenarios) and reserve full suites for CI/nightly.\n\n**Rationale:** Fast feedback loops reduce overall integration cost.\n\n## “Snapshot” / “golden file” comparisons fail\n**Cause:** Legitimate output changes, non-determinism, or environment-dependent formatting.\n\n**Fix:**\n- Confirm outputs are deterministic (timestamps, ordering, floating point tolerances).\n- If the change is intended, update the snapshot/golden artifacts and document the behavior change in the PR.\n- Normalize outputs (sorted keys, stable formatting) before comparison.\n\n**Rationale:** Golden files are a contract; update them deliberately and review diffs carefully.\n\n## Network-related failures (timeouts, DNS, rate limits)\n**Cause:** External dependency instability or restricted CI networking.\n\n**Fix:**\n- Prefer local test doubles (mock/stub) for third-party services.\n- If the E2E contract requires live calls, add clear timeouts and informative error messages.\n- Make failures actionable: log endpoint, timeout, and request context (without leaking secrets).\n\n## Secret/credential issues\n**Cause:** Missing secrets in environment, wrong scope, or secrets not available in forks/PR contexts.\n\n**Fix:**\n- Ensure secrets are injected via the CI secret store and are not committed to the repo.\n- For PRs from forks, use non-secret “mock mode” or a limited public environment.\n- Validate credential presence early and clearly.\n\n## “It works once, then fails” after re-running\n**Cause:** Persistent state from previous runs (databases, caches, temp files).\n\n**Fix:**\n- Reset state between runs (drop/recreate test DB, clear cache dirs).\n- Use unique run IDs and isolated namespaces for resources.\n- Ensure teardown runs even on failure (finally blocks / fixtures finalizers).\n\n## Where are logs and artifacts?\n**Guideline:**\n- E2E should emit a clear “artifacts directory” path at start/end of the run.\n- Store: runner logs, service logs, screenshots/traces (UI), and the final report.\n- In CI, publish artifacts so failures can be debugged without re-running.\n\n## Why split `README_e2e.md` into reusable sections?\n**Decision rationale:**\n- Keeps shared guidance (prereqs/config/FAQ) consistent across multiple entry points (local runs, CI, troubleshooting).\n- Reduces duplication and makes updates reviewable as focused diffs.\n- Enables linking to the same canonical explanations from scripts, CI configs, and contributor docs.\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:docs/e2e/README_e2e_sections/70_faq.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949c882be7c819088c3caf5ad10e5ac0ab56cad82a1639c",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:docs/e2e/README_e2e_sections/70_faq.md\nDIR_STATE:[\"docs/e2e/README_e2e_sections/00_overview.md\", \"docs/e2e/README_e2e_sections/10_prerequisites.md\", \"docs/e2e/README_e2e_sections/20_configuration.md\", \"docs/e2e/README_e2e_sections/30_running_locally.md\", \"docs/e2e/README_e2e_sections/40_ci_github_actions.md\", \"docs/e2e/README_e2e_sections/50_artifacts_and_logs.md\", \"docs/e2e/README_e2e_sections/60_acceptance_criteria.md\", \"docs/e2e/README_e2e_sections/70_faq.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0b2b7608df8a5913006949c9c95c408196ae8f25f6d9ecd506",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `docs/e2e/README_e2e_sections/70_faq.md` as a compact, reusable FAQ covering common E2E failure modes, practical fixes, and the rationale behind key documentation/workflow decisions for consistent referencing from `README_e2e.md`."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

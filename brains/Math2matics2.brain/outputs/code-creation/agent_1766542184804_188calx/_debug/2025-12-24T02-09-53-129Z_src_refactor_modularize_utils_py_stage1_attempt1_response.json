@@ -1,0 +1,56 @@
+{
+  "content": "Created `src/refactor_modularize/utils.py` as a compact, dependency-free utility module covering filesystem/text IO (including atomic writes), JSON read/write with stable defaults, SHA-256 hashing helpers, slug/timestamp helpers, logger configuration, and a small step-runner for simple pipelines.",
+  "reasoning": "",
+  "responseId": "resp_055bfdbb36838b8800694b4b77037081968452e8dc871173a5",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3276,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1682,
+    "output_tokens_details": {
+      "reasoning_tokens": 119
+    },
+    "total_tokens": 4958
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_055bfdbb36838b8800694b4b77bc308196bef24d1d0d0b5d77",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_055bfdbb36838b8800694b4b7960c48196a8867961cdb15beb",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re, hashlib, logging\ntarget_path = Path('/mnt/data').joinpath('src/refactor_modularize/utils.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\\\n\\\"\\\"\\\"refactor_modularize.utils\n\nSmall, reusable helpers used by artifact-generation scripts.\n\nFocus: filesystem IO, JSON/text convenience, hashing, logging setup, and tiny\npipeline helpers. The module is intentionally dependency-free and stable.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Callable, Iterable, Mapping, MutableMapping, Optional, Sequence, Tuple\nimport hashlib\nimport json\nimport logging\nimport os\nimport re\nimport tempfile\nfrom datetime import datetime, timezone\"\"\")\n\nchunks.append(\"\"\"\\\n# ---------------------------\n# Filesystem + text utilities\n# ---------------------------\n\ndef ensure_dir(path: Path) -> Path:\n    \\\"\\\"\\\"Create *path* as a directory (parents=True). Returns the same path.\\\"\\\"\\\"\n    path.mkdir(parents=True, exist_ok=True)\n    return path\n\n\ndef read_text(path: Path, *, encoding: str = \"utf-8\") -> str:\n    \\\"\\\"\\\"Read a UTF-8 (by default) text file.\\\"\\\"\\\"\n    return path.read_text(encoding=encoding)\n\n\ndef write_text(path: Path, text: str, *, encoding: str = \"utf-8\") -> Path:\n    \\\"\\\"\\\"Write text to *path*, creating parent directories.\\\"\\\"\\\"\n    ensure_dir(path.parent)\n    path.write_text(text, encoding=encoding)\n    return path\n\n\ndef atomic_write_text(path: Path, text: str, *, encoding: str = \"utf-8\") -> Path:\n    \\\"\\\"\\\"Atomically write text by writing to a temp file and os.replace().\\\"\\\"\\\"\n    ensure_dir(path.parent)\n    fd, tmp = tempfile.mkstemp(prefix=path.name + \".\", dir=str(path.parent))\n    try:\n        with os.fdopen(fd, \"w\", encoding=encoding) as f:\n            f.write(text)\n        os.replace(tmp, path)\n    finally:\n        if os.path.exists(tmp):\n            try:\n                os.remove(tmp)\n            except OSError:\n                pass\n    return path\"\"\")\n\nchunks.append(\"\"\"\\\n# -------------\n# JSON utilities\n# -------------\n\ndef read_json(path: Path, *, encoding: str = \"utf-8\") -> Any:\n    \\\"\\\"\\\"Read JSON from a file.\\\"\\\"\\\"\n    return json.loads(read_text(path, encoding=encoding))\n\n\ndef write_json(\n    path: Path,\n    data: Any,\n    *,\n    encoding: str = \"utf-8\",\n    indent: int = 2,\n    sort_keys: bool = True,\n    ensure_ascii: bool = False,\n) -> Path:\n    \\\"\\\"\\\"Write JSON with stable defaults suitable for diffs.\\\"\\\"\\\"\n    text = json.dumps(data, indent=indent, sort_keys=sort_keys, ensure_ascii=ensure_ascii) + \"\\\\n\"\n    return atomic_write_text(path, text, encoding=encoding)\"\"\")\n\nchunks.append(\"\"\"\\\n# ----------------\n# Hashing utilities\n# ----------------\n\ndef sha256_bytes(data: bytes) -> str:\n    \\\"\\\"\\\"Return hex sha256 of *data*.\\\"\\\"\\\"\n    return hashlib.sha256(data).hexdigest()\n\n\ndef sha256_text(text: str, *, encoding: str = \"utf-8\") -> str:\n    \\\"\\\"\\\"Return hex sha256 of *text*.\\\"\\\"\\\"\n    return sha256_bytes(text.encode(encoding))\n\n\ndef sha256_file(path: Path, *, chunk_size: int = 1024 * 1024) -> str:\n    \\\"\\\"\\\"Return hex sha256 of a file without loading it all into memory.\\\"\\\"\\\"\n    h = hashlib.sha256()\n    with path.open(\"rb\") as f:\n        for chunk in iter(lambda: f.read(chunk_size), b\"\"):\n            h.update(chunk)\n    return h.hexdigest()\"\"\")\n\nchunks.append(\"\"\"\\\n# ----------------\n# Text + timestamps\n# ----------------\n\n_slug_re = re.compile(r\"[^a-z0-9]+\", re.IGNORECASE)\n\ndef slugify(value: str, *, max_len: int = 80) -> str:\n    \\\"\\\"\\\"Make a filesystem-friendly slug (lowercase, dash-separated).\\\"\\\"\\\"\n    v = _slug_re.sub(\"-\", value.strip().lower()).strip(\"-\")\n    return v[:max_len] if max_len and len(v) > max_len else v\n\n\ndef now_utc_iso() -> str:\n    \\\"\\\"\\\"UTC timestamp in ISO-8601 with milliseconds (Z suffix).\\\"\\\"\\\"\n    dt = datetime.now(timezone.utc)\n    return dt.strftime(\"%Y-%m-%dT%H-%M-%S-%f\")[:-3] + \"Z\"  # safe for filenames\"\"\")\n\nchunks.append(\"\"\"\\\n# ----------------\n# Logging utilities\n# ----------------\n\ndef configure_logger(name: str = \"refactor_modularize\", *, level: int = logging.INFO) -> logging.Logger:\n    \\\"\\\"\\\"Return a logger with a simple, idempotent StreamHandler.\\\"\\\"\\\"\n    logger = logging.getLogger(name)\n    logger.setLevel(level)\n    if not any(isinstance(h, logging.StreamHandler) for h in logger.handlers):\n        h = logging.StreamHandler()\n        h.setFormatter(logging.Formatter(\"[%(levelname)s] %(message)s\"))\n        logger.addHandler(h)\n    logger.propagate = False\n    return logger\"\"\")\n\nchunks.append(\"\"\"\\\n# ----------------\n# Tiny pipeline helpers\n# ----------------\n\n@dataclass(frozen=True)\nclass StepResult:\n    \\\"\\\"\\\"Result for a pipeline step.\\\"\\\"\\\"\n    name: str\n    ok: bool\n    detail: str = \"\"\n\n\ndef run_steps(\n    steps: Sequence[Tuple[str, Callable[[], Any]]],\n    *,\n    logger: Optional[logging.Logger] = None,\n    stop_on_error: bool = True,\n) -> Sequence[StepResult]:\n    \\\"\\\"\\\"Run (name, callable) steps with optional logging and error handling.\\\"\\\"\\\"\n    log = logger or logging.getLogger(\"refactor_modularize\")\n    results: list[StepResult] = []\n    for name, fn in steps:\n        try:\n            fn()\n            results.append(StepResult(name=name, ok=True))\n            log.debug(\"step ok: %s\", name)\n        except Exception as e:  # pragma: no cover (script utility)\n            results.append(StepResult(name=name, ok=False, detail=str(e)))\n            log.error(\"step failed: %s: %s\", name, e)\n            if stop_on_error:\n                break\n    return results\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/refactor_modularize/utils.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4b6fb1608190a6dd5b6e9ba95ca3032ea6b5d55b5cdc",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/refactor_modularize/utils.py\nDIR_STATE:[\"src/refactor_modularize/utils.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_055bfdbb36838b8800694b4b85a9ec8196858e1359270d10ec",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `src/refactor_modularize/utils.py` as a compact, dependency-free utility module covering filesystem/text IO (including atomic writes), JSON read/write with stable defaults, SHA-256 hashing helpers, slug/timestamp helpers, logger configuration, and a small step-runner for simple pipelines."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

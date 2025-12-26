@@ -1,0 +1,119 @@
+{
+  "contract_version": "v0.1",
+  "purpose": "Defaults and benchmark-specific overrides for generating standardized Contract sections for COSMO benchmarks v0.1.",
+  "defaults": {
+    "required_metadata": {
+      "keys": [
+        "dataset",
+        "dataset_version",
+        "license",
+        "citation",
+        "randomness",
+        "required_seed_fields",
+        "hardware_assumptions",
+        "dependencies"
+      ],
+      "randomness_allowed": [
+        "none",
+        "seeded",
+        "stochastic"
+      ],
+      "dependency_item_schema": {
+        "name": "string",
+        "version_spec": "string"
+      }
+    },
+    "reference_algorithm": {
+      "kind_allowed": [
+        "pseudocode",
+        "math"
+      ],
+      "required_fields": [
+        "kind",
+        "body"
+      ],
+      "minimum_requirements": [
+        "Define authoritative computation unambiguously.",
+        "Define any canonicalization for non-numeric outputs.",
+        "If using custom tolerances/comparators, define them here."
+      ]
+    },
+    "output_invariants": [
+      {
+        "id": "inv_schema_json",
+        "statement": "All outputs MUST be JSON-serializable (numbers, strings, booleans, null, lists, objects) with UTF-8 strings.",
+        "severity": "MUST"
+      },
+      {
+        "id": "inv_determinism_for_fixed_seed",
+        "statement": "If randomness is seedable, outputs MUST be deterministic for fixed inputs and required seed fields.",
+        "severity": "MUST"
+      },
+      {
+        "id": "inv_no_nan_inf",
+        "statement": "NaN/Inf are forbidden in numeric outputs unless explicitly allowed by the benchmark contract.",
+        "severity": "MUST"
+      }
+    ],
+    "tolerance_policy": {
+      "default": {
+        "mode": "abs_rel",
+        "abs": 1e-09,
+        "rel": 1e-09,
+        "ulps": 0,
+        "nan_equal": false,
+        "inf_equal": true,
+        "aggregate": "all"
+      },
+      "per_output": {}
+    },
+    "canonical_test_vector": {
+      "id": "ctv_001",
+      "purpose": "Minimal self-contained correctness check for contract compliance.",
+      "inputs": {
+        "seed": 0
+      },
+      "expected_outputs": null,
+      "notes": "Benchmarks MUST override inputs/expected_outputs with a deterministic, self-contained vector."
+    },
+    "compliance_reporting": {
+      "result_allowed": [
+        "pass",
+        "fail",
+        "warn",
+        "skip"
+      ],
+      "required_report_fields": [
+        "benchmark_id",
+        "contract_version",
+        "implementation_id",
+        "runtime",
+        "platform",
+        "result",
+        "checks",
+        "diagnostics"
+      ],
+      "minimum_checks": [
+        "contract_schema_validation",
+        "canonical_test_vector_execution",
+        "output_comparison_with_tolerances",
+        "must_invariant_evaluation"
+      ],
+      "required_diagnostics_on_failure": [
+        "output_field",
+        "location/index (if applicable)",
+        "max_abs_error",
+        "max_rel_error",
+        "observed_vs_expected_summary",
+        "invariant_failures",
+        "seed_used",
+        "input_hash"
+      ]
+    }
+  },
+  "overrides": {},
+  "notes": [
+    "Generators should start from defaults then deep-merge any per-benchmark override by normalized benchmark_id.",
+    "Non-numeric outputs should use tolerance mode 'exact' and specify canonicalization in the reference algorithm when needed."
+  ]
+}

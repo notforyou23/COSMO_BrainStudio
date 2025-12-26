@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add a minimal smoke test target that runs first, capture full stdout/stderr into canonical artifacts under `/outputs/qa/exec_logs/`, and implement an automatic retry + environment dump (container image hash, resources, dependency versions) when the failure signature is detected.
+Project: generated_script_1766627137280 (python script)
+
+Target file details:
+- Path: docker/entrypoint.sh
+- Purpose: Container entrypoint that invokes the QA runner with sensible defaults and ensures logs and environment dumps are written under outputs/qa/exec_logs/.
+- Category: support
+
+Other planned files (for context only):
+- scripts/qa_run.py: End-to-end QA runner that executes a minimal smoke test first, captures full stdout/stderr into canonical artifacts under outputs/qa/exec_logs/, detects failure signatures, performs automatic retry, and writes an environment dump (container image hash, resources, dependency versions) on retry-triggered failures.
+- scripts/qa_smoke_test.py: Minimal smoke test entrypoint designed to run first and quickly validate basic runtime assumptions (Python, filesystem, Docker availability) while emitting deterministic output for log capture.
+- scripts/env_dump.py: Environment introspection utility that collects container identity (image hash when available), host/container resources, OS details, and dependency versions and writes a structured dump to outputs/qa/exec_logs/ for failure triage.
+- scripts/failure_signatures.py: Centralized catalog and matching logic for known unstable/unsupported-environment failure signatures used to trigger automatic retry and env dump behavior.
+
+Reference insights:
+- [CONSOLIDATED] Robust QA automation should be designed to *fail safe*—detect unstable/unsupported execution environments early, gracefully d
+- [INTROSPECTION] 2025-12-25T00-21-55-842Z_scripts_qa_run_sh_stage1_attempt2_prompt.txt from code-creation agent agent_1766622114110_412seks: 
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+
+Key requirements:
+- docker
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Container entrypoint that invokes the QA runner with sensible defaults and ensures logs and environment dumps are written under outputs/qa/exec_logs/.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('docker/entrypoint.sh')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:docker/entrypoint.sh')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside docker/entrypoint.sh.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

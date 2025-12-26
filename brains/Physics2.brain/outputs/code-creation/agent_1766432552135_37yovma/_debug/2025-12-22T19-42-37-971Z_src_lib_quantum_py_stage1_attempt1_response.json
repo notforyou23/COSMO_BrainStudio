@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/lib/quantum.py` providing NumPy-only quantum state utilities (common toy states, partial trace/reductions, von Neumann entropy & mutual information, and simple unitary evolution helpers) for entanglement diagnostics.",
+  "reasoning": "",
+  "responseId": "resp_0edc077e3f2002df0069499fe9193881959f12a0be023bc8e7",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3874,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2377,
+    "output_tokens_details": {
+      "reasoning_tokens": 365
+    },
+    "total_tokens": 6251
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0edc077e3f2002df0069499fe9f9c481959ad3d7d6c51ad181",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0edc077e3f2002df0069499ff22aac819596eb68641e06e54f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, numpy as np\ntarget_path = Path('/mnt/data').joinpath('src/lib/quantum.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"Lightweight quantum-state utilities for toy entanglement diagnostics.\n\nConventions: states are 1D complex kets (dim,), density matrices are (dim, dim).\nAll functions are NumPy-only and deterministic given inputs/RNG.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport numpy as np\n\"\"\".strip())\n\nchunks.append(\"\"\"\n# ---- Basic building blocks ----\n\ndef kron(*ops: np.ndarray) -> np.ndarray:\n    \\\"\\\"\\\"Kronecker product of many operators/vectors.\\\"\\\"\\\"\n    out = np.array([1.0], dtype=complex)\n    for op in ops:\n        out = np.kron(out, np.asarray(op, dtype=complex))\n    return out\n\n\ndef basis(dim: int, i: int) -> np.ndarray:\n    v = np.zeros(dim, dtype=complex)\n    v[i] = 1.0\n    return v\n\n\nket0 = basis(2, 0)\nket1 = basis(2, 1)\n\n\ndef normalize(psi: np.ndarray, tol: float = 1e-15) -> np.ndarray:\n    psi = np.asarray(psi, dtype=complex).reshape(-1)\n    n = np.linalg.norm(psi)\n    if n < tol:\n        raise ValueError(\\\"Cannot normalize near-zero vector\\\")\n    return psi / n\n\n\ndef dm(psi: np.ndarray) -> np.ndarray:\n    \\\"\\\"\\\"Density matrix from a pure state ket.\\\"\\\"\\\"\n    psi = np.asarray(psi, dtype=complex).reshape(-1)\n    return np.outer(psi, psi.conj())\n\"\"\".strip())\n\nchunks.append(\"\"\"\n# ---- Common toy states ----\n\ndef product_state(kets: list[np.ndarray]) -> np.ndarray:\n    \\\"\\\"\\\"Tensor product ket from a list of subsystem kets.\\\"\\\"\\\"\n    return kron(*kets)\n\n\ndef bell_state(label: str = \\\"phi+\\\") -> np.ndarray:\n    \\\"\\\"\\\"Return one of the four Bell states as a ket (2 qubits).\\\"\\\"\\\"\n    a = product_state([ket0, ket0])\n    b = product_state([ket1, ket1])\n    c = product_state([ket0, ket1])\n    d = product_state([ket1, ket0])\n    if label in (\\\"phi+\\\", \\\"Φ+\\\"):\n        psi = a + b\n    elif label in (\\\"phi-\\\", \\\"Φ-\\\"):\n        psi = a - b\n    elif label in (\\\"psi+\\\", \\\"Ψ+\\\"):\n        psi = c + d\n    elif label in (\\\"psi-\\\", \\\"Ψ-\\\"):\n        psi = c - d\n    else:\n        raise ValueError(f\\\"Unknown Bell label: {label}\\\")\n    return normalize(psi)  # 1/sqrt(2)\n\n\ndef ghz_state(n: int) -> np.ndarray:\n    \\\"\\\"\\\"n-qubit GHZ state (|0...0> + |1...1>)/sqrt(2).\\\"\\\"\\\"\n    if n < 1:\n        raise ValueError(\\\"n must be >= 1\\\")\n    return normalize(product_state([ket0] * n) + product_state([ket1] * n))\n\n\ndef random_pure(dim: int, rng: np.random.Generator) -> np.ndarray:\n    \\\"\\\"\\\"Haar-ish random pure state via complex Gaussian + normalization.\\\"\\\"\\\"\n    x = rng.normal(size=dim) + 1j * rng.normal(size=dim)\n    return normalize(x)\n\"\"\".strip())\n\nchunks.append(\"\"\"\n# ---- Partial trace & reductions ----\n\ndef partial_trace(rho: np.ndarray, keep: list[int], dims: list[int]) -> np.ndarray:\n    \\\"\\\"\\\"Partial trace of density matrix over subsystems not in keep.\n\n    Args:\n        rho: (D,D) density matrix where D=prod(dims).\n        keep: subsystem indices to keep (0..N-1).\n        dims: list of subsystem dimensions.\n    \\\"\\\"\\\"\n    dims = list(map(int, dims))\n    N = len(dims)\n    keep = sorted(set(map(int, keep)))\n    if any(k < 0 or k >= N for k in keep):\n        raise ValueError(\\\"keep indices out of range\\\")\n    rho = np.asarray(rho, dtype=complex)\n    D = int(np.prod(dims))\n    if rho.shape != (D, D):\n        raise ValueError(f\\\"rho shape {rho.shape} incompatible with dims (D={D})\\\")\n    traced = [i for i in range(N) if i not in keep]\n    out = rho.reshape(dims + dims)\n    for s in sorted(traced, reverse=True):\n        out = np.trace(out, axis1=s, axis2=s + N)\n        dims.pop(s)\n        N -= 1\n    d = int(np.prod(dims)) if dims else 1\n    return out.reshape(d, d)\n\n\ndef reduced_density(psi: np.ndarray, keep: list[int], dims: list[int]) -> np.ndarray:\n    \\\"\\\"\\\"Reduced density matrix from a pure state ket.\\\"\\\"\\\"\n    return partial_trace(dm(psi), keep=keep, dims=dims)\n\"\"\".strip())\n\nchunks.append(\"\"\"\n# ---- Entropies / mutual information ----\n\ndef entropy_vn(rho: np.ndarray, base: float = 2.0, tol: float = 1e-12) -> float:\n    \\\"\\\"\\\"Von Neumann entropy S(rho) = -Tr rho log rho.\\\"\\\"\\\"\n    rho = np.asarray(rho, dtype=complex)\n    if rho.ndim != 2 or rho.shape[0] != rho.shape[1]:\n        raise ValueError(\\\"rho must be square\\\")\n    # Ensure Hermitian numerical stability\n    evals = np.linalg.eigvalsh((rho + rho.conj().T) / 2.0).real\n    evals = np.clip(evals, 0.0, 1.0)\n    evals = evals[evals > tol]\n    if evals.size == 0:\n        return 0.0\n    return float(-(evals * (np.log(evals) / np.log(base))).sum())\n\n\ndef mutual_information(rho: np.ndarray, A: list[int], B: list[int], dims: list[int]) -> float:\n    \\\"\\\"\\\"I(A:B) = S(A)+S(B)-S(AB) for a joint density matrix.\\\"\\\"\\\"\n    A = sorted(set(map(int, A)))\n    B = sorted(set(map(int, B)))\n    AB = sorted(set(A + B))\n    rhoA = partial_trace(rho, keep=A, dims=dims)\n    rhoB = partial_trace(rho, keep=B, dims=dims)\n    rhoAB = partial_trace(rho, keep=AB, dims=dims)\n    return entropy_vn(rhoA) + entropy_vn(rhoB) - entropy_vn(rhoAB)\n\"\"\".strip())\n\nchunks.append(\"\"\"\n# ---- Simple evolutions (unitaries) ----\n\nI2 = np.eye(2, dtype=complex)\nX = np.array([[0, 1], [1, 0]], dtype=complex)\nY = np.array([[0, -1j], [1j, 0]], dtype=complex)\nZ = np.array([[1, 0], [0, -1]], dtype=complex)\nH = (1 / np.sqrt(2)) * np.array([[1, 1], [1, -1]], dtype=complex)\nCNOT = np.array(\n    [[1, 0, 0, 0],\n     [0, 1, 0, 0],\n     [0, 0, 0, 1],\n     [0, 0, 1, 0]],\n    dtype=complex,\n)\n\n\ndef apply_unitary_state(U: np.ndarray, psi: np.ndarray) -> np.ndarray:\n    U = np.asarray(U, dtype=complex)\n    psi = np.asarray(psi, dtype=complex).reshape(-1)\n    if U.shape[0] != U.shape[1] or U.shape[1] != psi.size:\n        raise ValueError(\\\"dimension mismatch\\\")\n    return U @ psi\n\n\ndef apply_unitary_rho(U: np.ndarray, rho: np.ndarray) -> np.ndarray:\n    U = np.asarray(U, dtype=complex)\n    rho = np.asarray(rho, dtype=complex)\n    if U.shape[0] != U.shape[1] or rho.shape != (U.shape[0], U.shape[0]):\n        raise ValueError(\\\"dimension mismatch\\\")\n    return U @ rho @ U.conj().T\n\"\"\".strip())\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/lib/quantum.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/lib/quantum.py\nDIR_STATE:[\"src/lib/graphs.py\", \"src/lib/io.py\", \"src/lib/plotting.py\", \"src/lib/quantum.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0edc077e3f2002df006949a009a1008195b739ef1829f8427f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/lib/quantum.py` providing NumPy-only quantum state utilities (common toy states, partial trace/reductions, von Neumann entropy & mutual information, and simple unitary evolution helpers) for entanglement diagnostics."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/claim_card.schema.json",
+  "title": "Claim Card",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["claim_text", "context", "provenance"],
+  "properties": {
+    "claim_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Optional stable identifier for this claim card."
+    },
+    "claim_text": {
+      "type": "string",
+      "minLength": 1,
+      "description": "EXACT claim text (verbatim) as stated in the source; do not paraphrase, summarize, or omit words."
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["speaker", "date", "source_url"],
+      "properties": {
+        "speaker": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Who made the claim (person/org/author), as shown in the source."
+        },
+        "date": {
+          "type": "string",
+          "description": "When the claim was made/published, in ISO 8601 date or date-time.",
+          "oneOf": [
+            {"format": "date"},
+            {"format": "date-time"}
+          ]
+        },
+        "source_url": {
+          "type": "string",
+          "minLength": 1,
+          "format": "uri",
+          "description": "Canonical link to the source containing the claim."
+        },
+        "source_title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional human-readable title of the source."
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["anchor"],
+      "properties": {
+        "anchor": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "value"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["quote", "timestamp", "page", "section", "paragraph", "line_range", "figure", "table", "commit", "other"],
+              "description": "Anchor type locating the claim inside the source."
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Anchor value (e.g., exact quote snippet, page number, timestamp, section heading, line range)."
+            }
+          }
+        },
+        "source_url": {
+          "type": "string",
+          "minLength": 1,
+          "format": "uri",
+          "description": "Optional duplicate/alternate source link for provenance (if different from context.source_url)."
+        },
+        "retrieved_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Optional ISO 8601 date-time when the source was accessed."
+        }
+      }
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional analyst notes; must not replace required verbatim/context/provenance fields."
+    },
+    "tags": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    }
+  },
+  "$comment": "Intake checklist: require verbatim claim_text + context(speaker/date/source_url) + provenance.anchor(type/value). If any required field is missing/empty, validation fails and downstream systems MUST abstain from using the claim.",
+  "x_validation": {
+    "abstain_when": [
+      "claim_text is missing, empty, or not verbatim (paraphrase/summarization)",
+      "context.speaker is missing/empty",
+      "context.date is missing/invalid ISO 8601",
+      "context.source_url is missing/invalid",
+      "provenance.anchor.type or provenance.anchor.value is missing/empty"
+    ]
+  }
+}

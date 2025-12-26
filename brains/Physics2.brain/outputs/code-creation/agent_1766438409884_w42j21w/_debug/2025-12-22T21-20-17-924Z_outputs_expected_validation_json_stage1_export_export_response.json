@@ -1,0 +1,56 @@
+{
+  "content": "FILE_EXPORT:{\"path\":\"outputs/expected_validation.json\",\"size\":224,\"encoding\":\"base64\",\"sha256\":\"71cb4993c6b614350abb625f099599e79682b3f4df4813d1c01ace9cf74f3ea1\",\"content\":\"ewogICJ2YWxpZCI6IHRydWUsCiAgImVycm9ycyI6IFtdLAogICJzdW1tYXJ5IjogewogICAgImNoZWNrZWRfZmlsZXMiOiBbCiAgICAgICJleGFtcGxlcy9zYW1wbGVfcnVuLmpzb24iCiAgICBdLAogICAgInNjaGVtYV9pZCI6ICJiZW5jaG1hcmsuc2NoZW1hLmpzb24iLAogICAgInZhbGlkYXRvciI6ICJiZW5jaG1hcmtzLnZhbGlkYXRlIiwKICAgICJ2ZXJzaW9uIjogIjAuMS4wIgogIH0KfQo=\"}\nDIR_STATE:[\"outputs/expected_report.txt\", \"outputs/expected_validation.json\"]",
+  "reasoning": "",
+  "responseId": "resp_056311e35bfdffde006949b85c6e90819390470abe873382ee",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 1578,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 561,
+    "output_tokens_details": {
+      "reasoning_tokens": 64
+    },
+    "total_tokens": 2139
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_056311e35bfdffde006949b85d323c819387d83dd9e71d8ca5",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_056311e35bfdffde006949b85f50e081939da029b1553048a5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport base64, json, hashlib, gzip\n\ntarget_path = Path('/mnt/data').joinpath('outputs/expected_validation.json')\nassert target_path.is_file(), 'Expected outputs/expected_validation.json to exist before export'\ndata = target_path.read_bytes()\npayload = {\n  'path': 'outputs/expected_validation.json',\n  'size': len(data),\n  'encoding': 'base64',\n  'sha256': hashlib.sha256(data).hexdigest(),\n  'content': None\n}\nif len(data) > 20000:\n    compressed = gzip.compress(data)\n    payload['encoding'] = 'gzip+base64'\n    payload['content'] = base64.b64encode(compressed).decode('ascii')\nelse:\n    payload['content'] = base64.b64encode(data).decode('ascii')\nprint('FILE_EXPORT:' + json.dumps(payload, separators=(',', ':')))\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_EXPORT:{\"path\":\"outputs/expected_validation.json\",\"size\":224,\"encoding\":\"base64\",\"sha256\":\"71cb4993c6b614350abb625f099599e79682b3f4df4813d1c01ace9cf74f3ea1\",\"content\":\"ewogICJ2YWxpZCI6IHRydWUsCiAgImVycm9ycyI6IFtdLAogICJzdW1tYXJ5IjogewogICAgImNoZWNrZWRfZmlsZXMiOiBbCiAgICAgICJleGFtcGxlcy9zYW1wbGVfcnVuLmpzb24iCiAgICBdLAogICAgInNjaGVtYV9pZCI6ICJiZW5jaG1hcmsuc2NoZW1hLmpzb24iLAogICAgInZhbGlkYXRvciI6ICJiZW5jaG1hcmtzLnZhbGlkYXRlIiwKICAgICJ2ZXJzaW9uIjogIjAuMS4wIgogIH0KfQo=\"}\nDIR_STATE:[\"outputs/expected_report.txt\", \"outputs/expected_validation.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_056311e35bfdffde006949b86569288193b668880d9e994fc7",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_EXPORT:{\"path\":\"outputs/expected_validation.json\",\"size\":224,\"encoding\":\"base64\",\"sha256\":\"71cb4993c6b614350abb625f099599e79682b3f4df4813d1c01ace9cf74f3ea1\",\"content\":\"ewogICJ2YWxpZCI6IHRydWUsCiAgImVycm9ycyI6IFtdLAogICJzdW1tYXJ5IjogewogICAgImNoZWNrZWRfZmlsZXMiOiBbCiAgICAgICJleGFtcGxlcy9zYW1wbGVfcnVuLmpzb24iCiAgICBdLAogICAgInNjaGVtYV9pZCI6ICJiZW5jaG1hcmsuc2NoZW1hLmpzb24iLAogICAgInZhbGlkYXRvciI6ICJiZW5jaG1hcmtzLnZhbGlkYXRlIiwKICAgICJ2ZXJzaW9uIjogIjAuMS4wIgogIH0KfQo=\"}\nDIR_STATE:[\"outputs/expected_report.txt\", \"outputs/expected_validation.json\"]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,45 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Update the intake checklist to hard-require dataset identifier (name + DOI/link) for the dataset-verification pilot claim; add a validation rule that blocks work if only a vague “research area” is provided.
+Project: generated_script_1766624151594 (python script)
+
+Target file details:
+- Path: config/intake_checklist.template.json
+- Purpose: Provides a ready-to-fill intake checklist template updated to include explicit dataset name and DOI/link fields for dataset-verification pilot claims and guidance to avoid vague research-area-only inputs.
+- Category: config
+
+Other planned files (for context only):
+- config/intake_checklist.schema.json: Defines the machine-validated intake checklist JSON Schema that hard-requires a dataset identifier (name plus DOI/link) for dataset-verification pilot claims and rejects entries that provide only a vague research area.
+- src/intake/validate_intake.py: Implements full intake checklist validation (schema + custom rules) including blocking work when dataset verification is selected without dataset name and DOI/link or when only a research area is provided.
+- scripts/validate_intake.py: CLI entrypoint that validates an intake checklist file against the updated rules and exits nonzero with actionable error messages when blocked.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-25T00-21-55-842Z_scripts_qa_run_sh_stage1_attempt1_prompt.txt from code-creation agent agent_1766622114110_412seks: 
+- [AGENT: agent_1766612249730_02kggt6] Finding 2: For primary-source verification (2019–2025), the agent identified the minimum viable inputs 
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Provides a ready-to-fill intake checklist template updated to include explicit dataset name and DOI/link fields for dataset-verification pilot claims and guidance to avoid vague research-area-only inputs.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('config/intake_checklist.template.json')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:config/intake_checklist.template.json')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside config/intake_checklist.template.json.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

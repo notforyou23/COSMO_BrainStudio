@@ -1,0 +1,243 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766547792970_kh8985x",
+  "agentType": "code-creation",
+  "goalId": "goal_111",
+  "missionId": "strategic_goal_111_1766547792970",
+  "spawnCycle": 96,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T03:43:25.474Z",
+  "completedAt": "2025-12-24T03:48:57.079Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/run_pipeline.py",
+      "description": "Pipeline entrypoint updated to accept a single seed, propagate it through all RNGs, enforce writing to a canonical outputs/ layout, and validate outputs/results.json and outputs/figure.png against the fixed schema before exiting.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/run_pipeline.py\nDIR_STATE:[\"scripts/run.py\", \"scripts/run_pipeline.py\"]\nSUMMARY: Updated scripts/run_pipeline.py to enforce canonical outputs layout, unified seed propagation, and output validation before exit.\n",
+          "timestamp": "2025-12-24T03:44:01.721Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/run_pipeline.py\nDIR_STATE:[\"scripts/run.py\", \"scripts/run_pipeline.py\"]\nSummary: Updated scripts/run_pipeline.py to enforce canonical outputs (outputs/results.json and outputs/figure.png), propagate a single seed across RNGs, and validate outputs against a fixed schema before exit.\n",
+          "timestamp": "2025-12-24T03:44:28.176Z"
+        }
+      ],
+      "createdAt": "2025-12-24T03:43:25.474Z",
+      "failedAt": "2025-12-24T03:44:28.176Z"
+    },
+    {
+      "path": "src/pipeline/output_schema.py",
+      "description": "Defines the canonical results schema (fixed keys/types), provides validation utilities, and implements a single function to write outputs/results.json in a stable, deterministic form.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/pipeline/output_schema.py\nDIR_STATE:[\"src/pipeline/output_schema.py\"]\nSUMMARY: Added a fixed canonical results.json schema with validation helpers and deterministic JSON writing.\n",
+          "timestamp": "2025-12-24T03:44:52.402Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/pipeline/output_schema.py\nDIR_STATE:[\"src/pipeline/output_schema.py\"]\nDefined a fixed results.json schema with validation and deterministic writer in src/pipeline/output_schema.py.\n",
+          "timestamp": "2025-12-24T03:45:13.718Z"
+        }
+      ],
+      "createdAt": "2025-12-24T03:43:25.474Z",
+      "failedAt": "2025-12-24T03:45:13.718Z"
+    },
+    {
+      "path": "src/pipeline/seed_control.py",
+      "description": "Implements unified seed control that sets and propagates one RNG seed across Python random, NumPy, and common ML/plotting libraries when available, returning a context object for downstream use.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/pipeline/seed_control.py\nDIR_STATE:[\"src/pipeline/output_schema.py\", \"src/pipeline/seed_control.py\"]\nSUMMARY: Implemented unified RNG seed control with best-effort propagation across common libraries and an optional restoration context manager.\n",
+          "timestamp": "2025-12-24T03:45:36.944Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/pipeline/seed_control.py\nDIR_STATE:[\"src/pipeline/output_schema.py\", \"src/pipeline/seed_control.py\"]\nSUMMARY:Implemented unified global seed control with best-effort deterministic settings and a returned SeedContext for downstream use.\n",
+          "timestamp": "2025-12-24T03:45:59.707Z"
+        }
+      ],
+      "createdAt": "2025-12-24T03:43:25.474Z",
+      "failedAt": "2025-12-24T03:45:59.707Z"
+    },
+    {
+      "path": "src/pipeline/output_paths.py",
+      "description": "Centralizes canonical output paths (outputs/results.json, outputs/figure.png, and optional metadata) and ensures directories exist with consistent behavior in local runs and CI.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/pipeline/output_paths.py\nDIR_STATE:[\"src/pipeline/output_paths.py\", \"src/pipeline/output_schema.py\", \"src/pipeline/seed_control.py\"]\nSUMMARY:Added a central OutputPaths definition with canonical outputs layout and directory-creation helpers for consistent local/CI behavior.\n",
+          "timestamp": "2025-12-24T03:46:12.658Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/pipeline/output_paths.py\nDIR_STATE:[\"src/pipeline/output_paths.py\", \"src/pipeline/output_schema.py\", \"src/pipeline/seed_control.py\"]\nSUMMARY: Added canonical OutputPaths utilities for outputs/results.json, outputs/figure.png, and optional metadata with consistent directory creation.\n",
+          "timestamp": "2025-12-24T03:46:25.503Z"
+        }
+      ],
+      "createdAt": "2025-12-24T03:43:25.474Z",
+      "failedAt": "2025-12-24T03:46:25.503Z"
+    },
+    {
+      "path": "docs/OUTPUTS_SCHEMA.md",
+      "description": "Documents the enforced canonical outputs layout, the exact results.json keys and meanings, and how to run the pipeline with deterministic seeding.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docs/OUTPUTS_SCHEMA.md\nDIR_STATE:[\"docs/OUTPUTS_SCHEMA.md\"]\nSummary: Added documentation defining the enforced canonical outputs layout, the required results.json schema, and deterministic single-seed run instructions.\n",
+          "timestamp": "2025-12-24T03:46:45.657Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docs/OUTPUTS_SCHEMA.md\nDIR_STATE:[\"docs/OUTPUTS_SCHEMA.md\"]\nSummary: Added documentation defining the enforced canonical outputs layout, fixed results.json schema, validation rules, and deterministic seeding usage.\n",
+          "timestamp": "2025-12-24T03:47:11.641Z"
+        }
+      ],
+      "createdAt": "2025-12-24T03:43:25.474Z",
+      "failedAt": "2025-12-24T03:47:11.641Z"
+    },
+    {
+      "path": "tests/test_pipeline_outputs_schema.py",
+      "description": "Automated tests that run the pipeline in a temp workspace to assert deterministic behavior under a fixed seed and validate that outputs/results.json and outputs/figure.png are produced and schema-compliant.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "ts/.DS_Store\", \"tests/test_artifacts.py\", \"tests/test_determinism_seed_and_plotting.py\", \"tests/test_outputs_smoke.py\", \"tests/test_pipeline.py\", \"tests/test_pipeline_outputs_schema.py\", \"tests/test_results_schema_validation.py\", \"tests/test_stability.py\"]\nSummary: Added pytest coverage to enforce canonical outputs layout, schema validation, and deterministic pipeline behavior under a fixed seed.\n",
+          "timestamp": "2025-12-24T03:47:42.263Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "py\", \"tests/test_determinism_seed_and_plotting.py\", \"tests/test_outputs_smoke.py\", \"tests/test_pipeline.py\", \"tests/test_pipeline_outputs_schema.py\", \"tests/test_results_schema_validation.py\", \"tests/test_stability.py\"]\nAdded pytest coverage to run the pipeline in a temp workspace, assert deterministic outputs under a fixed seed, and validate canonical outputs/results.json and outputs/figure.png.\n",
+          "timestamp": "2025-12-24T03:48:25.397Z"
+        }
+      ],
+      "createdAt": "2025-12-24T03:43:25.474Z",
+      "failedAt": "2025-12-24T03:48:25.397Z"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "description": "CI workflow that installs dependencies, runs unit tests, and executes the pipeline to enforce canonical outputs and deterministic seed behavior on every push and pull request.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/tests-and-capture-artifacts.yml\"]\nSummary: Added a CI workflow that installs dependencies, runs tests, executes the pipeline with a fixed seed, and verifies canonical outputs and deterministic behavior by comparing two runs.\n",
+          "timestamp": "2025-12-24T03:48:40.549Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/tests-and-capture-artifacts.yml\"]\n",
+          "timestamp": "2025-12-24T03:48:57.079Z"
+        }
+      ],
+      "createdAt": "2025-12-24T03:43:25.474Z",
+      "failedAt": "2025-12-24T03:48:57.079Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Define and enforce a canonical outputs schema (e.g., outputs/results.json with fixed keys + outputs/figure.png) and add seed control (single RNG seed propagated) in the pipeline entrypoint `python scripts/run_pipeline.py`.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Directly supports the gate requirement (green + deterministic runs) by emphasizing a deterministic entrypoint that produces fixed-schema artifacts (JSON + figure), enabling regression tests and stable..."
+  ],
+  "projectName": "generated_script_1766547793166",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [
+    "include_ci_cd"
+  ],
+  "lastSavedAt": "2025-12-24T03:48:57.079Z",
+  "summary": {
+    "completed": 0,
+    "failed": 7,
+    "total": 7
+  }
+}

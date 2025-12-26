@@ -1,0 +1,121 @@
+{
+  "schema_version": 1,
+  "name": "execution_smoketest",
+  "purpose": "Minimal fail-safe smoke test configuration for capturing execution environment and detecting instability early.",
+  "outputs": {
+    "qa_dir": "/outputs/qa",
+    "log_filename_template": "execution_smoketest_{timestamp}.log",
+    "env_json_path": "/outputs/qa/execution_env.json",
+    "timestamp_format": "%Y%m%dT%H%M%SZ"
+  },
+  "collect": {
+    "host_signals": {
+      "enabled": true,
+      "uname": true,
+      "os_release_paths": ["/etc/os-release", "/usr/lib/os-release"],
+      "python": true,
+      "pip_freeze": false,
+      "sys_path": false,
+      "cwd": true,
+      "time": true,
+      "locale": true
+    },
+    "container_signals": {
+      "enabled": true,
+      "cgroup_paths": ["/proc/1/cgroup", "/proc/self/cgroup"],
+      "mountinfo": "/proc/self/mountinfo",
+      "docker_env_hint_files": ["/.dockerenv"],
+      "containerd_hint_files": ["/run/.containerenv"],
+      "k8s_serviceaccount_hint_dir": "/var/run/secrets/kubernetes.io/serviceaccount"
+    },
+    "image_tag_heuristics": {
+      "enabled": true,
+      "env_vars": [
+        "OPENAI_IMAGE",
+        "IMAGE",
+        "IMAGE_NAME",
+        "IMAGE_TAG",
+        "CONTAINER_IMAGE",
+        "DOCKER_IMAGE",
+        "KUBERNETES_POD_IMAGE",
+        "CI_REGISTRY_IMAGE",
+        "CI_COMMIT_TAG",
+        "GITHUB_SHA",
+        "GITHUB_REF_NAME"
+      ],
+      "fallback_files": [
+        "/etc/hostname",
+        "/proc/1/cmdline"
+      ],
+      "report_raw_sources": true
+    },
+    "resources": {
+      "enabled": true,
+      "cpu": {
+        "count_logical": true,
+        "affinity": true,
+        "cgroup_quota": true
+      },
+      "memory": {
+        "psutil": true,
+        "cgroup_limits": true
+      },
+      "disk": {
+        "statvfs_paths": ["/", "/tmp", "/outputs", "/mnt", "/workspace"]
+      },
+      "limits": {
+        "rlimit": true,
+        "ulimit_via_shell": false
+      },
+      "gpu": {
+        "nvidia_smi": true,
+        "env_vars": ["NVIDIA_VISIBLE_DEVICES", "CUDA_VISIBLE_DEVICES"],
+        "torch_cuda_probe": "auto"
+      }
+    },
+    "process": {
+      "enabled": true,
+      "pid": true,
+      "ppid": true,
+      "cmdline": true,
+      "environ_allowlist_prefixes": ["CI_", "GITHUB_", "KUBERNETES_", "OPENAI_", "NVIDIA_", "CUDA_"],
+      "environ_denylist_keys": ["AWS_SECRET_ACCESS_KEY", "AWS_SESSION_TOKEN", "OPENAI_API_KEY"]
+    }
+  },
+  "checks": {
+    "fail_fast_on": {
+      "cannot_write_outputs_dir": true,
+      "clock_skew_seconds_gt": 300,
+      "low_disk_free_mb_lt": 128,
+      "memory_available_mb_lt": 256,
+      "python_version_min": "3.9"
+    },
+    "smoke": {
+      "python_exec": true,
+      "import_modules": ["json", "os", "sys", "pathlib", "platform", "subprocess", "time"],
+      "optional_import_modules": ["numpy", "pandas", "psutil", "torch"],
+      "filesystem_write_read": {
+        "enabled": true,
+        "dir_candidates": ["/outputs/qa", "/tmp"],
+        "bytes": 1024
+      },
+      "subprocess_echo": true,
+      "thread_spawn": true
+    },
+    "network": {
+      "enabled": false,
+      "dns_lookup_host": "example.com",
+      "connect_test": {
+        "host": "1.1.1.1",
+        "port": 53,
+        "timeout_seconds": 2
+      }
+    }
+  },
+  "stability": {
+    "reruns": 2,
+    "max_total_seconds": 60,
+    "require_consistent_exit_code": true,
+    "treat_flaky_as_failure": true
+  }
+}

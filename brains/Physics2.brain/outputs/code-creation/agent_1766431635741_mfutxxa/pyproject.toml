@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "qg-bench"
+version = "0.1.0"
+description = "Minimal benchmark CLI that computes observables and writes standardized results."
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "OpenAI", email = "noreply@example.com"}]
+dependencies = []
+
+[project.scripts]
+run_benchmark = "qg_bench.cli:main"
+[tool.setuptools]
+packages = ["qg_bench"]
+
+[tool.setuptools.package-data]
+qg_bench = ["schema.json", "data/*.jsonl"]

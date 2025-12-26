@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/claim_card.schema.json",
+  "title": "Claim Card",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["claim_text", "context", "provenance"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "claim_text": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Verbatim claim text (copy/paste exact wording)."
+    },
+    "claim_language": { "type": "string", "default": "en" },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["who", "when", "where"],
+      "properties": {
+        "who": { "type": "string", "minLength": 1, "description": "Who made the claim (person/org/handle)." },
+        "when": { "type": "string", "minLength": 1, "description": "When the claim was made (date/time or best-known)." },
+        "where": { "type": "string", "minLength": 1, "description": "Where the claim appeared (venue/platform/location)." },
+        "notes": { "type": "string" }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["claim_source", "dataset_anchor"],
+      "properties": {
+        "claim_source": { "$ref": "#/$defs/source_ref" },
+        "dataset_anchor": {
+          "description": "Hard requirement: either a dataset name + DOI/link, OR a fallback research area + >=2 seed papers/authors.",
+          "oneOf": [
+            { "$ref": "#/$defs/dataset_ref" },
+            { "$ref": "#/$defs/dataset_fallback" }
+          ]
+        },
+        "data_provenance_notes": { "type": "string" }
+      }
+    },
+    "tags": { "type": "array", "items": { "type": "string" } }
+  },
+  "$defs": {
+    "source_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "citation"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["paper", "preprint", "blog", "news", "talk", "podcast", "social", "report", "website", "other"]
+        },
+        "citation": { "type": "string", "minLength": 1, "description": "Human-readable citation for the claim source." },
+        "url": { "type": "string", "format": "uri" },
+        "doi": { "type": "string", "minLength": 3 },
+        "accessed_at": { "type": "string", "format": "date-time" }
+      },
+      "anyOf": [
+        { "required": ["url"] },
+        { "required": ["doi"] },
+        { "required": ["citation"] }
+      ]
+    },
+    "dataset_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataset_name"],
+      "properties": {
+        "dataset_name": { "type": "string", "minLength": 1 },
+        "dataset_doi": { "type": "string", "minLength": 3, "description": "Dataset DOI (preferred when available)." },
+        "dataset_url": { "type": "string", "format": "uri", "description": "Dataset landing page or repository link." },
+        "version": { "type": "string" },
+        "license": { "type": "string" }
+      },
+      "anyOf": [
+        { "required": ["dataset_doi"] },
+        { "required": ["dataset_url"] }
+      ]
+    },
+    "dataset_fallback": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["research_area", "seed_sources"],
+      "properties": {
+        "research_area": { "type": "string", "minLength": 1 },
+        "seed_sources": {
+          "type": "array",
+          "minItems": 2,
+          "items": { "$ref": "#/$defs/seed_source" },
+          "description": "At least 2 seed papers/authors that can be used to locate a dataset/provenance anchor."
+        }
+      }
+    },
+    "seed_source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authors_or_group"],
+      "properties": {
+        "title": { "type": "string" },
+        "authors_or_group": { "type": "string", "minLength": 1, "description": "Author(s) name(s) or group/lab." },
+        "year": { "type": "integer", "minimum": 1500, "maximum": 2200 },
+        "doi": { "type": "string", "minLength": 3 },
+        "url": { "type": "string", "format": "uri" }
+      },
+      "anyOf": [
+        { "required": ["title"] },
+        { "required": ["doi"] },
+        { "required": ["url"] }
+      ]
+    }
+  }
+}

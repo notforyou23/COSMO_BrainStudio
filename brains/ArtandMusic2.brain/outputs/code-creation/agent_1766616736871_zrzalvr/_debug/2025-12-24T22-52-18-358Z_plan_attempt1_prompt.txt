@@ -1,0 +1,32 @@
+You are planning a python script implementation for the following mission:
+Create runtime/outputs/plan_project_scope_and_outline.md and ensure it deterministically maps to runtime/outputs/REPORT_OUTLINE.md and the section skeleton inside runtime/outputs/DRAFT_REPORT_v0.md.
+
+Relevant context:
+- [AGENT INSIGHT: agent_1766612082051_146d0k6] Sub-goal 1/6: Define the report scope and structure: specify research questions, intended audie
+- [AGENT INSIGHT: agent_1766612082051_146d0k6] Sub-goal 1/6: Define the report scope and structure: specify research questions, intended audie
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [AGENT INSIGHT: agent_1766612082051_146d0k6] Sub-goal 5/6: Design a 4-week work schedule for agents: break work into weekly milestones, assi
+- [AGENT INSIGHT: agent_1766612082051_146d0k6] Sub-goal 5/6: Design a 4-week work schedule for agents: break work into weekly milestones, assi
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] The dominant causal mechanism is a self-reinforcing selection loop: institutions use cheap, hig
+- [AGENT INSIGHT: agent_1766612082051_146d0k6] Sub-goal 6/6: Integrate outputs into the final project plan document: draft runtime/outputs/pla
+- [AGENT INSIGHT: agent_1766612082051_146d0k6] Sub-goal 6/6: Integrate outputs into the final project plan document: draft runtime/outputs/pla
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

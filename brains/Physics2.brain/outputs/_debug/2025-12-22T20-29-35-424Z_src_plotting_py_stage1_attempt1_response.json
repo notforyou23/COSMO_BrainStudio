@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/plotting.py` with compact, reusable matplotlib helpers that enforce consistent publication-style defaults and provide deterministic figure saving via `SaveSpec`, `save_figure`, and a quick `save_simple` convenience wrapper (including a minimal `__main__` example).",
+  "reasoning": "",
+  "responseId": "resp_0d1933fc98ee76f0006949abac3b9c8195991158c23d708e49",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3324,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1856,
+    "output_tokens_details": {
+      "reasoning_tokens": 319
+    },
+    "total_tokens": 5180
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0d1933fc98ee76f0006949abad10dc8195adce1940b024bc44",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d1933fc98ee76f0006949abb424c88195a1b98c4be1da4668",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\r\nimport json, textwrap, os, re\r\n\r\ntarget_path = Path('/mnt/data').joinpath('src/plotting.py')\r\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\r\n\r\nchunks = []\r\n\r\nchunks.append(\"\"\"\\\r\n\\\"\\\"\\\"Centralized plotting helpers.\r\n\r\nDesign goals:\r\n- Consistent, publication-style matplotlib defaults.\r\n- Deterministic, reproducible saves (stable filenames + fixed DPI/layout).\r\n- Minimal surface area: helpers used by experiment scripts.\r\n\\\"\\\"\\\"\r\n\"\"\")\r\n\r\nchunks.append(\"\"\"\\\r\nfrom __future__ import annotations\r\n\r\nfrom dataclasses import dataclass\r\nfrom pathlib import Path\r\nimport re\r\nfrom typing import Iterable, Optional, Sequence, Tuple\r\n\r\nimport matplotlib as mpl\r\nimport matplotlib.pyplot as plt\r\n\"\"\")\r\n\r\nchunks.append(\"\"\"\\\r\n_DEFAULT_RC = {\r\n    # Typography / sizing\r\n    \"font.size\": 10.0,\r\n    \"axes.titlesize\": 11.0,\r\n    \"axes.labelsize\": 10.0,\r\n    \"legend.fontsize\": 9.0,\r\n    \"xtick.labelsize\": 9.0,\r\n    \"ytick.labelsize\": 9.0,\r\n    \"figure.dpi\": 120,\r\n    \"savefig.dpi\": 300,\r\n    # Clean look\r\n    \"axes.spines.top\": False,\r\n    \"axes.spines.right\": False,\r\n    \"axes.grid\": True,\r\n    \"grid.alpha\": 0.25,\r\n    \"grid.linewidth\": 0.7,\r\n    \"axes.axisbelow\": True,\r\n    \"lines.linewidth\": 1.8,\r\n    \"lines.markersize\": 4.5,\r\n    \"legend.frameon\": False,\r\n    # Determinism / stability across backends\r\n    \"figure.constrained_layout.use\": True,\r\n    \"path.simplify\": True,\r\n}\r\n\"\"\")\r\n\r\nchunks.append(\"\"\"\\\r\ndef set_mpl_defaults(style: Optional[str] = \"default\") -> None:\r\n    \\\"\\\"\\\"Apply consistent defaults once per process.\r\n\r\n    Parameters\r\n    ----------\r\n    style:\r\n        Matplotlib style name. Use \\\"default\\\" for predictable output.\r\n    \\\"\\\"\\\"\r\n    if style is not None:\r\n        plt.style.use(style)\r\n    mpl.rcParams.update(_DEFAULT_RC)\r\n\"\"\")\r\n\r\nchunks.append(\"\"\"\\\r\ndef slugify(name: str) -> str:\r\n    \\\"\\\"\\\"Convert a label into a safe, deterministic filename stem.\\\"\\\"\\\"\r\n    name = name.strip().lower()\r\n    name = re.sub(r\\\"[^a-z0-9]+\\\", \\\"_\\\", name)\r\n    name = re.sub(r\\\"_+\\\", \\\"_\\\", name).strip(\\\"_\\\")\r\n    return name or \\\"figure\\\"\r\n\"\"\")\r\n\r\nchunks.append(\"\"\"\\\r\n@dataclass(frozen=True)\r\nclass SaveSpec:\r\n    outdir: Path\r\n    stem: str\r\n    formats: Tuple[str, ...] = (\\\"png\\\", \\\"pdf\\\")\r\n    dpi: int = 300\r\n\r\n    def paths(self) -> Tuple[Path, ...]:\r\n        s = slugify(self.stem)\r\n        return tuple(self.outdir / f\\\"{s}.{ext.lstrip('.')}\\\" for ext in self.formats)\r\n\"\"\")\r\n\r\nchunks.append(\"\"\"\\\r\ndef figure(\r\n    *,\r\n    figsize: Tuple[float, float] = (5.4, 3.4),\r\n    nrows: int = 1,\r\n    ncols: int = 1,\r\n    sharex: bool | str = False,\r\n    sharey: bool | str = False,\r\n) -> Tuple[plt.Figure, plt.Axes]:\r\n    \\\"\\\"\\\"Create a figure with project defaults applied.\\\"\\\"\\\"\r\n    set_mpl_defaults()\r\n    fig, ax = plt.subplots(\r\n        nrows=nrows,\r\n        ncols=ncols,\r\n        figsize=figsize,\r\n        sharex=sharex,\r\n        sharey=sharey,\r\n    )\r\n    return fig, ax\r\n\"\"\")\r\n\r\nchunks.append(\"\"\"\\\r\ndef save_figure(\r\n    fig: plt.Figure,\r\n    spec: SaveSpec,\r\n    *,\r\n    close: bool = True,\r\n    bbox_inches: str = \\\"tight\\\",\r\n    pad_inches: float = 0.02,\r\n) -> Tuple[Path, ...]:\r\n    \\\"\\\"\\\"Save a figure deterministically to an output directory.\r\n\r\n    Notes on determinism:\r\n    - Fixed DPI + tight bounding box for stable rasterization.\r\n    - Sanitized file stem via `slugify`.\r\n    - Metadata is minimized (where supported) to avoid timestamp churn.\r\n    \\\"\\\"\\\"\r\n    spec.outdir.mkdir(parents=True, exist_ok=True)\r\n\r\n    # Supported by PDF/SVG/PS; ignored by PNG on many setups but harmless.\r\n    metadata = {\\\"Creator\\\": \\\"generated_script\\\", \\\"CreationDate\\\": None, \\\"Date\\\": None}\r\n\r\n    paths = spec.paths()\r\n    for path in paths:\r\n        ext = path.suffix.lower().lstrip(\\\".\\\")\r\n        fig.savefig(\r\n            path,\r\n            dpi=spec.dpi,\r\n            bbox_inches=bbox_inches,\r\n            pad_inches=pad_inches,\r\n            metadata=metadata if ext in {\\\"pdf\\\", \\\"svg\\\", \\\"ps\\\", \\\"eps\\\"} else None,\r\n            transparent=False,\r\n        )\r\n    if close:\r\n        plt.close(fig)\r\n    return paths\r\n\"\"\")\r\n\r\nchunks.append(\"\"\"\\\r\ndef save_simple(\r\n    x: Sequence[float],\r\n    y: Sequence[float],\r\n    *,\r\n    outdir: Path,\r\n    stem: str,\r\n    xlabel: str = \\\"x\\\",\r\n    ylabel: str = \\\"y\\\",\r\n    title: Optional[str] = None,\r\n    formats: Iterable[str] = (\\\"png\\\", \\\"pdf\\\"),\r\n) -> Tuple[Path, ...]:\r\n    \\\"\\\"\\\"Convenience: one-line plot + save (useful for quick diagnostics).\\\"\\\"\\\"\r\n    fig, ax = figure()\r\n    ax.plot(x, y)\r\n    ax.set_xlabel(xlabel)\r\n    ax.set_ylabel(ylabel)\r\n    if title:\r\n        ax.set_title(title)\r\n    return save_figure(fig, SaveSpec(Path(outdir), stem, tuple(formats)))\r\n\"\"\")\r\n\r\nchunks.append(\"\"\"\\\r\nif __name__ == \\\"__main__\\\":\r\n    # Minimal self-test / example: writes to ./output relative to CWD.\r\n    import numpy as np\r\n\r\n    xs = np.linspace(0, 2 * np.pi, 400)\r\n    ys = np.sin(xs) * np.exp(-0.15 * xs)\r\n    save_simple(\r\n        xs,\r\n        ys,\r\n        outdir=Path(\\\"output\\\"),\r\n        stem=\\\"example_damped_sine\\\",\r\n        xlabel=\\\"x\\\",\r\n        ylabel=\\\"sin(x) e^{-0.15x}\\\",\r\n        title=\\\"Example plot (deterministic save)\\\",\r\n    )\r\n\"\"\")\r\n\r\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\r\ntarget_path.write_text(final_text, encoding='utf-8')\r\n\r\nprint('FILE_WRITTEN:src/plotting.py')\r\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949aa2cd9908190a540c44a4880beb40f550cedb5ceca86",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/plotting.py\nDIR_STATE:[\"src/plotting.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0d1933fc98ee76f0006949abc7b87c8195b655b5701180b67e",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/plotting.py` with compact, reusable matplotlib helpers that enforce consistent publication-style defaults and provide deterministic figure saving via `SaveSpec`, `save_figure`, and a quick `save_simple` convenience wrapper (including a minimal `__main__` example)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

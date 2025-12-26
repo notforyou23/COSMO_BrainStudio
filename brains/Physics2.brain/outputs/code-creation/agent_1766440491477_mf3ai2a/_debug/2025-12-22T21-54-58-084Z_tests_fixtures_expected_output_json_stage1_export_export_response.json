@@ -1,0 +1,56 @@
+{
+  "content": "FILE_EXPORT:{\"path\":\"tests/fixtures/expected_output.json\",\"size\":105,\"encoding\":\"base64\",\"sha256\":\"d6f36d579e9e3efa3592481eacd156f82446211c6f3ccfd8a7cc488a04944d16\",\"content\":\"ewogICJhY2N1cmFjeSI6IDAuMCwKICAiZGF0YXNldF9wYXRoIjogImV4YW1wbGVzL2V4YW1wbGVfZGF0YXNldC5qc29uIiwKICAibl9pdGVtcyI6IDAsCiAgInNjb3JlcyI6IFtdCn0K\"}\nDIR_STATE:[\"tests/fixtures/expected_output.json\"]",
+  "reasoning": "",
+  "responseId": "resp_0712283afe705e33006949c086a67c81949b80397ba5224f2c",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 1476,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 452,
+    "output_tokens_details": {
+      "reasoning_tokens": 42
+    },
+    "total_tokens": 1928
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0712283afe705e33006949c0876ce48194800987d7b8e66635",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0712283afe705e33006949c0887e408194be5b424899fb7b3a",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport base64, json, hashlib, gzip\n\ntarget_path = Path('/mnt/data').joinpath('tests/fixtures/expected_output.json')\nassert target_path.is_file(), 'Expected tests/fixtures/expected_output.json to exist before export'\ndata = target_path.read_bytes()\npayload = {\n    'path': 'tests/fixtures/expected_output.json',\n    'size': len(data),\n    'encoding': 'base64',\n    'sha256': hashlib.sha256(data).hexdigest(),\n    'content': None\n}\nif len(data) > 20000:\n    compressed = gzip.compress(data)\n    payload['encoding'] = 'gzip+base64'\n    payload['content'] = base64.b64encode(compressed).decode('ascii')\nelse:\n    payload['content'] = base64.b64encode(data).decode('ascii')\n\nprint('FILE_EXPORT:' + json.dumps(payload, separators=(',', ':')))\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949be2fa9948190b7fd0f89484479600a95eb5fa105098f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_EXPORT:{\"path\":\"tests/fixtures/expected_output.json\",\"size\":105,\"encoding\":\"base64\",\"sha256\":\"d6f36d579e9e3efa3592481eacd156f82446211c6f3ccfd8a7cc488a04944d16\",\"content\":\"ewogICJhY2N1cmFjeSI6IDAuMCwKICAiZGF0YXNldF9wYXRoIjogImV4YW1wbGVzL2V4YW1wbGVfZGF0YXNldC5qc29uIiwKICAibl9pdGVtcyI6IDAsCiAgInNjb3JlcyI6IFtdCn0K\"}\nDIR_STATE:[\"tests/fixtures/expected_output.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0712283afe705e33006949c08d50e881949c40b24d59bcc8ab",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_EXPORT:{\"path\":\"tests/fixtures/expected_output.json\",\"size\":105,\"encoding\":\"base64\",\"sha256\":\"d6f36d579e9e3efa3592481eacd156f82446211c6f3ccfd8a7cc488a04944d16\",\"content\":\"ewogICJhY2N1cmFjeSI6IDAuMCwKICAiZGF0YXNldF9wYXRoIjogImV4YW1wbGVzL2V4YW1wbGVfZGF0YXNldC5qc29uIiwKICAibl9pdGVtcyI6IDAsCiAgInNjb3JlcyI6IFtdCn0K\"}\nDIR_STATE:[\"tests/fixtures/expected_output.json\"]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

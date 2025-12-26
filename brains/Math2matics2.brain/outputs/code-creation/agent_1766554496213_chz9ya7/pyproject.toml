@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "generated_script_1766554221975"
+version = "0.1.0"
+description = "Deterministic pipeline producing results.json and figure.png with reproducible tests."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Generated"}]
+dependencies = [
+  "numpy>=1.26,<3",
+  "matplotlib>=3.8,<4",
+  "pillow>=10,<12",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8,<9",
+  "pytest-cov>=5,<7",
+]
+
+[project.scripts]
+run-pipeline = "main:main"
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+pythonpath = ["src"]
+filterwarnings = [
+  "error",
+  "ignore:.*Matplotlib is currently using agg.*:UserWarning",
+]
+[tool.coverage.run]
+branch = true
+source = ["src"]

@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/lib/graphs.py` with concise, reproducible helpers to construct lattice/causal-like graphs, compute shortest-path distances, map an entanglement matrix onto edge weights (distance-like), and compute small emergent-geometry diagnostics (mean distance/diameter/clustering).",
+  "reasoning": "",
+  "responseId": "resp_048c870a7b1b729c006949982be53c8193b078d01ebdd2c75e",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3805,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2291,
+    "output_tokens_details": {
+      "reasoning_tokens": 150
+    },
+    "total_tokens": 6096
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_048c870a7b1b729c006949982c95d08193afd3fa30bc680330",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_048c870a7b1b729c0069499830fc2c8193bbdd4c639c90a82c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/lib/graphs.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\\\n\\\"\\\"\\\"Graph helpers for emergent-geometry toy diagnostics.\n\nThe experiments in this repo use small graphs (lattices / causal-like DAGs) as\nstand-ins for discrete substrate structure. This module provides:\n- constructors for simple graphs,\n- shortest-path distance utilities,\n- mapping of an \"entanglement\" matrix onto edge weights + derived distances.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Union\n\nimport numpy as np\nimport networkx as nx\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef grid_2d_graph(\n    Lx: int,\n    Ly: int,\n    *,\n    periodic: bool = False,\n    diagonal: bool = False,\n) -> nx.Graph:\n    \\\"\\\"\\\"Return an Lx x Ly undirected grid graph.\n\n    Nodes are integer tuples (x, y). If periodic=True, boundaries wrap.\n    If diagonal=True, add (x±1,y±1) neighbors as well (Chebyshev adjacency).\n    \\\"\\\"\\\"\n    if Lx <= 0 or Ly <= 0:\n        raise ValueError(\\\"Lx and Ly must be positive\\\")\n    G = nx.Graph()\n    for x in range(Lx):\n        for y in range(Ly):\n            G.add_node((x, y))\n            for dx, dy in [(1, 0), (0, 1)]:\n                nx_, ny_ = x + dx, y + dy\n                if periodic:\n                    nx_, ny_ = nx_ % Lx, ny_ % Ly\n                if 0 <= nx_ < Lx and 0 <= ny_ < Ly:\n                    G.add_edge((x, y), (nx_, ny_))\n            if diagonal:\n                for dx, dy in [(1, 1), (1, -1)]:\n                    nx_, ny_ = x + dx, y + dy\n                    if periodic:\n                        nx_, ny_ = nx_ % Lx, ny_ % Ly\n                    if 0 <= nx_ < Lx and 0 <= ny_ < Ly:\n                        G.add_edge((x, y), (nx_, ny_))\n    return G\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef ring_graph(n: int, *, k: int = 1) -> nx.Graph:\n    \\\"\\\"\\\"Return an undirected ring with n nodes and k-nearest neighbor edges.\\\"\\\"\\\"\n    if n <= 2:\n        raise ValueError(\\\"n must be > 2\\\")\n    if k <= 0 or k >= n // 2 + 1:\n        raise ValueError(\\\"k must be in [1, floor(n/2)]\\\")\n    G = nx.Graph()\n    G.add_nodes_from(range(n))\n    for i in range(n):\n        for d in range(1, k + 1):\n            G.add_edge(i, (i + d) % n)\n    return G\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef random_causal_dag(\n    n: int,\n    p: float,\n    *,\n    seed: Optional[int] = None,\n    time_order: Optional[Sequence[int]] = None,\n) -> nx.DiGraph:\n    \\\"\\\"\\\"Return a simple random DAG respecting a time ordering.\n\n    Edges only go forward in the provided order (default: 0..n-1). For each\n    ordered pair (i<j) an edge is included with probability p.\n    \\\"\\\"\\\"\n    if n <= 0:\n        raise ValueError(\\\"n must be positive\\\")\n    if not (0.0 <= p <= 1.0):\n        raise ValueError(\\\"p must be in [0,1]\\\")\n    order = list(range(n)) if time_order is None else list(time_order)\n    if len(order) != n or len(set(order)) != n:\n        raise ValueError(\\\"time_order must be a permutation of n labels\\\")\n    rng = np.random.default_rng(seed)\n    pos = {node: t for t, node in enumerate(order)}\n    G = nx.DiGraph()\n    G.add_nodes_from(order)\n    for a in order:\n        for b in order:\n            if pos[a] < pos[b] and rng.random() < p:\n                G.add_edge(a, b)\n    return G\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef shortest_path_distances(\n    G: Union[nx.Graph, nx.DiGraph],\n    *,\n    weight: Optional[str] = None,\n) -> Dict[Tuple[object, object], float]:\n    \\\"\\\"\\\"All-pairs shortest path distances as a flat dict keyed by (u,v).\\\"\\\"\\\"\n    d: Dict[Tuple[object, object], float] = {}\n    for u, dist_u in nx.all_pairs_dijkstra_path_length(G, weight=weight):\n        for v, dv in dist_u.items():\n            d[(u, v)] = float(dv)\n    return d\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef entanglement_weighted_graph(\n    base: Union[nx.Graph, nx.DiGraph],\n    E: np.ndarray,\n    *,\n    nodes: Optional[Sequence[object]] = None,\n    mode: str = \\\"neglog\\\",\n    eps: float = 1e-12,\n) -> Union[nx.Graph, nx.DiGraph]:\n    \\\"\\\"\\\"Copy base graph and assign edge weight from entanglement matrix E.\n\n    Parameters\n    ----------\n    base:\n        Graph defining which edges exist.\n    E:\n        NxN matrix (not necessarily symmetric) giving entanglement strength.\n    nodes:\n        Optional explicit node ordering matching E. Default: list(base.nodes()).\n    mode:\n        How to convert entanglement to distance-like edge weights:\n        - \\\"neglog\\\": w = -log(E+eps)  (large E -> short edge)\n        - \\\"inv\\\":    w = 1/(E+eps)\n        - \\\"one_minus\\\": w = 1 - clip(E,0,1)\n    eps:\n        Small constant for numerical stability.\n\n    Returns\n    -------\n    Graph with edge attribute 'weight'.\n    \\\"\\\"\\\"\n    node_list = list(base.nodes()) if nodes is None else list(nodes)\n    n = len(node_list)\n    E = np.asarray(E, dtype=float)\n    if E.shape != (n, n):\n        raise ValueError(f\\\"E must have shape ({n},{n}), got {E.shape}\\\")\n    idx = {node: i for i, node in enumerate(node_list)}\n    H = base.copy()\n    for u, v in H.edges():\n        euv = float(E[idx[u], idx[v]])\n        if mode == \\\"neglog\\\":\n            w = -np.log(max(euv, 0.0) + eps)\n        elif mode == \\\"inv\\\":\n            w = 1.0 / (euv + eps)\n        elif mode == \\\"one_minus\\\":\n            w = 1.0 - float(np.clip(euv, 0.0, 1.0))\n        else:\n            raise ValueError(\\\"mode must be one of: neglog, inv, one_minus\\\")\n        H.edges[u, v][\\\"entanglement\\\"] = euv\n        H.edges[u, v][\\\"weight\\\"] = float(w)\n    return H\n\"\"\")\n\nchunks.append(\"\"\"\\\n@dataclass(frozen=True)\nclass GeometryDiagnostics:\n    \\\"\\\"\\\"Lightweight emergent-geometry summary statistics.\\\"\\\"\\\"\n\n    n: int\n    m: int\n    mean_distance: float\n    diameter: float\n    clustering: float\n\n\ndef geometry_diagnostics(\n    G: Union[nx.Graph, nx.DiGraph],\n    *,\n    weight: Optional[str] = None,\n    sample: Optional[int] = None,\n    seed: Optional[int] = None,\n) -> GeometryDiagnostics:\n    \\\"\\\"\\\"Compute a small set of diagnostics for emergent geometry.\n\n    If sample is provided, estimate mean distance using that many random sources.\n    Diameter is computed exactly for small graphs; for large graphs consider\n    using sample to keep runtime predictable.\n    \\\"\\\"\\\"\n    nodes = list(G.nodes())\n    n = len(nodes)\n    m = G.number_of_edges()\n    if n == 0:\n        return GeometryDiagnostics(0, 0, float(\\\"nan\\\"), float(\\\"nan\\\"), float(\\\"nan\\\"))\n    rng = np.random.default_rng(seed)\n    sources = nodes if (sample is None or sample >= n) else list(rng.choice(nodes, size=sample, replace=False))\n    dists: List[float] = []\n    diam = 0.0\n    for s in sources:\n        dist_s = nx.single_source_dijkstra_path_length(G, s, weight=weight)\n        vals = [float(v) for v in dist_s.values()]\n        if len(vals) > 1:\n            dists.extend(vals)\n            diam = max(diam, max(vals))\n    mean_d = float(np.mean(dists)) if dists else 0.0\n    clust = float(nx.average_clustering(G.to_undirected())) if n >= 3 else 0.0\n    return GeometryDiagnostics(n=n, m=m, mean_distance=mean_d, diameter=float(diam), clustering=clust)\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/lib/graphs.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694996cf1f0881908fd6ebe4e5dd54140c8f193d7d2aa5f8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/lib/graphs.py\nDIR_STATE:[\"src/lib/graphs.py\", \"src/lib/quantum_states.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_048c870a7b1b729c006949984c5af08193bd0d3c90aa4a1685",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/lib/graphs.py` with concise, reproducible helpers to construct lattice/causal-like graphs, compute shortest-path distances, map an entanglement matrix onto edge weights (distance-like), and compute small emergent-geometry diagnostics (mean distance/diameter/clustering)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

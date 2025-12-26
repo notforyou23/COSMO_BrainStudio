@@ -1,0 +1,74 @@
+{
+  "content": "Created `tools/validate_benchmark_outputs.py`, a self-contained CLI that discovers JSON benchmark outputs under `outputs/`, validates them against `outputs/schemas/benchmark_schema.json` using Draft 2020-12, and fails with readable per-file JSON-path errors plus an explicit warning when files look like deprecated legacy/ad-hoc formats.",
+  "reasoning": "",
+  "responseId": "resp_0e8213201ee135b8006949aaa953388194bda837c599bd6abd",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3796,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2260,
+    "output_tokens_details": {
+      "reasoning_tokens": 730
+    },
+    "total_tokens": 6056
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0e8213201ee135b8006949aaaa28b48194a88e51808f35b071",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0e8213201ee135b8006949aab1b2f48194b8a876ae61e698d5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nroot=Path(\"/mnt/data\")\nlist(root.glob(\"**/*\"))[:20], sum(1 for _ in root.rglob(\"*\"))\n",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "([PosixPath('/mnt/data/tools'), PosixPath('/mnt/data/tools/schema_docs.py')],\n 2)"
+        }
+      ]
+    },
+    {
+      "id": "rs_0e8213201ee135b8006949aabba39c8194b8316844f0e7b427",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0e8213201ee135b8006949aac772548194815ff6596ad7333f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('tools/validate_benchmark_outputs.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\nr\"\"\"#!/usr/bin/env python3\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport sys\nfrom pathlib import Path\n\ntry:\n    import jsonschema\nexcept Exception as e:  # pragma: no cover\n    raise SystemExit(f\"ERROR: jsonschema is required (pip install jsonschema). Detail: {e}\")\"\"\",\nr\"\"\"LEGACY_NAME_HINTS = {\n    \"results.json\",\n    \"output.json\",\n    \"metrics.json\",\n    \"eval.json\",\n}\nLEGACY_KEY_SETS = [\n    {\"config\", \"results\"},\n    {\"metrics\", \"metadata\"},\n    {\"scores\", \"details\"},\n]\n\n\ndef _discover_json_files(root: Path) -> list[Path]:\n    candidates = []\n    for p in root.rglob(\"*.json\"):\n        rp = p.as_posix()\n        if \"/.git/\" in rp or \"/.venv/\" in rp or \"/node_modules/\" in rp:\n            continue\n        if rp.endswith(\"/outputs/schemas/benchmark_schema.json\") or \"/outputs/schemas/\" in rp:\n            continue\n        if \"/outputs/\" in rp:\n            candidates.append(p)\n    return sorted(candidates)\n\n\ndef _fmt_path(path_parts) -> str:\n    if not path_parts:\n        return \"$\"\n    out = \"$\"\n    for part in path_parts:\n        if isinstance(part, int):\n            out += f\"[{part}]\"\n        else:\n            out += \".\" + str(part)\n    return out\n\n\ndef _looks_legacy(path: Path, obj) -> bool:\n    name = path.name.lower()\n    if name in LEGACY_NAME_HINTS or any(name.endswith(suf) for suf in (\"_results.json\", \"-results.json\")):\n        return True\n    if isinstance(obj, dict):\n        keys = set(obj.keys())\n        if any(ks.issubset(keys) for ks in LEGACY_KEY_SETS):\n            return True\n        if \"schema_version\" in keys and \"$schema\" not in keys:\n            return True\n    return False\"\"\",\nr\"\"\"def _load_schema(schema_path: Path) -> dict:\n    if not schema_path.exists():\n        raise SystemExit(f\"ERROR: Schema not found: {schema_path}\")\n    try:\n        return json.loads(schema_path.read_text(encoding=\"utf-8\"))\n    except Exception as e:\n        raise SystemExit(f\"ERROR: Failed to read schema JSON: {schema_path} ({e})\")\n\n\ndef _validator(schema: dict, schema_path: Path):\n    base_uri = schema_path.resolve().as_uri()\n    resolver = jsonschema.RefResolver(base_uri=base_uri, referrer=schema)  # for local refs\n    return jsonschema.Draft202012Validator(schema, resolver=resolver)\n\n\ndef _validate_file(p: Path, v, schema_name: str) -> list[str]:\n    try:\n        data = json.loads(p.read_text(encoding=\"utf-8\"))\n    except Exception as e:\n        return [f\"{p}: invalid JSON ({e})\"]\n    errors = sorted(v.iter_errors(data), key=lambda e: (len(list(e.absolute_path)), str(e.absolute_path)))\n    msgs = []\n    if errors:\n        for e in errors[:50]:\n            at = _fmt_path(e.absolute_path)\n            msg = e.message\n            if e.validator == \"required\" and isinstance(e.validator_value, list):\n                missing = \", \".join(e.validator_value)\n                msg = f\"missing required field(s): {missing}\"\n            msgs.append(f\"{p}:{at}: {msg}\")\n        extra = \"\" if len(errors) <= 50 else f\" (showing first 50 of {len(errors)})\"\n        msgs.append(f\"{p}: does not match {schema_name}{extra}\")\n    if _looks_legacy(p, data) and errors:\n        msgs.append(\n            f\"{p}: appears to be a deprecated legacy/ad-hoc format. \"\n            \"Migrate to the canonical benchmark output schema and rename away from generic \"\n            \"names like results.json/output.json.\"\n        )\n    return msgs\"\"\",\nr\"\"\"def main(argv: list[str] | None = None) -> int:\n    ap = argparse.ArgumentParser(\n        description=\"Validate benchmark output JSON files against outputs/schemas/benchmark_schema.json.\"\n    )\n    ap.add_argument(\"paths\", nargs=\"*\", help=\"Files or directories to scan (default: repo root).\")\n    ap.add_argument(\n        \"--schema\",\n        default=\"outputs/schemas/benchmark_schema.json\",\n        help=\"Path to JSON Schema (default: outputs/schemas/benchmark_schema.json).\",\n    )\n    ap.add_argument(\"--fail-on-empty\", action=\"store_true\", help=\"Fail if no candidate JSON files are found.\")\n    args = ap.parse_args(argv)\n\n    root = Path.cwd()\n    schema_path = (root / args.schema).resolve()\n    schema = _load_schema(schema_path)\n    v = _validator(schema, schema_path)\n\n    targets: list[Path] = []\n    if args.paths:\n        for s in args.paths:\n            p = Path(s)\n            if p.is_dir():\n                targets.extend([q for q in p.rglob(\"*.json\") if q.is_file()])\n            elif p.is_file():\n                targets.append(p)\n    else:\n        targets = _discover_json_files(root)\n\n    targets = [t for t in sorted(set(t.resolve() for t in targets)) if t.suffix.lower() == \".json\"]\n    if not targets:\n        if args.fail_on_empty:\n            print(\"ERROR: No benchmark output JSON files discovered.\", file=sys.stderr)\n            return 2\n        print(\"OK: No benchmark output JSON files discovered.\")\n        return 0\n\n    schema_name = schema.get(\"$id\") or schema_path.as_posix()\n    all_msgs: list[str] = []\n    for p in targets:\n        if p.resolve() == schema_path:\n            continue\n        all_msgs.extend(_validate_file(p, v, schema_name))\n\n    if all_msgs:\n        print(\"VALIDATION_FAILED:\")\n        for m in all_msgs:\n            print(\" - \" + m, file=sys.stderr)\n        print(f\"Checked {len(targets)} file(s): FAIL\", file=sys.stderr)\n        return 1\n    print(f\"Checked {len(targets)} file(s): OK\")\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:tools/validate_benchmark_outputs.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tools/validate_benchmark_outputs.py\nDIR_STATE:[\"tools/schema_docs.py\", \"tools/validate_benchmark_outputs.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0e8213201ee135b8006949aae089548194a2f2cb20208a2c7c",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tools/validate_benchmark_outputs.py`, a self-contained CLI that discovers JSON benchmark outputs under `outputs/`, validates them against `outputs/schemas/benchmark_schema.json` using Draft 2020-12, and fails with readable per-file JSON-path errors plus an explicit warning when files look like deprecated legacy/ad-hoc formats."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

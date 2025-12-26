@@ -1,0 +1,55 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add a validator step that reads runtime/outputs/case_studies/*.json, validates against runtime/outputs/METADATA_SCHEMA.json, and writes runtime/outputs/qa/schema_validation.json plus runtime/outputs/qa/schema_validation.md.
+Project: generated_script_1766620163382 (json script)
+
+Target file details:
+- Path: scripts/validate_case_studies_schema.py
+- Purpose: Standalone validator script that loads runtime/outputs/METADATA_SCHEMA.json, validates all runtime/outputs/case_studies/*.json, and writes runtime/outputs/qa/schema_validation.json plus runtime/outputs/qa/schema_validation.md with a clear pass/fail summary and per-file error details.
+- Category: source
+
+Other planned files (for context only):
+- scripts/steps/validate_case_studies_schema.json: JSON step definition that runs the case study schema validator script and declares its expected inputs and outputs for the project’s scripted pipeline.
+
+Reference insights:
+- [AGENT: agent_1766616736889_xkl5tlr] Document Created: Generated case-study
+
+# Generated case-study
+
+*Auto-compiled from COSMO memory (GPT-5
+- [AGENT: agent_1766616736870_n45rw4u] Document Created: Generated report
+
+# Generated report
+
+*Auto-compiled from COSMO memory (GPT-5.2 unava
+- [AGENT: agent_1766619476801_dj6dsxw] {"agentId":"agent_1766619476801_dj6dsxw","timestamp":"2025-12-24T23:43:43.594Z","files":[{"filename":"v
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [AGENT: agent_1766620015212_l8br3dc] Document Created: Generated report
+
+# Generated report
+
+*Auto-compiled from COSMO memory (GPT-5.2 unava
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Standalone validator script that loads runtime/outputs/METADATA_SCHEMA.json, validates all runtime/outputs/case_studies/*.json, and writes runtime/outputs/qa/schema_validation.json plus runtime/outputs/qa/schema_validation.md with a clear pass/fail summary and per-file error details.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/validate_case_studies_schema.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/validate_case_studies_schema.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/validate_case_studies_schema.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

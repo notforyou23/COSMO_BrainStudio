@@ -1,0 +1,51 @@
+{
+  "content": "Created `qg_bench/schema.json`, a JSON Schema (draft 2020-12) that defines the standardized benchmark results structure with required top-level fields plus deterministic hash and environment metadata requirements.",
+  "reasoning": "",
+  "responseId": "resp_06c69037580406710069499bae400c8190bad6264feaa92261",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2607,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1094,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 3701
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "ci_06c69037580406710069499baf5044819080546999c3beeb1d",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('qg_bench/schema.json')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\nr'''{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"$id\": \"https://example.org/qg_bench/results.schema.json\",\n  \"title\": \"qg_bench standardized benchmark results\",\n  \"type\": \"object\",\n  \"additionalProperties\": false,\n  \"required\": [\"schema_version\", \"benchmark\", \"run\", \"dataset\", \"results\", \"metadata\"],\n  \"properties\": {\n    \"schema_version\": { \"type\": \"string\", \"pattern\": \"^1\\\\.[0-9]+\\\\.[0-9]+$\" },\n    \"benchmark\": {\n      \"type\": \"object\",\n      \"additionalProperties\": false,\n      \"required\": [\"name\", \"observables\"],\n      \"properties\": {\n        \"name\": { \"type\": \"string\", \"minLength\": 1 },\n        \"observables\": {\n          \"type\": \"array\",\n          \"minItems\": 1,\n          \"items\": { \"type\": \"string\", \"minLength\": 1 }\n        },\n        \"description\": { \"type\": \"string\" }\n      }\n    },\n    \"run\": {\n      \"type\": \"object\",\n      \"additionalProperties\": false,\n      \"required\": [\"started_at\", \"finished_at\", \"duration_s\"],\n      \"properties\": {\n        \"started_at\": { \"type\": \"string\", \"format\": \"date-time\" },\n        \"finished_at\": { \"type\": \"string\", \"format\": \"date-time\" },\n        \"duration_s\": { \"type\": \"number\", \"minimum\": 0 }\n      }\n    },\n    \"dataset\": {\n      \"type\": \"object\",\n      \"additionalProperties\": false,\n      \"required\": [\"name\", \"records\", \"hashes\"],\n      \"properties\": {\n        \"name\": { \"type\": \"string\", \"minLength\": 1 },\n        \"records\": { \"type\": \"integer\", \"minimum\": 0 },\n        \"source\": { \"type\": \"string\" },\n        \"hashes\": {\n          \"type\": \"object\",\n          \"additionalProperties\": false,\n          \"required\": [\"dataset_sha256\"],\n          \"properties\": {\n            \"dataset_sha256\": { \"type\": \"string\", \"pattern\": \"^[a-f0-9]{64}$\" }\n          }\n        }\n      }\n    },\n    \"results\": {\n      \"type\": \"object\",\n      \"additionalProperties\": false,\n      \"required\": [\"observables\"],\n      \"properties\": {\n        \"observables\": {\n          \"type\": \"object\",\n          \"additionalProperties\": false,\n          \"properties\": {\n            \"accuracy\": { \"type\": \"number\", \"minimum\": 0, \"maximum\": 1 },\n            \"mean_latency_ms\": { \"type\": \"number\", \"minimum\": 0 }\n          }\n        },\n        \"notes\": { \"type\": \"string\" }\n      }\n    },\n    \"metadata\": {\n      \"type\": \"object\",\n      \"additionalProperties\": false,\n      \"required\": [\"hashes\", \"environment\"],\n      \"properties\": {\n        \"hashes\": {\n          \"type\": \"object\",\n          \"additionalProperties\": false,\n          \"required\": [\"schema_sha256\", \"config_sha256\", \"results_sha256\"],\n          \"properties\": {\n            \"schema_sha256\": { \"type\": \"string\", \"pattern\": \"^[a-f0-9]{64}$\" },\n            \"config_sha256\": { \"type\": \"string\", \"pattern\": \"^[a-f0-9]{64}$\" },\n            \"results_sha256\": { \"type\": \"string\", \"pattern\": \"^[a-f0-9]{64}$\" }\n          }\n        },\n        \"environment\": {\n          \"type\": \"object\",\n          \"additionalProperties\": true,\n          \"required\": [\"python_version\", \"platform\"],\n          \"properties\": {\n            \"python_version\": { \"type\": \"string\", \"minLength\": 1 },\n            \"platform\": { \"type\": \"string\", \"minLength\": 1 }\n          }\n        },\n        \"generator\": {\n          \"type\": \"object\",\n          \"additionalProperties\": false,\n          \"properties\": {\n            \"name\": { \"type\": \"string\" },\n            \"version\": { \"type\": \"string\" }\n          }\n        }\n      }\n    }\n  }\n}'''\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:qg_bench/schema.json')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_69499b9ae2c081908ccd9fbfec7a37ba019f8e3dd8194ac9",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:qg_bench/schema.json\nDIR_STATE:[\"qg_bench/__init__.py\", \"qg_bench/schema.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_06c69037580406710069499bbe490c8190b78c751d6d8e8a4c",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `qg_bench/schema.json`, a JSON Schema (draft 2020-12) that defines the standardized benchmark results structure with required top-level fields plus deterministic hash and environment metadata requirements."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

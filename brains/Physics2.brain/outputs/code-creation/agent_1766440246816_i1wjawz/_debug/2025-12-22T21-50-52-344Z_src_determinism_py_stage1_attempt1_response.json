@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/determinism.py` with a deterministic-run policy that seeds Python `random`, NumPy, and (when available) PyTorch/TensorFlow, includes strict validation checks, and provides a `deterministic_run()` context manager that restores prior RNG states after benchmark execution.",
+  "reasoning": "",
+  "responseId": "resp_0f9148108c194712006949bd49df508197984c86a7c727142b",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3430,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1871,
+    "output_tokens_details": {
+      "reasoning_tokens": 400
+    },
+    "total_tokens": 5301
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0f9148108c194712006949bd4a98588197931cd78ec8e76cbf",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0f9148108c194712006949bd5413a48197ad017f92b822ce66",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os\n\ntarget_path = Path('/mnt/data').joinpath('src/determinism.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Deterministic-run policy for benchmarks.\n\nSets fixed RNG seeds across common frameworks and provides a context manager\nto enforce/restore deterministic settings for reproducible CI runs.\n\\\"\\\"\\\"\"\"\",\n\"\"\"from __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom contextlib import contextmanager\nfrom typing import Any, Dict, Iterator, Optional\nimport os\nimport random\"\"\",\n\"\"\"def _maybe_import(name: str):\n    try:\n        return __import__(name)\n    except Exception:\n        return None\"\"\",\n\"\"\"def _set_env_if_unset(key: str, value: str) -> None:\n    if os.environ.get(key) is None:\n        os.environ[key] = value\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass DeterminismPolicy:\n    seed: int = 0\n    enforce_torch_determinism: bool = True\n    enforce_tf_determinism: bool = True\n    strict: bool = True\n\n    def apply(self) -> None:\n        \\\"\\\"\\\"Apply deterministic settings for this process.\\\"\\\"\\\"\n        random.seed(self.seed)\n        np = _maybe_import(\"numpy\")\n        if np is not None:\n            np.random.seed(self.seed)\n\n        # Best-effort env vars; some must be set before import/initialization.\n        _set_env_if_unset(\"PYTHONHASHSEED\", str(self.seed))\n        _set_env_if_unset(\"CUBLAS_WORKSPACE_CONFIG\", \":4096:8\")  # for some CUDA libs\n        if self.enforce_tf_determinism:\n            _set_env_if_unset(\"TF_DETERMINISTIC_OPS\", \"1\")\n\n        torch = _maybe_import(\"torch\")\n        if torch is not None:\n            try:\n                torch.manual_seed(self.seed)\n                if hasattr(torch, \"cuda\") and torch.cuda.is_available():\n                    torch.cuda.manual_seed_all(self.seed)\n                if self.enforce_torch_determinism and hasattr(torch, \"use_deterministic_algorithms\"):\n                    torch.use_deterministic_algorithms(True)\n                if hasattr(torch, \"backends\") and hasattr(torch.backends, \"cudnn\"):\n                    torch.backends.cudnn.deterministic = True\n                    torch.backends.cudnn.benchmark = False\n            except Exception:\n                if self.strict:\n                    raise\n\n        tf = _maybe_import(\"tensorflow\")\n        if tf is not None:\n            try:\n                tf.random.set_seed(self.seed)\n                if self.enforce_tf_determinism and hasattr(tf.config.experimental, \"enable_op_determinism\"):\n                    tf.config.experimental.enable_op_determinism()\n            except Exception:\n                if self.strict:\n                    raise\n\n    def validate(self) -> None:\n        \\\"\\\"\\\"Validate that key RNGs are seeded as expected.\\\"\\\"\\\"\n        errors = []\n        # python/random\n        probe = random.Random(self.seed).randint(0, 2**31 - 1)\n        got = random.randint(0, 2**31 - 1)\n        if got != probe:\n            errors.append(f\\\"random mismatch: expected {probe}, got {got}\\\")\n\n        # numpy\n        np = _maybe_import(\"numpy\")\n        if np is not None:\n            try:\n                exp = np.random.RandomState(self.seed).randint(0, 2**31 - 1)\n                got_np = np.random.randint(0, 2**31 - 1)\n                if int(got_np) != int(exp):\n                    errors.append(f\\\"numpy mismatch: expected {exp}, got {got_np}\\\")\n            except Exception as e:\n                errors.append(f\\\"numpy validate error: {e}\\\")\n\n        if errors:\n            msg = \\\"DeterminismPolicy validation failed:\\\\n\\\" + \\\"\\\\n\\\".join(errors)\n            if self.strict:\n                raise RuntimeError(msg)\n            else:\n                print(msg)\"\"\",\n\"\"\"@contextmanager\ndef deterministic_run(seed: int = 0, strict: bool = True) -> Iterator[DeterminismPolicy]:\n    \\\"\\\"\\\"Context manager that applies determinism and restores RNG states.\\\"\\\"\\\"\n    np = _maybe_import(\"numpy\")\n    torch = _maybe_import(\"torch\")\n\n    py_state = random.getstate()\n    np_state = np.random.get_state() if np is not None else None\n    torch_cpu = torch.get_rng_state() if torch is not None else None\n    torch_cuda = None\n    if torch is not None and hasattr(torch, \"cuda\") and torch.cuda.is_available():\n        try:\n            torch_cuda = torch.cuda.get_rng_state_all()\n        except Exception:\n            torch_cuda = None\n\n    policy = DeterminismPolicy(seed=seed, strict=strict)\n    policy.apply()\n    policy.validate()\n    try:\n        yield policy\n    finally:\n        random.setstate(py_state)\n        if np is not None and np_state is not None:\n            np.random.set_state(np_state)\n        if torch is not None and torch_cpu is not None:\n            try:\n                torch.set_rng_state(torch_cpu)\n                if torch_cuda is not None and hasattr(torch, \"cuda\") and torch.cuda.is_available():\n                    torch.cuda.set_rng_state_all(torch_cuda)\n            except Exception:\n                if strict:\n                    raise\"\"\",\n\"\"\"def snapshot_determinism() -> Dict[str, Any]:\n    \\\"\\\"\\\"Return a small snapshot useful for debug logs/CI reports.\\\"\\\"\\\"\n    out: Dict[str, Any] = {\"PYTHONHASHSEED\": os.environ.get(\"PYTHONHASHSEED\")}\n    np = _maybe_import(\"numpy\")\n    if np is not None:\n        out[\"numpy_version\"] = getattr(np, \"__version__\", None)\n    torch = _maybe_import(\"torch\")\n    if torch is not None:\n        out[\"torch_version\"] = getattr(torch, \"__version__\", None)\n        try:\n            out[\"torch_cuda_available\"] = bool(torch.cuda.is_available())\n        except Exception:\n            out[\"torch_cuda_available\"] = None\n    tf = _maybe_import(\"tensorflow\")\n    if tf is not None:\n        out[\"tensorflow_version\"] = getattr(tf, \"__version__\", None)\n    return out\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/determinism.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd39c7008190b2d314f911169a74060596b8e6d512ff",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/determinism.py\nDIR_STATE:[\"src/determinism.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0f9148108c194712006949bd66ffa08197ba57e6f8eccb2342",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/determinism.py` with a deterministic-run policy that seeds Python `random`, NumPy, and (when available) PyTorch/TensorFlow, includes strict validation checks, and provides a `deterministic_run()` context manager that restores prior RNG states after benchmark execution."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

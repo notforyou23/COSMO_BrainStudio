@@ -1,0 +1,56 @@
+{
+  "content": "Created `src/utils/cli.py` with reusable argparse helpers to standardize output directory/file path flags plus overwrite and dry-run controls, including a resolver that returns concrete `Path` locations for `coverage_matrix.csv` and `eval_loop.md`.",
+  "reasoning": "",
+  "responseId": "resp_0f4fd750c7c95a2000694b5cbe7c748195a07144f1228f5d3a",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2664,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1139,
+    "output_tokens_details": {
+      "reasoning_tokens": 151
+    },
+    "total_tokens": 3803
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0f4fd750c7c95a2000694b5cbf5518819585b0b39f33379d99",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0f4fd750c7c95a2000694b5cc1b32c8195b5241f482caee179",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os\n\ntarget_path = Path('/mnt/data').joinpath('src/utils/cli.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\n\\\"\\\"\\\"Argument parsing helpers for the generator CLI.\n\nThis module centralizes common CLI flags used by scripts that deterministically\ngenerate artifacts into an output directory.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport argparse\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Iterable, Optional\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass OutputPaths:\n    \\\"\\\"\\\"Resolved output locations for generated artifacts.\\\"\\\"\\\"\n\n    out_dir: Path\n    coverage_matrix_csv: Path\n    eval_loop_md: Path\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\ndef _p(path: str) -> Path:\n    return Path(path).expanduser()\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\ndef add_output_args(parser: argparse.ArgumentParser) -> argparse.ArgumentParser:\n    \\\"\\\"\\\"Add standard output/overwrite controls to an existing parser.\\\"\\\"\\\"\n\n    grp = parser.add_argument_group(\"outputs\")\n    grp.add_argument(\n        \"--out-dir\",\n        type=_p,\n        default=Path(\"outputs\"),\n        help=\"Directory to write generated artifacts to (default: outputs).\",\n    )\n    grp.add_argument(\n        \"--coverage-matrix-path\",\n        type=_p,\n        default=None,\n        help=\"Explicit path for coverage_matrix.csv (default: <out-dir>/coverage_matrix.csv).\",\n    )\n    grp.add_argument(\n        \"--eval-loop-path\",\n        type=_p,\n        default=None,\n        help=\"Explicit path for eval_loop.md (default: <out-dir>/eval_loop.md).\",\n    )\n    grp.add_argument(\n        \"--overwrite\",\n        action=\"store_true\",\n        help=\"Allow overwriting existing output files.\",\n    )\n    grp.add_argument(\n        \"--dry-run\",\n        action=\"store_true\",\n        help=\"Parse arguments and print resolved paths without writing files.\",\n    )\n    return parser\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\ndef build_parser(\n    prog: Optional[str] = None,\n    description: Optional[str] = None,\n    extra_args: Optional[Iterable[tuple[list[str], dict]]] = None,\n) -> argparse.ArgumentParser:\n    \\\"\\\"\\\"Create a parser preloaded with the standard output args.\n\n    extra_args: iterable of (flags, kwargs) forwarded to parser.add_argument.\n    \\\"\\\"\\\"\n\n    parser = argparse.ArgumentParser(prog=prog, description=description)\n    add_output_args(parser)\n    if extra_args:\n        for flags, kwargs in extra_args:\n            parser.add_argument(*flags, **kwargs)\n    return parser\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\ndef resolve_output_paths(args: argparse.Namespace) -> OutputPaths:\n    \\\"\\\"\\\"Resolve output paths from parsed args.\n\n    - If explicit per-file paths are not provided, they are derived from out_dir.\n    - Returned paths are *not* created here; filesystem operations live elsewhere.\n    \\\"\\\"\\\"\n\n    out_dir = Path(getattr(args, \"out_dir\")).expanduser()\n    cov = getattr(args, \"coverage_matrix_path\", None)\n    evl = getattr(args, \"eval_loop_path\", None)\n\n    coverage_matrix_csv = (Path(cov).expanduser() if cov else out_dir / \"coverage_matrix.csv\")\n    eval_loop_md = (Path(evl).expanduser() if evl else out_dir / \"eval_loop.md\")\n\n    return OutputPaths(\n        out_dir=out_dir,\n        coverage_matrix_csv=coverage_matrix_csv,\n        eval_loop_md=eval_loop_md,\n    )\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\ndef parse_args(argv: Optional[list[str]] = None) -> tuple[argparse.Namespace, OutputPaths]:\n    \\\"\\\"\\\"Convenience wrapper returning (args, resolved_paths).\\\"\\\"\\\"\n\n    parser = build_parser()\n    args = parser.parse_args(argv)\n    return args, resolve_output_paths(args)\n\"\"\".strip(\"\\n\"))\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/utils/cli.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b5c56939c81908985d275ca637a8300916f77a7bfb0c9",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/utils/cli.py\nDIR_STATE:[\"src/utils/cli.py\", \"src/utils/csv_utils.py\", \"src/utils/fs.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0f4fd750c7c95a2000694b5ccce5888195a2b7ee0f49cc5474",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `src/utils/cli.py` with reusable argparse helpers to standardize output directory/file path flags plus overwrite and dry-run controls, including a resolver that returns concrete `Path` locations for `coverage_matrix.csv` and `eval_loop.md`."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

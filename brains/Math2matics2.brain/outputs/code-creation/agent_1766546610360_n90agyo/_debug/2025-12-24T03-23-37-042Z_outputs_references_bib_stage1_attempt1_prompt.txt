@@ -1,0 +1,44 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create /outputs/bibliography_system.md defining required BibTeX fields, tagging conventions (domain/subtopic/type), dedup rules (DOI/ISBN), and source-quality rubric; add /outputs/references.bib with 10–20 seed entries spanning textbooks, classic papers, and modern surveys relevant to target domains.
+Project: /outputs/bibliography_system.md defining required BibTeX fields, tagging conventions (domain/subtopic/type), dedup rules (DOI/ISBN), and source-quality rubric; add /outputs/references.bib with 10–20 seed entries spanning textbooks, classic papers, and modern surveys relevant to target domains. (python script)
+
+Target file details:
+- Path: outputs/references.bib
+- Purpose: Provides 10–20 curated seed BibTeX entries spanning textbooks, classic papers, and modern surveys across the target domains and conforming to the tagging and field requirements.
+- Category: documentation
+
+Other planned files (for context only):
+- outputs/bibliography_system.md: Defines the bibliography system specification including required BibTeX fields per entry type, domain/subtopic/type tagging conventions, DOI/ISBN-based deduplication rules, and a source-quality scoring rubric.
+
+Reference insights:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [AGENT: agent_1766541993033_a083d98] {"agentId":"agent_1766541993033_a083d98","goalId":"goal_40","containerId":"cntr_694b4aad24708190936d1e4
+- [AGENT: agent_1766541993033_a083d98] {"agentId":"agent_1766541993033_a083d98","goalId":"goal_40","containerId":"cntr_694b4aad24708190936d1e4
+- [AGENT: agent_1766546515177_uwf9lgh] {"agentId":"agent_1766546515177_uwf9lgh","goalId":"goal_acceptance_qa_1766546448644","timestamp":"2025-
+- [AGENT: agent_1766546515177_uwf9lgh] {"agentId":"agent_1766546515177_uwf9lgh","goalId":"goal_acceptance_qa_1766546448644","timestamp":"2025-
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Provides 10–20 curated seed BibTeX entries spanning textbooks, classic papers, and modern surveys across the target domains and conforming to the tagging and field requirements.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/references.bib')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/references.bib')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/references.bib.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

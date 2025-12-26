@@ -1,0 +1,125 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766623929865_04gu29c",
+  "agentType": "code-creation",
+  "goalId": "goal_114",
+  "missionId": "strategic_goal_114_1766623929865",
+  "spawnCycle": 108,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-25T00:52:13.191Z",
+  "completedAt": "2025-12-25T00:54:31.644Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "outputs/PROJECT_TRACKER.json",
+      "description": "Machine-readable project tracker ledger containing an array of goals with fields goal_id, description, priority, progress_pct, qa_status, and last_updated.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "TUDY_TEMPLATE.md\", \"outputs/CLAIM_CARD_TEMPLATE.md\", \"outputs/METADATA_SCHEMA.json\", \"outputs/PROJECT_TRACKER.csv\", \"outputs/PROJECT_TRACKER.json\", \"outputs/README.md\", \"outputs/REPORT_OUTLINE.md\", \"outputs/RIGHTS_AND_LICENSING_CHECKLIST.md\", \"outputs/RIGHTS_LOG.csv\"]\nSUMMARY: Initialized outputs/PROJECT_TRACKER.json as a structured, machine-readable ledger with required fields and starter goals.\n",
+          "timestamp": "2025-12-25T00:52:22.393Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "IC.md\", \"outputs/CASE_STUDY_TEMPLATE.md\", \"outputs/CLAIM_CARD_TEMPLATE.md\", \"outputs/METADATA_SCHEMA.json\", \"outputs/PROJECT_TRACKER.csv\", \"outputs/PROJECT_TRACKER.json\", \"outputs/README.md\", \"outputs/REPORT_OUTLINE.md\", \"outputs/RIGHTS_AND_LICENSING_CHECKLIST.md\", \"outputs/RIGHTS_LOG.csv\"]\nSummary: Initialized a validated PROJECT_TRACKER.json ledger with required fields and three baseline goals.\n",
+          "timestamp": "2025-12-25T00:52:30.849Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:13.191Z",
+      "failedAt": "2025-12-25T00:52:30.849Z"
+    },
+    {
+      "path": "scripts/update_tracker.py",
+      "description": "CLI script that loads/updates outputs/PROJECT_TRACKER.json and generates TRACKING_RECONCILIATION.md summarizing and validating tracker entries against the ledger.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-25T00:52:58.672Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "_tracker.py\", \"scripts/update_tracker.py\", \"scripts/validate_case_studies_schema.py\", \"scripts/validate_linkcheck_report.py\", \"scripts/validate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_rights_and_licensing.py\", \"scripts/validate_scaffold.py\"]\nSUMMARY: Added a CLI script to manage outputs/PROJECT_TRACKER.json and generate a validated TRACKING_RECONCILIATION.md report.\n",
+          "timestamp": "2025-12-25T00:53:25.228Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:13.191Z",
+      "failedAt": "2025-12-25T00:53:25.228Z"
+    },
+    {
+      "path": "TRACKING_RECONCILIATION.md",
+      "description": "Generated markdown reconciliation report derived from outputs/PROJECT_TRACKER.json showing current status, validation results, and a summary table of goals.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:TRACKING_RECONCILIATION.md\nDIR_STATE:[\"Makefile\", \"README.md\", \"README_LINKCHECK.md\", \"README_QA.md\", \"README_add_case_study.md\", \"TRACKING_RECONCILIATION.md\", \"exec_1766624039225_oiputfb.py\", \"pyproject.toml\", \"requirements.txt\"]\nSUMMARY: Generated TRACKING_RECONCILIATION.md from outputs/PROJECT_TRACKER.json with validation results and a goals summary table.\n",
+          "timestamp": "2025-12-25T00:53:59.287Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:TRACKING_RECONCILIATION.md\nDIR_STATE:[\"Makefile\", \"README.md\", \"README_LINKCHECK.md\", \"README_QA.md\", \"README_add_case_study.md\", \"TRACKING_RECONCILIATION.md\", \"exec_1766624071582_f6oleio.py\", \"pyproject.toml\", \"requirements.txt\"]\nGenerated TRACKING_RECONCILIATION.md by loading and validating outputs/PROJECT_TRACKER.json and summarizing all goal rows into a markdown table.\n",
+          "timestamp": "2025-12-25T00:54:31.644Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:13.191Z",
+      "failedAt": "2025-12-25T00:54:31.644Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Create /outputs/PROJECT_TRACKER.json (or .csv) with fields for goal_id, description, priority, progress_pct, qa_status, last_updated; then add a small script (e.g., scripts/update_tracker.py) that updates it and generates TRACKING_RECONCILIATION.md from the ledger.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Directly resolves the portfolio inconsistency by establishing a single source-of-truth progress ledger (machine-readable) plus a lightweight updater script, enabling consistent reporting across audits..."
+  ],
+  "projectName": "/outputs/PROJECT_TRACKER.json (or .csv) with fields for goal_id, description, priority, progress_pct, qa_status, last_updated; then add a small",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-25T00:54:31.644Z",
+  "summary": {
+    "completed": 0,
+    "failed": 3,
+    "total": 3
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0.0",
+  "case_id": "benchmark_case_001",
+  "name": "Basic statistics on small integer dataset",
+  "description": "Deterministic end-to-end benchmark: compute basic statistics on a small integer vector.",
+  "computation": {
+    "type": "basic_statistics",
+    "version": "v1",
+    "parameters": {
+      "variance": "population"
+    }
+  },
+  "inputs": {
+    "data": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  "expected_outputs": {
+    "count": 5,
+    "sum": 15,
+    "mean": 3.0,
+    "min": 1,
+    "max": 5,
+    "variance": 2.0,
+    "std_dev": 1.4142135623730951
+  },
+  "comparison": {
+    "numeric_tolerance": {
+      "abs": 1e-12,
+      "rel": 1e-12
+    }
+  }
+}

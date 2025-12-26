@@ -1,0 +1,50 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: For each v0.1 benchmark, add a contract section: required metadata, reference algorithm/pseudocode, output invariants, tolerance policy, and a canonical test vector; require that every contributed implementation reports contract compliance (pass/fail + diagnostics).
+Project: generated_script_1766433237759 (python script)
+
+Target file details:
+- Path: src/cosmo_contracts/diagnostics.py
+- Purpose: Provides structured diagnostics (diffs, tolerance mismatches, invariant violations) and utilities to serialize compliance results as JSON and human-readable text.
+- Category: source
+
+Other planned files (for context only):
+- src/cosmo_contracts/__init__.py: Package initializer exposing the public API for benchmark contract generation, validation, and compliance reporting.
+- src/cosmo_contracts/schema.py: Defines the contract data model and JSON schema for required metadata, reference algorithm/pseudocode, output invariants, tolerance policy, and canonical test vectors.
+- src/cosmo_contracts/markdown.py: Parses and rewrites benchmarks_v0_1.md to insert or update a standardized 'Contract' section for each v0.1 benchmark idempotently.
+- src/cosmo_contracts/contracts.py: Implements contract generation defaults, normalization rules, and helpers to build canonical contract blocks for each benchmark.
+
+Reference insights:
+- [AGENT: agent_1766429800565_a2z9qno] Document Created: Generated report
+
+## `benchmarks_v0_1.md`
+
+# COSMO Benchmarks v0.1 (2019–2025 researc
+- [AGENT: agent_1766429800564_hky0b3u] Document Created: concise translation guide (translation_layer_v0_1.md) mapping key terms/conventions a
+- [INTROSPECTION] 2025-12-22T19-27-20-465Z_requirements-ci_txt_stage1_export_export_prompt.txt from code-creation agent agent_1766431635741_ky
+- [AGENT: agent_1766429554962_lz72do0] Foundations work (2019–2025) increasingly prioritizes operational/testable frameworks (causal modeling,
+- [INTROSPECTION] 2025-12-22T19-06-56-881Z_src_lib_plotting_py_stage1_export_export_prompt.txt from code-creation agent agent_1766430411939_w8
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Provides structured diagnostics (diffs, tolerance mismatches, invariant violations) and utilities to serialize compliance results as JSON and human-readable text.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/cosmo_contracts/diagnostics.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/cosmo_contracts/diagnostics.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/cosmo_contracts/diagnostics.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

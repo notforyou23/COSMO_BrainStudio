@@ -1,0 +1,60 @@
+{
+  "content": "FILE_WRITTEN:pyproject.toml  \nDIR_STATE:[\".dockerignore\", \"Dockerfile\", \"pyproject.toml\"]  \n\nCreated a Poetry-based `pyproject.toml` that pins the supported Python version range and defines core dev tooling (pytest/ruff/black/mypy) for reproducible builds.",
+  "reasoning": "",
+  "responseId": "resp_0db1b6ca770c7fad006949be664cfc81949bdc08011b07eb18",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2158,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 730,
+    "output_tokens_details": {
+      "reasoning_tokens": 662
+    },
+    "total_tokens": 2888
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0db1b6ca770c7fad006949be6715048194805ab971a9776994",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0db1b6ca770c7fad006949be6aa6888194ad5232b3f6771437",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap\n\ntarget_path = Path('/mnt/data').joinpath('pyproject.toml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"[tool.poetry]\nname = \"generated_configuration_1766440496320\"\nversion = \"0.1.0\"\ndescription = \"Reproducible benchmark/configuration project.\"\nauthors = [\"OpenAI Code Interpreter <noreply@example.com>\"]\nlicense = \"MIT\"\nreadme = \"README.md\"\npackages = [{ include = \"generated_configuration_1766440496320\" }]\n\n[tool.poetry.dependencies]\npython = \">=3.11,<3.13\"\n\n[tool.poetry.group.dev.dependencies]\npytest = \"^8.3.3\"\npytest-cov = \"^5.0.0\"\nruff = \"^0.8.4\"\nblack = \"^24.10.0\"\nmypy = \"^1.13.0\"\n\n[tool.poetry.scripts]\ngc176644 = \"generated_configuration_1766440496320.__main__:main\"\n\n[build-system]\nrequires = [\"poetry-core>=1.9.0\"]\nbuild-backend = \"poetry.core.masonry.api\"\n\n[tool.black]\nline-length = 88\ntarget-version = [\"py311\"]\n\n[tool.ruff]\nline-length = 88\ntarget-version = \"py311\"\nextend-select = [\"I\"]\nfix = false\n\n[tool.ruff.lint]\nselect = [\"E\", \"F\", \"I\", \"B\", \"UP\"]\nignore = [\"E501\"]\n\n[tool.pytest.ini_options]\naddopts = \"-q\"\ntestpaths = [\"tests\"]\n\n[tool.mypy]\npython_version = \"3.11\"\nwarn_return_any = true\nwarn_unused_configs = true\ndisallow_untyped_defs = false\ncheck_untyped_defs = true\nno_implicit_optional = true\nstrict_equality = true\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:pyproject.toml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\nlen(final_text.splitlines())\n",
+      "container_id": "cntr_6949be2fd1108190a4d8a6e21b630b5104ad172254e2add5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:pyproject.toml\nDIR_STATE:[\".dockerignore\", \"Dockerfile\", \"pyproject.toml\"]\n"
+        },
+        {
+          "type": "logs",
+          "logs": "52"
+        }
+      ]
+    },
+    {
+      "id": "msg_0db1b6ca770c7fad006949be72b7c88194b284a923ecd77d90",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_WRITTEN:pyproject.toml  \nDIR_STATE:[\".dockerignore\", \"Dockerfile\", \"pyproject.toml\"]  \n\nCreated a Poetry-based `pyproject.toml` that pins the supported Python version range and defines core dev tooling (pytest/ruff/black/mypy) for reproducible builds."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

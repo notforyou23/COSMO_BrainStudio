@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "generated_library_1766438416249"
+version = "0.1.0"
+description = "Minimal reference implementation for loading a benchmark JSON schema and validating benchmark runs."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "OpenAI", email = "noreply@openai.com"}]
+dependencies = [
+  "jsonschema>=4.21.0",
+]
+keywords = ["benchmark", "jsonschema", "validation"]
+
+[project.urls]
+Repository = "https://example.invalid/generated_library_1766438416249"
+[project.scripts]
+benchmarks-validate = "benchmarks.validate:main"
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

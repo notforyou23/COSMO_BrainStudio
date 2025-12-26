@@ -1,0 +1,187 @@
+{
+  "content": "Implemented `src/dgpipe/cli.py` as a compact argparse-based CLI exposing `new`, `validate`, `show`, and `plan` commands over `dgpipe` core models with clear help text, normalized JSON output, and consistent user-facing error reporting/exit codes.",
+  "reasoning": "",
+  "responseId": "resp_0f719dacb6a2f028006949b650e40c8195a24d30f2445ffe6b",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 9290,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2009,
+    "output_tokens_details": {
+      "reasoning_tokens": 804
+    },
+    "total_tokens": 11299
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0f719dacb6a2f028006949b651dc848195beda4ace5b7ae87a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0f719dacb6a2f028006949b652ec4481959e89d7a968c4565b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path('/mnt/data')\nlist(base.glob('src/dgpipe/*.py'))[:20], [p.name for p in base.glob('src/dgpipe/*')]\n",
+      "container_id": "cntr_6949b590d1548190ae21728e2f723cbf0045b034ab97adc3",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "([PosixPath('/mnt/data/src/dgpipe/__init__.py'),\n  PosixPath('/mnt/data/src/dgpipe/protocols.py'),\n  PosixPath('/mnt/data/src/dgpipe/models.py'),\n  PosixPath('/mnt/data/src/dgpipe/utils.py')],\n ['__init__.py', 'protocols.py', 'models.py', 'utils.py'])"
+        }
+      ]
+    },
+    {
+      "id": "rs_0f719dacb6a2f028006949b65611808195b1c6b2c6ff1b3943",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0f719dacb6a2f028006949b6568d38819589fd430d9087c47e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nfor fname in ['__init__.py','models.py','protocols.py','utils.py']:\n    p=Path('/mnt/data/src/dgpipe')/fname\n    print(\"----\",fname)\n    print(p.read_text()[:1200])\n",
+      "container_id": "cntr_6949b590d1548190ae21728e2f723cbf0045b034ab97adc3",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "---- __init__.py\n\"\"\"dgpipe package.\n\nThis module is the package entrypoint and public API surface. It is intentionally\nlightweight: it avoids importing submodules at import time to prevent side\neffects and to keep import costs low.\n\nPublic objects are exposed via lazy attribute access (PEP 562).\"\"\"\nfrom __future__ import annotations\nfrom importlib import metadata as _metadata\ndef _read_version() -> str:\n    \\\"\\\"\\\"Return the installed package version, or a safe fallback.\\\"\\\"\\\"\n    try:\n        return _metadata.version(\"dgpipe\")\n    except _metadata.PackageNotFoundError:\n        # Running from source (not installed) or during tooling.\n        return \"0.0.0\"\n__version__ = _read_version()\ndef version() -> str:\n    \\\"\\\"\\\"Convenience accessor for :data:`__version__`.\\\"\\\"\\\"\n    return __version__\n# Lazy exports: map public attribute names to (module, attribute).\n# These modules are expected to exist in the full project, but are not imported\n# eagerly to keep this entrypoint side-effect free.\n_LAZY_EXPORTS: dict[str, tuple[str, str]] = {\n    # models\n    \"PipelineSpec\": (\"dgpipe.models\", \"PipelineSpec\"),\n    \"StageSpec\": (\"dgpipe.models\", \"StageSpec\"),\n    \"StageResult\": (\"dgpipe.models\", \"StageResult\"),\n \n---- models.py\n\"\"\"dgpipe domain models.\n\nThis module defines small, reusable dataclasses shared across dgpipe modules.\nThey are intentionally dependency-light to keep the public API stable.\n\"\"\"\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom datetime import datetime, timezone\nfrom enum import Enum\nfrom typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence\ndef utc_now() -> datetime:\n    \"\"\"Return an aware UTC timestamp.\"\"\"\n    return datetime.now(timezone.utc)\n\n\ndef _omit_none(d: Mapping[str, Any]) -> Dict[str, Any]:\n    return {k: v for k, v in d.items() if v is not None}\nclass StageStatus(str, Enum):\n    \"\"\"Execution status for an individual stage.\"\"\"\n\n    PENDING = \"pending\"\n    RUNNING = \"running\"\n    SKIPPED = \"skipped\"\n    SUCCESS = \"success\"\n    FAILED = \"failed\"\"\"\n@dataclass(frozen=True)\nclass StageSpec:\n    \"\"\"Declarative stage configuration.\n\n    Attributes:\n        name: Stable identifier used in logs and result lookups.\n        kind: Implementation discriminator (e.g., \"python\", \"shell\").\n        config: Arbitrary stage configuration (JSON-serializable).\n        requires: Names of stages that must complete successfully first.\n    \"\"\"\n\n  \n---- protocols.py\n\"\"\"dgpipe.protocols\n\nLightweight, typed protocols (structural interfaces) used across dgpipe.\n\nThese protocols define the minimal contracts for stages, pipelines, runners,\nand IO backends so that user extensions can plug in without inheriting from\nframework base classes.\n\"\"\"\nfrom __future__ import annotations\n\nfrom typing import (\n    Any,\n    Callable,\n    Iterable,\n    Mapping,\n    Optional,\n    Protocol,\n    Sequence,\n    TypeVar,\n    runtime_checkable,\n)\n\nInT = TypeVar(\"InT\")\nOutT = TypeVar(\"OutT\")\nT_co = TypeVar(\"T_co\", covariant=True)\nT_contra = TypeVar(\"T_contra\", contravariant=True)\n@runtime_checkable\nclass ArtifactStore(Protocol):\n    \"\"\"Minimal IO abstraction for reading/writing pipeline artifacts.\n\n    Implementations may map keys to files, object storage, databases, etc.\n    Keys are treated as opaque identifiers (often a relative path).\n    \"\"\"\n\n    def read_bytes(self, key: str) -> bytes: ...\n    def write_bytes(self, key: str, data: bytes) -> None: ...\n    def exists(self, key: str) -> bool: ...\n    def list(self, prefix: str = \"\") -> Iterable[str]: ...\n@runtime_checkable\nclass Logger(Protocol):\n    \"\"\"Structured-logging compatible callable.\"\"\"\n\n    def __call__(self\n---- utils.py\n\"\"\"dgpipe.utils\n\nReusable helper utilities for dgpipe's CLI and core modules.\n\nThis module is intentionally small and dependency-light. It provides common\nvalidation helpers, JSON helpers, and formatting/error utilities so that other\nmodules can stay focused on their primary responsibilities.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import is_dataclass, asdict\nfrom pathlib import Path\nfrom typing import Any, Iterable, Mapping, MutableMapping, Optional\n\nimport json\nimport os\nimport re\nclass DgpipeError(Exception):\n    \"\"\"Base exception for dgpipe.\"\"\"\n\n\nclass ValidationError(DgpipeError, ValueError):\n    \"\"\"Raised when user-supplied configuration or inputs are invalid.\"\"\"\n\n\nclass IOError(DgpipeError):\n    \"\"\"Raised for dgpipe-specific IO failures.\"\"\"\n_IDENT_RE = re.compile(r\"^[A-Za-z0-9][A-Za-z0-9._-]*$\")\n\n\ndef ensure(condition: bool, message: str, *, exc: type[Exception] = ValidationError) -> None:\n    \"\"\"Raise *exc* with *message* if *condition* is falsy.\"\"\"\n    if not condition:\n        raise exc(message)\n\n\ndef validate_identifier(value: str, *, what: str = \"identifier\") -> str:\n    \"\"\"Validate and return a stable identifier (e.g., stage/pipeline name).\"\"\"\n    ens\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0f719dacb6a2f028006949b65946b88195a50225788df8c04d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0f719dacb6a2f028006949b659ace481958b374afd6fc95a0e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nprint(Path('/mnt/data/src/dgpipe/models.py').read_text())\n",
+      "container_id": "cntr_6949b590d1548190ae21728e2f723cbf0045b034ab97adc3",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"dgpipe domain models.\n\nThis module defines small, reusable dataclasses shared across dgpipe modules.\nThey are intentionally dependency-light to keep the public API stable.\n\"\"\"\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom datetime import datetime, timezone\nfrom enum import Enum\nfrom typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence\ndef utc_now() -> datetime:\n    \"\"\"Return an aware UTC timestamp.\"\"\"\n    return datetime.now(timezone.utc)\n\n\ndef _omit_none(d: Mapping[str, Any]) -> Dict[str, Any]:\n    return {k: v for k, v in d.items() if v is not None}\nclass StageStatus(str, Enum):\n    \"\"\"Execution status for an individual stage.\"\"\"\n\n    PENDING = \"pending\"\n    RUNNING = \"running\"\n    SKIPPED = \"skipped\"\n    SUCCESS = \"success\"\n    FAILED = \"failed\"\"\"\n@dataclass(frozen=True)\nclass StageSpec:\n    \"\"\"Declarative stage configuration.\n\n    Attributes:\n        name: Stable identifier used in logs and result lookups.\n        kind: Implementation discriminator (e.g., \"python\", \"shell\").\n        config: Arbitrary stage configuration (JSON-serializable).\n        requires: Names of stages that must complete successfully first.\n    \"\"\"\n\n    name: str\n    kind: str = \"python\"\n    config: Dict[str, Any] = field(default_factory=dict)\n    requires: List[str] = field(default_factory=list)\n\n    def to_dict(self) -> Dict[str, Any]:\n        return {\n            \"name\": self.name,\n            \"kind\": self.kind,\n            \"config\": self.config,\n            \"requires\": list(self.requires),\n        }\n\n    @classmethod\n    def from_dict(cls, d: Mapping[str, Any]) -> \"StageSpec\":\n        return cls(\n            name=str(d[\"name\"]),\n            kind=str(d.get(\"kind\", \"python\")),\n            config=dict(d.get(\"config\") or {}),\n            requires=list(d.get(\"requires\") or []),\n        )\n@dataclass(frozen=True)\nclass PipelineSpec:\n    \"\"\"Declarative pipeline configuration (ordered stages).\"\"\"\n\n    name: str = \"pipeline\"\n    stages: List[StageSpec] = field(default_factory=list)\n    metadata: Dict[str, Any] = field(default_factory=dict)\n\n    def stage_by_name(self) -> Dict[str, StageSpec]:\n        return {s.name: s for s in self.stages}\n\n    def validate(self) -> None:\n        seen: set[str] = set()\n        for s in self.stages:\n            if s.name in seen:\n                raise ValueError(f\"Duplicate stage name: {s.name}\")\n            seen.add(s.name)\n        unknown = sorted({r for s in self.stages for r in s.requires if r not in seen})\n        if unknown:\n            raise ValueError(f\"Unknown stage dependencies: {unknown}\")\n\n    def to_dict(self) -> Dict[str, Any]:\n        return {\n            \"name\": self.name,\n            \"stages\": [s.to_dict() for s in self.stages],\n            \"metadata\": self.metadata,\n        }\n\n    @classmethod\n    def from_dict(cls, d: Mapping[str, Any]) -> \"PipelineSpec\":\n        return cls(\n            name=str(d.get(\"name\", \"pipeline\")),\n            stages=[StageSpec.from_dict(x) for x in (d.get(\"stages\") or [])],\n            metadata=dict(d.get(\"metadata\") or {}),\n        )\n@dataclass(frozen=True)\nclass RunConfig:\n    \"\"\"Runtime configuration for running a pipeline.\"\"\"\n\n    workdir: Optional[str] = None\n    env: Dict[str, str] = field(default_factory=dict)\n    max_workers: int = 1\n    dry_run: bool = False\n    continue_on_error: bool = False\n\n    def to_dict(self) -> Dict[str, Any]:\n        return _omit_none(\n            {\n                \"workdir\": self.workdir,\n                \"env\": dict(self.env),\n                \"max_workers\": int(self.max_workers),\n                \"dry_run\": bool(self.dry_run),\n                \"continue_on_error\": bool(self.continue_on_error),\n            }\n        )\n\n    @classmethod\n    def from_dict(cls, d: Mapping[str, Any]) -> \"RunConfig\":\n        return cls(\n            workdir=d.get(\"workdir\"),\n            env={str(k): str(v) for k, v in (d.get(\"env\") or {}).items()},\n            max_workers=int(d.get(\"max_workers\", 1)),\n            dry_run=bool(d.get(\"dry_run\", False)),\n            continue_on_error=bool(d.get(\"continue_on_error\", False)),\n        )\n@dataclass\nclass StageResult:\n    \"\"\"Result of running a single stage.\"\"\"\n\n    name: str\n    status: StageStatus = StageStatus.PENDING\n    started_at: Optional[datetime] = None\n    finished_at: Optional[datetime] = None\n    outputs: Dict[str, Any] = field(default_factory=dict)\n    error: Optional[str] = None\n    logs: List[str] = field(default_factory=list)\n\n    def mark_running(self) -> None:\n        self.status = StageStatus.RUNNING\n        self.started_at = self.started_at or utc_now()\n\n    def mark_finished(self, status: StageStatus, *, error: Optional[str] = None) -> None:\n        self.status = status\n        self.finished_at = self.finished_at or utc_now()\n        self.error = error\n\n    @property\n    def ok(self) -> bool:\n        return self.status in (StageStatus.SUCCESS, StageStatus.SKIPPED)\n\n    def to_dict(self) -> Dict[str, Any]:\n        def dt(x: Optional[datetime]) -> Optional[str]:\n            return x.isoformat() if x else None\n\n        return _omit_none(\n            {\n                \"name\": self.name,\n                \"status\": self.status.value,\n                \"started_at\": dt(self.started_at),\n                \"finished_at\": dt(self.finished_at),\n                \"outputs\": self.outputs,\n                \"error\": self.error,\n                \"logs\": list(self.logs),\n            }\n        )\n\n    @classmethod\n    def from_dict(cls, d: Mapping[str, Any]) -> \"StageResult\":\n        def parse_dt(s: Optional[str]) -> Optional[datetime]:\n            return datetime.fromisoformat(s) if s else None\n\n        return cls(\n            name=str(d[\"name\"]),\n            status=StageStatus(str(d.get(\"status\", StageStatus.PENDING.value))),\n            started_at=parse_dt(d.get(\"started_at\")),\n            finished_at=parse_dt(d.get(\"finished_at\")),\n            outputs=dict(d.get(\"outputs\") or {}),\n            error=d.get(\"error\"),\n            logs=list(d.get(\"logs\") or []),\n        )\n@dataclass\nclass PipelineResult:\n    \"\"\"Result of running an entire pipeline.\"\"\"\n\n    spec_name: str\n    run_id: str\n    started_at: datetime = field(default_factory=utc_now)\n    finished_at: Optional[datetime] = None\n    stages: List[StageResult] = field(default_factory=list)\n    metadata: Dict[str, Any] = field(default_factory=dict)\n\n    def stage_map(self) -> Dict[str, StageResult]:\n        return {r.name: r for r in self.stages}\n\n    @property\n    def ok(self) -> bool:\n        return all(r.ok for r in self.stages)\n\n    def to_dict(self) -> Dict[str, Any]:\n        return _omit_none(\n            {\n                \"spec_name\": self.spec_name,\n                \"run_id\": self.run_id,\n                \"started_at\": self.started_at.isoformat(),\n                \"finished_at\": self.finished_at.isoformat() if self.finished_at else None,\n                \"stages\": [s.to_dict() for s in self.stages],\n                \"metadata\": self.metadata,\n                \"ok\": self.ok,\n            }\n        )\n\n    @classmethod\n    def from_dict(cls, d: Mapping[str, Any]) -> \"PipelineResult\":\n        started = datetime.fromisoformat(str(d[\"started_at\"]))\n        finished = d.get(\"finished_at\")\n        return cls(\n            spec_name=str(d[\"spec_name\"]),\n            run_id=str(d[\"run_id\"]),\n            started_at=started,\n            finished_at=datetime.fromisoformat(finished) if finished else None,\n            stages=[StageResult.from_dict(x) for x in (d.get(\"stages\") or [])],\n            metadata=dict(d.get(\"metadata\") or {}),\n        )\n\n\ndef stages_in_order(spec: PipelineSpec, names: Sequence[str]) -> List[StageSpec]:\n    \"\"\"Return StageSpec objects in pipeline order filtered by stage names.\"\"\"\n    wanted = set(names)\n    return [s for s in spec.stages if s.name in wanted]\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0f719dacb6a2f028006949b65c0dd88195b0fef1c36e807f48",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0f719dacb6a2f028006949b65d22008195a0f74c86aa0932d2",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nprint(Path('/mnt/data/src/dgpipe/utils.py').read_text())\n",
+      "container_id": "cntr_6949b590d1548190ae21728e2f723cbf0045b034ab97adc3",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"dgpipe.utils\n\nReusable helper utilities for dgpipe's CLI and core modules.\n\nThis module is intentionally small and dependency-light. It provides common\nvalidation helpers, JSON helpers, and formatting/error utilities so that other\nmodules can stay focused on their primary responsibilities.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import is_dataclass, asdict\nfrom pathlib import Path\nfrom typing import Any, Iterable, Mapping, MutableMapping, Optional\n\nimport json\nimport os\nimport re\nclass DgpipeError(Exception):\n    \"\"\"Base exception for dgpipe.\"\"\"\n\n\nclass ValidationError(DgpipeError, ValueError):\n    \"\"\"Raised when user-supplied configuration or inputs are invalid.\"\"\"\n\n\nclass IOError(DgpipeError):\n    \"\"\"Raised for dgpipe-specific IO failures.\"\"\"\n_IDENT_RE = re.compile(r\"^[A-Za-z0-9][A-Za-z0-9._-]*$\")\n\n\ndef ensure(condition: bool, message: str, *, exc: type[Exception] = ValidationError) -> None:\n    \"\"\"Raise *exc* with *message* if *condition* is falsy.\"\"\"\n    if not condition:\n        raise exc(message)\n\n\ndef validate_identifier(value: str, *, what: str = \"identifier\") -> str:\n    \"\"\"Validate and return a stable identifier (e.g., stage/pipeline name).\"\"\"\n    ensure(isinstance(value, str), f\"{what} must be a string\")\n    ensure(value.strip() == value and value, f\"{what} must be non-empty and trimmed\")\n    ensure(_IDENT_RE.match(value) is not None, f\"Invalid {what}: {value!r}\")\n    return value\n\n\ndef require_keys(d: Mapping[str, Any], keys: Iterable[str], *, what: str = \"mapping\") -> None:\n    \"\"\"Validate that *d* contains all required keys.\"\"\"\n    missing = [k for k in keys if k not in d]\n    ensure(not missing, f\"{what} missing required keys: {missing}\")\ndef coerce_path(value: str | os.PathLike[str] | Path, *, expand: bool = True) -> Path:\n    \"\"\"Convert a path-like to :class:`~pathlib.Path`.\n\n    If *expand* is True, user home and environment variables are expanded.\n    \"\"\"\n    p = Path(value)\n    if expand:\n        p = Path(os.path.expandvars(os.path.expanduser(str(p))))\n    return p\n\n\ndef ensure_dir(path: str | os.PathLike[str] | Path) -> Path:\n    \"\"\"Create *path* as a directory if it doesn't exist; return as Path.\"\"\"\n    p = coerce_path(path)\n    p.mkdir(parents=True, exist_ok=True)\n    return p\ndef _to_jsonable(obj: Any) -> Any:\n    \"\"\"Best-effort conversion for JSON serialization.\"\"\"\n    if is_dataclass(obj):\n        return asdict(obj)\n    if isinstance(obj, Path):\n        return str(obj)\n    return obj\n\n\ndef json_dumps(obj: Any, *, indent: int = 2, sort_keys: bool = True) -> str:\n    \"\"\"Serialize *obj* to JSON with stable defaults.\"\"\"\n    return json.dumps(\n        obj,\n        default=_to_jsonable,\n        indent=indent,\n        sort_keys=sort_keys,\n        ensure_ascii=False,\n    )\n\n\ndef read_json(path: str | os.PathLike[str] | Path) -> Any:\n    \"\"\"Read JSON from *path* and return the decoded value.\"\"\"\n    p = coerce_path(path)\n    try:\n        return json.loads(p.read_text(encoding=\"utf-8\"))\n    except FileNotFoundError as e:\n        raise IOError(f\"JSON file not found: {p}\") from e\n    except json.JSONDecodeError as e:\n        raise ValidationError(f\"Invalid JSON in {p}: {e}\") from e\n\n\ndef write_json(path: str | os.PathLike[str] | Path, value: Any) -> Path:\n    \"\"\"Write *value* as JSON to *path* (UTF-8) and return the path.\"\"\"\n    p = coerce_path(path)\n    p.parent.mkdir(parents=True, exist_ok=True)\n    p.write_text(json_dumps(value) + \"\\n\", encoding=\"utf-8\")\n    return p\ndef format_exception(exc: BaseException) -> str:\n    \"\"\"Return a concise, user-facing error message for an exception.\"\"\"\n    msg = str(exc).strip()\n    name = type(exc).__name__\n    return f\"{name}: {msg}\" if msg else name\n\n\ndef format_kv(fields: Mapping[str, Any], *, sep: str = \", \") -> str:\n    \"\"\"Format a mapping as stable key=value pairs for logs.\"\"\"\n    items = []\n    for k in sorted(fields.keys()):\n        v = fields[k]\n        items.append(f\"{k}={v!r}\")\n    return sep.join(items)\n\n\ndef merge_dicts(base: Mapping[str, Any], updates: Optional[Mapping[str, Any]] = None) -> dict[str, Any]:\n    \"\"\"Shallow-merge two mappings into a new dict (updates override base).\"\"\"\n    out: dict[str, Any] = dict(base)\n    if updates:\n        out.update(dict(updates))\n    return out\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0f719dacb6a2f028006949b65fea6081959426a09c6014f9d1",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0f719dacb6a2f028006949b661fe9c8195bef704718ddcb833",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nprint(Path('/mnt/data/src/dgpipe/__init__.py').read_text())\n",
+      "container_id": "cntr_6949b590d1548190ae21728e2f723cbf0045b034ab97adc3",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"dgpipe package.\n\nThis module is the package entrypoint and public API surface. It is intentionally\nlightweight: it avoids importing submodules at import time to prevent side\neffects and to keep import costs low.\n\nPublic objects are exposed via lazy attribute access (PEP 562).\"\"\"\nfrom __future__ import annotations\nfrom importlib import metadata as _metadata\ndef _read_version() -> str:\n    \\\"\\\"\\\"Return the installed package version, or a safe fallback.\\\"\\\"\\\"\n    try:\n        return _metadata.version(\"dgpipe\")\n    except _metadata.PackageNotFoundError:\n        # Running from source (not installed) or during tooling.\n        return \"0.0.0\"\n__version__ = _read_version()\ndef version() -> str:\n    \\\"\\\"\\\"Convenience accessor for :data:`__version__`.\\\"\\\"\\\"\n    return __version__\n# Lazy exports: map public attribute names to (module, attribute).\n# These modules are expected to exist in the full project, but are not imported\n# eagerly to keep this entrypoint side-effect free.\n_LAZY_EXPORTS: dict[str, tuple[str, str]] = {\n    # models\n    \"PipelineSpec\": (\"dgpipe.models\", \"PipelineSpec\"),\n    \"StageSpec\": (\"dgpipe.models\", \"StageSpec\"),\n    \"StageResult\": (\"dgpipe.models\", \"StageResult\"),\n    \"PipelineResult\": (\"dgpipe.models\", \"PipelineResult\"),\n    \"RunConfig\": (\"dgpipe.models\", \"RunConfig\"),\n    # protocols\n    \"Stage\": (\"dgpipe.protocols\", \"Stage\"),\n    \"Runner\": (\"dgpipe.protocols\", \"Runner\"),\n    \"ArtifactStore\": (\"dgpipe.protocols\", \"ArtifactStore\"),\n    \"Logger\": (\"dgpipe.protocols\", \"Logger\"),\n}\n__all__ = [\"__version__\", \"version\", *_LAZY_EXPORTS.keys()]\ndef __getattr__(name: str):\n    \\\"\\\"\\\"Dynamically import exported objects on first access.\n\n    This allows users to import from the package root (e.g. ``from dgpipe import\n    PipelineSpec``) without importing submodules during ``import dgpipe``.\n    \\\"\\\"\\\"\n    try:\n        module_name, attr_name = _LAZY_EXPORTS[name]\n    except KeyError as exc:\n        raise AttributeError(f\"module 'dgpipe' has no attribute {name!r}\") from exc\n\n    from importlib import import_module\n\n    module = import_module(module_name)\n    try:\n        value = getattr(module, attr_name)\n    except AttributeError as exc:\n        raise AttributeError(\n            f\"Lazy export {name!r} not found as {module_name}.{attr_name}\"\n        ) from exc\n    globals()[name] = value  # cache for subsequent lookups\n    return value\ndef __dir__() -> list[str]:\n    \\\"\\\"\\\"Return a helpful list of attributes for introspection tools.\\\"\\\"\\\"\n    return sorted(list(globals().keys()) + list(_LAZY_EXPORTS.keys()))\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0f719dacb6a2f028006949b66514708195aef3e1da24618901",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0f719dacb6a2f028006949b66575548195b7d5487abe9db3ae",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import re\ntext=Path('/mnt/data/src/dgpipe/protocols.py').read_text()\nprint(text)\n",
+      "container_id": "cntr_6949b590d1548190ae21728e2f723cbf0045b034ab97adc3",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"dgpipe.protocols\n\nLightweight, typed protocols (structural interfaces) used across dgpipe.\n\nThese protocols define the minimal contracts for stages, pipelines, runners,\nand IO backends so that user extensions can plug in without inheriting from\nframework base classes.\n\"\"\"\nfrom __future__ import annotations\n\nfrom typing import (\n    Any,\n    Callable,\n    Iterable,\n    Mapping,\n    Optional,\n    Protocol,\n    Sequence,\n    TypeVar,\n    runtime_checkable,\n)\n\nInT = TypeVar(\"InT\")\nOutT = TypeVar(\"OutT\")\nT_co = TypeVar(\"T_co\", covariant=True)\nT_contra = TypeVar(\"T_contra\", contravariant=True)\n@runtime_checkable\nclass ArtifactStore(Protocol):\n    \"\"\"Minimal IO abstraction for reading/writing pipeline artifacts.\n\n    Implementations may map keys to files, object storage, databases, etc.\n    Keys are treated as opaque identifiers (often a relative path).\n    \"\"\"\n\n    def read_bytes(self, key: str) -> bytes: ...\n    def write_bytes(self, key: str, data: bytes) -> None: ...\n    def exists(self, key: str) -> bool: ...\n    def list(self, prefix: str = \"\") -> Iterable[str]: ...\n@runtime_checkable\nclass Logger(Protocol):\n    \"\"\"Structured-logging compatible callable.\"\"\"\n\n    def __call__(self, message: str, /, **fields: Any) -> None: ...\n@runtime_checkable\nclass StageContext(Protocol):\n    \"\"\"Context passed to stages.\n\n    The context is intentionally small: stages can use the artifact store for IO,\n    a logger for diagnostics, and arbitrary config values.\n    \"\"\"\n\n    artifacts: ArtifactStore\n    log: Logger\n    config: Mapping[str, Any]\n@runtime_checkable\nclass Stage(Protocol[InT, OutT]):\n    \"\"\"Synchronous stage contract.\"\"\"\n\n    name: str\n\n    def run(self, ctx: StageContext, data: InT) -> OutT: ...\n@runtime_checkable\nclass AsyncStage(Protocol[InT, OutT]):\n    \"\"\"Asynchronous stage contract.\"\"\"\n\n    name: str\n\n    async def arun(self, ctx: StageContext, data: InT) -> OutT: ...\n@runtime_checkable\nclass Pipeline(Protocol[InT, OutT]):\n    \"\"\"A pipeline is an executable composition of one or more stages.\"\"\"\n\n    name: str\n    stages: Sequence[object]\n\n    def run(self, ctx: StageContext, data: InT) -> OutT: ...\n@runtime_checkable\nclass Runner(Protocol):\n    \"\"\"Executes pipelines, providing common concerns (retries, metrics, etc.).\"\"\"\n\n    def run(self, pipeline: Pipeline[Any, Any], ctx: StageContext, data: Any) -> Any: ...\n@runtime_checkable\nclass Serializer(Protocol[T_contra]):\n    \"\"\"Converts a value into bytes (for ArtifactStore).\"\"\"\n\n    content_type: str\n\n    def dumps(self, value: T_contra) -> bytes: ...\n@runtime_checkable\nclass Deserializer(Protocol[T_co]):\n    \"\"\"Converts bytes into a value (from ArtifactStore).\"\"\"\n\n    content_type: str\n\n    def loads(self, data: bytes) -> T_co: ...\n@runtime_checkable\nclass Codec(Serializer[T_contra], Deserializer[T_co], Protocol[T_contra, T_co]):\n    \"\"\"Bidirectional serialization protocol.\"\"\"\n@runtime_checkable\nclass Callback(Protocol):\n    \"\"\"Hook for observing lifecycle events without coupling to implementations.\"\"\"\n\n    def on_stage_start(self, stage_name: str, *, ctx: StageContext) -> None: ...\n    def on_stage_end(self, stage_name: str, *, ctx: StageContext, result: Any) -> None: ...\n    def on_stage_error(self, stage_name: str, *, ctx: StageContext, error: BaseException) -> None: ...\ndef null_logger() -> Logger:\n    \"\"\"Return a no-op logger that matches the Logger protocol.\"\"\"\n\n    def _log(message: str, /, **fields: Any) -> None:\n        return None\n\n    return _log\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0f719dacb6a2f028006949b668af5c8195b5397d8b300f707f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0f719dacb6a2f028006949b66f46bc8195bc4465b4c4641d58",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/dgpipe/cli.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"dgpipe CLI.\n\nSmall, dependency-light command line interface that operates on dgpipe's core\nmodels (PipelineSpec, StageSpec, RunConfig). It supports creating, validating,\nand inspecting pipeline specs stored as JSON.\n\nTypical usage:\n  dgpipe new pipeline.json\n  dgpipe validate pipeline.json\n  dgpipe show pipeline.json\n  dgpipe plan pipeline.json\n\\\"\\\"\\\"\nfrom __future__ import annotations\n\nimport argparse\nimport sys\nfrom pathlib import Path\nfrom typing import Any, Sequence\n\nfrom . import __version__\nfrom .models import PipelineSpec, StageSpec, stages_in_order\nfrom .utils import ValidationError, DgpipeError, format_exception, json_dumps, read_json, write_json\n\"\"\",\n\"\"\"def _load_spec(path: str | Path) -> PipelineSpec:\n    d = read_json(path)\n    if not isinstance(d, dict):\n        raise ValidationError(f\"Pipeline spec must be a JSON object: {path}\")\n    spec = PipelineSpec.from_dict(d)\n    spec.validate()\n    return spec\n\n\ndef _cmd_new(args: argparse.Namespace) -> int:\n    spec = PipelineSpec(\n        name=args.name,\n        stages=[StageSpec(name=\"stage1\", kind=\"python\", config={\"note\": \"edit me\"})],\n        metadata={\"dgpipe_version\": __version__},\n    )\n    if args.output:\n        write_json(args.output, spec.to_dict())\n    else:\n        sys.stdout.write(json_dumps(spec.to_dict()) + \"\\\\n\")\n    return 0\n\n\ndef _cmd_validate(args: argparse.Namespace) -> int:\n    _load_spec(args.spec)\n    if not args.quiet:\n        sys.stdout.write(\"OK\\\\n\")\n    return 0\n\n\ndef _cmd_show(args: argparse.Namespace) -> int:\n    spec = _load_spec(args.spec)\n    sys.stdout.write(json_dumps(spec.to_dict()) + \"\\\\n\")\n    return 0\n\n\ndef _cmd_plan(args: argparse.Namespace) -> int:\n    spec = _load_spec(args.spec)\n    if args.stages:\n        stage_specs = stages_in_order(spec, args.stages)\n        missing = [n for n in args.stages if n not in {s.name for s in stage_specs}]\n        if missing:\n            raise ValidationError(f\"Unknown stage(s): {missing}\")\n    else:\n        stage_specs = list(spec.stages)\n    for s in stage_specs:\n        req = f\" requires={s.requires}\" if s.requires else \"\"\n        sys.stdout.write(f\"{s.name} kind={s.kind}{req}\\\\n\")\n    return 0\n\"\"\",\n\"\"\"def build_parser() -> argparse.ArgumentParser:\n    p = argparse.ArgumentParser(\n        prog=\"dgpipe\",\n        description=\"Work with dgpipe pipeline specs (JSON).\",\n    )\n    p.add_argument(\"-V\", \"--version\", action=\"version\", version=f\"%(prog)s {__version__}\")\n\n    sub = p.add_subparsers(dest=\"cmd\", required=True)\n\n    p_new = sub.add_parser(\"new\", help=\"Create a minimal pipeline spec JSON.\")\n    p_new.add_argument(\"output\", nargs=\"?\", help=\"Output path (default: stdout).\")\n    p_new.add_argument(\"--name\", default=\"pipeline\", help=\"Pipeline name.\")\n    p_new.set_defaults(func=_cmd_new)\n\n    p_val = sub.add_parser(\"validate\", help=\"Validate a pipeline spec JSON file.\")\n    p_val.add_argument(\"spec\", help=\"Path to pipeline spec JSON.\")\n    p_val.add_argument(\"-q\", \"--quiet\", action=\"store_true\", help=\"Suppress OK output.\")\n    p_val.set_defaults(func=_cmd_validate)\n\n    p_show = sub.add_parser(\"show\", help=\"Print a normalized pipeline spec JSON.\")\n    p_show.add_argument(\"spec\", help=\"Path to pipeline spec JSON.\")\n    p_show.set_defaults(func=_cmd_show)\n\n    p_plan = sub.add_parser(\"plan\", help=\"Print a stage execution plan (in order).\")\n    p_plan.add_argument(\"spec\", help=\"Path to pipeline spec JSON.\")\n    p_plan.add_argument(\n        \"stages\",\n        nargs=\"*\",\n        help=\"Optional stage names to filter the plan (still in pipeline order).\",\n    )\n    p_plan.set_defaults(func=_cmd_plan)\n\n    return p\n\n\ndef main(argv: Sequence[str] | None = None) -> int:\n    argv = list(sys.argv[1:] if argv is None else argv)\n    p = build_parser()\n    try:\n        args = p.parse_args(argv)\n        return int(args.func(args))\n    except (ValidationError, DgpipeError, ValueError) as e:\n        sys.stderr.write(format_exception(e) + \"\\\\n\")\n        return 2\n    except KeyboardInterrupt:\n        sys.stderr.write(\"Interrupted\\\\n\")\n        return 130\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/dgpipe/cli.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949b590d1548190ae21728e2f723cbf0045b034ab97adc3",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/dgpipe/cli.py\nDIR_STATE:[\"src/dgpipe/__init__.py\", \"src/dgpipe/cli.py\", \"src/dgpipe/models.py\", \"src/dgpipe/protocols.py\", \"src/dgpipe/utils.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0f719dacb6a2f028006949b67f5cc081958b121b07c786a06a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0f719dacb6a2f028006949b67feb9c81959e42b9cfb64d7272",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\ntext=Path('/mnt/data/src/dgpipe/cli.py').read_text().splitlines()\nlen(text), text[:5], text[-5:]\n",
+      "container_id": "cntr_6949b590d1548190ae21728e2f723cbf0045b034ab97adc3",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(121,\n ['\"\"\"dgpipe CLI.',\n  '',\n  \"Small, dependency-light command line interface that operates on dgpipe's core\",\n  'models (PipelineSpec, StageSpec, RunConfig). It supports creating, validating,',\n  'and inspecting pipeline specs stored as JSON.'],\n ['        return 130',\n  '',\n  '',\n  'if __name__ == \"__main__\":',\n  '    raise SystemExit(main())'])"
+        }
+      ]
+    },
+    {
+      "id": "rs_0f719dacb6a2f028006949b68346cc8195835139a62b992ba0",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0f719dacb6a2f028006949b6837c7c8195928e56adc18e0a21",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/dgpipe/cli.py` as a compact argparse-based CLI exposing `new`, `validate`, `show`, and `plan` commands over `dgpipe` core models with clear help text, normalized JSON output, and consistent user-facing error reporting/exit codes."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

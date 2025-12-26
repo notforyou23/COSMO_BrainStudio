@@ -1,0 +1,56 @@
+{
+  "content": "Created `tests/test_sweep_io_plotting.py`, a pytest suite that enforces deterministic sweep outputs, verifies CSV save/load round-trips, and confirms PNG/SVG figure exports using a non-interactive Matplotlib backend.",
+  "reasoning": "",
+  "responseId": "resp_0c6f9b4da9572f9d00694b4ce54d60819480b747cf50d38776",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3897,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2358,
+    "output_tokens_details": {
+      "reasoning_tokens": 1098
+    },
+    "total_tokens": 6255
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0c6f9b4da9572f9d00694b4ce60b908194b16c560ca7a9841b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c6f9b4da9572f9d00694b4cf59bcc8194b9377cbbd7290603",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, inspect\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_sweep_io_plotting.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\nimport inspect\nimport json\nfrom pathlib import Path\n\nimport numpy as np\nimport pytest\n\n# Ensure non-interactive backend for figure export tests\nimport matplotlib\nmatplotlib.use(\"Agg\", force=True)\nimport matplotlib.pyplot as plt  # noqa: E402\n\n\ndef _resolve_attr(mod, candidates):\n    for name in candidates:\n        if hasattr(mod, name):\n            return getattr(mod, name)\n    pytest.fail(f\"Missing required API. Tried: {candidates!r}\")\n\n\ndef _normalize(obj):\n    # Normalize common container types to a JSON-stable python structure.\n    if obj is None:\n        return None\n    if hasattr(obj, \"to_dict\"):\n        try:\n            return obj.to_dict(orient=\"records\")  # pandas DataFrame\n        except TypeError:\n            return obj.to_dict()\n    if isinstance(obj, np.ndarray):\n        return obj.tolist()\n    if isinstance(obj, (list, tuple)):\n        return [_normalize(x) for x in obj]\n    if isinstance(obj, dict):\n        return {str(k): _normalize(v) for k, v in sorted(obj.items(), key=lambda kv: str(kv[0]))}\n    if isinstance(obj, (np.floating, np.integer)):\n        return obj.item()\n    return obj\n\n\ndef _call_sweep(sweep_fn):\n    sig = inspect.signature(sweep_fn)\n    kw = {}\n    # Prefer a pure deterministic runner if supported.\n    if \"runner\" in sig.parameters:\n        kw[\"runner\"] = lambda p: {\"y\": float(p[\"x\"]) ** 2}\n    if \"func\" in sig.parameters and \"runner\" not in kw:\n        kw[\"func\"] = lambda p: {\"y\": float(p[\"x\"]) ** 2}\n    if \"params_list\" in sig.parameters:\n        kw[\"params_list\"] = [{\"x\": 0.0}, {\"x\": 1.0}, {\"x\": 2.0}]\n    else:\n        grid = {\"x\": [0.0, 1.0, 2.0]}\n        for k in (\"param_grid\", \"grid\", \"sweep\", \"params\", \"parameters\"):\n            if k in sig.parameters:\n                kw[k] = grid\n                break\n    for k in (\"seed\", \"random_seed\", \"rng_seed\"):\n        if k in sig.parameters:\n            kw[k] = 123\n    for k in (\"experiment\", \"experiment_id\", \"name\"):\n        if k in sig.parameters and k not in kw:\n            kw[k] = \"experiment_1\"\n    for k in (\"n_trials\", \"trials\", \"repeats\"):\n        if k in sig.parameters:\n            kw[k] = 1\n    return sweep_fn(**kw)\n\n\ndef test_sweep_reproducibility(tmp_path, monkeypatch):\n    monkeypatch.setenv(\"MPLBACKEND\", \"Agg\")\n    import experiments as exp\n\n    sweep_fn = _resolve_attr(exp, [\"run_sweep\", \"parameter_sweep\", \"run_parameter_sweep\", \"sweep\"])\n    r1 = _normalize(_call_sweep(sweep_fn))\n    r2 = _normalize(_call_sweep(sweep_fn))\n    assert json.dumps(r1, sort_keys=True) == json.dumps(r2, sort_keys=True)\n\n\ndef test_csv_roundtrip(tmp_path):\n    import experiments as exp\n\n    sweep_fn = _resolve_attr(exp, [\"run_sweep\", \"parameter_sweep\", \"run_parameter_sweep\", \"sweep\"])\n    results = _call_sweep(sweep_fn)\n\n    save_csv = _resolve_attr(exp, [\"save_results_csv\", \"write_results_csv\", \"results_to_csv\", \"to_csv\"])\n    load_csv = _resolve_attr(exp, [\"load_results_csv\", \"read_results_csv\", \"results_from_csv\", \"from_csv\"])\n\n    path = tmp_path / \"results.csv\"\n    save_sig = inspect.signature(save_csv)\n    if len(save_sig.parameters) == 1:\n        save_csv(path)\n    else:\n        save_csv(results, path)\n\n    loaded = load_csv(path)\n    assert json.dumps(_normalize(results), sort_keys=True) == json.dumps(_normalize(loaded), sort_keys=True)\n\n\ndef test_figure_export_png_svg(tmp_path):\n    import experiments as exp\n\n    export_fig = _resolve_attr(exp, [\"export_figure\", \"save_figure\", \"save_figures\", \"savefig\"])\n\n    fig, ax = plt.subplots()\n    ax.plot([0, 1, 2], [0, 1, 4])\n    ax.set_title(\"export-test\")\n\n    png = tmp_path / \"fig.png\"\n    svg = tmp_path / \"fig.svg\"\n\n    sig = inspect.signature(export_fig)\n    if \"fig\" in sig.parameters:\n        export_fig(fig=fig, path=png)\n        export_fig(fig=fig, path=svg)\n    else:\n        export_fig(fig, png)\n        export_fig(fig, svg)\n\n    assert png.exists() and png.stat().st_size > 0\n    assert svg.exists() and svg.stat().st_size > 0\n    plt.close(fig)\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tests/test_sweep_io_plotting.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4bd0381081909cae03b5047a4b910a942f49460a0d3d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_sweep_io_plotting.py\nDIR_STATE:[\"tests/test_sweep_io_plotting.py\", \"tests/test_symbolic_numeric_consistency.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0c6f9b4da9572f9d00694b4d0507788194866580dee005e4d4",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/test_sweep_io_plotting.py`, a pytest suite that enforces deterministic sweep outputs, verifies CSV save/load round-trips, and confirms PNG/SVG figure exports using a non-interactive Matplotlib backend."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

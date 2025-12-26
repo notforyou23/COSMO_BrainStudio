@@ -1,0 +1,200 @@
+{
+  "content": "Created `tests/fixtures/valid_output.json` containing a representative, fully-populated v1 benchmark output JSON fixture aligned with the documented `outputs/schemas/benchmark_schema.json` structure for use in validator and schema-doc generation tests.",
+  "reasoning": "",
+  "responseId": "resp_0ede05ecf1cd48cf006949ac1324548195b0060118b2941aa7",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 7917,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1552,
+    "output_tokens_details": {
+      "reasoning_tokens": 1501
+    },
+    "total_tokens": 9469
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0ede05ecf1cd48cf006949ac13efb48195b065a57fc1493ab8",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ede05ecf1cd48cf006949ac14ae948195b9b67dba5df02ad0",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nimport json, textwrap, os, re\nbase=Path('/mnt/data')\nlist(base.rglob('benchmark_schema.json'))[:10], len(list(base.rglob('benchmark_schema.json')))\n",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "([], 0)"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ede05ecf1cd48cf006949ac1774308195b55a8608a5477d0b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ede05ecf1cd48cf006949ac17ec4c81958b760aeea52c69ff",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "sorted([str(p.relative_to(base)) for p in base.rglob('*') if p.is_file()])[:200], len(sorted([str(p.relative_to(base)) for p in base.rglob('*') if p.is_file()]))\n",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(['.github/workflows/validate-benchmark-outputs.yml',\n  '.pre-commit-config.yaml',\n  'docs/benchmark_output_schema.md',\n  'pyproject.toml',\n  'tests/test_validate_benchmark_outputs.py',\n  'tools/output_format_policy.py',\n  'tools/schema_docs.py',\n  'tools/schema_utils.py',\n  'tools/validate_benchmark_outputs.py'],\n 9)"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ede05ecf1cd48cf006949ac1a5d908195b7851e4223735c4e",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ede05ecf1cd48cf006949ac1b3868819599c661ef9cc89c4e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "md=base/'docs/benchmark_output_schema.md'\nprint(md.read_text(encoding='utf-8')[:4000])\n",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "# Benchmark output schema (v1)\n\nThis repository standardizes benchmark outputs as JSON validated by a single canonical JSON Schema (`outputs/schemas/benchmark_schema.json`).\nAny benchmark output JSON committed to the repo **must** conform to this schema; legacy/ad-hoc formats are deprecated and will fail validation.\n\n## Where benchmark outputs may live (path policy)\n\nBenchmark output JSON files are recognized only in these locations:\n\n- **Allowed (canonical)**:\n  - `outputs/**/*.json`\n  - `benchmarks/**/results/**/*.json`\n- **Deprecated** (must migrate):\n  - `results/**/*.json`\n  - `**/output.json` (and other ambiguous generic filenames like `results.json`, `metrics.json`, `eval.json`)\n\nRationale: keeping outputs in predictable locations makes discovery/validation reliable and prevents format drift.\n\n## Top-level shape\n\nA benchmark output is a single JSON object with the following required top-level keys:\n\n| Field | Type | Required | Notes |\n|---|---:|:---:|---|\n| `$schema` | string | yes | URI/path to the JSON Schema used to validate this file. |\n| `schema_version` | string | yes | Schema version identifier (currently `v1`). |\n| `metadata` | object | yes | Identifies *what* was run (benchmark/model/dataset) and *how* it was produced. |\n| `results` | object | yes | The measured outcomes (metrics), plus optional per-case details. |\n\nAll other top-level keys are reserved for future schema versions.\n\n## `metadata` (required)\n\n`metadata` is an object with the following required keys:\n\n| Field | Type | Required | Notes |\n|---|---:|:---:|---|\n| `benchmark` | object | yes | Benchmark identity (name and optional suite/version). |\n| `model` | object | yes | Model identity (name/provider and optional parameters). |\n| `run` | object | yes | Run identity and provenance (time, git commit, command, environment). |\n\nRecommended (optional) keys:\n- `tags` (array of strings): freeform labels for filtering/grouping.\n- `notes` (string): human-friendly context (kept short; large logs belong in artifacts).\n\n### `metadata.benchmark` (required)\nRequired:\n- `name` (string): benchmark name (e.g. `\"mmlu\"`, `\"swe-bench\"`, `\"custom_eval\"`)\n\nOptional:\n- `suite` (string): benchmark suite/grouping\n- `version` (string): benchmark version or config id\n- `task` (string): task name/subset (if applicable)\n\n### `metadata.model` (required)\nRequired:\n- `name` (string): model identifier (e.g. `\"gpt-4.1-mini\"`, `\"llama-3.1-8b-instruct\"`)\n- `provider` (string): model provider or runtime (e.g. `\"openai\"`, `\"vllm\"`, `\"hf\"`)\n\nOptional:\n- `parameters` (object): stable, JSON-serializable settings (temperature, max_tokens, etc.)\n- `revision` (string): checkpoint/revision hash/tag if applicable\n\n### `metadata.run` (required)\nRequired:\n- `id` (string): unique run id within the repo (recommend UUID or timestamp-based id)\n- `started_at` (string): ISO-8601 timestamp\nOptional but strongly recommended:\n- `finished_at` (string): ISO-8601 timestamp\n- `git` (object): `{ \"commit\": \"...\", \"dirty\": false }`\n- `command` (string): command line used to produce the output\n- `host` (object): `{ \"os\": \"...\", \"python\": \"...\", \"hostname\": \"...\" }`\n\n## `results` (required)\n\n`results` is an object with the following required keys:\n\n| Field | Type | Required | Notes |\n|---|---:|:---:|---|\n| `status` | string | yes | `\"ok\"` or `\"error\"`. |\n| `metrics` | object | yes | Map of metric name → numeric value. |\n\nOptional keys:\n- `error` (object): present when `status` is `\"error\"`; include `message` and optional `type`/`traceback`.\n- `details` (object): structured, schema-stable aggregates (confusion matrices, per-split metrics, etc.).\n- `cases` (array): per-item results (keep minimal; large payloads should be stored separately and referenced).\n- `artifacts` (array): references to external files (paths/URIs + role).\n\n### Metric naming guidance\nUse short, stable keys (snake_case), e.g. `accuracy`, `f1`, `pass_at_1`, `latency_ms_p50`.\nPrefer units in the name when needed (e.g. `latency_ms_p95`).\n\n## Minimal\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ede05ecf1cd48cf006949ac1ded808195bf3459a250ef5d40",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ede05ecf1cd48cf006949ac1e25b48195b2eef2bcce0eeef4",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "text=md.read_text(encoding='utf-8')\nprint(text[text.find(\"## Minimal\"):text.find(\"## Full example\")])\n",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "## Minimal valid example (v1)\n\n```json\n{\n  \"$schema\": \"outputs/schemas/benchmark_schema.json\",\n  \"schema_version\": \"v1\",\n  \"metadata\": {\n    \"benchmark\": { \"name\": \"mmlu\", \"task\": \"all\" },\n    \"model\": { \"name\": \"gpt-4.1-mini\", \"provider\": \"openai\" },\n    \"run\": { \"id\": \"2025-12-22T18:00:00Z_001\", \"started_at\": \"2025-12-22T18:00:00Z\" }\n  },\n  \"results\": {\n    \"status\": \"ok\",\n    \"metrics\": { \"accuracy\": 0.712 }\n  }\n}\n```\n\n## Example with per-split details and artifacts\n\n```json\n{\n  \"$schema\": \"outputs/schemas/benchmark_schema.json\",\n  \"schema_version\": \"v1\",\n  \"metadata\": {\n    \"benchmark\": { \"name\": \"custom_eval\", \"suite\": \"regression\", \"version\": \"2025.12\" },\n    \"model\": {\n      \"name\": \"llama-3.1-8b-instruct\",\n      \"provider\": \"vllm\",\n      \"parameters\": { \"temperature\": 0.2, \"max_tokens\": 512 }\n    },\n    \"run\": {\n      \"id\": \"f6a3e3b3-6ac2-4ab8-9fd2-1d2d6f7d4c2a\",\n      \"started_at\": \"2025-12-22T18:00:00Z\",\n      \"finished_at\": \"2025-12-22T18:08:31Z\",\n      \"git\": { \"commit\": \"abc1234\", \"dirty\": false },\n      \"command\": \"python -m benchmarks.run --suite regression\"\n    },\n    \"tags\": [\"nightly\", \"cpu\"]\n  },\n  \"results\": {\n    \"status\": \"ok\",\n    \"metrics\": { \"pass_at_1\": 0.43, \"latency_ms_p50\": 120.5 },\n    \"details\": {\n      \"by_split\": {\n        \"easy\": { \"pass_at_1\": 0.61 },\n        \"hard\": { \"pass_at_1\": 0.22 }\n      }\n    },\n    \"artifacts\": [\n      { \"role\": \"raw_predictions\", \"path\": \"outputs/artifacts/f6a3e3b3/preds.jsonl\" }\n    ]\n  }\n}\n```\n\n## Migration notes (deprecated ad-hoc formats)\n\nThe validator intentionally flags common ad-hoc outputs such as `output.json`/`results.json` and legacy shapes like:\n- `{ \"config\": ..., \"results\": ... }`\n- `{ \"metrics\": ..., \"metadata\": ... }`\n- `{ \"scores\": ..., \"details\": ... }`\n\nTo migrate:\n1. **Move/rename the file** to a canonical location (prefer `outputs/<benchmark>/<run_id>.json`).\n2. **Add** top-level `$schema` and `schema_version: \"v1\"`.\n3. **Map metadata**:\n   - old `config.*` → `metadata.*` (benchmark/model/run parameters)\n   - old `metadata.*` → `metadata.*` (ensure `benchmark`, `model`, `run` exist)\n4. **Map results**:\n   - old `metrics`/`scores` → `results.metrics`\n   - old `details` → `results.details`\n   - failures/errors → `results.status=\"error\"` and `results.error.message`\n\nCI/pre-commit will fail if deprecated locations or non-conforming JSON are committed, ensuring the schema remains the single source of truth.\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ede05ecf1cd48cf006949ac20d25881959024051d4ef16457",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ede05ecf1cd48cf006949ac220bc081959256bfda8877da99",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((base/'tools/schema_utils.py').read_text(encoding='utf-8')[:4000])\n",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Schema utilities.\n\nProvides:\n- Loading JSON / JSON Schema from disk.\n- Resolving *local* ($ref starting with \"#/\") references into an inline schema.\n- Draft 2020-12 validation with stable, readable error reporting.\n\nThese helpers are intentionally small and dependency-light; they only assume\n`jsonschema` is installed.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Mapping, MutableMapping, Optional, Tuple\n\nimport copy\nimport json\n\nfrom jsonschema import Draft202012Validator\nfrom jsonschema.exceptions import ValidationError\ndef load_json(path: Path) -> Any:\n    \"\"\"Load a JSON file with UTF-8 encoding.\"\"\"\n    return json.loads(path.read_text(encoding=\"utf-8\"))\n\n\ndef _decode_json_pointer_part(part: str) -> str:\n    # RFC 6901: \"~1\" => \"/\", \"~0\" => \"~\"\n    return part.replace(\"~1\", \"/\").replace(\"~0\", \"~\")\n\n\ndef _get_by_json_pointer(doc: Any, ref: str) -> Any:\n    \"\"\"Resolve a local JSON pointer like '#/a/b/0'.\"\"\"\n    if not ref.startswith(\"#\"):\n        raise ValueError(f\"Only local refs are supported, got: {ref!r}\")\n    pointer = ref[1:]\n    if pointer in (\"\", \"/\"):\n        return doc\n    if not pointer.startswith(\"/\"):\n        raise ValueError(f\"Invalid JSON pointer in ref: {ref!r}\")\n    cur = doc\n    for raw in pointer.lstrip(\"/\").split(\"/\"):\n        part = _decode_json_pointer_part(raw)\n        if isinstance(cur, list):\n            cur = cur[int(part)]\n        else:\n            cur = cur[part]\n    return cur\ndef resolve_local_refs(schema: Mapping[str, Any]) -> Dict[str, Any]:\n    \"\"\"Return a deep-copied schema with local '#/..' $ref inlined.\n\n    Notes:\n    - Only resolves references within the same document.\n    - If an object contains \"$ref\" plus sibling keys, siblings override the\n      referenced schema (useful for narrowing constraints in place).\n    - Cycles are not expanded infinitely; a previously-expanded ref is reused.\n    \"\"\"\n    root: Any = copy.deepcopy(schema)\n    cache: Dict[str, Any] = {}\n\n    def _walk(node: Any) -> Any:\n        if isinstance(node, list):\n            return [_walk(v) for v in node]\n        if not isinstance(node, dict):\n            return node\n\n        ref = node.get(\"$ref\")\n        if isinstance(ref, str) and ref.startswith(\"#/\"):\n            if ref in cache:\n                base = copy.deepcopy(cache[ref])\n            else:\n                base = _walk(copy.deepcopy(_get_by_json_pointer(root, ref)))\n                cache[ref] = copy.deepcopy(base)\n            # Siblings override referenced schema (except $ref itself).\n            siblings = {k: _walk(v) for k, v in node.items() if k != \"$ref\"}\n            if siblings and isinstance(base, dict):\n                merged = dict(base)\n                merged.update(siblings)\n                return merged\n            return base\n\n        return {k: _walk(v) for k, v in node.items()}\n\n    resolved = _walk(root)\n    if not isinstance(resolved, dict):\n        raise ValueError(\"Schema root must be an object\")\n    return resolved\n@dataclass(frozen=True)\nclass ValidationIssue:\n    path: str\n    message: str\n    validator: str\n\n    @staticmethod\n    def from_error(err: ValidationError) -> \"ValidationIssue\":\n        path = \"/\" + \"/\".join(str(p) for p in err.path) if err.path else \"/\"\n        return ValidationIssue(path=path, message=err.message, validator=err.validator or \"unknown\")\n\n\ndef iter_validation_issues(validator: Draft202012Validator, instance: Any) -> List[ValidationIssue]:\n    errors = list(validator.iter_errors(instance))\n    # Stable ordering: (path, validator, message)\n    issues = [ValidationIssue.from_error(e) for e in errors]\n    issues.sort(key=lambda i: (i.path, i.validator, i.message))\n    return issues\n\n\ndef format_issues(issues: Iterable[ValidationIssue], *, header: str = \"Schema validation failed\") -> str:\n    items = list(issues)\n    if not items:\n        return header + \": <no issues>\"\n    lines = [f\"{header} ({len(items)} issue(s)):\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ede05ecf1cd48cf006949ac2472188195be71587f672edb84",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ede05ecf1cd48cf006949ac24dcf081959887131c279bd41f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((base/'tools/validate_benchmark_outputs.py').read_text(encoding='utf-8')[:4000])\n",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "#!/usr/bin/env python3\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport sys\nfrom pathlib import Path\n\ntry:\n    import jsonschema\nexcept Exception as e:  # pragma: no cover\n    raise SystemExit(f\"ERROR: jsonschema is required (pip install jsonschema). Detail: {e}\")\nLEGACY_NAME_HINTS = {\n    \"results.json\",\n    \"output.json\",\n    \"metrics.json\",\n    \"eval.json\",\n}\nLEGACY_KEY_SETS = [\n    {\"config\", \"results\"},\n    {\"metrics\", \"metadata\"},\n    {\"scores\", \"details\"},\n]\n\n\ndef _discover_json_files(root: Path) -> list[Path]:\n    candidates = []\n    for p in root.rglob(\"*.json\"):\n        rp = p.as_posix()\n        if \"/.git/\" in rp or \"/.venv/\" in rp or \"/node_modules/\" in rp:\n            continue\n        if rp.endswith(\"/outputs/schemas/benchmark_schema.json\") or \"/outputs/schemas/\" in rp:\n            continue\n        if \"/outputs/\" in rp:\n            candidates.append(p)\n    return sorted(candidates)\n\n\ndef _fmt_path(path_parts) -> str:\n    if not path_parts:\n        return \"$\"\n    out = \"$\"\n    for part in path_parts:\n        if isinstance(part, int):\n            out += f\"[{part}]\"\n        else:\n            out += \".\" + str(part)\n    return out\n\n\ndef _looks_legacy(path: Path, obj) -> bool:\n    name = path.name.lower()\n    if name in LEGACY_NAME_HINTS or any(name.endswith(suf) for suf in (\"_results.json\", \"-results.json\")):\n        return True\n    if isinstance(obj, dict):\n        keys = set(obj.keys())\n        if any(ks.issubset(keys) for ks in LEGACY_KEY_SETS):\n            return True\n        if \"schema_version\" in keys and \"$schema\" not in keys:\n            return True\n    return False\ndef _load_schema(schema_path: Path) -> dict:\n    if not schema_path.exists():\n        raise SystemExit(f\"ERROR: Schema not found: {schema_path}\")\n    try:\n        return json.loads(schema_path.read_text(encoding=\"utf-8\"))\n    except Exception as e:\n        raise SystemExit(f\"ERROR: Failed to read schema JSON: {schema_path} ({e})\")\n\n\ndef _validator(schema: dict, schema_path: Path):\n    base_uri = schema_path.resolve().as_uri()\n    resolver = jsonschema.RefResolver(base_uri=base_uri, referrer=schema)  # for local refs\n    return jsonschema.Draft202012Validator(schema, resolver=resolver)\n\n\ndef _validate_file(p: Path, v, schema_name: str) -> list[str]:\n    try:\n        data = json.loads(p.read_text(encoding=\"utf-8\"))\n    except Exception as e:\n        return [f\"{p}: invalid JSON ({e})\"]\n    errors = sorted(v.iter_errors(data), key=lambda e: (len(list(e.absolute_path)), str(e.absolute_path)))\n    msgs = []\n    if errors:\n        for e in errors[:50]:\n            at = _fmt_path(e.absolute_path)\n            msg = e.message\n            if e.validator == \"required\" and isinstance(e.validator_value, list):\n                missing = \", \".join(e.validator_value)\n                msg = f\"missing required field(s): {missing}\"\n            msgs.append(f\"{p}:{at}: {msg}\")\n        extra = \"\" if len(errors) <= 50 else f\" (showing first 50 of {len(errors)})\"\n        msgs.append(f\"{p}: does not match {schema_name}{extra}\")\n    if _looks_legacy(p, data) and errors:\n        msgs.append(\n            f\"{p}: appears to be a deprecated legacy/ad-hoc format. \"\n            \"Migrate to the canonical benchmark output schema and rename away from generic \"\n            \"names like results.json/output.json.\"\n        )\n    return msgs\ndef main(argv: list[str] | None = None) -> int:\n    ap = argparse.ArgumentParser(\n        description=\"Validate benchmark output JSON files against outputs/schemas/benchmark_schema.json.\"\n    )\n    ap.add_argument(\"paths\", nargs=\"*\", help=\"Files or directories to scan (default: repo root).\")\n    ap.add_argument(\n        \"--schema\",\n        default=\"outputs/schemas/benchmark_schema.json\",\n        help=\"Path to JSON Schema (default: outputs/schemas/benchmark_schema.json).\",\n    )\n    ap.add_argument(\"--fail-on-empty\", action=\"store_true\", help=\"Fail if no candidate JSON files are found.\")\n    args = ap.parse_args(argv)\n\n    root = Path.\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ede05ecf1cd48cf006949ac2731848195a1551e217ce37f76",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ede05ecf1cd48cf006949ac27e3f0819598bce7167e6f1d94",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((base/'tests/test_validate_benchmark_outputs.py').read_text(encoding='utf-8')[:4000])\n",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "import json\nfrom pathlib import Path\n\nimport pytest\n\nfrom tools.validate_benchmark_outputs import main\ndef _write_json(p: Path, obj) -> Path:\n    p.parent.mkdir(parents=True, exist_ok=True)\n    p.write_text(json.dumps(obj, indent=2, sort_keys=True) + \"\\n\", encoding=\"utf-8\")\n    return p\ndef test_validation_success_explicit_file(tmp_path, capsys):\n    schema = {\n        \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n        \"$id\": \"https://example.com/benchmark.schema.json\",\n        \"type\": \"object\",\n        \"required\": [\"$schema\", \"schema_version\", \"benchmark\", \"results\"],\n        \"properties\": {\n            \"$schema\": {\"type\": \"string\"},\n            \"schema_version\": {\"type\": \"string\"},\n            \"benchmark\": {\"type\": \"object\", \"required\": [\"name\"], \"properties\": {\"name\": {\"type\": \"string\"}}},\n            \"results\": {\"type\": \"object\"},\n        },\n    }\n    schema_path = _write_json(tmp_path / \"schema.json\", schema)\n    out_path = _write_json(\n        tmp_path / \"bench_output.json\",\n        {\"$schema\": schema[\"$id\"], \"schema_version\": \"1.0\", \"benchmark\": {\"name\": \"demo\"}, \"results\": {}},\n    )\n\n    rc = main([str(out_path), \"--schema\", str(schema_path)])\n    captured = capsys.readouterr()\n    assert rc == 0\n    assert \"Checked 1 file(s): OK\" in captured.out\n    assert captured.err == \"\"\ndef test_validation_failure_and_legacy_detection(tmp_path, capsys):\n    schema = {\n        \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n        \"$id\": \"https://example.com/benchmark.schema.json\",\n        \"type\": \"object\",\n        \"required\": [\"$schema\", \"schema_version\"],\n        \"properties\": {\"$schema\": {\"type\": \"string\"}, \"schema_version\": {\"type\": \"string\"}},\n    }\n    schema_path = _write_json(tmp_path / \"schema.json\", schema)\n\n    legacy_like = tmp_path / \"results.json\"\n    legacy_like.write_text(\"{}\", encoding=\"utf-8\")\n\n    rc = main([str(legacy_like), \"--schema\", str(schema_path)])\n    captured = capsys.readouterr()\n    assert rc == 1\n    assert \"VALIDATION_FAILED:\" in captured.out\n    assert str(legacy_like) in captured.err\n    assert \"deprecated legacy/ad-hoc format\" in captured.err\n    assert \"Checked 1 file(s): FAIL\" in captured.err\ndef test_deterministic_error_ordering(tmp_path, capsys):\n    schema = {\n        \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n        \"$id\": \"https://example.com/benchmark.schema.json\",\n        \"type\": \"object\",\n        \"required\": [\"x\", \"y\"],\n        \"properties\": {\"x\": {\"type\": \"integer\"}, \"y\": {\"type\": \"string\"}},\n        \"additionalProperties\": False,\n    }\n    schema_path = _write_json(tmp_path / \"schema.json\", schema)\n    bad_path = _write_json(tmp_path / \"out.json\", {\"x\": \"nope\"})\n\n    rc = main([str(bad_path), \"--schema\", str(schema_path)])\n    captured = capsys.readouterr()\n    assert rc == 1\n\n    err_lines = [ln for ln in captured.err.splitlines() if ln.startswith(\" - \")]\n    assert len(err_lines) >= 2\n    assert f\"{bad_path}:$:\" in err_lines[0]\n    assert \"missing required field(s)\" in err_lines[0]\n    assert f\"{bad_path}:$.x:\" in err_lines[1]\n    assert \"is not of type\" in err_lines[1]\ndef test_fail_on_empty_discovery(tmp_path, monkeypatch, capsys):\n    schema = {\n        \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n        \"$id\": \"https://example.com/benchmark.schema.json\",\n        \"type\": \"object\",\n    }\n    schema_path = _write_json(tmp_path / \"schema.json\", schema)\n    monkeypatch.chdir(tmp_path)\n\n    rc = main([\"--schema\", str(schema_path), \"--fail-on-empty\"])\n    captured = capsys.readouterr()\n    assert rc == 2\n    assert \"No benchmark output JSON files discovered\" in captured.err\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ede05ecf1cd48cf006949ac2a3998819587de5e340861d29c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ede05ecf1cd48cf006949ac2e57bc8195a84d61a46849ba5e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import re\ntext=md.read_text(encoding='utf-8')\nfor pat in [\"cases\", \"artifacts\", \"error\", \"details\"]:\n    idx=text.find(f\"### `{pat}`\")\n    print(pat, idx)\n",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "cases -1\nartifacts -1\nerror -1\ndetails -1\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ede05ecf1cd48cf006949ac313d2c8195a858f201407d93eb",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ede05ecf1cd48cf006949ac38dc508195879aa0cbbd1bea5f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\ntarget_path = Path('/mnt/data').joinpath('tests/fixtures/valid_output.json')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nfixture = {\n  \"$schema\": \"outputs/schemas/benchmark_schema.json\",\n  \"schema_version\": \"v1\",\n  \"metadata\": {\n    \"benchmark\": {\n      \"name\": \"custom_eval\",\n      \"suite\": \"regression\",\n      \"version\": \"2025.12\",\n      \"task\": \"sanity\"\n    },\n    \"model\": {\n      \"name\": \"gpt-4.1-mini\",\n      \"provider\": \"openai\",\n      \"revision\": \"2025-12-01\",\n      \"parameters\": {\n        \"temperature\": 0.2,\n        \"max_tokens\": 256,\n        \"top_p\": 1.0\n      }\n    },\n    \"run\": {\n      \"id\": \"f6a3e3b3-6ac2-4ab8-9fd2-1d2d6f7d4c2a\",\n      \"started_at\": \"2025-12-22T18:00:00Z\",\n      \"finished_at\": \"2025-12-22T18:01:23Z\",\n      \"git\": {\"commit\": \"abc1234\", \"dirty\": False},\n      \"command\": \"python -m benchmarks.run --suite regression --task sanity\",\n      \"host\": {\"os\": \"linux\", \"python\": \"3.11.6\", \"hostname\": \"ci-runner-01\"}\n    },\n    \"tags\": [\"fixture\", \"unit-test\"],\n    \"notes\": \"Representative valid benchmark output used for validator and docs tests.\"\n  },\n  \"results\": {\n    \"status\": \"ok\",\n    \"metrics\": {\n      \"accuracy\": 0.75,\n      \"pass_at_1\": 0.5,\n      \"latency_ms_p50\": 123.4\n    },\n    \"details\": {\n      \"by_split\": {\n        \"easy\": {\"accuracy\": 0.9, \"pass_at_1\": 0.7},\n        \"hard\": {\"accuracy\": 0.6, \"pass_at_1\": 0.3}\n      }\n    },\n    \"artifacts\": [\n      {\"role\": \"raw_predictions\", \"path\": \"outputs/artifacts/f6a3e3b3/preds.jsonl\"},\n      {\"role\": \"run_log\", \"path\": \"outputs/artifacts/f6a3e3b3/run.log\"}\n    ]\n  }\n}\n\n# Ensure deterministic key order? fixture file maybe wants pretty format. We'll use json.dumps indent=2 sort_keys=True\nfinal_text = json.dumps(fixture, indent=2, sort_keys=True) + \"\\n\"\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:tests/fixtures/valid_output.json')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/fixtures/valid_output.json\nDIR_STATE:[\"tests/fixtures/valid_output.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0ede05ecf1cd48cf006949ac49a2a8819589a4779d7ee8a17a",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/fixtures/valid_output.json` containing a representative, fully-populated v1 benchmark output JSON fixture aligned with the documented `outputs/schemas/benchmark_schema.json` structure for use in validator and schema-doc generation tests."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

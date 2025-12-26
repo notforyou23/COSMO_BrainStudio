@@ -1,0 +1,56 @@
+{
+  "content": "Created `docs/e2e/README_e2e_sections/50_artifacts_and_logs.md` as a reusable, self-contained section that defines a standard run directory layout, enumer考虑 expected artifacts/logs, and provides concrete retention + debugging workflows suitable for both local and CI runs.",
+  "reasoning": "",
+  "responseId": "resp_05f533c0282ee201006949c9515e4881968852ed0dc35a09b0",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3073,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1501,
+    "output_tokens_details": {
+      "reasoning_tokens": 164
+    },
+    "total_tokens": 4574
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_05f533c0282ee201006949c95231948196a6d14ed20de475c6",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_05f533c0282ee201006949c95652f481969b476e1982afe524",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('docs/e2e/README_e2e_sections/50_artifacts_and_logs.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"## Artifacts, logs, and debugging\n\nThis section describes **where E2E runs write output**, what artifacts you should expect, and a practical workflow for diagnosing failures. It is intended to be reusable from `README_e2e.md` and CI documentation.\"\"\",\n\"\"\"### Default output layout\n\nE2E runs should write everything for a single execution into a **run directory** (often named with a timestamp and/or run id). If your project provides a wrapper script, prefer using it so paths are consistent across local runs and CI.\n\nA typical layout looks like:\n\n```text\nartifacts/\n  e2e/\n    2025-12-22T22-10-00Z_run-abc123/\n      logs/\n        run.log\n        step_*.log\n      reports/\n        summary.json\n        junit.xml\n      outputs/\n        ...pipeline outputs...\n      metadata/\n        config.resolved.json\n        env.json\n```\n\nIf your repository uses a different root (for example `./out/` or `./.artifacts/`), map the concepts below to that structure.\"\"\",\n\"\"\"### What gets written where\n\n| Category | Recommended path (relative to run dir) | Purpose | Typical consumer |\n|---|---|---|---|\n| Human-readable logs | `logs/` | Console output, step logs, stack traces | Developers, CI log upload |\n| Machine-readable summary | `reports/summary.json` | High-level status, timings, key metrics | CI gates, dashboards |\n| Test runner output | `reports/junit.xml` (optional) | Standard JUnit results for CI | CI test report UI |\n| Resolved configuration | `metadata/config.resolved.json` | The exact config used after defaults/overrides | Reproducibility, bug reports |\n| Environment Considerations | `metadata/env.json` | Python version, OS, package versions, git SHA | Reproducibility, triage |\n| Pipeline outputs | `outputs/` | Generated files produced by the E2E pipeline | Downstream validation |\n\nGuidance:\n- Prefer **one run dir per invocation** to avoid mixing logs between runs.\n- Write a short **top-level log** (`logs/run.log`) plus **per-step logs** when steps are long or parallelized.\n- Keep `summary.json` small and stable; attach large payloads (e.g., raw model outputs) under `outputs/`.\"\"\",\n\"\"\"### Naming and run identifiers\n\nUse a deterministic run identifier format that works in both local and CI contexts:\n- Timestamp in UTC (ISO-like), plus a short unique suffix.\n- Include the CI job id / commit SHA in `metadata/env.json` when available.\n- Avoid spaces and characters that can break tooling (`:`, `\\\\`, `*`).\"\"\",\n\"\"\"### Retention and size management\n\nLocal development:\n- Keep the most recent **N** runs (for example, 10) and prune older run directories.\n- If logs are large, compress `logs/` into a single archive after the run (e.g., `logs.tar.gz`).\n\nCI:\n- Upload the entire run directory as an artifact when the run fails.\n- On success, consider uploading only `reports/` and `metadata/` unless outputs are needed for downstream jobs.\n- Prefer explicit retention policies (e.g., “keep failing runs for 30 days, passing runs for 7 days”) rather than best-effort cleanup.\n\nData hygiene:\n- Do not write secrets (tokens, credentials) into logs or `metadata/*`.\n- If you must record endpoints or identifiers, redact/hashed forms are preferred.\"\"\",\n\"\"\"### Debugging workflow (practical checklist)\n\nWhen an E2E run fails, use the following order of operations:\n\n1. **Open `reports/summary.json`**  \n   Confirm which step failed, the exit code, and the failure category (setup vs. execution vs. validation).\n\n2. **Read `logs/run.log` first**  \n   It should contain the high-level timeline, invoked commands, and any “first error” context.\n\n3. **Jump to the failing step log** (e.g., `logs/step_<name>.log`)  \n   Look for:\n   - Python tracebacks or subprocess stderr\n   - retries/timeouts\n   - missing files/paths\n   - schema/validation errors\n\n4. **Verify configuration** in `metadata/config.resolved.json`  \n   Confirm the expected environment (dev/stage), input paths, feature flags, and any overrides.\n\n5. **Reproduce locally** using the same config and environment snapshot  \n   Use the recorded versions in `metadata/env.json` to align Python/package versions.\n\n6. **Inspect outputs** in `outputs/`  \n   If validation failed, compare expected vs. actual outputs; keep a minimal failing sample for reports.\"\"\",\n\"\"\"### Common failure patterns and what to check\n\n- **Path not found / file missing**: verify run dir creation and relative paths; ensure steps write into `outputs/` not the repo root.\n- **Non-deterministic failures**: capture seeds and randomness controls in `metadata/config.resolved.json`; record timing and retry settings.\n- **Timeouts / slow steps**: add per-step timings to `summary.json`; consider chunking steps and emitting intermediate logs.\n- **CI-only failures**: compare `metadata/env.json` between local and CI; check permissions, working directory, and caching behavior.\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:docs/e2e/README_e2e_sections/50_artifacts_and_logs.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949c882be7c819088c3caf5ad10e5ac0ab56cad82a1639c",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:docs/e2e/README_e2e_sections/50_artifacts_and_logs.md\nDIR_STATE:[\"docs/e2e/README_e2e_sections/00_overview.md\", \"docs/e2e/README_e2e_sections/10_prerequisites.md\", \"docs/e2e/README_e2e_sections/20_configuration.md\", \"docs/e2e/README_e2e_sections/30_running_locally.md\", \"docs/e2e/README_e2e_sections/40_ci_github_actions.md\", \"docs/e2e/README_e2e_sections/50_artifacts_and_logs.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_05f533c0282ee201006949c9786e8881969a3c20bee5935e46",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `docs/e2e/README_e2e_sections/50_artifacts_and_logs.md` as a reusable, self-contained section that defines a standard run directory layout, enumer考虑 expected artifacts/logs, and provides concrete retention + debugging workflows suitable for both local and CI runs."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a CI/regression safeguard that runs the canonical QA command on every change (or on a scheduled cadence) and stores QA_REPORT.json as an artifact; fail CI if QA gate fails or if outputs are written outside the canonical /outputs tree.
+Project: CI/regression safeguard that runs the canonical QA command on every change (or on a scheduled cadence) and stores QA_REPORT.json as an artifact; fail CI if QA gate fails or if outputs are written outside the canonical /outputs tree. (json script)
+
+Target file details:
+- Path: scripts/validate_outputs.py
+- Purpose: Utility that scans the repository after QA execution and fails if any new/modified files are written outside the canonical outputs tree with allowlist support.
+- Category: source
+
+Other planned files (for context only):
+- scripts/ci_qa_harness.py: Deterministic CI/QA entrypoint that generates required scaffold, runs the canonical QA command, enforces the /outputs-only write policy, and writes QA_REPORT.json to /outputs.
+- scripts/scaffold_outputs.py: Creates and normalizes the canonical /outputs directory structure and required placeholder files to make the harness deterministic.
+- .github/workflows/qa-regression.yml: GitHub Actions workflow that runs the harness on every push/PR and on a scheduled cadence, uploads outputs/QA_REPORT.json as an artifact, and fails on QA gate or invalid writes.
+- config/qa_harness.json: Config declaring the canonical QA command, outputs root, write-policy allowlists, and report/artifact paths for consistent CI and local runs.
+
+Reference insights:
+- [CONSOLIDATED] A robust QA/CI harness should be a single, deterministic entrypoint that first generates the required scaffold, then verifies
+- [CONSOLIDATED] A robust QA/CI harness should be a single, deterministic entrypoint that first generates the required scaffold, then verifies
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766619349563
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Utility that scans the repository after QA execution and fails if any new/modified files are written outside the canonical outputs tree with allowlist support.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/validate_outputs.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/validate_outputs.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/validate_outputs.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

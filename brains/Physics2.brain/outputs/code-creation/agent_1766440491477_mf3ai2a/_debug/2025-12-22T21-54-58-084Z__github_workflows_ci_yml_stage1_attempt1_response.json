@@ -1,0 +1,56 @@
+{
+  "content": "Created a GitHub Actions CI workflow that triggers on push and pull requests, sets up Python 3.11/3.12, installs the package plus pytest, and runs the test suite to enforce schema/fixture checks.",
+  "reasoning": "",
+  "responseId": "resp_00419df66e0137b2006949bf721e988193880a66d429478592",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2037,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 556,
+    "output_tokens_details": {
+      "reasoning_tokens": 220
+    },
+    "total_tokens": 2593
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_00419df66e0137b2006949bf72cc3081939e1e7434974f9cd8",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_00419df66e0137b2006949bf7712d881938e46ab94baf6740d",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('.github/workflows/ci.yml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"name: CI\n\non:\n  push:\n  pull_request:\n\njobs:\n  test:\n    runs-on: ubuntu-latest\n    strategy:\n      fail-fast: false\n      matrix:\n        python-version: [\"3.11\", \"3.12\"]\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-python@v5\n        with:\n          python-version: ${{ matrix.python-version }}\n          cache: pip\n      - name: Install\n        run: |\n          python -m pip install --upgrade pip\n          python -m pip install -e .\n          python -m pip install pytest\n      - name: Run tests\n        run: |\n          pytest -q\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:.github/workflows/ci.yml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949be2fa9948190b7fd0f89484479600a95eb5fa105098f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_00419df66e0137b2006949bf7b9d788193ad24cb622a9f6d9b",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a GitHub Actions CI workflow that triggers on push and pull requests, sets up Python 3.11/3.12, installs the package plus pytest, and runs the test suite to enforce schema/fixture checks."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

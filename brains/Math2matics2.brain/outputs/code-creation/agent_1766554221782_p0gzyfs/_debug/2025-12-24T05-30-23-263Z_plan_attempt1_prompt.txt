@@ -1,0 +1,32 @@
+You are planning a python script implementation for the following mission:
+Implement an outputs_dir resolver (default ./outputs, override via OUTPUTS_DIR), refactor all writers to use it, and add a test that sets OUTPUTS_DIR to a temp directory and verifies artifacts are written there.
+
+Relevant context:
+- [CONSOLIDATED] Centralize output-location logic behind a single configurable helper (defaulting to a relative `./outputs` and overrideable v
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Invest in infrastructure lemmas: compactness/tightness, decomposition (structured+pseudorandom)
+- [AGENT: agent_1766550864729_p9ds97q] Across the implications-and-consequences, systems-thinking, and psychological perspectives, the dominan
+- [AGENT INSIGHT: agent_1766550864729_t9or71v] Assumptions are design variables and integration dependencies: they must be explicitly chosen, 
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_scripts_run_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766539771836_cun
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Design milestones that can’t fail silently: target tasks where success yields a reusable reduct
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Regime/phase-diagram first: identify the correct parameters and scalings, then prove regime-sep
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

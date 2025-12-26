@@ -1,0 +1,162 @@
+#!/usr/bin/env python3
+"""Automated runner for the "syntax error reproduction → fix → verify" workflow.
+
+Usage:
+    python execute_syntax_plan.py /path/to/repo
+
+What it does:
+  1) Runs: python -m compileall -q .
+  2) Runs: python -m py_compile on qg_bench/cli.py and src/experiments/toy_*.py (if present)
+  3) Runs: pytest -q --collect-only
+  4) If SyntaxError is detected, prints a structured report (file, line, message).
+     (Auto-fixing is intentionally conservative; most syntax errors require human intent.)
+  5) Runs: pytest -q
+
+Notes:
+  - This script DOES NOT assume a particular dependency manager.
+  - It is safe to run multiple times.
+"""
+
+import glob
+import json
+import pathlib
+import re
+import subprocess
+import sys
+from dataclasses import dataclass
+from typing import List
+
+
+@dataclass
+class CmdResult:
+    cmd: List[str]
+    cwd: str
+    returncode: int
+    stdout: str
+    stderr: str
+
+
+def run_cmd(cmd: List[str], cwd: pathlib.Path) -> CmdResult:
+    """Run a subprocess command and capture output; never raises."""
+    try:
+        p = subprocess.run(
+            cmd,
+            cwd=str(cwd),
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        return CmdResult(cmd=cmd, cwd=str(cwd), returncode=p.returncode, stdout=p.stdout, stderr=p.stderr)
+    except Exception as e:
+        return CmdResult(cmd=cmd, cwd=str(cwd), returncode=999, stdout="", stderr=f"{type(e).__name__}: {e}")
+
+
+# Best-effort parsing of SyntaxError locations/messages from stderr across compileall/py_compile/pytest
+_RE_FILELINE = re.compile(r'File "([^"]+)", line (\d+)')
+_RE_SYNTAX = re.compile(r"SyntaxError:\s*(.*)$")
+
+
+def extract_syntax_errors(stderr_text: str) -> List[dict]:
+    """Extract SyntaxError info from tracebacks in stderr."""
+    errors: List[dict] = []
+    last_path = None
+    last_line = None
+    for raw in stderr_text.splitlines():
+        m1 = _RE_FILELINE.search(raw)
+        if m1:
+            last_path = m1.group(1)
+            last_line = int(m1.group(2))
+        m2 = _RE_SYNTAX.search(raw)
+        if m2:
+            errors.append({"path": last_path, "line": last_line, "message": m2.group(1).strip()})
+            last_path, last_line = None, None
+    return errors
+
+
+def print_cmd_result(res: CmdResult) -> None:
+    print("\n$ " + " ".join(res.cmd))
+    print("  cwd:", res.cwd)
+    print("  returncode:", res.returncode)
+    if res.stdout.strip():
+        print("  --- stdout ---")
+        print(res.stdout.rstrip())
+    if res.stderr.strip():
+        print("  --- stderr ---")
+        print(res.stderr.rstrip())
+
+
+def main() -> int:
+    if len(sys.argv) < 2:
+        print("ERROR: Missing repo path argument.")
+        print("Usage: python execute_syntax_plan.py /path/to/repo")
+        return 2
+
+    repo_root = pathlib.Path(sys.argv[1]).resolve()
+    print("Python:", sys.version)
+    print("Repo root:", repo_root)
+
+    if not repo_root.exists():
+        print("ERROR: Repo path does not exist.")
+        return 2
+
+    errors: List[dict] = []
+
+    # --- Experiment 1: compileall baseline ---
+    print("\n=== Experiment 1 — Reproduce and localize syntax errors (baseline) ===")
+    res_compileall = run_cmd([sys.executable, "-m", "compileall", "-q", "."], cwd=repo_root)
+    print_cmd_result(res_compileall)
+    errors.extend(extract_syntax_errors(res_compileall.stderr))
+
+    # Targeted compilation for expected files (if they exist)
+    print("\nTargeted compilation pass (py_compile):")
+    targets = [
+        repo_root / "qg_bench" / "cli.py",
+        *[pathlib.Path(p) for p in glob.glob(str(repo_root / "src" / "experiments" / "toy_*.py"))],
+    ]
+    targets = [t for t in targets if t.exists()]
+
+    if not targets:
+        print("  No targeted files found (qg_bench/cli.py and/or src/experiments/toy_*.py missing).")
+    else:
+        for t in targets:
+            res = run_cmd([sys.executable, "-m", "py_compile", str(t)], cwd=repo_root)
+            print_cmd_result(res)
+            errors.extend(extract_syntax_errors(res.stderr))
+
+    # --- Experiment 1 (optional): pytest collect-only ---
+    print("\n=== Experiment 1 (optional) — pytest --collect-only ===")
+    res_collect = run_cmd([sys.executable, "-m", "pytest", "-q", "--collect-only"], cwd=repo_root)
+    print_cmd_result(res_collect)
+    errors.extend(extract_syntax_errors(res_collect.stderr))
+
+    # Summarize syntax errors
+    errors = [e for e in errors if e.get("message")]
+    if errors:
+        print("\nDetected SyntaxError(s):")
+        print(json.dumps(errors, indent=2))
+    else:
+        print("\nNo SyntaxError detected during baseline steps.")
+
+    # --- Experiment 2: Fix syntax errors (manual) ---
+    print("\n=== Experiment 2 — Fix syntax errors and verify parsing succeeds repo-wide ===")
+    if errors:
+        print("Syntax errors were detected. This script does not auto-edit source files.")
+        print("Fix the files/lines above, then re-run to verify compileall is clean.")
+    else:
+        print("Skipping fixes; none detected.")
+
+    res_compileall2 = run_cmd([sys.executable, "-m", "compileall", "-q", "."], cwd=repo_root)
+    print_cmd_result(res_compileall2)
+
+    # --- Experiment 3: Run tests ---
+    print("\n=== Experiment 3 — Run unit tests ===")
+    res_pytest = run_cmd([sys.executable, "-m", "pytest", "-q"], cwd=repo_root)
+    print_cmd_result(res_pytest)
+
+    ok = (res_compileall2.returncode == 0) and (res_pytest.returncode == 0)
+    print("\nDONE. Overall status:", "SUCCESS" if ok else "FAILED")
+    return 0 if ok else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

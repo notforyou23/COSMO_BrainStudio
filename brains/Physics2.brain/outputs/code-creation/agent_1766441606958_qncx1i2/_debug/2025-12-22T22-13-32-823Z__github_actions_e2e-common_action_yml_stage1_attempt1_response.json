@@ -1,0 +1,56 @@
+{
+  "content": "Created `.github/actions/e2e-common/action.yml` as a composite GitHub Action that standardizes CI environment variables, sets up Python with pip caching, and installs e2e dependencies from a configurable requirements file.",
+  "reasoning": "",
+  "responseId": "resp_011584ae8de9f84b006949c2b3fb6481949dc638f5c2920c11",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2662,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1074,
+    "output_tokens_details": {
+      "reasoning_tokens": 327
+    },
+    "total_tokens": 3736
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_011584ae8de9f84b006949c2b4a9388194acbea4f412dc0d5f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_011584ae8de9f84b006949c2bc678881948274ce83f7ba2913",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('.github/actions/e2e-common/action.yml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"name: e2e-common\ndescription: Reusable e2e setup (Python, caching, env normalization, dependency install)\ninputs:\n  python-version:\n    description: Python version passed to actions/setup-python\n    required: false\n    default: \"3.11\"\n  working-directory:\n    description: Directory to run install commands from\n    required: false\n    default: \".\"\n  requirements-file:\n    description: Path to pip requirements file (relative to repository root)\n    required: false\n    default: \"docs/e2e/requirements-ci.txt\"\n  extra-pip-args:\n    description: Extra arguments appended to pip install (e.g. --pre)\n    required: false\n    default: \"\"\n  cache-dependency-path:\n    description: Path(s) used by setup-python to key pip cache\n    required: false\n    default: \"docs/e2e/requirements-ci.txt\"\n  install:\n    description: Whether to install dependencies (set to false for diagnostics-only jobs)\n    required: false\n    default: \"true\"\noutputs:\n  python-version:\n    description: Resolved Python version from setup-python\n    value: ${{ steps.py.outputs.python-version }}\nruns:\n  using: composite\n  steps:\n    - name: Normalize CI environment\n      shell: bash\n      run: |\n        set -euo pipefail\n        echo \"TZ=UTC\" >> \"$GITHUB_ENV\"\n        echo \"PIP_DISABLE_PIP_VERSION_CHECK=1\" >> \"$GITHUB_ENV\"\n        echo \"PIP_NO_PYTHON_VERSION_WARNING=1\" >> \"$GITHUB_ENV\"\n        echo \"PYTHONDONTWRITEBYTECODE=1\" >> \"$GITHUB_ENV\"\n        echo \"PYTHONUNBUFFERED=1\" >> \"$GITHUB_ENV\"\n        echo \"FORCE_COLOR=1\" >> \"$GITHUB_ENV\"\n        echo \"CI=true\" >> \"$GITHUB_ENV\"\n\n    - name: Set up Python\n      id: py\n      uses: actions/setup-python@v5\n      with:\n        python-version: ${{ inputs.python-version }}\n        cache: pip\n        cache-dependency-path: ${{ inputs.cache-dependency-path }}\n\n    - name: Install e2e dependencies\n      if: ${{ inputs.install == 'true' }}\n      shell: bash\n      working-directory: ${{ inputs.working-directory }}\n      run: |\n        set -euo pipefail\n        python -m pip install --upgrade pip setuptools wheel\n        python -m pip install -r \"${{ github.workspace }}/${{ inputs.requirements-file }}\" ${{ inputs.extra-pip-args }}\n        python -c \"import sys; print('Python:', sys.version)\"\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:.github/actions/e2e-common/action.yml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949c289d32c81909670b17a73e06bb5058924e5a7d358e0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:.github/actions/e2e-common/action.yml\nDIR_STATE:[\".github/actions/e2e-common/action.yml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_011584ae8de9f84b006949c2c6d6948194ab6e1b277e83925e",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `.github/actions/e2e-common/action.yml` as a composite GitHub Action that standardizes CI environment variables, sets up Python with pip caching, and installs e2e dependencies from a configurable requirements file."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,56 @@
+{
+  "content": "The `docs/e2e/README_e2e.md` documentation has been created to explain the E2E failure workflow/action behavior, required inputs, artifact structure, and CI/local usage patterns within the 150-line budget.",
+  "reasoning": "",
+  "responseId": "resp_0512a8195f3645d6006949c53c55f8819597a69138f8a2341d",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3022,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1440,
+    "output_tokens_details": {
+      "reasoning_tokens": 52
+    },
+    "total_tokens": 4462
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0512a8195f3645d6006949c53d093c8195a81f6216132f4d0a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0512a8195f3645d6006949c53e02f88195a1e75bb70a9ee209",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('docs/e2e/README_e2e.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"# E2E failure diagnostics (workflow + action)\n\nThis document explains how we collect and upload diagnostics **only when E2E fails** in CI, using:\n- **Reusable workflow**: `.github/workflows/e2e_failure.yml`\n- **Composite action**: `.github/actions/e2e-on-failure/action.yml`\n- **Collector script**: `scripts/e2e/collect_diagnostics.sh` (gathers files + metadata into one directory)\n- **Config validator**: `scripts/e2e/validate_config.py` (fails fast on bad inputs/assumptions)\n\nThe goal is consistent artifacts (logs/screenshots/videos/reports) across E2E jobs without bloating successful runs.\"\"\")\n\nchunks.append(\"\"\"## How it works (high level)\n\n1. Your E2E job runs tests normally.\n2. A final step calls the composite action with `if: failure()` so it runs **only on failure**.\n3. The action:\n   - validates inputs/environment,\n   - collects diagnostics into a single folder,\n   - uploads that folder as a GitHub Actions artifact.\n\nIf the job succeeds, the collector/upload steps are skipped.\"\"\")\n\nchunks.append(\"\"\"## Inputs (composite action)\n\nCommon inputs used by the action/workflow (names may be passed directly or via the reusable workflow):\n- `name` (string): Artifact name, e.g. `e2e-diagnostics-${{ github.run_id }}`.\n- `diagnostics_dir` (string): Output directory for collected diagnostics (default typically `e2e-diagnostics`).\n- `workdir` (string): Working directory where your E2E project lives (monorepo-friendly).\n- `paths` (multiline string): Extra paths/globs to include (optional).\n- `retention_days` (number): Artifact retention period.\n- `upload` (boolean): Whether to upload the artifact (useful to disable locally).\n\nEnvironment variables that improve metadata (optional):\n- `CI`, `GITHUB_*` (provided by Actions)\n- App/test specific vars (base URLs, browser, shard index, etc.).\"\"\")\n\nchunks.append(\"\"\"## Diagnostics artifact layout\n\nThe collector script produces a single directory (the value of `diagnostics_dir`) containing a predictable structure.\n\nTypical contents (when present):\n- `meta/`\n  - `github_context.json` (subset of GitHub context)\n  - `env.txt` (selected environment variables)\n  - `system.txt` (OS/kernel/versions when available)\n- `logs/` (application/server logs, playwright/cypress logs, etc.)\n- `screenshots/` (failure screenshots)\n- `videos/` (failure videos)\n- `reports/` (JUnit/XML/HTML reports, coverage summaries if relevant)\n- `raw/` (any extra files you include via `paths`)\n\nThe artifact is uploaded as a single bundle to make “download and inspect” fast.\"\"\")\n\nchunks.append(\"\"\"## CI usage\n\n### Option A: Use the reusable workflow (recommended)\n\nIn an E2E workflow, call the reusable workflow after/around your test job as designed by your repo’s standard. Example pattern:\n\n```yaml\njobs:\n  e2e:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - name: Run E2E\n        run: npm test -- --e2e\n\n      - name: Upload diagnostics on failure\n        if: failure()\n        uses: ./.github/actions/e2e-on-failure\n        with:\n          name: e2e-diagnostics-${{ github.run_id }}\n          workdir: .\n          diagnostics_dir: e2e-diagnostics\n          retention_days: 14\n```\n\nYour repo may alternatively centralize this logic by `uses: ./.github/workflows/e2e_failure.yml` (workflow_call),\nso multiple E2E pipelines share the same failure-handling behavior.\"\"\")\n\nchunks.append(\"\"\"### Option B: Call the composite action directly\n\nUse this when you want per-job customization without the reusable workflow:\n\n- Add the action at the end of the job.\n- Guard it with `if: failure()` (or `if: cancelled() || failure()` if desired).\n- Pass `paths` for framework-specific locations (Playwright, Cypress, Selenium, etc.).\"\"\")\n\nchunks.append(\"\"\"## Local usage (developer machine)\n\nYou can run the collector locally to package diagnostics after a failed run:\n\n```bash\n# From repo root (or set WORKDIR accordingly)\nbash scripts/e2e/collect_diagnostics.sh \\\n  --workdir . \\\n  --out e2e-diagnostics \\\n  --paths \"playwright-report\" \\\n  --paths \"test-results\" \\\n  --paths \"logs\"\n```\n\nNotes:\n- Local runs typically skip the “upload artifact” step; the output directory is still useful to attach to bug reports.\n- If the validator is used in your scripts, run it first to catch missing directories/commands early:\n  `python scripts/e2e/validate_config.py --workdir . --diagnostics-dir e2e-diagnostics`.\"\"\")\n\nchunks.append(\"\"\"## Troubleshooting\n\n- **No artifact uploaded**: confirm the step is gated with `if: failure()` and that the job actually failed (not skipped).\n- **Artifact is empty**: ensure your E2E framework is configured to write reports/screenshots/videos to disk and that those paths are included.\n- **Permission/path issues**: set `workdir` to the directory where the test output exists (common in monorepos).\n- **Large artifacts**: reduce included paths or disable video capture except on failure in your test runner configuration.\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\n# line budget check (informational, not printed)\nassert final_text.count('\\n') + 1 <= 150\n\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:docs/e2e/README_e2e.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949c4c596008190acfa409a64608da20b039f16c5820fcb",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:docs/e2e/README_e2e.md\nDIR_STATE:[\"docs/e2e/README_e2e.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0512a8195f3645d6006949c55431c48195848d90e8ef0cff3c",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "The `docs/e2e/README_e2e.md` documentation has been created to explain the E2E failure workflow/action behavior, required inputs, artifact structure, and CI/local usage patterns within the 150-line budget."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

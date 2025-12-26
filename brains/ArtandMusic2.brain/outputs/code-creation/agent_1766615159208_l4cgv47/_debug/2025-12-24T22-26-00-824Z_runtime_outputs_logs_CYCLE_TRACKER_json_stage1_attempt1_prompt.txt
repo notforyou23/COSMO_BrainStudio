@@ -1,0 +1,44 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add a lightweight tracker file (e.g., `runtime/outputs/logs/CYCLE_TRACKER.json`) that records cycle id/date, expected artifacts, validation status, and links to QA reports; require it to be updated by the validation harness.
+Project: generated_script_1766615159413 (json script)
+
+Target file details:
+- Path: runtime/outputs/logs/CYCLE_TRACKER.json
+- Purpose: Lightweight persistent JSON tracker storing cycle metadata, expected artifacts, validation status, and links/paths to QA reports for each run.
+- Category: support
+
+Other planned files (for context only):
+- scripts/cycle_tracker.py: Utility module that defines the cycle tracker JSON schema, reads/writes/updates entries atomically, and provides helpers for linking validation/QA outputs.
+- scripts/validate_outputs.py: Validation harness that checks for required artifacts, generates/collects QA report paths, and updates runtime/outputs/logs/CYCLE_TRACKER.json on every run with cycle id/date, expectations, and pass/fail status.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T22-11-55-228Z_docs_PROJECT_TRACKER_md_stage1_attempt2_prompt.txt from code-creation agent agent_1766614312949_333
+- [INTROSPECTION] 2025-12-24T22-17-09-292Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766614627657
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] The dominant causal mechanism is a self-reinforcing selection loop: institutions use cheap, hig
+- [INTROSPECTION] 2025-12-24T22-11-55-228Z_outputs_PROJECT_TRACKER_json_stage1_attempt1_prompt.txt from code-creation agent agent_176661431294
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Lightweight persistent JSON tracker storing cycle metadata, expected artifacts, validation status, and links/paths to QA reports for each run.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('runtime/outputs/logs/CYCLE_TRACKER.json')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:runtime/outputs/logs/CYCLE_TRACKER.json')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside runtime/outputs/logs/CYCLE_TRACKER.json.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

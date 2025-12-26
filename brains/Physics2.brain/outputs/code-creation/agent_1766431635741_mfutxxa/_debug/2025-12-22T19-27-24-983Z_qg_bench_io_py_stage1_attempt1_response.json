@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `qg_bench/io.py` with deterministic helpers to load `schema.json`, read/iterate JSONL datasets with validation, and write standardized results JSON using canonical serialization plus a stable SHA-256 hash block computed over the output excluding the hash field itself.",
+  "reasoning": "",
+  "responseId": "resp_066be07905ced3c80069499c134f508195856cf0c5a1b8df02",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3126,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1588,
+    "output_tokens_details": {
+      "reasoning_tokens": 453
+    },
+    "total_tokens": 4714
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_066be07905ced3c80069499c13fd248195a50d175c0a160982",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_066be07905ced3c80069499c200d308195846e37a972fcf38b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('qg_bench/io.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"I/O helpers for qg_bench.\n\nThis module focuses on deterministic, stable serialization so benchmark outputs\ncan be compared and hashed reliably across environments.\n\\\"\\\"\\\"\"\"\",\n\"\"\"from __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom hashlib import sha256\nimport json\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, Iterator, List, Optional, Union\"\"\",\n\"\"\"PathLike = Union[str, Path]\n\n\ndef _pkg_dir() -> Path:\n    return Path(__file__).resolve().parent\"\"\",\n\"\"\"def load_schema(path: Optional[PathLike] = None) -> Dict[str, Any]:\n    \\\"\\\"\\\"Load the benchmark results schema.json.\n\n    If *path* is None, loads qg_bench/schema.json bundled with the package.\n    \\\"\\\"\\\"\n    schema_path = Path(path) if path is not None else _pkg_dir() / \"schema.json\"\n    return json.loads(schema_path.read_text(encoding=\"utf-8\"))\"\"\",\n\"\"\"def iter_jsonl(path: PathLike) -> Iterator[Dict[str, Any]]:\n    \\\"\\\"\\\"Yield records from a JSONL file.\n\n    Empty/whitespace-only lines are skipped. Raises ValueError with line context\n    on invalid JSON.\n    \\\"\\\"\\\"\n    p = Path(path)\n    with p.open(\"r\", encoding=\"utf-8\") as f:\n        for i, line in enumerate(f, start=1):\n            s = line.strip()\n            if not s:\n                continue\n            try:\n                obj = json.loads(s)\n            except json.JSONDecodeError as e:\n                raise ValueError(f\"Invalid JSON on line {i} of {p}: {e}\") from e\n            if not isinstance(obj, dict):\n                raise ValueError(f\"Expected object on line {i} of {p}, got {type(obj).__name__}\")\n            yield obj\"\"\",\n\"\"\"def read_jsonl(path: PathLike, limit: Optional[int] = None) -> List[Dict[str, Any]]:\n    \\\"\\\"\\\"Read a JSONL dataset into memory.\\\"\\\"\\\"\n    out: List[Dict[str, Any]] = []\n    for rec in iter_jsonl(path):\n        out.append(rec)\n        if limit is not None and len(out) >= limit:\n            break\n    return out\"\"\",\n\"\"\"def canonical_dumps(obj: Any) -> str:\n    \\\"\\\"\\\"Deterministic JSON serialization used for hashing and output.\n\n    Notes:\n      - sort_keys=True ensures stable key ordering\n      - separators removes whitespace differences\n      - ensure_ascii=False preserves UTF-8 (hash is over UTF-8 bytes)\n    \\\"\\\"\\\"\n    return json.dumps(obj, sort_keys=True, separators=(\",\", \":\"), ensure_ascii=False)\"\"\",\n\"\"\"def _hash_payload(payload: Any) -> str:\n    return sha256(canonical_dumps(payload).encode(\"utf-8\")).hexdigest()\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass HashBlock:\n    algorithm: str\n    value: str\n    canonicalization: str = \"json/sort_keys,separators=(',',':'),utf-8\"\n\n    def to_dict(self) -> Dict[str, str]:\n        return {\n            \"algorithm\": self.algorithm,\n            \"value\": self.value,\n            \"canonicalization\": self.canonicalization,\n        }\"\"\",\n\"\"\"def write_results_json(\n    path: PathLike,\n    results_obj: Dict[str, Any],\n    *,\n    extra_metadata: Optional[Dict[str, Any]] = None,\n    include_hash: bool = True,\n) -> Dict[str, Any]:\n    \\\"\\\"\\\"Write standardized results JSON with stable ordering and a hash block.\n\n    The returned dict is the exact object written to disk.\n\n    Hashing rule:\n      - The hash is computed over the full output object *excluding* the \\\"hash\\\"\n        field itself (if present), using canonical_dumps().\n    \\\"\\\"\\\"\n    out: Dict[str, Any] = dict(results_obj)\n    if extra_metadata:\n        md = dict(out.get(\"metadata\") or {})\n        md.update(extra_metadata)\n        out[\"metadata\"] = md\n\n    if include_hash:\n        to_hash = dict(out)\n        to_hash.pop(\"hash\", None)\n        out[\"hash\"] = HashBlock(algorithm=\"sha256\", value=_hash_payload(to_hash)).to_dict()\n\n    p = Path(path)\n    p.parent.mkdir(parents=True, exist_ok=True)\n    p.write_text(canonical_dumps(out) + \"\\\\n\", encoding=\"utf-8\")\n    return out\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:qg_bench/io.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499b9ae2c081908ccd9fbfec7a37ba019f8e3dd8194ac9",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:qg_bench/io.py\nDIR_STATE:[\"qg_bench/__init__.py\", \"qg_bench/hashing.py\", \"qg_bench/io.py\", \"qg_bench/observables.py\", \"qg_bench/schema.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_066be07905ced3c80069499c31e1948195b0382a2026c50d2b",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `qg_bench/io.py` with deterministic helpers to load `schema.json`, read/iterate JSONL datasets with validation, and write standardized results JSON using canonical serialization plus a stable SHA-256 hash block computed over the output excluding the hash field itself."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

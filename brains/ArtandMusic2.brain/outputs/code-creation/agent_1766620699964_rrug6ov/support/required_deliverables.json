@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "project_root_hint": "/",
+  "canonical_outputs_root": "/outputs",
+  "generated_index_path": "/outputs/ARTIFACT_INDEX.md",
+  "tracker_candidates": [
+    "/outputs/PROJECT_TRACKER.json",
+    "/PROJECT_TRACKER.json",
+    "/support/PROJECT_TRACKER.json"
+  ],
+  "deliverables": [
+    {
+      "id": "artifact_index",
+      "title": "Artifact Index",
+      "category": "outputs",
+      "required": true,
+      "kind": "file",
+      "format": "markdown",
+      "canonical_path": "/outputs/ARTIFACT_INDEX.md",
+      "legacy_paths": [
+        "/runtime/outputs/ARTIFACT_INDEX.md",
+        "/runtime/outputs/execution/outputs/ARTIFACT_INDEX.md"
+      ],
+      "discoverability": {
+        "must_exist": true,
+        "generated_by": "scripts/artifact_discoverability_fix.py"
+      },
+      "notes": "Canonical index listing required deliverables, canonical paths, legacy locations, and migration status."
+    },
+    {
+      "id": "discoverability_script",
+      "title": "Artifact Discoverability Fix Script",
+      "category": "scripts",
+      "required": true,
+      "kind": "file",
+      "format": "python",
+      "canonical_path": "/scripts/artifact_discoverability_fix.py",
+      "legacy_paths": [
+        "/runtime/outputs/execution/scripts/artifact_discoverability_fix.py"
+      ],
+      "discoverability": {
+        "must_exist": true,
+        "entrypoint": true
+      },
+      "notes": "Single runnable script that generates /outputs/ARTIFACT_INDEX.md and canonicalizes tracker paths."
+    },
+    {
+      "id": "maintenance_docs",
+      "title": "Artifact Index and Tracker Maintenance",
+      "category": "docs",
+      "required": true,
+      "kind": "file",
+      "format": "markdown",
+      "canonical_path": "/docs/ARTIFACT_INDEX_AND_TRACKER_MAINTENANCE.md",
+      "legacy_paths": [
+        "/runtime/outputs/execution/docs/ARTIFACT_INDEX_AND_TRACKER_MAINTENANCE.md"
+      ],
+      "discoverability": {
+        "must_exist": true
+      },
+      "notes": "How to run the discoverability script and how canonicalization is verified."
+    },
+    {
+      "id": "project_tracker",
+      "title": "Project Tracker JSON",
+      "category": "outputs",
+      "required": false,
+      "kind": "file",
+      "format": "json",
+      "canonical_path": "/outputs/PROJECT_TRACKER.json",
+      "legacy_paths": [
+        "/PROJECT_TRACKER.json",
+        "/runtime/outputs/PROJECT_TRACKER.json",
+        "/runtime/outputs/execution/PROJECT_TRACKER.json"
+      ],
+      "discoverability": {
+        "must_exist": false,
+        "updated_by": "scripts/artifact_discoverability_fix.py",
+        "canonicalize_paths": true
+      },
+      "notes": "If present, the script will update tracker references to use canonical /outputs paths."
+    }
+  ]
+}

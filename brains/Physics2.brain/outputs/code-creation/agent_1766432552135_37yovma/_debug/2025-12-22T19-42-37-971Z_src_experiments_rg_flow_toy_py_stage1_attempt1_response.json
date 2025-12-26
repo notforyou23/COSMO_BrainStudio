@@ -1,0 +1,74 @@
+{
+  "content": "Implemented `src/experiments/rg_flow_toy.py`, a reproducible 1D Ising decimation RG toy experiment that computes the discrete beta function, iterates sample flows, and saves deterministic CSV/PNG outputs plus metadata to a user-specified output directory.",
+  "reasoning": "",
+  "responseId": "resp_0cd34c4328e1820e006949a039e5c481969503c9f8cf8202b4",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3926,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2418,
+    "output_tokens_details": {
+      "reasoning_tokens": 2357
+    },
+    "total_tokens": 6344
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0cd34c4328e1820e006949a03ab03481968f0fe9b81886a7d0",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0cd34c4328e1820e006949a041598c81969de45b6905a3a337",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, numpy as np\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": []
+    },
+    {
+      "id": "rs_0cd34c4328e1820e006949a0433f408196abc4aa4646f4ef61",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0cd34c4328e1820e006949a0455ce08196bd58b52cd4509ece",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, math, csv\ntarget_path = Path('/mnt/data').joinpath('src/experiments/rg_flow_toy.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\\\n\\\"\\\"\\\"Toy renormalization-group (RG) flow experiment: 1D Ising decimation.\n\nWe consider the zero-field 1D Ising model with coupling K = beta * J.\nDecimating every other spin (block size b=2) yields the exact map:\n    K' = 0.5 * log(cosh(2K))\n(up to an additive constant in the free energy, which we ignore).\n\nThis script generates:\n- A table (CSV) of K, K', and beta(K)=K'-K over a grid.\n- A beta-function plot and example flow trajectories (PNG).\n\nRun:\n  python -m src.experiments.rg_flow_toy --out outputs/rg_toy\n\\\"\\\"\\\"\nfrom __future__ import annotations\n\nimport argparse\nimport csv\nimport json\nimport math\nfrom dataclasses import asdict, dataclass\nfrom pathlib import Path\nfrom typing import Dict, Iterable, List, Tuple\n\nimport numpy as np\n\n\ndef rg_map(K: np.ndarray) -> np.ndarray:\n    \\\"\\\"\\\"Exact decimation map for 1D Ising coupling K.\\\"\\\"\\\"\n    K = np.asarray(K, dtype=float)\n    return 0.5 * np.log(np.cosh(2.0 * K))\n\n\ndef beta_function(K: np.ndarray) -> np.ndarray:\n    \\\"\\\"\\\"Discrete beta function for b=2: beta(K) = K' - K.\\\"\\\"\\\"\n    return rg_map(K) - np.asarray(K, dtype=float)\n\n\ndef iterate_flow(K0: float, n_steps: int) -> np.ndarray:\n    \\\"\\\"\\\"Iterate RG map starting at K0.\\\"\\\"\\\"\n    Ks = [float(K0)]\n    K = float(K0)\n    for _ in range(n_steps):\n        K = float(rg_map(K))\n        Ks.append(K)\n    return np.array(Ks, dtype=float)\n\n\n@dataclass(frozen=True)\nclass Config:\n    out: str\n    n_grid: int = 301\n    k_max: float = 3.0\n    n_steps: int = 12\n    n_traj: int = 7\n    seed: int = 0\n\n\ndef _ensure_dir(p: Path) -> None:\n    p.mkdir(parents=True, exist_ok=True)\n\n\ndef _write_csv(path: Path, rows: Iterable[Dict[str, float]]) -> None:\n    rows = list(rows)\n    with path.open(\\\"w\\\", newline=\\\"\\\", encoding=\\\"utf-8\\\") as f:\n        w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))\n        w.writeheader()\n        w.writerows(rows)\n\n\ndef make_plots(out_dir: Path, grid_K: np.ndarray, Kp: np.ndarray, beta: np.ndarray, trajs: List[np.ndarray]) -> None:\n    import matplotlib.pyplot as plt\n\n    # Beta-function plot\n    fig, ax = plt.subplots(figsize=(6, 4))\n    ax.plot(grid_K, beta, lw=2)\n    ax.axhline(0.0, color=\\\"k\\\", lw=1)\n    ax.set_xlabel(r\\\"Coupling $K$\\\")\n    ax.set_ylabel(r\\\"$\\\\beta(K)=K'-K$\\\")\n    ax.set_title(\\\"1D Ising decimation: discrete beta function (b=2)\\\")\n    ax.grid(True, alpha=0.3)\n    fig.tight_layout()\n    fig.savefig(out_dir / \\\"rg_beta.png\\\", dpi=160)\n    plt.close(fig)\n\n    # Flow trajectories K_n vs step\n    fig, ax = plt.subplots(figsize=(6, 4))\n    for Ks in trajs:\n        ax.plot(np.arange(len(Ks)), Ks, marker=\\\"o\\\", ms=3)\n    ax.set_xlabel(\\\"RG step n\\\")\n    ax.set_ylabel(r\\\"$K_n$\\\")\n    ax.set_title(\\\"RG flow trajectories under decimation\\\")\n    ax.grid(True, alpha=0.3)\n    fig.tight_layout()\n    fig.savefig(out_dir / \\\"flow_trajectories.png\\\", dpi=160)\n    plt.close(fig)\n\n    # K' vs K with diagonal\n    fig, ax = plt.subplots(figsize=(5, 5))\n    ax.plot(grid_K, Kp, lw=2, label=r\\\"$K' = f(K)$\\\")\n    ax.plot(grid_K, grid_K, lw=1, color=\\\"k\\\", alpha=0.7, label=r\\\"$K'=K$\\\")\n    ax.set_xlabel(r\\\"$K$\\\")\n    ax.set_ylabel(r\\\"$K'$\\\")\n    ax.set_title(\\\"RG map (fixed points at intersections)\\\")\n    ax.legend(frameon=False)\n    ax.grid(True, alpha=0.3)\n    fig.tight_layout()\n    fig.savefig(out_dir / \\\"rg_map.png\\\", dpi=160)\n    plt.close(fig)\n\n\ndef run(cfg: Config) -> Dict[str, str]:\n    out_dir = Path(cfg.out)\n    _ensure_dir(out_dir)\n\n    rng = np.random.default_rng(cfg.seed)\n    grid_K = np.linspace(0.0, float(cfg.k_max), int(cfg.n_grid))\n    Kp = rg_map(grid_K)\n    beta = Kp - grid_K\n\n    rows = ({\\\"K\\\": float(k), \\\"K_prime\\\": float(kp), \\\"beta\\\": float(b)} for k, kp, b in zip(grid_K, Kp, beta))\n    _write_csv(out_dir / \\\"rg_table.csv\\\", rows)\n\n    # Pick some initial couplings for trajectories (include small and moderate K)\n    K0s = np.r_[np.linspace(0.05, 0.6, cfg.n_traj // 2), np.linspace(0.8, min(2.5, cfg.k_max), cfg.n_traj - cfg.n_traj // 2)]\n    K0s = (K0s + 0.02 * rng.normal(size=K0s.shape)).clip(0.0, cfg.k_max)\n    trajs = [iterate_flow(float(k0), int(cfg.n_steps)) for k0 in K0s]\n\n    make_plots(out_dir, grid_K, Kp, beta, trajs)\n\n    # Small-K linearization slope: f(K) ~ a K^2 (no linear term) for this map\n    # Estimate numerically by fitting log(f(K)) ~ log(a) + 2 log(K) over small K.\n    small = grid_K[1:40]\n    loga = np.mean(np.log(rg_map(small) / (small**2 + 1e-300)))\n    a_est = float(np.exp(loga))\n\n    meta = {\n        \\\"config\\\": asdict(cfg),\n        \\\"notes\\\": \\\"1D Ising, zero field, exact decimation map K' = 0.5*log(cosh(2K)).\\\",\n        \\\"fixed_points\\\": {\\\"K=0\\\": \\\"stable\\\", \\\"K->infty\\\": \\\"stable (flows upward for large K)\\\"},\n        \\\"small_K_asymptotic\\\": {\\\"f(K) ~ a K^2\\\": a_est},\n        \\\"artifacts\\\": [\\\"rg_table.csv\\\", \\\"rg_beta.png\\\", \\\"flow_trajectories.png\\\", \\\"rg_map.png\\\"],\n    }\n    (out_dir / \\\"meta.json\\\").write_text(json.dumps(meta, indent=2), encoding=\\\"utf-8\\\")\n    return {\\\"out_dir\\\": str(out_dir)}\n\n\ndef build_argparser() -> argparse.ArgumentParser:\n    p = argparse.ArgumentParser(description=__doc__)\n    p.add_argument(\\\"--out\\\", type=str, required=True, help=\\\"Output directory.\\\")\n    p.add_argument(\\\"--n-grid\\\", type=int, default=Config.n_grid)\n    p.add_argument(\\\"--k-max\\\", type=float, default=Config.k_max)\n    p.add_argument(\\\"--n-steps\\\", type=int, default=Config.n_steps)\n    p.add_argument(\\\"--n-traj\\\", type=int, default=Config.n_traj)\n    p.add_argument(\\\"--seed\\\", type=int, default=Config.seed)\n    return p\n\n\ndef main(argv: List[str] | None = None) -> None:\n    args = build_argparser().parse_args(argv)\n    cfg = Config(out=args.out, n_grid=args.n_grid, k_max=args.k_max, n_steps=args.n_steps, n_traj=args.n_traj, seed=args.seed)\n    info = run(cfg)\n    print(json.dumps(info))\n\n\nif __name__ == \\\"__main__\\\":\n    main()\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/experiments/rg_flow_toy.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/rg_flow_toy.py\nDIR_STATE:[\"src/experiments/entanglement_diagnostics.py\", \"src/experiments/rg_flow_toy.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0cd34c4328e1820e006949a06195ec8196b968ae56432e7506",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0cd34c4328e1820e006949a061e2308196b306af2fd74cc8a9",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/experiments/rg_flow_toy.py`, a reproducible 1D Ising decimation RG toy experiment that computes the discrete beta function, iterates sample flows, and saves deterministic CSV/PNG outputs plus metadata to a user-specified output directory."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

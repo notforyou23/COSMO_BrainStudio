@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/lib/io.py` with deterministic run IDs/filenames (stable JSON hashing), atomic JSON/text writers, parameter dumps, and run manifest generation capturing reproducibility metadata.",
+  "reasoning": "",
+  "responseId": "resp_05608793332c63f1006949986b13448190bc0cf97e7e6fdbbe",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2976,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1450,
+    "output_tokens_details": {
+      "reasoning_tokens": 131
+    },
+    "total_tokens": 4426
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_05608793332c63f1006949986be8a481909c512d3f347505c2",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_05608793332c63f1006949986f94d88190a8ed39fd879e1d01",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, hashlib, os, sys\ntarget_path = Path('/mnt/data').joinpath('src/lib/io.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\"\"\"\n\\\"\\\"\\\"Output management utilities.\n\nProvides deterministic run IDs / filenames and small helpers to write\nmanifests and parameter dumps for reproducible experiments.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import asdict, is_dataclass\nfrom pathlib import Path\nfrom typing import Any, Mapping, Optional, Union\nimport hashlib\nimport json\nimport os\nimport time\n\n\nJsonable = Union[None, bool, int, float, str, list, dict]\n\n\ndef _to_jsonable(obj: Any) -> Jsonable:\n    \\\"\\\"\\\"Best-effort conversion to something json.dumps can handle.\\\"\\\"\\\"\n    if is_dataclass(obj):\n        obj = asdict(obj)\n    if isinstance(obj, (str, int, float, bool)) or obj is None:\n        return obj\n    if isinstance(obj, Path):\n        return str(obj)\n    if isinstance(obj, Mapping):\n        return {str(k): _to_jsonable(v) for k, v in obj.items()}\n    if isinstance(obj, (list, tuple)):\n        return [_to_jsonable(v) for v in obj]\n    # Fallback: stable string repr (avoid non-deterministic object ids).\n    return str(obj)\n\n\ndef stable_json_dumps(data: Any) -> str:\n    \\\"\\\"\\\"Canonical JSON string for hashing (sorted keys, no whitespace).\\\"\\\"\\\"\n    return json.dumps(_to_jsonable(data), sort_keys=True, separators=(\\\",\\\", \\\":\\\"), ensure_ascii=False)\n\n\ndef short_hash(data: Any, n: int = 12) -> str:\n    \\\"\\\"\\\"Deterministic short hash of data (via canonical JSON).\\\"\\\"\\\"\n    h = hashlib.sha256(stable_json_dumps(data).encode(\\\"utf-8\\\")).hexdigest()\n    return h[: max(4, int(n))]\n\n\ndef build_run_id(params: Any, *, prefix: str = \\\"run\\\", tag: str = \\\"\\\", n: int = 12) -> str:\n    \\\"\\\"\\\"Build a deterministic run identifier from parameters.\n\n    The returned value is suitable for directory/file naming.\n    \\\"\\\"\\\"\n    core = short_hash(params, n=n)\n    if tag:\n        tag = \\\"-\\\" + \\\"\\\".join(c for c in str(tag) if c.isalnum() or c in \\\"-_\\\")[:40]\n    return f\\\"{prefix}-{core}{tag}\\\"\n\n\ndef ensure_dir(path: Union[str, Path]) -> Path:\n    p = Path(path)\n    p.mkdir(parents=True, exist_ok=True)\n    return p\n\n\ndef atomic_write_text(path: Union[str, Path], text: str, *, encoding: str = \\\"utf-8\\\") -> Path:\n    \\\"\\\"\\\"Atomic-ish write (write temp then replace).\\\"\\\"\\\"\n    path = Path(path)\n    ensure_dir(path.parent)\n    tmp = path.with_suffix(path.suffix + f\\\".tmp.{os.getpid()}\\\")\n    tmp.write_text(text, encoding=encoding)\n    tmp.replace(path)\n    return path\n\n\ndef write_json(path: Union[str, Path], data: Any, *, indent: int = 2) -> Path:\n    path = Path(path)\n    txt = json.dumps(_to_jsonable(data), sort_keys=True, indent=indent, ensure_ascii=False) + \\\"\\\\n\\\"\n    return atomic_write_text(path, txt)\n\n\ndef write_params_dump(out_dir: Union[str, Path], params: Any, *, name: str = \\\"params.json\\\") -> Path:\n    out_dir = ensure_dir(out_dir)\n    return write_json(out_dir / name, params)\n\n\ndef write_run_manifest(\n    out_dir: Union[str, Path],\n    *,\n    params: Any,\n    run_id: Optional[str] = None,\n    argv: Optional[list[str]] = None,\n    extra: Optional[Mapping[str, Any]] = None,\n    name: str = \\\"manifest.json\\\",\n) -> Path:\n    \\\"\\\"\\\"Write a manifest.json capturing params + execution metadata.\\\"\\\"\\\"\n    out_dir = ensure_dir(out_dir)\n    rid = run_id or build_run_id(params)\n    manifest: dict[str, Any] = {\n        \\\"run_id\\\": rid,\n        \\\"created_unix\\\": int(time.time()),\n        \\\"cwd\\\": str(Path.cwd()),\n        \\\"params_hash\\\": short_hash(params),\n        \\\"params\\\": _to_jsonable(params),\n        \\\"argv\\\": list(argv) if argv is not None else None,\n        \\\"env\\\": {k: os.environ.get(k) for k in (\\\"PYTHONHASHSEED\\\", \\\"OMP_NUM_THREADS\\\", \\\"MKL_NUM_THREADS\\\")},\n    }\n    if extra:\n        manifest[\\\"extra\\\"] = _to_jsonable(dict(extra))\n    return write_json(out_dir / name, manifest)\n\n\ndef deterministic_path(\n    out_dir: Union[str, Path],\n    *,\n    stem: str,\n    params: Any,\n    ext: str = \\\".json\\\",\n    tag: str = \\\"\\\",\n) -> Path:\n    \\\"\\\"\\\"Deterministically name an output file based on params.\\\"\\\"\\\"\n    out_dir = ensure_dir(out_dir)\n    safe_stem = \\\"\\\".join(c for c in str(stem) if c.isalnum() or c in \\\"-_\\\") or \\\"out\\\"\n    if ext and not ext.startswith(\\\".\\\"):\n        ext = \\\".\\\" + ext\n    return out_dir / f\\\"{safe_stem}-{short_hash(params)}{('-'+tag) if tag else ''}{ext}\\\"\n\"\"\"]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/lib/io.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694996cf1f0881908fd6ebe4e5dd54140c8f193d7d2aa5f8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/lib/io.py\nDIR_STATE:[\"src/lib/graphs.py\", \"src/lib/io.py\", \"src/lib/plotting.py\", \"src/lib/quantum_states.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_05608793332c63f10069499882072c81908536ec65e35dc834",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/lib/io.py` with deterministic run IDs/filenames (stable JSON hashing), atomic JSON/text writers, parameter dumps, and run manifest generation capturing reproducibility metadata."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,74 @@
+{
+  "content": "Implemented `random_circuit_entanglement.py`, a reproducible statevector-based 1D brickwork random-unitary circuit experiment that computes midcut entanglement entropy vs depth, prints a small checkpoint table, and saves a growth/saturation plot to an output directory.",
+  "reasoning": "",
+  "responseId": "resp_0d55cbb1aa860555006949ab71b59081948773dccac7b2ceac",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3748,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2189,
+    "output_tokens_details": {
+      "reasoning_tokens": 2093
+    },
+    "total_tokens": 5937
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0d55cbb1aa860555006949ab72885c8194bf1d8b82dfe0b65d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d55cbb1aa860555006949ab79271c819483283b11a619e7be",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, numpy as np, matplotlib.pyplot as plt",
+      "container_id": "cntr_6949aa2cd9908190a540c44a4880beb40f550cedb5ceca86",
+      "outputs": []
+    },
+    {
+      "id": "rs_0d55cbb1aa860555006949ab7c4080819497c79284e3c2d407",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d55cbb1aa860555006949ab7e24cc81948b8b270be28ee73e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re, sys, math\ntarget_path = Path('/mnt/data').joinpath('src/experiments/random_circuit_entanglement.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"Random circuit entanglement growth toy experiment.\n\nSimulates a 1D brickwork random unitary circuit on n qubits (statevector),\ntracking bipartite entanglement entropy across the middle cut vs depth.\nProduces a saved figure and prints a small summary table.\n\nRun:\n  python -m src.experiments.random_circuit_entanglement --n 8 --depth 40 --samples 32\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport argparse\nfrom dataclasses import dataclass\nfrom pathlib import Path\n\nimport numpy as np\n\n\ndef haar_unitary(dim: int, rng: np.random.Generator) -> np.ndarray:\n    \\\"\\\"\\\"Sample a Haar-random unitary via QR decomposition.\\\"\\\"\\\"\n    z = (rng.normal(size=(dim, dim)) + 1j * rng.normal(size=(dim, dim))) / np.sqrt(2.0)\n    q, r = np.linalg.qr(z)\n    ph = np.diag(r) / np.abs(np.diag(r))\n    return q * ph\n\n\ndef apply_two_qubit_gate(state: np.ndarray, U: np.ndarray, i: int, n: int) -> np.ndarray:\n    \\\"\\\"\\\"Apply 2-qubit gate U to qubits (i, i+1) in an n-qubit statevector.\\\"\\\"\\\"\n    psi = state.reshape([2] * n)\n    axes = list(range(n))\n    axes[i], axes[-2] = axes[-2], axes[i]\n    axes[i + 1], axes[-1] = axes[-1], axes[i + 1]\n    tmp = np.transpose(psi, axes).reshape(-1, 4)\n    tmp = tmp @ U.T  # act on last two indices\n    psi2 = tmp.reshape([2] * n)\n    inv = np.argsort(axes)\n    return np.transpose(psi2, inv).reshape(-1)\n\n\ndef entanglement_entropy_midcut(state: np.ndarray, n: int) -> float:\n    \\\"\\\"\\\"Von Neumann entropy S(ρ_A) across the middle cut in bits.\\\"\\\"\\\"\n    na = n // 2\n    psi = state.reshape(2**na, 2 ** (n - na))\n    s = np.linalg.svd(psi, compute_uv=False)\n    p = (s**2).real\n    p = p[p > 1e-15]\n    return float(-(p * np.log2(p)).sum())\n\n\n@dataclass(frozen=True)\nclass Result:\n    depth: np.ndarray\n    mean_S: np.ndarray\n    std_S: np.ndarray\n    sat_value: float\n\"\"\")\n\nchunks.append(\"\"\"\ndef run_experiment(n: int, depth: int, samples: int, seed: int) -> Result:\n    rng = np.random.default_rng(seed)\n    depths = np.arange(depth + 1)\n    ent = np.zeros((samples, depth + 1), dtype=float)\n\n    for s in range(samples):\n        state = np.zeros(2**n, dtype=complex)\n        state[0] = 1.0\n        ent[s, 0] = entanglement_entropy_midcut(state, n)\n        for t in range(1, depth + 1):\n            parity = (t - 1) % 2\n            for i in range(parity, n - 1, 2):\n                U = haar_unitary(4, rng)\n                state = apply_two_qubit_gate(state, U, i, n)\n            ent[s, t] = entanglement_entropy_midcut(state, n)\n\n    mean_S = ent.mean(axis=0)\n    std_S = ent.std(axis=0, ddof=1) if samples > 1 else np.zeros_like(mean_S)\n    sat_value = float(mean_S[-max(3, depth // 5) :].mean())\n    return Result(depth=depths, mean_S=mean_S, std_S=std_S, sat_value=sat_value)\n\n\ndef save_plot(res: Result, n: int, outpath: Path) -> None:\n    import matplotlib.pyplot as plt\n\n    plt.figure(figsize=(6.0, 3.8))\n    plt.plot(res.depth, res.mean_S, lw=2.0, label=\"mean S(midcut)\")\n    if np.any(res.std_S > 0):\n        plt.fill_between(\n            res.depth,\n            res.mean_S - res.std_S,\n            res.mean_S + res.std_S,\n            alpha=0.25,\n            linewidth=0.0,\n            label=\"±1 std\",\n        )\n    plt.axhline(n // 2, ls=\"--\", lw=1.0, color=\"k\", alpha=0.5, label=\"max (=n/2)\")\n    plt.xlabel(\"Circuit depth (layers)\")\n    plt.ylabel(\"Entanglement entropy S (bits)\")\n    plt.title(f\"Random brickwork circuit entanglement (n={n})\")\n    plt.legend(frameon=False, fontsize=9)\n    plt.tight_layout()\n    outpath.parent.mkdir(parents=True, exist_ok=True)\n    plt.savefig(outpath, dpi=160)\n    plt.close()\n\"\"\")\n\nchunks.append(\"\"\"\ndef main(argv: list[str] | None = None) -> int:\n    p = argparse.ArgumentParser(description=__doc__)\n    p.add_argument(\"--n\", type=int, default=8, help=\"number of qubits (even recommended)\")\n    p.add_argument(\"--depth\", type=int, default=40, help=\"number of circuit layers\")\n    p.add_argument(\"--samples\", type=int, default=32, help=\"Monte Carlo samples\")\n    p.add_argument(\"--seed\", type=int, default=0, help=\"RNG seed\")\n    p.add_argument(\"--outdir\", type=Path, default=Path(\"outputs\"), help=\"output directory\")\n    args = p.parse_args(argv)\n\n    if args.n < 2 or args.depth < 1 or args.samples < 1:\n        raise SystemExit(\"Require n>=2, depth>=1, samples>=1\")\n\n    res = run_experiment(args.n, args.depth, args.samples, args.seed)\n    outpath = args.outdir / f\"random_circuit_entanglement_n{args.n}_d{args.depth}_s{args.samples}.png\"\n    save_plot(res, args.n, outpath)\n\n    maxS = args.n // 2\n    checkpoints = [0, 1, 2, 5, 10, args.depth]\n    checkpoints = sorted({c for c in checkpoints if 0 <= c <= args.depth})\n    print(f\"Saved figure: {outpath}\")\n    print(f\"Estimated saturation: {res.sat_value:.3f} bits (max {maxS})\")\n    print(\"Depth  MeanS  StdS\")\n    for d in checkpoints:\n        print(f\"{d:>5d}  {res.mean_S[d]:>5.3f}  {res.std_S[d]:>5.3f}\")\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/experiments/random_circuit_entanglement.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949aa2cd9908190a540c44a4880beb40f550cedb5ceca86",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/random_circuit_entanglement.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/diagnostics.py\", \"src/experiments/random_circuit_entanglement.py\", \"src/experiments/registry.py\", \"src/experiments/shared.py\", \"src/experiments/symbolic_rg_flow.py\", \"src/experiments/toy_lattice_decoherence.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0d55cbb1aa860555006949aba9467881949cc5e6562198a534",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0d55cbb1aa860555006949aba989ac8194b023d51241a2ebd8",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `random_circuit_entanglement.py`, a reproducible statevector-based 1D brickwork random-unitary circuit experiment that computes midcut entanglement entropy vs depth, prints a small checkpoint table, and saves a growth/saturation plot to an output directory."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deterministic-runner"
+version = "0.1.0"
+description = "Deterministic CLI entrypoint that writes fixed outputs and captures runtime metadata."
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "Generated Library"}]
+keywords = ["deterministic", "reproducible", "cli"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+
+dependencies = [
+  "numpy>=1.22",
+  "matplotlib>=3.6",
+]
+
+[project.urls]
+Homepage = "https://example.invalid/deterministic-runner"
+Repository = "https://example.invalid/deterministic-runner"
+
+[project.scripts]
+deterministic-runner = "deterministic_runner.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

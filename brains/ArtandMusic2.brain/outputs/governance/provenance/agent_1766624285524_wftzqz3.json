@@ -1,0 +1,47 @@
+{
+  "agentId": "agent_1766624285524_wftzqz3",
+  "timestamp": "2025-12-25T00:58:24.451Z",
+  "mode": "observe",
+  "stats": {
+    "eventsLogged": 2938,
+    "actionsClassified": 0,
+    "actionsBlocked": 0,
+    "actionsWarned": 0,
+    "errors": 0
+  },
+  "inventoryHash": "no_inventory",
+  "agentData": {
+    "mission": "Add a required QA gate in the pilot workflow: no claim analysis is considered complete unless the schema validation report and QA_REPORT.* are present and pass under /outputs/qa/.",
+    "status": "completed",
+    "results": {
+      "success": true,
+      "document": {
+        "title": "Generated report",
+        "content": "## Required QA Gate for Pilot Workflow (Claim Analysis Completion Criteria)\n\n### Mission requirement (new hard gate)\nIn the pilot workflow, **no claim analysis is considered “complete” unless BOTH of the following are present under `/outputs/qa/` and they pass**:\n\n1. **Schema validation report** (must show a passing result)\n2. **`QA_REPORT.*` artifact(s)** (must be present and must show a passing result)\n\nIf either item is missing or failing, the claim analysis remains incomplete.\n\n---\n\n## Grounding in existing COSMO QA configuration (what we already know exists)\n\nCOSMO already has an explicit QA gating mechanism configured in `qa_gates.yaml` (from code-creation agent `agent_1766618407426_jbwdhcj`) with:\n\n- `version: 1`\n- `qa.fail_fast: true` (failure stops the process early)\n- A defined artifact gate for `claim_card` including:\n  - `template_path: outputs/templates/CLAIM_CARD.yaml`\n  - `workflow_path: outputs/workflows/CLAIM_VERIFICATION_WORKFLOW.md`\n  - `schema_path: config/claim_card.schema.yaml`\n  - `artifact_globs` that define acceptable locations/formats for the Claim Card:\n    - `outputs/**/CLAIM_CARD.yaml`\n    - `outputs/**/CLAIM_CARD.yml`\n    - `outputs/**/CLAIM_CARD.md`\n  - `required_inputs: [v]`\n\nThis proves the system already treats QA as a **configurable, explicit gate** with:\n- a schema (`config/claim_card.schema.yaml`) and\n- known output artifact patterns (`outputs/**/CLAIM_CARD.*`),\nand it is already set to **fail fast**.\n\nThe mission now adds an additional *completion criterion* specific to the pilot workflow: the QA artifacts must be located in `/outputs/qa/` and must pass.\n\n---\n\n## Definition of “complete” (updated acceptance criteria)\n\nA pilot claim analysis is only complete when all of the following conditions are met:\n\n### A) Claim Card exists (existing artifact expectations)\n- A Claim Card artifact exists matching one of these patterns:\n  - `outputs/**/CLAIM_CARD.yaml`\n  - `outputs/**/CLAIM_CARD.yml`\n  - `outputs/**/CLAIM_CARD.md`\n\n### B) Schema validation passes and is documented (new required QA gate component)\n- A **schema validation report** exists under:\n  - `/outputs/qa/`\n- The report must indicate a **passing** validation against the schema already identified in the QA config:\n  - `config/claim_card.schema.yaml`\n\n### C) QA report exists and passes (new required QA gate component)\n- One or more QA report artifacts exist under:\n  - `/outputs/qa/`\n- The QA report filename(s) must match:\n  - `QA_REPORT.*` (explicit wildcard requirement)\n- The QA report(s) must indicate **pass**.\n\n### D) Fail-fast behavior applies (already configured)\nBecause `qa.fail_fast: true` is already part of the QA system configuration, the intended behavior is consistent with the mission:\n- if schema validation fails, stop;\n- if `QA_REPORT.*` is missing or failing, stop;\n- do not mark analysis complete.\n\n---\n\n## Required artifact location and naming (enforced by this mission)\n\n### Required directory\nAll QA completion artifacts for the pilot workflow must be placed under:\n\n- `/outputs/qa/`\n\n### Required QA artifacts (must exist in that directory)\n- **Schema validation report** (file present under `/outputs/qa/`)\n- **`QA_REPORT.*`** (at least one file matching that glob under `/outputs/qa/`)\n\nThe mission’s language is explicit: completion requires that these artifacts are **present** and **pass** in `/outputs/qa/`.\n\n---\n\n## How this integrates with the existing workflow artifacts\n\nThe existing QA configuration already references a workflow document:\n\n- `outputs/workflows/CLAIM_VERIFICATION_WORKFLOW.md`\n\nTo satisfy the mission, the pilot workflow described in that workflow document must include a required QA gate step at the end (or at the point where “complete” would otherwise be assigned), stating:\n\n- Do not mark “complete” until:\n  - schema validation report exists in `/outputs/qa/` and passes, and\n  - `QA_REPORT.*` exists in `/outputs/qa/` and passes.\n\nThis also aligns with COSMO’s consolidated process principle that reliable research is produced by a repeatable process that **validates against explicit acceptance/QA criteria with transparent documentation** (summaries, sources, citations). The mission’s requirement is exactly such an explicit acceptance criterion with mandatory documentation artifacts.\n\n---\n\n## Operational rule for pilot runs (what must happen every time)\n\nFor each pilot claim analysis run:\n\n1. Produce the Claim Card artifact (per existing globs and schema path).\n2. Run schema validation against `config/claim_card.schema.yaml`.\n3. Write the **schema validation report** into `/outputs/qa/`.\n4. Produce a QA report file named `QA_REPORT.*` into `/outputs/qa/`.\n5. Confirm both reports indicate **PASS**.\n6. Only then can the claim analysis be labeled “complete”.\n\nBecause `qa.fail_fast: true`, any failure at steps 2–5 should halt the completion path.\n\n---\n\n## Conclusion\n\nCOSMO already has a structured QA gate system (`qa_gates.yaml`, `version: 1`) with fail-fast behavior and an explicit Claim Card schema (`config/claim_card.schema.yaml`). The mission adds a **hard completion gate** for the pilot workflow: **a claim analysis is not complete unless `/outputs/qa/` contains both (1) a passing schema validation report and (2) passing `QA_REPORT.*` artifact(s)**. This requirement is concrete (specific directory + specific artifact naming) and matches COSMO’s stated emphasis on repeatable validation against explicit QA criteria with transparent documentation.",
+        "format": "markdown",
+        "metadata": {
+          "author": "COSMO Document Agent",
+          "createdAt": "2025-12-25T00:58:23.755Z",
+          "mode": "memory_based",
+          "memoryNodesUsed": 44,
+          "formattedAt": "2025-12-25T00:58:23.755Z"
+        },
+        "filePath": "/Users/jtr/_JTR23_/COSMO/runtime/outputs/document-creation/agent_1766624285524_wftzqz3/agent_1766624285524_wftzqz3_report_01.md",
+        "wordCount": 737,
+        "createdAt": "2025-12-25T00:58:23.758Z",
+        "version": "1.0.0",
+        "deliverablePath": "/Users/jtr/_JTR23_/COSMO/runtime/outputs/document-creation/agent_1766624285524_wftzqz3/agent_1766624285524_wftzqz3_report_01.md",
+        "metadataPath": "/Users/jtr/_JTR23_/COSMO/runtime/outputs/document-creation/agent_1766624285524_wftzqz3/agent_1766624285524_wftzqz3_report_01_metadata.json"
+      },
+      "metadata": {
+        "type": "report",
+        "title": "Generated report",
+        "filePath": "/Users/jtr/_JTR23_/COSMO/runtime/outputs/document-creation/agent_1766624285524_wftzqz3/agent_1766624285524_wftzqz3_report_01.md",
+        "wordCount": 737,
+        "filesCreated": 1,
+        "status": "complete",
+        "createdAt": "2025-12-25T00:58:23.758Z"
+      }
+    }
+  }
+}

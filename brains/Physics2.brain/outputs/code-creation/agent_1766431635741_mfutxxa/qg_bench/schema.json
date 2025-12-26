@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/qg_bench/results.schema.json",
+  "title": "qg_bench standardized benchmark results",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "benchmark", "run", "dataset", "results", "metadata"],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^1\\.[0-9]+\\.[0-9]+$" },
+    "benchmark": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "observables"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "observables": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "description": { "type": "string" }
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["started_at", "finished_at", "duration_s"],
+      "properties": {
+        "started_at": { "type": "string", "format": "date-time" },
+        "finished_at": { "type": "string", "format": "date-time" },
+        "duration_s": { "type": "number", "minimum": 0 }
+      }
+    },
+    "dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "records", "hashes"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "records": { "type": "integer", "minimum": 0 },
+        "source": { "type": "string" },
+        "hashes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["dataset_sha256"],
+          "properties": {
+            "dataset_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          }
+        }
+      }
+    },
+    "results": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observables"],
+      "properties": {
+        "observables": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
+            "mean_latency_ms": { "type": "number", "minimum": 0 }
+          }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hashes", "environment"],
+      "properties": {
+        "hashes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["schema_sha256", "config_sha256", "results_sha256"],
+          "properties": {
+            "schema_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "config_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+            "results_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          }
+        },
+        "environment": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["python_version", "platform"],
+          "properties": {
+            "python_version": { "type": "string", "minLength": 1 },
+            "platform": { "type": "string", "minLength": 1 }
+          }
+        },
+        "generator": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string" },
+            "version": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "content": "[\n  {\n    \"path\": \"src/entrypoint.py\",\n    \"description\": \"Single executable entrypoint that runs the pipeline normally or in --determinism mode by executing two runs with the same fixed seed, collecting artifact paths, and delegating checksum reporting to the determinism utilities.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/determinism.py\",\n    \"description\": \"Determinism helpers that run the pipeline twice with a fixed seed, compute sha256 checksums for outputs/results.json, outputs/run_stamp.json, and logs, and write outputs/determinism_report.json in a stable schema for CI verification.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"tests/test_determinism.py\",\n    \"description\": \"Pytest that invokes the single entrypoint determinism mode and asserts that the two runs produce identical sha256 checksums for results.json, run_stamp.json, and logs as recorded in outputs/determinism_report.json.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \".github/workflows/ci.yml\",\n    \"description\": \"CI workflow that installs dependencies, runs unit tests including the determinism pytest, and fails the build if determinism checksums differ across the two fixed-seed runs.\",\n    \"category\": \"config\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_0338c69d7e7f429a00694b7b82078481978d764fe1f7340721",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 699,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 622,
+    "output_tokens_details": {
+      "reasoning_tokens": 339
+    },
+    "total_tokens": 1321
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0338c69d7e7f429a00694b7b824dc0819799fee8ea29c3871f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0338c69d7e7f429a00694b7b89c338819796928bde9623b4df",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"src/entrypoint.py\",\n    \"description\": \"Single executable entrypoint that runs the pipeline normally or in --determinism mode by executing two runs with the same fixed seed, collecting artifact paths, and delegating checksum reporting to the determinism utilities.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/determinism.py\",\n    \"description\": \"Determinism helpers that run the pipeline twice with a fixed seed, compute sha256 checksums for outputs/results.json, outputs/run_stamp.json, and logs, and write outputs/determinism_report.json in a stable schema for CI verification.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"tests/test_determinism.py\",\n    \"description\": \"Pytest that invokes the single entrypoint determinism mode and asserts that the two runs produce identical sha256 checksums for results.json, run_stamp.json, and logs as recorded in outputs/determinism_report.json.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \".github/workflows/ci.yml\",\n    \"description\": \"CI workflow that installs dependencies, runs unit tests including the determinism pytest, and fails the build if determinism checksums differ across the two fixed-seed runs.\",\n    \"category\": \"config\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

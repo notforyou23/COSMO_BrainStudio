@@ -1,0 +1,56 @@
+{
+  "content": "Wrote a complete, concise `README.md` documenting the tool’s purpose, installation, CLI/library usage, configuration options, and practical examples for refactoring/modularizing reusable artifacts.",
+  "reasoning": "",
+  "responseId": "resp_0357181c20970ab600694b48c96d8081949c626d69cbb80d3c",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2922,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1372,
+    "output_tokens_details": {
+      "reasoning_tokens": 63
+    },
+    "total_tokens": 4294
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0357181c20970ab600694b48ca5118819484ea0bddbb0f2c9b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0357181c20970ab600694b48cb40b08194a77f49fa9e572c50",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('README.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"# refactor-modularize\n\nA small Python CLI/library for **refactoring and modularizing reusable artifacts** (e.g., repeated README sections, duplicated configuration snippets, or shared prompt templates) across a set of input files. It loads artifacts, normalizes them, detects repeated fragments, and produces **deduplicated, modular outputs** suitable for reuse/export.\n\n## Features\n\n- Load multiple artifact files (Markdown/text/TOML/etc.) with metadata.\n- Normalize content (line endings, trimming, lightweight canonicalization).\n- Detect reusable fragments (exact/near-duplicate blocks) and centralize them.\n- Export rewritten artifacts and a small “module” bundle of shared fragments.\n- Usable as a library (`refactor_modularize.*`) or via CLI (`refactor-modularize`).\n\n## Installation\n\n### From source (recommended in this repo)\n\n```bash\npython -m venv .venv\n# macOS/Linux:\n. .venv/bin/activate\n# Windows:\n# .venv\\\\Scripts\\\\activate\n\npython -m pip install -U pip\npip install -e .\n```\n\n### Verify\n\n```bash\nrefactor-modularize --help\n```\"\"\",\n\"\"\"## Quickstart (CLI)\n\nRefactor a set of artifacts and write outputs to a directory:\n\n```bash\nrefactor-modularize \\\\\n  analyze /path/to/artifacts \\\\\n  --include \"**/*.md\" \"**/*.txt\" \"**/*.toml\" \\\\\n  --out out/\n```\n\nExport modularized fragments (and rewritten artifacts) to a bundle:\n\n```bash\nrefactor-modularize \\\\\n  export /path/to/artifacts \\\\\n  --out out/ \\\\\n  --bundle out/bundle/\n```\n\nIf your inputs are specific files (instead of a directory), pass them directly:\n\n```bash\nrefactor-modularize analyze README.md pyproject.toml prompts/*.txt --out out/\n```\"\"\",\n\"\"\"## Typical workflow\n\n1. **Analyze**: scan inputs, compute normalized forms, find repeated blocks.\n2. **Refactor**: rewrite artifacts to reference shared fragments.\n3. **Export**: write:\n   - rewritten artifacts (same filenames by default, under `--out`)\n   - shared fragment modules (under `--bundle`, if provided)\n   - a machine-readable summary (JSON) describing what changed\n\n## Configuration\n\nThe CLI is designed to be “flags-first”. Common options (names may vary slightly by command):\n\n- `--include PATTERN...`: glob patterns to include.\n- `--exclude PATTERN...`: glob patterns to ignore.\n- `--out PATH`: output directory for rewritten artifacts and reports.\n- `--bundle PATH`: directory for extracted shared fragments/modules.\n- `--min-lines N`: minimum block size (in lines) to consider reusable.\n- `--min-occurrences N`: require N repeats before extracting a fragment.\n- `--format {md,text}`: output style for extracted modules (when applicable).\n\nRun `refactor-modularize <command> --help` for the definitive list.\n\n## Library usage\n\nUse the package programmatically when you want tighter integration:\n\n```python\nfrom refactor_modularize.artifacts import load_artifacts\nfrom refactor_modularize.refactor import RefactorEngine\n\nartifacts = load_artifacts([\"README.md\", \"pyproject.toml\"])\nengine = RefactorEngine(min_lines=4, min_occurrences=2)\n\nresult = engine.run(artifacts)\n\n# result.fragments: extracted reusable blocks\n# result.rewrites: per-file rewritten text\n```\n\nWrite outputs:\n\n```python\nfrom pathlib import Path\n\nout = Path(\"out\")\nout.mkdir(exist_ok=True)\n\nfor rewrite in result.rewrites:\n    (out / rewrite.relpath).write_text(rewrite.text, encoding=\"utf-8\")\n```\"\"\",\n\"\"\"## Examples\n\n### Example: deduplicate repeated README sections\n\nInput: multiple `README.md`-like files contain the same “Installation” section.\n\nCommand:\n\n```bash\nrefactor-modularize export docs/ --include \"**/*.md\" --min-lines 6 --min-occurrences 2 --out out/ --bundle out/bundle/\n```\n\nOutput:\n- `out/docs/...` rewritten to reference a shared fragment (or replaced with a canonical copy)\n- `out/bundle/fragments/installation.md` (name depends on the engine’s labeling)\n\n### Example: unify prompt templates\n\nInput: repeated prompt blocks across `*.txt` files.\n\n```bash\nrefactor-modularize analyze prompts/ --include \"**/*.txt\" --min-lines 5 --min-occurrences 3 --out out/\n```\n\nReview `out/report.json` to see:\n- which blocks were considered duplicates\n- where they were found\n- proposed module names/identifiers\n\n## Output layout (convention)\n\nWhen `--out out/` is used, the tool typically writes:\n- `out/report.json` – summary of detected fragments and rewrites\n- `out/<original tree>/...` – rewritten copies of the input artifacts\n- `out/bundle/` – extracted fragments/modules (when `--bundle` is set)\n\n## Notes\n\n- The tool favors **safe, minimal rewrites**: it only extracts blocks that meet the configured thresholds.\n- Artifact parsing is intentionally lightweight; it treats most inputs as text and focuses on block-level reuse.\n\n## Development\n\n```bash\npip install -e \".[dev]\"\npython -m pytest\n```\n\n## License\n\nSee repository license (if provided).\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:README.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b48372d7081909f70f3661941a95b001f3dc92161f15d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:README.md\nDIR_STATE:[\"README.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0357181c20970ab600694b48dc73b88194a0219561579b91e4",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Wrote a complete, concise `README.md` documenting the tool’s purpose, installation, CLI/library usage, configuration options, and practical examples for refactoring/modularizing reusable artifacts."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

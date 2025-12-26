@@ -1,0 +1,154 @@
+{
+  "content": "Created `tests/test_contract_injection.py` with end-to-end pytest coverage that verifies deterministic/idempotent insertion and replacement of per-benchmark `### Contract` sections and asserts the presence of all required contract subsections plus canonical JSON and compliance-reporting fields.",
+  "reasoning": "",
+  "responseId": "resp_0248b4484eeaf792006949a33be400819087235cc4d8ab0796",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 6019,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2868,
+    "output_tokens_details": {
+      "reasoning_tokens": 632
+    },
+    "total_tokens": 8887
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0248b4484eeaf792006949a33caf8c8190bf3a866b6f216846",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0248b4484eeaf792006949a33f41408190851f0592610e0acf",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import os, pathlib, json, textwrap, re\nbase=pathlib.Path(\"/mnt/data\")\nlist(base.iterdir())[:20]\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/src')]"
+        }
+      ]
+    },
+    {
+      "id": "ci_0248b4484eeaf792006949a34166388190900fbb14305a0a5d",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import pathlib, os\nfor p in pathlib.Path(\"/mnt/data/src\").rglob(\"*\"):\n    if p.is_file():\n        print(p.relative_to(\"/mnt/data\"), p.stat().st_size)\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "src/cosmo_contracts/__init__.py 3081\nsrc/cosmo_contracts/schema.py 7821\nsrc/cosmo_contracts/markdown.py 6487\nsrc/cosmo_contracts/contracts.py 5891\nsrc/cosmo_contracts/runner.py 8470\nsrc/cosmo_contracts/cli.py 6451\nsrc/cosmo_contracts/__main__.py 4295\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0248b4484eeaf792006949a343e7ec8190b7037d2abb268437",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0248b4484eeaf792006949a3447a2c8190b125ce0afc4b3a7d",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nprint(Path(\"/mnt/data/src/cosmo_contracts/markdown.py\").read_text()[:4000])\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "from __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nimport re\nfrom typing import Callable, Dict, Iterable, List, Optional\n\n\n_CONTRACT_TITLE = \"### Contract\"\n\n\n@dataclass(frozen=True)\nclass ContractInsertResult:\n    text: str\n    updated_ids: List[str]\n\n\ndef _default_contract_md(benchmark_id: str) -> str:\n    # A deterministic, benchmark-agnostic contract block; other modules may\n    # provide a richer contract generator via `contract_for_id`.\n    return \"\\n\".join(\n        [\n            _CONTRACT_TITLE,\n            \"\",\n            \"**Required metadata**\",\n            \"\",\n            \"- `benchmark_id`: `\" + benchmark_id + \"`\",\n            \"- `version`: `v0.1`\",\n            \"- `name`: human-readable name (must be reported by implementations)\",\n            \"- `input_spec`: description of inputs and domains\",\n            \"- `output_spec`: description of outputs, units, and shapes\",\n            \"\",\n            \"**Reference algorithm / pseudocode**\",\n            \"\",\n            \"Implementations MUST document the algorithm used and MUST match the\",\n            \"reference behavior on the canonical test vector(s). If an official\",\n            \"reference is provided for this benchmark, it overrides this generic policy.\",\n            \"\",\n            \"**Output invariants**\",\n            \"\",\n            \"- Output MUST be deterministic for a fixed input.\",\n            \"- Output MUST be serializable as JSON (numbers, strings, lists, dicts).\",\n            \"- NaN/Inf are forbidden unless explicitly specified by the benchmark.\",\n            \"\",\n            \"**Tolerance policy**\",\n            \"\",\n            \"- Exact match for non-floats (strings, integers, booleans).\",\n            \"- For floats: absolute tolerance `1e-9` and relative tolerance `1e-9`, unless\",\n            \"  a benchmark-specific contract states otherwise.\",\n            \"\",\n            \"**Canonical test vector**\",\n            \"\",\n            \"```json\",\n            \"{\",\n            '  \"benchmark_id\": \"' + benchmark_id + '\",',\n            '  \"version\": \"v0.1\",',\n            '  \"input\": {\"seed\": 0},',\n            '  \"expected_output\": null',\n            \"}\",\n            \"```\",\n            \"\",\n            \"**Contract compliance reporting**\",\n            \"\",\n            \"Every contributed implementation MUST report contract compliance as:\",\n            \"\",\n            \"- `pass`: boolean\",\n            \"- `diagnostics`: list of human-readable strings (empty when pass is true)\",\n        ]\n    )\n\n\ndef _find_headings(lines: List[str], pattern: re.Pattern) -> List[tuple[int, str]]:\n    out: List[tuple[int, str]] = []\n    for i, ln in enumerate(lines):\n        m = pattern.match(ln)\n        if m:\n            out.append((i, m.group(1).strip()))\n    return out\n\n\ndef upsert_contract_sections(\n    markdown_text: str,\n    contract_for_id: Optional[Callable[[str], str]] = None,\n    benchmark_heading_re: str = r\"^##\\s+(.+?)\\s*$\",\n) -> ContractInsertResult:\n    \\\"\\\"\\\"Insert/replace a standardized Contract section per v0.1 benchmark.\n\n    Benchmarks are detected as level-2 headings (`## ...`). Within each benchmark\n    section, a level-3 heading `### Contract` is inserted after the benchmark\n    heading (or replaced if present). The rewrite is idempotent.\n    \\\"\\\"\\\"\n    contract_for_id = contract_for_id or _default_contract_md\n    lines = markdown_text.splitlines()\n    bench_pat = re.compile(benchmark_heading_re)\n    benches = _find_headings(lines, bench_pat)\n    if not benches:\n        return ContractInsertResult(text=markdown_text, updated_ids=[])\n\n    # Add sentinel end.\n    benches = benches + [(len(lines), \"__END__\")]\n    updated: List[str] = []\n\n    for (start, bench_id), (end, _) in zip(benches, benches[1:]):\n        if bench_id == \"__END__\":\n            continue\n        section = lines[start:end]\n        # Locate an existing contract block within this section.\n        contract_start = None\n        for j in range(1, len(section)):\n            if sectio\n"
+        }
+      ]
+    },
+    {
+      "id": "ci_0248b4484eeaf792006949a3477e14819098f22577837fd79c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path(\"/mnt/data/src/cosmo_contracts/markdown.py\").read_text()[4000:8000])\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "n[j].strip() == _CONTRACT_TITLE:\n                contract_start = j\n                break\n\n        new_block = contract_for_id(bench_id).splitlines()\n        if not new_block or new_block[0].strip() != _CONTRACT_TITLE:\n            raise ValueError(\"contract_for_id must return markdown starting with '### Contract'\")\n\n        if contract_start is None:\n            # Insert after heading and an optional following blank line.\n            insert_at = 1\n            while insert_at < len(section) and section[insert_at].strip() == \"\":\n                insert_at += 1\n            section = section[:insert_at] + [\"\"] + new_block + [\"\"] + section[insert_at:]\n            updated.append(bench_id)\n        else:\n            # Replace until next level-3 heading or end-of-section.\n            contract_end = len(section)\n            h3 = re.compile(r\"^###\\s+\")\n            for k in range(contract_start + 1, len(section)):\n                if h3.match(section[k]) and section[k].strip() != _CONTRACT_TITLE:\n                    contract_end = k\n                    break\n            before = section[:contract_start]\n            after = section[contract_end:]\n            # Normalize surrounding blank lines.\n            while before and before[-1].strip() == \"\":\n                before.pop()\n            while after and after[0].strip() == \"\":\n                after.pop(0)\n            section = before + [\"\"] + new_block + [\"\"] + after\n            updated.append(bench_id)\n\n        lines[start:end] = section\n        # Adjust subsequent indices by recomputing headings would be expensive; instead\n        # restart scan by recomputing benches on the mutated lines.\n        # The number of benchmarks is small; simplicity > micro-optimizations.\n        benches = _find_headings(lines, bench_pat) + [(len(lines), \"__END__\")]\n\n    return ContractInsertResult(text=\"\\\\n\".join(lines) + (\"\" if markdown_text.endswith(\"\\\\n\") else \"\"), updated_ids=updated)\n\n\ndef rewrite_benchmarks_file(\n    input_path: Path,\n    output_path: Optional[Path] = None,\n    contract_for_id: Optional[Callable[[str], str]] = None,\n) -> List[str]:\n    \\\"\\\"\\\"Rewrite `input_path` inserting/updating Contract sections; returns updated ids.\\\"\\\"\\\"\n    md = input_path.read_text(encoding=\"utf-8\")\n    res = upsert_contract_sections(md, contract_for_id=contract_for_id)\n    outp = output_path or input_path\n    outp.write_text(res.text if res.text.endswith(\"\\\\n\") else res.text + \"\\\\n\", encoding=\"utf-8\")\n    return res.updated_ids\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0248b4484eeaf792006949a349e2cc819094266055a1597804",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0248b4484eeaf792006949a34e31c08190ac45ec5473ab5c36",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, re\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_contract_injection.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(r\"\"\"\nimport re\nfrom textwrap import dedent\n\nimport pytest\n\nfrom cosmo_contracts.markdown import upsert_contract_sections\n\n\nREQUIRED_SUBSECTIONS = [\n    r\"^\\*\\*Required metadata\\*\\*$\",\n    r\"^\\*\\*Reference algorithm / pseudocode\\*\\*$\",\n    r\"^\\*\\*Output invariants\\*\\*$\",\n    r\"^\\*\\*Tolerance policy\\*\\*$\",\n    r\"^\\*\\*Canonical test vector\\*\\*$\",\n    r\"^\\*\\*Contract compliance reporting\\*\\*$\",\n]\n\n\ndef _contract_blocks(md: str):\n    # Returns list of (benchmark_id, contract_text) for each \"## ...\" benchmark.\n    bench = re.compile(r\"^##\\s+(.+?)\\s*$\", re.M)\n    h3 = re.compile(r\"^###\\s+\", re.M)\n    out = []\n    starts = [(m.start(), m.end(), m.group(1)) for m in bench.finditer(md)]\n    if not starts:\n        return out\n    starts.append((len(md), len(md), \"__END__\"))\n    for (s, e, bid), (ns, _, _) in zip(starts, starts[1:]):\n        section = md[e:ns]\n        m = re.search(r\"(?m)^###\\s+Contract\\s*$\", section)\n        if not m:\n            out.append((bid, None))\n            continue\n        c_start = e + m.start()\n        # contract extends until next H3 (excluding itself) or next benchmark\n        rest = md[c_start:ns]\n        m2 = re.search(r\"(?m)^###\\s+(?!Contract\\b).+$\", rest)\n        c_end = c_start + (m2.start() if m2 else len(rest))\n        out.append((bid, md[c_start:c_end].strip(\"\\n\")))\n    return out\n\n\ndef _assert_contract_has_required_parts(contract: str):\n    assert contract is not None\n    lines = contract.splitlines()\n    assert lines[0].strip() == \"### Contract\"\n    for pat in REQUIRED_SUBSECTIONS:\n        assert any(re.match(pat, ln.strip()) for ln in lines), f\"missing subsection {pat}\"\n    # canonical json fenced block required\n    assert \"```json\" in contract\n    assert contract.count(\"```\") >= 2\n    # compliance fields must be mentioned\n    assert re.search(r\"(?m)^- `pass`:\\s*boolean\\s*$\", contract)\n    assert re.search(r\"(?m)^- `diagnostics`:\\s*list of human-readable strings\", contract)\n\"\"\")\n\nchunks.append(r\"\"\"\ndef test_inserts_contracts_and_is_idempotent():\n    md = dedent(\n        \"\"\"\n        # COSMO Benchmarks v0.1\n\n        ## BM001: toy\n        Some description.\n\n        ### Notes\n        - blah\n\n        ## BM002: other\n        More text.\n        \"\"\"\n    ).strip() + \"\\n\"\n\n    res1 = upsert_contract_sections(md)\n    assert set(res1.updated_ids) == {\"BM001: toy\", \"BM002: other\"}\n    out1 = res1.text\n    assert \"### Contract\" in out1\n\n    # contracts inserted for each benchmark and include required subsections\n    blocks = dict(_contract_blocks(out1))\n    assert set(blocks) == {\"BM001: toy\", \"BM002: other\"}\n    _assert_contract_has_required_parts(blocks[\"BM001: toy\"])\n    _assert_contract_has_required_parts(blocks[\"BM002: other\"])\n\n    # Idempotent rewrite: running again yields identical output and no drift\n    res2 = upsert_contract_sections(out1)\n    assert res2.text == out1\n    assert set(res2.updated_ids) == {\"BM001: toy\", \"BM002: other\"}\n\"\"\")\n\nchunks.append(r\"\"\"\ndef test_replaces_existing_contract_deterministically():\n    md = dedent(\n        \"\"\"\n        # COSMO Benchmarks v0.1\n\n        ## BM003: replace-me\n\n        ### Contract\n        **Required metadata**\n        - junk: true\n\n        ### Details\n        Something.\n\n        \"\"\"\n    ).lstrip()\n\n    out = upsert_contract_sections(md).text\n    blocks = dict(_contract_blocks(out))\n    c = blocks[\"BM003: replace-me\"]\n    _assert_contract_has_required_parts(c)\n    # ensure old marker removed\n    assert \"junk: true\" not in c\n    # contract should appear before Details heading inside benchmark section\n    sec = re.search(r\"(?s)##\\s+BM003: replace-me\\s*(.+)\", out).group(1)\n    assert sec.index(\"### Contract\") < sec.index(\"### Details\")\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tests/test_contract_injection.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": []
+    },
+    {
+      "id": "rs_0248b4484eeaf792006949a36b69bc81909e41db8c1abdc40c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0248b4484eeaf792006949a36e3214819086e6b893cdb86685",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data/tests/test_contract_injection.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\nimport re\nfrom textwrap import dedent\n\nimport pytest\n\nfrom cosmo_contracts.markdown import upsert_contract_sections\n\n\nREQUIRED_SUBSECTIONS = [\n    r\"^\\\\*\\\\*Required metadata\\\\*\\\\*$\",\n    r\"^\\\\*\\\\*Reference algorithm / pseudocode\\\\*\\\\*$\",\n    r\"^\\\\*\\\\*Output invariants\\\\*\\\\*$\",\n    r\"^\\\\*\\\\*Tolerance policy\\\\*\\\\*$\",\n    r\"^\\\\*\\\\*Canonical test vector\\\\*\\\\*$\",\n    r\"^\\\\*\\\\*Contract compliance reporting\\\\*\\\\*$\",\n]\n\n\ndef _contract_blocks(md: str):\n    \\\"\\\"\\\"Return list of (benchmark_id, contract_text|None) for each `## ...` section.\\\"\\\"\\\"\n    bench = re.compile(r\"^##\\\\s+(.+?)\\\\s*$\", re.M)\n    out = []\n    starts = [(m.start(), m.end(), m.group(1)) for m in bench.finditer(md)]\n    if not starts:\n        return out\n    starts.append((len(md), len(md), \"__END__\"))\n    for (_, e, bid), (ns, _, _) in zip(starts, starts[1:]):\n        section = md[e:ns]\n        m = re.search(r\"(?m)^###\\\\s+Contract\\\\s*$\", section)\n        if not m:\n            out.append((bid, None))\n            continue\n        c_start = e + m.start()\n        rest = md[c_start:ns]\n        m2 = re.search(r\"(?m)^###\\\\s+(?!Contract\\\\b).+$\", rest)\n        c_end = c_start + (m2.start() if m2 else len(rest))\n        out.append((bid, md[c_start:c_end].strip(\"\\\\n\")))\n    return out\n\n\ndef _assert_contract_has_required_parts(contract: str):\n    assert contract is not None\n    lines = contract.splitlines()\n    assert lines[0].strip() == \"### Contract\"\n    for pat in REQUIRED_SUBSECTIONS:\n        assert any(re.match(pat, ln.strip()) for ln in lines), f\"missing subsection {pat}\"\n    assert \"```json\" in contract\n    assert contract.count(\"```\") >= 2\n    assert re.search(r\"(?m)^- `pass`:\\\\s*boolean\\\\s*$\", contract)\n    assert re.search(r\"(?m)^- `diagnostics`:\\\\s*list of human-readable strings\", contract)\n\"\"\")\n\nchunks.append(\"\"\"\ndef test_inserts_contracts_and_is_idempotent():\n    md = dedent('''\n        # COSMO Benchmarks v0.1\n\n        ## BM001: toy\n        Some description.\n\n        ### Notes\n        - blah\n\n        ## BM002: other\n        More text.\n    ''').strip() + \"\\\\n\"\n\n    res1 = upsert_contract_sections(md)\n    assert set(res1.updated_ids) == {\"BM001: toy\", \"BM002: other\"}\n    out1 = res1.text\n    assert \"### Contract\" in out1\n\n    blocks = dict(_contract_blocks(out1))\n    assert set(blocks) == {\"BM001: toy\", \"BM002: other\"}\n    _assert_contract_has_required_parts(blocks[\"BM001: toy\"])\n    _assert_contract_has_required_parts(blocks[\"BM002: other\"])\n\n    res2 = upsert_contract_sections(out1)\n    assert res2.text == out1\n    assert set(res2.updated_ids) == {\"BM001: toy\", \"BM002: other\"}\n\"\"\")\n\nchunks.append(\"\"\"\ndef test_replaces_existing_contract_deterministically():\n    md = dedent('''\n        # COSMO Benchmarks v0.1\n\n        ## BM003: replace-me\n\n        ### Contract\n        **Required metadata**\n        - junk: true\n\n        ### Details\n        Something.\n    ''').lstrip()\n\n    out = upsert_contract_sections(md).text\n    blocks = dict(_contract_blocks(out))\n    c = blocks[\"BM003: replace-me\"]\n    _assert_contract_has_required_parts(c)\n    assert \"junk: true\" not in c\n\n    sec = re.search(r\"(?s)##\\\\s+BM003: replace-me\\\\s*(.+)\", out).group(1)\n    assert sec.index(\"### Contract\") < sec.index(\"### Details\")\n\"\"\")\n\nfinal_text = \"\\n\".join(block.strip(\"\\n\") for block in chunks).strip() + \"\\n\"\ntarget_path.write_text(final_text, encoding=\"utf-8\")\nprint(\"FILE_WRITTEN:tests/test_contract_injection.py\")\nprint(\"DIR_STATE:\" + json.dumps(sorted(str(p.relative_to(Path('/mnt/data'))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_contract_injection.py\nDIR_STATE:[\"tests/test_contract_injection.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0248b4484eeaf792006949a37890d08190a7f9f1db1919db25",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0248b4484eeaf792006949a378e31881909807216e3f5cb139",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\ntxt=Path(\"/mnt/data/tests/test_contract_injection.py\").read_text()\nlen(txt.splitlines()), txt[:200]\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(99,\n 'import re\\nfrom textwrap import dedent\\n\\nimport pytest\\n\\nfrom cosmo_contracts.markdown import upsert_contract_sections\\n\\n\\nREQUIRED_SUBSECTIONS = [\\n    r\"^\\\\*\\\\*Required metadata\\\\*\\\\*$\",\\n    r\"^\\\\*\\\\*Reference ')"
+        }
+      ]
+    },
+    {
+      "id": "rs_0248b4484eeaf792006949a37b8c8481908d4470c3e58e5a4f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0248b4484eeaf792006949a37bdc348190a1711dae23a78466",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/test_contract_injection.py` with end-to-end pytest coverage that verifies deterministic/idempotent insertion and replacement of per-benchmark `### Contract` sections and asserts the presence of all required contract subsections plus canonical JSON and compliance-reporting fields."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

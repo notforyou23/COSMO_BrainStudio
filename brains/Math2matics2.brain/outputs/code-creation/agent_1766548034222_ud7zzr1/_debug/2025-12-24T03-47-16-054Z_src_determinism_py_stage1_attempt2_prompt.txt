@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement deterministic generation of results.json (e.g., metrics for mean vs median-of-means) and a corresponding plot saved to figure.png; ensure identical bytes/values across runs given the same seed.
+Project: generated_script_1766548034720 (json script)
+
+Target file details:
+- Path: src/determinism.py
+- Purpose: Provides utilities to enforce deterministic behavior across numpy/random/matplotlib and stable JSON/PNG writing for byte-identical outputs.
+- Category: source
+
+Other planned files (for context only):
+- scripts/generate_results.py: Deterministically generates results.json and figure.png for mean vs median-of-means metrics using a fixed RNG seed and stable serialization/plot settings.
+- src/metrics.py: Implements the mean and median-of-means estimators plus metric calculations in a deterministic, numerically stable manner.
+- src/plotting.py: Creates the comparison plot and saves figure.png with deterministic styling, layout, and rendering parameters.
+- results/results.json: Example deterministic output JSON containing computed metrics and parameters for the mean vs median-of-means experiment.
+
+Reference insights:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT: agent_1766547792970_aqtjpym] {"agentId":"agent_1766547792970_aqtjpym","timestamp":"2025-12-24T03:44:34.541Z","files":[{"filename":".
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+- [AGENT: agent_1766547586805_j8aytnq] {"agentId":"agent_1766547586805_j8aytnq","timestamp":"2025-12-24T03:44:00.423Z","files":[{"filename":"r
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Provides utilities to enforce deterministic behavior across numpy/random/matplotlib and stable JSON/PNG writing for byte-identical outputs.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/determinism.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/determinism.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/determinism.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

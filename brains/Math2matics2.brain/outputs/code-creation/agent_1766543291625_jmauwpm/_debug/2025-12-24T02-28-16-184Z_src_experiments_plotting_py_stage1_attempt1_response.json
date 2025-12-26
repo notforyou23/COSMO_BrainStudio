@@ -1,0 +1,74 @@
+{
+  "content": "Implemented `src/experiments/plotting.py` as a small, dependency-light plotting helper module with lazy Matplotlib/Seaborn imports, a consistent `plot_style()` context manager, and convenience functions for metric curves, summary bar charts, and safe figure saving.",
+  "reasoning": "",
+  "responseId": "resp_0d995b2d5dcf98e900694b500d104881909f19da0f1d71be43",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 5083,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 3454,
+    "output_tokens_details": {
+      "reasoning_tokens": 336
+    },
+    "total_tokens": 8537
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0d995b2d5dcf98e900694b500da9ac8190a69ed83a094e9e12",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d995b2d5dcf98e900694b5010ec808190b3b4c2fe75abe3a4",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/plotting.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(r\"\"\"# Reusable plotting helpers for experiment outputs.\n# Designed to be dependency-light: Matplotlib/Seaborn are imported lazily.\n\nfrom __future__ import annotations\n\nfrom contextlib import contextmanager\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, Mapping, Optional, Sequence, Tuple, Union\n\n\ndef _import_matplotlib():\n    try:\n        import matplotlib as mpl  # type: ignore\n        import matplotlib.pyplot as plt  # type: ignore\n    except Exception as e:  # pragma: no cover\n        raise ImportError(\n            \"Matplotlib is required for plotting utilities. \"\n            \"Install with `pip install matplotlib`.\"\n        ) from e\n    return mpl, plt\n\n\ndef _import_seaborn():\n    try:\n        import seaborn as sns  # type: ignore\n    except Exception:\n        return None\n    return sns\n\n\n_DEFAULT_RC: Dict[str, Any] = {\n    \"figure.dpi\": 120,\n    \"savefig.dpi\": 150,\n    \"font.size\": 11,\n    \"axes.grid\": True,\n    \"grid.alpha\": 0.25,\n    \"axes.spines.top\": False,\n    \"axes.spines.right\": False,\n    \"legend.frameon\": False,\n}\"\"\")\n\nchunks.append(r\"\"\"@contextmanager\ndef plot_style(\n    *,\n    use_seaborn: bool = True,\n    rc: Optional[Mapping[str, Any]] = None,\n    palette: Optional[Union[str, Sequence[Any]]] = \"deep\",\n):\n    \"\"\"Context manager applying a consistent plotting style.\n\n    Works with Matplotlib alone; if Seaborn is available, a nicer theme is applied.\n    \"\"\"\n    mpl, _ = _import_matplotlib()\n    merged = dict(_DEFAULT_RC)\n    if rc:\n        merged.update(dict(rc))\n\n    sns = _import_seaborn() if use_seaborn else None\n    if sns is not None:\n        # Using seaborn's theme on top of rc_context keeps defaults tidy.\n        sns.set_theme(context=\"notebook\", style=\"whitegrid\", palette=palette)\n\n    with mpl.rc_context(rc=merged):\n        yield\n\n    if sns is not None:\n        # Restore seaborn to defaults for callers outside the context.\n        sns.reset_defaults()\"\"\")\n\nchunks.append(r\"\"\"def ensure_ax(ax=None, *, figsize: Tuple[float, float] = (6.4, 4.0)):\n    \"\"\"Return (fig, ax), creating them if needed.\"\"\"\n    _, plt = _import_matplotlib()\n    if ax is None:\n        fig, ax = plt.subplots(figsize=figsize)\n        return fig, ax\n    return ax.figure, ax\n\n\ndef save_figure(\n    fig,\n    path: Union[str, Path],\n    *,\n    tight: bool = True,\n    dpi: Optional[int] = None,\n    transparent: bool = False,\n    metadata: Optional[Mapping[str, str]] = None,\n):\n    \"\"\"Save a Matplotlib figure with sensible defaults and safe path handling.\"\"\"\n    p = Path(path)\n    p.parent.mkdir(parents=True, exist_ok=True)\n    kwargs: Dict[str, Any] = {\"transparent\": transparent}\n    if dpi is not None:\n        kwargs[\"dpi\"] = dpi\n    if metadata:\n        kwargs[\"metadata\"] = dict(metadata)\n    if tight:\n        kwargs[\"bbox_inches\"] = \"tight\"\n    fig.savefig(str(p), **kwargs)\n    return p\"\"\")\n\nchunks.append(r\"\"\"def plot_metric_curve(\n    records: Sequence[Mapping[str, Any]],\n    *,\n    x: str = \"step\",\n    y: str = \"value\",\n    hue: Optional[str] = \"run\",\n    ax=None,\n    title: Optional[str] = None,\n    xlabel: Optional[str] = None,\n    ylabel: Optional[str] = None,\n    legend: bool = True,\n    use_seaborn: bool = True,\n):\n    \"\"\"Plot a metric curve from a list of dict records.\n\n    Expected keys per record: x, y, and optionally hue (e.g., run id / seed).\n    This avoids a hard dependency on pandas while still being convenient.\n    \"\"\"\n    _, plt = _import_matplotlib()\n    sns = _import_seaborn() if use_seaborn else None\n    fig, ax = ensure_ax(ax)\n\n    if sns is not None:\n        sns.lineplot(\n            data=list(records),\n            x=x,\n            y=y,\n            hue=hue if hue else None,\n            ax=ax,\n            errorbar=None,\n        )\n    else:\n        # Fallback: group by hue and plot with Matplotlib.\n        if hue:\n            groups: Dict[Any, list] = {}\n            for r in records:\n                groups.setdefault(r.get(hue), []).append(r)\n            for k, rows in groups.items():\n                xs = [rr.get(x) for rr in rows]\n                ys = [rr.get(y) for rr in rows]\n                ax.plot(xs, ys, label=str(k))\n        else:\n            xs = [r.get(x) for r in records]\n            ys = [r.get(y) for r in records]\n            ax.plot(xs, ys)\n\n    ax.set_title(title or \"\")\n    ax.set_xlabel(xlabel or x)\n    ax.set_ylabel(ylabel or y)\n    if legend and hue:\n        ax.legend(title=hue)\n    elif ax.get_legend() is not None:\n        ax.get_legend().remove()\n    plt.tight_layout()\n    return fig, ax\"\"\")\n\nchunks.append(r\"\"\"def plot_summary_bar(\n    values: Mapping[str, float],\n    *,\n    ax=None,\n    title: Optional[str] = None,\n    xlabel: str = \"\",\n    ylabel: str = \"value\",\n    sort: bool = True,\n    rotation: int = 30,\n    use_seaborn: bool = True,\n):\n    \"\"\"Plot an aggregated summary as a bar chart (e.g., final scores by method).\"\"\"\n    _, plt = _import_matplotlib()\n    sns = _import_seaborn() if use_seaborn else None\n    fig, ax = ensure_ax(ax, figsize=(7.2, 4.0))\n\n    items = list(values.items())\n    if sort:\n        items.sort(key=lambda kv: kv[1], reverse=True)\n    labels, ys = zip(*items) if items else ([], [])\n\n    if sns is not None:\n        sns.barplot(x=list(labels), y=list(ys), ax=ax)\n    else:\n        ax.bar(list(labels), list(ys))\n\n    ax.set_title(title or \"\")\n    ax.set_xlabel(xlabel)\n    ax.set_ylabel(ylabel)\n    ax.set_xticklabels(ax.get_xticklabels(), rotation=rotation, ha=\"right\")\n    plt.tight_layout()\n    return fig, ax\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/experiments/plotting.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4fbeb5a8819082ef6cca0e8e962a0289c9c218902ef0",
+      "outputs": []
+    },
+    {
+      "id": "rs_0d995b2d5dcf98e900694b501ed4ac8190bed19fb3a476a00d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d995b2d5dcf98e900694b501fed988190b4aa5c049950ed32",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/plotting.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"# Reusable plotting helpers for experiment outputs.\n# Designed to be dependency-light: Matplotlib/Seaborn are imported lazily.\n\nfrom __future__ import annotations\n\nfrom contextlib import contextmanager\nfrom pathlib import Path\nfrom typing import Any, Dict, Mapping, Optional, Sequence, Tuple, Union\n\n\ndef _import_matplotlib():\n    try:\n        import matplotlib as mpl  # type: ignore\n        import matplotlib.pyplot as plt  # type: ignore\n    except Exception as e:  # pragma: no cover\n        raise ImportError(\n            \"Matplotlib is required for plotting utilities. \"\n            \"Install with `pip install matplotlib`.\"\n        ) from e\n    return mpl, plt\n\n\ndef _import_seaborn():\n    try:\n        import seaborn as sns  # type: ignore\n    except Exception:\n        return None\n    return sns\n\n\n_DEFAULT_RC: Dict[str, Any] = {\n    \"figure.dpi\": 120,\n    \"savefig.dpi\": 150,\n    \"font.size\": 11,\n    \"axes.grid\": True,\n    \"grid.alpha\": 0.25,\n    \"axes.spines.top\": False,\n    \"axes.spines.right\": False,\n    \"legend.frameon\": False,\n}\n\"\"\")\n\nchunks.append(\"\"\"@contextmanager\ndef plot_style(\n    *,\n    use_seaborn: bool = True,\n    rc: Optional[Mapping[str, Any]] = None,\n    palette: Optional[Union[str, Sequence[Any]]] = \"deep\",\n):\n    '''Context manager applying a consistent plotting style.\n\n    Works with Matplotlib alone; if Seaborn is available, a nicer theme is applied.\n    '''\n    mpl, _ = _import_matplotlib()\n    merged = dict(_DEFAULT_RC)\n    if rc:\n        merged.update(dict(rc))\n\n    sns = _import_seaborn() if use_seaborn else None\n    if sns is not None:\n        sns.set_theme(context=\"notebook\", style=\"whitegrid\", palette=palette)\n\n    with mpl.rc_context(rc=merged):\n        yield\n\n    if sns is not None:\n        sns.reset_defaults()\n\"\"\")\n\nchunks.append(\"\"\"def ensure_ax(ax=None, *, figsize: Tuple[float, float] = (6.4, 4.0)):\n    '''Return (fig, ax), creating them if needed.'''\n    _, plt = _import_matplotlib()\n    if ax is None:\n        fig, ax = plt.subplots(figsize=figsize)\n        return fig, ax\n    return ax.figure, ax\n\n\ndef save_figure(\n    fig,\n    path: Union[str, Path],\n    *,\n    tight: bool = True,\n    dpi: Optional[int] = None,\n    transparent: bool = False,\n    metadata: Optional[Mapping[str, str]] = None,\n):\n    '''Save a Matplotlib figure with sensible defaults and safe path handling.'''\n    p = Path(path)\n    p.parent.mkdir(parents=True, exist_ok=True)\n    kwargs: Dict[str, Any] = {\"transparent\": transparent}\n    if dpi is not None:\n        kwargs[\"dpi\"] = dpi\n    if metadata:\n        kwargs[\"metadata\"] = dict(metadata)\n    if tight:\n        kwargs[\"bbox_inches\"] = \"tight\"\n    fig.savefig(str(p), **kwargs)\n    return p\n\"\"\")\n\nchunks.append(\"\"\"def plot_metric_curve(\n    records: Sequence[Mapping[str, Any]],\n    *,\n    x: str = \"step\",\n    y: str = \"value\",\n    hue: Optional[str] = \"run\",\n    ax=None,\n    title: Optional[str] = None,\n    xlabel: Optional[str] = None,\n    ylabel: Optional[str] = None,\n    legend: bool = True,\n    use_seaborn: bool = True,\n):\n    '''Plot a metric curve from a list of dict records.\n\n    Expected keys per record: x, y, and optionally hue (e.g., run id / seed).\n    This avoids a hard dependency on pandas while still being convenient.\n    '''\n    _, plt = _import_matplotlib()\n    sns = _import_seaborn() if use_seaborn else None\n    fig, ax = ensure_ax(ax)\n\n    if sns is not None:\n        sns.lineplot(\n            data=list(records),\n            x=x,\n            y=y,\n            hue=hue if hue else None,\n            ax=ax,\n            errorbar=None,\n        )\n    else:\n        if hue:\n            groups: Dict[Any, list] = {}\n            for r in records:\n                groups.setdefault(r.get(hue), []).append(r)\n            for k, rows in groups.items():\n                xs = [rr.get(x) for rr in rows]\n                ys = [rr.get(y) for rr in rows]\n                ax.plot(xs, ys, label=str(k))\n        else:\n            xs = [r.get(x) for r in records]\n            ys = [r.get(y) for r in records]\n            ax.plot(xs, ys)\n\n    ax.set_title(title or \"\")\n    ax.set_xlabel(xlabel or x)\n    ax.set_ylabel(ylabel or y)\n    if legend and hue:\n        ax.legend(title=hue)\n    elif ax.get_legend() is not None:\n        ax.get_legend().remove()\n    plt.tight_layout()\n    return fig, ax\n\"\"\")\n\nchunks.append(\"\"\"def plot_summary_bar(\n    values: Mapping[str, float],\n    *,\n    ax=None,\n    title: Optional[str] = None,\n    xlabel: str = \"\",\n    ylabel: str = \"value\",\n    sort: bool = True,\n    rotation: int = 30,\n    use_seaborn: bool = True,\n):\n    '''Plot an aggregated summary as a bar chart (e.g., final scores by method).'''\n    _, plt = _import_matplotlib()\n    sns = _import_seaborn() if use_seaborn else None\n    fig, ax = ensure_ax(ax, figsize=(7.2, 4.0))\n\n    items = list(values.items())\n    if sort:\n        items.sort(key=lambda kv: kv[1], reverse=True)\n    labels, ys = zip(*items) if items else ([], [])\n\n    if sns is not None:\n        sns.barplot(x=list(labels), y=list(ys), ax=ax)\n    else:\n        ax.bar(list(labels), list(ys))\n\n    ax.set_title(title or \"\")\n    ax.set_xlabel(xlabel)\n    ax.set_ylabel(ylabel)\n    ax.set_xticklabels(ax.get_xticklabels(), rotation=rotation, ha=\"right\")\n    plt.tight_layout()\n    return fig, ax\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/experiments/plotting.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4fbeb5a8819082ef6cca0e8e962a0289c9c218902ef0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/plotting.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/common.py\", \"src/experiments/io.py\", \"src/experiments/plotting.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0d995b2d5dcf98e900694b502806c08190a02b9f695b1ceb72",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0d995b2d5dcf98e900694b50285c4c8190b546d48715dca2a9",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/experiments/plotting.py` as a small, dependency-light plotting helper module with lazy Matplotlib/Seaborn imports, a consistent `plot_style()` context manager, and convenience functions for metric curves, summary bar charts, and safe figure saving."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

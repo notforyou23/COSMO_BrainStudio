@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `scripts/record_benchmark_metadata.py`, a CLI utility that captures timestamp, Python/platform details, selected or full installed package versions, and best-effort git commit/tag info, writing them either as a JSON sidecar or embedding into an existing benchmark JSON under a configurable key.",
+  "reasoning": "",
+  "responseId": "resp_077ec2cea02b8e30006949beaf4bb48194afee809f6cc4d712",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3579,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2124,
+    "output_tokens_details": {
+      "reasoning_tokens": 333
+    },
+    "total_tokens": 5703
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_077ec2cea02b8e30006949beb020f4819491886b0e31352a52",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_077ec2cea02b8e30006949beb77c788194bcd8c409c75049d1",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('scripts/record_benchmark_metadata.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"#!/usr/bin/env python3\n\\\"\\\"\\\"Record benchmark reproducibility metadata.\n\nWrites a metadata JSON either as a sidecar file (default) or embedded into an\nexisting JSON benchmark output.\n\nCaptured fields: UTC timestamp, Python version/implementation, platform details,\nselected (or all) installed package versions, and git commit/tag (best-effort).\n\\\"\\\"\\\"\"\"\",\n\"\"\"from __future__ import annotations\n\nimport argparse\nimport datetime as _dt\nimport json\nimport os\nimport platform\nimport subprocess\nimport sys\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, Optional, Tuple\n\ntry:\n    from importlib import metadata as importlib_metadata  # py3.8+\nexcept Exception:  # pragma: no cover\n    import importlib_metadata  # type: ignore\n\"\"\",\n\"\"\"def _run_git(args: Iterable[str], cwd: Optional[Path] = None) -> Optional[str]:\n    try:\n        p = subprocess.run(\n            [\"git\", *args],\n            cwd=str(cwd) if cwd else None,\n            stdout=subprocess.PIPE,\n            stderr=subprocess.DEVNULL,\n            text=True,\n            check=True,\n        )\n        out = p.stdout.strip()\n        return out or None\n    except Exception:\n        return None\n\n\ndef _git_info(cwd: Path) -> Dict[str, Optional[str]]:\n    commit = _run_git([\"rev-parse\", \"HEAD\"], cwd=cwd)\n    branch = _run_git([\"rev-parse\", \"--abbrev-ref\", \"HEAD\"], cwd=cwd)\n    # exact tag if on a tag; otherwise try a descriptive string\n    tag = _run_git([\"describe\", \"--tags\", \"--exact-match\"], cwd=cwd)\n    describe = _run_git([\"describe\", \"--tags\", \"--dirty\", \"--always\"], cwd=cwd)\n    return {\"commit\": commit, \"branch\": branch, \"tag\": tag, \"describe\": describe}\n\"\"\",\n\"\"\"def _python_info() -> Dict[str, Any]:\n    return {\n        \"version\": sys.version.replace(\"\\\\n\", \" \"),\n        \"version_info\": list(sys.version_info[:]),\n        \"executable\": sys.executable,\n        \"implementation\": platform.python_implementation(),\n    }\n\n\ndef _platform_info() -> Dict[str, Any]:\n    return {\n        \"platform\": platform.platform(),\n        \"system\": platform.system(),\n        \"release\": platform.release(),\n        \"machine\": platform.machine(),\n        \"processor\": platform.processor() or None,\n    }\n\n\ndef _timestamp_utc_iso() -> str:\n    return _dt.datetime.now(tz=_dt.timezone.utc).isoformat()\n\"\"\",\n\"\"\"def _dist_version(name: str) -> Optional[str]:\n    try:\n        return importlib_metadata.version(name)\n    except Exception:\n        return None\n\n\ndef _all_packages() -> Dict[str, str]:\n    pkgs: Dict[str, str] = {}\n    try:\n        for dist in importlib_metadata.distributions():\n            meta_name = dist.metadata.get(\"Name\") if hasattr(dist, \"metadata\") else None\n            name = (meta_name or getattr(dist, \"name\", None) or \"\").strip()\n            ver = getattr(dist, \"version\", None) or \"\"\n            if name and ver:\n                pkgs[name] = ver\n    except Exception:\n        pass\n    return dict(sorted(pkgs.items(), key=lambda kv: kv[0].lower()))\n\n\ndef _selected_packages(names: Iterable[str]) -> Dict[str, Optional[str]]:\n    out: Dict[str, Optional[str]] = {}\n    for n in names:\n        n = n.strip()\n        if n:\n            out[n] = _dist_version(n)\n    return out\n\"\"\",\n\"\"\"def build_metadata(\n    *,\n    cwd: Optional[Path] = None,\n    packages: Optional[Iterable[str]] = None,\n    all_packages: bool = False,\n) -> Dict[str, Any]:\n    cwd = cwd or Path.cwd()\n    meta: Dict[str, Any] = {\n        \"timestamp_utc\": _timestamp_utc_iso(),\n        \"python\": _python_info(),\n        \"platform\": _platform_info(),\n        \"git\": _git_info(cwd),\n        \"env\": {\n            \"cwd\": str(cwd),\n            \"ci\": bool(os.environ.get(\"CI\")),\n        },\n    }\n    if all_packages:\n        meta[\"packages\"] = _all_packages()\n    elif packages:\n        meta[\"packages\"] = _selected_packages(packages)\n    else:\n        # Minimal defaults without blowing up file sizes.\n        meta[\"packages\"] = _selected_packages([\"pip\", \"setuptools\", \"wheel\"])\n    return meta\n\"\"\",\n\"\"\"def _read_json(path: Path) -> Any:\n    with path.open(\"r\", encoding=\"utf-8\") as f:\n        return json.load(f)\n\n\ndef _write_json(path: Path, obj: Any) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    with path.open(\"w\", encoding=\"utf-8\") as f:\n        json.dump(obj, f, indent=2, sort_keys=True)\n        f.write(\"\\\\n\")\n\"\"\",\n\"\"\"def record(\n    benchmark_json: Path,\n    *,\n    embed: bool,\n    output: Optional[Path] = None,\n    key: str = \"benchmark_metadata\",\n    packages: Optional[Iterable[str]] = None,\n    all_packages: bool = False,\n) -> Path:\n    meta = build_metadata(cwd=benchmark_json.parent, packages=packages, all_packages=all_packages)\n    if embed:\n        data = _read_json(benchmark_json)\n        if not isinstance(data, dict):\n            raise SystemExit(f\"Cannot embed metadata: root JSON is {type(data).__name__}, expected object.\")\n        data[key] = meta\n        _write_json(benchmark_json, data)\n        return benchmark_json\n    out = output or Path(str(benchmark_json) + \".meta.json\")\n    _write_json(out, meta)\n    return out\n\"\"\",\n\"\"\"def parse_args(argv: Optional[Iterable[str]] = None) -> argparse.Namespace:\n    p = argparse.ArgumentParser(description=__doc__)\n    p.add_argument(\"benchmark_json\", type=Path, help=\"Path to benchmark JSON output.\")\n    g = p.add_mutually_exclusive_group()\n    g.add_argument(\"--embed\", action=\"store_true\", help=\"Embed metadata into benchmark JSON.\")\n    g.add_argument(\"--sidecar\", action=\"store_true\", help=\"Write metadata as a sidecar (default).\")\n    p.add_argument(\"--output\", type=Path, default=None, help=\"Sidecar output path (sidecar mode only).\")\n    p.add_argument(\"--key\", default=\"benchmark_metadata\", help=\"JSON key to use when embedding.\")\n    p.add_argument(\"--packages\", nargs=\"*\", default=None, help=\"Specific packages to record versions for.\")\n    p.add_argument(\"--all-packages\", action=\"store_true\", help=\"Record all installed packages (may be large).\")\n    return p.parse_args(list(argv) if argv is not None else None)\n\n\ndef main(argv: Optional[Iterable[str]] = None) -> int:\n    ns = parse_args(argv)\n    if not ns.benchmark_json.exists():\n        raise SystemExit(f\"Benchmark JSON not found: {ns.benchmark_json}\")\n    embed = bool(ns.embed)\n    out_path = record(\n        ns.benchmark_json,\n        embed=embed,\n        output=None if embed else ns.output,\n        key=ns.key,\n        packages=ns.packages,\n        all_packages=bool(ns.all_packages),\n    )\n    # Keep output short for CI logs.\n    print(str(out_path))\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:scripts/record_benchmark_metadata.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949be2fd1108190a4d8a6e21b630b5104ad172254e2add5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:scripts/record_benchmark_metadata.py\nDIR_STATE:[\"scripts/record_benchmark_metadata.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_077ec2cea02b8e30006949becff06481948385a5c9c17f8544",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `scripts/record_benchmark_metadata.py`, a CLI utility that captures timestamp, Python/platform details, selected or full installed package versions, and best-effort git commit/tag info, writing them either as a JSON sidecar or embedding into an existing benchmark JSON under a configurable key."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

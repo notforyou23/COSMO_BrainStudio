@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/claim_card_schema.json",
+  "title": "Claim Card + Case Study Claim-Linkage Schema",
+  "type": "object",
+  "description": "Schema definitions for claim cards and case-study claim linkage. Use $defs.ClaimCard to validate individual claim cards; use $defs.CaseStudy to validate claim linkage in case studies.",
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^[A-Z0-9][A-Z0-9_\-\.]*$",
+      "description": "Stable ID (e.g., CC_0001)."
+    },
+    "VerificationStatus": {
+      "type": "string",
+      "enum": ["unverified", "partially_verified", "verified"]
+    },
+    "EvidenceType": {
+      "type": "string",
+      "enum": [
+        "experiment",
+        "observational",
+        "systematic_review",
+        "meta_analysis",
+        "simulation",
+        "dataset",
+        "policy_document",
+        "expert_opinion",
+        "anecdote",
+        "theory",
+        "other"
+      ]
+    },
+    "ClaimType": {
+      "type": "string",
+      "enum": ["empirical", "theoretical", "normative", "descriptive_other"]
+    },
+    "Citation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "value"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["doi", "url", "bibliographic"]
+        },
+        "value": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 2048
+        },
+        "notes": {
+          "type": "string",
+          "maxLength": 1000
+        }
+      }
+    },
+    "Scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary"],
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 2000,
+          "description": "Plain-language statement of what the claim covers and what it does not."
+        },
+        "population": {"type": "string", "maxLength": 500},
+        "geography": {"type": "string", "maxLength": 200},
+        "timeframe": {"type": "string", "maxLength": 200},
+        "setting": {"type": "string", "maxLength": 500},
+        "assumptions": {"type": "array", "items": {"type": "string", "maxLength": 500}, "maxItems": 50}
+      }
+    },
+    "ClaimCard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "claim_text",
+        "claim_type",
+        "scope",
+        "evidence_type",
+        "citations",
+        "verification_status",
+        "abstention_triggers"
+      ],
+      "properties": {
+        "id": {"$ref": "#/$defs/Identifier"},
+        "claim_text": {"type": "string", "minLength": 10, "maxLength": 5000},
+        "claim_type": {"$ref": "#/$defs/ClaimType"},
+        "scope": {"$ref": "#/$defs/Scope"},
+        "evidence_type": {"$ref": "#/$defs/EvidenceType"},
+        "citations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": {"$ref": "#/$defs/Citation"},
+          "description": "At least one citation (DOI, URL, or bibliographic)."
+        },
+        "verification_status": {"$ref": "#/$defs/VerificationStatus"},
+        "abstention_triggers": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 50,
+          "items": {"type": "string", "minLength": 3, "maxLength": 400},
+          "description": "Conditions under which the system should abstain or qualify the claim (e.g., missing data, confounding, domain shift)."
+        },
+        "notes": {"type": "string", "maxLength": 5000},
+        "created_at": {"type": "string", "format": "date-time"},
+        "updated_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "CaseStudyClaim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["claim_text", "claim_type"],
+      "properties": {
+        "claim_text": {"type": "string", "minLength": 10, "maxLength": 5000},
+        "claim_type": {"$ref": "#/$defs/ClaimType"},
+        "claim_card_id": {
+          "anyOf": [
+            {"$ref": "#/$defs/Identifier"},
+            {"type": "null"}
+          ],
+          "description": "Required for any empirical claim; should match a ClaimCard.id."
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"claim_type": {"const": "empirical"}}, "required": ["claim_type"]},
+          "then": {"required": ["claim_card_id"], "properties": {"claim_card_id": {"$ref": "#/$defs/Identifier"}}}
+        }
+      ]
+    },
+    "CaseStudy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["case_study_id", "title", "claims"],
+      "properties": {
+        "case_study_id": {"$ref": "#/$defs/Identifier"},
+        "title": {"type": "string", "minLength": 3, "maxLength": 300},
+        "claims": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 500,
+          "items": {"$ref": "#/$defs/CaseStudyClaim"},
+          "description": "Every empirical claim must include claim_card_id."
+        },
+        "claim_cards_in_scope": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/Identifier"},
+          "uniqueItems": true,
+          "description": "Optional declared set of claim card IDs that this case study relies on."
+        }
+      }
+    }
+  }
+}

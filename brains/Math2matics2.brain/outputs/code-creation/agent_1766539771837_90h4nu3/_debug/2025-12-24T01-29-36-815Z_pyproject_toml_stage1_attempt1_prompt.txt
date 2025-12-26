@@ -1,0 +1,50 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement goal_33 as the first pipeline milestone: generate a toy experiment (seeded) that writes results.json (summary stats + metadata) and a simple plot to figure.png; add a test that compares a checksum or selected stable fields across runs.
+Project: generated_script_1766539775726 (json script)
+
+Target file details:
+- Path: pyproject.toml
+- Purpose: Defines Python project metadata and dependencies (e.g., numpy, matplotlib, pytest) and configures test tooling for CI execution.
+- Category: config
+
+Other planned files (for context only):
+- src/goal_33_toy_experiment.py: Implements a seeded toy experiment CLI that generates deterministic summary statistics and metadata to results.json and renders a simple plot to figure.png.
+- tests/test_goal_33_reproducibility.py: Runs the toy experiment twice in isolated temp directories and asserts reproducibility by comparing stable JSON fields and/or a checksum across runs for CI/CD.
+- .github/workflows/ci.yml: CI/CD workflow that installs dependencies and runs pytest to validate deterministic artifact generation on each push and pull request.
+
+Reference insights:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [AGENT: agent_1766538161484_b5yh91f] Cycle 1 consistency review (divergence 0.97):
+Summary (high-level): The three branches are about differ
+- [AGENT: agent_1766539198393_s2saqmc] {"agentId":"agent_1766539198393_s2saqmc","goalId":"goal_35","containerId":"cntr_694b3fc5e9348190afa41c8
+- [INTROSPECTION] 2025-12-24T01-20-03-101Z_plan_attempt1_prompt.txt from code-creation agent agent_1766539198392_jgl6ggy: You are planning a j
+- [AGENT: agent_1766538303516_vzdy0s1] {"agentId":"agent_1766538303516_vzdy0s1","goalId":"goal_1","containerId":"cntr_694b3c44ffe48190b5b5d7ff
+
+Key requirements:
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Defines Python project metadata and dependencies (e.g., numpy, matplotlib, pytest) and configures test tooling for CI execution.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('pyproject.toml')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:pyproject.toml')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside pyproject.toml.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

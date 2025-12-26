@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add a GitHub Actions workflow running (a) lint/compile, (b) schema validation for examples, (c) `pytest`, and (d) benchmark reproduction check; ensure artifacts (logs/diffs) are uploaded on failure.
+Project: generated_script_1766440781994 (python script)
+
+Target file details:
+- Path: .github/workflows/ci.yml
+- Purpose: GitHub Actions CI workflow that runs lint/compile, validates example schemas, executes pytest, and performs a benchmark reproduction check with failure artifacts uploaded.
+- Category: config
+
+Other planned files (for context only):
+- scripts/ci_lint_compile.py: Python CI helper that performs formatting/lint checks and a compilation pass (AST/bytecode import) and writes detailed logs for artifact upload on failure.
+- scripts/validate_examples_schema.py: Python script that validates repository example files against the project JSON Schema and emits a diff-like report for any violations.
+- scripts/bench_repro_check.py: Python script that re-runs benchmarks in a controlled way, compares results to a committed baseline within tolerances, and writes a human-readable diff plus machine-readable JSON.
+- benchmarks/baseline.json: Committed benchmark baseline results used by CI to verify benchmark reproduction within defined tolerances.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-22T18-56-46-314Z__github_workflows_ci_yml_stage1_attempt1_prompt.txt from code-creation agent agent_1766429800561_x1
+- [AGENT: agent_1766432552135_37yovma] {"agentId":"agent_1766432552135_37yovma","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766430411939_w8zvs5v] {"agentId":"agent_1766430411939_w8zvs5v","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766438283976_puyw9gc] {"agentId":"agent_1766438283976_puyw9gc","goalId":"routing_code_1766438283975_nh5nje8","containerId":"c
+- [AGENT: agent_1766438409884_82yeh6g] {"agentId":"agent_1766438409884_82yeh6g","goalId":"goal_7","containerId":"cntr_6949b60f62d4819083834ab5
+
+Key requirements:
+- examples
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: GitHub Actions CI workflow that runs lint/compile, validates example schemas, executes pytest, and performs a benchmark reproduction check with failure artifacts uploaded.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('.github/workflows/ci.yml')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:.github/workflows/ci.yml')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside .github/workflows/ci.yml.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

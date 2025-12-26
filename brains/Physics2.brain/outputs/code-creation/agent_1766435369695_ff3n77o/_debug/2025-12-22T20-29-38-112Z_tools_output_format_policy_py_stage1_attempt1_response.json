@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `tools/output_format_policy.py` as a compact shared policy module defining allowed benchmark output path globs, deprecated legacy/ad-hoc globs with migration notes, and schema-version mapping plus helper functions for validators and CI/pre-commit hooks.",
+  "reasoning": "",
+  "responseId": "resp_0790ac688866ad77006949aae3fdf0819695b67e019116a37e",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3151,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1636,
+    "output_tokens_details": {
+      "reasoning_tokens": 1583
+    },
+    "total_tokens": 4787
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0790ac688866ad77006949aae4cb008196b4dceba09552f314",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0790ac688866ad77006949aaebbc5c819680cba2a49045237b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap\n\ntarget_path = Path('/mnt/data').joinpath('tools/output_format_policy.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\\\n\\\"\\\"\\\"Shared benchmark output format policy.\n\nThis module is consumed by validators and CI/pre-commit hooks to:\n- define which JSON output paths are accepted as benchmark outputs\n- flag deprecated legacy/ad-hoc output paths for migration\n- map output paths to schema versions (used to pick a JSON Schema file)\n\nDesign goals: tiny, deterministic, no I/O, and stable error messages.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom fnmatch import fnmatch\nfrom typing import Iterable, Optional, Sequence, Tuple\n\"\"\")\n\nchunks.append(\"\"\"\\\n# Canonical schema version used by the repository. Validators should map versions\n# to concrete schema paths (e.g. outputs/schemas/benchmark_schema.json).\nDEFAULT_SCHEMA_VERSION = \"v1\"\n\n# When adding a new schema version, keep the old version mapping so migration\n# messaging can remain actionable.\nKNOWN_SCHEMA_VERSIONS = (\"v1\",)\n\"\"\")\n\nchunks.append(\"\"\"\\\n@dataclass(frozen=True)\nclass PathRule:\n    \\\"\\\"\\\"Policy rule for benchmark output JSON paths.\\\"\\\"\\\"\n\n    name: str\n    glob: str  # POSIX-style glob matched against repo-relative path\n    schema_version: str = DEFAULT_SCHEMA_VERSION\n    deprecated: bool = False\n    note: str = \"\"\n\"\"\")\n\nchunks.append(\"\"\"\\\n# Allowed locations for benchmark output JSON files.\n# Keep these narrow: validation should fail loudly if outputs are written\n# somewhere unexpected (helps catch ad-hoc formats early).\nALLOWED_RULES: Tuple[PathRule, ...] = (\n    PathRule(\n        name=\"canonical_outputs_dir\",\n        glob=\"outputs/**/*.json\",\n        schema_version=\"v1\",\n        note=\"Canonical benchmark outputs location.\",\n    ),\n    PathRule(\n        name=\"benchmarks_results_dir\",\n        glob=\"benchmarks/**/results/**/*.json\",\n        schema_version=\"v1\",\n        note=\"Benchmark-specific results subdirectories.\",\n    ),\n)\n\n# Deprecated legacy/ad-hoc output locations that must be migrated.\nDEPRECATED_RULES: Tuple[PathRule, ...] = (\n    PathRule(\n        name=\"legacy_results_root\",\n        glob=\"results/**/*.json\",\n        schema_version=\"v1\",\n        deprecated=True,\n        note=\"Legacy root-level results/. Move files under outputs/.\",\n    ),\n    PathRule(\n        name=\"legacy_benchmark_output_json\",\n        glob=\"**/output.json\",\n        schema_version=\"v1\",\n        deprecated=True,\n        note=\"Ambiguous ad-hoc output.json. Rename and move under outputs/.\",\n    ),\n)\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef _to_posix_relpath(path: str) -> str:\n    # Validators may pass Windows paths; normalize to POSIX for matching.\n    return path.replace(\"\\\\\\\\\", \"/\").lstrip(\"./\")\n\n\ndef _match_first(rules: Sequence[PathRule], relpath: str) -> Optional[PathRule]:\n    for r in rules:\n        if fnmatch(relpath, r.glob):\n            return r\n    return None\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef classify_path(relpath: str) -> Tuple[str, Optional[PathRule]]:\n    \\\"\\\"\\\"Classify a repo-relative path.\n\n    Returns (status, rule) where status is one of:\n      - \"allowed\": matches an allowed rule\n      - \"deprecated\": matches a deprecated rule\n      - \"unknown\": matches neither\n    \\\"\\\"\\\"\n    rel = _to_posix_relpath(relpath)\n    rule = _match_first(ALLOWED_RULES, rel)\n    if rule:\n        return \"allowed\", rule\n    rule = _match_first(DEPRECATED_RULES, rel)\n    if rule:\n        return \"deprecated\", rule\n    return \"unknown\", None\n\n\ndef is_allowed_output_path(relpath: str) -> bool:\n    return classify_path(relpath)[0] == \"allowed\"\n\n\ndef is_deprecated_output_path(relpath: str) -> bool:\n    return classify_path(relpath)[0] == \"deprecated\"\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef schema_version_for_output_path(relpath: str) -> Optional[str]:\n    \\\"\\\"\\\"Return schema version for a path if it is recognized (allowed/deprecated).\\\"\\\"\\\"\n    status, rule = classify_path(relpath)\n    if status in (\"allowed\", \"deprecated\") and rule:\n        return rule.schema_version\n    return None\n\n\ndef explain_path_policy(relpath: str) -> str:\n    \\\"\\\"\\\"Human-readable explanation used in actionable validator errors.\\\"\\\"\\\"\n    status, rule = classify_path(relpath)\n    rel = _to_posix_relpath(relpath)\n    if status == \"allowed\":\n        return f\"{rel}: allowed ({rule.name}); schema={rule.schema_version}.\"\n    if status == \"deprecated\":\n        note = f\" {rule.note}\" if rule.note else \"\"\n        return f\"{rel}: DEPRECATED ({rule.name}); schema={rule.schema_version}.{note}\"\n    allowed = \", \".join(r.glob for r in ALLOWED_RULES)\n    return f\"{rel}: not a recognized benchmark output path. Allowed globs: {allowed}.\"\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef iter_policy_globs(include_deprecated: bool = False) -> Iterable[str]:\n    \\\"\\\"\\\"Yield globs used by discovery tooling.\\\"\\\"\\\"\n    for r in ALLOWED_RULES:\n        yield r.glob\n    if include_deprecated:\n        for r in DEPRECATED_RULES:\n            yield r.glob\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:tools/output_format_policy.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tools/output_format_policy.py\nDIR_STATE:[\"tools/output_format_policy.py\", \"tools/schema_docs.py\", \"tools/validate_benchmark_outputs.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0790ac688866ad77006949ab00146c8196abbb4679a5395559",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `tools/output_format_policy.py` as a compact shared policy module defining allowed benchmark output path globs, deprecated legacy/ad-hoc globs with migration notes, and schema-version mapping plus helper functions for validators and CI/pre-commit hooks."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

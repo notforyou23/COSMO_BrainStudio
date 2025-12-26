@@ -1,0 +1,61 @@
+{
+  "content": "Implemented `src/experiments/entanglement_diagnostics.py` with reproducible toy entanglement diagnostics (von Neumann entropy + mutual information) for Bell/GHZ/W/graph (cluster) states and exact-diagonalization TFIM ground states, including a `run_examples()` routine for deterministic example outputs.",
+  "reasoning": "",
+  "responseId": "resp_07156c37f3bba061006949a00bd3dc8195b465ec9c0536da2a",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4541,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 3073,
+    "output_tokens_details": {
+      "reasoning_tokens": 3003
+    },
+    "total_tokens": 7614
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_07156c37f3bba061006949a00c82c48195b5e986abbef2a4f3",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_07156c37f3bba061006949a01a48f881959b9040800a268288",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, numpy as np\ntarget_path = Path('/mnt/data').joinpath('src/experiments/entanglement_diagnostics.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\\\n\\\"\\\"\\\"Entanglement diagnostics for small qubit systems.\n\nProvides reproducible toy experiments computing von Neumann entanglement entropy\nand mutual information for (i) small transverse-field Ising chains (exact\ndiagonalization) and (ii) graph/cluster states (CZ-on-|+> construction).\n\\\"\\\"\\\"\\\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Dict, Iterable, List, Sequence, Tuple\n\nimport numpy as np\n\ntry:\n    from scipy.linalg import eigh\nexcept Exception as _e:  # pragma: no cover\n    eigh = None\n\"\"\")\n\nchunks.append(\"\"\"\\\n# --- Basic quantum utilities ---\n\n\ndef _bits(x: int, n: int) -> List[int]:\n    return [(x >> k) & 1 for k in range(n)]\n\n\ndef state_plus(n: int) -> np.ndarray:\n    \\\"\\\"\\\"|+>^{⊗n} statevector.\\\"\\\"\\\"\n    psi = np.ones(2**n, dtype=complex) / np.sqrt(2**n)\n    return psi\n\n\ndef ghz_state(n: int) -> np.ndarray:\n    psi = np.zeros(2**n, dtype=complex)\n    psi[0] = psi[-1] = 1 / np.sqrt(2)\n    return psi\n\n\ndef bell_state() -> np.ndarray:\n    return ghz_state(2)\n\n\ndef w_state(n: int) -> np.ndarray:\n    psi = np.zeros(2**n, dtype=complex)\n    for k in range(n):\n        psi[1 << k] = 1 / np.sqrt(n)\n    return psi\n\n\ndef graph_state(n: int, edges: Sequence[Tuple[int, int]]) -> np.ndarray:\n    \\\"\\\"\\\"Graph state: apply CZ for each undirected edge on |+>^{⊗n}.\\\"\\\"\\\"\n    psi = state_plus(n).copy()\n    for i, j in edges:\n        if i == j:\n            continue\n        if i > j:\n            i, j = j, i\n        mask = (1 << i) | (1 << j)\n        for idx in range(2**n):\n            if (idx & mask) == mask:\n                psi[idx] *= -1\n    return psi\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef reduced_density_matrix(psi: np.ndarray, keep: Sequence[int], n: int) -> np.ndarray:\n    \\\"\\\"\\\"Reduced density matrix ρ_keep for a pure state |ψ> on n qubits.\\\"\\\"\\\"\n    keep = list(keep)\n    if any((k < 0 or k >= n) for k in keep):\n        raise ValueError(\\\"keep indices out of range\\\")\n    if len(set(keep)) != len(keep):\n        raise ValueError(\\\"keep has duplicates\\\")\n    psi_t = psi.reshape((2,) * n)\n    trace = [i for i in range(n) if i not in keep]\n    rho = np.tensordot(psi_t, psi_t.conj(), axes=(trace, trace))\n    d = 2 ** len(keep)\n    return rho.reshape((d, d))\n\n\ndef von_neumann_entropy(rho: np.ndarray, base: float = 2.0) -> float:\n    \\\"\\\"\\\"S(ρ) = -Tr ρ log ρ, numerically stable for small matrices.\\\"\\\"\\\"\n    vals = np.linalg.eigvalsh((rho + rho.conj().T) / 2)\n    vals = np.clip(vals.real, 0.0, 1.0)\n    nz = vals[vals > 1e-15]\n    return float(-(nz * (np.log(nz) / np.log(base))).sum())\n\n\ndef entanglement_entropy(psi: np.ndarray, A: Sequence[int], n: int) -> float:\n    return von_neumann_entropy(reduced_density_matrix(psi, A, n))\n\n\ndef mutual_information(psi: np.ndarray, A: Sequence[int], B: Sequence[int], n: int) -> float:\n    A, B = list(A), list(B)\n    if set(A) & set(B):\n        raise ValueError(\\\"A and B must be disjoint\\\")\n    S_A = entanglement_entropy(psi, A, n)\n    S_B = entanglement_entropy(psi, B, n)\n    S_AB = entanglement_entropy(psi, sorted(A + B), n)\n    return S_A + S_B - S_AB\n\"\"\")\n\nchunks.append(\"\"\"\\\n# --- Spin chain: transverse-field Ising model (exact diagonalization) ---\n\n_PAULI_X = np.array([[0, 1], [1, 0]], dtype=complex)\n_PAULI_Z = np.array([[1, 0], [0, -1]], dtype=complex)\n_I2 = np.eye(2, dtype=complex)\n\n\ndef _kron_all(ops: Sequence[np.ndarray]) -> np.ndarray:\n    out = ops[0]\n    for op in ops[1:]:\n        out = np.kron(out, op)\n    return out\n\n\ndef _op_on(n: int, i: int, op: np.ndarray) -> np.ndarray:\n    return _kron_all([op if k == i else _I2 for k in range(n)])\n\n\ndef tfim_hamiltonian(n: int, J: float = 1.0, h: float = 1.0, periodic: bool = False) -> np.ndarray:\n    \\\"\\\"\\\"H = -J Σ Z_i Z_{i+1} - h Σ X_i.\\\"\\\"\\\"\n    dim = 2**n\n    H = np.zeros((dim, dim), dtype=complex)\n    for i in range(n):\n        H += -h * _op_on(n, i, _PAULI_X)\n    for i in range(n - 1 + int(periodic)):\n        a, b = i, (i + 1) % n\n        ops = [_PAULI_Z if k in (a, b) else _I2 for k in range(n)]\n        H += -J * _kron_all(ops)\n    return H\n\n\ndef tfim_ground_state(n: int, J: float = 1.0, h: float = 1.0, periodic: bool = False) -> np.ndarray:\n    if eigh is None:\n        raise ImportError(\\\"scipy is required for TFIM diagonalization\\\")\n    H = tfim_hamiltonian(n, J=J, h=h, periodic=periodic)\n    vals, vecs = eigh(H)\n    psi0 = vecs[:, np.argmin(vals)]\n    return psi0 / np.linalg.norm(psi0)\n\"\"\")\n\nchunks.append(\"\"\"\\\n@dataclass(frozen=True)\nclass EntanglementResult:\n    name: str\n    n: int\n    partition: Tuple[Tuple[int, ...], Tuple[int, ...]]\n    S_A: float\n    S_B: float\n    I_AB: float\n\n    def as_dict(self) -> Dict[str, object]:\n        A, B = self.partition\n        return {\n            \\\"name\\\": self.name,\n            \\\"n\\\": self.n,\n            \\\"A\\\": list(A),\n            \\\"B\\\": list(B),\n            \\\"S_A\\\": self.S_A,\n            \\\"S_B\\\": self.S_B,\n            \\\"I_AB\\\": self.I_AB,\n        }\n\n\ndef diagnose_state(name: str, psi: np.ndarray, A: Sequence[int], B: Sequence[int], n: int) -> EntanglementResult:\n    S_A = entanglement_entropy(psi, A, n)\n    S_B = entanglement_entropy(psi, B, n)\n    I_AB = mutual_information(psi, A, B, n)\n    return EntanglementResult(name=name, n=n, partition=(tuple(A), tuple(B)), S_A=S_A, S_B=S_B, I_AB=I_AB)\n\"\"\")\n\nchunks.append(\"\"\"\\\n# --- Reproducible toy experiment suite ---\n\n\ndef run_examples(seed: int = 0) -> List[Dict[str, object]]:\n    \\\"\\\"\\\"Return example diagnostics as JSON-serializable dicts.\\\"\\\"\\\"\n    np.random.seed(seed)\n    out: List[EntanglementResult] = []\n\n    # Bell pair: maximal entanglement; I(A:B)=2 bits.\n    psi = bell_state()\n    out.append(diagnose_state(\\\"bell\\\", psi, A=[0], B=[1], n=2))\n\n    # GHZ_4: any single qubit vs rest has S=1; pairwise MI between two single qubits is 1.\n    psi = ghz_state(4)\n    out.append(diagnose_state(\\\"ghz4_0|1\\\", psi, A=[0], B=[1], n=4))\n    out.append(diagnose_state(\\\"ghz4_0|123\\\", psi, A=[0], B=[1, 2, 3], n=4))\n\n    # 1D 4-qubit cluster state (line graph).\n    edges = [(0, 1), (1, 2), (2, 3)]\n    psi = graph_state(4, edges)\n    out.append(diagnose_state(\\\"cluster4_01|23\\\", psi, A=[0, 1], B=[2, 3], n=4))\n    out.append(diagnose_state(\\\"cluster4_1|2\\\", psi, A=[1], B=[2], n=4))\n\n    # TFIM ground state: compare weak vs strong field.\n    for h in (0.3, 1.5):\n        psi = tfim_ground_state(6, J=1.0, h=h, periodic=False)\n        out.append(diagnose_state(f\\\"tfim6_h{h:.1f}_012|345\\\", psi, A=[0, 1, 2], B=[3, 4, 5], n=6))\n\n    return [r.as_dict() for r in out]\n\n\nif __name__ == \\\"__main__\\\":  # pragma: no cover\n    rows = run_examples(seed=0)\n    for r in rows:\n        print(r)\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/experiments/entanglement_diagnostics.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/entanglement_diagnostics.py\nDIR_STATE:[\"src/experiments/entanglement_diagnostics.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_07156c37f3bba061006949a036f3c8819584a378f719659b67",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_07156c37f3bba061006949a037147081959405b33b75dc0f6b",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/experiments/entanglement_diagnostics.py` with reproducible toy entanglement diagnostics (von Neumann entropy + mutual information) for Bell/GHZ/W/graph (cluster) states and exact-diagonalization TFIM ground states, including a `run_examples()` routine for deterministic example outputs."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

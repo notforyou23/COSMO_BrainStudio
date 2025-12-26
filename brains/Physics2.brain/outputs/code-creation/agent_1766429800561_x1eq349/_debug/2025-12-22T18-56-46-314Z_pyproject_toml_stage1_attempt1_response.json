@@ -1,0 +1,56 @@
+{
+  "content": "Created `pyproject.toml` with PEP 621 project metadata plus pinned-enough `jsonschema` and `pytest` configuration to support reproducible CI test runs.",
+  "reasoning": "",
+  "responseId": "resp_054a00220a4123460069499479e72c8196b6e273376dbd7a00",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 1868,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 443,
+    "output_tokens_details": {
+      "reasoning_tokens": 59
+    },
+    "total_tokens": 2311
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_054a00220a412346006949947ab58c8196b5b55b7cdb78fbbb",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_054a00220a412346006949947c39f0819698f7c86317b6b6d5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('pyproject.toml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"[build-system]\nrequires = [\"setuptools>=68\", \"wheel\"]\nbuild-backend = \"setuptools.build_meta\"\n\n[project]\nname = \"generated_configuration_1766429804913\"\nversion = \"0.1.0\"\ndescription = \"Reproducible benchmark schema + computation validation harness.\"\nreadme = \"outputs/README.md\"\nrequires-python = \">=3.10\"\nlicense = {text = \"MIT\"}\nauthors = [{name = \"OpenAI\", email = \"noreply@openai.com\"}]\ndependencies = [\n  \"jsonschema>=4.21\",\n]\n\n[project.optional-dependencies]\ntest = [\n  \"pytest>=8.0\",\n]\n\n[tool.pytest.ini_options]\nminversion = \"8.0\"\naddopts = \"-q\"\ntestpaths = [\"tests\"]\npythonpath = [\".\"]\n\n[tool.setuptools]\ninclude-package-data = true\n\n[tool.setuptools.packages.find]\nwhere = [\".\"]\nexclude = [\"outputs*\", \".github*\", \"tests*\"]\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:pyproject.toml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:pyproject.toml\nDIR_STATE:[\"pyproject.toml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_054a00220a412346006949948423608196a357b2691f1203de",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `pyproject.toml` with PEP 621 project metadata plus pinned-enough `jsonschema` and `pytest` configuration to support reproducible CI test runs."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

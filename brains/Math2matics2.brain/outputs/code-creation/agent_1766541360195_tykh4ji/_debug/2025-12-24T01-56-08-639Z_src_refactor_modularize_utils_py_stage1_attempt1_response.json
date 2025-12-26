@@ -1,0 +1,87 @@
+{
+  "content": "Implemented `src/refactor_modularize/utils.py` as a compact shared utility module providing path normalization/relative paths, newline-normalized safe text reading, atomic text writing, sha256 hashing for bytes/text/files, unified diff generation, and a `FileSnapshot` helper for content+hash capture.",
+  "reasoning": "",
+  "responseId": "resp_023098555d47659800694b48afb5cc8194a6cd17c58b9f38e7",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4320,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2591,
+    "output_tokens_details": {
+      "reasoning_tokens": 200
+    },
+    "total_tokens": 6911
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_023098555d47659800694b48b0545c819492e60cc6f21e85d4",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_023098555d47659800694b48b177648194a2a8b4c8330ad330",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, os, hashlib, tempfile, difflib\ntarget_path = Path('/mnt/data').joinpath('src/refactor_modularize/utils.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(r\"\"\"\n\"\"\"Shared utilities used across refactor_modularize.\n\nIncludes small helpers for:\n- Path handling and normalization\n- Hashing (sha256) for text/bytes/files\n- Text diffing (unified diff)\n- Safe file IO with atomic writes\n\"\"\"\n\"\"\")\n\nchunks.append(r\"\"\"\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Iterable, Iterator, Optional, Sequence, Union\n\nimport difflib\nimport hashlib\nimport os\nimport tempfile\n\"\"\")\n\nchunks.append(r\"\"\"\nPathLike = Union[str, os.PathLike, Path]\n\"\"\")\n\nchunks.append(r\"\"\"\ndef to_path(p: PathLike) -> Path:\n    \"\"\"Convert a path-like into a resolved Path without requiring it to exist.\"\"\"\n    if isinstance(p, Path):\n        return p\n    return Path(p)\n\n\ndef ensure_parent_dir(path: PathLike) -> Path:\n    \"\"\"Ensure parent directory exists; return path as Path.\"\"\"\n    p = to_path(path)\n    p.parent.mkdir(parents=True, exist_ok=True)\n    return p\n\n\ndef relpath(path: PathLike, start: PathLike) -> str:\n    \"\"\"Return a stable forward-slash relative path (best-effort).\"\"\"\n    p = to_path(path)\n    s = to_path(start)\n    try:\n        r = p.relative_to(s)\n    except Exception:\n        r = Path(os.path.relpath(os.fspath(p), os.fspath(s)))\n    return r.as_posix()\n\"\"\")\n\nchunks.append(r\"\"\"\ndef normalize_newlines(text: str) -> str:\n    \"\"\"Normalize CRLF/CR newlines to LF.\"\"\"\n    return text.replace(\"\\r\\n\", \"\\n\").replace(\"\\r\", \"\\n\")\n\n\ndef read_text(path: PathLike, encoding: str = \"utf-8\") -> str:\n    \"\"\"Read a UTF-8 (by default) text file; normalizes newlines to LF.\"\"\"\n    return normalize_newlines(to_path(path).read_text(encoding=encoding))\n\n\ndef write_text_atomic(\n    path: PathLike,\n    text: str,\n    *,\n    encoding: str = \"utf-8\",\n    newline: str = \"\\n\",\n) -> None:\n    \"\"\"Atomically write text to `path` (write temp file then os.replace).\n\n    `newline` is applied after normalizing the input to LF.\n    \"\"\"\n    p = ensure_parent_dir(path)\n    data = normalize_newlines(text)\n    if newline != \"\\n\":\n        data = data.replace(\"\\n\", newline)\n    # Write to a temp file in the same directory for atomic replace on most OSes.\n    with tempfile.NamedTemporaryFile(\n        \"w\",\n        encoding=encoding,\n        dir=os.fspath(p.parent),\n        prefix=f\".{p.name}.\",\n        suffix=\".tmp\",\n        delete=False,\n        newline=\"\",\n    ) as tf:\n        tmp_name = tf.name\n        tf.write(data)\n    os.replace(tmp_name, os.fspath(p))\n\"\"\")\n\nchunks.append(r\"\"\"\ndef sha256_bytes(data: bytes) -> str:\n    \"\"\"Hex sha256 for raw bytes.\"\"\"\n    return hashlib.sha256(data).hexdigest()\n\n\ndef sha256_text(text: str, encoding: str = \"utf-8\") -> str:\n    \"\"\"Hex sha256 for text (after newline normalization).\"\"\"\n    return sha256_bytes(normalize_newlines(text).encode(encoding))\n\n\ndef sha256_file(path: PathLike, chunk_size: int = 1024 * 1024) -> str:\n    \"\"\"Hex sha256 of a file (binary read).\"\"\"\n    h = hashlib.sha256()\n    with open(os.fspath(to_path(path)), \"rb\") as f:\n        for chunk in iter(lambda: f.read(chunk_size), b\"\"):\n            h.update(chunk)\n    return h.hexdigest()\n\"\"\")\n\nchunks.append(r\"\"\"\ndef unified_diff(\n    a_text: str,\n    b_text: str,\n    *,\n    fromfile: str = \"a\",\n    tofile: str = \"b\",\n    lineterm: str = \"\\n\",\n) -> str:\n    \"\"\"Return a unified diff string between two texts (newline-normalized).\"\"\"\n    a_lines = normalize_newlines(a_text).splitlines(keepends=True)\n    b_lines = normalize_newlines(b_text).splitlines(keepends=True)\n    diff = difflib.unified_diff(a_lines, b_lines, fromfile=fromfile, tofile=tofile, lineterm=lineterm)\n    return \"\".join(diff)\n\"\"\")\n\nchunks.append(r\"\"\"\n@dataclass(frozen=True)\nclass FileSnapshot:\n    \"\"\"Small immutable representation of file content and a content hash.\"\"\"\n    path: Path\n    text: str\n    sha256: str\n\n    @classmethod\n    def from_path(cls, path: PathLike, encoding: str = \"utf-8\") -> \"FileSnapshot\":\n        p = to_path(path)\n        t = read_text(p, encoding=encoding)\n        return cls(path=p, text=t, sha256=sha256_text(t, encoding=encoding))\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/refactor_modularize/utils.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b48372d7081909f70f3661941a95b001f3dc92161f15d",
+      "outputs": []
+    },
+    {
+      "id": "rs_023098555d47659800694b48bbdebc8194bf71e8aef7933f15",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_023098555d47659800694b48bc964881949b7ab833767c696c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, os, hashlib, tempfile, difflib\ntarget_path = Path('/mnt/data').joinpath('src/refactor_modularize/utils.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append('''\"\"\"Shared utilities used across refactor_modularize.\n\nIncludes helpers for path handling, hashing (sha256), text diffing, and\nsafe file IO with atomic writes.\n\"\"\"''')\n\nchunks.append('''from __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Union\n\nimport difflib\nimport hashlib\nimport os\nimport tempfile\n''')\n\nchunks.append('''PathLike = Union[str, os.PathLike, Path]\n''')\n\nchunks.append('''def to_path(p: PathLike) -> Path:\n    \"\"\"Convert a path-like into a Path (does not require existence).\"\"\"\n    return p if isinstance(p, Path) else Path(p)\n\n\ndef ensure_parent_dir(path: PathLike) -> Path:\n    \"\"\"Ensure `path` parent directory exists; return `path` as Path.\"\"\"\n    p = to_path(path)\n    p.parent.mkdir(parents=True, exist_ok=True)\n    return p\n\n\ndef relpath(path: PathLike, start: PathLike) -> str:\n    \"\"\"Return a stable forward-slash relative path (best-effort).\"\"\"\n    p, s = to_path(path), to_path(start)\n    try:\n        r = p.relative_to(s)\n    except Exception:\n        r = Path(os.path.relpath(os.fspath(p), os.fspath(s)))\n    return r.as_posix()\n''')\n\nchunks.append('''def normalize_newlines(text: str) -> str:\n    \"\"\"Normalize CRLF/CR newlines to LF.\"\"\"\n    return text.replace(\"\\\\r\\\\n\", \"\\\\n\").replace(\"\\\\r\", \"\\\\n\")\n\n\ndef read_text(path: PathLike, encoding: str = \"utf-8\") -> str:\n    \"\"\"Read a text file; normalizes newlines to LF.\"\"\"\n    return normalize_newlines(to_path(path).read_text(encoding=encoding))\n\n\ndef write_text_atomic(\n    path: PathLike,\n    text: str,\n    *,\n    encoding: str = \"utf-8\",\n    newline: str = \"\\\\n\",\n) -> None:\n    \"\"\"Atomically write text to `path` (temp file then os.replace).\"\"\"\n    p = ensure_parent_dir(path)\n    data = normalize_newlines(text)\n    if newline != \"\\\\n\":\n        data = data.replace(\"\\\\n\", newline)\n    with tempfile.NamedTemporaryFile(\n        \"w\",\n        encoding=encoding,\n        dir=os.fspath(p.parent),\n        prefix=f\".{p.name}.\",\n        suffix=\".tmp\",\n        delete=False,\n        newline=\"\",\n    ) as tf:\n        tmp_name = tf.name\n        tf.write(data)\n    os.replace(tmp_name, os.fspath(p))\n''')\n\nchunks.append('''def sha256_bytes(data: bytes) -> str:\n    \"\"\"Hex sha256 for raw bytes.\"\"\"\n    return hashlib.sha256(data).hexdigest()\n\n\ndef sha256_text(text: str, encoding: str = \"utf-8\") -> str:\n    \"\"\"Hex sha256 for text (after newline normalization).\"\"\"\n    return sha256_bytes(normalize_newlines(text).encode(encoding))\n\n\ndef sha256_file(path: PathLike, chunk_size: int = 1024 * 1024) -> str:\n    \"\"\"Hex sha256 of a file (binary read).\"\"\"\n    h = hashlib.sha256()\n    with open(os.fspath(to_path(path)), \"rb\") as f:\n        for chunk in iter(lambda: f.read(chunk_size), b\"\"):\n            h.update(chunk)\n    return h.hexdigest()\n''')\n\nchunks.append('''def unified_diff(\n    a_text: str,\n    b_text: str,\n    *,\n    fromfile: str = \"a\",\n    tofile: str = \"b\",\n    lineterm: str = \"\\\\n\",\n) -> str:\n    \"\"\"Return a unified diff string between two texts (newline-normalized).\"\"\"\n    a_lines = normalize_newlines(a_text).splitlines(keepends=True)\n    b_lines = normalize_newlines(b_text).splitlines(keepends=True)\n    d = difflib.unified_diff(a_lines, b_lines, fromfile=fromfile, tofile=tofile, lineterm=lineterm)\n    return \"\".join(d)\n''')\n\nchunks.append('''@dataclass(frozen=True)\nclass FileSnapshot:\n    \"\"\"Immutable representation of file content and a content hash.\"\"\"\n    path: Path\n    text: str\n    sha256: str\n\n    @classmethod\n    def from_path(cls, path: PathLike, encoding: str = \"utf-8\") -> \"FileSnapshot\":\n        p = to_path(path)\n        t = read_text(p, encoding=encoding)\n        return cls(path=p, text=t, sha256=sha256_text(t, encoding=encoding))\n''')\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/refactor_modularize/utils.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b48372d7081909f70f3661941a95b001f3dc92161f15d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/refactor_modularize/utils.py\nDIR_STATE:[\"src/refactor_modularize/__init__.py\", \"src/refactor_modularize/artifacts.py\", \"src/refactor_modularize/cli.py\", \"src/refactor_modularize/export.py\", \"src/refactor_modularize/refactor.py\", \"src/refactor_modularize/utils.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_023098555d47659800694b48c42c288194af7fdee6f50fc713",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_023098555d47659800694b48c48c908194b3cc08e823c086c5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\np=Path('/mnt/data/src/refactor_modularize/utils.py')\nlen(p.read_text().splitlines()), p.read_text()[:200]\n",
+      "container_id": "cntr_694b48372d7081909f70f3661941a95b001f3dc92161f15d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(112,\n '\"\"\"Shared utilities used across refactor_modularize.\\n\\nIncludes helpers for path handling, hashing (sha256), text diffing, and\\nsafe file IO with atomic writes.\\n\"\"\"\\nfrom __future__ import annotations\\n\\nf')"
+        }
+      ]
+    },
+    {
+      "id": "msg_023098555d47659800694b48c6aeac81949e1d86036d09f422",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/refactor_modularize/utils.py` as a compact shared utility module providing path normalization/relative paths, newline-normalized safe text reading, atomic text writing, sha256 hashing for bytes/text/files, unified diff generation, and a `FileSnapshot` helper for content+hash capture."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,110 @@
+{
+  "content": "Created `tests/test_schema_conformance.py`, a pytest suite that discovers all JSON files under `examples/` and validates each against the benchmark input JSON Schema (auto-locating common schema paths and skipping cleanly if no examples are present).",
+  "reasoning": "",
+  "responseId": "resp_0b1b3d08897410c4006949a216040481978d42a30697e0b2d9",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2887,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1328,
+    "output_tokens_details": {
+      "reasoning_tokens": 1275
+    },
+    "total_tokens": 4215
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0b1b3d08897410c4006949a216b89c81978d11ec431fb856a8",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0b1b3d08897410c4006949a2176c7c8197a7286d6246628b57",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nroot=Path(\"/mnt/data\")\nlist(root.iterdir())[:20]\n",
+      "container_id": "cntr_6949a1f4d2c881908a8c0b7968ab83a502e1863ff81ebb71",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/.github')]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0b1b3d08897410c4006949a2199ab08197ae13a39c8f0f473d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0b1b3d08897410c4006949a21a4dd08197ab8ee93bbe57dba2",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "sorted([p for p in root.rglob(\"*\") if p.is_file()])[:50]\n",
+      "container_id": "cntr_6949a1f4d2c881908a8c0b7968ab83a502e1863ff81ebb71",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/.github/workflows/ci.yml')]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0b1b3d08897410c4006949a21cfa28819781db657d4961efb2",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0b1b3d08897410c4006949a21e725481978a2614e35296cd4e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "sorted([p for p in root.iterdir()])\n",
+      "container_id": "cntr_6949a1f4d2c881908a8c0b7968ab83a502e1863ff81ebb71",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/.github')]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0b1b3d08897410c4006949a2210ca0819795893c643c3ec602",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0b1b3d08897410c4006949a22b041c81978bc5550c9ead1b2f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re\ntarget_path = Path('/mnt/data').joinpath('tests/test_schema_conformance.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\nchunks = []\nchunks.append(\"\"\"\\\nfrom __future__ import annotations\n\nimport json\nfrom pathlib import Path\n\nimport pytest\nfrom jsonschema import Draft202012Validator\n\n\ndef _repo_root() -> Path:\n    return Path(__file__).resolve().parents[1]\n\n\ndef _schema_path(root: Path) -> Path | None:\n    candidates = [\n        root / \"outputs\" / \"schemas\" / \"benchmark_schema.json\",\n        root / \"schemas\" / \"benchmark_schema.json\",\n        root / \"schema\" / \"benchmark_schema.json\",\n        root / \"benchmark_schema.json\",\n        root / \"benchmark_schema.schema.json\",\n    ]\n    for p in candidates:\n        if p.is_file():\n            return p\n    # Fallback: first match anywhere under outputs/schemas or schemas.\n    for base in [root / \"outputs\" / \"schemas\", root / \"schemas\"]:\n        if base.is_dir():\n            matches = sorted(base.rglob(\"*benchmark*schema*.json\"))\n            if matches:\n                return matches[0]\n    return None\n\n\ndef _example_json_files(root: Path) -> list[Path]:\n    examples_dir = root / \"examples\"\n    if not examples_dir.is_dir():\n        return []\n    files = sorted(p for p in examples_dir.rglob(\"*.json\") if p.is_file())\n    # Exclude any schema files that might be co-located in examples.\n    return [p for p in files if \"schema\" not in p.name.lower()]\n\n\ndef _load_json(path: Path):\n    try:\n        return json.loads(path.read_text(encoding=\"utf-8\"))\n    except Exception as e:  # pragma: no cover\n        raise AssertionError(f\"Failed to parse JSON: {path}: {e}\") from e\n\n\n@pytest.mark.parametrize(\"example_path\", _example_json_files(_repo_root()))\ndef test_examples_conform_to_benchmark_input_schema(example_path: Path) -> None:\n    root = _repo_root()\n    schema_file = _schema_path(root)\n\n    if not (root / \"examples\").is_dir():\n        pytest.skip(\"No examples/ directory present.\")\n    if not _example_json_files(root):\n        pytest.skip(\"No example JSON files found under examples/.\")\n\n    assert schema_file is not None and schema_file.is_file(), (\n        \"Example JSON files exist, but benchmark input schema was not found. \"\n        \"Looked for outputs/schemas/benchmark_schema.json (and common alternatives).\"\n    )\n\n    schema = _load_json(schema_file)\n    instance = _load_json(example_path)\n\n    validator = Draft202012Validator(schema)\n    errors = sorted(validator.iter_errors(instance), key=lambda e: list(e.absolute_path))\n    if errors:\n        formatted = \"\\\\n\".join(\n            f\"- {example_path}: {list(err.absolute_path)}: {err.message}\" for err in errors\n        )\n        raise AssertionError(f\"Schema validation failed:\\\\n{formatted}\")\n\"\"\")\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tests/test_schema_conformance.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949a1f4d2c881908a8c0b7968ab83a502e1863ff81ebb71",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_schema_conformance.py\nDIR_STATE:[\"tests/test_schema_conformance.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0b1b3d08897410c4006949a23cc3c881978fb22a7b3e9e5ee0",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/test_schema_conformance.py`, a pytest suite that discovers all JSON files under `examples/` and validates each against the benchmark input JSON Schema (auto-locating common schema paths and skipping cleanly if no examples are present)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

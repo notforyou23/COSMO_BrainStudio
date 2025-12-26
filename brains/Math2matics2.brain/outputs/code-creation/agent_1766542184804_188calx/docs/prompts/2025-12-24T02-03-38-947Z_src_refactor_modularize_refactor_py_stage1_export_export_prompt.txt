@@ -1,0 +1,69 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Refactor and modularize reusable code artifacts: utils.py, README.md, generate_artifacts.py, and export the exact prompts used for reproducibility/auditing.
+Project: generated_script_1766542191957 (python script)
+
+Branch: refactor (refactor-only; do not change runtime behavior unless explicitly required)
+
+Primary goal for this stage:
+- Create a well-documented reusable utility module at src/refactor_modularize/utils.py and adjust the artifact-generation script(s) to use it.
+- Keep changes minimal, deterministic, and easy to audit.
+- Export this prompt into docs/prompts as an immutable reference artifact.
+
+Scope (files you may touch in this refactor branch):
+- src/refactor_modularize/utils.py
+- scripts/generate_artifacts.py
+- README.md
+- docs/prompts/<timestamp>_src_refactor_modularize_refactor_py_stage1_export_export_prompt.txt (this file)
+
+Non-goals:
+- Do not add network calls.
+- Do not introduce non-standard dependencies.
+- Do not change artifact output formats unless needed for correctness.
+- No placeholders/TODOs in final artifacts.
+
+Implementation guidance:
+1) utils.py (new or refactored)
+   - Provide small, reusable helpers commonly needed by artifact-generation scripts:
+     * Filesystem: ensure_dir(path), atomic_write_text(path, text), read_text(path), list_files(path, glob), safe_relpath(path, start)
+     * Text: normalize_newlines(text), strip_trailing_whitespace(text), chunk_text(text, max_chars)
+     * JSON: read_json(path), write_json(path, obj, indent=2, sort_keys=True)
+     * Hashing: sha256_text(text), sha256_file(path)
+     * Logging: get_logger(name, level), log_exception(logger, exc)
+     * Pipeline helpers: timestamped_output_dir(root, ts=None), deterministic_path(root, parts)
+   - Use pathlib.Path throughout; type-hint public functions; include docstrings.
+   - Make all outputs deterministic (stable ordering, normalized newlines).
+   - Avoid global state; keep functions pure where feasible.
+
+2) scripts/generate_artifacts.py (refactor)
+   - Convert to a small CLI (argparse) that uses utils.py for all filesystem/text/JSON operations.
+   - Provide flags (as applicable to the repo):
+     * --out-dir (default under /mnt/data or project root)
+     * --export-prompts (bool) and --prompts-dir
+     * --timestamp (optional override to make runs reproducible)
+     * --verbose
+   - Ensure the script remains runnable in this environment and writes deterministic paths.
+   - Keep side effects limited to the chosen output directory.
+
+3) README.md (update)
+   - Explain project purpose: generating/exporting refactor/modularization artifacts.
+   - Document module layout and CLI usage with examples.
+   - Describe reproducibility features (timestamps, prompt export, hashing).
+
+Quality checklist:
+- Code is formatted, readable, and has docstrings.
+- No unused imports; no dead code.
+- File writes are explicit and encoding is utf-8.
+- All directory creation uses parents=True, exist_ok=True.
+- Stable output: sorted file lists, sorted JSON keys, consistent newline normalization.
+- Keep each stage within the line budget stated by the orchestrator.
+
+Prompt export requirement:
+- The exact text of this prompt must be saved into:
+  docs/prompts/2025-12-24T02-03-38-947Z_src_refactor_modularize_refactor_py_stage1_export_export_prompt.txt
+- The exported prompt must be immutable and should not include tool outputs or execution logs.
+
+Completion requirement:
+- After implementing, print minimal status lines:
+  FILE_WRITTEN:<relative-path>
+  DIR_STATE:<json list of sibling prompt files>

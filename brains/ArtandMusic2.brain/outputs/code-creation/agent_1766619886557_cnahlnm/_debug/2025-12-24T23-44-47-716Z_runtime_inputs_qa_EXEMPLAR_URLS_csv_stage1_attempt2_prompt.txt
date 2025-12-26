@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement link-check automation for exemplar URLs referenced in case studies and/or a media catalog (reachability + timestamp + optional archival snapshot policy), saving results under runtime/outputs/qa/LINK_CHECK_REPORT.csv. If no exemplar list exists yet, generate a minimal exemplar URL list from the pilot case study as the first test input.
+Project: generated_automation_script_1766619886750 (python automation_script)
+
+Target file details:
+- Path: runtime/inputs/qa/EXEMPLAR_URLS.csv
+- Purpose: Optional exemplar URL seed list (single column 'url') used by the link-check script when present to define which URLs to validate.
+- Category: source
+
+Other planned files (for context only):
+- scripts/link_check.py: Command-line Python automation script that discovers or generates an exemplar URL list (from an existing list, media catalog, or by extracting URLs from the pilot case study), checks reachability with timestamps, optionally triggers an archival snapshot policy, and writes results to runtime/outputs/qa/LINK_CHECK_REPORT.csv.
+- runtime/inputs/qa/LINKCHECK_CONFIG.json: Optional configuration file providing defaults for timeouts, user agent, input discovery paths, and archival snapshot policy for the link-check script.
+
+Reference insights:
+- [INTROSPECTION] README_LINKCHECK.md from code-creation agent agent_1766615159208_a3kjol2: # Link-check runner (QA)
+
+This project includes a 
+- [AGENT: agent_1766619476801_dj6dsxw] {"agentId":"agent_1766619476801_dj6dsxw","timestamp":"2025-12-24T23:43:43.594Z","files":[{"filename":"v
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [AGENT: agent_1766614627657_h1iraii] {"agentId":"agent_1766614627657_h1iraii","timestamp":"2025-12-24T22:18:53.796Z","files":[{"filename":"v
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Optional exemplar URL seed list (single column 'url') used by the link-check script when present to define which URLs to validate.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('runtime/inputs/qa/EXEMPLAR_URLS.csv')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:runtime/inputs/qa/EXEMPLAR_URLS.csv')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside runtime/inputs/qa/EXEMPLAR_URLS.csv.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

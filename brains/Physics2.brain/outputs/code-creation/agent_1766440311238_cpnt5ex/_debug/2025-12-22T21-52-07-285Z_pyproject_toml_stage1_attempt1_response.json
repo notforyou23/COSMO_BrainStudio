@@ -1,0 +1,69 @@
+{
+  "content": "Wrote a complete `pyproject.toml` configuring a minimal setuptools-based Python project with a CLI entry point (`experiments`), core numeric/symbolic dependencies, an optional plotting extra, and default formatter/linter/test tool settings.",
+  "reasoning": "",
+  "responseId": "resp_043d0ebc316fbaed006949bdc41834819386dec455275bf740",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2686,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1176,
+    "output_tokens_details": {
+      "reasoning_tokens": 324
+    },
+    "total_tokens": 3862
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_043d0ebc316fbaed006949bdc4e8dc81938949dfc8f52d054a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_043d0ebc316fbaed006949bdcccb7c8193867f1e7cc67e1eb1",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('pyproject.toml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"[build-system]\nrequires = [\"setuptools>=68\", \"wheel\"]\nbuild-backend = \"setuptools.build_meta\\\"\"\",\n\"\"\"[project]\nname = \"generated_script_1766440325922\"\nversion = \"0.1.0\"\ndescription = \"Prototype numerical/symbolic experiments with a small reproducible CLI.\"\nreadme = \"README.md\"\nrequires-python = \">=3.11\"\nlicense = {text = \"MIT\"}\nauthors = [{name = \"OpenAI Code Interpreter\"}]\ndependencies = [\n  \"numpy>=1.26\",\n  \"sympy>=1.12\",\n]\n\n[project.optional-dependencies]\nplot = [\"matplotlib>=3.8\"]\n\n[project.scripts]\nexperiments = \"main:main\\\"\"\",\n\"\"\"[tool.setuptools]\npackage-dir = {\"\" = \"src\"}\npy-modules = [\"main\"]\n\n[tool.black]\nline-length = 88\ntarget-version = [\"py311\"]\n\n[tool.ruff]\nline-length = 88\ntarget-version = \"py311\"\nlint.select = [\"E\", \"F\", \"I\", \"B\", \"UP\"]\nlint.ignore = [\"E501\"]\nlint.fixable = [\"ALL\"]\n\n[tool.pytest.ini_options]\naddopts = \"-q\"\ntestpaths = [\"tests\"]\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:pyproject.toml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949bd84af8481908e931e87d628d2450d02f5accc7ac937",
+      "outputs": []
+    },
+    {
+      "id": "rs_043d0ebc316fbaed006949bdd3d8408193bfdab0cca7de16d4",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_043d0ebc316fbaed006949bdd43a788193a5e1180f46b4fa68",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('pyproject.toml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"[build-system]\nrequires = [\"setuptools>=68\", \"wheel\"]\nbuild-backend = \"setuptools.build_meta\"\n\"\"\",\n\"\"\"[project]\nname = \"generated_script_1766440325922\"\nversion = \"0.1.0\"\ndescription = \"Prototype numerical/symbolic experiments with a small reproducible CLI.\"\nreadme = \"README.md\"\nrequires-python = \">=3.11\"\nlicense = { text = \"MIT\" }\nauthors = [{ name = \"OpenAI Code Interpreter\" }]\ndependencies = [\n  \"numpy>=1.26\",\n  \"sympy>=1.12\",\n]\n\n[project.optional-dependencies]\nplot = [\"matplotlib>=3.8\"]\n\n[project.scripts]\nexperiments = \"main:main\"\n\"\"\",\n\"\"\"[tool.setuptools]\npackage-dir = { \"\" = \"src\" }\npy-modules = [\"main\"]\n\n[tool.black]\nline-length = 88\ntarget-version = [\"py311\"]\n\n[tool.ruff]\nline-length = 88\ntarget-version = \"py311\"\nlint.select = [\"E\", \"F\", \"I\", \"B\", \"UP\"]\nlint.ignore = [\"E501\"]\nlint.fixable = [\"ALL\"]\n\n[tool.pytest.ini_options]\naddopts = \"-q\"\ntestpaths = [\"tests\"]\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:pyproject.toml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949bd84af8481908e931e87d628d2450d02f5accc7ac937",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:pyproject.toml\nDIR_STATE:[\"README.md\", \"pyproject.toml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_043d0ebc316fbaed006949bdd8b85881939f1c78d4afb8c295",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Wrote a complete `pyproject.toml` configuring a minimal setuptools-based Python project with a CLI entry point (`experiments`), core numeric/symbolic dependencies, an optional plotting extra, and default formatter/linter/test tool settings."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,56 @@
+{
+  "content": "Created a GitHub Actions CI workflow at `.github/workflows/ci.yml` that runs on pushes/PRs across Python 3.9–3.12, installs the package plus pytest, performs `python -c` import smoke checks (including `cosmo_contracts.markdown`), and then runs `pytest`.",
+  "reasoning": "",
+  "responseId": "resp_0ae96eb435055e6b006949bf9a244c819483e5f8fe7abbe416",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2070,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 597,
+    "output_tokens_details": {
+      "reasoning_tokens": 185
+    },
+    "total_tokens": 2667
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0ae96eb435055e6b006949bf9adc488194b1fd8df840772520",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ae96eb435055e6b006949bf9e81d881948fd5170b6c58ebd4",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('.github/workflows/ci.yml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"name: CI\n\non:\n  push:\n  pull_request:\n\njobs:\n  test:\n    runs-on: ubuntu-latest\n    strategy:\n      fail-fast: false\n      matrix:\n        python-version: [\"3.9\", \"3.10\", \"3.11\", \"3.12\"]\n\n    steps:\n      - uses: actions/checkout@v4\n\n      - name: Set up Python\n        uses: actions/setup-python@v5\n        with:\n          python-version: ${{ matrix.python-version }}\n          cache: pip\n\n      - name: Install\n        run: |\n          python -m pip install --upgrade pip\n          python -m pip install -e .\n          python -m pip install pytest\n\n      - name: Import smoke (entrypoints)\n        run: |\n          python -c \"import cosmo_contracts\"\n          python -c \"import cosmo_contracts.markdown\"\n\n      - name: Run tests\n        run: |\n          pytest -q\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:.github/workflows/ci.yml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bf4868f48190afb7ac7aab80c24301c1c0df42eb0f40",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0ae96eb435055e6b006949bfa3b68081949c4124957641a424",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a GitHub Actions CI workflow at `.github/workflows/ci.yml` that runs on pushes/PRs across Python 3.9–3.12, installs the package plus pytest, performs `python -c` import smoke checks (including `cosmo_contracts.markdown`), and then runs `pytest`."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

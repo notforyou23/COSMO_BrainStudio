@@ -1,0 +1,56 @@
+{
+  "content": "FILE_WRITTEN:src/core/conjectures.py  \nDIR_STATE:[\"src/core/conjectures.py\"]  \n\nImplemented a compact conjecture framework with explicit priors, sampling/logpdf utilities, and concrete evaluators (dS slope, refined dS, distance, axion-WGC proxy) plus a small default registry and a multi-conjecture evaluation helper to map theory constraints into model-level consistency checks.",
+  "reasoning": "",
+  "responseId": "resp_0ea9a57ca4a2ee43006949a2436d1481909678bc13b1e1e86b",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4101,
+    "input_tokens_details": {
+      "cached_tokens": 1408
+    },
+    "output_tokens": 2575,
+    "output_tokens_details": {
+      "reasoning_tokens": 2488
+    },
+    "total_tokens": 6676
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0ea9a57ca4a2ee43006949a2441bb881908dfadf90d77dd21e",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ea9a57ca4a2ee43006949a2481e608190b259d876bc724db1",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, numpy as np, math\ntarget_path = Path('/mnt/data').joinpath('src/core/conjectures.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"Swampland conjecture encodings.\n\nThis module provides compact, model-agnostic objects used by the rest of the\npackage to translate theory constraints into bounds/priors over cosmological\nmodel parameters and derived quantities.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom typing import Any, Callable, Dict, Mapping, Optional, Sequence, Tuple\n\nimport math\nimport numpy as np\n\"\"\")\n\nchunks.append(\"\"\"\n# ----------------------------- Priors ---------------------------------\n\n\n@dataclass(frozen=True)\nclass Prior:\n    \\\"\\\"\\\"Lightweight prior object.\n\n    Parameters\n    ----------\n    kind: {'uniform','loguniform','normal','delta'}\n    params: distribution parameters (see `logpdf`).\n    \\\"\\\"\\\"\n\n    kind: str\n    params: Tuple[float, ...]\n    name: str = \"\"\n\n    def sample(self, rng: np.random.Generator) -> float:\n        k, p = self.kind, self.params\n        if k == \"uniform\":\n            lo, hi = p\n            return float(rng.uniform(lo, hi))\n        if k == \"loguniform\":\n            lo, hi = p\n            return float(math.exp(rng.uniform(math.log(lo), math.log(hi))))\n        if k == \"normal\":\n            mu, sig = p\n            return float(rng.normal(mu, sig))\n        if k == \"delta\":\n            (x,) = p\n            return float(x)\n        raise ValueError(f\"Unknown prior kind: {k}\")\n\n    def logpdf(self, x: float) -> float:\n        k, p = self.kind, self.params\n        if k == \"uniform\":\n            lo, hi = p\n            return -math.log(hi - lo) if (lo <= x <= hi) else -math.inf\n        if k == \"loguniform\":\n            lo, hi = p\n            if not (lo <= x <= hi) or x <= 0:\n                return -math.inf\n            return -math.log(x) - math.log(math.log(hi / lo))\n        if k == \"normal\":\n            mu, sig = p\n            return -0.5 * ((x - mu) / sig) ** 2 - math.log(sig * math.sqrt(2 * math.pi))\n        if k == \"delta\":\n            (x0,) = p\n            return 0.0 if x == x0 else -math.inf\n        raise ValueError(f\"Unknown prior kind: {k}\")\n\"\"\")\n\nchunks.append(\"\"\"\n# --------------------------- Conjectures -------------------------------\n\n\n@dataclass(frozen=True)\nclass EvalResult:\n    ok: bool\n    metric: float\n    threshold: float\n    details: Dict[str, Any] = field(default_factory=dict)\n\n    @property\n    def violation(self) -> float:\n        \\\"\\\"\\\"Positive means a violation amount, 0 means satisfied.\\\"\\\"\\\"\n        return float(max(0.0, self.threshold - self.metric))\n\n\nEvaluator = Callable[[Mapping[str, Any], Mapping[str, float]], EvalResult]\n\n\n@dataclass(frozen=True)\nclass Conjecture:\n    \\\"\\\"\\\"A named conjecture with parameters + an evaluator.\n\n    `params` are the conjecture's free constants (e.g. c, c').\n    `priors` are optional priors over those constants for sampling/forecasting.\n    \\\"\\\"\\\"\n\n    name: str\n    params: Tuple[str, ...]\n    evaluator: Evaluator\n    priors: Dict[str, Prior] = field(default_factory=dict)\n    reference: str = \"\"\n\n    def sample_params(self, rng: np.random.Generator) -> Dict[str, float]:\n        out: Dict[str, float] = {}\n        for k in self.params:\n            pr = self.priors.get(k)\n            if pr is None:\n                raise KeyError(f\\\"Missing prior for parameter '{k}' in {self.name}\\\")\n            out[k] = pr.sample(rng)\n        return out\n\n    def evaluate(self, model: Mapping[str, Any], params: Mapping[str, float]) -> EvalResult:\n        return self.evaluator(model, params)\n\"\"\")\n\nchunks.append(\"\"\"\n# ---------------------- Built-in evaluators ----------------------------\n\n\ndef _req(model: Mapping[str, Any], *keys: str) -> None:\n    missing = [k for k in keys if k not in model]\n    if missing:\n        raise KeyError(f\\\"Model missing required quantities: {missing}\\\")\n\n\ndef eval_ds_slope(model: Mapping[str, Any], p: Mapping[str, float]) -> EvalResult:\n    \\\"\\\"\\\"De Sitter slope conjecture: |∇V|/V >= c (in reduced Planck units).\\\"\\\"\\\"\n    _req(model, \"V\", \"dV_dphi\")\n    V = float(model[\"V\"])\n    grad = float(model[\"dV_dphi\"])\n    c = float(p[\"c\"])\n    metric = abs(grad) / max(abs(V), 1e-300)\n    ok = metric >= c\n    return EvalResult(ok=ok, metric=metric, threshold=c, details={\"V\": V, \"dV_dphi\": grad})\n\n\ndef eval_refined_ds(model: Mapping[str, Any], p: Mapping[str, float]) -> EvalResult:\n    \\\"\\\"\\\"Refined de Sitter: either slope bound OR tachyon bound holds.\n\n    Uses model quantities:\n      - 'V', 'dV_dphi' for slope, and\n      - 'hess_min' for the minimum Hessian eigenvalue of V in field space.\n    Condition: (|∇V|/V >= c) OR (hess_min/V <= -c').\n    \\\"\\\"\\\"\n    _req(model, \"V\", \"dV_dphi\", \"hess_min\")\n    V = float(model[\"V\"])\n    grad = float(model[\"dV_dphi\"])\n    lam_min = float(model[\"hess_min\"])\n    c = float(p[\"c\"])\n    cp = float(p[\"cp\"])\n    slope = abs(grad) / max(abs(V), 1e-300)\n    eta = lam_min / max(abs(V), 1e-300)\n    ok = (slope >= c) or (eta <= -cp)\n    # return metric as max satisfaction margin for simple scoring\n    metric = max(slope / max(c, 1e-300), (-eta) / max(cp, 1e-300))\n    return EvalResult(ok=ok, metric=metric, threshold=1.0, details={\"slope\": slope, \"etaV\": eta})\n\n\ndef eval_distance(model: Mapping[str, Any], p: Mapping[str, float]) -> EvalResult:\n    \\\"\\\"\\\"Distance conjecture: Δφ <= d (field excursion in Planck units).\\\"\\\"\\\"\n    _req(model, \"delta_phi\")\n    dphi = float(model[\"delta_phi\"])\n    d = float(p[\"d\"])\n    ok = dphi <= d\n    # metric: remaining headroom (>=0 is ok)\n    metric = d - dphi\n    return EvalResult(ok=ok, metric=metric, threshold=0.0, details={\"delta_phi\": dphi, \"d\": d})\n\n\ndef eval_wgc_axion(model: Mapping[str, Any], p: Mapping[str, float]) -> EvalResult:\n    \\\"\\\"\\\"Simple axionic WGC proxy: f <= 1/kappa.\n\n    Requires model quantity 'f_axion' (decay constant in Mpl units).\n    Parameter kappa is O(1) and encodes instanton action/model dependence.\n    \\\"\\\"\\\"\n    _req(model, \"f_axion\")\n    f = float(model[\"f_axion\"])\n    kappa = float(p[\"kappa\"])\n    thr = 1.0 / max(kappa, 1e-300)\n    ok = f <= thr\n    metric = thr - f\n    return EvalResult(ok=ok, metric=metric, threshold=0.0, details={\"f_axion\": f, \"f_max\": thr})\n\"\"\")\n\nchunks.append(\"\"\"\n# --------------------- Factory / registry ------------------------------\n\n\ndef default_conjectures() -> Dict[str, Conjecture]:\n    \\\"\\\"\\\"Return a small, opinionated registry of standard conjectures.\\\"\\\"\\\"\n    return {\n        \"ds_slope\": Conjecture(\n            name=\"DeSitterSlope\",\n            params=(\"c\",),\n            evaluator=eval_ds_slope,\n            priors={\"c\": Prior(\"loguniform\", (1e-3, 1.0), name=\"c\")},\n            reference=\"Obied et al. (2018); Ooguri et al. (2019)\",\n        ),\n        \"refined_ds\": Conjecture(\n            name=\"RefinedDeSitter\",\n            params=(\"c\", \"cp\"),\n            evaluator=eval_refined_ds,\n            priors={\n                \"c\": Prior(\"loguniform\", (1e-3, 1.0), name=\"c\"),\n                \"cp\": Prior(\"loguniform\", (1e-3, 1.0), name=\\\"c'\\\"),\n            },\n            reference=\"Garg & Krishnan (2018); Ooguri et al. (2019)\",\n        ),\n        \"distance\": Conjecture(\n            name=\"Distance\",\n            params=(\"d\",),\n            evaluator=eval_distance,\n            priors={\"d\": Prior(\"uniform\", (0.5, 10.0), name=\"d\")},\n            reference=\"Ooguri & Vafa (2006)\",\n        ),\n        \"wgc_axion\": Conjecture(\n            name=\"AxionWGCProxy\",\n            params=(\"kappa\",),\n            evaluator=eval_wgc_axion,\n            priors={\"kappa\": Prior(\"loguniform\", (0.1, 10.0), name=\"kappa\")},\n            reference=\"Weak Gravity Conjecture (axion proxy)\",\n        ),\n    }\n\n\ndef evaluate_all(\n    conjectures: Mapping[str, Conjecture],\n    model: Mapping[str, Any],\n    params: Mapping[str, Mapping[str, float]],\n) -> Dict[str, EvalResult]:\n    \\\"\\\"\\\"Evaluate multiple conjectures against a model state.\\\"\\\"\\\"\n    out: Dict[str, EvalResult] = {}\n    for key, conj in conjectures.items():\n        out[key] = conj.evaluate(model, params.get(key, {}))\n    return out\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/core/conjectures.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949a1d497e081909a00da1af070d618029e616ce667a0de",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/core/conjectures.py\nDIR_STATE:[\"src/core/conjectures.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0ea9a57ca4a2ee43006949a2677ce881908f3e755c542aa8dd",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_WRITTEN:src/core/conjectures.py  \nDIR_STATE:[\"src/core/conjectures.py\"]  \n\nImplemented a compact conjecture framework with explicit priors, sampling/logpdf utilities, and concrete evaluators (dS slope, refined dS, distance, axion-WGC proxy) plus a small default registry and a multi-conjecture evaluation helper to map theory constraints into model-level consistency checks."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

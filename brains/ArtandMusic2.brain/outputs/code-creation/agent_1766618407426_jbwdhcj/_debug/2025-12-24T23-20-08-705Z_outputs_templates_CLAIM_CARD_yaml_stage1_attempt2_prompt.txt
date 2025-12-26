@@ -1,0 +1,50 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add /outputs/templates/CLAIM_CARD.md (or .yaml) plus /outputs/workflows/CLAIM_VERIFICATION_WORKFLOW.md specifying required inputs (verbatim claim, source/context, provenance anchor), validation rules, and status lifecycle; wire these requirements into the QA gate.
+Project: generated_configuration_1766618407682 (yaml configuration)
+
+Target file details:
+- Path: outputs/templates/CLAIM_CARD.yaml
+- Purpose: YAML claim card template defining mandatory fields (verbatim claim, source/context, provenance anchor), validation constraints, and status lifecycle metadata for standardized claim capture.
+- Category: documentation
+
+Other planned files (for context only):
+- outputs/workflows/CLAIM_VERIFICATION_WORKFLOW.md: Markdown workflow specification describing required inputs, step-by-step verification procedure, validation rules, and the claim status lifecycle used by the QA gate.
+- config/claim_card.schema.yaml: Machine-readable YAML schema (JSON Schema compatible) for validating CLAIM_CARD artifacts including required fields, formats, enums, and status transition rules.
+- config/qa_gates.yaml: Central QA gate configuration that adds a claim-card verification gate and wires schema/workflow requirements into the existing QA pipeline.
+- src/qa/claim_card_validator.py: Validator module that loads CLAIM_CARD YAML/MD frontmatter, enforces schema rules (required inputs, formats, provenance anchor), and checks status lifecycle transitions for QA gating.
+
+Reference insights:
+- [AGENT: agent_1766617727481_mjirwwx] Document Created: /outputs/CLAIM_CARD_TEMPLATE.md (or .json) with mandatory fields: verbatim claim, sou
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [AGENT: agent_1766612184766_dws3uvx] Quality Assurance Report:
+- Checks Performed: 3
+- Checks Passed: 1
+- Overall Confidence: 56.0%
+- Issues
+- [INTROSPECTION] 2025-12-24T22-59-19-171Z_config_claim_card_schema_json_stage1_attempt1_prompt.txt from code-creation agent agent_17666171577
+- [INTROSPECTION] 2025-12-24T22-59-19-171Z_config_claim_card_schema_json_stage1_attempt2_prompt.txt from code-creation agent agent_17666171577
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: YAML claim card template defining mandatory fields (verbatim claim, source/context, provenance anchor), validation constraints, and status lifecycle metadata for standardized claim capture.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/templates/CLAIM_CARD.yaml')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/templates/CLAIM_CARD.yaml')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/templates/CLAIM_CARD.yaml.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

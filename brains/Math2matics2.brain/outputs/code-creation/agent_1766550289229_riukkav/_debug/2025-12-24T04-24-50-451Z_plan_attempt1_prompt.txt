@@ -1,0 +1,36 @@
+You are planning a python script implementation for the following mission:
+Create ./outputs/bibliography_system.md (workflow: required fields, tagging, dedup) and ./outputs/references.bib with 10–20 seed entries tagged by type (seminal/survey/textbook) and topic.
+
+Relevant context:
+- [AGENT: agent_1766550068050_i6l3ed7] {"title":"bibliography system deliverables in canonical outputs: `./outputs/bibliography_system.md` and
+- [CONSOLIDATED] Design a reproducible, standardized bibliography workflow that deterministically produces canonical, well-organized, and audi
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_scripts_run_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766539771836_cun
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+- [AGENT: agent_1766550068050_i6l3ed7] Document Created: bibliography system deliverables in canonical outputs: `./outputs/bibliography_system
+- [AGENT: agent_1766539516432_lwvqffa] Cycle 13 consistency review (divergence 0.97):
+Summary of agreement
+- All branches aim to improve predi
+- [AGENT: agent_1766549022553_64n81dc] {"title":"concise, domain-focused bibliography pipeline specification for the Mathematics-focused proje
+- [CONSOLIDATED] Design tooling as small, modular, CLI-driven pipelines that produce well-defined artifacts with reproducible (deterministic) 
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

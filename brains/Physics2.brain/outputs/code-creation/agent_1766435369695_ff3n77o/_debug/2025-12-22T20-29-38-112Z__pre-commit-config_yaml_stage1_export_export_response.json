@@ -1,0 +1,56 @@
+{
+  "content": "FILE_EXPORT:{\"path\":\".pre-commit-config.yaml\",\"size\":745,\"encoding\":\"base64\",\"sha256\":\"66e8f8021d351d799b31d1fb0e41b20e974847dd3d57eb0636d048ec3cd5998c\",\"content\":\"IyBQcmUtY29tbWl0IGNvbmZpZ3VyYXRpb24gZm9yIGJlbmNobWFyayBvdXRwdXQgdmFsaWRhdGlvbi4KIyBUaGlzIGhvb2sgYmxvY2tzIGNvbW1pdHMgdGhhdCBpbnRyb2R1Y2UgYmVuY2htYXJrIG91dHB1dHMgdGhhdDoKIyAtIGRvIG5vdCBjb25mb3JtIHRvIG91dHB1dHMvc2NoZW1hcy9iZW5jaG1hcmtfc2NoZW1hLmpzb24KIyAtIG1hdGNoIGRlcHJlY2F0ZWQgbGVnYWN5L2FkLWhvYyBmb3JtYXRzIGRpc2FsbG93ZWQgYnkgcG9saWN5CiMKIyBSdW4gbWFudWFsbHk6CiMgICBwcmUtY29tbWl0IHJ1biB2YWxpZGF0ZS1iZW5jaG1hcmstb3V0cHV0cyAtLWFsbC1maWxlcwpkZWZhdWx0X2xhbmd1YWdlX3ZlcnNpb246CiAgcHl0aG9uOiBweXRob24zCnJlcG9zOgogIC0gcmVwbzogbG9jYWwKICAgIGhvb2tzOgogICAgICAtIGlkOiB2YWxpZGF0ZS1iZW5jaG1hcmstb3V0cHV0cwogICAgICAgIG5hbWU6IFZhbGlkYXRlIGJlbmNobWFyayBvdXRwdXRzIGFnYWluc3Qgc2NoZW1hL3BvbGljeQogICAgICAgIGxhbmd1YWdlOiBweXRob24KICAgICAgICBlbnRyeTogcHl0aG9uIHRvb2xzL3ZhbGlkYXRlX2JlbmNobWFya19vdXRwdXRzLnB5CiAgICAgICAgcGFzc19maWxlbmFtZXM6IGZhbHNlCiAgICAgICAgcmVxdWlyZV9zZXJpYWw6IHRydWUKICAgICAgICBmaWxlczogPi0KICAgICAgICAgIF4ob3V0cHV0cy8oPyFzY2hlbWFzLykuK1wuKGpzb258anNvbmwpfGJlbmNobWFya3MvLitcLihqc29ufGpzb25sKSkkCg==\"}\nDIR_STATE:[\".pre-commit-config.yaml\",\"pyproject.toml\"]",
+  "reasoning": "",
+  "responseId": "resp_0303f2d9cd4dd637006949ad3ab4588194ba3a055fedd53c05",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 1993,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 972,
+    "output_tokens_details": {
+      "reasoning_tokens": 36
+    },
+    "total_tokens": 2965
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0303f2d9cd4dd637006949ad3b5fe88194abf9c2d23ce798db",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0303f2d9cd4dd637006949ad3c3228819480884638cc000656",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport base64, json, hashlib, gzip\n\ntarget_path = Path('/mnt/data').joinpath('.pre-commit-config.yaml')\nassert target_path.is_file(), 'Expected .pre-commit-config.yaml to exist before export'\ndata = target_path.read_bytes()\npayload = {\n    'path': '.pre-commit-config.yaml',\n    'size': len(data),\n    'encoding': 'base64',\n    'sha256': hashlib.sha256(data).hexdigest(),\n    'content': None\n}\nif len(data) > 20000:\n    compressed = gzip.compress(data)\n    payload['encoding'] = 'gzip+base64'\n    payload['content'] = base64.b64encode(compressed).decode('ascii')\nelse:\n    payload['content'] = base64.b64encode(data).decode('ascii')\n\nprint('FILE_EXPORT:' + json.dumps(payload, separators=(',', ':')))\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_EXPORT:{\"path\":\".pre-commit-config.yaml\",\"size\":745,\"encoding\":\"base64\",\"sha256\":\"66e8f8021d351d799b31d1fb0e41b20e974847dd3d57eb0636d048ec3cd5998c\",\"content\":\"IyBQcmUtY29tbWl0IGNvbmZpZ3VyYXRpb24gZm9yIGJlbmNobWFyayBvdXRwdXQgdmFsaWRhdGlvbi4KIyBUaGlzIGhvb2sgYmxvY2tzIGNvbW1pdHMgdGhhdCBpbnRyb2R1Y2UgYmVuY2htYXJrIG91dHB1dHMgdGhhdDoKIyAtIGRvIG5vdCBjb25mb3JtIHRvIG91dHB1dHMvc2NoZW1hcy9iZW5jaG1hcmtfc2NoZW1hLmpzb24KIyAtIG1hdGNoIGRlcHJlY2F0ZWQgbGVnYWN5L2FkLWhvYyBmb3JtYXRzIGRpc2FsbG93ZWQgYnkgcG9saWN5CiMKIyBSdW4gbWFudWFsbHk6CiMgICBwcmUtY29tbWl0IHJ1biB2YWxpZGF0ZS1iZW5jaG1hcmstb3V0cHV0cyAtLWFsbC1maWxlcwpkZWZhdWx0X2xhbmd1YWdlX3ZlcnNpb246CiAgcHl0aG9uOiBweXRob24zCnJlcG9zOgogIC0gcmVwbzogbG9jYWwKICAgIGhvb2tzOgogICAgICAtIGlkOiB2YWxpZGF0ZS1iZW5jaG1hcmstb3V0cHV0cwogICAgICAgIG5hbWU6IFZhbGlkYXRlIGJlbmNobWFyayBvdXRwdXRzIGFnYWluc3Qgc2NoZW1hL3BvbGljeQogICAgICAgIGxhbmd1YWdlOiBweXRob24KICAgICAgICBlbnRyeTogcHl0aG9uIHRvb2xzL3ZhbGlkYXRlX2JlbmNobWFya19vdXRwdXRzLnB5CiAgICAgICAgcGFzc19maWxlbmFtZXM6IGZhbHNlCiAgICAgICAgcmVxdWlyZV9zZXJpYWw6IHRydWUKICAgICAgICBmaWxlczogPi0KICAgICAgICAgIF4ob3V0cHV0cy8oPyFzY2hlbWFzLykuK1wuKGpzb258anNvbmwpfGJlbmNobWFya3MvLitcLihqc29ufGpzb25sKSkkCg==\"}\nDIR_STATE:[\".pre-commit-config.yaml\", \"pyproject.toml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0303f2d9cd4dd637006949ad40b4188194ae474a9cfca20b8b",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_EXPORT:{\"path\":\".pre-commit-config.yaml\",\"size\":745,\"encoding\":\"base64\",\"sha256\":\"66e8f8021d351d799b31d1fb0e41b20e974847dd3d57eb0636d048ec3cd5998c\",\"content\":\"IyBQcmUtY29tbWl0IGNvbmZpZ3VyYXRpb24gZm9yIGJlbmNobWFyayBvdXRwdXQgdmFsaWRhdGlvbi4KIyBUaGlzIGhvb2sgYmxvY2tzIGNvbW1pdHMgdGhhdCBpbnRyb2R1Y2UgYmVuY2htYXJrIG91dHB1dHMgdGhhdDoKIyAtIGRvIG5vdCBjb25mb3JtIHRvIG91dHB1dHMvc2NoZW1hcy9iZW5jaG1hcmtfc2NoZW1hLmpzb24KIyAtIG1hdGNoIGRlcHJlY2F0ZWQgbGVnYWN5L2FkLWhvYyBmb3JtYXRzIGRpc2FsbG93ZWQgYnkgcG9saWN5CiMKIyBSdW4gbWFudWFsbHk6CiMgICBwcmUtY29tbWl0IHJ1biB2YWxpZGF0ZS1iZW5jaG1hcmstb3V0cHV0cyAtLWFsbC1maWxlcwpkZWZhdWx0X2xhbmd1YWdlX3ZlcnNpb246CiAgcHl0aG9uOiBweXRob24zCnJlcG9zOgogIC0gcmVwbzogbG9jYWwKICAgIGhvb2tzOgogICAgICAtIGlkOiB2YWxpZGF0ZS1iZW5jaG1hcmstb3V0cHV0cwogICAgICAgIG5hbWU6IFZhbGlkYXRlIGJlbmNobWFyayBvdXRwdXRzIGFnYWluc3Qgc2NoZW1hL3BvbGljeQogICAgICAgIGxhbmd1YWdlOiBweXRob24KICAgICAgICBlbnRyeTogcHl0aG9uIHRvb2xzL3ZhbGlkYXRlX2JlbmNobWFya19vdXRwdXRzLnB5CiAgICAgICAgcGFzc19maWxlbmFtZXM6IGZhbHNlCiAgICAgICAgcmVxdWlyZV9zZXJpYWw6IHRydWUKICAgICAgICBmaWxlczogPi0KICAgICAgICAgIF4ob3V0cHV0cy8oPyFzY2hlbWFzLykuK1wuKGpzb258anNvbmwpfGJlbmNobWFya3MvLitcLihqc29ufGpzb25sKSkkCg==\"}\nDIR_STATE:[\".pre-commit-config.yaml\",\"pyproject.toml\"]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

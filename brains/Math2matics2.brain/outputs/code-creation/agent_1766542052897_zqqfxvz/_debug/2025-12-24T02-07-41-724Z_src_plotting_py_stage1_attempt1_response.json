@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/plotting.py` with deterministic matplotlib (Agg backend) styling and a `render_canonical_figure()` helper that generates a consistent `figure.png` from `results.json` metrics and optional series data.",
+  "reasoning": "",
+  "responseId": "resp_056c86b882dc3b8400694b4b0c5ff88197a931a7e312bf8da8",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3144,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1658,
+    "output_tokens_details": {
+      "reasoning_tokens": 214
+    },
+    "total_tokens": 4802
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_056c86b882dc3b8400694b4b0d03e48197ac3dfadc60975c3c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_056c86b882dc3b8400694b4b104cb081978042489dee8b45a7",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/plotting.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Plotting helpers for the evidence-pack pipeline.\n\nThis module renders a canonical PNG (`figure.png`) from pipeline results with\nconsistent styling and deterministic output across runs and environments.\n\\\"\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, Mapping, Optional, Sequence, Tuple, Union\n\nimport matplotlib\nmatplotlib.use(\"Agg\")  # deterministic, non-interactive backend\nimport matplotlib.pyplot as plt\"\"\",\n\"\"\"def _apply_style() -> None:\n    \\\"\\\"\\\"Apply a small, deterministic matplotlib style.\\\"\\\"\\\"\n    plt.rcParams.update(\n        {\n            \"figure.figsize\": (8.0, 4.5),\n            \"figure.dpi\": 150,\n            \"savefig.dpi\": 150,\n            \"savefig.facecolor\": \"white\",\n            \"savefig.edgecolor\": \"white\",\n            \"font.size\": 10,\n            \"axes.titlesize\": 11,\n            \"axes.labelsize\": 10,\n            \"axes.grid\": True,\n            \"grid.alpha\": 0.25,\n            \"grid.linestyle\": \"-\",\n            \"axes.spines.top\": False,\n            \"axes.spines.right\": False,\n            \"legend.frameon\": False,\n            \"lines.linewidth\": 2.0,\n            \"lines.markersize\": 4.0,\n        }\n    )\"\"\",\n\"\"\"def _as_metrics(results: Mapping[str, Any]) -> Dict[str, float]:\n    \\\"\\\"\\\"Extract a stable metrics mapping from results.\\\"\\\"\\\"\n    metrics = results.get(\"metrics\", {})\n    if not isinstance(metrics, Mapping):\n        return {}\n    out: Dict[str, float] = {}\n    for k in sorted(metrics.keys(), key=str):\n        v = metrics[k]\n        try:\n            out[str(k)] = float(v)\n        except Exception:\n            continue\n    return out\"\"\",\n\"\"\"def _as_series(results: Mapping[str, Any]) -> Sequence[Tuple[Sequence[float], Sequence[float], str]]:\n    \\\"\\\"\\\"Extract optional time/iteration series in a normalized form.\n\n    Supported input forms:\n      - results[\"series\"] = [{\"x\": [...], \"y\": [...], \"label\": \"name\"}, ...]\n      - results[\"series\"] = {\"name\": {\"x\": [...], \"y\": [...]}, ...}\n    \\\"\\\"\\\"\n    series = results.get(\"series\")\n    normalized: list[Tuple[Sequence[float], Sequence[float], str]] = []\n    if series is None:\n        return normalized\n\n    if isinstance(series, Mapping):\n        items = [(str(k), v) for k, v in series.items()]\n        for name, s in sorted(items, key=lambda t: t[0]):\n            if isinstance(s, Mapping) and \"x\" in s and \"y\" in s:\n                x, y = s.get(\"x\"), s.get(\"y\")\n                if isinstance(x, Sequence) and isinstance(y, Sequence):\n                    normalized.append((list(map(float, x)), list(map(float, y)), name))\n        return normalized\n\n    if isinstance(series, Sequence):\n        for s in series:\n            if not isinstance(s, Mapping):\n                continue\n            x, y = s.get(\"x\"), s.get(\"y\")\n            label = str(s.get(\"label\", \"series\"))\n            if isinstance(x, Sequence) and isinstance(y, Sequence):\n                normalized.append((list(map(float, x)), list(map(float, y)), label))\n        normalized.sort(key=lambda t: t[2])\n    return normalized\"\"\",\n\"\"\"def render_canonical_figure(\n    results: Mapping[str, Any],\n    out_path: Union[str, Path],\n    *,\n    title: str = \"Evidence Pack\",\n) -> Path:\n    \\\"\\\"\\\"Render a deterministic canonical figure from `results` to `out_path`.\n\n    The figure includes:\n      - a horizontal bar chart of numeric metrics (if present)\n      - optional line plot(s) for any provided series\n\n    Parameters\n    ----------\n    results:\n        Pipeline results mapping (typically parsed from outputs/results.json).\n    out_path:\n        Destination for the PNG.\n    title:\n        Figure title.\n\n    Returns\n    -------\n    Path to the written PNG.\n    \\\"\\\"\\\"\n    _apply_style()\n    out_path = Path(out_path)\n    out_path.parent.mkdir(parents=True, exist_ok=True)\n\n    metrics = _as_metrics(results)\n    series = _as_series(results)\n\n    nrows = 2 if series else 1\n    fig, axes = plt.subplots(nrows=nrows, ncols=1, constrained_layout=True)\n    if not isinstance(axes, Iterable):\n        axes_list = [axes]\n    else:\n        axes_list = list(axes)\n\n    fig.suptitle(title)\n\n    # Metrics panel (always present but may show a note).\n    ax0 = axes_list[0]\n    if metrics:\n        names = list(metrics.keys())\n        values = [metrics[k] for k in names]\n        ax0.barh(names, values, color=\"#4C78A8\")\n        ax0.set_xlabel(\"value\")\n        ax0.set_title(\"Metrics\")\n        ax0.invert_yaxis()\n    else:\n        ax0.text(0.5, 0.5, \"No metrics\", ha=\"center\", va=\"center\", transform=ax0.transAxes)\n        ax0.set_axis_off()\n\n    # Optional series panel.\n    if series:\n        ax1 = axes_list[1]\n        for i, (x, y, label) in enumerate(series):\n            ax1.plot(x, y, marker=\"o\", label=label)\n        ax1.set_title(\"Series\")\n        ax1.set_xlabel(\"x\")\n        ax1.set_ylabel(\"y\")\n        if len(series) > 1:\n            ax1.legend(loc=\"best\")\n\n    # Ensure deterministic metadata as much as matplotlib allows.\n    fig.savefig(\n        out_path,\n        format=\"png\",\n        metadata={\"Software\": \"evidence-pack\", \"Title\": title},\n    )\n    plt.close(fig)\n    return out_path\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/plotting.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_694b4aec1e8081909daf775a3b668d2c0adc623df7df482c",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/plotting.py\nDIR_STATE:[\"src/pipeline.py\", \"src/plotting.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_056c86b882dc3b8400694b4b1eb48881978eff664bbe14b056",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/plotting.py` with deterministic matplotlib (Agg backend) styling and a `render_canonical_figure()` helper that generates a consistent `figure.png` from `results.json` metrics and optional series data."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

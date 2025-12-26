@@ -1,0 +1,105 @@
+{
+  "content": "Created `tests/test_schema_validation.py`, which discovers benchmark JSON outputs (excluding schemas) under `outputs/` and `outputs/expected/` and validates them against `outputs/schemas/benchmark_schema.json` using `jsonschema` with detailed, per-error diagnostics.",
+  "reasoning": "",
+  "responseId": "resp_0a344a45da03c5370069499bd44bb48195964db0489fe5f780",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4049,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1631,
+    "output_tokens_details": {
+      "reasoning_tokens": 1573
+    },
+    "total_tokens": 5680
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0a344a45da03c5370069499bd503a08195bc22e4eca01ebd7f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a344a45da03c5370069499bd61fe081958f53fedcbf44cb47",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path('/mnt/data')\nsorted([str(p.relative_to(base)) for p in base.rglob('*') if p.is_file()][:50])[:50], len([p for p in base.rglob('*') if p.is_file()])",
+      "container_id": "cntr_69499b967d148190962faee7981fd5060c9b277098400d23",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(['tests/conftest.py'], 1)"
+        }
+      ]
+    },
+    {
+      "id": "rs_0a344a45da03c5370069499bd8f30c8195b61484b79481f025",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a344a45da03c5370069499bd962908195ba3660e584ae8408",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nprint(Path('/mnt/data/tests/conftest.py').read_text()[:4000])",
+      "container_id": "cntr_69499b967d148190962faee7981fd5060c9b277098400d23",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Shared pytest fixtures and helpers.\n\nThese utilities focus on:\n- locating the repository root deterministically\n- stable JSON read/write (sorted keys, consistent separators, newline)\n- normalizing nested structures for deterministic comparisons\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import is_dataclass, asdict\nimport json\nfrom pathlib import Path\nfrom typing import Any, Iterable, Mapping, MutableMapping, MutableSequence\n\nimport pytest\ndef find_project_root(start: Path) -> Path:\n    \"\"\"Find the repository root by searching upwards for common markers.\"\"\"\n    start = start.resolve()\n    markers = (\"pyproject.toml\", \"setup.cfg\", \"requirements.txt\", \".git\")\n    for p in (start, *start.parents):\n        if any((p / m).exists() for m in markers):\n            return p\n        # fall back: many generated projects include these dirs at root\n        if (p / \"outputs\").is_dir() and (p / \"tests\").is_dir():\n            return p\n    return start.parent\n\n\n@pytest.fixture(scope=\"session\")\ndef project_root() -> Path:\n    return find_project_root(Path(__file__).resolve())\n@pytest.fixture(scope=\"session\")\ndef outputs_dir(project_root: Path) -> Path:\n    return project_root / \"outputs\"\n\n\n@pytest.fixture(scope=\"session\")\ndef schemas_dir(outputs_dir: Path) -> Path:\n    return outputs_dir / \"schemas\"\n\n\n@pytest.fixture(scope=\"session\")\ndef benchmark_schema_path(schemas_dir: Path) -> Path:\n    return schemas_dir / \"benchmark_schema.json\"\n\n\ndef expected_outputs_dir(outputs_dir: Path) -> Path:\n    \"\"\"Return directory holding committed 'expected' JSON outputs, if present.\"\"\"\n    cand = outputs_dir / \"expected\"\n    return cand if cand.is_dir() else outputs_dir\ndef read_json(path: Path) -> Any:\n    with path.open(\"r\", encoding=\"utf-8\") as f:\n        return json.load(f)\n\n\ndef stable_json_dumps(obj: Any) -> str:\n    \"\"\"Deterministic JSON encoding used for byte-stable comparisons.\"\"\"\n    return json.dumps(\n        obj,\n        sort_keys=True,\n        ensure_ascii=False,\n        indent=2,\n        separators=(\",\", \": \"),\n    ) + \"\\n\"\n\n\ndef write_json(path: Path, obj: Any) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    path.write_text(stable_json_dumps(obj), encoding=\"utf-8\")\ndef _normalize_number(x: Any, *, rel_tol: float | None = None, abs_tol: float | None = None, digits: int = 12) -> Any:\n    if not isinstance(x, float):\n        return x\n    # If tolerances are provided, keep full precision; otherwise round for determinism.\n    if rel_tol is None and abs_tol is None:\n        y = round(x, digits)\n        return 0.0 if y == 0.0 else y  # normalize -0.0\n    return x\n\n\ndef normalize_for_compare(\n    obj: Any,\n    *,\n    digits: int = 12,\n    rel_tol: float | None = None,\n    abs_tol: float | None = None,\n) -> Any:\n    \"\"\"Recursively normalize structures for deterministic comparisons.\n\n    - dataclasses -> dict\n    - dict keys preserved; values normalized\n    - lists/tuples preserved order\n    - floats optionally rounded (when tolerances are not used)\n    \"\"\"\n    if is_dataclass(obj):\n        obj = asdict(obj)\n\n    if isinstance(obj, Mapping):\n        return {k: normalize_for_compare(v, digits=digits, rel_tol=rel_tol, abs_tol=abs_tol) for k, v in obj.items()}\n    if isinstance(obj, (list, tuple)):\n        return [normalize_for_compare(v, digits=digits, rel_tol=rel_tol, abs_tol=abs_tol) for v in obj]\n    return _normalize_number(obj, rel_tol=rel_tol, abs_tol=abs_tol, digits=digits)\ndef iter_json_files(root: Path) -> list[Path]:\n    \"\"\"Return JSON files under root, sorted by relative path.\"\"\"\n    files = [p for p in root.rglob(\"*.json\") if p.is_file()]\n    return sorted(files, key=lambda p: p.as_posix())\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0a344a45da03c5370069499bdba5708195986ae9d5db5d4bc4",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a344a45da03c5370069499be783d881959fb445f6b93eb45c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, sys\ntarget_path = Path('/mnt/data/tests/test_schema_validation.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n",
+      "container_id": "cntr_69499b967d148190962faee7981fd5060c9b277098400d23",
+      "outputs": []
+    },
+    {
+      "id": "rs_0a344a45da03c5370069499beae654819589e1845072b4e1fe",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a344a45da03c5370069499beb43d881958d0804a97f774db3",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\ntarget_path = Path('/mnt/data/tests/test_schema_validation.py')\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Schema conformance tests for benchmark JSON outputs.\n\nValidates all benchmark JSON files (expected and/or generated) against\noutputs/schemas/benchmark_schema.json with helpful diagnostics.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom pathlib import Path\nfrom typing import Iterable\n\nimport pytest\n\ntry:\n    import jsonschema\nexcept Exception as e:  # pragma: no cover\n    jsonschema = None  # type: ignore[assignment]\n    _jsonschema_import_error = e\n\"\"\",\n\"\"\"from .conftest import expected_outputs_dir, iter_json_files, read_json\n\n\ndef _iter_benchmark_json_files(outputs_dir: Path) -> list[Path]:\n    \\\"\\\"\\\"Collect candidate benchmark JSON files, excluding schemas.\\\"\\\"\\\"\n    files: list[Path] = []\n    expected_dir = expected_outputs_dir(outputs_dir)\n    for root in {outputs_dir, expected_dir}:\n        if not root.exists():\n            continue\n        for p in iter_json_files(root):\n            # Exclude schema files and anything under outputs/schemas/\n            if \"schemas\" in p.parts:\n                continue\n            files.append(p)\n    # Unique, stable ordering by relative path\n    seen: set[str] = set()\n    out: list[Path] = []\n    for p in sorted(files, key=lambda x: x.as_posix()):\n        k = p.resolve().as_posix()\n        if k not in seen:\n            seen.add(k)\n            out.append(p)\n    return out\n\n\ndef _format_validation_errors(errors: Iterable[\\\"jsonschema.ValidationError\\\"], *, file_path: Path) -> str:\n    lines = [f\\\"Schema validation failed for: {file_path.as_posix()}\\\"]\n    for i, err in enumerate(errors, start=1):\n        inst_path = \\\"/\\\" + \\\"/\\\".join(str(p) for p in err.path) if err.path else \\\"<root>\\\"\n        schema_path = \\\"/\\\" + \\\"/\\\".join(str(p) for p in err.schema_path) if err.schema_path else \\\"<schema>\\\"\n        lines.append(f\\\"  [{i}] instance path: {inst_path}\\\")\n        lines.append(f\\\"      schema path:   {schema_path}\\\")\n        lines.append(f\\\"      message:       {err.message}\\\")\n    return \\\"\\\\n\\\".join(lines)\n\"\"\",\n\"\"\"@pytest.mark.skipif(jsonschema is None, reason=\\\"jsonschema is required for schema validation\\\")\ndef test_benchmark_schema_exists_and_is_valid_json(benchmark_schema_path: Path) -> None:\n    assert benchmark_schema_path.exists(), (\n        \\\"Missing benchmark schema at outputs/schemas/benchmark_schema.json; \\\"\n        \\\"generate or commit it to enable schema validation.\\\"\n    )\n    schema = read_json(benchmark_schema_path)\n    # Ensure the schema itself is valid (raises on error).\n    jsonschema.Draft202012Validator.check_schema(schema)\n\"\"\",\n\"\"\"@pytest.mark.skipif(jsonschema is None, reason=\\\"jsonschema is required for schema validation\\\")\ndef test_all_benchmark_json_conform_to_schema(outputs_dir: Path, benchmark_schema_path: Path) -> None:\n    if not benchmark_schema_path.exists():\n        pytest.skip(\\\"Benchmark schema not present; skipping schema conformance checks.\\\")\n\n    schema = read_json(benchmark_schema_path)\n    validator_cls = jsonschema.validators.validator_for(schema)\n    validator_cls.check_schema(schema)\n    validator = validator_cls(schema)\n\n    files = _iter_benchmark_json_files(outputs_dir)\n    if not files:\n        pytest.skip(\\\"No benchmark JSON files found under outputs/ (or outputs/expected).\\\")\n\n    failures: list[str] = []\n    for path in files:\n        instance = read_json(path)\n        errors = sorted(validator.iter_errors(instance), key=lambda e: (list(e.path), e.message))\n        if errors:\n            failures.append(_format_validation_errors(errors, file_path=path))\n\n    assert not failures, \\\"\\\\n\\\\n\\\".join(failures)\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tests/test_schema_validation.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499b967d148190962faee7981fd5060c9b277098400d23",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_schema_validation.py\nDIR_STATE:[\"tests/conftest.py\", \"tests/test_schema_validation.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0a344a45da03c5370069499c00c4148195a67aa42be34c3c72",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/test_schema_validation.py`, which discovers benchmark JSON outputs (excluding schemas) under `outputs/` and `outputs/expected/` and validates them against `outputs/schemas/benchmark_schema.json` using `jsonschema` with detailed, per-error diagnostics."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

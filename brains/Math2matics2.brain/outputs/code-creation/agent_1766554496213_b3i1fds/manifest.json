@@ -1,0 +1,301 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766554496213_b3i1fds",
+  "agentType": "code-creation",
+  "goalId": "goal_232",
+  "missionId": "strategic_goal_232_1766554496213",
+  "spawnCycle": 151,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T05:35:07.311Z",
+  "completedAt": "2025-12-24T05:42:21.505Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "src/run.py",
+      "description": "Single deterministic CLI entrypoint that sets all RNG seeds, runs the canonical pipeline, writes outputs/results.json and outputs/figure.png with fixed schema, and writes outputs/hashes.json with SHA256 hashes of each artifact.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": ".py\", \"src/pipeline.py\", \"src/plotting.py\", \"src/repro_json_pipeline.py\", \"src/results_io.py\", \"src/results_schema.py\", \"src/run.py\", \"src/run_artifacts.py\", \"src/run_pipeline.py\", \"src/run_toy_experiment.py\", \"src/schema.py\", \"src/simulate.py\", \"src/toy_experiment.py\"]\nSummary: Wrote a deterministic CLI entrypoint that fixes seeds, runs the pipeline, and emits results, figure, and SHA256 hashes.\n",
+          "timestamp": "2025-12-24T05:35:46.364Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": ".py\", \"src/plotting.py\", \"src/repro_json_pipeline.py\", \"src/results_io.py\", \"src/results_schema.py\", \"src/run.py\", \"src/run_artifacts.py\", \"src/run_pipeline.py\", \"src/run_toy_experiment.py\", \"src/schema.py\", \"src/simulate.py\", \"src/toy_experiment.py\"]\nSummary: Wrote a deterministic CLI entrypoint that seeds RNGs, runs a canonical pipeline, writes fixed-schema artifacts, and records SHA256 hashes.\n",
+          "timestamp": "2025-12-24T05:36:15.154Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:35:07.311Z",
+      "failedAt": "2025-12-24T05:36:15.154Z"
+    },
+    {
+      "path": "src/pipeline.py",
+      "description": "Implements the canonical pipeline steps (data generation/loading, processing, metrics computation, and figure creation) as pure functions to support deterministic execution from the CLI.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": " \"src/pipeline.py\", \"src/plotting.py\", \"src/repro_json_pipeline.py\", \"src/results_io.py\", \"src/results_schema.py\", \"src/run.py\", \"src/run_artifacts.py\", \"src/run_pipeline.py\", \"src/run_toy_experiment.py\", \"src/schema.py\", \"src/simulate.py\", \"src/toy_experiment.py\"]\nSummary: Implemented a deterministic, pure-function canonical pipeline producing results and a matplotlib figure from a provided RNG.\n",
+          "timestamp": "2025-12-24T05:36:53.157Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "/plotting.py\", \"src/repro_json_pipeline.py\", \"src/results_io.py\", \"src/results_schema.py\", \"src/run.py\", \"src/run_artifacts.py\", \"src/run_pipeline.py\", \"src/run_toy_experiment.py\", \"src/schema.py\", \"src/simulate.py\", \"src/toy_experiment.py\"]\nSummary: Implemented a deterministic, pure-function canonical pipeline (data generation, polynomial fit, metrics, and figure creation) for CLI orchestration.\n",
+          "timestamp": "2025-12-24T05:37:26.324Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:35:07.311Z",
+      "failedAt": "2025-12-24T05:37:26.324Z"
+    },
+    {
+      "path": "src/determinism.py",
+      "description": "Utilities to set seeds across random/numpy/optional torch, enforce deterministic settings, and compute SHA256 hashes for produced artifacts.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "/output_paths.py\", \"src/outputs.py\", \"src/pipeline.py\", \"src/plotting.py\", \"src/repro_json_pipeline.py\", \"src/results_io.py\", \"src/results_schema.py\", \"src/run.py\", \"src/run_artifacts.py\", \"src/run_pipeline.py\", \"src/run_toy_experiment.py\", \"src/schema.py\", \"src/simulate.py\", \"src/toy_experiment.py\"]\nSUMMARY: Wrote deterministic seeding and SHA256 artifact hashing utilities to src/determinism.py.\n",
+          "timestamp": "2025-12-24T05:37:48.093Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "src/pipeline.py\", \"src/plotting.py\", \"src/repro_json_pipeline.py\", \"src/results_io.py\", \"src/results_schema.py\", \"src/run.py\", \"src/run_artifacts.py\", \"src/run_pipeline.py\", \"src/run_toy_experiment.py\", \"src/schema.py\", \"src/simulate.py\", \"src/toy_experiment.py\"]\nSummary: Added determinism utilities to set global RNG seeds (including optional torch) and compute SHA256 hashes for output artifacts.\n",
+          "timestamp": "2025-12-24T05:38:06.799Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:35:07.311Z",
+      "failedAt": "2025-12-24T05:38:06.799Z"
+    },
+    {
+      "path": "src/io_utils.py",
+      "description": "Helpers for atomic output writing, JSON schema-stable serialization, and ensuring the outputs directory exists.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "eline.py\", \"src/plotting.py\", \"src/repro_json_pipeline.py\", \"src/results_io.py\", \"src/results_schema.py\", \"src/run.py\", \"src/run_artifacts.py\", \"src/run_pipeline.py\", \"src/run_toy_experiment.py\", \"src/schema.py\", \"src/simulate.py\", \"src/toy_experiment.py\"]\nSummary: Wrote src/io_utils.py with stable JSON serialization helpers, outputs directory creation, and atomic text/bytes/JSON write utilities.\n",
+          "timestamp": "2025-12-24T05:38:27.560Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "\"src/pipeline.py\", \"src/plotting.py\", \"src/repro_json_pipeline.py\", \"src/results_io.py\", \"src/results_schema.py\", \"src/run.py\", \"src/run_artifacts.py\", \"src/run_pipeline.py\", \"src/run_toy_experiment.py\", \"src/schema.py\", \"src/simulate.py\", \"src/toy_experiment.py\"]\nSUMMARY: Implemented deterministic, schema-stable JSON serialization and atomic output-writing helpers with output directory creation.\n",
+          "timestamp": "2025-12-24T05:38:41.180Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:35:07.311Z",
+      "failedAt": "2025-12-24T05:38:41.180Z"
+    },
+    {
+      "path": "tests/test_cli_outputs.py",
+      "description": "End-to-end test that runs the CLI, verifies the existence and schema of results.json, existence of figure.png, and correctness/consistency of hashes.json across repeated runs.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "py\", \"tests/test_pipeline_outputs_schema.py\", \"tests/test_pipeline_runnable.py\", \"tests/test_repro_json_pipeline_import_and_run.py\", \"tests/test_reproducibility.py\", \"tests/test_results_schema.py\", \"tests/test_results_schema_validation.py\", \"tests/test_stability.py\"]\nSummary: Added an end-to-end pytest that runs the CLI twice and verifies output artifacts, schema, and deterministic SHA256 hashes.\n",
+          "timestamp": "2025-12-24T05:39:06.130Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "ts.py\", \"tests/test_pipeline_outputs_schema.py\", \"tests/test_pipeline_runnable.py\", \"tests/test_repro_json_pipeline_import_and_run.py\", \"tests/test_reproducibility.py\", \"tests/test_results_schema.py\", \"tests/test_results_schema_validation.py\", \"tests/test_stability.py\"]\nSummary: Added an end-to-end deterministic CLI output test validating artifacts, schema, and SHA256 hashes across repeated runs.\n",
+          "timestamp": "2025-12-24T05:39:28.501Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:35:07.311Z",
+      "failedAt": "2025-12-24T05:39:28.501Z"
+    },
+    {
+      "path": "tests/test_hashing.py",
+      "description": "Unit tests for SHA256 hashing utilities and atomic writing to ensure deterministic byte-level outputs.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "pipeline_outputs_schema.py\", \"tests/test_pipeline_runnable.py\", \"tests/test_repro_json_pipeline_import_and_run.py\", \"tests/test_reproducibility.py\", \"tests/test_results_schema.py\", \"tests/test_results_schema_validation.py\", \"tests/test_stability.py\"]\nSummary: Added pytest unit tests validating SHA256 hashing consistency and atomic write utilities produce deterministic, exact byte-level artifacts.\n",
+          "timestamp": "2025-12-24T05:39:56.243Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "ipeline_outputs.py\", \"tests/test_pipeline_outputs_schema.py\", \"tests/test_pipeline_runnable.py\", \"tests/test_repro_json_pipeline_import_and_run.py\", \"tests/test_reproducibility.py\", \"tests/test_results_schema.py\", \"tests/test_results_schema_validation.py\", \"tests/test_stability.py\"]\nSUMMARY: Added pytest unit tests covering SHA256 hashing and atomic writing for deterministic, byte-stable outputs.\n",
+          "timestamp": "2025-12-24T05:40:20.786Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:35:07.311Z",
+      "failedAt": "2025-12-24T05:40:20.786Z"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "description": "CI workflow that installs dependencies, runs formatting/linting (if configured), and executes the test suite on supported Python versions for determinism verification.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/pipeline-ci.yml\", \".github/workflows/reproducibility.yml\", \".github/workflows/tests-and-capture-artifacts.yml\"]\nSUMMARY: Added a CI workflow that installs dependencies, runs optional lint/format checks, runs tests when present, and verifies deterministic artifacts via stable hashes.\n",
+          "timestamp": "2025-12-24T05:40:48.462Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/pipeline-ci.yml\", \".github/workflows/reproducibility.yml\", \".github/workflows/tests-and-capture-artifacts.yml\"]\nSUMMARY: Added a GitHub Actions CI workflow that installs dependencies, optionally runs configured linters/formatters, and executes pytest across supported Python versions for determinism checks.\n",
+          "timestamp": "2025-12-24T05:41:13.242Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:35:07.311Z",
+      "failedAt": "2025-12-24T05:41:13.242Z"
+    },
+    {
+      "path": "pyproject.toml",
+      "description": "Project configuration defining dependencies, test tooling, and a console script entry (optional) to invoke src/run.py as the single CLI entrypoint.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-24T05:41:26.037Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "re\", \".gitignore\", \"Makefile\", \"README.md\", \"README_reproducibility.md\", \"automation_script.json\", \"exec_1766554898784_td3g4t3.py\", \"pyproject.toml\", \"pytest.ini\", \"requirements-dev.txt\", \"requirements.lock.txt\", \"requirements.txt\", \"roadmap_v1.md\"]\nSUMMARY: Added a complete pyproject.toml with runtime/dev dependencies, pytest/ruff tooling, and a console script entrypoint mapping to src.run:main.\n",
+          "timestamp": "2025-12-24T05:41:38.831Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:35:07.311Z",
+      "failedAt": "2025-12-24T05:41:38.831Z"
+    },
+    {
+      "path": "README.md",
+      "description": "Documentation describing how to run the CLI tool, the deterministic guarantees, and the fixed output artifact schemas and locations.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-24T05:42:00.765Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "ATE:[\".DS_Store\", \".gitignore\", \"Makefile\", \"README.md\", \"README_reproducibility.md\", \"automation_script.json\", \"exec_1766554941459_w7a7tw1.py\", \"pyproject.toml\", \"pytest.ini\", \"requirements-dev.txt\", \"requirements.lock.txt\", \"requirements.txt\", \"roadmap_v1.md\"]\nSUMMARY: Added README documentation for running the deterministic CLI and for the fixed output artifact schemas and verification hashes.\n",
+          "timestamp": "2025-12-24T05:42:21.505Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:35:07.311Z",
+      "failedAt": "2025-12-24T05:42:21.505Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Create a single CLI entrypoint (e.g., src/run.py) that (1) sets all RNG seeds, (2) runs the canonical pipeline, (3) writes ./outputs/results.json and ./outputs/figure.png with a fixed schema, and (4) writes ./outputs/hashes.json containing SHA256 of each artifact for determinism verification.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Directly establishes the /outputs contract by producing deterministic, overwrite-safe artifacts (results.json, figure.png) and adds a determinism check, enabling regression testing and stable iteratio..."
+  ],
+  "projectName": "single CLI entrypoint (e.g., src/run.py) that (1) sets all RNG seeds, (2) runs the canonical pipeline, (3) writes ./outputs/results.json and ./outputs/figure.png with a fixed schema, and (4) writes ./outputs/hashes.json containing SHA256 of each artifact for determinism verification.",
+  "language": "python",
+  "type": "cli_tool",
+  "status": "failed",
+  "requirements": [
+    "include_ci_cd"
+  ],
+  "lastSavedAt": "2025-12-24T05:42:21.505Z",
+  "summary": {
+    "completed": 0,
+    "failed": 9,
+    "total": 9
+  }
+}

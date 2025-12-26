@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/benchmark_determinism.py`, defining a shared deterministic policy that seeds common RNGs (random/numpy/torch when available) and provides canonical JSON serialization with stable key ordering and deterministic float formatting for use by both the runner and comparator.",
+  "reasoning": "",
+  "responseId": "resp_0bdbb1fd745d1a01006949bf50728081948938ee15760c35cc",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3417,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1918,
+    "output_tokens_details": {
+      "reasoning_tokens": 576
+    },
+    "total_tokens": 5335
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0bdbb1fd745d1a01006949bf514c9481949b7560fdb267043f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0bdbb1fd745d1a01006949bf5f788c8194917d2bdd333dece8",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/benchmark_determinism.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Deterministic policy shared by benchmark runner and comparator.\n\nThis module centralizes two pieces of determinism:\n1) Seed setting across common RNGs (random / numpy / torch when available).\n2) Canonical JSON serialization (stable key ordering + stable float formatting).\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nimport json\nimport os\nimport random\nfrom typing import Any, Optional, Union, Callable\"\"\",\n\"\"\"def set_global_determinism(seed: int) -> None:\n    \\\"\\\"\\\"Best-effort deterministic seeding across common libraries.\n\n    Note: PYTHONHASHSEED must be set before interpreter start to fully take\n    effect. We still set it here for subprocesses and for documentation.\n    \\\"\\\"\\\"\n    os.environ.setdefault(\"PYTHONHASHSEED\", str(seed))\n    random.seed(seed)\n\n    # numpy\n    try:\n        import numpy as np  # type: ignore\n        np.random.seed(seed)\n    except Exception:\n        pass\n\n    # torch\n    try:\n        import torch  # type: ignore\n        torch.manual_seed(seed)\n        if torch.cuda.is_available():\n            torch.cuda.manual_seed_all(seed)\n        # Best-effort deterministic behavior.\n        try:\n            torch.use_deterministic_algorithms(True)\n        except Exception:\n            pass\n        try:\n            import torch.backends.cudnn as cudnn  # type: ignore\n            cudnn.deterministic = True\n            cudnn.benchmark = False\n        except Exception:\n            pass\n    except Exception:\n        pass\"\"\",\n\"\"\"class CanonicalJSONEncoder(json.JSONEncoder):\n    \\\"\\\"\\\"JSON encoder with stable float formatting and key ordering.\\\"\\\"\\\"\n\n    def __init__(\n        self,\n        *,\n        float_format: Union[str, Callable[[float], str]] = \".12g\",\n        **kwargs: Any,\n    ) -> None:\n        super().__init__(**kwargs)\n        self._float_format = float_format\n\n    def iterencode(self, o: Any, _one_shot: bool = False):\n        # Inspired by CPython's json.encoder, but with a custom floatstr.\n        if isinstance(self._float_format, str):\n            def _fmt(x: float) -> str:\n                # Normalize negative zero.\n                if x == 0.0:\n                    x = 0.0\n                s = format(x, self._float_format)\n                # Ensure JSON number validity (no NaN/Infinity).\n                if s in {\"nan\", \"NaN\", \"inf\", \"Inf\", \"-inf\", \"-Inf\"}:\n                    raise ValueError(\"Out of range float values are not JSON compliant\")\n                return s\n        else:\n            _fmt = self._float_format\n\n        def floatstr(\n            o: float,\n            allow_nan: bool = self.allow_nan,\n            _repr: Any = float.__repr__,\n        ) -> str:\n            # We ignore _repr and use the deterministic formatter.\n            if not allow_nan and (o != o or o in (float(\"inf\"), float(\"-inf\"))):\n                raise ValueError(\"Out of range float values are not JSON compliant\")\n            return _fmt(float(o))\n\n        from json.encoder import _make_iterencode  # type: ignore\n\n        _iterencode = _make_iterencode(\n            markers={},\n            _default=self.default,\n            _encoder=json.encoder.encode_basestring_ascii if self.ensure_ascii else json.encoder.encode_basestring,\n            _indent=self.indent,\n            _floatstr=floatstr,\n            _key_separator=self.key_separator,\n            _item_separator=self.item_separator,\n            _sort_keys=self.sort_keys,\n            _skipkeys=self.skipkeys,\n            _one_shot=_one_shot,\n        )\n        return _iterencode(o, 0)\"\"\",\n\"\"\"def dumps_canonical(\n    data: Any,\n    *,\n    float_format: Union[str, Callable[[float], str]] = \".12g\",\n    sort_keys: bool = True,\n    ensure_ascii: bool = False,\n) -> str:\n    \\\"\\\"\\\"Serialize *data* to canonical JSON with stable formatting.\\\"\\\"\\\"\n    return json.dumps(\n        data,\n        cls=CanonicalJSONEncoder,\n        float_format=float_format,\n        sort_keys=sort_keys,\n        ensure_ascii=ensure_ascii,\n        separators=(\",\", \":\"),\n        allow_nan=False,\n    )\n\n\ndef dump_canonical_bytes(\n    data: Any,\n    *,\n    float_format: Union[str, Callable[[float], str]] = \".12g\",\n    sort_keys: bool = True,\n    ensure_ascii: bool = False,\n) -> bytes:\n    return dumps_canonical(\n        data, float_format=float_format, sort_keys=sort_keys, ensure_ascii=ensure_ascii\n    ).encode(\"utf-8\")\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass DeterminismPolicy:\n    \\\"\\\"\\\"Single source of truth for deterministic benchmark behavior.\\\"\\\"\\\"\n\n    seed: int = 0\n    float_format: Union[str, Callable[[float], str]] = \".12g\"\n    sort_keys: bool = True\n    ensure_ascii: bool = False\n\n    def apply(self) -> None:\n        set_global_determinism(self.seed)\n\n    def dumps(self, data: Any) -> str:\n        return dumps_canonical(\n            data,\n            float_format=self.float_format,\n            sort_keys=self.sort_keys,\n            ensure_ascii=self.ensure_ascii,\n        )\n\n    def dump_bytes(self, data: Any) -> bytes:\n        return self.dumps(data).encode(\"utf-8\")\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/benchmark_determinism.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bf4905a48190a8b8f9c9497ab5080ae2bb7dc1b948aa",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/benchmark_determinism.py\nDIR_STATE:[\"src/benchmark_determinism.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0bdbb1fd745d1a01006949bf73c5d0819495eb07d504012d12",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/benchmark_determinism.py`, defining a shared deterministic policy that seeds common RNGs (random/numpy/torch when available) and provides canonical JSON serialization with stable key ordering and deterministic float formatting for use by both the runner and comparator."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

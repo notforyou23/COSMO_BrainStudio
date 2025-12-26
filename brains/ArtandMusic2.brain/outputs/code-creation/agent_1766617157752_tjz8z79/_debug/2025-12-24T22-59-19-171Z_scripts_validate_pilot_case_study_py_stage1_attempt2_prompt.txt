@@ -1,0 +1,54 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add CASE_STUDY_TEMPLATE.md (or CLAIM_CARD_TEMPLATE.md) with fields: claim text, scope, evidence type, citations/DOIs/URLs, verification status (unverified/partially/verified), and abstention triggers; require it for any new empirical claim in the pilot case study.
+Project: generated_configuration_1766617158208 (python configuration)
+
+Target file details:
+- Path: scripts/validate_pilot_case_study.py
+- Purpose: Standalone script wrapper that runs the claim-card validator specifically on the pilot case study paths for easy CI or local execution.
+- Category: support
+
+Other planned files (for context only):
+- templates/CASE_STUDY_TEMPLATE.md: Markdown template for creating new case studies with explicit sections that require linking each empirical claim to a claim card ID.
+- templates/CLAIM_CARD_TEMPLATE.md: Markdown template for individual claim cards containing fields for claim text, scope, evidence type, citations/DOIs/URLs, verification status, and abstention triggers.
+- config/claim_card_schema.json: JSON schema defining the required fields and allowed values for claim cards and the claim-to-case-study linkage rules.
+- src/claim_cards/__init__.py: Package initializer for claim card tooling used to validate and enforce the empirical-claim workflow.
+
+Reference insights:
+- [AGENT: agent_1766612184767_sso1aiw] Quality Assurance Report:
+- Checks Performed: 3
+- Checks Passed: 1
+- Overall Confidence: 56.0%
+- Issues
+- [CONSOLIDATED] Establish a standardized, schema-driven workflow for collecting case studies—using shared templates, a single intake index, a
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [AGENT: agent_1766612184766_dws3uvx] Quality Assurance Report:
+- Checks Performed: 3
+- Checks Passed: 1
+- Overall Confidence: 56.0%
+- Issues
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] The dominant causal mechanism is a self-reinforcing selection loop: institutions use cheap, hig
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Standalone script wrapper that runs the claim-card validator specifically on the pilot case study paths for easy CI or local execution.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/validate_pilot_case_study.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/validate_pilot_case_study.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/validate_pilot_case_study.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/experiments/shared.py` providing lightweight shared utilities for deterministic RNG seeding, atomic JSON/NPZ result saving with standard run directory conventions, Markdown table formatting, and cached numerical diagnostics (von Neumann entropy, purity, participation ratio).",
+  "reasoning": "",
+  "responseId": "resp_0a826eb10ef5b246006949aaabfba88196ad3816fb150e4278",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3996,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2497,
+    "output_tokens_details": {
+      "reasoning_tokens": 374
+    },
+    "total_tokens": 6493
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0a826eb10ef5b246006949aaacf9f88196bad59b826f93ea2d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a826eb10ef5b246006949aab58c708196b03afb3a6baed97b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, hashlib, functools, math, random\ntarget_path = Path('/mnt/data').joinpath('src/experiments/shared.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"Shared utilities for the experiment suite.\n\nThis module is intentionally lightweight (std-lib + numpy) and provides:\n- Deterministic RNG seeding across common libraries.\n- Simple, reproducible result saving (JSON/NPZ) with atomic writes.\n- Small table/markdown formatting helpers.\n- Cached diagnostics (e.g., entropy/purity) keyed by array content.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Callable, Dict, Iterable, List, Mapping, MutableMapping, Optional, Sequence, Tuple, Union\nimport functools\nimport hashlib\nimport json\nimport math\nimport os\nimport random\n\nimport numpy as np\n\"\"\")\n\nchunks.append(\"\"\"\n# -----------------------------\n# RNG seeding\n# -----------------------------\n\ndef seed_everything(seed: int) -> np.random.Generator:\n    \\\"\\\"\\\"Seed python/random + numpy and return a fresh default numpy Generator.\\\"\\\"\\\"\n    seed = int(seed)\n    random.seed(seed)\n    np.random.seed(seed)  # legacy global RNG (some libs still use it)\n    os.environ[\"PYTHONHASHSEED\"] = str(seed)\n    try:\n        import torch  # type: ignore\n        torch.manual_seed(seed)\n        if torch.cuda.is_available():\n            torch.cuda.manual_seed_all(seed)\n        torch.backends.cudnn.deterministic = True  # type: ignore[attr-defined]\n        torch.backends.cudnn.benchmark = False  # type: ignore[attr-defined]\n    except Exception:\n        pass\n    return np.random.default_rng(seed)\n\n\ndef rng_from_seed(seed: Optional[int] = None) -> np.random.Generator:\n    \\\"\\\"\\\"Construct a numpy Generator (seed=None uses entropy).\\\"\\\"\\\"\n    return np.random.default_rng(None if seed is None else int(seed))\n\"\"\")\n\nchunks.append(\"\"\"\n# -----------------------------\n# Result saving (atomic)\n# -----------------------------\n\ndef ensure_dir(path: Union[str, Path]) -> Path:\n    p = Path(path)\n    p.mkdir(parents=True, exist_ok=True)\n    return p\n\n\ndef _atomic_write_bytes(path: Path, data: bytes) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    tmp = path.with_suffix(path.suffix + \".tmp\")\n    tmp.write_bytes(data)\n    os.replace(tmp, path)\n\n\ndef save_json(path: Union[str, Path], obj: Any, *, indent: int = 2) -> Path:\n    p = Path(path)\n    data = json.dumps(obj, indent=indent, sort_keys=True, default=_json_default).encode(\"utf-8\")\n    _atomic_write_bytes(p, data)\n    return p\n\n\ndef save_npz(path: Union[str, Path], **arrays: np.ndarray) -> Path:\n    p = Path(path)\n    p.parent.mkdir(parents=True, exist_ok=True)\n    tmp = p.with_suffix(p.suffix + \".tmp\")\n    np.savez_compressed(tmp, **arrays)\n    os.replace(tmp, p)\n    return p\n\n\ndef _json_default(x: Any) -> Any:\n    if isinstance(x, (np.integer, np.int64)):\n        return int(x)\n    if isinstance(x, (np.floating, np.float64)):\n        return float(x)\n    if isinstance(x, np.ndarray):\n        return {\"__ndarray__\": True, \"shape\": list(x.shape), \"dtype\": str(x.dtype)}\n    if hasattr(x, \"__dict__\"):\n        return x.__dict__\n    return str(x)\n\n\n@dataclass(frozen=True)\nclass RunPaths:\n    root: Path\n    out_dir: Path\n    cache_dir: Path\n\n\ndef make_run_paths(root: Union[str, Path], experiment: str) -> RunPaths:\n    root = Path(root)\n    out_dir = ensure_dir(root / \"results\" / experiment)\n    cache_dir = ensure_dir(root / \".cache\" / experiment)\n    return RunPaths(root=root, out_dir=out_dir, cache_dir=cache_dir)\n\"\"\")\n\nchunks.append(\"\"\"\n# -----------------------------\n# Table formatting\n# -----------------------------\n\ndef format_table(rows: Sequence[Mapping[str, Any]], columns: Optional[Sequence[str]] = None, *,\n                 floatfmt: str = \".6g\") -> str:\n    \\\"\\\"\\\"Return a GitHub-flavored markdown table from a list of dict-like rows.\\\"\\\"\\\"\n    if not rows:\n        return \"\"\n    cols = list(columns) if columns is not None else sorted({k for r in rows for k in r.keys()})\n    def fmt(v: Any) -> str:\n        if v is None:\n            return \"\"\n        if isinstance(v, (float, np.floating)):\n            return format(float(v), floatfmt)\n        return str(v)\n    header = \"| \" + \" | \".join(cols) + \" |\"\n    sep = \"| \" + \" | \".join([\"---\"] * len(cols)) + \" |\"\n    body = [\"| \" + \" | \".join(fmt(r.get(c, \"\")) for c in cols) + \" |\" for r in rows]\n    return \"\\\\n\".join([header, sep] + body)\n\"\"\")\n\nchunks.append(\"\"\"\n# -----------------------------\n# Cached diagnostics\n# -----------------------------\n\ndef _arr_key(a: np.ndarray, *, digest_size: int = 16) -> Tuple[str, Tuple[int, ...], str]:\n    a = np.ascontiguousarray(a)\n    h = hashlib.blake2b(a.view(np.uint8), digest_size=digest_size).hexdigest()\n    return h, tuple(a.shape), str(a.dtype)\n\n\n@functools.lru_cache(maxsize=2048)\ndef _cached_entropy_from_key(key: Tuple[str, Tuple[int, ...], str], log_base: float) -> float:\n    # Key-only cache; the actual array content is incorporated via the hash.\n    # Callers should compute the entropy and then store it via this shim.\n    raise RuntimeError(\"internal cache shim must not be called directly\")\n\n\ndef _cache_set(key: Tuple[str, Tuple[int, ...], str], log_base: float, value: float) -> float:\n    # Abuse lru_cache by memoizing a closure-free function; we store via __wrapped__.\n    try:\n        _cached_entropy_from_key.cache_clear  # type: ignore[attr-defined]\n    except Exception:\n        pass\n    # Implement our own tiny dict on the function object to avoid fragile lru_cache hacks.\n    store: Dict[Tuple[Tuple[str, Tuple[int, ...], str], float], float] = getattr(_cache_set, \"_store\", {})\n    store[(key, log_base)] = float(value)\n    setattr(_cache_set, \"_store\", store)\n    return float(value)\n\n\ndef _cache_get(key: Tuple[str, Tuple[int, ...], str], log_base: float) -> Optional[float]:\n    store: Dict[Tuple[Tuple[str, Tuple[int, ...], str], float], float] = getattr(_cache_set, \"_store\", {})\n    return store.get((key, log_base))\n\n\ndef spectral_entropy(p: np.ndarray, *, base: float = 2.0, eps: float = 1e-15) -> float:\n    \\\"\\\"\\\"Shannon entropy of a probability vector (normalized if needed).\\\"\\\"\\\"\n    p = np.asarray(p, dtype=float).ravel()\n    s = float(p.sum())\n    if s <= 0:\n        return 0.0\n    p = p / s\n    p = np.clip(p, eps, 1.0)\n    return float(-(p * (np.log(p) / math.log(base))).sum())\n\n\ndef von_neumann_entropy(rho: np.ndarray, *, base: float = 2.0, eps: float = 1e-15) -> float:\n    \\\"\\\"\\\"Von Neumann entropy S(ρ) = -Tr ρ log ρ for a density matrix.\\\"\\\"\\\"\n    rho = np.asarray(rho)\n    key = _arr_key(rho)\n    cached = _cache_get(key, base)\n    if cached is not None:\n        return cached\n    # Hermitize for numerical stability.\n    r = (rho + rho.conj().T) / 2.0\n    evals = np.linalg.eigvalsh(r)\n    evals = np.clip(np.real(evals), 0.0, 1.0)\n    val = spectral_entropy(evals, base=base, eps=eps)\n    return _cache_set(key, base, val)\n\n\ndef purity(rho: np.ndarray) -> float:\n    \\\"\\\"\\\"Purity Tr(ρ²).\\\"\\\"\\\"\n    r = np.asarray(rho)\n    return float(np.real(np.trace(r @ r)))\n\n\ndef participation_ratio(vec: np.ndarray, *, eps: float = 1e-15) -> float:\n    \\\"\\\"\\\"Effective number of components: 1 / sum |v_i|^4 for normalized vectors.\\\"\\\"\\\"\n    v = np.asarray(vec).ravel()\n    nrm = np.linalg.norm(v)\n    if nrm <= eps:\n        return 0.0\n    v = v / nrm\n    return float(1.0 / np.sum(np.abs(v) ** 4))\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/experiments/shared.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949aa2cd9908190a540c44a4880beb40f550cedb5ceca86",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/shared.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/registry.py\", \"src/experiments/shared.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0a826eb10ef5b246006949aad63ea88196b37acafec97d9fa8",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/experiments/shared.py` providing lightweight shared utilities for deterministic RNG seeding, atomic JSON/NPZ result saving with standard run directory conventions, Markdown table formatting, and cached numerical diagnostics (von Neumann entropy, purity, participation ratio)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,87 @@
+{
+  "content": "Created `tests/test_smoke_artifacts.py` with 3 pytest smoke tests that locate an outputs directory, assert artifacts exist, and validate that up to three JSON artifacts parse and conform to a minimal “script-like” structure.",
+  "reasoning": "",
+  "responseId": "resp_0ea16a5ebe6fa2ac00694b3fc592b0819496c773391d05e19f",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4014,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2538,
+    "output_tokens_details": {
+      "reasoning_tokens": 871
+    },
+    "total_tokens": 6552
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0ea16a5ebe6fa2ac00694b3fc6603881949527f0b1c2286906",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ea16a5ebe6fa2ac00694b3fc71c4481949e5643e561f62cba",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nroot=Path(\"/mnt/data\")\nlist(root.iterdir())[:20], sum(1 for _ in root.rglob(\"*\"))\n",
+      "container_id": "cntr_694b3fc1a2f08190b1bb7adda7e48c5308db4d7f2887ec56",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "([], 0)"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ea16a5ebe6fa2ac00694b3fcbc5148194abbbcd438302226c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ea16a5ebe6fa2ac00694b3fd58764819488fad4be402b8e40",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_smoke_artifacts.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"from __future__ import annotations\n\nfrom pathlib import Path\nimport json\nimport pytest\"\"\",\n\"\"\"def _project_root() -> Path:\n    # tests/.. is assumed to be repository root\n    return Path(__file__).resolve().parents[1]\n\n\ndef _find_outputs_dir(root: Path) -> Path:\n    for name in (\"outputs\", \"output\", \"out\"):\n        p = root / name\n        if p.is_dir():\n            return p\n    # fallback: first directory containing at least one JSON file\n    for p in sorted(root.rglob(\"*\")):\n        if p.is_dir() and any(c.suffix == \".json\" for c in p.iterdir() if c.is_file()):\n            return p\n    return root / \"outputs\"  # will fail with a clear assertion\n\n\ndef _iter_json_files(outputs_dir: Path) -> list[Path]:\n    files = sorted({*outputs_dir.glob(\"*.json\"), *outputs_dir.rglob(\"*.json\")})\n    return [p for p in files if p.is_file()]\"\"\",\n\"\"\"def _load_json(path: Path):\n    try:\n        return json.loads(path.read_text(encoding=\"utf-8\"))\n    except UnicodeDecodeError:\n        return json.loads(path.read_text(encoding=\"utf-8-sig\"))\n\n\ndef _has_list_of_dicts(obj) -> bool:\n    if isinstance(obj, list):\n        return len(obj) > 0 and all(isinstance(x, dict) for x in obj)\n    if isinstance(obj, dict):\n        return any(_has_list_of_dicts(v) for v in obj.values())\n    return False\n\n\ndef _assert_scriptish_schema(data):\n    assert data is not None\n    assert isinstance(data, (dict, list)), f\"Expected dict/list JSON, got {type(data)}\"\n    # Prefer known top-level keys when present; otherwise accept any nested list-of-dicts.\n    if isinstance(data, dict):\n        assert data, \"Top-level JSON object is empty\"\n        for key in (\"scenes\", \"steps\", \"events\", \"items\", \"segments\"):\n            if key in data:\n                assert isinstance(data[key], list), f\"{key} must be a list\"\n                assert data[key], f\"{key} must be non-empty\"\n                assert all(isinstance(x, dict) for x in data[key]), f\"{key} elements must be objects\"\n                return\n        assert _has_list_of_dicts(data), \"Could not find any list-of-objects in JSON\"\n    else:\n        assert data, \"Top-level JSON array is empty\"\n        assert any(isinstance(x, dict) for x in data), \"Top-level JSON array has no objects\" მძ",
+      "container_id": "cntr_694b3fc1a2f08190b1bb7adda7e48c5308db4d7f2887ec56",
+      "outputs": []
+    },
+    {
+      "id": "rs_0ea16a5ebe6fa2ac00694b3fdbf2e4819485deb0f561738907",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ea16a5ebe6fa2ac00694b3fdcea148194babaa913d7657e5f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_smoke_artifacts.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"from __future__ import annotations\n\nfrom pathlib import Path\nimport json\nimport pytest\n\"\"\",\n\"\"\"def _project_root() -> Path:\n    # tests/.. is assumed to be repository root\n    return Path(__file__).resolve().parents[1]\n\n\ndef _find_outputs_dir(root: Path) -> Path:\n    for name in (\"outputs\", \"output\", \"out\"):\n        p = root / name\n        if p.is_dir():\n            return p\n    # fallback: first directory containing at least one JSON file\n    for p in sorted(root.rglob(\"*\")):\n        if p.is_dir():\n            try:\n                if any(c.suffix == \".json\" for c in p.iterdir() if c.is_file()):\n                    return p\n            except PermissionError:\n                continue\n    return root / \"outputs\"  # will fail with a clear assertion\n\n\ndef _iter_json_files(outputs_dir: Path) -> list[Path]:\n    files = sorted({*outputs_dir.glob(\"*.json\"), *outputs_dir.rglob(\"*.json\")})\n    return [p for p in files if p.is_file()]\n\"\"\",\n\"\"\"def _load_json(path: Path):\n    try:\n        return json.loads(path.read_text(encoding=\"utf-8\"))\n    except UnicodeDecodeError:\n        return json.loads(path.read_text(encoding=\"utf-8-sig\"))\n\n\ndef _has_list_of_dicts(obj) -> bool:\n    if isinstance(obj, list):\n        return len(obj) > 0 and all(isinstance(x, dict) for x in obj)\n    if isinstance(obj, dict):\n        return any(_has_list_of_dicts(v) for v in obj.values())\n    return False\n\n\ndef _assert_scriptish_schema(data):\n    assert data is not None\n    assert isinstance(data, (dict, list)), f\"Expected dict/list JSON, got {type(data)}\"\n    # Prefer known top-level keys when present; otherwise accept any nested list-of-dicts.\n    if isinstance(data, dict):\n        assert data, \"Top-level JSON object is empty\"\n        for key in (\"scenes\", \"steps\", \"events\", \"items\", \"segments\"):\n            if key in data:\n                assert isinstance(data[key], list), f\"{key} must be a list\"\n                assert data[key], f\"{key} must be non-empty\"\n                assert all(isinstance(x, dict) for x in data[key]), f\"{key} elements must be objects\"\n                return\n        assert _has_list_of_dicts(data), \"Could not find any list-of-objects in JSON\"\n    else:\n        assert data, \"Top-level JSON array is empty\"\n        assert any(isinstance(x, dict) for x in data), \"Top-level JSON array has no objects\"\n\"\"\",\n\"\"\"def test_outputs_directory_has_artifacts():\n    root = _project_root()\n    outputs = _find_outputs_dir(root)\n    assert outputs.is_dir(), f\"Outputs directory not found: {outputs}\"\n    files = [p for p in outputs.rglob(\"*\") if p.is_file()]\n    assert files, f\"No files found under outputs directory: {outputs}\"\n\n\ndef test_at_least_one_json_artifact_parses_and_looks_like_a_script():\n    root = _project_root()\n    outputs = _find_outputs_dir(root)\n    json_paths = _iter_json_files(outputs)\n    assert json_paths, f\"No JSON artifacts found in: {outputs}\"\n\n    # Smoke-test up to 3 JSON files so a single non-script JSON doesn't fail the suite.\n    checked = 0\n    for path in json_paths[:3]:\n        data = _load_json(path)\n        _assert_scriptish_schema(data)\n        checked += 1\n    assert checked >= 1\n\"\"\",\n\"\"\"@pytest.mark.parametrize(\"must_exist_name\", [\"outputs\", \"output\", \"out\"])\ndef test_common_outputs_directory_name_is_present_or_json_found(must_exist_name: str):\n    root = _project_root()\n    candidate = root / must_exist_name\n    outputs = _find_outputs_dir(root)\n    # Either the common directory exists, or the fallback found a directory with JSON.\n    assert candidate.is_dir() or outputs.is_dir()\n\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:tests/test_smoke_artifacts.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b3fc1a2f08190b1bb7adda7e48c5308db4d7f2887ec56",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_smoke_artifacts.py\nDIR_STATE:[\"tests/test_smoke_artifacts.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0ea16a5ebe6fa2ac00694b3fe55290819496c0e02a40ca1797",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/test_smoke_artifacts.py` with 3 pytest smoke tests that locate an outputs directory, assert artifacts exist, and validate that up to three JSON artifacts parse and conform to a minimal “script-like” structure."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

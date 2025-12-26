@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/stable_json.py` to provide canonicalized, byte-for-byte stable JSON output via key sorting, stable float formatting (including `-0.0` normalization), consistent indentation/separators, and guaranteed trailing newline for reproducible CI comparisons.",
+  "reasoning": "",
+  "responseId": "resp_0aa303e78ade63ba006949bd69453c8197a83add02f493c77a",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3446,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1880,
+    "output_tokens_details": {
+      "reasoning_tokens": 1824
+    },
+    "total_tokens": 5326
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0aa303e78ade63ba006949bd6a14588197bbcb5b04ab4b2f89",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0aa303e78ade63ba006949bd74bde0819798aa395a9341a014",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, math, dataclasses\ntarget_path = Path('/mnt/data').joinpath('src/stable_json.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"Stable, reproducible JSON serialization utilities.\n\nThis module aims for byte-for-byte identical JSON output across machines and CI by:\n- canonical key ordering (via sort_keys=True),\n- normalized float rendering (stable formatting, -0.0 -> 0.0),\n- consistent indentation and newline handling,\n- basic canonicalization for common non-JSON-native Python types.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import is_dataclass, asdict\nimport json\nimport math\nfrom pathlib import Path\nfrom typing import Any, Mapping, MutableMapping, Sequence\n\"\"\")\n\nchunks.append(\"\"\"\ndef canonicalize(obj: Any) -> Any:\n    \\\"\\\"\\\"Convert common Python objects into JSON-serializable, stable structures.\\\"\\\"\\\"\n    if obj is None or isinstance(obj, (str, int, bool)):\n        return obj\n    if isinstance(obj, float):\n        # Normalize negative zero; keep NaN/Infinity as-is (JSON module handles via allow_nan).\n        if obj == 0.0:\n            return 0.0\n        return obj\n    if isinstance(obj, (bytes, bytearray, memoryview)):\n        return obj.hex()\n    if isinstance(obj, Path):\n        return str(obj)\n    if is_dataclass(obj):\n        return canonicalize(asdict(obj))\n    if isinstance(obj, Mapping):\n        # Ensure plain dict values; keys must be str for JSON (convert defensively).\n        out: MutableMapping[str, Any] = {}\n        for k, v in obj.items():\n            out[str(k)] = canonicalize(v)\n        return out\n    if isinstance(obj, (list, tuple)):\n        return [canonicalize(v) for v in obj]\n    if isinstance(obj, set):\n        return sorted((canonicalize(v) for v in obj), key=lambda x: json.dumps(x, sort_keys=True))\n    # Common scalar-like objects (e.g., numpy scalars) expose item()\n    item = getattr(obj, \"item\", None)\n    if callable(item):\n        try:\n            return canonicalize(item())\n        except Exception:\n            pass\n    # Fallback: try __dict__ if it looks like a simple record.\n    d = getattr(obj, \"__dict__\", None)\n    if isinstance(d, dict) and d:\n        return canonicalize(d)\n    return obj\n\"\"\")\n\nchunks.append(\"\"\"\ndef _float_to_str(x: float) -> str:\n    \\\"\\\"\\\"Stable float rendering for JSON (handles -0.0, NaN/inf).\\\"\\\"\\\"\n    if math.isnan(x):\n        return \"NaN\"\n    if math.isinf(x):\n        return \"Infinity\" if x > 0 else \"-Infinity\"\n    if x == 0.0:\n        x = 0.0  # removes negative zero\n    # 17 significant digits round-trips IEEE-754 double.\n    s = format(x, \".17g\")\n    # Ensure JSON-compliant exponent with lowercase 'e' (format already uses 'e').\n    return s\n\"\"\")\n\nchunks.append(\"\"\"\nclass StableJSONEncoder(json.JSONEncoder):\n    \\\"\\\"\\\"JSONEncoder with stable float formatting.\\\"\\\"\\\"\n\n    def iterencode(self, o: Any, _one_shot: bool = False):\n        # Adapted from Python's stdlib json.encoder, with custom float formatting.\n        if self.check_circular:\n            markers = {}\n        else:\n            markers = None\n        _encoder = json.encoder.encode_basestring_ascii if self.ensure_ascii else json.encoder.encode_basestring\n\n        def floatstr(\n            value,\n            allow_nan=self.allow_nan,\n            _inf=math.inf,\n            _neginf=-math.inf,\n        ):\n            if value != value:\n                text = \"NaN\"\n            elif value == _inf:\n                text = \"Infinity\"\n            elif value == _neginf:\n                text = \"-Infinity\"\n            else:\n                text = _float_to_str(value)\n            if not allow_nan and text in (\"NaN\", \"Infinity\", \"-Infinity\"):\n                raise ValueError(\"Out of range float values are not JSON compliant\")\n            return text\n\n        _iterencode = json.encoder._make_iterencode(\n            markers,\n            self.default,\n            _encoder,\n            self.indent,\n            floatstr,\n            self.key_separator,\n            self.item_separator,\n            self.sort_keys,\n            self.skipkeys,\n            _one_shot,\n        )\n        return _iterencode(o, 0)\n\"\"\")\n\nchunks.append(\"\"\"\ndef dumps(obj: Any, *, indent: int = 2, ensure_ascii: bool = False) -> str:\n    \\\"\\\"\\\"Deterministically serialize to JSON text (always ends with a single '\\\\n').\\\"\\\"\\\"\n    canon = canonicalize(obj)\n    text = json.dumps(\n        canon,\n        cls=StableJSONEncoder,\n        sort_keys=True,\n        ensure_ascii=ensure_ascii,\n        indent=indent,\n        separators=(\",\", \": \") if indent else (\",\", \":\"),\n        allow_nan=True,\n    )\n    return text + \"\\\\n\"\n\n\ndef dump(obj: Any, fp, *, indent: int = 2, ensure_ascii: bool = False) -> None:\n    \\\"\\\"\\\"Write stable JSON to a file-like object.\\\"\\\"\\\"\n    fp.write(dumps(obj, indent=indent, ensure_ascii=ensure_ascii))\n\n\ndef write_text(path: str | Path, obj: Any, *, indent: int = 2, ensure_ascii: bool = False) -> Path:\n    \\\"\\\"\\\"Write stable JSON to a filesystem path (UTF-8).\\\"\\\"\\\"\n    p = Path(path)\n    p.write_text(dumps(obj, indent=indent, ensure_ascii=ensure_ascii), encoding=\"utf-8\", newline=\"\\\\n\")\n    return p\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/stable_json.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd39c7008190b2d314f911169a74060596b8e6d512ff",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/stable_json.py\nDIR_STATE:[\"src/determinism.py\", \"src/stable_json.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0aa303e78ade63ba006949bd8ebc7481978ae38e1fd9a975a6",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/stable_json.py` to provide canonicalized, byte-for-byte stable JSON output via key sorting, stable float formatting (including `-0.0` normalization), consistent indentation/separators, and guaranteed trailing newline for reproducible CI comparisons."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

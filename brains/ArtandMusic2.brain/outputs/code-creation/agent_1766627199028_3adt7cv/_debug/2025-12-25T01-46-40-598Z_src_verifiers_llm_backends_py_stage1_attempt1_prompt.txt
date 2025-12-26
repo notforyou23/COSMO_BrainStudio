@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Select 2–3 verifier patterns to implement in a benchmark harness (e.g., best-of-N + verifier; entailment-check over retrieved evidence), define metrics (precision/recall for error detection, calibration curves), and run on a grounded dataset with cited evidence to compare failure modes.
+Project: generated_script_1766627199289 (python script)
+
+Target file details:
+- Path: src/verifiers/llm_backends.py
+- Purpose: Provides pluggable model backends (OpenAI-compatible HTTP, local stub) for generation and verification prompts with retries, timeouts, and deterministic seeding.
+- Category: source
+
+Other planned files (for context only):
+- scripts/verifier_benchmark.py: Main runnable benchmark harness implementing 2–3 verifier patterns, loading a grounded QA dataset with cited evidence, executing generate→verify→revise pipelines, and writing standardized result artifacts.
+- src/verifiers/patterns.py: Implements verifier patterns (best-of-N + verifier rerank, entailment/attribution check over retrieved evidence, and self-consistency + critique gating) with a unified interface.
+- src/data/grounded_dataset.py: Loads and validates a grounded dataset schema (questions, answers, evidence snippets with citations) and exposes iteration plus canonical ID/evidence indexing.
+- src/metrics/evaluation.py: Computes error-detection precision/recall/F1, AUROC/AUPRC, calibration curves (ECE/reliability diagram bins), and failure-mode slices from run outputs.
+
+Reference insights:
+- [AGENT: agent_1766612249731_5hjm1fw] Verification is increasingly implemented as “generate → verify → revise” rather than single-shot answer
+- [INTROSPECTION] 2025-12-25T00-21-55-842Z_scripts_qa_run_sh_stage1_attempt2_prompt.txt from code-creation agent agent_1766622114110_412seks: 
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Provides pluggable model backends (OpenAI-compatible HTTP, local stub) for generation and verification prompts with retries, timeouts, and deterministic seeding.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/verifiers/llm_backends.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/verifiers/llm_backends.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/verifiers/llm_backends.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

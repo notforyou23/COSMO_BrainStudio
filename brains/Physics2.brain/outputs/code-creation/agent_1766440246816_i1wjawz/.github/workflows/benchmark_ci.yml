@@ -1,0 +1,72 @@
+name: benchmark-ci
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+  workflow_dispatch:
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BENCHMARK_CONFIG_PATH: config/benchmark_determinism_and_tolerance.json
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+      PYTHONUNBUFFERED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Load determinism/tolerance config into env
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          cfg_path = Path("${{ env.BENCHMARK_CONFIG_PATH }}")
+          cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
+
+          seed = int(cfg.get("determinism", {}).get("seed", 0))
+          env = cfg.get("determinism", {}).get("env", {}) or {}
+
+          defaults = cfg.get("numeric_tolerance_diff", {}).get("defaults", {}) or {}
+          atol = defaults.get("abs_tol", 1e-8)
+          rtol = defaults.get("rel_tol", 1e-6)
+
+          # This repo's runner expects an overrides mapping; keep it stable even if empty.
+          tolerances_json = "{}"
+
+          lines = [
+              f"BENCHMARK_SEED={seed}",
+              f"BENCHMARK_ATOL={atol}",
+              f"BENCHMARK_RTOL={rtol}",
+              f"BENCHMARK_TOLERANCES_JSON={tolerances_json}",
+          ]
+          # Propagate key determinism env vars (e.g., PYTHONHASHSEED) from config.
+          for k, v in sorted(env.items()):
+              lines.append(f"{k}={v}")
+
+          github_env = Path.cwd() / (Path(__import__("os").environ["GITHUB_ENV"]).name)
+          # Use provided path rather than recreating, but keep write logic explicit.
+          Path(__import__("os").environ["GITHUB_ENV"]).write_text("\n".join(lines) + "\n", encoding="utf-8")
+          print("Loaded benchmark config:", cfg_path)
+          PY
+
+      - name: Run benchmark case 001 (deterministic + tolerance compare)
+        shell: bash
+        run: |
+          python scripts/run_benchmark_case_001.py
+
+      - name: Upload benchmark artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-diffs
+          path: |
+            actual/**
+          if-no-files-found: warn
+          retention-days: 7

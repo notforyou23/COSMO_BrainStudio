@@ -1,0 +1,100 @@
+claim_card:
+  version: "1.0"
+  kind: "CLAIM_CARD"
+  id: "claim-0001"
+  created_utc: "2025-01-01T00:00:00Z"
+  created_by: "author_or_agent_id"
+  status: "draft"
+
+required_inputs:
+  verbatim_claim:
+    text: "Verbatim claim exactly as asserted (quote; do not paraphrase)."
+    language: "en"
+    claim_type: "factual"
+  source_context:
+    summary: "Where/how the claim appears (document title, section, prompt, conversation turn)."
+    source_locator:
+      type: "url"
+      value: "https://example.com/path"
+    excerpt: "Minimum necessary surrounding text to preserve meaning."
+    timestamp_utc: "2025-01-01T00:00:00Z"
+  provenance_anchor:
+    anchor_type: "document+location"
+    anchor: "doc_id:PAGE:LINE or stable hash pointer"
+    evidence_artifacts:
+      - kind: "quote"
+        ref: "source_context.excerpt"
+        notes: "Direct quote supporting the claim."
+      - kind: "dataset_row"
+        ref: "dataset://name#row=123"
+        notes: "Optional: structured evidence pointer."
+
+verification:
+  question: "What exactly must be true for the claim to hold?"
+  methodology: "triangulation"
+  checks:
+    - id: "check-1"
+      description: "Locate primary evidence at provenance_anchor and confirm verbatim alignment."
+      required: true
+    - id: "check-2"
+      description: "Validate dates/units/entities; resolve ambiguity; note assumptions explicitly."
+      required: true
+    - id: "check-3"
+      description: "Cross-check with at least one independent corroborating source when feasible."
+      required: false
+  verdict:
+    status: "unverified"
+    confidence: 0.0
+    rationale: "Concise reasoning grounded in evidence; cite anchors."
+    evidence_used:
+      - anchor: "provenance_anchor.anchor"
+        note: "Primary evidence reference."
+    limitations: "Known gaps, uncertainty drivers, and what would change the verdict."
+
+validation_constraints:
+  required_fields:
+    - "claim_card.version"
+    - "claim_card.kind"
+    - "claim_card.id"
+    - "claim_card.created_utc"
+    - "claim_card.created_by"
+    - "claim_card.status"
+    - "required_inputs.verbatim_claim.text"
+    - "required_inputs.source_context.summary"
+    - "required_inputs.source_context.source_locator.type"
+    - "required_inputs.source_context.source_locator.value"
+    - "required_inputs.provenance_anchor.anchor_type"
+    - "required_inputs.provenance_anchor.anchor"
+  formats:
+    utc_timestamp: "RFC3339 date-time ending with Z (e.g., 2025-01-01T00:00:00Z)"
+    id_pattern: "^claim-[0-9]{4,}$"
+    locator_type_enum: ["url", "file", "repo_path", "doi", "isbn", "conversation", "dataset", "other"]
+    claim_type_enum: ["factual", "numerical", "attribution", "causal", "forecast", "normative"]
+  text_rules:
+    verbatim_claim_min_chars: 15
+    verbatim_claim_must_be_verbatim: true
+    excerpt_should_include_context: true
+  provenance_rules:
+    anchor_must_be_stable: true
+    at_least_one_evidence_artifact: true
+
+status_lifecycle:
+  allowed_statuses: ["draft", "in_review", "verified_true", "verified_false", "partially_supported", "needs_revision", "rejected", "obsolete"]
+  terminal_statuses: ["verified_true", "verified_false", "rejected", "obsolete"]
+  transitions:
+    draft: ["in_review", "rejected"]
+    in_review: ["verified_true", "verified_false", "partially_supported", "needs_revision", "rejected"]
+    needs_revision: ["in_review", "rejected"]
+    partially_supported: ["in_review", "needs_revision", "obsolete"]
+    verified_true: ["obsolete"]
+    verified_false: ["obsolete"]
+    rejected: ["obsolete"]
+    obsolete: []
+
+qa_gate_expectations:
+  gate_name: "claim_card_verification"
+  must_have_required_inputs: true
+  must_validate_against_schema: true
+  must_use_status_lifecycle: true
+  passing_statuses: ["verified_true", "verified_false", "partially_supported"]
+  failing_statuses: ["draft", "in_review", "needs_revision", "rejected"]

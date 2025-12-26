@@ -1,0 +1,61 @@
+{
+  "content": "Created `observables.py` defining a compact, prioritized catalog of continuum-recovery observables (with required dataset keys, output schemas, and concrete estimators) plus a small API to list, fetch, and compute single or multiple diagnostics from unified RG/coarse-graining datasets.",
+  "reasoning": "",
+  "responseId": "resp_0832ea288ea7cfb00069499c0aaf1081958996cf06a9bc8217",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4380,
+    "input_tokens_details": {
+      "cached_tokens": 1408
+    },
+    "output_tokens": 2833,
+    "output_tokens_details": {
+      "reasoning_tokens": 309
+    },
+    "total_tokens": 7213
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0832ea288ea7cfb00069499c0b675481958670f6f5e2d47477",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0832ea288ea7cfb00069499c13ad488195997c0c568fcb53ab",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, numpy as np\ntarget_path = Path('/mnt/data').joinpath('src/sf_gft_diagnostics/observables.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\n\\\"\\\"\\\"Continuum-recovery observables for spin-foam / GFT renormalization.\n\nThis module provides a *prioritized* catalog of candidate continuum observables and\nscaling quantities, with lightweight schemas and computable estimators.\n\nConventions:\n- Estimators consume an in-memory mapping ``data: dict`` (produced by rg_io adapters).\n- Missing required keys raise ``KeyError`` with a clear message.\n- Returned values are numpy scalars/arrays, suitable for bootstraps/FSS in scaling.py.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Union\n\nimport numpy as np\n\"\"\")\n\nchunks.append(\"\"\"\nArray = np.ndarray\nData = Mapping[str, Any]\nEstimator = Callable[[Data], Any]\n\n\n@dataclass(frozen=True)\nclass ObservableSpec:\n    \\\"\\\"\\\"Specification for a computable diagnostic observable.\\\"\\\"\\\"\n\n    name: str\n    priority: int  # 1 = highest\n    description: str\n    requires: Tuple[str, ...]\n    schema: Dict[str, Any]\n    estimator: Estimator\n\n    def compute(self, data: Data) -> Any:\n        for k in self.requires:\n            if k not in data:\n                raise KeyError(f\\\"Observable '{self.name}' requires key '{k}'\\\")\n        return self.estimator(data)\n\"\"\")\n\nchunks.append(\"\"\"\ndef _as_array(x: Any) -> Array:\n    return np.asarray(x)\n\n\ndef _mean_var(x: Any) -> Tuple[float, float]:\n    a = _as_array(x).astype(float)\n    return float(np.mean(a)), float(np.var(a, ddof=1) if a.size > 1 else 0.0)\n\n\ndef _safe_log(x: Array, eps: float = 1e-300) -> Array:\n    return np.log(np.maximum(_as_array(x).astype(float), eps))\n\"\"\")\n\nchunks.append(\"\"\"\n# ---- Estimators (generic, dataset-key based) ---------------------------------\n\n\ndef est_mean_volume(data: Data) -> float:\n    \\\"\\\"\\\"Mean 4-volume proxy (e.g. number of 4-simplices, or GFT quanta).\\\"\\\"\\\"\n    m, _ = _mean_var(data[\\\"volume\\\"])\n    return m\n\n\ndef est_volume_susceptibility(data: Data) -> float:\n    \\\"\\\"\\\"Var(V)/<V> as a coarse analog of compressibility/susceptibility.\\\"\\\"\\\"\n    m, v = _mean_var(data[\\\"volume\\\"])\n    return float(v / (m + 1e-30))\n\n\ndef est_binder_volume(data: Data) -> float:\n    \\\"\\\"\\\"Binder cumulant of volume: 1 - <V^4>/(3 <V^2>^2).\\\"\\\"\\\"\n    V = _as_array(data[\\\"volume\\\"]).astype(float)\n    v2 = np.mean(V**2)\n    v4 = np.mean(V**4)\n    return float(1.0 - v4 / (3.0 * (v2**2 + 1e-30)))\n\n\ndef est_spin_mean(data: Data) -> float:\n    \\\"\\\"\\\"Mean spin from a histogram or sample list (proxy for area scale).\\\"\\\"\\\"\n    j = _as_array(data[\\\"spin\\\"]).astype(float)\n    return float(np.mean(j))\n\n\ndef est_spin_entropy(data: Data) -> float:\n    \\\"\\\"\\\"Shannon entropy of spin distribution (requires prob vector 'spin_p').\\\"\\\"\\\"\n    p = _as_array(data[\\\"spin_p\\\"]).astype(float)\n    p = p / (np.sum(p) + 1e-30)\n    return float(-np.sum(p * _safe_log(p)))\n\n\ndef est_two_point_connected(data: Data) -> Array:\n    \\\"\\\"\\\"Connected correlator C(r)=<O_x O_{x+r}>-<O>^2 provided as raw arrays.\\\"\\\"\\\"\n    oo = _as_array(data[\\\"two_point\\\"]).astype(float)  # shape (R,) or (nsamp,R)\n    o = _as_array(data[\\\"one_point\\\"]).astype(float)   # scalar or (nsamp,)\n    return np.mean(oo, axis=0) - (np.mean(o) ** 2)\n\n\ndef est_corr_length_second_moment(data: Data) -> float:\n    \\\"\\\"\\\"Second-moment correlation length from C(r) and radii r.\\\"\\\"\\\"\n    r = _as_array(data[\\\"r\\\"]).astype(float)\n    C = _as_array(data[\\\"C_r\\\"]).astype(float)\n    C0 = np.sum(C)\n    if C0 <= 0:\n        return float(np.nan)\n    xi2 = np.sum((r**2) * C) / (2.0 * C0 + 1e-30)\n    return float(np.sqrt(max(xi2, 0.0)))\n\n\ndef est_spectral_dimension(data: Data) -> float:\n    \\\"\\\"\\\"Spectral dimension from return prob P(s): d_s=-2 d ln P / d ln s.\\\"\\\"\\\"\n    s = _as_array(data[\\\"diffusion_time\\\"]).astype(float)\n    P = _as_array(data[\\\"return_prob\\\"]).astype(float)\n    ls, lP = _safe_log(s), _safe_log(P)\n    # local slope via least squares on central window if provided\n    i0, i1 = data.get(\\\"fit_window\\\", (max(1, len(s)//4), max(2, 3*len(s)//4)))\n    i0, i1 = int(i0), int(i1)\n    A = np.vstack([ls[i0:i1], np.ones(i1 - i0)]).T\n    slope, _ = np.linalg.lstsq(A, lP[i0:i1], rcond=None)[0]\n    return float(-2.0 * slope)\n\n\ndef est_regge_curvature_rms(data: Data) -> float:\n    \\\"\\\"\\\"RMS deficit angle (proxy for |R| scale) from 'deficit_angles'.\\\"\\\"\\\"\n    d = _as_array(data[\\\"deficit_angles\\\"]).astype(float)\n    return float(np.sqrt(np.mean(d**2)))\n\"\"\")\n\nchunks.append(\"\"\"\n# ---- Prioritized catalog ------------------------------------------------------\n\nCATALOG: List[ObservableSpec] = [\n    ObservableSpec(\n        name=\\\"mean_volume\\\",\n        priority=1,\n        description=\\\"Mean total 4-volume proxy (tracks phase structure and continuum limit at fixed physical volume).\\\",\\n        requires=(\\\"volume\\\",),\n        schema={\\\"type\\\": \\\"scalar\\\", \\\"unit\\\": \\\"(l_P)^4 or simplex-count\\\"},\n        estimator=est_mean_volume,\n    ),\n    ObservableSpec(\n        name=\\\"volume_susceptibility\\\",\n        priority=1,\n        description=\\\"Var(V)/<V> (peaks indicate criticality; useful for FSS).\\\",\\n        requires=(\\\"volume\\\",),\n        schema={\\\"type\\\": \\\"scalar\\\", \\\"unit\\\": \\\"dimensionless\\\"},\n        estimator=est_volume_susceptibility,\n    ),\n    ObservableSpec(\n        name=\\\"binder_volume\\\",\n        priority=1,\n        description=\\\"Binder cumulant for volume (distinguishes 1st vs 2nd order transitions, universality).\\\",\\n        requires=(\\\"volume\\\",),\n        schema={\\\"type\\\": \\\"scalar\\\", \\\"range\\\": [-2, 1]},\n        estimator=est_binder_volume,\n    ),\n    ObservableSpec(\n        name=\\\"spin_mean\\\",\n        priority=2,\n        description=\\\"Mean spin/area scale (monitors coarse-graining drift and 'continuum' scaling of typical quantum numbers).\\\",\\n        requires=(\\\"spin\\\",),\n        schema={\\\"type\\\": \\\"scalar\\\", \\\"unit\\\": \\\"dimensionless j\\\"},\n        estimator=est_spin_mean,\n    ),\n    ObservableSpec(\n        name=\\\"spin_entropy\\\",\n        priority=2,\n        description=\\\"Entropy of spin distribution (checks approach to fixed-point distributions; comparable across RG schemes).\\\",\\n        requires=(\\\"spin_p\\\",),\n        schema={\\\"type\\\": \\\"scalar\\\", \\\"unit\\\": \\\"nats\\\"},\n        estimator=est_spin_entropy,\n    ),\n    ObservableSpec(\n        name=\\\"C_r_connected\\\",\n        priority=2,\n        description=\\\"Connected 2-point correlator (input for correlation length and anomalous scaling).\\\",\\n        requires=(\\\"two_point\\\", \\\"one_point\\\"),\n        schema={\\\"type\\\": \\\"array\\\", \\\"axis\\\": \\\"r\\\"},\n        estimator=est_two_point_connected,\n    ),\n    ObservableSpec(\n        name=\\\"xi_second_moment\\\",\n        priority=1,\n        description=\\\"Second-moment correlation length from C(r) (primary continuum diagnostic; enables FSS collapse).\\\",\\n        requires=(\\\"r\\\", \\\"C_r\\\"),\n        schema={\\\"type\\\": \\\"scalar\\\", \\\"unit\\\": \\\"lattice units\\\"},\n        estimator=est_corr_length_second_moment,\n    ),\n    ObservableSpec(\n        name=\\\"spectral_dimension\\\",\n        priority=1,\n        description=\\\"Spectral dimension from diffusion return probability (robust semiclassical/continuum comparison target).\\\",\\n        requires=(\\\"diffusion_time\\\", \\\"return_prob\\\"),\n        schema={\\\"type\\\": \\\"scalar\\\", \\\"unit\\\": \\\"dimensionless\\\", \\\"notes\\\": \\\"fit_window optional\\\"},\n        estimator=est_spectral_dimension,\n    ),\n    ObservableSpec(\n        name=\\\"regge_curvature_rms\\\",\n        priority=3,\n        description=\\\"RMS deficit angle (curvature proxy; compare with semiclassical/Regge expectations at large scales).\\\",\\n        requires=(\\\"deficit_angles\\\",),\n        schema={\\\"type\\\": \\\"scalar\\\", \\\"unit\\\": \\\"radians\\\"},\n        estimator=est_regge_curvature_rms,\n    ),\n]\n\n_BY_NAME: Dict[str, ObservableSpec] = {o.name: o for o in CATALOG}\n\"\"\")\n\nchunks.append(\"\"\"\ndef list_observables(sort: bool = True) -> List[ObservableSpec]:\n    \\\"\\\"\\\"Return catalog entries (optionally sorted by increasing priority).\\\"\\\"\\\"\n    obs = list(CATALOG)\n    return sorted(obs, key=lambda o: (o.priority, o.name)) if sort else obs\n\n\ndef get_observable(name: str) -> ObservableSpec:\n    \\\"\\\"\\\"Fetch an observable spec by name.\\\"\\\"\\\"\n    try:\n        return _BY_NAME[name]\n    except KeyError as e:\n        raise KeyError(f\\\"Unknown observable '{name}'. Available: {sorted(_BY_NAME)}\\\") from e\n\n\ndef compute(name: str, data: Data) -> Any:\n    \\\"\\\"\\\"Compute an observable by name.\\\"\\\"\\\"\n    return get_observable(name).compute(data)\n\n\ndef compute_many(names: Sequence[str], data: Data) -> Dict[str, Any]:\n    \\\"\\\"\\\"Compute multiple observables, returning a mapping name->value.\\\"\\\"\\\"\n    return {n: compute(n, data) for n in names}\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/sf_gft_diagnostics/observables.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499b97284881909e58fb047f14c1e300fdec2b43878464",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/sf_gft_diagnostics/observables.py\nDIR_STATE:[\"src/sf_gft_diagnostics/__init__.py\", \"src/sf_gft_diagnostics/observables.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0832ea288ea7cfb00069499c4208888195abcb3e4145b52ca5",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0832ea288ea7cfb00069499c423bc8819584de9d94253b35dc",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `observables.py` defining a compact, prioritized catalog of continuum-recovery observables (with required dataset keys, output schemas, and concrete estimators) plus a small API to list, fetch, and compute single or multiple diagnostics from unified RG/coarse-graining datasets."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

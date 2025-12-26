@@ -1,0 +1,56 @@
+{
+  "content": "Created `docs/e2e/README_e2e_sections/_template.md` as a concise authoring template that standardizes section structure, stable anchors, and cross-linking conventions for modular E2E README sections.",
+  "reasoning": "",
+  "responseId": "resp_06c68d4bb66b8716006949c9ccb0dc81909aa4b3d76fabd703",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2870,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1250,
+    "output_tokens_details": {
+      "reasoning_tokens": 198
+    },
+    "total_tokens": 4120
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_06c68d4bb66b8716006949c9cd5d3881909a4483f763f655c4",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06c68d4bb66b8716006949c9d33e8c8190b6ee46a2b67104d4",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('docs/e2e/README_e2e_sections/_template.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"# E2E README modular section template\n\nThis file defines the standard structure and linking conventions for a modular section consumed by `docs/e2e/README_e2e.md`.\n\nCopy this file to a new section file (for example `30_running.md`) and edit the prose while keeping the heading levels and anchor conventions consistent.\"\"\",\n\"\"\"## Conventions (keep consistent across all sections)\n\n### File naming\n- Use a two-digit prefix to control ordering in the assembled README: `00_`, `10_`, `20_`, …\n- Use lowercase snake-case: `30_running.md`, `40_troubleshooting.md`.\n\n### Heading levels\n- Each section file starts with a single level-1 heading (`#`).\n- Use level-2 headings (`##`) for subsections.\n- Use level-3 headings (`###`) for deeper detail only when needed.\n\n### Anchors (stable link targets)\n- Prefer explicit HTML anchors for any heading that will be cross-linked.\n- Anchor format: `e2e-<area>-<topic>` using lowercase and hyphens.\n- Keep anchors stable even if you reword the visible heading.\n\nExample:\n```md\n## Running the suite <a id=\"e2e-running-suite\"></a>\n```\n\n### Cross-links\n- Link within a section using the explicit anchor: `[text](#e2e-running-suite)`.\n- Link to another section file using a relative file link plus anchor:\n  - `[Configuration](./20_configuration.md#e2e-configuration-overview)`\n- When linking back to the assembled doc, use the relative path from this folder:\n  - `[Back to README_e2e](../README_e2e.md)\n\n### Code blocks and commands\n- Use fenced code blocks with a language tag where possible (`bash`, `yaml`, `json`).\n- Prefer copy/pasteable commands that are safe by default and clearly scoped to E2E.\"\"\"\n,\n\"\"\"# Section title (short, descriptive)\n\nOne or two paragraphs explaining:\n- what this section covers,\n- who it is for,\n- and where it sits in the E2E workflow.\n\n## Quick links <a id=\"e2e-section-quick-links\"></a>\n- [Back to README_e2e](../README_e2e.md)\n- [Prerequisites](./10_prerequisites.md)\n- [Configuration](./20_configuration.md)\n\n## Scope <a id=\"e2e-section-scope\"></a>\nDescribe what is included and excluded. Use bullets for clarity.\n\nIncluded:\n- Item 1\n- Item 2\n\nNot included:\n- Item A\n- Item B\n\n## Inputs and outputs <a id=\"e2e-section-io\"></a>\nDocument the contract for this section.\n\nInputs:\n- Config files (paths and formats)\n- Environment variables (names and meaning)\n- External services (if any)\n\nOutputs:\n- Logs (where to find them)\n- Artifacts (reports, snapshots)\n- Exit codes / failure modes\n\n## Procedure <a id=\"e2e-section-procedure\"></a>\nDescribe the recommended steps in order. Keep steps actionable.\n\n1. Step one with a clear precondition.\n2. Step two with expected result.\n3. Step three with verification.\n\nExample command pattern:\n```bash\n# Run from repository root\npython -m <module> --help\n```\n\n## Validation checklist <a id=\"e2e-section-validation\"></a>\nA short list readers can use to confirm success.\n\n- Expected files exist in the output directory.\n- The run completes with a zero exit code.\n- A summary report is generated and readable.\n\n## Troubleshooting <a id=\"e2e-section-troubleshooting\"></a>\nList common issues, their likely causes, and fixes.\n\n- Symptom: …\n  - Cause: …\n  - Fix: …\n\n## References <a id=\"e2e-section-references\"></a>\nLink to other local sections and any project-internal docs that clarify details.\n\n- Related: [Overview](./00_overview.md)\n- Related: [Prerequisites](./10_prerequisites.md)\n- Related: [Configuration](./20_configuration.md)\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:docs/e2e/README_e2e_sections/_template.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949c882be7c819088c3caf5ad10e5ac0ab56cad82a1639c",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:docs/e2e/README_e2e_sections/_template.md\nDIR_STATE:[\"docs/e2e/README_e2e_sections/00_overview.md\", \"docs/e2e/README_e2e_sections/10_prerequisites.md\", \"docs/e2e/README_e2e_sections/20_configuration.md\", \"docs/e2e/README_e2e_sections/30_running_locally.md\", \"docs/e2e/README_e2e_sections/40_ci_github_actions.md\", \"docs/e2e/README_e2e_sections/50_artifacts_and_logs.md\", \"docs/e2e/README_e2e_sections/60_acceptance_criteria.md\", \"docs/e2e/README_e2e_sections/70_faq.md\", \"docs/e2e/README_e2e_sections/_template.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_06c68d4bb66b8716006949c9e7e9b48190a50bd04e2bdf5957",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `docs/e2e/README_e2e_sections/_template.md` as a concise authoring template that standardizes section structure, stable anchors, and cross-linking conventions for modular E2E README sections."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

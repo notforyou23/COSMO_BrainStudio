@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/refactor_modularize/refactor.py` with a compact, dependency-free analysis pipeline that extracts reusable Python artifacts (imports/functions/classes/entrypoints), groups them into proposed modules via simple heuristics, and renders module texts for downstream export.",
+  "reasoning": "",
+  "responseId": "resp_04db654f59da3cc700694b4a3b0eb881938d001821c8d4f444",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3748,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2159,
+    "output_tokens_details": {
+      "reasoning_tokens": 321
+    },
+    "total_tokens": 5907
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_04db654f59da3cc700694b4a3bcb1c8193a13c98098fe9a216",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_04db654f59da3cc700694b4a4103dc8193861db8b098ab9871",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/refactor_modularize/refactor.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Core refactoring + modularization logic.\n\nThis module analyzes input source texts (primarily Python) and emits structured\n\"artifacts\" that can be re-used by export helpers (e.g., written as modules).\nThe heuristics are intentionally lightweight and dependency-free.\n\\\"\\\"\\\"\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple\nimport ast\nimport hashlib\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass Artifact:\n    \\\"\\\"\\\"A reusable unit produced by analysis (module/function/class/etc.).\\\"\\\"\\\"\n    name: str\n    kind: str  # e.g. module, function, class, entrypoint, text\n    content: str\n    origin: str = \\\"\\\"\n    metadata: Dict[str, Any] = field(default_factory=dict)\n\n    @property\n    def stable_id(self) -> str:\n        h = hashlib.sha256((self.kind + \\\"\\\\n\\\" + self.name + \\\"\\\\n\\\" + self.content).encode(\\\"utf-8\\\")).hexdigest()\n        return h[:16]\n\n\n@dataclass\nclass RefactorResult:\n    artifacts: List[Artifact]\n    warnings: List[str] = field(default_factory=list)\n    stats: Dict[str, Any] = field(default_factory=dict)\"\"\",\n\"\"\"def _language_for_path(path: str) -> str:\n    p = path.lower()\n    if p.endswith(\\\".py\\\"):\n        return \\\"python\\\"\n    if p.endswith(\\\".md\\\") or p.endswith(\\\".markdown\\\"):\n        return \\\"markdown\\\"\n    return \\\"text\\\"\n\n\ndef _slice(text: str, node: ast.AST) -> Optional[str]:\n    try:\n        return ast.get_source_segment(text, node)\n    except Exception:\n        return None\"\"\",\n\"\"\"def _python_artifacts(text: str, origin: str) -> Tuple[List[Artifact], List[str]]:\n    warnings: List[str] = []\n    try:\n        tree = ast.parse(text)\n    except SyntaxError as e:\n        return [Artifact(name=origin, kind=\\\"text\\\", content=text, origin=origin, metadata={\\\"syntax_error\\\": str(e)})], [f\\\"{origin}: {e}\\\"]\n\n    lines = text.splitlines()\n    imports: List[str] = []\n    defs: List[Artifact] = []\n    entrypoint: List[str] = []\n    for n in tree.body:\n        if isinstance(n, (ast.Import, ast.ImportFrom)):\n            seg = _slice(text, n) or \\\"\\\"\n            if seg.strip():\n                imports.append(seg.rstrip())\n        elif isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):\n            seg = _slice(text, n)\n            if not seg:\n                continue\n            kind = \\\"class\\\" if isinstance(n, ast.ClassDef) else \\\"function\\\"\n            defs.append(Artifact(name=n.name, kind=kind, content=seg.rstrip() + \\\"\\\\n\\\", origin=origin))\n        elif isinstance(n, ast.If):\n            # capture common entrypoint pattern\n            test = _slice(text, n.test) or \\\"\\\"\n            if \\\"__name__\\\" in test and \\\"__main__\\\" in test:\n                seg = _slice(text, n) or \\\"\\\"\n                if seg.strip():\n                    entrypoint.append(seg.rstrip())\n\n    artifacts: List[Artifact] = []\n    if imports:\n        artifacts.append(Artifact(name=\\\"imports\\\", kind=\\\"imports\\\", content=\\\"\\\\n\\\".join(imports) + \\\"\\\\n\\\", origin=origin))\n    artifacts.extend(defs)\n    if entrypoint:\n        artifacts.append(Artifact(name=\\\"__main__\\\", kind=\\\"entrypoint\\\", content=\\\"\\\\n\\\\n\\\".join(entrypoint) + \\\"\\\\n\\\", origin=origin))\n\n    # If nothing extracted, keep file as-is to avoid data loss\n    if not artifacts:\n        artifacts.append(Artifact(name=origin, kind=\\\"module\\\", content=text if text.endswith(\\\"\\\\n\\\") else text + \\\"\\\\n\\\", origin=origin))\n    return artifacts, warnings\"\"\",\n\"\"\"def analyze_sources(sources: Mapping[str, str]) -> RefactorResult:\n    \\\"\\\"\\\"Analyze path->text mapping and return structured reusable artifacts.\\\"\\\"\\\"\n    artifacts: List[Artifact] = []\n    warnings: List[str] = []\n    for path, text in sources.items():\n        lang = _language_for_path(path)\n        if lang == \\\"python\\\":\n            a, w = _python_artifacts(text, origin=path)\n            artifacts.extend(a)\n            warnings.extend(w)\n        else:\n            artifacts.append(Artifact(name=path, kind=lang, content=text if text.endswith(\\\"\\\\n\\\") else text + \\\"\\\\n\\\", origin=path))\n\n    stats = {\n        \\\"sources\\\": len(sources),\n        \\\"artifacts\\\": len(artifacts),\n        \\\"kinds\\\": {k: sum(1 for a in artifacts if a.kind == k) for k in sorted({a.kind for a in artifacts})},\n    }\n    return RefactorResult(artifacts=artifacts, warnings=warnings, stats=stats)\"\"\",\n\"\"\"def propose_modules(result: RefactorResult) -> Dict[str, List[Artifact]]:\n    \\\"\\\"\\\"Group artifacts into suggested module files.\n\n    Heuristic:\n    - imports are grouped into a per-origin pseudo-module\n    - functions with helper-ish names go to utils.py\n    - other defs go to a module derived from origin file name\n    - non-python/text artifacts keep their origin-derived names\n    \\\"\\\"\\\"\n    grouped: Dict[str, List[Artifact]] = {}\n    for a in result.artifacts:\n        if a.kind in {\\\"markdown\\\", \\\"text\\\"}:\n            mod = a.origin or a.name\n        elif a.kind == \\\"imports\\\":\n            base = Path(a.origin).stem if a.origin else \\\"module\\\"\n            mod = f\\\"{base}.py\\\"\n        elif a.kind in {\\\"function\\\", \\\"class\\\", \\\"entrypoint\\\"}:\n            nm = a.name.lower()\n            if any(t in nm for t in (\\\"util\\\", \\\"helper\\\", \\\"parse_\\\", \\\"read_\\\", \\\"write_\\\", \\\"slug\\\", \\\"normalize\\\")):\n                mod = \\\"utils.py\\\"\n            else:\n                base = Path(a.origin).stem if a.origin else \\\"module\\\"\n                mod = f\\\"{base}.py\\\"\n        else:  # module/unknown\n            mod = Path(a.origin).name if a.origin else \\\"module.py\\\"\n        grouped.setdefault(mod, []).append(a)\n\n    # stable ordering: imports first, then classes, then functions, then entrypoint/text\n    order = {\\\"imports\\\": 0, \\\"class\\\": 1, \\\"function\\\": 2, \\\"entrypoint\\\": 3, \\\"module\\\": 4, \\\"markdown\\\": 5, \\\"text\\\": 6}\n    for mod, items in list(grouped.items()):\n        grouped[mod] = sorted(items, key=lambda x: (order.get(x.kind, 99), x.name))\n    return grouped\"\"\",\n\"\"\"def refactor_and_modularize(sources: Mapping[str, str]) -> Tuple[RefactorResult, Dict[str, str]]:\n    \\\"\\\"\\\"End-to-end helper returning analysis plus rendered module texts.\\\"\\\"\\\"\n    result = analyze_sources(sources)\n    modules: Dict[str, str] = {}\n    for mod, items in propose_modules(result).items():\n        if mod.endswith(\\\".py\\\"):\n            body = \\\"\\\\n\\\\n\\\".join(i.content.rstrip(\\\"\\\\n\\\") for i in items).rstrip() + \\\"\\\\n\\\"\n        else:\n            body = \\\"\\\\n\\\".join(i.content.rstrip(\\\"\\\\n\\\") for i in items).rstrip() + \\\"\\\\n\\\"\n        modules[mod] = body\n    return result, modules\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/refactor_modularize/refactor.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b49f988e88190b0cbb25ca37056a608ca97619881281d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/refactor_modularize/refactor.py\nDIR_STATE:[\"src/refactor_modularize/__init__.py\", \"src/refactor_modularize/refactor.py\", \"src/refactor_modularize/utils.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_04db654f59da3cc700694b4a54a6ac8193805bf7c4d13eb053",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/refactor_modularize/refactor.py` with a compact, dependency-free analysis pipeline that extracts reusable Python artifacts (imports/functions/classes/entrypoints), groups them into proposed modules via simple heuristics, and renders module texts for downstream export."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

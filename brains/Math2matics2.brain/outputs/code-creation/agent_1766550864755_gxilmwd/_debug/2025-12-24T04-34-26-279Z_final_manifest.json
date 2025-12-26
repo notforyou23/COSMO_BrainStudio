@@ -1,0 +1,185 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766550864755_gxilmwd",
+  "agentType": "code-creation",
+  "goalId": "goal_170",
+  "missionId": "strategic_goal_170_1766550864755",
+  "spawnCycle": 121,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T04:34:29.032Z",
+  "completedAt": "2025-12-24T04:36:09.710Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/run_pipeline.py",
+      "description": "Single deterministic entrypoint script that runs the pipeline with a fixed seed and writes outputs/run_stamp.json and outputs/run.log with fixed filenames and schema/versioned metadata.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": ", \"scripts/generate_results.py\", \"scripts/generate_roadmap.py\", \"scripts/run.py\", \"scripts/run_experiment.py\", \"scripts/run_pipeline.py\", \"scripts/run_tests_and_capture_log.py\", \"scripts/update_outputs_index.py\", \"scripts/verify_test_artifacts.py\"]\nSummary: Added a deterministic pipeline entrypoint script that writes fixed outputs/run_stamp.json and outputs/run.log with schema/versioned metadata.\n",
+          "timestamp": "2025-12-24T04:34:41.028Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "pts/generate_results.py\", \"scripts/generate_roadmap.py\", \"scripts/run.py\", \"scripts/run_experiment.py\", \"scripts/run_pipeline.py\", \"scripts/run_tests_and_capture_log.py\", \"scripts/update_outputs_index.py\", \"scripts/verify_test_artifacts.py\"]\nSummary: Created a deterministic pipeline entrypoint that writes versioned outputs/run_stamp.json and outputs/run.log with a fixed seed and stable filenames.\n",
+          "timestamp": "2025-12-24T04:34:53.784Z"
+        }
+      ],
+      "createdAt": "2025-12-24T04:34:29.032Z",
+      "failedAt": "2025-12-24T04:34:53.784Z"
+    },
+    {
+      "path": "src/pipeline/__init__.py",
+      "description": "Package initializer exposing the pipeline version constant used by the entrypoint and tests.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "WRITTEN:src/pipeline/__init__.py\nDIR_STATE:[\"src/pipeline/__init__.py\", \"src/pipeline/bibliography.py\", \"src/pipeline/coverage.py\", \"src/pipeline/io_utils.py\", \"src/pipeline/output_paths.py\", \"src/pipeline/output_schema.py\", \"src/pipeline/seed_control.py\"]\nSummary: Added a pipeline package initializer that defines and exports a single pipeline version constant for use by the entrypoint and tests.\n",
+          "timestamp": "2025-12-24T04:34:58.476Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/pipeline/__init__.py\nDIR_STATE:[\"src/pipeline/__init__.py\", \"src/pipeline/bibliography.py\", \"src/pipeline/coverage.py\", \"src/pipeline/io_utils.py\", \"src/pipeline/output_paths.py\", \"src/pipeline/output_schema.py\", \"src/pipeline/seed_control.py\"]\nSummary: Exposed a stable PIPELINE_VERSION constant (and alias __version__) for shared use by the entrypoint and tests.\n",
+          "timestamp": "2025-12-24T04:35:04.335Z"
+        }
+      ],
+      "createdAt": "2025-12-24T04:34:29.032Z",
+      "failedAt": "2025-12-24T04:35:04.335Z"
+    },
+    {
+      "path": "src/pipeline/stamp_schema.py",
+      "description": "Defines the run_stamp.json schema/version fields and validation helpers shared by the script and pytest.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "ma.py\nDIR_STATE:[\"src/pipeline/__init__.py\", \"src/pipeline/bibliography.py\", \"src/pipeline/coverage.py\", \"src/pipeline/io_utils.py\", \"src/pipeline/output_paths.py\", \"src/pipeline/output_schema.py\", \"src/pipeline/seed_control.py\", \"src/pipeline/stamp_schema.py\"]\nSummary: Added a versioned run_stamp.json schema contract with builders and validators for shared use by the entrypoint script and tests.\n",
+          "timestamp": "2025-12-24T04:35:16.648Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "File not found after execution",
+          "timestamp": "2025-12-24T04:35:28.119Z"
+        }
+      ],
+      "createdAt": "2025-12-24T04:34:29.032Z",
+      "failedAt": "2025-12-24T04:35:28.119Z"
+    },
+    {
+      "path": "tests/test_run_pipeline_outputs.py",
+      "description": "Pytest that executes scripts/run_pipeline.py and asserts outputs/run_stamp.json and outputs/run.log exist and that run_stamp.json matches the expected schema/version deterministically.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "File not found after execution",
+          "timestamp": "2025-12-24T04:35:41.845Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "File not found after execution",
+          "timestamp": "2025-12-24T04:35:52.164Z"
+        }
+      ],
+      "createdAt": "2025-12-24T04:34:29.032Z",
+      "failedAt": "2025-12-24T04:35:52.164Z"
+    },
+    {
+      "path": "outputs/index.md",
+      "description": "Documentation index listing outputs/run_stamp.json and outputs/run.log and describing their purpose and schema/version contract.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/index.md\nDIR_STATE:[\"outputs/.DS_Store\", \"outputs/.gitkeep\", \"outputs/README.md\", \"outputs/bibliography_system.md\", \"outputs/index.md\", \"outputs/manifest.json\", \"outputs/manifest.md\", \"outputs/references.bib\", \"outputs/roadmap_scope_success_criteria.md\"]\nSUMMARY:Wrote outputs/index.md documenting run_stamp.json and run.log purpose and schema/version contract.\n",
+          "timestamp": "2025-12-24T04:35:59.993Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "TEN:outputs/index.md\nDIR_STATE:[\"outputs/.DS_Store\", \"outputs/.gitkeep\", \"outputs/README.md\", \"outputs/bibliography_system.md\", \"outputs/index.md\", \"outputs/manifest.json\", \"outputs/manifest.md\", \"outputs/references.bib\", \"outputs/roadmap_scope_success_criteria.md\"]\nSummary: Wrote outputs/index.md documenting run_stamp.json and run.log purposes and the schema/version contract for CI verification.\n",
+          "timestamp": "2025-12-24T04:36:09.709Z"
+        }
+      ],
+      "createdAt": "2025-12-24T04:34:29.032Z",
+      "failedAt": "2025-12-24T04:36:09.709Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Implement a single entrypoint script (e.g., python scripts/run_pipeline.py) that writes ./outputs/run_stamp.json and ./outputs/run.log deterministically (fixed seed, fixed filenames), add pytest -q test asserting those files exist and match schema/version, and list them in ./outputs/index.md.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Directly establishes the required evidence-pack mechanics (deterministic artifact writing to ./outputs/, run_stamp.json + run.log) and adds a minimal test that proves artifacts are created, supporting..."
+  ],
+  "projectName": "generated_script_1766550865077",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [
+    "include_ci_cd"
+  ],
+  "lastSavedAt": "2025-12-24T04:36:09.710Z",
+  "summary": {
+    "completed": 0,
+    "failed": 5,
+    "total": 5
+  }
+}

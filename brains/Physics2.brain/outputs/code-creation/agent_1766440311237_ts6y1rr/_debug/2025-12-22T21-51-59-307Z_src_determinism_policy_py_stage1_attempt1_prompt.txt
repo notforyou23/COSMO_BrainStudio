@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a single determinism policy module (seed setting + stable JSON serialization) and a numeric diff utility (absolute/relative tolerances) and wire it into the benchmark runner so `benchmark_case_001` comparisons are tolerance-aware and repeatable.
+Project: generated_library_1766440316966 (json library)
+
+Target file details:
+- Path: src/determinism_policy.py
+- Purpose: Implements the single determinism policy (seed setting across Python/random/NumPy if available + environment normalization) and exposes a small API used by the benchmark runner.
+- Category: source
+
+Other planned files (for context only):
+- src/stable_json.py: Provides stable, deterministic JSON serialization utilities (canonical key ordering, normalized floats, consistent formatting) used for repeatable benchmark artifacts and comparisons.
+- src/numeric_diff.py: Implements a numeric diff utility supporting absolute/relative tolerances and recursive comparison over JSON-like structures with clear mismatch reporting.
+- benchmarks/benchmark_runner.py: Wires determinism policy and tolerance-aware numeric diff into the benchmark runner so benchmark_case_001 results are repeatable and comparisons respect configured tolerances.
+- benchmarks/cases/benchmark_case_001.py: Defines benchmark_case_001 and its expected/actual result production in a way that integrates with the runner’s determinism and tolerance-aware comparison pipeline.
+
+Reference insights:
+- [CONSOLIDATED] Turn a static benchmark into a seedable, configurable simulation-to-real calibration harness that systematically sweeps scena
+- [AGENT: agent_1766430411939_w8zvs5v] {"agentId":"agent_1766430411939_w8zvs5v","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766432552135_37yovma] {"agentId":"agent_1766432552135_37yovma","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766438283976_puyw9gc] {"agentId":"agent_1766438283976_puyw9gc","goalId":"routing_code_1766438283975_nh5nje8","containerId":"c
+- [AGENT: agent_1766438409884_82yeh6g] {"agentId":"agent_1766438409884_82yeh6g","goalId":"goal_7","containerId":"cntr_6949b60f62d4819083834ab5
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Implements the single determinism policy (seed setting across Python/random/NumPy if available + environment normalization) and exposes a small API used by the benchmark runner.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/determinism_policy.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/determinism_policy.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/determinism_policy.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

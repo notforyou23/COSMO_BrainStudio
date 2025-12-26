@@ -1,0 +1,205 @@
+{
+  "content": "Implemented `benchmark_case_001` as a deterministic, seed-driven JSON-like payload generator that produces `expected` via canonical normalization and `actual` via stable JSON round-trip, returning both through the runner-compatible `run(seed, stable_dumps)` API with helpful metadata.",
+  "reasoning": "",
+  "responseId": "resp_01769a3a75866796006949be023b688197897da08e2afecd32",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 7041,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2280,
+    "output_tokens_details": {
+      "reasoning_tokens": 2220
+    },
+    "total_tokens": 9321
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_01769a3a75866796006949be02ec0481979bd65c19c55f35f0",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01769a3a75866796006949be03f60c8197b50c467a11ad7f93",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path('/mnt/data')\nsorted([str(p.relative_to(base)) for p in base.rglob('*') if p.is_file()][:50])[:50]\n",
+      "container_id": "cntr_6949bd7c27f481909eaafa795397fda805ca11b7959e0da0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "['benchmarks/benchmark_runner.py',\n 'src/determinism_policy.py',\n 'src/numeric_diff.py',\n 'src/stable_json.py']"
+        }
+      ]
+    },
+    {
+      "id": "rs_01769a3a75866796006949be06ee8081979331a9930253740d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01769a3a75866796006949be07a5e88197b4a0d409d2867892",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nprint(Path('/mnt/data/benchmarks/benchmark_runner.py').read_text()[:4000])\n",
+      "container_id": "cntr_6949bd7c27f481909eaafa795397fda805ca11b7959e0da0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Benchmark runner with deterministic execution and tolerance-aware comparison.\n\nThis runner is intentionally small: it applies a single determinism policy, runs a\nbenchmark case module, and compares expected vs actual using numeric tolerances.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport importlib\nimport os\nimport sys\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Optional, Tuple\n\nfrom src.determinism_policy import apply_determinism_policy\nfrom src.numeric_diff import DiffResult, diff\nfrom src.stable_json import stable_dumps\n@dataclass(frozen=True)\nclass Tolerances:\n    atol: float = 0.0\n    rtol: float = 0.0\n\n    @classmethod\n    def from_env(cls) -> \"Tolerances\":\n        def f(name: str, default: float) -> float:\n            v = os.environ.get(name)\n            return default if v is None or v == \"\" else float(v)\n        return cls(atol=f(\"BENCH_ATOL\", 0.0), rtol=f(\"BENCH_RTOL\", 0.0))\ndef _ensure_repo_on_path() -> None:\n    # Allow `python benchmarks/benchmark_runner.py` from repo root or elsewhere.\n    repo_root = Path(__file__).resolve().parents[1]\n    if str(repo_root) not in sys.path:\n        sys.path.insert(0, str(repo_root))\ndef _load_case(case_name: str):\n    _ensure_repo_on_path()\n    return importlib.import_module(f\"benchmarks.cases.{case_name}\")\ndef _run_case_module(mod, seed: int) -> Tuple[Any, Any, Dict[str, Any]]:\n    \"\"\"Return (expected, actual, metadata) from a case module.\n\n    Supported case APIs (checked in this order):\n    - mod.run(seed=..., stable_dumps=...): returns dict with keys expected/actual\n    - mod.get_expected()/mod.get_actual()\n    - mod.expected and mod.actual attributes\n    \"\"\"\n    meta: Dict[str, Any] = {\"case_module\": getattr(mod, \"__name__\", str(mod))}\n    if hasattr(mod, \"run\") and callable(mod.run):\n        out = mod.run(seed=seed, stable_dumps=stable_dumps)\n        if isinstance(out, dict) and \"expected\" in out and \"actual\" in out:\n            meta.update({k: v for k, v in out.items() if k not in (\"expected\", \"actual\")})\n            return out[\"expected\"], out[\"actual\"], meta\n    if all(hasattr(mod, n) and callable(getattr(mod, n)) for n in (\"get_expected\", \"get_actual\")):\n        return mod.get_expected(), mod.get_actual(), meta\n    if hasattr(mod, \"expected\") and hasattr(mod, \"actual\"):\n        return getattr(mod, \"expected\"), getattr(mod, \"actual\"), meta\n    raise TypeError(\n        f\"Unsupported benchmark case API for {meta['case_module']}. \"\n        \"Expected run() or get_expected/get_actual or expected/actual.\"\n    )\ndef compare_expected_actual(expected: Any, actual: Any, tolerances: Tolerances) -> DiffResult:\n    return diff(expected, actual, atol=tolerances.atol, rtol=tolerances.rtol)\ndef run_case(case_name: str, seed: int, tolerances: Optional[Tolerances] = None) -> int:\n    tolerances = tolerances or Tolerances.from_env()\n    apply_determinism_policy(seed=seed)\n\n    mod = _load_case(case_name)\n    expected, actual, meta = _run_case_module(mod, seed=seed)\n\n    # Deterministic, stable renderings are useful for debug logs.\n    exp_s = stable_dumps(expected)\n    act_s = stable_dumps(actual)\n\n    result = compare_expected_actual(expected, actual, tolerances)\n    if result.ok:\n        return 0\n\n    # Keep output concise but actionable.\n    sys.stderr.write(f\"CASE_FAILED:{case_name}\\n\")\n    sys.stderr.write(f\"SEED:{seed} ATOL:{tolerances.atol} RTOL:{tolerances.rtol}\\n\")\n    if meta:\n        sys.stderr.write(f\"META:{stable_dumps(meta)}\\n\")\n    sys.stderr.write(f\"MISMATCH:{result.message}\\n\")\n    # Include stable JSON for small payloads only.\n    if len(exp_s) <= 10_000 and len(act_s) <= 10_000:\n        sys.stderr.write(f\"EXPECTED:{exp_s}\\n\")\n        sys.stderr.write(f\"ACTUAL:{act_s}\\n\")\n    return 1\ndef main(argv: Optional[list[str]] = None) -> int:\n    p = argparse.ArgumentParser(description=\"Deterministic benchmark runner\")\n    p.add_argument(\"--case\", default=\"benchmark_case_001\", help=\"Case module name under benchmark\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_01769a3a75866796006949be09f37881979aa4da30e41986d9",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01769a3a75866796006949be0a2c8c8197bf005c7a33d4697e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\ntxt=Path('/mnt/data/benchmarks/benchmark_runner.py').read_text()\nprint(txt[4000:8000])\n",
+      "container_id": "cntr_6949bd7c27f481909eaafa795397fda805ca11b7959e0da0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "s/cases/\")\n    p.add_argument(\"--seed\", type=int, default=int(os.environ.get(\"BENCH_SEED\", \"0\")))\n    p.add_argument(\"--atol\", type=float, default=None)\n    p.add_argument(\"--rtol\", type=float, default=None)\n    args = p.parse_args(argv)\n\n    tol = Tolerances.from_env()\n    if args.atol is not None or args.rtol is not None:\n        tol = Tolerances(atol=tol.atol if args.atol is None else args.atol,\n                         rtol=tol.rtol if args.rtol is None else args.rtol)\n    return run_case(args.case, seed=args.seed, tolerances=tol)\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_01769a3a75866796006949be0c45988197b67c04891b5e91af",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01769a3a75866796006949be0ec9f8819793d331e3a12e5837",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nprint(Path('/mnt/data/src/determinism_policy.py').read_text()[:2000])\n",
+      "container_id": "cntr_6949bd7c27f481909eaafa795397fda805ca11b7959e0da0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Determinism policy utilities.\n\nThis module centralizes repeatability controls for benchmarks:\n- Sets seeds for Python's `random` and NumPy (if installed).\n- Normalizes common environment variables that influence determinism.\n\nIt is intentionally lightweight and dependency-free (NumPy optional).\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nimport os\nimport random\nfrom typing import Any, Dict, Optional, Tuple\ndef _import_numpy():\n    try:\n        import numpy as np  # type: ignore\n    except Exception:\n        return None\n    return np\n\n\ndef set_global_seed(seed: int) -> None:\n    \"\"\"Seed Python's RNGs (and NumPy if available).\"\"\"\n    if not isinstance(seed, int):\n        raise TypeError(f\"seed must be int, got {type(seed)!r}\")\n    random.seed(seed)\n    np = _import_numpy()\n    if np is not None:\n        np.random.seed(seed)\ndef normalized_env_defaults() -> Dict[str, str]:\n    \"\"\"Environment variables commonly set for deterministic execution.\"\"\"\n    return {\n        # Hash randomization affects iteration order of sets/dicts in some cases.\n        \"PYTHONHASHSEED\": \"0\",\n        # Prefer stable UTF-8 behavior across systems.\n        \"PYTHONUTF8\": \"1\",\n        # Keep locale/timezone stable for any incidental formatting.\n        \"TZ\": \"UTC\",\n        \"LC_ALL\": \"C\",\n        \"LANG\": \"C\",\n        # Reduce non-determinism from threaded BLAS backends (best effort).\n        \"OMP_NUM_THREADS\": \"1\",\n        \"MKL_NUM_THREADS\": \"1\",\n        \"OPENBLAS_NUM_THREADS\": \"1\",\n        \"VECLIB_MAXIMUM_THREADS\": \"1\",\n        \"NUMEXPR_NUM_THREADS\": \"1\",\n        # GPU libraries (if present) can require additional controls.\n        \"CUBLAS_WORKSPACE_CONFIG\": \":4096:8\",\n    }\n\n\ndef apply_environment(env: Optional[Dict[str, str]] = None) -> Dict[str, Optional[str]]:\n    \"\"\"Apply environment overrides and return previous values for restoration.\"\"\"\n    overrides = normalized_env_defaults()\n    if env:\n        overrides.update({k: str(v) for k, v in env.items()\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_01769a3a75866796006949be10ff188197848adf84fca62c05",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01769a3a75866796006949be11369c8197848c10fb1a8bb84d",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nprint(Path('/mnt/data/src/numeric_diff.py').read_text()[:2000])\n",
+      "container_id": "cntr_6949bd7c27f481909eaafa795397fda805ca11b7959e0da0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"numeric_diff.py\n\nTolerance-aware recursive comparison for JSON-like structures.\n\nSupports dict/list/tuple/scalars and numeric comparisons with absolute and\nrelative tolerances. Produces clear, path-addressed mismatch messages.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Any, List, Optional, Sequence, Mapping\nimport math\n\n\n_JSON_SCALARS = (str, int, float, bool, type(None))\n\n\n@dataclass\nclass DiffResult:\n    ok: bool\n    mismatches: List[str]\n\n    def __bool__(self) -> bool:  # convenience\n        return self.ok\n\n\ndef _is_number(x: Any) -> bool:\n    # bool is a subclass of int; treat separately to avoid surprises.\n    return isinstance(x, (int, float)) and not isinstance(x, bool)\n\n\ndef _path_join(path: str, token: str) -> str:\n    if not path:\n        return \"$\" + token\n    return path + token\n\n\ndef _format_value(x: Any) -> str:\n    if isinstance(x, float):\n        if math.isnan(x):\n            return \"NaN\"\n        if math.isinf(x):\n            return \"Infinity\" if x > 0 else \"-Infinity\"\n        # repr keeps enough precision while staying deterministic.\n        return repr(x)\n    return repr(x)\n\n\ndef _numbers_close(a: float, b: float, abs_tol: float, rel_tol: float) -> bool:\n    # Handle NaN/inf explicitly.\n    if math.isnan(a) or math.isnan(b):\n        return math.isnan(a) and math.isnan(b)\n    if math.isinf(a) or math.isinf(b):\n        return a == b\n    diff = abs(a - b)\n    scale = max(abs(a), abs(b), 0.0)\n    return diff <= max(abs_tol, rel_tol * scale)\n\n\ndef compare(\n    actual: Any,\n    expected: Any,\n    *,\n    abs_tol: float = 0.0,\n    rel_tol: float = 0.0,\n    path: str = \"\",\n    max_mismatches: int = 50,\n) -> DiffResult:\n    \"\"\"Compare two JSON-like structures.\n\n    Parameters\n    ----------\n    actual, expected:\n        Structures composed of dict/list/tuple/scalars.\n    abs_tol, rel_tol:\n        Numeric tolerances used when comparing ints/floats (except bool).\n    path:\n        Root path for reporting; \n"
+        }
+      ]
+    },
+    {
+      "id": "rs_01769a3a75866796006949be1345048197b399755bde92f2a7",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01769a3a75866796006949be13dde08197ac757e10bb925bee",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\ntxt=Path('/mnt/data/src/numeric_diff.py').read_text()\nprint(txt[2000:4000])\n",
+      "container_id": "cntr_6949bd7c27f481909eaafa795397fda805ca11b7959e0da0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "by default starts at '$'.\n    max_mismatches:\n        Stop collecting mismatch strings after this many entries.\n    \"\"\"\n    mismatches: List[str] = []\n\n    def add(msg: str) -> None:\n        if len(mismatches) < max_mismatches:\n            mismatches.append(msg)\n\n    def rec(a: Any, e: Any, p: str) -> None:\n        if len(mismatches) >= max_mismatches:\n            return\n\n        # Numeric comparisons with tolerance\n        if _is_number(a) and _is_number(e):\n            af, ef = float(a), float(e)\n            if not _numbers_close(af, ef, abs_tol, rel_tol):\n                diff = abs(af - ef) if (not math.isnan(af) and not math.isnan(ef)) else float(\"nan\")\n                add(\n                    f\"{p or '$'}: numbers differ actual={_format_value(a)} expected={_format_value(e)} \"\n                    f\"abs_diff={_format_value(diff)} abs_tol={abs_tol} rel_tol={rel_tol}\"\n                )\n            return\n\n        # Type mismatch fast path (but allow tuple/list interchange)\n        if isinstance(a, (list, tuple)) and isinstance(e, (list, tuple)):\n            a_seq: Sequence[Any] = list(a)\n            e_seq: Sequence[Any] = list(e)\n            if len(a_seq) != len(e_seq):\n                add(f\"{p or '$'}: length differs actual={len(a_seq)} expected={len(e_seq)}\")\n                # still compare overlapping prefix for more detail\n            for i in range(min(len(a_seq), len(e_seq))):\n                rec(a_seq[i], e_seq[i], _path_join(p or '$', f\"[{i}]\"))\n            return\n\n        if isinstance(a, Mapping) and isinstance(e, Mapping):\n            a_keys = set(a.keys())\n            e_keys = set(e.keys())\n            missing = sorted(e_keys - a_keys)\n            extra = sorted(a_keys - e_keys)\n            for k in missing:\n                add(f\"{_path_join(p or '$', '.' + str(k))}: missing key (expected present)\")\n            for k in extra:\n                add(f\"{_path_join(p or '$', '.' + str(k))}: unexpected key (actual present)\")\n            for k in sorted(a_keys\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_01769a3a75866796006949be1718108197887c72e4fbaf9808",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01769a3a75866796006949be298fdc81979ca147b38fa070d1",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nprint(Path('/mnt/data/src/stable_json.py').read_text()[:2000])\n",
+      "container_id": "cntr_6949bd7c27f481909eaafa795397fda805ca11b7959e0da0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Stable, deterministic JSON serialization utilities.\n\nThis module is used by benchmarks to produce repeatable artifacts and to\nserialize results in a canonical form (stable key ordering, float\nnormalization, consistent formatting).\n\"\"\"\n\nfrom __future__ import annotations\n\nimport json\nimport math\nfrom typing import Any, Mapping, Sequence, Union, IO, Optional\n\n\nJsonLike = Union[None, bool, int, float, str, Sequence[\"JsonLike\"], Mapping[str, \"JsonLike\"]]\ndef _normalize_float(x: float, precision: int) -> float:\n    \"\"\"Normalize floats for stable cross-run JSON output.\n\n    - Rounds to a configurable significant decimal precision.\n    - Converts -0.0 to 0.0.\n    - Disallows NaN/Infinity (JSON-incompatible in strict mode).\n    \"\"\"\n    if not math.isfinite(x):\n        raise ValueError(f\"Non-finite float is not JSON compatible: {x!r}\")\n    if precision is None:\n        y = float(x)\n    else:\n        y = round(float(x), int(precision))\n    # Avoid negative zero which can appear after rounding.\n    return 0.0 if y == 0.0 else y\ndef normalize(obj: Any, *, float_precision: int = 15) -> Any:\n    \"\"\"Recursively normalize a JSON-like structure for canonical serialization.\"\"\"\n    if obj is None or isinstance(obj, (bool, int, str)):\n        return obj\n    if isinstance(obj, float):\n        return _normalize_float(obj, float_precision)\n    if isinstance(obj, (list, tuple)):\n        return [normalize(v, float_precision=float_precision) for v in obj]\n    if isinstance(obj, dict):\n        # JSON object keys must be strings; coerce for stability.\n        return {\n            str(k): normalize(v, float_precision=float_precision)\n            for k, v in obj.items()\n        }\n    # Allow callers to pass objects implementing __json__ or similar patterns.\n    to_json = getattr(obj, \"__json__\", None)\n    if callable(to_json):\n        return normalize(to_json(), float_precision=float_precision)\n    raise TypeError(f\"Object of type {type(obj).__name__} is not JSON serializable\")\ndef dumps(\n   \n"
+        }
+      ]
+    },
+    {
+      "id": "rs_01769a3a75866796006949be2b8f048197a482cbb072583d4e",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01769a3a75866796006949be3077d48197908b3246774a58a1",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap\ntarget_path = Path('/mnt/data').joinpath('benchmarks/cases/benchmark_case_001.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\\\"\\\"\\\"benchmark_case_001\n\nA small deterministic benchmark case that produces JSON-like expected/actual\nresults suitable for tolerance-aware recursive comparison.\n\nThe runner applies the global determinism policy; this case additionally uses a\nlocal RNG keyed by the provided seed to make its payload generation explicit and\nrepeatable.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport json\nimport math\nimport random\nfrom typing import Any, Dict, List, Mapping\n\nfrom src.stable_json import normalize\n\"\"\")\n\nchunks.append(\"\"\"def _make_payload(seed: int) -> Dict[str, Any]:\n    rng = random.Random(seed)\n\n    # Generate values with a mix of magnitudes to exercise numeric comparison.\n    values: List[float] = []\n    for i in range(50):\n        # Deterministic but \"noisy\" signal.\n        base = math.sin((i + 1) * 0.1) + math.cos((i + 1) * 0.07)\n        jitter = (rng.random() - 0.5) * 1e-6\n        values.append(base + jitter)\n\n    # Use both sum and fsum to create stable, well-conditioned stats.\n    s = float(math.fsum(values))\n    mean = s / len(values)\n    var = float(math.fsum((v - mean) ** 2 for v in values)) / len(values)\n\n    payload: Dict[str, Any] = {\n        \"case\": \"benchmark_case_001\",\n        \"seed\": seed,\n        \"values\": values,\n        \"stats\": {\n            \"count\": len(values),\n            \"sum\": s,\n            \"mean\": mean,\n            \"variance\": var,\n            \"min\": min(values),\n            \"max\": max(values),\n        },\n        # Include nested structure and key-order variability to ensure stability.\n        \"nested\": {\n            \"b\": {\"x\": 1, \"y\": 2.0, \"z\": [3, 4.0]},\n            \"a\": [{\"k\": \"v\", \"n\": 1.25}, {\"k\": \"w\", \"n\": -0.0}],\n        },\n    }\n    return payload\n\"\"\")\n\nchunks.append(\"\"\"def run(*, seed: int, stable_dumps) -> Mapping[str, Any]:\n    \\\"\\\"\\\"Return {expected, actual, ...} for the benchmark runner.\n\n    expected:\n        Canonically normalized JSON-like structure.\n    actual:\n        Round-trip through stable JSON to ensure deterministic serialization.\n    \\\"\\\"\\\"\n    raw = _make_payload(seed)\n\n    expected = normalize(raw, float_precision=15)\n    # Serialize using the runner-provided stable_dumps for determinism,\n    # then parse back to a structure for tolerance-aware comparison.\n    actual = json.loads(stable_dumps(raw))\n\n    return {\n        \"expected\": expected,\n        \"actual\": actual,\n        \"metadata\": {\n            \"float_precision\": 15,\n            # Helps debug without relying on dict ordering.\n            \"expected_json\": stable_dumps(expected),\n        },\n    }\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:benchmarks/cases/benchmark_case_001.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd7c27f481909eaafa795397fda805ca11b7959e0da0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:benchmarks/cases/benchmark_case_001.py\nDIR_STATE:[\"benchmarks/cases/benchmark_case_001.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_01769a3a75866796006949be3c6be881979d14309378d67e2f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01769a3a75866796006949be3cb1588197b27c55c4870c40cc",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "text=Path('/mnt/data/benchmarks/cases/benchmark_case_001.py').read_text()\nlen(text.splitlines()), text[:200]\n",
+      "container_id": "cntr_6949bd7c27f481909eaafa795397fda805ca11b7959e0da0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(77,\n '\"\"\"benchmark_case_001\\n\\nA small deterministic benchmark case that produces JSON-like expected/actual\\nresults suitable for tolerance-aware recursive comparison.\\n\\nThe runner applies the global determinis')"
+        }
+      ]
+    },
+    {
+      "id": "rs_01769a3a75866796006949be3ec8b081979362eae0fa6ab503",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_01769a3a75866796006949be3ef9788197b75b6d8a47ab6aa3",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `benchmark_case_001` as a deterministic, seed-driven JSON-like payload generator that produces `expected` via canonical normalization and `actual` via stable JSON round-trip, returning both through the runner-compatible `run(seed, stable_dumps)` API with helpful metadata."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

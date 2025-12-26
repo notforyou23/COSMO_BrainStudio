@@ -1,0 +1,270 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766615159208_a3kjol2",
+  "agentType": "code-creation",
+  "goalId": "goal_70",
+  "missionId": "urgent_goal_70_1766615159207",
+  "spawnCycle": 30,
+  "coordinatorReview": null,
+  "spawnedBy": "meta_coordinator_urgent",
+  "triggerSource": "urgent_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T22:26:07.765Z",
+  "completedAt": "2025-12-24T22:35:05.099Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/linkcheck_runner.py",
+      "description": "CLI runner that loads exemplar URLs from case-study JSON files, checks them (status/redirects), and writes runtime/outputs/qa/linkcheck_report.json and runtime/outputs/qa/LINKCHECK_SUMMARY.md.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-24T22:26:50.159Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "TTEN:scripts/linkcheck_runner.py\nDIR_STATE:[\"scripts/cycle_tracker.py\", \"scripts/linkcheck_runner.py\", \"scripts/run_scaffold.py\", \"scripts/update_project_tracker.py\", \"scripts/validate_outputs.py\"]\nSummary: Implemented a standalone CLI link-check runner that discovers case-study JSON files, extracts URLs, checks HTTP status/redirects, and writes JSON and Markdown outputs under runtime/outputs/qa.\n",
+          "timestamp": "2025-12-24T22:27:38.717Z"
+        }
+      ],
+      "createdAt": "2025-12-24T22:26:07.765Z",
+      "failedAt": "2025-12-24T22:27:38.717Z"
+    },
+    {
+      "path": "src/qa/linkcheck.py",
+      "description": "Core link-check library providing URL extraction from case-study JSON, HTTP checking logic (redirect chains, timeouts, retries), and report/summary generation helpers.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/qa/linkcheck.py\nDIR_STATE:[\"src/qa/linkcheck.py\"]\nSummary: Implemented URL extraction, HTTP link checking with redirect chains/retries, and report/Markdown summary helpers in src/qa/linkcheck.py.\n",
+          "timestamp": "2025-12-24T22:28:20.316Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-24T22:28:55.289Z"
+        }
+      ],
+      "createdAt": "2025-12-24T22:26:07.765Z",
+      "failedAt": "2025-12-24T22:28:55.289Z"
+    },
+    {
+      "path": "src/qa/linkcheck_types.py",
+      "description": "Dataclasses and type definitions for link-check inputs/outputs to keep report schema consistent and easy to validate.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-24T22:29:20.570Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/qa/linkcheck_types.py\nDIR_STATE:[\"src/qa/linkcheck.py\", \"src/qa/linkcheck_types.py\"]\nSummary: Added link-check dataclasses and JSON-serializable report/result types to standardize schema across runner, library, and outputs.\n",
+          "timestamp": "2025-12-24T22:29:40.817Z"
+        }
+      ],
+      "createdAt": "2025-12-24T22:26:07.765Z",
+      "failedAt": "2025-12-24T22:29:40.817Z"
+    },
+    {
+      "path": "src/qa/linkcheck_io.py",
+      "description": "Filesystem utilities for discovering case-study JSON files, reading/writing the report JSON, and emitting the Markdown summary under runtime/outputs/qa.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/qa/linkcheck_io.py\nDIR_STATE:[\"src/qa/linkcheck.py\", \"src/qa/linkcheck_io.py\", \"src/qa/linkcheck_types.py\"]\nSUMMARY: Implemented filesystem utilities to discover case-study JSON files and to read/write the linkcheck JSON report and Markdown summary under runtime/outputs/qa.\n",
+          "timestamp": "2025-12-24T22:30:24.429Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-24T22:30:49.358Z"
+        }
+      ],
+      "createdAt": "2025-12-24T22:26:07.765Z",
+      "failedAt": "2025-12-24T22:30:49.358Z"
+    },
+    {
+      "path": "src/qa/user_agent.py",
+      "description": "Shared user-agent and polite request defaults (headers, rate limiting settings) used by the link-check runner.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/qa/user_agent.py\nDIR_STATE:[\"src/qa/linkcheck.py\", \"src/qa/linkcheck_io.py\", \"src/qa/linkcheck_types.py\", \"src/qa/user_agent.py\"]\nSUMMARY: Added shared user-agent, header defaults, and a simple rate limiter helper for polite link-check requests.\n",
+          "timestamp": "2025-12-24T22:32:12.317Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/qa/user_agent.py\nDIR_STATE:[\"src/qa/linkcheck.py\", \"src/qa/linkcheck_io.py\", \"src/qa/linkcheck_types.py\", \"src/qa/user_agent.py\"]\nCreated shared polite request defaults (user-agent, headers, timeouts, retries, and rate-limit settings) for the link-check runner.\n",
+          "timestamp": "2025-12-24T22:32:31.948Z"
+        }
+      ],
+      "createdAt": "2025-12-24T22:26:07.765Z",
+      "failedAt": "2025-12-24T22:32:31.948Z"
+    },
+    {
+      "path": "scripts/validate_linkcheck_report.py",
+      "description": "Validation script that checks linkcheck_report.json schema basics and ensures LINKCHECK_SUMMARY.md exists and references the same totals.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "STATE:[\"scripts/cycle_tracker.py\", \"scripts/linkcheck_runner.py\", \"scripts/run_scaffold.py\", \"scripts/update_project_tracker.py\", \"scripts/validate_linkcheck_report.py\", \"scripts/validate_outputs.py\"]\nSUMMARY: Wrote a validation script that sanity-checks the linkcheck report JSON structure, verifies timestamps and status fields, and ensures the Markdown summary exists and matches computed totals.\n",
+          "timestamp": "2025-12-24T22:33:12.012Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/validate_linkcheck_report.py\nDIR_STATE:[\"scripts/cycle_tracker.py\", \"scripts/linkcheck_runner.py\", \"scripts/run_scaffold.py\", \"scripts/update_project_tracker.py\", \"scripts/validate_linkcheck_report.py\", \"scripts/validate_outputs.py\"]\nSUMMARY: Wrote a validation script that checks the linkcheck report schema and verifies the Markdown summary totals match the computed results.\n",
+          "timestamp": "2025-12-24T22:33:47.114Z"
+        }
+      ],
+      "createdAt": "2025-12-24T22:26:07.765Z",
+      "failedAt": "2025-12-24T22:33:47.114Z"
+    },
+    {
+      "path": "runtime/outputs/qa/.gitkeep",
+      "description": "Placeholder file ensuring the QA outputs directory exists in the repository for link-check artifacts.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runtime/outputs/qa/.gitkeep\nDIR_STATE:[\"runtime/outputs/qa/.gitkeep\"]\nSUMMARY:Created the QA outputs directory placeholder file to ensure link-check artifacts have a committed destination.\n",
+          "timestamp": "2025-12-24T22:33:52.714Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runtime/outputs/qa/.gitkeep\nDIR_STATE:[\"runtime/outputs/qa/.gitkeep\"]\nSummary: Created a .gitkeep placeholder to ensure runtime/outputs/qa is tracked for link-check artifacts.\n",
+          "timestamp": "2025-12-24T22:34:00.017Z"
+        }
+      ],
+      "createdAt": "2025-12-24T22:26:07.765Z",
+      "failedAt": "2025-12-24T22:34:00.017Z"
+    },
+    {
+      "path": "README_LINKCHECK.md",
+      "description": "Documentation describing how to run the link-check runner, expected inputs, report schema, and troubleshooting for network/redirect issues.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:README_LINKCHECK.md\nDIR_STATE:[\"README.md\", \"README_LINKCHECK.md\", \"README_add_case_study.md\", \"exec_1766615672075_54ag6xt.py\", \"requirements.txt\"]\nSummary: Wrote README_LINKCHECK.md documenting how to run link checking, expected inputs, output report schema, and troubleshooting guidance.\n",
+          "timestamp": "2025-12-24T22:34:32.135Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-24T22:35:05.098Z"
+        }
+      ],
+      "createdAt": "2025-12-24T22:26:07.765Z",
+      "failedAt": "2025-12-24T22:35:05.098Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Implement a link-check runner that reads exemplar URLs from case-study JSON and writes results to `runtime/outputs/qa/linkcheck_report.json` (status codes, redirects, last-checked timestamp) and a human-readable summary `runtime/outputs/qa/LINKCHECK_SUMMARY.md`.",
+  "missionSuccessCriteria": [
+    "Complete the urgent task identified by Meta-Coordinator",
+    "Curated insight (actionability 8-9/10): Adds automated integrity checks for exemplar URLs (reachability + timestamps), reducing silent decay and ensuring the media catalog/case studies remain verifiable without downloading copyrighted mater..."
+  ],
+  "projectName": "generated_script_1766615159468",
+  "language": "json",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-24T22:35:05.099Z",
+  "summary": {
+    "completed": 0,
+    "failed": 8,
+    "total": 8
+  }
+}

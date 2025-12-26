@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/lib/io.py` with lightweight, deterministic utilities for global seeding, stable run output directory creation, and atomic JSON/CSV saving (plus standard run metadata persistence) to support fully reproducible experiment runs.",
+  "reasoning": "",
+  "responseId": "resp_0b4fc7422fdee0570069499f9184b081909513938da266daed",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3016,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1561,
+    "output_tokens_details": {
+      "reasoning_tokens": 177
+    },
+    "total_tokens": 4577
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0b4fc7422fdee0570069499f926a74819092f28931b24b1a92",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0b4fc7422fdee0570069499f9689348190bc63c89fb69bc546",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/lib/io.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"I/O utilities for reproducible toy experiments.\n\nProvides:\n- Deterministic seeding across Python / NumPy (if available).\n- Output directory management with stable run identifiers.\n- Structured result saving to JSON/CSV with atomic writes.\n\nThese helpers are intentionally lightweight and dependency-minimal.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import asdict, is_dataclass\nfrom pathlib import Path\nimport csv\nimport hashlib\nimport json\nimport os\nimport random\nfrom typing import Any, Dict, Iterable, Mapping, Optional, Sequence, Tuple, Union\n\n\nPathLike = Union[str, os.PathLike, Path]\"\"\",\n\"\"\"def _try_import_numpy():\n    try:\n        import numpy as np  # type: ignore\n    except Exception:\n        return None\n    return np\n\n\ndef set_global_seed(seed: int) -> int:\n    \\\"\\\"\\\"Seed Python's RNG and NumPy's RNG (if installed). Returns the seed.\\\"\\\"\\\"\n    seed = int(seed)\n    random.seed(seed)\n    np = _try_import_numpy()\n    if np is not None:\n        np.random.seed(seed)\n    return seed\n\n\ndef stable_hash(text: str, n: int = 10) -> str:\n    \\\"\\\"\\\"Short stable hex digest (useful for directory names).\\\"\\\"\\\"\n    h = hashlib.sha256(text.encode(\\\"utf-8\\\")).hexdigest()\n    return h[: max(1, int(n))]\"\"\",\n\"\"\"def ensure_dir(path: PathLike) -> Path:\n    p = Path(path)\n    p.mkdir(parents=True, exist_ok=True)\n    return p\n\n\ndef make_run_dir(\n    base_dir: PathLike,\n    experiment: str,\n    seed: int,\n    tag: Optional[str] = None,\n) -> Path:\n    \\\"\\\"\\\"Create a deterministic output directory for an experiment run.\n\n    Directory name is stable given (experiment, seed, tag) to support\n    reproducible reruns without timestamps.\n    \\\"\\\"\\\"\n    base = ensure_dir(base_dir)\n    key = f\\\"{experiment}|{int(seed)}|{tag or ''}\\\"\n    run_id = stable_hash(key, n=12)\n    name = f\\\"{experiment}_seed{int(seed)}_{run_id}\\\"\n    if tag:\n        name = f\\\"{name}_{tag}\\\"\n    out = base / name\n    out.mkdir(parents=True, exist_ok=True)\n    return out\"\"\",\n\"\"\"def _json_default(o: Any) -> Any:\n    # dataclasses\n    if is_dataclass(o):\n        return asdict(o)\n    # pathlib\n    if isinstance(o, Path):\n        return str(o)\n    # numpy scalars/arrays (if present)\n    np = _try_import_numpy()\n    if np is not None:\n        if isinstance(o, (np.integer, np.floating)):\n            return o.item()\n        if isinstance(o, np.ndarray):\n            return o.tolist()\n    # sets/tuples\n    if isinstance(o, (set, tuple)):\n        return list(o)\n    raise TypeError(f\\\"Object of type {type(o).__name__} is not JSON serializable\\\")\"\"\",\n\"\"\"def write_json(\n    path: PathLike,\n    obj: Any,\n    *,\n    indent: int = 2,\n    sort_keys: bool = True,\n) -> Path:\n    \\\"\\\"\\\"Write JSON with an atomic replace to avoid partial files.\\\"\\\"\\\"\n    p = Path(path)\n    p.parent.mkdir(parents=True, exist_ok=True)\n    tmp = p.with_suffix(p.suffix + \\\".tmp\\\")\n    with tmp.open(\\\"w\\\", encoding=\\\"utf-8\\\") as f:\n        json.dump(obj, f, indent=indent, sort_keys=sort_keys, default=_json_default)\n        f.write(\\\"\\\\n\\\")\n    tmp.replace(p)\n    return p\n\n\ndef read_json(path: PathLike) -> Any:\n    p = Path(path)\n    with p.open(\\\"r\\\", encoding=\\\"utf-8\\\") as f:\n        return json.load(f)\"\"\",\n\"\"\"def write_csv(\n    path: PathLike,\n    rows: Iterable[Mapping[str, Any]],\n    *,\n    fieldnames: Optional[Sequence[str]] = None,\n) -> Path:\n    \\\"\\\"\\\"Write a CSV file deterministically (stable column order).\n\n    If fieldnames is None, uses sorted keys from the first row.\n    \\\"\\\"\\\"\n    p = Path(path)\n    p.parent.mkdir(parents=True, exist_ok=True)\n    rows = list(rows)\n    if not rows:\n        raise ValueError(\\\"write_csv requires at least one row\\\")\n    if fieldnames is None:\n        fieldnames = sorted(rows[0].keys())\n    tmp = p.with_suffix(p.suffix + \\\".tmp\\\")\n    with tmp.open(\\\"w\\\", encoding=\\\"utf-8\\\", newline=\\\"\\\") as f:\n        w = csv.DictWriter(f, fieldnames=fieldnames)\n        w.writeheader()\n        for r in rows:\n            w.writerow({k: r.get(k, \\\"\\\") for k in fieldnames})\n    tmp.replace(p)\n    return p\"\"\",\n\"\"\"def save_run_metadata(\n    out_dir: PathLike,\n    *,\n    experiment: str,\n    seed: int,\n    params: Optional[Dict[str, Any]] = None,\n    extra: Optional[Dict[str, Any]] = None,\n    filename: str = \\\"run_metadata.json\\\",\n) -> Path:\n    \\\"\\\"\\\"Save standard metadata for a run in a single JSON file.\\\"\\\"\\\"\n    payload: Dict[str, Any] = {\n        \\\"experiment\\\": experiment,\n        \\\"seed\\\": int(seed),\n        \\\"params\\\": params or {},\n    }\n    if extra:\n        payload.update(extra)\n    return write_json(Path(out_dir) / filename, payload)\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/lib/io.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/lib/io.py\nDIR_STATE:[\"src/lib/io.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0b4fc7422fdee0570069499fa8f7408190818428b183c3099d",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/lib/io.py` with lightweight, deterministic utilities for global seeding, stable run output directory creation, and atomic JSON/CSV saving (plus standard run metadata persistence) to support fully reproducible experiment runs."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

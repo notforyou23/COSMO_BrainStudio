@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `tools/schema_utils.py` with JSON/Schema loaders, local `#/...` `$ref` inlining, and Draft 2020-12 validation that emits stable, readable, path-sorted error reports suitable for CI/pre-commit gating.",
+  "reasoning": "",
+  "responseId": "resp_056cedc5c949fb94006949ab0339988195abe298aeeb6ad66f",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3461,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1949,
+    "output_tokens_details": {
+      "reasoning_tokens": 463
+    },
+    "total_tokens": 5410
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_056cedc5c949fb94006949ab04002c81958d606ebfc4da63d1",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_056cedc5c949fb94006949ab0f25f88195bae8b6473a178fb0",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('tools/schema_utils.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\\\n\\\"\\\"\\\"Schema utilities.\n\nProvides:\n- Loading JSON / JSON Schema from disk.\n- Resolving *local* ($ref starting with \"#/\") references into an inline schema.\n- Draft 2020-12 validation with stable, readable error reporting.\n\nThese helpers are intentionally small and dependency-light; they only assume\n`jsonschema` is installed.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Mapping, MutableMapping, Optional, Tuple\n\nimport copy\nimport json\n\nfrom jsonschema import Draft202012Validator\nfrom jsonschema.exceptions import ValidationError\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef load_json(path: Path) -> Any:\n    \\\"\\\"\\\"Load a JSON file with UTF-8 encoding.\\\"\\\"\\\"\n    return json.loads(path.read_text(encoding=\"utf-8\"))\n\n\ndef _decode_json_pointer_part(part: str) -> str:\n    # RFC 6901: \"~1\" => \"/\", \"~0\" => \"~\"\n    return part.replace(\"~1\", \"/\").replace(\"~0\", \"~\")\n\n\ndef _get_by_json_pointer(doc: Any, ref: str) -> Any:\n    \\\"\\\"\\\"Resolve a local JSON pointer like '#/a/b/0'.\\\"\\\"\\\"\n    if not ref.startswith(\"#\"):\n        raise ValueError(f\"Only local refs are supported, got: {ref!r}\")\n    pointer = ref[1:]\n    if pointer in (\"\", \"/\"):\n        return doc\n    if not pointer.startswith(\"/\"):\n        raise ValueError(f\"Invalid JSON pointer in ref: {ref!r}\")\n    cur = doc\n    for raw in pointer.lstrip(\"/\").split(\"/\"):\n        part = _decode_json_pointer_part(raw)\n        if isinstance(cur, list):\n            cur = cur[int(part)]\n        else:\n            cur = cur[part]\n    return cur\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef resolve_local_refs(schema: Mapping[str, Any]) -> Dict[str, Any]:\n    \\\"\\\"\\\"Return a deep-copied schema with local '#/..' $ref inlined.\n\n    Notes:\n    - Only resolves references within the same document.\n    - If an object contains \\\"$ref\\\" plus sibling keys, siblings override the\n      referenced schema (useful for narrowing constraints in place).\n    - Cycles are not expanded infinitely; a previously-expanded ref is reused.\n    \\\"\\\"\\\"\n    root: Any = copy.deepcopy(schema)\n    cache: Dict[str, Any] = {}\n\n    def _walk(node: Any) -> Any:\n        if isinstance(node, list):\n            return [_walk(v) for v in node]\n        if not isinstance(node, dict):\n            return node\n\n        ref = node.get(\"$ref\")\n        if isinstance(ref, str) and ref.startswith(\"#/\"):\n            if ref in cache:\n                base = copy.deepcopy(cache[ref])\n            else:\n                base = _walk(copy.deepcopy(_get_by_json_pointer(root, ref)))\n                cache[ref] = copy.deepcopy(base)\n            # Siblings override referenced schema (except $ref itself).\n            siblings = {k: _walk(v) for k, v in node.items() if k != \"$ref\"}\n            if siblings and isinstance(base, dict):\n                merged = dict(base)\n                merged.update(siblings)\n                return merged\n            return base\n\n        return {k: _walk(v) for k, v in node.items()}\n\n    resolved = _walk(root)\n    if not isinstance(resolved, dict):\n        raise ValueError(\"Schema root must be an object\")\n    return resolved\n\"\"\")\n\nchunks.append(\"\"\"\\\n@dataclass(frozen=True)\nclass ValidationIssue:\n    path: str\n    message: str\n    validator: str\n\n    @staticmethod\n    def from_error(err: ValidationError) -> \"ValidationIssue\":\n        path = \"/\" + \"/\".join(str(p) for p in err.path) if err.path else \"/\"\n        return ValidationIssue(path=path, message=err.message, validator=err.validator or \"unknown\")\n\n\ndef iter_validation_issues(validator: Draft202012Validator, instance: Any) -> List[ValidationIssue]:\n    errors = list(validator.iter_errors(instance))\n    # Stable ordering: (path, validator, message)\n    issues = [ValidationIssue.from_error(e) for e in errors]\n    issues.sort(key=lambda i: (i.path, i.validator, i.message))\n    return issues\n\n\ndef format_issues(issues: Iterable[ValidationIssue], *, header: str = \"Schema validation failed\") -> str:\n    items = list(issues)\n    if not items:\n        return header + \": <no issues>\"\n    lines = [f\"{header} ({len(items)} issue(s)):\"]\n    for i, it in enumerate(items, 1):\n        lines.append(f\"  {i}. {it.path}: {it.message} [{it.validator}]\")\n    return \"\\\\n\".join(lines)\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef load_schema(schema_path: Path, *, resolve_refs: bool = True) -> Dict[str, Any]:\n    \\\"\\\"\\\"Load a JSON schema from disk, optionally inlining local refs.\\\"\\\"\\\"\n    schema = load_json(schema_path)\n    if not isinstance(schema, dict):\n        raise ValueError(f\"Schema must be an object: {schema_path}\")\n    return resolve_local_refs(schema) if resolve_refs else schema\n\n\ndef validate_instance(instance: Any, schema: Mapping[str, Any], *, schema_name: str = \"schema\") -> None:\n    \\\"\\\"\\\"Validate an instance; raise ValueError with readable issues on failure.\\\"\\\"\\\"\n    validator = Draft202012Validator(schema)\n    issues = iter_validation_issues(validator, instance)\n    if issues:\n        raise ValueError(format_issues(issues, header=f\"{schema_name} validation failed\"))\n\n\ndef validate_json_file(json_path: Path, schema: Mapping[str, Any], *, schema_name: str = \"schema\") -> None:\n    \\\"\\\"\\\"Load a JSON file and validate it against a schema.\\\"\\\"\\\"\n    instance = load_json(json_path)\n    try:\n        validate_instance(instance, schema, schema_name=schema_name)\n    except ValueError as e:\n        raise ValueError(f\"{json_path}: {e}\") from None\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tools/schema_utils.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tools/schema_utils.py\nDIR_STATE:[\"tools/output_format_policy.py\", \"tools/schema_docs.py\", \"tools/schema_utils.py\", \"tools/validate_benchmark_outputs.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_056cedc5c949fb94006949ab220c848195a0bfd3219d229b2d",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `tools/schema_utils.py` with JSON/Schema loaders, local `#/...` `$ref` inlining, and Draft 2020-12 validation that emits stable, readable, path-sorted error reports suitable for CI/pre-commit gating."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

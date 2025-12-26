@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/core/holography.py` with a compact suite of holography/entropy/quantum-information inspired constraint evaluators (dS entropy, species cutoff, quantum break time) plus a unified `evaluate_holography()` report that maps model parameters to bounds and implied observable-level quantities (e.g., `r`, `H_from_As_eps`).",
+  "reasoning": "",
+  "responseId": "resp_0e8d9c0d4217f582006949a2c4ea5c81939f20f98a8e9f5954",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4370,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2746,
+    "output_tokens_details": {
+      "reasoning_tokens": 366
+    },
+    "total_tokens": 7116
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0e8d9c0d4217f582006949a2c5b54c8193abaef9bdb2328c09",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0e8d9c0d4217f582006949a2ce46508193b57144279e3d0b9e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, math\ntarget_path = Path('/mnt/data').joinpath('src/core/holography.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\n\\\"\\\"\\\"Holographic/entropy/quantum-information-inspired constraints.\n\nThis module provides lightweight, model-agnostic evaluators that map\nholography-motivated bounds (dS entropy/Bousso, species, quantum break time)\nto concrete cosmological parameter constraints and observable-level signatures\n(e.g. upper bounds on H, r, maximal efolds).\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Any, Dict, Mapping, Optional, Tuple\nimport math\n\"\"\")\n\nchunks.append(\"\"\"\n_REDUCED_MPL_GEV = 2.435e18  # for optional GeV conversions; set mpl=1 for dimensionless work\n\n\ndef _get(x: Mapping[str, Any], key: str, default: Optional[float] = None) -> Optional[float]:\n    v = x.get(key, default)\n    return None if v is None else float(v)\n\n\ndef de_sitter_entropy(H: float, mpl: float = 1.0) -> float:\n    \\\"\\\"\\\"Gibbons-Hawking entropy S_dS = pi * (M_pl/H)^2 (reduced Planck mass).\\\"\\\"\\\"\n    if H <= 0 or mpl <= 0:\n        raise ValueError(\\\"H and mpl must be positive\\\")\n    return math.pi * (mpl / H) ** 2\n\n\ndef tensor_to_scalar_ratio(epsilon: float, c_s: float = 1.0) -> float:\n    \\\"\\\"\\\"Single-clock EFT relation r ≈ 16 ε c_s (used as a mapping, not a theorem).\\\"\\\"\\\"\n    return max(0.0, 16.0 * float(epsilon) * float(c_s))\n\"\"\")\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass ConstraintResult:\n    name: str\n    passed: bool\n    bounds: Dict[str, Tuple[Optional[float], Optional[float]]]\n    implied: Dict[str, float]\n    details: str\n\n    def to_dict(self) -> Dict[str, Any]:\n        return {\n            \\\"name\\\": self.name,\n            \\\"passed\\\": self.passed,\n            \\\"bounds\\\": {k: {\\\"min\\\": v[0], \\\"max\\\": v[1]} for k, v in self.bounds.items()},\n            \\\"implied\\\": dict(self.implied),\n            \\\"details\\\": self.details,\n        }\n\n\nclass HolographicConstraint:\n    \\\"\\\"\\\"Base class for holography-inspired constraints.\\\"\\\"\\\"\n\n    name: str = \\\"base\\\"\n\n    def evaluate(self, params: Mapping[str, Any]) -> ConstraintResult:  # pragma: no cover\n        raise NotImplementedError\n\"\"\")\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass DeSitterEntropyBound(HolographicConstraint):\n    \\\"\\\"\\\"dS entropy implies an absolute upper bound on the number of accessible states.\n\n    Operational mapping: for a quasi-dS phase with H ~ const, require that\n    the number of produced Hubble patches does not exceed S_dS:\n        N <= (1/2) ln(S_dS)  (order-one mapping used in the literature as a testable prior)\n    \\\"\\\"\\\"\n\n    name: str = \\\"ds_entropy\\\"\n    factor: float = 0.5  # N_max = factor * ln(S_dS)\n    mpl: float = 1.0\n\n    def evaluate(self, params: Mapping[str, Any]) -> ConstraintResult:\n        H = _get(params, \\\"H\\\")\n        N = _get(params, \\\"N\\\")\n        if H is None or N is None:\n            return ConstraintResult(self.name, True, {}, {}, \\\"missing H or N; not evaluated\\\")\n        S = de_sitter_entropy(H, self.mpl)\n        N_max = self.factor * math.log(S)\n        passed = N <= N_max + 1e-12\n        bounds = {\\\"N\\\": (None, N_max), \\\"H\\\": (None, H)}\n        implied = {\\\"S_dS\\\": S, \\\"N_max\\\": N_max}\n        details = f\\\"S_dS={S:.3e}, implied N_max={N_max:.3f} (mapping factor={self.factor})\\\"\n        return ConstraintResult(self.name, passed, bounds, implied, details)\n\"\"\")\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass SpeciesBound(HolographicConstraint):\n    \\\"\\\"\\\"Species bound: cutoff Λ ~ M_pl/sqrt(N_s), implying H < Λ for EFT validity.\\\"\\\"\\\"\n\n    name: str = \\\"species\\\"\n    mpl: float = 1.0\n\n    def evaluate(self, params: Mapping[str, Any]) -> ConstraintResult:\n        H = _get(params, \\\"H\\\")\n        Ns = _get(params, \\\"N_species\\\", 1.0)\n        if H is None:\n            return ConstraintResult(self.name, True, {}, {}, \\\"missing H; not evaluated\\\")\n        Ns = max(1.0, float(Ns))\n        Lambda = self.mpl / math.sqrt(Ns)\n        passed = H < Lambda + 1e-12\n        bounds = {\\\"H\\\": (None, Lambda)}\n        implied = {\\\"Lambda_species\\\": Lambda}\n        details = f\\\"N_species={Ns:.3g}, Lambda={Lambda:.3g} (units of mpl)\\\"\n        return ConstraintResult(self.name, passed, bounds, implied, details)\n\"\"\")\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass QuantumBreakTime(HolographicConstraint):\n    \\\"\\\"\\\"Quantum break-time bound for (quasi-)dS.\n\n    Use estimate t_q ~ M_pl^2 / (N_eff H^3). Requiring N/H < t_q gives:\n        N < (M_pl/H)^2 / N_eff\n    This maps to an upper bound on N at fixed H and N_eff.\n    \\\"\\\"\\\"\n\n    name: str = \\\"quantum_break\\\"\n    mpl: float = 1.0\n\n    def evaluate(self, params: Mapping[str, Any]) -> ConstraintResult:\n        H = _get(params, \\\"H\\\")\n        N = _get(params, \\\"N\\\")\n        Neff = _get(params, \\\"N_eff\\\", 1.0)\n        if H is None or N is None:\n            return ConstraintResult(self.name, True, {}, {}, \\\"missing H or N; not evaluated\\\")\n        Neff = max(1.0, float(Neff))\n        N_max = (self.mpl / H) ** 2 / Neff\n        passed = N <= N_max + 1e-12\n        bounds = {\\\"N\\\": (None, N_max)}\n        implied = {\\\"N_max\\\": N_max, \\\"N_eff\\\": Neff}\n        details = f\\\"N_eff={Neff:.3g}, implied N_max={N_max:.3g}\\\"\n        return ConstraintResult(self.name, passed, bounds, implied, details)\n\"\"\")\n\nchunks.append(\"\"\"\ndef implied_observable_bounds(params: Mapping[str, Any]) -> Dict[str, float]:\n    \\\"\\\"\\\"Derive observable-level bounds implied by basic holographic inputs.\n\n    Expected inputs: H (in mpl units), epsilon, c_s, A_s (scalar amplitude).\n    Returns: r (from epsilon), r_from_H (if A_s given), and H_GeV if mpl provided.\n    \\\"\\\"\\\"\n    out: Dict[str, float] = {}\n    H = _get(params, \\\"H\\\")\n    eps = _get(params, \\\"epsilon\\\")\n    c_s = _get(params, \\\"c_s\\\", 1.0) or 1.0\n    A_s = _get(params, \\\"A_s\\\")  # ~2.1e-9 from Planck; optional\n    mpl = float(params.get(\\\"mpl\\\", 1.0))\n\n    if eps is not None:\n        out[\\\"r\\\"] = tensor_to_scalar_ratio(eps, c_s)\n    if H is not None and A_s is not None and eps is not None and eps > 0:\n        # A_s ≈ H^2/(8π^2 ε M_pl^2) => H ≈ 2√2 π M_pl √(A_s ε)\n        out[\\\"H_from_As_eps\\\"] = 2.0 * math.sqrt(2.0) * math.pi * mpl * math.sqrt(A_s * eps)\n    if H is not None and mpl != 1.0:\n        out[\\\"H_GeV\\\"] = H * mpl * _REDUCED_MPL_GEV\n    return out\n\"\"\")\n\nchunks.append(\"\"\"\ndef evaluate_holography(\n    params: Mapping[str, Any],\n    *,\n    mpl: float = 1.0,\n    include: Tuple[str, ...] = (\\\"ds_entropy\\\", \\\"species\\\", \\\"quantum_break\\\"),\n) -> Dict[str, Any]:\n    \\\"\\\"\\\"Run a small suite of holographic constraints and return a compact report.\n\n    params is a flat mapping produced by model backends, e.g.\n      {H, N, epsilon, c_s, A_s, N_species, N_eff, mpl}\n    \\\"\\\"\\\"\n    suite = {\n        \\\"ds_entropy\\\": DeSitterEntropyBound(mpl=mpl),\n        \\\"species\\\": SpeciesBound(mpl=mpl),\n        \\\"quantum_break\\\": QuantumBreakTime(mpl=mpl),\n    }\n    results = [suite[k].evaluate(dict(params, mpl=mpl)) for k in include if k in suite]\n    passed_all = all(r.passed for r in results)\n    bounds: Dict[str, Tuple[Optional[float], Optional[float]]] = {}\n    for r in results:\n        for k, (mn, mx) in r.bounds.items():\n            cur = bounds.get(k, (None, None))\n            bounds[k] = (mn if cur[0] is None else max(cur[0], mn) if mn is not None else cur[0],\n                         mx if cur[1] is None else min(cur[1], mx) if mx is not None else cur[1])\n    report = {\n        \\\"passed\\\": passed_all,\n        \\\"bounds\\\": {k: {\\\"min\\\": v[0], \\\"max\\\": v[1]} for k, v in bounds.items()},\n        \\\"implied\\\": implied_observable_bounds(dict(params, mpl=mpl)),\n        \\\"results\\\": [r.to_dict() for r in results],\n    }\n    return report\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/core/holography.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949a1d497e081909a00da1af070d618029e616ce667a0de",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/core/holography.py\nDIR_STATE:[\"src/core/conjectures.py\", \"src/core/holography.py\", \"src/core/models.py\", \"src/core/observables.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0e8d9c0d4217f582006949a2f48e188193b122900b82771777",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/core/holography.py` with a compact suite of holography/entropy/quantum-information inspired constraint evaluators (dS entropy, species cutoff, quantum break time) plus a unified `evaluate_holography()` report that maps model parameters to bounds and implied observable-level quantities (e.g., `r`, `H_from_As_eps`)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

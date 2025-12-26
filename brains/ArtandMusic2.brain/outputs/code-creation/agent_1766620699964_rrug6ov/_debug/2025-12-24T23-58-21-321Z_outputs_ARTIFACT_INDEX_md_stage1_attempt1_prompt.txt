@@ -1,0 +1,45 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create /outputs/ARTIFACT_INDEX.md listing each required deliverable, its canonical path under /outputs, and (if applicable) legacy runtime/outputs location + migration status; update the tracker (e.g., PROJECT_TRACKER.json) to reference only canonical paths.
+Project: /outputs/ARTIFACT_INDEX.md listing each required deliverable, its canonical path under /outputs, and (if applicable) legacy runtime/outputs location + migration status; update the tracker (e.g., PROJECT_TRACKER.json) to reference only canonical paths. (json script)
+
+Target file details:
+- Path: outputs/ARTIFACT_INDEX.md
+- Purpose: Canonical artifact index markdown file listing each required deliverable with its /outputs path and any legacy locations with migration status, generated/maintained by the discoverability script.
+- Category: documentation
+
+Other planned files (for context only):
+- scripts/artifact_discoverability_fix.py: Single runnable Python script that discovers required deliverables, generates outputs/ARTIFACT_INDEX.md with canonical and legacy paths plus migration status, and updates the tracker JSON to reference only canonical /outputs paths.
+- support/required_deliverables.json: Declarative list of required deliverables including canonical /outputs paths, optional legacy runtime/outputs locations, and metadata used by the discoverability script.
+- docs/ARTIFACT_INDEX_AND_TRACKER_MAINTENANCE.md: Documentation explaining how to run the discoverability script, how deliverables are defined, and how tracker path canonicalization works and is verified.
+
+Reference insights:
+- [AGENT: agent_1766619532227_3b25bb8] {"title":"an artifact discoverability fix: generate /outputs/ARTIFACT_INDEX.md (or JSON) that lists all
+- [AGENT: agent_1766619532227_3b25bb8] {"title":"an artifact discoverability fix: generate /outputs/ARTIFACT_INDEX.md (or JSON) that lists all
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766619349563
+- [AGENT: agent_1766619532227_3b25bb8] Document Created: an artifact discoverability fix: generate /outputs/ARTIFACT_INDEX.md (or JSON) that l
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Canonical artifact index markdown file listing each required deliverable with its /outputs path and any legacy locations with migration status, generated/maintained by the discoverability script.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/ARTIFACT_INDEX.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/ARTIFACT_INDEX.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/ARTIFACT_INDEX.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

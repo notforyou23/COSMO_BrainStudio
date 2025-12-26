@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install -U pip wheel
+          if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
+          if [ -f requirements-dev.txt ]; then python -m pip install -r requirements-dev.txt; fi
+          if [ -f pyproject.toml ] || [ -f setup.py ] || [ -f setup.cfg ]; then python -m pip install .; fi
+          python -m pip install -U pytest
+
+      - name: Lint/format (if configured)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f pyproject.toml ] && grep -qE '^\[tool\.ruff\]' pyproject.toml; then python -m pip install -U ruff && ruff check .; fi
+          if [ -f ruff.toml ] || [ -f .ruff.toml ]; then python -m pip install -U ruff && ruff check .; fi
+          if [ -f pyproject.toml ] && grep -qE '^\[tool\.black\]' pyproject.toml; then python -m pip install -U black && black --check .; fi
+          if [ -f pyproject.toml ] && grep -qE '^\[tool\.isort\]' pyproject.toml; then python -m pip install -U isort && isort --check-only .; fi
+          if [ -f .flake8 ] || [ -f tox.ini ] || [ -f setup.cfg ]; then python -m pip install -U flake8 && flake8; fi
+
+      - name: Run tests (determinism verification)
+        shell: bash
+        run: |
+          set -euo pipefail
+          pytest -q

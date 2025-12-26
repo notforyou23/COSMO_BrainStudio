@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a single output-path utility used everywhere (e.g., get_outputs_dir() that defaults to ./outputs and optionally respects an env var like OUTPUT_DIR), and refactor pipeline writes to go through it.
+Project: generated_script_1766550068280 (go script)
+
+Target file details:
+- Path: internal/outputdir/outputdir.go
+- Purpose: Provides a single GetOutputsDir utility that defaults to ./outputs, respects OUTPUT_DIR, and ensures the directory exists for all pipeline writers.
+- Category: source
+
+Other planned files (for context only):
+- internal/outputdir/outputdir_test.go: Unit tests validating OUTPUT_DIR override behavior, default ./outputs behavior, path cleaning, and directory creation semantics.
+- .github/workflows/ci.yml: CI workflow that runs gofmt, go test, and basic static checks to ensure cross-platform correctness and prevent regressions.
+
+Reference insights:
+- [AGENT INSIGHT: agent_1766540049061_an5rb16] **Ensure portability of the `/outputs` requirement**: because `/outputs` can be unwritable (obs
+- [INTROSPECTION] 2025-12-24T03-39-48-400Z_scripts_run_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766547586803_y8e7q9t: You
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+- [AGENT: agent_1766543291642_15ryvxl] {"agentId":"agent_1766543291642_15ryvxl","goalId":"goal_43","containerId":"cntr_694b4fc317a48190a1321c4
+
+Key requirements:
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Provides a single GetOutputsDir utility that defaults to ./outputs, respects OUTPUT_DIR, and ensures the directory exists for all pipeline writers.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('internal/outputdir/outputdir.go')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:internal/outputdir/outputdir.go')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside internal/outputdir/outputdir.go.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

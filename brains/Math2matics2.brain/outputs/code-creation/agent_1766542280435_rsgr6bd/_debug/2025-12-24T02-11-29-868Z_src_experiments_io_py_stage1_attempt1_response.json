@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/experiments/io.py` with standardized run directory management (run IDs + run metadata), CSV save/load utilities, and figure export (PNG/SVG) with JSON sidecar metadata and consistent paths.",
+  "reasoning": "",
+  "responseId": "resp_07d9c6458b60c70e00694b4ca911288197829dc36738ac6446",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3303,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1737,
+    "output_tokens_details": {
+      "reasoning_tokens": 1690
+    },
+    "total_tokens": 5040
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_07d9c6458b60c70e00694b4ca9af408197ba27884cfc15532a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_07d9c6458b60c70e00694b4cad4e9c8197b99e3618757691f7",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, csv, uuid\nfrom datetime import datetime, timezone\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/io.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"I/O utilities for experiment outputs.\n\nProvides standardized run directories, CSV result export/import, and\nfigure writing with JSON sidecar metadata.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom datetime import datetime, timezone\nfrom pathlib import Path\nfrom typing import Any, Iterable, Mapping, Sequence\nimport csv\nimport json\nimport os\nimport uuid\n\"\"\")\n\nchunks.append(\"\"\"\ndef utc_now() -> str:\n    \\\"\\\"\\\"Return an ISO-8601 UTC timestamp string.\\\"\\\"\\\"\n    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()\n\n\ndef make_run_id(prefix: str | None = None) -> str:\n    \\\"\\\"\\\"Create a sortable run identifier (UTC timestamp + random suffix).\\\"\\\"\\\"\n    ts = datetime.now(timezone.utc).strftime(\"%Y%m%dT%H%M%SZ\")\n    suf = uuid.uuid4().hex[:8]\n    return f\"{prefix + '-' if prefix else ''}{ts}-{suf}\"\n\n\ndef default_base_dir() -> Path:\n    \\\"\\\"\\\"Base directory for outputs; controlled via EXPERIMENTS_OUT.\\\"\\\"\\\"\n    return Path(os.environ.get(\"EXPERIMENTS_OUT\", \"outputs\")).resolve()\n\n\ndef ensure_dir(path: Path) -> Path:\n    path.mkdir(parents=True, exist_ok=True)\n    return path\n\"\"\")\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass RunPaths:\n    \\\"\\\"\\\"Standard locations for a single run.\\\"\\\"\\\"\n\n    base_dir: Path\n    run_id: str\n\n    @property\n    def run_dir(self) -> Path:\n        return self.base_dir / \"runs\" / self.run_id\n\n    @property\n    def figures_dir(self) -> Path:\n        return self.run_dir / \"figures\"\n\n    @property\n    def results_dir(self) -> Path:\n        return self.run_dir / \"results\"\n\n    @property\n    def metadata_path(self) -> Path:\n        return self.run_dir / \"run_metadata.json\"\n\n    def mkdirs(self) -> \"RunPaths\":\n        ensure_dir(self.figures_dir)\n        ensure_dir(self.results_dir)\n        ensure_dir(self.run_dir)\n        return self\n\"\"\")\n\nchunks.append(\"\"\"\ndef init_run(\n    base_dir: str | Path | None = None,\n    run_id: str | None = None,\n    *,\n    prefix: str | None = None,\n    metadata: Mapping[str, Any] | None = None,\n) -> RunPaths:\n    \\\"\\\"\\\"Create a run directory and write run-level metadata.\\\"\\\"\\\"\n    base = Path(base_dir) if base_dir is not None else default_base_dir()\n    rid = run_id or make_run_id(prefix=prefix)\n    paths = RunPaths(base_dir=base, run_id=rid).mkdirs()\n    meta = {\"run_id\": rid, \"created_utc\": utc_now(), **(dict(metadata or {}))}\n    paths.metadata_path.write_text(json.dumps(meta, indent=2, sort_keys=True), encoding=\"utf-8\")\n    return paths\n\"\"\")\n\nchunks.append(\"\"\"\ndef save_results_csv(\n    rows: Sequence[Mapping[str, Any]] | Iterable[Mapping[str, Any]],\n    path: str | Path,\n    *,\n    dialect: str = \"excel\",\n) -> Path:\n    \\\"\\\"\\\"Write a list/iterable of dict-like rows to CSV with stable headers.\\\"\\\"\\\"\n    p = Path(path)\n    ensure_dir(p.parent)\n    rows_list = list(rows)\n    keys: list[str] = sorted({k for r in rows_list for k in r.keys()})\n    with p.open(\"w\", newline=\"\", encoding=\"utf-8\") as f:\n        w = csv.DictWriter(f, fieldnames=keys, dialect=dialect)\n        w.writeheader()\n        for r in rows_list:\n            w.writerow({k: r.get(k, \"\") for k in keys})\n    return p\n\n\ndef load_results_csv(path: str | Path, *, dialect: str = \"excel\") -> list[dict[str, str]]:\n    \\\"\\\"\\\"Load CSV results previously written by :func:`save_results_csv`.\\\"\\\"\\\"\n    p = Path(path)\n    with p.open(\"r\", newline=\"\", encoding=\"utf-8\") as f:\n        r = csv.DictReader(f, dialect=dialect)\n        return [dict(row) for row in r]\n\"\"\")\n\nchunks.append(\"\"\"\ndef _write_json(path: Path, payload: Mapping[str, Any]) -> Path:\n    ensure_dir(path.parent)\n    path.write_text(json.dumps(dict(payload), indent=2, sort_keys=True), encoding=\"utf-8\")\n    return path\n\n\ndef save_figure(\n    fig: Any,\n    paths: RunPaths,\n    name: str,\n    *,\n    formats: Sequence[str] = (\"png\", \"svg\"),\n    dpi: int = 200,\n    metadata: Mapping[str, Any] | None = None,\n) -> dict[str, Path]:\n    \\\"\\\"\\\"Save a matplotlib-like figure to standard locations with metadata.\\\"\\\"\\\"\n    out: dict[str, Path] = {}\n    ensure_dir(paths.figures_dir)\n    safe = \"\".join(c if (c.isalnum() or c in \"-_.\") else \"_\" for c in name).strip(\"._\") or \"figure\"\n    for fmt in formats:\n        fp = paths.figures_dir / f\"{safe}.{fmt}\"\n        fig.savefig(fp, dpi=dpi, bbox_inches=\"tight\")\n        out[fmt] = fp\n    _write_json(\n        paths.figures_dir / f\"{safe}.json\",\n        {\n            \"run_id\": paths.run_id,\n            \"name\": safe,\n            \"created_utc\": utc_now(),\n            \"formats\": list(formats),\n            **(dict(metadata or {})),\n        },\n    )\n    return out\n\"\"\")\n\nchunks.append(\"\"\"\ndef standard_results_path(paths: RunPaths, stem: str = \"results\") -> Path:\n    \\\"\\\"\\\"Convenience helper for placing CSV results under a run directory.\\\"\\\"\\\"\n    safe = \"\".join(c if (c.isalnum() or c in \"-_.\") else \"_\" for c in stem).strip(\"._\") or \"results\"\n    return paths.results_dir / f\"{safe}.csv\"\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/experiments/io.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4bd0381081909cae03b5047a4b910a942f49460a0d3d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/io.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/io.py\", \"src/experiments/numeric.py\", \"src/experiments/plotting.py\", \"src/experiments/sweep.py\", \"src/experiments/symbolic.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_07d9c6458b60c70e00694b4cb9dd8081979e1ba0f3164a7e96",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/experiments/io.py` with standardized run directory management (run IDs + run metadata), CSV save/load utilities, and figure export (PNG/SVG) with JSON sidecar metadata and consistent paths."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

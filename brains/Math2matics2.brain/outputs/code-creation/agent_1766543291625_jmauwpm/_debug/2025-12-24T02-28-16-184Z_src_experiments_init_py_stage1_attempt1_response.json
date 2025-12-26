@@ -1,0 +1,56 @@
+{
+  "content": "Created `src/experiments/__init__.py` as a lazy-loading package initializer that defines a stable public API (`__all__`) and resolves exports on demand via `__getattr__`, avoiding eager imports of optional/heavy dependencies.",
+  "reasoning": "",
+  "responseId": "resp_06d6c445d0261f7e00694b4fc8090c819398aa4d082a1e2659",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2924,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1347,
+    "output_tokens_details": {
+      "reasoning_tokens": 363
+    },
+    "total_tokens": 4271
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_06d6c445d0261f7e00694b4fc8c6008193a9952034c8da76e7",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06d6c445d0261f7e00694b4fce2ca08193bc6479076e155771",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/__init__.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\n\\\"\\\"\\\"Reusable experiment utilities.\n\nThis package provides small, dependency-light building blocks for running\nexperiments (configuration, IO, parameter sweeps, and plotting). The public API\nis exposed from this module to keep imports stable for downstream users.\n\nThe implementation uses lazy attribute access (PEP 562) so importing\n``experiments`` does not import optional/heavy dependencies (e.g., matplotlib).\n\\\"\\\"\\\"\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\nfrom __future__ import annotations\n\nfrom importlib import import_module\nfrom typing import Dict, Tuple\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\n# Public symbols are defined as a mapping from name -> (module, attribute).\n# This keeps the import surface stable while avoiding eager imports.\n_EXPORTS: Dict[str, Tuple[str, str]] = {\n    # common.py\n    \"set_global_seed\": (\".common\", \"set_global_seed\"),\n    \"ensure_json_serializable\": (\".common\", \"ensure_json_serializable\"),\n    \"now_timestamp\": (\".common\", \"now_timestamp\"),\n    \"flatten_dict\": (\".common\", \"flatten_dict\"),\n    \"merge_dicts\": (\".common\", \"merge_dicts\"),\n    \"ExperimentMetadata\": (\".common\", \"ExperimentMetadata\"),\n    \"build_run_id\": (\".common\", \"build_run_id\"),\n    # io.py\n    \"ExperimentPaths\": (\".io\", \"ExperimentPaths\"),\n    \"atomic_write_text\": (\".io\", \"atomic_write_text\"),\n    \"atomic_write_bytes\": (\".io\", \"atomic_write_bytes\"),\n    \"read_json\": (\".io\", \"read_json\"),\n    \"write_json\": (\".io\", \"write_json\"),\n    \"read_yaml\": (\".io\", \"read_yaml\"),\n    \"write_yaml\": (\".io\", \"write_yaml\"),\n    \"read_table\": (\".io\", \"read_table\"),\n    \"write_table\": (\".io\", \"write_table\"),\n    # sweep.py\n    \"grid\": (\".sweep\", \"grid\"),\n    \"random_search\": (\".sweep\", \"random_search\"),\n    \"run_sweep\": (\".sweep\", \"run_sweep\"),\n    \"SweepResult\": (\".sweep\", \"SweepResult\"),\n    # plotting.py (may rely on optional deps; still lazy)\n    \"set_plot_style\": (\".plotting\", \"set_plot_style\"),\n    \"plot_metric_curves\": (\".plotting\", \"plot_metric_curves\"),\n    \"plot_aggregate_summary\": (\".plotting\", \"plot_aggregate_summary\"),\n}\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\n__all__ = sorted(_EXPORTS.keys())\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\ndef __getattr__(name: str):\n    \\\"\\\"\\\"Lazily resolve public attributes.\n\n    This function is invoked when ``experiments.<name>`` is accessed and\n    ``name`` is not found in the module globals. It imports the providing\n    submodule on demand and returns the requested attribute.\n    \\\"\\\"\\\"\n    spec = _EXPORTS.get(name)\n    if spec is None:\n        raise AttributeError(f\"module {__name__!r} has no attribute {name!r}\")\n    module_name, attr_name = spec\n    module = import_module(module_name, package=__name__)\n    try:\n        value = getattr(module, attr_name)\n    except AttributeError as e:\n        # Surface a clearer message while preserving the original exception.\n        raise AttributeError(\n            f\"Failed to import {attr_name!r} from {module.__name__!r}\"\n        ) from e\n    globals()[name] = value  # Cache for subsequent lookups.\n    return value\n\n\ndef __dir__():\n    return sorted(set(globals().keys()) | set(__all__))\n\"\"\".strip(\"\\n\"))\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/experiments/__init__.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4fbeb5a8819082ef6cca0e8e962a0289c9c218902ef0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/__init__.py\nDIR_STATE:[\"src/experiments/__init__.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_06d6c445d0261f7e00694b4fd77b308193a9eb0d06f76ad670",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `src/experiments/__init__.py` as a lazy-loading package initializer that defines a stable public API (`__all__`) and resolves exports on demand via `__getattr__`, avoiding eager imports of optional/heavy dependencies."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,52 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Define and enforce a canonical outputs schema (e.g., outputs/results.json with fixed keys + outputs/figure.png) and add seed control (single RNG seed propagated) in the pipeline entrypoint `python scripts/run_pipeline.py`.
+Project: generated_script_1766547793166 (python script)
+
+Target file details:
+- Path: tests/test_pipeline_outputs_schema.py
+- Purpose: Automated tests that run the pipeline in a temp workspace to assert deterministic behavior under a fixed seed and validate that outputs/results.json and outputs/figure.png are produced and schema-compliant.
+- Category: test
+
+Other planned files (for context only):
+- scripts/run_pipeline.py: Pipeline entrypoint updated to accept a single seed, propagate it through all RNGs, enforce writing to a canonical outputs/ layout, and validate outputs/results.json and outputs/figure.png against the fixed schema before exiting.
+- src/pipeline/output_schema.py: Defines the canonical results schema (fixed keys/types), provides validation utilities, and implements a single function to write outputs/results.json in a stable, deterministic form.
+- src/pipeline/seed_control.py: Implements unified seed control that sets and propagates one RNG seed across Python random, NumPy, and common ML/plotting libraries when available, returning a context object for downstream use.
+- src/pipeline/output_paths.py: Centralizes canonical output paths (outputs/results.json, outputs/figure.png, and optional metadata) and ensures directories exist with consistent behavior in local runs and CI.
+
+Reference insights:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [CONSOLIDATED] Establish a reproducible workflow by standardizing, validating, and documenting all generated outputs (via explicit policies/
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_scripts_run_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766539771836_cun
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+
+Key requirements:
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Automated tests that run the pipeline in a temp workspace to assert deterministic behavior under a fixed seed and validate that outputs/results.json and outputs/figure.png are produced and schema-compliant.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('tests/test_pipeline_outputs_schema.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:tests/test_pipeline_outputs_schema.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside tests/test_pipeline_outputs_schema.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

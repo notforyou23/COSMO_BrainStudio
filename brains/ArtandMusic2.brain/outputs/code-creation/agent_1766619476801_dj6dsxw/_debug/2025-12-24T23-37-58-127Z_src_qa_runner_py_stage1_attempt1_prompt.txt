@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a minimal automated validation harness (e.g., a single command/script) that runs the scaffold generator and then verifies expected files exist in /outputs (REPORT_OUTLINE.md, CASE_STUDY_TEMPLATE.md, METADATA_SCHEMA.md, CASE_STUDIES_INDEX.csv, rights artifacts) and outputs a pass/fail report saved under /outputs/qa/.
+Project: minimal automated validation harness (e.g., a single command/script) that runs the scaffold generator and then verifies expected files exist in /outputs (REPORT_OUTLINE.md, CASE_STUDY_TEMPLATE.md, METADATA_SCHEMA.md, CASE_STUDIES_INDEX.csv, rights artifacts) and outputs a pass/fail report saved under /outputs/qa/. (python configuration)
+
+Target file details:
+- Path: src/qa/runner.py
+- Purpose: Subprocess runner wrapper to execute the scaffold generator command with controlled environment, timeouts, and captured stdout/stderr.
+- Category: source
+
+Other planned files (for context only):
+- scripts/validate_scaffold.py: Single-command validation harness that runs the scaffold generator, verifies required artifacts in outputs/, and writes a pass/fail QA report under outputs/qa/.
+- src/qa/validator.py: Core validation logic for locating project root, invoking the generator deterministically, checking expected files (including rights artifacts), and producing structured results.
+- src/qa/reporting.py: Utilities to render validation results as a human-readable report and machine-readable JSON saved to outputs/qa/.
+- src/qa/paths.py: Path and filesystem helpers to resolve outputs directories, enforce deterministic locations, and support cross-platform execution.
+
+Reference insights:
+- [CONSOLIDATED] Establish a deterministic scaffold-to-artifact pipeline where a single command generates the project’s report structure and t
+- [CONSOLIDATED] Establish a deterministic scaffold-to-artifact pipeline where a single command generates the project’s report structure and t
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- Assumption: art and music exist mainly for aesthetic pleasure — while aesthetics matter, their primary functions historically and cognitivel
+- [AGENT: agent_1766614627655_4lrkb6s] Across perspectives, “genius vs. craft/process” narratives operate less as attitudes and more as instit
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Subprocess runner wrapper to execute the scaffold generator command with controlled environment, timeouts, and captured stdout/stderr.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/qa/runner.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/qa/runner.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/qa/runner.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

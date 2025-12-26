@@ -1,0 +1,56 @@
+{
+  "content": "Created `README.md` documenting installation, the benchmark dataset schema overview, how to validate and run the included example benchmark, and how CI verifies deterministic runner output against a checked-in fixture.",
+  "reasoning": "",
+  "responseId": "resp_0d18153ff0edd9e5006949bf7e80008197b811bc11cc2f1870",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2610,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1134,
+    "output_tokens_details": {
+      "reasoning_tokens": 320
+    },
+    "total_tokens": 3744
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0d18153ff0edd9e5006949bf8023f481978f23df62bf458c95",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d18153ff0edd9e5006949bf88021c8197967bb8e8f2926fa5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('README.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"# qg_bench\n\nMinimal benchmark harness for question-generation (QG) style tasks.\n\nIt provides:\n- **Dataset schema validation** via `jsonschema`\n- A **single benchmark runner stub** that reads a dataset and emits deterministic JSON output\n- One **worked example dataset** and an **expected-output fixture** used by CI\n\n## Installation\n\nFrom the repository root:\n\n```bash\npython -m pip install -e .\n```\n\nOr build/install normally:\n\n```bash\npython -m pip install .\n```\n\nAfter installation, the console entry point is:\n\n```bash\nqg-bench --help\n```\n\n## Dataset format (schema overview)\n\nDatasets are JSON files validated against the bundled schema:\n`src/qg_bench/schemas/benchmark.schema.json`.\n\nAt a high level the dataset is an object with:\n- `benchmark_name` (string): Human-readable benchmark name\n- `benchmark_version` (string): Dataset version (e.g., `\"1.0\"`)\n- `items` (array): Each item is one example in the benchmark\n\nEach item typically contains:\n- `id` (string): Unique identifier within the dataset\n- `context` (string): Source text from which a question could be generated\n- `reference_question` (string): A gold/expected question (for simple fixtures)\n- Optional metadata fields (object) depending on your use case\n\nTo see the authoritative definition, open the schema file listed above. Any dataset used by\nthe runner should validate against it.\n\n## Validating a dataset\n\nValidate a dataset JSON file against the bundled schema:\n\n```bash\nqg-bench validate path/to/dataset.json\n```\n\nIf your environment does not expose the console script, you can also run validation as a module:\n\n```bash\npython -m qg_bench.validate path/to/dataset.json\n```\n\nValidation errors are reported with a clear JSON pointer/path to the failing field.\n\n## Running the example benchmark\n\nThis repository includes a worked example dataset under `examples/`\n(see the file names in that directory).\n\nRun:\n\n```bash\nqg-bench run examples/example_benchmark.json\n```\n\nThe runner prints a single JSON document to stdout containing:\n- dataset identity (name/version)\n- basic counts (e.g., number of items)\n- any deterministic “stub” metrics computed by the runner\n\nYou can write the output to a file:\n\n```bash\nqg-bench run examples/example_benchmark.json > /tmp/qg_bench_output.json\n```\n\n## Expected-output fixtures and CI\n\nTo keep the benchmark runner deterministic and testable, CI checks that the example dataset\nproduces exactly the expected JSON output.\n\nThe expected output fixture lives under `tests/fixtures/` (see the file names there).\nIn CI, the workflow effectively does:\n\n1. Run the benchmark on the example dataset to produce `actual.json`\n2. Compare `actual.json` to the checked-in fixture (`expected.json`)\n3. Fail if they differ (preventing accidental output/schema drift)\n\nWhen you intentionally change runner output semantics, update the fixture accordingly and\nensure the example dataset still validates against the schema.\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:README.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949be2fa9948190b7fd0f89484479600a95eb5fa105098f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:README.md\nDIR_STATE:[\"README.md\", \"pyproject.toml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0d18153ff0edd9e5006949bf9869288197ad8e8172c4521ea0",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `README.md` documenting installation, the benchmark dataset schema overview, how to validate and run the included example benchmark, and how CI verifies deterministic runner output against a checked-in fixture."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

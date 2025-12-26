@@ -1,0 +1,125 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766619886557_cnahlnm",
+  "agentType": "code-creation",
+  "goalId": "goal_60",
+  "missionId": "strategic_goal_60_1766619886556",
+  "spawnCycle": 75,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "medium",
+  "createdAt": "2025-12-24T23:45:01.167Z",
+  "completedAt": "2025-12-24T23:47:20.084Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/link_check.py",
+      "description": "Command-line Python automation script that discovers or generates an exemplar URL list (from an existing list, media catalog, or by extracting URLs from the pilot case study), checks reachability with timestamps, optionally triggers an archival snapshot policy, and writes results to runtime/outputs/qa/LINK_CHECK_REPORT.csv.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "caffold.py\", \"scripts/update_project_tracker.py\", \"scripts/validate_linkcheck_report.py\", \"scripts/validate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_scaffold.py\"]\nSUMMARY: Created a CLI link-check script that discovers or generates exemplar URLs, checks reachability with timestamps, optionally archives via Wayback, and writes runtime/outputs/qa/LINK_CHECK_REPORT.csv.\n",
+          "timestamp": "2025-12-24T23:45:39.416Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "y\", \"scripts/update_project_tracker.py\", \"scripts/validate_linkcheck_report.py\", \"scripts/validate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_scaffold.py\"]\nSummary: Implemented a CLI link-check script that discovers or generates exemplar URLs, checks reachability with timestamps, optionally triggers Wayback archival, and writes runtime/outputs/qa/LINK_CHECK_REPORT.csv.\n",
+          "timestamp": "2025-12-24T23:46:09.026Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:45:01.167Z",
+      "failedAt": "2025-12-24T23:46:09.026Z"
+    },
+    {
+      "path": "runtime/inputs/qa/EXEMPLAR_URLS.csv",
+      "description": "Optional exemplar URL seed list (single column 'url') used by the link-check script when present to define which URLs to validate.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runtime/inputs/qa/EXEMPLAR_URLS.csv\nDIR_STATE:[\"runtime/inputs/qa/EXEMPLAR_URLS.csv\"]\nSummary: Wrote an exemplar URL seed list (single-column CSV) to support link-check automation inputs.\n",
+          "timestamp": "2025-12-24T23:46:28.253Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runtime/inputs/qa/EXEMPLAR_URLS.csv\nDIR_STATE:[\"runtime/inputs/qa/EXEMPLAR_URLS.csv\"]\nSUMMARY:Created a minimal exemplar URL seed list for initial link-check validation.\n",
+          "timestamp": "2025-12-24T23:46:44.508Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:45:01.167Z",
+      "failedAt": "2025-12-24T23:46:44.508Z"
+    },
+    {
+      "path": "runtime/inputs/qa/LINKCHECK_CONFIG.json",
+      "description": "Optional configuration file providing defaults for timeouts, user agent, input discovery paths, and archival snapshot policy for the link-check script.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runtime/inputs/qa/LINKCHECK_CONFIG.json\nDIR_STATE:[\"runtime/inputs/qa/EXEMPLAR_URLS.csv\", \"runtime/inputs/qa/LINKCHECK_CONFIG.json\"]\nSUMMARY: Wrote a complete default LINKCHECK_CONFIG.json defining HTTP behavior, input discovery, output paths, and archival snapshot policy.\n",
+          "timestamp": "2025-12-24T23:47:00.830Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runtime/inputs/qa/LINKCHECK_CONFIG.json\nDIR_STATE:[\"runtime/inputs/qa/EXEMPLAR_URLS.csv\", \"runtime/inputs/qa/LINKCHECK_CONFIG.json\"]\nSummary: Wrote a complete LINKCHECK_CONFIG.json with defaults for timeouts, discovery paths, output report settings, and an optional archival snapshot policy.\n",
+          "timestamp": "2025-12-24T23:47:20.083Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:45:01.167Z",
+      "failedAt": "2025-12-24T23:47:20.083Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Implement link-check automation for exemplar URLs referenced in case studies and/or a media catalog (reachability + timestamp + optional archival snapshot policy), saving results under runtime/outputs/qa/LINK_CHECK_REPORT.csv. If no exemplar list exists yet, generate a minimal exemplar URL list from the pilot case study as the first test input.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Missing direction explicitly called out: link-check automation. This is required to keep multimedia exemplars stable and auditable, and to prevent silent rot as the catalog scales."
+  ],
+  "projectName": "generated_automation_script_1766619886750",
+  "language": "python",
+  "type": "automation_script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-24T23:47:20.084Z",
+  "summary": {
+    "completed": 0,
+    "failed": 3,
+    "total": 3
+  }
+}

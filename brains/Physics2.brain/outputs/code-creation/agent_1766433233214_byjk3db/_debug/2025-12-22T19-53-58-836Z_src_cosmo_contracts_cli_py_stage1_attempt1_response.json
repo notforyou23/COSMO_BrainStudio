@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/cosmo_contracts/cli.py` as a compact `argparse` CLI with `sync` (idempotently rewrite v0.1 benchmark markdown via `cosmo_contracts.markdown.rewrite_with_contracts`) and `validate` (aggregate required pass/fail+diagnostics compliance reports from JSON files, or delegate to `cosmo_contracts.validate_compliance` when available), emitting a canonical JSON report and appropriate exit codes.",
+  "reasoning": "",
+  "responseId": "resp_0e5877f58bbd8bf8006949a2f6a73881978735980b2b5710ef",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3797,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2278,
+    "output_tokens_details": {
+      "reasoning_tokens": 2181
+    },
+    "total_tokens": 6075
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0e5877f58bbd8bf8006949a2f787c88197805250ceb3dde093",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0e5877f58bbd8bf8006949a301c2ac8197bfb0166659bcd839",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re\ntarget_path = Path('/mnt/data').joinpath('src/cosmo_contracts/cli.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(r\"\"\"# SPDX-License-Identifier: MIT\n\"\"\"[:-1])\nchunks.append(r\"\"\"from __future__ import annotations\n\nimport argparse\nimport importlib\nimport json\nimport sys\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Optional, Tuple\n\"\"\")\nchunks.append(r\"\"\"@dataclass\nclass ComplianceResult:\n    benchmark_id: str\n    implementation: str\n    passed: bool\n    diagnostics: Any = None\n\n    @classmethod\n    def from_json(cls, obj: Dict[str, Any], source: str) -> \"ComplianceResult\":\n        missing = [k for k in (\"benchmark_id\", \"implementation\", \"pass\") if k not in obj]\n        if missing:\n            raise ValueError(f\"{source}: missing required fields: {', '.join(missing)}\")\n        return cls(\n            benchmark_id=str(obj[\"benchmark_id\"]),\n            implementation=str(obj[\"implementation\"]),\n            passed=bool(obj[\"pass\"]),\n            diagnostics=obj.get(\"diagnostics\"),\n        )\n\n    def to_json(self) -> Dict[str, Any]:\n        return {\n            \"benchmark_id\": self.benchmark_id,\n            \"implementation\": self.implementation,\n            \"pass\": self.passed,\n            \"diagnostics\": self.diagnostics,\n        }\n\"\"\")\nchunks.append(r\"\"\"def _try_import(path: str):\n    try:\n        return importlib.import_module(path)\n    except Exception as e:  # pragma: no cover\n        raise RuntimeError(\n            f\"Failed to import '{path}'. Ensure cosmo_contracts is installed with its dependencies.\\n\"\n            f\"Underlying error: {type(e).__name__}: {e}\"\n        ) from e\n\"\"\")\nchunks.append(r\"\"\"def _read_json(path: Path) -> Any:\n    try:\n        return json.loads(path.read_text(encoding=\"utf-8\"))\n    except json.JSONDecodeError as e:\n        raise SystemExit(f\"Invalid JSON in {path}: {e}\") from e\n\n\ndef _load_report_files(paths: Iterable[Path]) -> List[ComplianceResult]:\n    results: List[ComplianceResult] = []\n    for p in paths:\n        obj = _read_json(p)\n        if isinstance(obj, dict):\n            results.append(ComplianceResult.from_json(obj, str(p)))\n        elif isinstance(obj, list):\n            for i, item in enumerate(obj):\n                if not isinstance(item, dict):\n                    raise SystemExit(f\"{p}[{i}]: expected object, got {type(item).__name__}\")\n                results.append(ComplianceResult.from_json(item, f\"{p}[{i}]\"))\n        else:\n            raise SystemExit(f\"{p}: expected object or array, got {type(obj).__name__}\")\n    return results\n\"\"\")\nchunks.append(r\"\"\"def _aggregate(results: List[ComplianceResult]) -> Dict[str, Any]:\n    total = len(results)\n    passed = sum(1 for r in results if r.passed)\n    failed = total - passed\n    by_benchmark: Dict[str, Dict[str, Any]] = {}\n    for r in results:\n        b = by_benchmark.setdefault(r.benchmark_id, {\"passed\": 0, \"failed\": 0, \"results\": []})\n        b[\"passed\" if r.passed else \"failed\"] += 1\n        b[\"results\"].append(r.to_json())\n    return {\"summary\": {\"total\": total, \"passed\": passed, \"failed\": failed}, \"by_benchmark\": by_benchmark}\n\"\"\")\nchunks.append(r\"\"\"def cmd_sync(args: argparse.Namespace) -> int:\n    md_path = Path(args.benchmarks_md)\n    out_path = Path(args.out) if args.out else md_path\n    markdown = _try_import(\"cosmo_contracts.markdown\")\n    if not hasattr(markdown, \"rewrite_with_contracts\"):\n        raise SystemExit(\"cosmo_contracts.markdown.rewrite_with_contracts is required for 'sync'.\")\n    new_text = markdown.rewrite_with_contracts(md_path.read_text(encoding=\"utf-8\"))\n    if args.check:\n        if new_text != md_path.read_text(encoding=\"utf-8\"):\n            sys.stdout.write(\"contracts_out_of_date\\n\")\n            return 2\n        sys.stdout.write(\"contracts_up_to_date\\n\")\n        return 0\n    out_path.write_text(new_text, encoding=\"utf-8\")\n    sys.stdout.write(f\"written:{out_path}\\n\")\n    return 0\n\"\"\")\nchunks.append(r\"\"\"def cmd_validate(args: argparse.Namespace) -> int:\n    # Two modes:\n    # (A) Validate compliance-report JSON files (always supported).\n    # (B) If cosmo_contracts has a validator API, run it and emit a report.\n    if args.reports:\n        results = _load_report_files([Path(p) for p in args.reports])\n        report = _aggregate(results)\n    else:\n        validator = _try_import(\"cosmo_contracts\")\n        if not hasattr(validator, \"validate_compliance\"):\n            raise SystemExit(\n                \"No reports provided and cosmo_contracts.validate_compliance not available. \"\n                \"Provide --reports or install full cosmo_contracts package.\"\n            )\n        report = validator.validate_compliance(\n            benchmarks_md=Path(args.benchmarks_md) if args.benchmarks_md else None,\n            implementations=args.implementations or [],\n        )\n\n    text = json.dumps(report, indent=2, sort_keys=True)\n    if args.out:\n        Path(args.out).write_text(text + \"\\n\", encoding=\"utf-8\")\n    else:\n        sys.stdout.write(text + \"\\n\")\n\n    failed = int(report.get(\"summary\", {}).get(\"failed\", 0))\n    return 1 if failed else 0\n\"\"\")\nchunks.append(r\"\"\"def build_parser() -> argparse.ArgumentParser:\n    p = argparse.ArgumentParser(prog=\"cosmo-contracts\", description=\"Contract section sync + compliance validation\")\n    sub = p.add_subparsers(dest=\"cmd\", required=True)\n\n    s = sub.add_parser(\"sync\", help=\"Add/update standardized Contract sections in v0.1 benchmark markdown\")\n    s.add_argument(\"benchmarks_md\", help=\"Path to benchmarks_v0_1.md (input; also output if --out not set)\")\n    s.add_argument(\"--out\", help=\"Write updated markdown to this path (default: in-place)\")\n    s.add_argument(\"--check\", action=\"store_true\", help=\"Do not write; exit 0 if up-to-date else 2\")\n    s.set_defaults(func=cmd_sync)\n\n    v = sub.add_parser(\"validate\", help=\"Validate implementation contract compliance and emit a report\")\n    v.add_argument(\"--benchmarks-md\", dest=\"benchmarks_md\", help=\"Optional markdown path for API-driven validation\")\n    v.add_argument(\"--implementations\", nargs=\"*\", help=\"Optional implementation identifiers for API-driven validation\")\n    v.add_argument(\"--reports\", nargs=\"*\", help=\"Paths to JSON compliance reports emitted by implementations\")\n    v.add_argument(\"--out\", help=\"Write JSON report to this file (default: stdout)\")\n    v.set_defaults(func=cmd_validate)\n\n    return p\n\n\ndef main(argv: Optional[List[str]] = None) -> int:\n    args = build_parser().parse_args(argv)\n    try:\n        return int(args.func(args))\n    except SystemExit:\n        raise\n    except Exception as e:  # pragma: no cover\n        sys.stderr.write(f\"error:{type(e).__name__}:{e}\\n\")\n        return 1\n\n\nif __name__ == \"__main__\":  # pragma: no cover\n    raise SystemExit(main())\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/cosmo_contracts/cli.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/cosmo_contracts/cli.py\nDIR_STATE:[\"src/cosmo_contracts/__init__.py\", \"src/cosmo_contracts/cli.py\", \"src/cosmo_contracts/contracts.py\", \"src/cosmo_contracts/markdown.py\", \"src/cosmo_contracts/runner.py\", \"src/cosmo_contracts/schema.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0e5877f58bbd8bf8006949a31cb508819791eb080a086646d1",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/cosmo_contracts/cli.py` as a compact `argparse` CLI with `sync` (idempotently rewrite v0.1 benchmark markdown via `cosmo_contracts.markdown.rewrite_with_contracts`) and `validate` (aggregate required pass/fail+diagnostics compliance reports from JSON files, or delegate to `cosmo_contracts.validate_compliance` when available), emitting a canonical JSON report and appropriate exit codes."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

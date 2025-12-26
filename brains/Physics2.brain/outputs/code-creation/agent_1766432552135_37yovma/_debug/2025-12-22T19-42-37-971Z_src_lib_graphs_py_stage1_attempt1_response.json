@@ -1,0 +1,56 @@
+{
+  "content": "Implemented a lightweight `src/lib/graphs.py` module providing a small `Graph` container plus deterministic constructors (path, cycle, 2D grid with optional periodicity, Erdős–Rényi, random geometric) and core matrix utilities (adjacency, Laplacian, degrees) for downstream emergence/entanglement diagnostics.",
+  "reasoning": "",
+  "responseId": "resp_09f73d5c441e437a0069499fca66188194b634e9af5a6b76aa",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3356,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1911,
+    "output_tokens_details": {
+      "reasoning_tokens": 146
+    },
+    "total_tokens": 5267
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_09f73d5c441e437a0069499fcb3fb88194ae32972f8a85f413",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_09f73d5c441e437a0069499fcea01881948150c5ac8c62f54a",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap\n\ntarget_path = Path('/mnt/data').joinpath('src/lib/graphs.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\n\\\"\\\"\\\"Graph/lattice construction utilities.\n\nThis module provides tiny, dependency-light graph builders used by the toy\nemergence / entanglement diagnostics. Graphs are undirected and simple by\nconstruction (no self-loops, no parallel edges).\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Iterable, Optional, Sequence, Tuple\n\nimport numpy as np\n\"\"\")\n\nchunks.append(\"\"\"\nEdge = Tuple[int, int]\n\n\ndef _canon_edge(u: int, v: int) -> Edge:\n    if u == v:\n        raise ValueError(\"self-loops are not allowed\")\n    return (u, v) if u < v else (v, u)\n\n\ndef _unique_edges(edges: Iterable[Edge], n: int) -> Tuple[Edge, ...]:\n    seen = set()\n    out = []\n    for (u, v) in edges:\n        if not (0 <= u < n and 0 <= v < n):\n            raise ValueError(\"edge endpoint out of range\")\n        e = _canon_edge(int(u), int(v))\n        if e not in seen:\n            seen.add(e)\n            out.append(e)\n    return tuple(out)\n\"\"\")\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass Graph:\n    \\\"\\\"\\\"Simple undirected graph container.\n\n    Attributes\n    ----------\n    n : int\n        Number of vertices labeled 0..n-1.\n    edges : tuple[(u,v), ...]\n        Canonical undirected edge list with u<v.\n    coords : np.ndarray | None\n        Optional vertex coordinates (n, d), useful for geometric graphs/lattices.\n    \\\"\\\"\\\"\n\n    n: int\n    edges: Tuple[Edge, ...]\n    coords: Optional[np.ndarray] = None\n\n    def adjacency(self, *, dtype=float) -> np.ndarray:\n        a = np.zeros((self.n, self.n), dtype=dtype)\n        for u, v in self.edges:\n            a[u, v] = 1\n            a[v, u] = 1\n        return a\n\n    def laplacian(self, *, dtype=float) -> np.ndarray:\n        a = self.adjacency(dtype=dtype)\n        deg = np.sum(a, axis=1)\n        return np.diag(deg) - a\n\n    def degrees(self) -> np.ndarray:\n        d = np.zeros(self.n, dtype=int)\n        for u, v in self.edges:\n            d[u] += 1\n            d[v] += 1\n        return d\n\"\"\")\n\nchunks.append(\"\"\"\ndef path_graph(n: int) -> Graph:\n    n = int(n)\n    if n < 1:\n        raise ValueError(\"n must be >= 1\")\n    edges = [(i, i + 1) for i in range(n - 1)]\n    return Graph(n=n, edges=_unique_edges(edges, n))\n\n\ndef cycle_graph(n: int) -> Graph:\n    n = int(n)\n    if n < 3:\n        raise ValueError(\"n must be >= 3\")\n    edges = [(i, (i + 1) % n) for i in range(n)]\n    return Graph(n=n, edges=_unique_edges(edges, n))\n\n\ndef grid_2d(Lx: int, Ly: int, *, periodic: bool = False) -> Graph:\n    \\\"\\\"\\\"2D square lattice with optional periodic boundaries.\\\"\\\"\\\"\n    Lx, Ly = int(Lx), int(Ly)\n    if Lx < 1 or Ly < 1:\n        raise ValueError(\"Lx,Ly must be >= 1\")\n    def vid(x: int, y: int) -> int:\n        return y * Lx + x\n\n    edges = []\n    for y in range(Ly):\n        for x in range(Lx):\n            if x + 1 < Lx:\n                edges.append((vid(x, y), vid(x + 1, y)))\n            elif periodic and Lx > 1:\n                edges.append((vid(x, y), vid(0, y)))\n            if y + 1 < Ly:\n                edges.append((vid(x, y), vid(x, y + 1)))\n            elif periodic and Ly > 1:\n                edges.append((vid(x, y), vid(x, 0)))\n    coords = np.array([(x, y) for y in range(Ly) for x in range(Lx)], dtype=float)\n    return Graph(n=Lx * Ly, edges=_unique_edges(edges, Lx * Ly), coords=coords)\n\"\"\")\n\nchunks.append(\"\"\"\ndef erdos_renyi(n: int, p: float, *, rng: Optional[np.random.Generator] = None) -> Graph:\n    \\\"\\\"\\\"G(n,p) with independent edges.\\\"\\\"\\\"\n    n = int(n)\n    if n < 1:\n        raise ValueError(\"n must be >= 1\")\n    if not (0.0 <= p <= 1.0):\n        raise ValueError(\"p must be in [0,1]\")\n    rng = np.random.default_rng() if rng is None else rng\n    edges = []\n    for i in range(n):\n        r = rng.random(n - i - 1)\n        js = np.where(r < p)[0]\n        for off in js:\n            edges.append((i, i + 1 + int(off)))\n    return Graph(n=n, edges=_unique_edges(edges, n))\n\n\ndef random_geometric(\n    n: int,\n    radius: float,\n    *,\n    dim: int = 2,\n    periodic: bool = True,\n    rng: Optional[np.random.Generator] = None,\n) -> Graph:\n    \\\"\\\"\\\"Random geometric graph on [0,1)^dim with optional torus metric.\\\"\\\"\\\"\n    n, dim = int(n), int(dim)\n    if n < 1 or dim < 1:\n        raise ValueError(\"n, dim must be >= 1\")\n    if radius <= 0:\n        raise ValueError(\"radius must be > 0\")\n    rng = np.random.default_rng() if rng is None else rng\n    x = rng.random((n, dim))\n    edges = []\n    for i in range(n):\n        d = x[i + 1 :] - x[i]\n        if periodic:\n            d = np.minimum(np.abs(d), 1.0 - np.abs(d))\n        dist = np.sqrt(np.sum(d * d, axis=1))\n        js = np.where(dist <= radius)[0]\n        for off in js:\n            edges.append((i, i + 1 + int(off)))\n    return Graph(n=n, edges=_unique_edges(edges, n), coords=x)\n\"\"\")\n\nchunks.append(\"\"\"\ndef subgraph(g: Graph, nodes: Sequence[int]) -> Graph:\n    \\\"\\\"\\\"Induced subgraph on `nodes`, relabeled to 0..k-1 in given order.\\\"\\\"\\\"\n    idx = [int(u) for u in nodes]\n    k = len(idx)\n    pos = {u: i for i, u in enumerate(idx)}\n    edges = []\n    for u, v in g.edges:\n        if u in pos and v in pos:\n            edges.append((pos[u], pos[v]))\n    coords = None\n    if g.coords is not None:\n        coords = np.asarray(g.coords, dtype=float)[idx]\n    return Graph(n=k, edges=_unique_edges(edges, k), coords=coords)\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/lib/graphs.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/lib/graphs.py\nDIR_STATE:[\"src/lib/graphs.py\", \"src/lib/io.py\", \"src/lib/plotting.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_09f73d5c441e437a0069499fe647548194a4a85f8efbd143c9",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented a lightweight `src/lib/graphs.py` module providing a small `Graph` container plus deterministic constructors (path, cycle, 2D grid with optional periodicity, Erdős–Rényi, random geometric) and core matrix utilities (adjacency, Laplacian, degrees) for downstream emergence/entanglement diagnostics."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

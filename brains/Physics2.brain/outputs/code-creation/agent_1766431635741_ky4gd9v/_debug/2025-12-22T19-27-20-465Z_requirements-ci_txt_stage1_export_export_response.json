@@ -1,0 +1,56 @@
+{
+  "content": "FILE_EXPORT:{\"path\":\"requirements-ci.txt\",\"size\":251,\"encoding\":\"base64\",\"sha256\":\"10be5d4682cecce836e867098e027ef843ff9cd8a1c48b385a4a88e347d2f656\",\"content\":\"IyBQaW5uZWQgQ0kvdGVzdCBkZXBlbmRlbmNpZXMgZm9yIGdlbmVyYXRlZF9zY3JpcHRfMTc2NjQzMTYzODg3NAojIEtlZXAgdGhpcyBmaWxlIG1pbmltYWwgYW5kIGZ1bGx5IHBpbm5lZCBmb3IgcmVwcm9kdWNpYmxlIEdpdEh1YiBBY3Rpb25zIHJ1bnMuCgpweXRlc3Q9PTguMy40Cmpzb25zY2hlbWE9PTQuMjMuMAoKIyBOdW1lcmljYWwgdXRpbGl0aWVzIHVzZWQgYnkgdG9sZXJhbmNlL2FjY2VwdGFuY2UgdGVzdHMuCm51bXB5PT0yLjEuMwo=\"}\nDIR_STATE:[\"pytest.ini\",\"requirements-ci.txt\"]",
+  "reasoning": "",
+  "responseId": "resp_001d3a46c3d5de6d0069499e1647088196a241225bac6e6eba",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 1585,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 567,
+    "output_tokens_details": {
+      "reasoning_tokens": 46
+    },
+    "total_tokens": 2152
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_001d3a46c3d5de6d0069499e1724e08196ac1296a15e6cce3c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_001d3a46c3d5de6d0069499e188c1881968cb5b55753b1f27b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\r\nimport base64, json, hashlib, gzip\r\n\r\ntarget_path = Path('/mnt/data').joinpath('requirements-ci.txt')\r\nassert target_path.is_file(), 'Expected requirements-ci.txt to exist before export'\r\ndata = target_path.read_bytes()\r\npayload = {\r\n    'path': 'requirements-ci.txt',\r\n    'size': len(data),\r\n    'encoding': 'base64',\r\n    'sha256': hashlib.sha256(data).hexdigest(),\r\n    'content': None\r\n}\r\nif len(data) > 20000:\r\n    compressed = gzip.compress(data)\r\n    payload['encoding'] = 'gzip+base64'\r\n    payload['content'] = base64.b64encode(compressed).decode('ascii')\r\nelse:\r\n    payload['content'] = base64.b64encode(data).decode('ascii')\r\nprint('FILE_EXPORT:' + json.dumps(payload, separators=(',', ':')))\r\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_69499b967d148190962faee7981fd5060c9b277098400d23",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_EXPORT:{\"path\":\"requirements-ci.txt\",\"size\":251,\"encoding\":\"base64\",\"sha256\":\"10be5d4682cecce836e867098e027ef843ff9cd8a1c48b385a4a88e347d2f656\",\"content\":\"IyBQaW5uZWQgQ0kvdGVzdCBkZXBlbmRlbmNpZXMgZm9yIGdlbmVyYXRlZF9zY3JpcHRfMTc2NjQzMTYzODg3NAojIEtlZXAgdGhpcyBmaWxlIG1pbmltYWwgYW5kIGZ1bGx5IHBpbm5lZCBmb3IgcmVwcm9kdWNpYmxlIEdpdEh1YiBBY3Rpb25zIHJ1bnMuCgpweXRlc3Q9PTguMy40Cmpzb25zY2hlbWE9PTQuMjMuMAoKIyBOdW1lcmljYWwgdXRpbGl0aWVzIHVzZWQgYnkgdG9sZXJhbmNlL2FjY2VwdGFuY2UgdGVzdHMuCm51bXB5PT0yLjEuMwo=\"}\nDIR_STATE:[\"pytest.ini\", \"requirements-ci.txt\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_001d3a46c3d5de6d0069499e1ccc908196916e7cf9918cdbf6",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_EXPORT:{\"path\":\"requirements-ci.txt\",\"size\":251,\"encoding\":\"base64\",\"sha256\":\"10be5d4682cecce836e867098e027ef843ff9cd8a1c48b385a4a88e347d2f656\",\"content\":\"IyBQaW5uZWQgQ0kvdGVzdCBkZXBlbmRlbmNpZXMgZm9yIGdlbmVyYXRlZF9zY3JpcHRfMTc2NjQzMTYzODg3NAojIEtlZXAgdGhpcyBmaWxlIG1pbmltYWwgYW5kIGZ1bGx5IHBpbm5lZCBmb3IgcmVwcm9kdWNpYmxlIEdpdEh1YiBBY3Rpb25zIHJ1bnMuCgpweXRlc3Q9PTguMy40Cmpzb25zY2hlbWE9PTQuMjMuMAoKIyBOdW1lcmljYWwgdXRpbGl0aWVzIHVzZWQgYnkgdG9sZXJhbmNlL2FjY2VwdGFuY2UgdGVzdHMuCm51bXB5PT0yLjEuMwo=\"}\nDIR_STATE:[\"pytest.ini\",\"requirements-ci.txt\"]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,56 @@
+{
+  "content": "Fixed `src/goal_33_toy_experiment.py` by replacing it with a deterministic, CLI-runnable linear-regression toy experiment that (when run) writes canonical artifacts to `./outputs/results.json` and `./outputs/figure.png`.",
+  "reasoning": "",
+  "responseId": "resp_023840654318193400694b5dbff3f08193b6ca9c6488a4a8d2",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2717,
+    "input_tokens_details": {
+      "cached_tokens": 1280
+    },
+    "output_tokens": 1297,
+    "output_tokens_details": {
+      "reasoning_tokens": 1242
+    },
+    "total_tokens": 4014
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_023840654318193400694b5dc093008193ae8f145819b0b170",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_023840654318193400694b5dc2fbec8193a6f5c71bf260cd4a",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, sys, math, random\ntarget_path = Path('/mnt/data').joinpath('src/goal_33_toy_experiment.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\nchunks = []\nchunks.append(\"\"\"\\\n\\\"\\\"\\\"Deterministic toy experiment.\n\nRun:\n  python src/goal_33_toy_experiment.py --seed 0\n\nWrites:\n  ./outputs/results.json\n  ./outputs/figure.png\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport json\nfrom dataclasses import asdict, dataclass\nfrom pathlib import Path\n\nimport matplotlib\nmatplotlib.use(\"Agg\")  # headless, deterministic backend\nimport matplotlib.pyplot as plt\nimport numpy as np\n\"\"\")\nchunks.append(\"\"\"\\\n@dataclass\nclass ExperimentConfig:\n    seed: int = 0\n    n: int = 80\n    x_min: float = -2.0\n    x_max: float = 2.0\n    true_w: float = 1.7\n    true_b: float = -0.4\n    noise_std: float = 0.25\n    outputs_dir: str = \"outputs\"\n\"\"\")\nchunks.append(\"\"\"\\\ndef _fit_linear_least_squares(x: np.ndarray, y: np.ndarray) -> tuple[float, float]:\n    \\\"\\\"\\\"Fit y ≈ w*x + b with closed-form least squares.\\\"\\\"\\\"\n    x = np.asarray(x).reshape(-1)\n    y = np.asarray(y).reshape(-1)\n    X = np.column_stack([x, np.ones_like(x)])\n    # Deterministic solution via lstsq (SVD-based); rcond=None ensures stable default.\n    w, b = np.linalg.lstsq(X, y, rcond=None)[0]\n    return float(w), float(b)\n\n\ndef run_experiment(cfg: ExperimentConfig) -> dict:\n    rng = np.random.default_rng(cfg.seed)\n    x = rng.uniform(cfg.x_min, cfg.x_max, size=cfg.n)\n    y = cfg.true_w * x + cfg.true_b + rng.normal(0.0, cfg.noise_std, size=cfg.n)\n\n    w_hat, b_hat = _fit_linear_least_squares(x, y)\n    y_hat = w_hat * x + b_hat\n    mse = float(np.mean((y - y_hat) ** 2))\n\n    outputs = Path(cfg.outputs_dir)\n    outputs.mkdir(parents=True, exist_ok=True)\n\n    results = {\n        \"config\": asdict(cfg),\n        \"fit\": {\"w_hat\": w_hat, \"b_hat\": b_hat},\n        \"metrics\": {\"mse\": mse},\n        \"artifacts\": {\n            \"results_json\": str(outputs / \"results.json\"),\n            \"figure_png\": str(outputs / \"figure.png\"),\n        },\n    }\n\n    (outputs / \"results.json\").write_text(json.dumps(results, indent=2, sort_keys=True) + \"\\\\n\", encoding=\"utf-8\")\n\n    # Plot: scatter + fitted line (use fixed x-grid for deterministic figure)\n    fig, ax = plt.subplots(figsize=(6, 4), dpi=150)\n    ax.scatter(x, y, s=18, alpha=0.85, label=\"data\")\n    grid = np.linspace(cfg.x_min, cfg.x_max, 200)\n    ax.plot(grid, w_hat * grid + b_hat, color=\"C1\", linewidth=2.0, label=\"fit\")\n    ax.set_title(f\"Linear fit (seed={cfg.seed})\\\\nMSE={mse:.4f}\")\n    ax.set_xlabel(\"x\")\n    ax.set_ylabel(\"y\")\n    ax.legend(frameon=False, loc=\"best\")\n    ax.grid(True, linestyle=\":\", linewidth=0.6, alpha=0.7)\n    fig.tight_layout()\n    fig.savefig(outputs / \"figure.png\")\n    plt.close(fig)\n\n    return results\n\"\"\")\nchunks.append(\"\"\"\\\ndef _parse_args(argv: list[str] | None = None) -> ExperimentConfig:\n    p = argparse.ArgumentParser(description=\"Deterministic toy linear regression experiment.\")\n    p.add_argument(\"--seed\", type=int, default=0)\n    p.add_argument(\"--n\", type=int, default=80)\n    p.add_argument(\"--outputs-dir\", type=str, default=\"outputs\")\n    args = p.parse_args(argv)\n    return ExperimentConfig(seed=args.seed, n=args.n, outputs_dir=args.outputs_dir)\n\n\ndef main(argv: list[str] | None = None) -> None:\n    cfg = _parse_args(argv)\n    results = run_experiment(cfg)\n    # Minimal console output for CI/logging; artifacts are canonical.\n    print(json.dumps({\"mse\": results[\"metrics\"][\"mse\"], \"outputs_dir\": cfg.outputs_dir}, sort_keys=True))\n\n\nif __name__ == \"__main__\":\n    main()\n\"\"\")\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/goal_33_toy_experiment.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b5d7e1d248190a76614b61690b02b02800fde3a04adf1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/goal_33_toy_experiment.py\nDIR_STATE:[\"src/goal_33_toy_experiment.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_023840654318193400694b5dd1b8d881939c714d4dabb48753",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Fixed `src/goal_33_toy_experiment.py` by replacing it with a deterministic, CLI-runnable linear-regression toy experiment that (when run) writes canonical artifacts to `./outputs/results.json` and `./outputs/figure.png`."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

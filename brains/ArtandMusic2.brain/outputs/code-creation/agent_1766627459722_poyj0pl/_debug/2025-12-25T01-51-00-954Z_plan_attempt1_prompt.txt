@@ -1,0 +1,32 @@
+You are planning a python script implementation for the following mission:
+Canonicalize deliverables by selecting ONE authoritative QA runner + ONE authoritative schema from the existing created files, then migrate/copy the best-known versions into a single canonical /outputs/ tree and generate a refreshed /outputs/ARTIFACT_INDEX.md that points only to canonical paths (not agent-specific runtime/outputs locations).
+
+Relevant context:
+- [CONSOLIDATED] Establish a single, automated canonicalization workflow that scans all scattered agent/runtime output locations, selects and 
+- [INTROSPECTION] 2025-12-25T00-21-55-842Z_scripts_qa_run_sh_stage1_attempt2_prompt.txt from code-creation agent agent_1766622114110_412seks: 
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+- [INTROSPECTION] 2025-12-24T22-59-19-146Z_scripts_validate_outputs_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766617157732
+- [INTROSPECTION] 2025-12-25T00-50-00-140Z_scripts_qa_README_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766623798549_61a97n
+- [INTROSPECTION] 2025-12-25T00-50-00-140Z_scripts_qa_artifacts_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766623798549_61a
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

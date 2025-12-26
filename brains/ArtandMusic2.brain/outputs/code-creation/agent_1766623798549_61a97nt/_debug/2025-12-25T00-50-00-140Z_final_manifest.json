@@ -1,0 +1,301 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766623798549_61a97nt",
+  "agentType": "code-creation",
+  "goalId": "goal_181",
+  "missionId": "strategic_goal_181_1766623798549",
+  "spawnCycle": 106,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-25T00:50:11.225Z",
+  "completedAt": "2025-12-25T00:57:44.901Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/qa/qa_gate.py",
+      "description": "Canonical QA gate entrypoint that attempts containerized execution first and transparently falls back to a no-container failsafe mode while always writing logs and partial results to /outputs/qa.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/qa/qa_gate.py\nDIR_STATE:[\"scripts/qa/qa_gate.py\"]\nSummary: Wrote qa_gate.py implementing a docker-first QA gate with automatic failsafe fallback and structured artifact logging to outputs/qa.\n",
+          "timestamp": "2025-12-25T00:50:45.424Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/qa/qa_gate.py\nDIR_STATE:[\"scripts/qa/qa_gate.py\"]\nSummary: Added a docker-first QA gate entrypoint that always writes artifacts and falls back to a deterministic local failsafe mode on container failure.\n",
+          "timestamp": "2025-12-25T00:51:18.953Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:50:11.225Z",
+      "failedAt": "2025-12-25T00:51:18.953Z"
+    },
+    {
+      "path": "scripts/qa/docker_runner.py",
+      "description": "Docker-based QA execution helper that runs the intended full QA command in a container, captures stdout/stderr and exit codes, and detects container-loss scenarios for failsafe triggering.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/qa/docker_runner.py\nDIR_STATE:[\"scripts/qa/docker_runner.py\", \"scripts/qa/qa_gate.py\"]\nSummary: Added a compact docker QA runner helper that captures stdout/stderr/exit, supports timeouts, and flags container-loss conditions for downstream failsafe triggering.\n",
+          "timestamp": "2025-12-25T00:51:39.952Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/qa/docker_runner.py\nDIR_STATE:[\"scripts/qa/docker_runner.py\", \"scripts/qa/qa_gate.py\"]\nSummary: Added a Docker QA execution helper that captures stdout/stderr/exit codes, detects likely container-loss conditions, and supports log file writes for failsafe triggering.\n",
+          "timestamp": "2025-12-25T00:52:01.898Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:50:11.225Z",
+      "failedAt": "2025-12-25T00:52:01.898Z"
+    },
+    {
+      "path": "scripts/qa/failsafe_runner.py",
+      "description": "No-container failsafe QA runner that executes a reduced, deterministic test subset locally with strict timeouts and structured error capture to ensure logs and partial results are produced.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/qa/failsafe_runner.py\nDIR_STATE:[\"scripts/qa/docker_runner.py\", \"scripts/qa/failsafe_runner.py\", \"scripts/qa/qa_gate.py\"]\nSummary: Wrote a deterministic, timeout-bound failsafe QA runner that always emits structured artifacts and combined logs for partial results.\n",
+          "timestamp": "2025-12-25T00:52:35.761Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/qa/failsafe_runner.py\nDIR_STATE:[\"scripts/qa/docker_runner.py\", \"scripts/qa/failsafe_runner.py\", \"scripts/qa/qa_gate.py\"]\nSUMMARY: Added a standalone no-container failsafe QA runner that executes a deterministic reduced local test plan with strict timeouts and always writes structured logs and partial results.\n",
+          "timestamp": "2025-12-25T00:53:13.400Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:50:11.225Z",
+      "failedAt": "2025-12-25T00:53:13.400Z"
+    },
+    {
+      "path": "scripts/qa/artifacts.py",
+      "description": "Utility module for creating /outputs/qa directories and writing standardized artifacts (run metadata, logs, partial results, and error reports) in a consistent schema.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/qa/artifacts.py\nDIR_STATE:[\"scripts/qa/artifacts.py\", \"scripts/qa/docker_runner.py\", \"scripts/qa/failsafe_runner.py\", \"scripts/qa/qa_gate.py\"]\nSUMMARY: Added a compact artifacts utility module to create /outputs/qa run directories and atomically write standardized metadata, logs, partial results, and error reports for QA execution modes.\n",
+          "timestamp": "2025-12-25T00:53:37.922Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/qa/artifacts.py\nDIR_STATE:[\"scripts/qa/artifacts.py\", \"scripts/qa/docker_runner.py\", \"scripts/qa/failsafe_runner.py\", \"scripts/qa/qa_gate.py\"]\nSUMMARY: Added a compact artifacts utility module to create outputs/qa run directories and write standardized metadata, logs, partial results, errors, and a latest-run index.\n",
+          "timestamp": "2025-12-25T00:54:00.476Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:50:11.225Z",
+      "failedAt": "2025-12-25T00:54:00.476Z"
+    },
+    {
+      "path": "scripts/qa/commands.py",
+      "description": "Command construction and environment normalization utilities that define the canonical container and failsafe command sets and ensure deterministic behavior across modes.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-25T00:54:22.516Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "E_WRITTEN:scripts/qa/commands.py\nDIR_STATE:[\"scripts/qa/artifacts.py\", \"scripts/qa/commands.py\", \"scripts/qa/docker_runner.py\", \"scripts/qa/failsafe_runner.py\", \"scripts/qa/qa_gate.py\", \"scripts/qa/run_schema_validation.py\"]\nSummary: Added deterministic command/env utilities defining canonical container and failsafe QA command specs with repo/output normalization and no-container force detection.\n",
+          "timestamp": "2025-12-25T00:54:55.480Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:50:11.225Z",
+      "failedAt": "2025-12-25T00:54:55.480Z"
+    },
+    {
+      "path": "scripts/qa/detect.py",
+      "description": "Environment and failure detection helpers that identify docker availability, container runtime health, and common 'container lost' patterns to decide when to degrade gracefully.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/qa/detect.py\nDIR_STATE:[\"scripts/qa/artifacts.py\", \"scripts/qa/commands.py\", \"scripts/qa/detect.py\", \"scripts/qa/docker_runner.py\", \"scripts/qa/failsafe_runner.py\", \"scripts/qa/qa_gate.py\", \"scripts/qa/run_schema_validation.py\"]\nSummary: Added docker readiness checks and robust container-loss detection utilities to enable graceful QA fallback decisions.\n",
+          "timestamp": "2025-12-25T00:55:17.328Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "\nDIR_STATE:[\"scripts/qa/_schema_validation_utils.py\", \"scripts/qa/artifacts.py\", \"scripts/qa/commands.py\", \"scripts/qa/detect.py\", \"scripts/qa/docker_runner.py\", \"scripts/qa/failsafe_runner.py\", \"scripts/qa/qa_gate.py\", \"scripts/qa/run_schema_validation.py\"]\nSummary: Added docker/runtime health checks and container-loss pattern detection helpers to support graceful QA failsafe fallback decisions.\n",
+          "timestamp": "2025-12-25T00:55:46.464Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:50:11.225Z",
+      "failedAt": "2025-12-25T00:55:46.464Z"
+    },
+    {
+      "path": "scripts/qa/README.md",
+      "description": "Developer-facing documentation describing the QA gate behavior, artifacts produced, and how to extend the test sets for both container and failsafe modes.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "\", \"scripts/qa/_schema_validation_utils.py\", \"scripts/qa/artifacts.py\", \"scripts/qa/commands.py\", \"scripts/qa/detect.py\", \"scripts/qa/docker_runner.py\", \"scripts/qa/failsafe_runner.py\", \"scripts/qa/qa_gate.py\", \"scripts/qa/run_schema_validation.py\"]\nSUMMARY: Added developer-facing QA gate documentation covering container and failsafe modes, artifact expectations, and how to extend both test sets.\n",
+          "timestamp": "2025-12-25T00:56:11.855Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "ema_validation_utils.py\", \"scripts/qa/artifacts.py\", \"scripts/qa/commands.py\", \"scripts/qa/detect.py\", \"scripts/qa/docker_runner.py\", \"scripts/qa/failsafe_runner.py\", \"scripts/qa/qa_gate.py\", \"scripts/qa/run_schema_validation.py\"]\nSummary: Wrote developer-facing QA gate documentation describing container-first execution with failsafe fallback, expected artifacts, and how to extend both test sets.\n",
+          "timestamp": "2025-12-25T00:56:35.734Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:50:11.225Z",
+      "failedAt": "2025-12-25T00:56:35.734Z"
+    },
+    {
+      "path": "outputs/qa/RUN_INSTRUCTIONS.md",
+      "description": "Runbook documenting the single canonical QA gate command, expected outputs under /outputs/qa, and how to force docker or failsafe modes.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-25T00:56:53.696Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-25T00:57:09.621Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:50:11.225Z",
+      "failedAt": "2025-12-25T00:57:09.621Z"
+    },
+    {
+      "path": "scripts/qa/defaults.yaml",
+      "description": "Configuration file defining default docker image/args, full test command, failsafe reduced test selection, timeouts, and artifact paths for the QA gate.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "tifacts.py\", \"scripts/qa/commands.py\", \"scripts/qa/defaults.yaml\", \"scripts/qa/detect.py\", \"scripts/qa/docker_runner.py\", \"scripts/qa/failsafe_runner.py\", \"scripts/qa/qa_gate.py\", \"scripts/qa/run_schema_validation.py\"]\nSummary: Wrote defaults.yaml defining docker execution defaults, full vs failsafe QA commands, timeouts, container-loss triggers, and standardized artifact paths under /outputs/qa.\n",
+          "timestamp": "2025-12-25T00:57:28.849Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "scripts/qa/artifacts.py\", \"scripts/qa/commands.py\", \"scripts/qa/defaults.yaml\", \"scripts/qa/detect.py\", \"scripts/qa/docker_runner.py\", \"scripts/qa/failsafe_runner.py\", \"scripts/qa/qa_gate.py\", \"scripts/qa/run_schema_validation.py\"]\nSUMMARY: Added QA gate defaults config defining container-first execution, deterministic local failsafe command, timeouts, and standardized /outputs/qa artifact paths.\n",
+          "timestamp": "2025-12-25T00:57:44.901Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:50:11.225Z",
+      "failedAt": "2025-12-25T00:57:44.901Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Create a focused remediation patch that adds a 'no-container/failsafe execution mode' to the QA runner scripts (e.g., graceful degradation, reduced test set, clear error capture) so that execution does not terminate with 'container lost' without producing logs and partial results; document the run command in /outputs/qa/RUN_INSTRUCTIONS.md.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Current execution repeatedly aborts before testing any files, yielding zero outputs. A failsafe mode that guarantees logs/partials is necessary to progress under unstable execution conditions."
+  ],
+  "projectName": "focused remediation patch that adds a 'no-container/failsafe execution mode' to the QA runner",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [
+    "include_docker"
+  ],
+  "lastSavedAt": "2025-12-25T00:57:44.901Z",
+  "summary": {
+    "completed": 0,
+    "failed": 9,
+    "total": 9
+  }
+}

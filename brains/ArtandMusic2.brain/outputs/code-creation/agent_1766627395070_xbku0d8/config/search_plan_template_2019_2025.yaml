@@ -1,0 +1,153 @@
+schema_version: 1
+template_id: primary_source_verification_search_plan_2019_2025
+template_name: Primary-source verification search plan (2019–2025)
+template_scope:
+  year_range: [2019, 2025]
+  purpose: >
+    Standardized, machine-mappable plan for verifying primary sources behind a claim,
+    dataset, metric, or empirical finding.
+  mapping_from_intake:
+    primary_source_verification:
+      dataset_name: inputs.dataset.name
+      dataset_doi: inputs.dataset.doi
+      dataset_link: inputs.dataset.link
+      research_area_if_unknown: inputs.discovery.research_area
+      candidate_authors_if_unknown: inputs.discovery.candidate_authors
+      keywords_if_unknown: inputs.discovery.keywords
+      notes: inputs.notes
+required_inputs:
+  any_of:
+    - all_of: [inputs.dataset.name, inputs.dataset.doi_or_link]
+    - all_of: [inputs.discovery.research_area, inputs.discovery.keywords_or_authors]
+inputs:
+  dataset:
+    name: null
+    doi: null
+    link: null
+    doi_or_link: null
+  discovery:
+    research_area: null
+    candidate_authors: []
+    keywords: []
+    keywords_or_authors: null
+  notes: null
+normalization_rules:
+  - rule: inputs.dataset.doi_or_link
+    description: Prefer DOI if available; else canonical URL.
+  - rule: inputs.discovery.keywords_or_authors
+    description: At least one keyword or one author is required when dataset identifiers are unknown.
+search_plan:
+  strategy:
+    objective: Identify and confirm the authoritative primary source(s) (dataset landing page and/or original publication).
+    approach_order:
+      - direct_identifier_lookup
+      - dataset_registry_search
+      - scholarly_index_search
+      - web_search_with_constraints
+      - citation_chaining
+    stop_conditions:
+      - condition: primary_source_confirmed
+        details: DOI or stable landing page found and matches dataset/paper metadata (title/authors/year/version).
+      - condition: exhausted_candidates
+        details: No credible primary sources after executing all steps; document best available evidence.
+  sources:
+    registries:
+      - name: Crossref
+        type: doi_registry
+      - name: DataCite
+        type: doi_registry
+      - name: OpenAlex
+        type: scholarly_index
+      - name: Google Scholar
+        type: scholarly_index
+      - name: Semantic Scholar
+        type: scholarly_index
+    datasets:
+      - name: Zenodo
+      - name: Figshare
+      - name: OSF
+      - name: ICPSR
+      - name: World Bank Data
+      - name: OECD Data
+    general_web:
+      - name: Search engine (web)
+        constraints:
+          - prefer_site_filters
+          - prefer_pdf_or_official_landing_pages
+          - avoid_secondary_summaries_when_primary_available
+  queries:
+    direct_identifier_lookup:
+      description: Resolve DOI/URL; verify metadata and version.
+      inputs_used: [inputs.dataset.doi_or_link, inputs.dataset.name]
+      actions:
+        - action: resolve_identifier
+          fields_out: [primary_source.url, primary_source.doi, primary_source.title, primary_source.authors, primary_source.year, primary_source.publisher]
+        - action: verify_match
+          match_rules:
+            - rule: title_similarity>=0.8
+            - rule: author_overlap>=0.5
+            - rule: year_in_range_or_versioned
+    dataset_registry_search:
+      description: Search dataset repositories/registries using name + keywords.
+      inputs_used: [inputs.dataset.name, inputs.discovery.keywords, inputs.discovery.research_area]
+      query_patterns:
+        - '"{dataset_name}" dataset'
+        - '"{dataset_name}" site:zenodo.org'
+        - '"{dataset_name}" site:figshare.com'
+    scholarly_index_search:
+      description: Find original paper describing dataset/measure; capture DOI and citation trail.
+      inputs_used: [inputs.dataset.name, inputs.discovery.keywords, inputs.discovery.candidate_authors, inputs.discovery.research_area]
+      query_patterns:
+        - '"{dataset_name}" "{keyword}"'
+        - '"{dataset_name}" "{author}"'
+        - '"{research_area}" dataset "{keyword}"'
+    web_search_with_constraints:
+      description: Target official hosts (publisher, institution, lab, repository).
+      inputs_used: [inputs.dataset.name, inputs.discovery.keywords, inputs.discovery.candidate_authors]
+      query_patterns:
+        - '"{dataset_name}" (DOI OR DataCite OR Crossref)'
+        - '"{dataset_name}" site:.edu OR site:.org'
+        - '"{dataset_name}" (codebook OR documentation OR technical report)'
+    citation_chaining:
+      description: Use references/backward and citing papers/forward chaining to locate origin.
+      inputs_used: [primary_source.doi, primary_source.title, candidate_sources]
+      actions:
+        - action: backward_references
+        - action: forward_citations
+  evaluation:
+    credibility_checks:
+      - check: authoritative_host
+        criteria: repository/publisher/institutional domain or DOI registry record.
+      - check: primary_vs_secondary
+        criteria: source is original dataset landing page, technical report, or original peer-reviewed article.
+      - check: version_and_date
+        criteria: capture dataset version/release date; if multiple, choose canonical and note alternatives.
+      - check: reproducibility_artifacts
+        criteria: availability of codebook, methodology, and access conditions.
+    conflict_resolution:
+      - rule: prefer_doi_record_over_web_copy
+      - rule: prefer_latest_version_for_access_but_record_original_if_cited
+      - rule: if multiple candidates, retain top_3 with rationale
+outputs:
+  primary_source:
+    url: null
+    doi: null
+    title: null
+    authors: []
+    year: null
+    publisher_or_host: null
+    dataset_version: null
+    access_notes: null
+  candidates:
+    - url: null
+      doi: null
+      title: null
+      authors: []
+      year: null
+      rationale: null
+  audit_log:
+    executed_steps: []
+    queries_run: []
+    sources_checked: []
+    decisions: []
+    timestamp_utc: null

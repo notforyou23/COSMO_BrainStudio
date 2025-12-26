@@ -1,0 +1,56 @@
+{
+  "content": "Created `docs/e2e/README_e2e.md` as the canonical, under-150-line E2E guide covering local/CI execution, failure triage expectations, and how the workflow is modularized via composite actions.",
+  "reasoning": "",
+  "responseId": "resp_087abb3ffb9fe6f5006949c2f3fb50819487650e5165f30556",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2989,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1391,
+    "output_tokens_details": {
+      "reasoning_tokens": 61
+    },
+    "total_tokens": 4380
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_087abb3ffb9fe6f5006949c2f5be488194bef9167890c57c58",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_087abb3ffb9fe6f5006949c2f751bc8194b6b7e05fc58d7056",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('docs/e2e/README_e2e.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"# End-to-end (E2E) test runs\n\nThis document is the canonical reference for running E2E tests locally and in CI, and for understanding how failures are triaged and reported.\n\n## What “E2E” means in this repo\n\nE2E tests exercise the system in a production-like way (build + run + validate) rather than unit-level behavior.\nThey typically take longer, depend on more tooling, and produce artifacts useful for debugging (logs, screenshots, traces, etc.).\n\n## Running E2E locally\n\n### Prereqs\n\n- Python (match the version used in CI when possible)\n- The project’s normal dependencies (your standard development install)\n- Any browser / driver / container runtime required by your E2E framework (project-specific)\n\n### Install dependencies\n\n- Local development dependencies are usually installed from the repo root (your normal workflow).\n- CI-only dependencies used by E2E runs are documented in: `docs/e2e/requirements-ci.txt`.\n\nIf you want your local environment to mimic CI as closely as possible, install the CI set too:\n\n```bash\npython -m pip install -r docs/e2e/requirements-ci.txt\n```\n\n### Run\n\nRun the project’s E2E command the same way CI does (see the workflow in `.github/workflows/` for the exact invocation).\nCommon patterns include:\n\n```bash\n# Example patterns only (use the workflow as the source of truth)\npython -m pytest -m e2e\n# or\nmake e2e\n```\n\n### Tips for reproducing CI locally\n\n- Prefer a clean virtualenv (or fresh dependency install) when chasing a flaky failure.\n- Set the same env vars the CI job sets (see `.github/workflows/e2e_failure.yml`).\n- Re-run with increased logging (framework-specific) and preserve logs between runs.\n\n## Running E2E in CI\n\nE2E runs are executed via GitHub Actions.\nThe workflow is designed to be reusable and consistent across branches and triggers, while still capturing rich failure diagnostics.\n\n### Where the workflow lives\n\n- Workflow entry point: `.github/workflows/e2e_failure.yml`\n- Shared setup logic (composite action): `.github/actions/e2e-common/action.yml`\n- Failure-only diagnostics (composite action): `.github/actions/e2e-on-failure/action.yml`\n\n### High-level job flow\n\n1. Checkout repository\n2. **Common setup** via `e2e-common`:\n   - environment normalization (shell, paths, locale/timezone if needed)\n   - dependency caching\n   - install Python deps (including `docs/e2e/requirements-ci.txt` where applicable)\n3. Run the E2E command\n4. On failure, **triage** via `e2e-on-failure`:\n   - collect diagnostics\n   - bundle logs\n   - upload artifacts\n   - write a concise GitHub Actions job summary\n\n## Failure triage: what gets captured and how to use it\n\nWhen an E2E run fails, the CI job captures evidence to make failures actionable:\n\n- **Artifacts**: uploaded bundles of logs and other runtime outputs\n- **Console logs**: full job output for quick scanning\n- **Step summary**: short “what failed / where to look” notes\n\n### How to debug from CI artifacts\n\n1. Open the failing workflow run in GitHub Actions.\n2. Download uploaded artifacts from the run.\n3. Inspect:\n   - primary test runner output (often the fastest signal)\n   - per-test logs/traces (if produced)\n   - environment info captured during setup (versions, paths)\n\n### Common failure classes\n\n- Dependency drift: pinning mismatches or missing CI-only deps (check `docs/e2e/requirements-ci.txt`)\n- Environment differences: OS / PATH / locale / permissions differences between local and runner\n- Flaky external dependencies: network calls, rate limits, ephemeral services\n- Timing issues: add retries/awaits at the right layer (test code vs system under test)\n\n## Workflow modularization (why composite actions)\n\nThe E2E workflow is split into composite actions to reduce duplication and to keep behavior consistent:\n\n- **`e2e-common`**: everything that should be identical across all E2E workflows\n  (setup, caching, dependency installation, normalized environment).\n- **`e2e-on-failure`**: everything that should only run when something fails\n  (diagnostics, artifact upload, summaries).\n\nThis structure makes it easier to:\n- update E2E infrastructure once and reuse it everywhere\n- review changes (setup vs diagnostics vs test execution are clearly separated)\n- add new E2E workflows without copy/paste\n\n## Making changes safely\n\nIf you change E2E dependencies or the runtime environment:\n\n- Update `docs/e2e/requirements-ci.txt` when CI-only packages are added/removed/pinned.\n- Prefer changing shared behavior inside the composite actions so all workflows stay consistent.\n- Validate by running locally (if possible) and then confirming CI produces the expected artifacts on failure.\n\n## Quick links\n\n- Workflow: `.github/workflows/e2e_failure.yml`\n- Composite actions:\n  - `.github/actions/e2e-common/action.yml`\n  - `.github/actions/e2e-on-failure/action.yml`\n- CI requirements: `docs/e2e/requirements-ci.txt`\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\n# Ensure line budget <= 150 lines\nline_count = final_text.count('\\n')\nassert line_count <= 150, line_count\n\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:docs/e2e/README_e2e.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949c289d32c81909670b17a73e06bb5058924e5a7d358e0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:docs/e2e/README_e2e.md\nDIR_STATE:[\"docs/e2e/README_e2e.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_087abb3ffb9fe6f5006949c316e3908194b1b4b7ea328ccbfc",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `docs/e2e/README_e2e.md` as the canonical, under-150-line E2E guide covering local/CI execution, failure triage expectations, and how the workflow is modularized via composite actions."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cli_tool"
+version = "0.1.0"
+description = "Deterministic, outputs-first canonical pipeline CLI"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Unknown"}]
+dependencies = [
+  "numpy>=1.24",
+  "matplotlib>=3.7",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.4",
+  "ruff>=0.3.0",
+]
+
+[project.scripts]
+run = "src.run:main"
+
+[tool.setuptools]
+package-dir = {"" = "."}
+py-modules = ["src.run", "src.pipeline", "src.determinism", "src.artifacts"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+pythonpath = ["."]
+filterwarnings = ["error"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-select = ["I"]

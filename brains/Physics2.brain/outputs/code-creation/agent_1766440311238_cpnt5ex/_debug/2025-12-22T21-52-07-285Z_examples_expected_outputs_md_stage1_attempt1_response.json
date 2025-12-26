@@ -1,0 +1,56 @@
+{
+  "content": "Wrote `examples/expected_outputs.md` containing concrete CLI invocation examples with expected stdout summary lines and the exact output artifact filenames each command should generate.",
+  "reasoning": "",
+  "responseId": "resp_0ec3f0671af48413006949bda9b53881938e1a6df57b10259a",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2807,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1323,
+    "output_tokens_details": {
+      "reasoning_tokens": 171
+    },
+    "total_tokens": 4130
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0ec3f0671af48413006949bdaa70f0819397f08c43da3f3eef",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ec3f0671af48413006949bdae9f448193be078ff4d6ecc78e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('examples/expected_outputs.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"# Expected outputs (examples)\n\nThis document provides concrete example invocations of the CLI along with **typical** stdout summaries and the **exact artifact filenames** the command is expected to create, to support reproducible Definition-of-Done checks.\n\nNotes:\n\n- Examples assume execution from the repository root.\n- Paths are shown relative to the repo root.\n- Stdout may include additional timing lines depending on platform; the key summary lines and filenames shown below must appear.\n\n---\n\n## 1) List available experiments\n\n**Command**\n```bash\npython -m src.main list\n```\n\n**Expected stdout (summary)**\n```text\nAVAILABLE_EXPERIMENTS: 3\n- logistic_map\n- damped_oscillator\n- symbolic_series\n```\n\n**Artifacts**\n- None (this command only prints metadata).\n\n---\n\n## 2) Logistic map sweep (numerical)\n\nRuns a classic nonlinear map sweep over parameters and saves a small CSV plus a PNG plot.\n\n**Command**\n```bash\npython -m src.main run logistic_map --mu-min 3.5 --mu-max 4.0 --mu-steps 50 --n 200 --burn 100 --outdir outputs/logistic_map_demo\n```\n\n**Expected stdout (summary)**\n```text\nEXPERIMENT: logistic_map\nOUTDIR: outputs/logistic_map_demo\nWROTE: outputs/logistic_map_demo/summary.json\nWROTE: outputs/logistic_map_demo/bifurcation.csv\nWROTE: outputs/logistic_map_demo/bifurcation.png\nSTATUS: OK\n```\n\n**Artifacts (must exist)**\n- `outputs/logistic_map_demo/summary.json`\n- `outputs/logistic_map_demo/bifurcation.csv`\n- `outputs/logistic_map_demo/bifurcation.png`\n\n---\n\n## 3) Damped oscillator (ODE integration)\n\nIntegrates a damped harmonic oscillator and saves a timeseries table and plot.\n\n**Command**\n```bash\npython -m src.main run damped_oscillator --x0 1.0 --v0 0.0 --omega 2.0 --gamma 0.15 --t-max 20 --dt 0.01 --outdir outputs/oscillator_demo\n```\n\n**Expected stdout (summary)**\n```text\nEXPERIMENT: damped_oscillator\nOUTDIR: outputs/oscillator_demo\nWROTE: outputs/oscillator_demo/summary.json\nWROTE: outputs/oscillator_demo/timeseries.csv\nWROTE: outputs/oscillator_demo/timeseries.png\nSTATUS: OK\n```\n\n**Artifacts (must exist)**\n- `outputs/oscillator_demo/summary.json`\n- `outputs/oscillator_demo/timeseries.csv`\n- `outputs/oscillator_demo/timeseries.png`\n\n---\n\n## 4) Symbolic series expansion (symbolic)\n\nComputes and verifies a symbolic series expansion, then exports both a human-readable report and a machine-readable JSON record.\n\n**Command**\n```bash\npython -m src.main run symbolic_series --expr \"sin(x)/(1+x)\" --about 0 --order 8 --outdir outputs/symbolic_demo\n```\n\n**Expected stdout (summary)**\n```text\nEXPERIMENT: symbolic_series\nOUTDIR: outputs/symbolic_demo\nWROTE: outputs/symbolic_demo/summary.json\nWROTE: outputs/symbolic_demo/series.txt\nWROTE: outputs/symbolic_demo/series.json\nSTATUS: OK\n```\n\n**Artifacts (must exist)**\n- `outputs/symbolic_demo/summary.json`\n- `outputs/symbolic_demo/series.txt`\n- `outputs/symbolic_demo/series.json`\n\n---\n\n## 5) Re-running into an existing directory (idempotent overwrite)\n\nIf the output directory already exists, re-running should overwrite the same filenames (no random suffixes).\n\n**Command**\n```bash\npython -m src.main run logistic_map --mu-min 3.7 --mu-max 3.9 --mu-steps 10 --n 100 --burn 50 --outdir outputs/logistic_map_demo\n```\n\n**Expected stdout (summary)**\n```text\nEXPERIMENT: logistic_map\nOUTDIR: outputs/logistic_map_demo\nWROTE: outputs/logistic_map_demo/summary.json\nWROTE: outputs/logistic_map_demo/bifurcation.csv\nWROTE: outputs/logistic_map_demo/bifurcation.png\nSTATUS: OK\n```\n\n**Artifacts (must exist; same names as before)**\n- `outputs/logistic_map_demo/summary.json`\n- `outputs/logistic_map_demo/bifurcation.csv`\n- `outputs/logistic_map_demo/bifurcation.png`\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:examples/expected_outputs.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd84af8481908e931e87d628d2450d02f5accc7ac937",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:examples/expected_outputs.md\nDIR_STATE:[\"examples/expected_outputs.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0ec3f0671af48413006949bdc1d44c8193882b66292747f0d4",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Wrote `examples/expected_outputs.md` containing concrete CLI invocation examples with expected stdout summary lines and the exact output artifact filenames each command should generate."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,56 @@
+{
+  "content": "Created `pytest.ini` with consistent test discovery defaults, strict config/marker enforcement, and CI-friendly default options (short tracebacks, show locals, stable JUnit output).",
+  "reasoning": "",
+  "responseId": "resp_0a8097b786c097990069499cd085bc8196a334bea9eb816115",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2071,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 601,
+    "output_tokens_details": {
+      "reasoning_tokens": 562
+    },
+    "total_tokens": 2672
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0a8097b786c097990069499cd15594819688bc0650ef47bf80",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a8097b786c097990069499cd88b988196b7517783630cb989",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('pytest.ini')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"[pytest]\nminversion = 7.0\ntestpaths = tests\npython_files = test_*.py\npython_functions = test_*\nnorecursedirs = .* build dist __pycache__ .venv venv\n\naddopts =\n    -ra\n    --strict-config\n    --strict-markers\n    --tb=short\n    --showlocals\n\nxfail_strict = true\njunit_family = xunit2\n\nmarkers =\n    schema_validation: validate JSON outputs against the benchmark schema\n    deterministic_recompute: recompute example outputs and assert byte-stable determinism\n    numerical_tolerances: compare recomputed vs expected outputs using numeric tolerances\n    slow: long-running tests that may be excluded from CI\n\nfilterwarnings =\n    default\n    ignore::DeprecationWarning:pkg_resources\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:pytest.ini')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499b967d148190962faee7981fd5060c9b277098400d23",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:pytest.ini\nDIR_STATE:[\"pytest.ini\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0a8097b786c097990069499ce00e9c8196b6d528578853e11f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `pytest.ini` with consistent test discovery defaults, strict config/marker enforcement, and CI-friendly default options (short tracebacks, show locals, stable JUnit output)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

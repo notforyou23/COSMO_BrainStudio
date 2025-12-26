@@ -1,0 +1,110 @@
+{
+  "content": "Created `src/experiments/symbolic_rg_utils.py` with small, dependency-free helpers (monomial parsing/validation, deterministic sorting/cleanup, and safe accumulation) to centralize shared symbolic RG logic and avoid import-time issues.",
+  "reasoning": "",
+  "responseId": "resp_04781bc84d65fbd2006949bdb8d93081909bf007f0f3e11263",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4439,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1408,
+    "output_tokens_details": {
+      "reasoning_tokens": 1356
+    },
+    "total_tokens": 5847
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_04781bc84d65fbd2006949bdb973448190a53c3f5f282d86f2",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_04781bc84d65fbd2006949bdbaadd48190b14cd50d5025cf23",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path('/mnt/data')\nlist((base/'src/experiments').glob('*'))[:20]\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/src/experiments/toy_ising_emergent_classicality.py'),\n PosixPath('/mnt/data/src/experiments/symbolic_rg.py')]"
+        }
+      ]
+    },
+    {
+      "id": "rs_04781bc84d65fbd2006949bdbcc52c8190a787d753648a408d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_04781bc84d65fbd2006949bdbd0d7c81908d64927f3caf776f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nprint((Path('/mnt/data/src/experiments/symbolic_rg.py')).read_text()[:4000])\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Symbolic renormalization group (RG) toy experiment.\n\nThis module provides a tiny, syntax-valid experiment implementation for the\nbenchmark pipeline. It is intentionally lightweight (no heavy symbolic algebra\ndependencies) while still behaving like a symbolic RG flow: it evolves a small\nset of coupling \"expressions\" across coarse-graining steps in a deterministic\nway.\n\nPublic API:\n- ExperimentConfig\n- default_config()\n- run_experiment(config=None)\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, asdict\nfrom typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union\n@dataclass(frozen=True)\nclass ExperimentConfig:\n    \"\"\"Configuration for the symbolic RG toy model.\"\"\"\n\n    # Couplings are keyed by simple monomial names (e.g. \"phi^2\", \"phi^4\").\n    couplings: Dict[str, float] = None  # populated by default_config()\n    steps: int = 4\n    scale_factor: float = 2.0\n    mixing_strength: float = 0.05  # small deterministic \"operator mixing\"\n\n    def to_dict(self) -> Dict[str, Any]:\n        d = asdict(self)\n        # dataclasses would include None as couplings if user constructs directly\n        if d[\"couplings\"] is None:\n            d[\"couplings\"] = {}\n        return d\ndef default_config() -> ExperimentConfig:\n    \"\"\"Return a deterministic default configuration.\"\"\"\n    return ExperimentConfig(\n        couplings={\"phi^2\": 1.0, \"phi^4\": 0.1},\n        steps=4,\n        scale_factor=2.0,\n        mixing_strength=0.05,\n    )\n_MONOMIAL_RE = re.compile(r\"^(?P<field>[a-zA-Z_][a-zA-Z0-9_]*)\\^(?P<power>[0-9]+)$\")\n\n\ndef _parse_monomial(name: str) -> Tuple[str, int]:\n    \"\"\"Parse a monomial key like 'phi^4' into ('phi', 4).\"\"\"\n    m = _MONOMIAL_RE.match(name)\n    if not m:\n        raise ValueError(f\"Invalid coupling key: {name!r} (expected like 'phi^4')\")\n    return m.group(\"field\"), int(m.group(\"power\"))\ndef _validate(cfg: ExperimentConfig) -> None:\n    if cfg.couplings is None:\n        raise ValueError(\"couplings must be provided (or use default_config())\")\n    if cfg.steps < 0:\n        raise ValueError(\"steps must be >= 0\")\n    if cfg.scale_factor <= 1.0:\n        raise ValueError(\"scale_factor must be > 1\")\n    if cfg.mixing_strength < 0.0:\n        raise ValueError(\"mixing_strength must be >= 0\")\n    for k, v in cfg.couplings.items():\n        _parse_monomial(k)\n        if not isinstance(v, (int, float)):\n            raise TypeError(f\"Coupling {k!r} must be numeric, got {type(v).__name__}\")\ndef _rg_step(\n    couplings: Mapping[str, float], scale: float, mix: float\n) -> Dict[str, float]:\n    \"\"\"Perform a single toy RG step.\n\n    Rule (toy, deterministic):\n    - A monomial 'phi^n' rescales by scale**(2-n).\n    - A higher operator feeds into a lower one via a small mixing term:\n      phi^(n+2) contributes mix * coeff to phi^n.\n    \"\"\"\n    out: Dict[str, float] = {}\n    parsed: List[Tuple[str, int, float]] = []\n    for name, coeff in couplings.items():\n        field, power = _parse_monomial(name)\n        parsed.append((field, power, float(coeff)))\n\n    for field, power, coeff in parsed:\n        # naive engineering dimension in 2D: dim(phi^n) ~ n, so exponent (2-n)\n        rescaled = coeff * (scale ** (2 - power))\n        key = f\"{field}^{power}\"\n        out[key] = out.get(key, 0.0) + rescaled\n\n    # operator mixing: phi^(p) feeds into phi^(p-2) for p>=4\n    for field, power, coeff in parsed:\n        if power >= 4:\n            lower = f\"{field}^{power-2}\"\n            out[lower] = out.get(lower, 0.0) + mix * coeff\n\n    # small cleanup: drop near-zero entries for stable JSON outputs\n    out = {k: float(v) for k, v in out.items() if abs(v) > 1e-15}\n    return dict(sorted(out.items()))\ndef run_experiment(\n    config: Optional[Union[ExperimentConfig, Dict[str, Any]]] = None\n) -> Dict[str, Any]:\n    \"\"\"Run the symbolic RG flow and return JSON-serializable results.\"\"\"\n    if config is None:\n        cfg = default_config()\n    elif isinstance(config, ExperimentConfig):\n        cfg = config\n    elif isinstance(config,\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_04781bc84d65fbd2006949bdbeefd881909b739fd0758a3c8e",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_04781bc84d65fbd2006949bdbf0a888190a2790b9d7caf885c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\ntext=Path('/mnt/data/src/experiments/symbolic_rg.py').read_text()\nprint(text[4000:8000])\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": " dict):\n        cfg = ExperimentConfig(**config)\n    else:\n        raise TypeError(\"config must be None, ExperimentConfig, or dict\")\n\n    _validate(cfg)\n\n    history: List[Dict[str, float]] = [dict(sorted({k: float(v) for k, v in cfg.couplings.items()}.items()))]\n    for _ in range(cfg.steps):\n        history.append(_rg_step(history[-1], cfg.scale_factor, cfg.mixing_strength))\n\n    # Simple \"fixed point\" heuristic: L2 norm of delta between last two steps.\n    if len(history) >= 2:\n        keys = sorted(set(history[-1]) | set(history[-2]))\n        delta2 = 0.0\n        for k in keys:\n            delta = history[-1].get(k, 0.0) - history[-2].get(k, 0.0)\n            delta2 += delta * delta\n        flow_norm = delta2 ** 0.5\n    else:\n        flow_norm = 0.0\n\n    return {\n        \"experiment\": \"symbolic_rg\",\n        \"config\": cfg.to_dict(),\n        \"observables\": {\n            \"couplings_by_step\": history,\n            \"final_couplings\": history[-1] if history else {},\n            \"flow_norm\": flow_norm,\n            \"n_steps\": cfg.steps,\n        },\n    }\n__all__ = [\"ExperimentConfig\", \"default_config\", \"run_experiment\"]\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_04781bc84d65fbd2006949bdc1466c8190854b734dd3cc44a4",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_04781bc84d65fbd2006949bdc516ac8190b3e1f71454105c6f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap\ntarget_path = Path('/mnt/data').joinpath('src/experiments/symbolic_rg_utils.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"Shared helpers for symbolic renormalization-group (RG) toy experiments.\n\nThe benchmark includes small \"symbolic RG\" experiment modules that should remain\ndependency-free and deterministic. This module centralizes common parsing,\nvalidation, and numeric housekeeping to keep those modules small and to avoid\nimport-time errors (e.g., missing `re` imports).\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport math\nimport re\nfrom typing import Dict, Iterable, Mapping, MutableMapping, Tuple\n\"\"\")\n\nchunks.append(\"\"\"\n# Accept monomials of the form \"phi^4\", \"x_1^2\", etc.\n_MONOMIAL_RE = re.compile(r\"^(?P<field>[A-Za-z_][A-Za-z0-9_]*)\\\\^(?P<power>[0-9]+)$\")\n\n\ndef parse_monomial(name: str) -> Tuple[str, int]:\n    \\\"\\\"\\\"Parse a monomial key like ``'phi^4'`` into ``('phi', 4)``.\n\n    Raises:\n        ValueError: if the name is not of the expected form.\n    \\\"\\\"\\\"\n    m = _MONOMIAL_RE.match(name)\n    if not m:\n        raise ValueError(f\\\"Invalid monomial: {name!r} (expected like 'phi^4')\\\")\n    return m.group(\\\"field\\\"), int(m.group(\\\"power\\\"))\n\"\"\")\n\nchunks.append(\"\"\"\ndef validate_couplings(couplings: Mapping[str, float]) -> None:\n    \\\"\\\"\\\"Validate that couplings are a mapping of monomial -> finite number.\\\"\\\"\\\"\n    if couplings is None:\n        raise ValueError(\\\"couplings must not be None\\\")\n    if not isinstance(couplings, Mapping):\n        raise TypeError(f\\\"couplings must be a mapping, got {type(couplings).__name__}\\\")\n    for k, v in couplings.items():\n        parse_monomial(str(k))\n        if not isinstance(v, (int, float)):\n            raise TypeError(f\\\"Coupling {k!r} must be numeric, got {type(v).__name__}\\\")\n        if not math.isfinite(float(v)):\n            raise ValueError(f\\\"Coupling {k!r} must be finite, got {v!r}\\\")\n\"\"\")\n\nchunks.append(\"\"\"\ndef sorted_couplings(couplings: Mapping[str, float]) -> Dict[str, float]:\n    \\\"\\\"\\\"Return a plain dict with string keys and float values, sorted by key.\\\"\\\"\\\"\n    return dict(sorted(((str(k), float(v)) for k, v in couplings.items()), key=lambda kv: kv[0]))\n\n\ndef drop_near_zero(couplings: Mapping[str, float], *, eps: float = 1e-15) -> Dict[str, float]:\n    \\\"\\\"\\\"Drop coefficients with absolute value <= eps (useful for stable JSON).\\\"\\\"\\\"\n    out = {str(k): float(v) for k, v in couplings.items() if abs(float(v)) > eps}\n    return dict(sorted(out.items()))\n\"\"\")\n\nchunks.append(\"\"\"\ndef accumulate(dst: MutableMapping[str, float], src: Mapping[str, float]) -> None:\n    \\\"\\\"\\\"In-place add coefficients from *src* into *dst* (both monomial-keyed).\\\"\\\"\\\"\n    for k, v in src.items():\n        dst[str(k)] = float(dst.get(str(k), 0.0)) + float(v)\n\n\ndef union_keys(*maps: Mapping[str, float]) -> Iterable[str]:\n    \\\"\\\"\\\"Return sorted union of keys across maps (deterministic).\\\"\\\"\\\"\n    keys = set()\n    for m in maps:\n        keys.update(map(str, m.keys()))\n    return sorted(keys)\n\"\"\")\n\nchunks.append(\"\"\"\n__all__ = [\n    \\\"parse_monomial\\\",\n    \\\"validate_couplings\\\",\n    \\\"sorted_couplings\\\",\n    \\\"drop_near_zero\\\",\n    \\\"accumulate\\\",\n    \\\"union_keys\\\",\n]\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/experiments/symbolic_rg_utils.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/symbolic_rg_utils.py\nDIR_STATE:[\"src/experiments/symbolic_rg.py\", \"src/experiments/symbolic_rg_utils.py\", \"src/experiments/toy_ising_emergent_classicality.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_04781bc84d65fbd2006949bdd3536c819098284257fc5950c1",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `src/experiments/symbolic_rg_utils.py` with small, dependency-free helpers (monomial parsing/validation, deterministic sorting/cleanup, and safe accumulation) to centralize shared symbolic RG logic and avoid import-time issues."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

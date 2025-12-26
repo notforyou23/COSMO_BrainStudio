@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a single utility for output paths (e.g., `OUTPUT_DIR = Path(os.getenv('OUTPUT_DIR', './outputs'))`) used everywhere; ensure directories are created and all writers use this path (never `/outputs`).
+Project: generated_script_1766547793162 (python script)
+
+Target file details:
+- Path: src/writers/__init__.py
+- Purpose: Package initializer for writers that centralizes shared output directory behavior by re-exporting output path utilities for consistent use.
+- Category: source
+
+Other planned files (for context only):
+- src/utils/output_paths.py: Defines a single portable OUTPUT_DIR (from env var with safe default), helper functions to resolve/create output subdirectories, and path-joining utilities used across the project.
+- src/run_pipeline.py: Main pipeline entrypoint updated to import and use OUTPUT_DIR utilities for all output artifacts, ensuring directories are created and avoiding any hard-coded /outputs paths.
+- src/writers/artifact_writers.py: All artifact writer implementations updated so every file write resolves through OUTPUT_DIR helpers and pre-creates required directories rather than writing to /outputs or ad-hoc paths.
+- src/config.py: Central configuration module updated to reference OUTPUT_DIR from the shared utility and to remove/avoid any legacy default of /outputs.
+
+Reference insights:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [AGENT INSIGHT: agent_1766540049061_an5rb16] **Ensure portability of the `/outputs` requirement**: because `/outputs` can be unwritable (obs
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_scripts_run_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766539771836_cun
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Package initializer for writers that centralizes shared output directory behavior by re-exporting output path utilities for consistent use.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/writers/__init__.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/writers/__init__.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/writers/__init__.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

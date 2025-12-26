@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/deterministic_runner/determinism.py` with deterministic seeding utilities (random + NumPy best-effort), stable output path helpers (fixed filenames), and a metadata collector including optional git hash, Python/platform info, and key package versions.",
+  "reasoning": "",
+  "responseId": "resp_08ec4d8cd778e40c00694b46e66fe481959f1f7c2a72bb2865",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2812,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1318,
+    "output_tokens_details": {
+      "reasoning_tokens": 1262
+    },
+    "total_tokens": 4130
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_08ec4d8cd778e40c00694b46e837fc8195b28ed49b13ee87cc",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_08ec4d8cd778e40c00694b46eb6eb08195ae0e3aae6b42dc9c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, sys, subprocess, platform\ntarget_path = Path('/mnt/data').joinpath('src/deterministic_runner/determinism.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\\\"\\\"\\\"Determinism utilities for reproducible runs.\n\nThis module centralizes seeding of RNGs and collection of small metadata to\nsupport deterministic, comparable outputs across executions.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nimport os\nimport platform\nimport random\nimport subprocess\nimport sys\nfrom typing import Any, Dict, Optional, Tuple\n\"\"\")\n\nchunks.append(\"\"\"@dataclass(frozen=True)\nclass DeterminismConfig:\n    \\\"\\\"\\\"Configuration for deterministic behavior.\\\"\\\"\\\"\n\n    seed: int = 0\n    python_hash_seed: int = 0\n    set_source_date_epoch: bool = True\n\"\"\")\n\nchunks.append(\"\"\"def set_global_determinism(config: DeterminismConfig = DeterminismConfig()) -> None:\n    \\\"\\\"\\\"Seed RNGs and set relevant environment variables.\n\n    Notes\n    -----\n    - PYTHONHASHSEED only fully affects hashing if set before interpreter start.\n      We still set it here for downstream subprocesses and to document intent.\n    - numpy seeding is best-effort and is skipped if numpy is not installed.\n    \\\"\\\"\\\"\n    if config.set_source_date_epoch:\n        # Used by various tooling to avoid embedding current time in outputs.\n        os.environ.setdefault(\"SOURCE_DATE_EPOCH\", \"0\")\n\n    os.environ.setdefault(\"PYTHONHASHSEED\", str(config.python_hash_seed))\n\n    random.seed(config.seed)\n\n    try:\n        import numpy as np  # type: ignore\n\n        np.random.seed(config.seed)\n    except Exception:\n        # numpy is optional at library level; CLI may depend on it.\n        pass\n\"\"\")\n\nchunks.append(\"\"\"def make_numpy_generator(seed: int = 0):\n    \\\"\\\"\\\"Return a NumPy Generator seeded deterministically.\n\n    Raises ImportError if numpy is not available.\n    \\\"\\\"\\\"\n    import numpy as np  # type: ignore\n\n    return np.random.default_rng(seed)\n\"\"\")\n\nchunks.append(\"\"\"def stable_output_paths(base_dir: os.PathLike | str = \"/outputs\") -> Tuple[Path, Path]:\n    \\\"\\\"\\\"Return stable output paths (results.json, figure.png) under base_dir.\\\"\\\"\\\"\n    base = Path(base_dir)\n    base.mkdir(parents=True, exist_ok=True)\n    return base / \"results.json\", base / \"figure.png\"\n\"\"\")\n\nchunks.append(\"\"\"def _pkg_version(name: str) -> Optional[str]:\n    try:\n        from importlib.metadata import version\n\n        return version(name)\n    except Exception:\n        return None\n\"\"\")\n\nchunks.append(\"\"\"def _git_hash(cwd: Optional[os.PathLike | str] = None) -> Optional[str]:\n    \\\"\\\"\\\"Best-effort short git hash; returns None if unavailable.\\\"\\\"\\\"\n    try:\n        cp = subprocess.run(\n            [\"git\", \"rev-parse\", \"--short\", \"HEAD\"],\n            cwd=str(cwd) if cwd is not None else None,\n            check=True,\n            stdout=subprocess.PIPE,\n            stderr=subprocess.DEVNULL,\n            text=True,\n        )\n        out = cp.stdout.strip()\n        return out or None\n    except Exception:\n        return None\n\"\"\")\n\nchunks.append(\"\"\"def metadata(cwd: Optional[os.PathLike | str] = None) -> Dict[str, Any]:\n    \\\"\\\"\\\"Return a small, stable metadata block for result provenance.\\\"\\\"\\\"\n    return {\n        \"git_hash\": _git_hash(cwd),\n        \"python_version\": sys.version.split()[0],\n        \"platform\": platform.platform(),\n        \"packages\": {\n            \"numpy\": _pkg_version(\"numpy\"),\n            \"matplotlib\": _pkg_version(\"matplotlib\"),\n        },\n    }\n\"\"\")\n\nchunks.append(\"\"\"__all__ = [\n    \"DeterminismConfig\",\n    \"make_numpy_generator\",\n    \"metadata\",\n    \"set_global_determinism\",\n    \"stable_output_paths\",\n]\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/deterministic_runner/determinism.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b46a9b06081908ddabe8eda0d3a7007b40091a73fffb7",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/deterministic_runner/determinism.py\nDIR_STATE:[\"src/deterministic_runner/__init__.py\", \"src/deterministic_runner/cli.py\", \"src/deterministic_runner/determinism.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_08ec4d8cd778e40c00694b46f4cfb48195abbe923e8cef7d4d",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/deterministic_runner/determinism.py` with deterministic seeding utilities (random + NumPy best-effort), stable output path helpers (fixed filenames), and a metadata collector including optional git hash, Python/platform info, and key package versions."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

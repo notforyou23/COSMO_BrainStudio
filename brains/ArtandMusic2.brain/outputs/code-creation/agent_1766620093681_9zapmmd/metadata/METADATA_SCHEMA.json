@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/METADATA_SCHEMA.json",
+  "title": "Project Metadata Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["artifact"],
+  "properties": {
+    "artifact": { "$ref": "#/$defs/artifact" }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "description": "Stable identifier used in ARTIFACT_INDEX and filenames.",
+      "pattern": "^[a-z0-9][a-z0-9_-]{2,63}$"
+    },
+    "iso_date": {
+      "type": "string",
+      "description": "ISO-8601 date or datetime string.",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}([T ]\\d{2}:\\d{2}(:\\d{2}(\\.\\d{1,6})?)?(Z|[+-]\\d{2}:\\d{2})?)?$"
+    },
+    "nonempty_string": { "type": "string", "minLength": 1 },
+    "string_array": { "type": "array", "items": { "type": "string" }, "default": [] },
+    "person": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "$ref": "#/$defs/nonempty_string" },
+        "email": { "type": "string", "format": "email" },
+        "affiliation": { "type": "string" },
+        "url": { "type": "string", "format": "uri" }
+      }
+    },
+    "path": {
+      "type": "string",
+      "description": "Project-relative path. Prefer outputs/case_studies/.. for case studies.",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\.{2})(?:[^\\0]+)$"
+    },
+    "artifact_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": { "type": "string" },
+        "path": { "$ref": "#/$defs/path" },
+        "description": { "type": "string" }
+      }
+    },
+    "artifact_common": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "title", "createdAt"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "type": {
+          "type": "string",
+          "enum": ["case_study", "report", "dataset", "code", "model", "notebook", "image", "video", "audio", "other"]
+        },
+        "title": { "$ref": "#/$defs/nonempty_string" },
+        "createdAt": { "$ref": "#/$defs/iso_date" },
+        "updatedAt": { "$ref": "#/$defs/iso_date" },
+        "summary": { "type": "string" },
+        "tags": { "$ref": "#/$defs/string_array" },
+        "authors": { "type": "array", "items": { "$ref": "#/$defs/person" }, "default": [] },
+        "license": { "type": "string" },
+        "source": { "type": "string", "format": "uri" },
+        "paths": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "metadata": { "$ref": "#/$defs/path" },
+            "content": { "$ref": "#/$defs/path" }
+          }
+        }
+      }
+    },
+    "case_study": {
+      "allOf": [
+        { "$ref": "#/$defs/artifact_common" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "status", "date", "problem", "approach", "outcome", "lessons", "paths"],
+          "properties": {
+            "type": { "const": "case_study" },
+            "status": { "type": "string", "enum": ["draft", "published", "archived"] },
+            "date": { "$ref": "#/$defs/iso_date" },
+            "domain": { "type": "string" },
+            "organization": { "type": "string" },
+            "problem": { "$ref": "#/$defs/nonempty_string" },
+            "context": { "type": "string" },
+            "approach": { "$ref": "#/$defs/nonempty_string" },
+            "implementation": { "type": "string" },
+            "outcome": { "$ref": "#/$defs/nonempty_string" },
+            "metrics": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name", "value"],
+                "properties": {
+                  "name": { "$ref": "#/$defs/nonempty_string" },
+                  "value": { "type": ["string", "number", "integer", "boolean"] },
+                  "unit": { "type": "string" },
+                  "notes": { "type": "string" }
+                }
+              },
+              "default": []
+            },
+            "lessons": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/nonempty_string" },
+              "minItems": 1
+            },
+            "risks": { "$ref": "#/$defs/string_array" },
+            "artifacts": { "type": "array", "items": { "$ref": "#/$defs/artifact_ref" }, "default": [] },
+            "citations": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["title"],
+                "properties": {
+                  "title": { "$ref": "#/$defs/nonempty_string" },
+                  "url": { "type": "string", "format": "uri" },
+                  "publishedAt": { "$ref": "#/$defs/iso_date" }
+                }
+              },
+              "default": []
+            },
+            "paths": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["metadata", "content"],
+              "properties": {
+                "metadata": { "$ref": "#/$defs/path" },
+                "content": { "$ref": "#/$defs/path" }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "generic_artifact": { "$ref": "#/$defs/artifact_common" },
+    "artifact": {
+      "oneOf": [
+        { "$ref": "#/$defs/case_study" },
+        { "$ref": "#/$defs/generic_artifact" }
+      ]
+    }
+  }
+}

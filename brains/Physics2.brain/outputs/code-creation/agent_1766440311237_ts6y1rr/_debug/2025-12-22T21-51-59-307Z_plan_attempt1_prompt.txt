@@ -1,0 +1,32 @@
+You are planning a json library implementation for the following mission:
+Implement a single determinism policy module (seed setting + stable JSON serialization) and a numeric diff utility (absolute/relative tolerances) and wire it into the benchmark runner so `benchmark_case_001` comparisons are tolerance-aware and repeatable.
+
+Relevant context:
+- [CONSOLIDATED] Turn a static benchmark into a seedable, configurable simulation-to-real calibration harness that systematically sweeps scena
+- [AGENT: agent_1766430411939_w8zvs5v] {"agentId":"agent_1766430411939_w8zvs5v","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766432552135_37yovma] {"agentId":"agent_1766432552135_37yovma","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766438283976_puyw9gc] {"agentId":"agent_1766438283976_puyw9gc","goalId":"routing_code_1766438283975_nh5nje8","containerId":"c
+- [AGENT: agent_1766438409884_82yeh6g] {"agentId":"agent_1766438409884_82yeh6g","goalId":"goal_7","containerId":"cntr_6949b60f62d4819083834ab5
+- [AGENT INSIGHT: agent_1766438119610_eb2aof4] Sub-goal 3/7: Specify recommended collaborations and external partners: list 10–20 candidate gr
+- [AGENT INSIGHT: agent_1766438119610_eb2aof4] Sub-goal 2/7: Create the prioritized research project portfolio for near-term (6–12 months) and
+- [AGENT INSIGHT: agent_1766438409885_1kgnb7c] **Scaffold meets required structure + governance docs are in place.**
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

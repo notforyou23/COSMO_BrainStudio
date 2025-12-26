@@ -1,0 +1,56 @@
+{
+  "content": "Created `.pre-commit-config.yaml` with a local pre-commit hook that runs `tools/validate_benchmark_outputs.py` to enforce schema/policy validation for benchmark output files and block commits containing invalid or deprecated formats.",
+  "reasoning": "",
+  "responseId": "resp_0e9632e5322eb8ad006949ab8157c0819795a80ba3537fab3c",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2194,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 702,
+    "output_tokens_details": {
+      "reasoning_tokens": 336
+    },
+    "total_tokens": 2896
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0e9632e5322eb8ad006949ab81f9448197ba5784601a9e2543",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0e9632e5322eb8ad006949ab89949c8197a4e815226e84c4f1",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('.pre-commit-config.yaml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"# Pre-commit configuration for benchmark output validation.\n# This hook blocks commits that introduce benchmark outputs that:\n# - do not conform to outputs/schemas/benchmark_schema.json\n# - match deprecated legacy/ad-hoc formats disallowed by policy\n#\n# Run manually:\n#   pre-commit run validate-benchmark-outputs --all-files\"\"\",\n\"\"\"default_language_version:\n  python: python3\"\"\",\n\"\"\"repos:\n  - repo: local\n    hooks:\n      - id: validate-benchmark-outputs\n        name: Validate benchmark outputs against schema/policy\n        language: python\n        entry: python tools/validate_benchmark_outputs.py\n        pass_filenames: false\n        require_serial: true\n        files: >-\n          ^(outputs/(?!schemas/).+\\\\.(json|jsonl)|benchmarks/.+\\\\.(json|jsonl))$\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:.pre-commit-config.yaml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:.pre-commit-config.yaml\nDIR_STATE:[\".pre-commit-config.yaml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0e9632e5322eb8ad006949ab911af8819780787daf356d4dfa",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `.pre-commit-config.yaml` with a local pre-commit hook that runs `tools/validate_benchmark_outputs.py` to enforce schema/policy validation for benchmark output files and block commits containing invalid or deprecated formats."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

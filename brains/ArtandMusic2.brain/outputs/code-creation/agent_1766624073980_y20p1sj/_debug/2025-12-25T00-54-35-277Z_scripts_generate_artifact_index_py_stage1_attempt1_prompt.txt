@@ -1,0 +1,40 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Generate/refresh /outputs/ARTIFACT_INDEX.md by scanning ONLY the canonical /outputs tree, ensuring every required deliverable is linked with correct relative paths (report, pilot case study, rights log, schemas, QA outputs, tracker).
+Project: generated_script_1766624074199 (python script)
+
+Target file details:
+- Path: scripts/generate_artifact_index.py
+- Purpose: Python script that scans ONLY the canonical outputs/ tree and generates or refreshes outputs/ARTIFACT_INDEX.md with required deliverables linked via correct relative paths plus a complete discovered-files section.
+- Category: source
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T23-58-21-321Z_docs_ARTIFACT_INDEX_AND_TRACKER_MAINTENANCE_md_stage1_attempt2_prompt.txt from code-creation agent 
+- [INTROSPECTION] 2025-12-25T00-21-55-842Z_scripts_qa_run_sh_stage1_attempt2_prompt.txt from code-creation agent agent_1766622114110_412seks: 
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Python script that scans ONLY the canonical outputs/ tree and generates or refreshes outputs/ARTIFACT_INDEX.md with required deliverables linked via correct relative paths plus a complete discovered-files section.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/generate_artifact_index.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/generate_artifact_index.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/generate_artifact_index.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

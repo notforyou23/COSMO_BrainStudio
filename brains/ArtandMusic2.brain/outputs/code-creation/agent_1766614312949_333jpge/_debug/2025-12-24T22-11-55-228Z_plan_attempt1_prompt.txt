@@ -1,0 +1,32 @@
+You are planning a json script implementation for the following mission:
+Add /outputs/PROJECT_TRACKER.json (or .csv) with fields for goal IDs, artifact paths, timestamps, status, and QA result; add a tiny script or documented manual update procedure and update it for the current cycle’s artifacts.
+
+Relevant context:
+- [INTROSPECTION] 2025-12-24T21-56-41-741Z_src_csv_utils_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766613398846_yr1euha: Y
+- [AGENT: agent_1766613398846_yr1euha] {"agentId":"agent_1766613398846_yr1euha","timestamp":"2025-12-24T22:02:11.184Z","files":[{"filename":"i
+- [CONSOLIDATED] Successful exemplar/report pipelines start by scaffolding a standardized, automation-friendly project structure—clear templat
+- [CONSOLIDATED] Creativity and artistic meaning emerge when minds and cultures use learnable structures (constraints, motifs, rhythm/temporal
+- [INTROSPECTION] 2025-12-24T21-56-41-741Z_pyproject_toml_stage1_attempt1_prompt.txt from code-creation agent agent_1766613398846_yr1euha: You
+- [INTROSPECTION] 2025-12-24T21-56-41-741Z_src_path_utils_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766613398846_yr1euha: 
+- [INTROSPECTION] 2025-12-24T21-56-41-741Z_src_templates_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766613398846_yr1euha: Y
+- [INTROSPECTION] 2025-12-24T21-56-41-741Z_pyproject_toml_stage1_attempt2_prompt.txt from code-creation agent agent_1766613398846_yr1euha: You
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

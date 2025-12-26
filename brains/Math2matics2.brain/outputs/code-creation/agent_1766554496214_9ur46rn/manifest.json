@@ -1,0 +1,96 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766554496214_9ur46rn",
+  "agentType": "code-creation",
+  "goalId": "goal_235",
+  "missionId": "strategic_goal_235_1766554496214",
+  "spawnCycle": 151,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T05:35:04.845Z",
+  "completedAt": "2025-12-24T05:37:08.072Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "src/utils/output_dir.py",
+      "description": "Provides a shared repo-relative OUTPUT_DIR with optional environment override plus helper functions to create and resolve output paths consistently across scripts and agents.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/utils/output_dir.py\nDIR_STATE:[\"src/utils/output_dir.py\", \"src/utils/output_path.py\", \"src/utils/output_paths.py\", \"src/utils/outputs_dir.py\", \"src/utils/paths.py\", \"src/utils/repro.py\"]\nAdded a shared OUTPUT_DIR utility with env override and safe helpers to resolve/create output paths consistently across the repo.\n",
+          "timestamp": "2025-12-24T05:35:26.888Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/utils/output_dir.py\nDIR_STATE:[\"src/utils/output_dir.py\", \"src/utils/output_path.py\", \"src/utils/output_paths.py\", \"src/utils/outputs_dir.py\", \"src/utils/paths.py\", \"src/utils/repro.py\"]\nSUMMARY: Added a shared OUTPUT_DIR helper with repo-root detection, env override, and consistent output path helpers.\n",
+          "timestamp": "2025-12-24T05:35:51.639Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:35:04.845Z",
+      "failedAt": "2025-12-24T05:35:51.639Z"
+    },
+    {
+      "path": "tests/test_no_absolute_outputs_paths.py",
+      "description": "Pytest that scans generated artifacts/logs to fail on any absolute '/outputs' path occurrences and asserts expected key artifacts are created under the repo './outputs/' directory.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "s/test_pipeline_outputs_schema.py\", \"tests/test_pipeline_runnable.py\", \"tests/test_repro_json_pipeline_import_and_run.py\", \"tests/test_reproducibility.py\", \"tests/test_results_schema.py\", \"tests/test_results_schema_validation.py\", \"tests/test_stability.py\"]\nSummary: Added a pytest that enforces artifacts live under ./outputs/ and rejects any absolute '/outputs' path occurrences in logs/artifacts.\n",
+          "timestamp": "2025-12-24T05:36:42.476Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "est_pipeline_outputs_schema.py\", \"tests/test_pipeline_runnable.py\", \"tests/test_repro_json_pipeline_import_and_run.py\", \"tests/test_reproducibility.py\", \"tests/test_results_schema.py\", \"tests/test_results_schema_validation.py\", \"tests/test_stability.py\"]\nSUMMARY: Added a pytest that asserts artifacts exist under ./outputs and fails if any scanned artifact/log contains an absolute '/outputs' path.\n",
+          "timestamp": "2025-12-24T05:37:08.072Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:35:04.845Z",
+      "failedAt": "2025-12-24T05:37:08.072Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Audit the repo for any agent-/script-specific output paths, refactor them to use a shared OUTPUT_DIR helper (repo-relative, env override allowed), then add/extend a pytest that fails if any artifact/log contains an absolute '/outputs' path and verifies key artifacts appear under ./outputs/.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Directly supports the strategic directives to canonize outputs and prevent fragmentation by enforcing a single, repo-relative ./outputs/ location and consolidating artifacts there. This reduces path d..."
+  ],
+  "projectName": "generated_script_1766554496401",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-24T05:37:08.072Z",
+  "summary": {
+    "completed": 0,
+    "failed": 2,
+    "total": 2
+  }
+}

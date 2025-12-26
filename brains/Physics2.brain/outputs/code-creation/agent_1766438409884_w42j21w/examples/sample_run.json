@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0.0",
+  "run_id": "sample-run-0001",
+  "timestamp": "2025-01-15T12:00:00Z",
+  "benchmark": {
+    "name": "minimal-example-benchmark",
+    "version": "0.1.0",
+    "description": "A tiny worked example demonstrating a valid benchmark run document."
+  },
+  "system": {
+    "model": {
+      "name": "example-model",
+      "provider": "example",
+      "version": "2025.01",
+      "parameters": {
+        "temperature": 0.0,
+        "max_tokens": 32
+      }
+    },
+    "runner": {
+      "name": "benchmarks-validator",
+      "version": "0.1.0"
+    },
+    "hardware": {
+      "cpu": "Example CPU",
+      "ram_gb": 16
+    },
+    "os": "linux"
+  },
+  "config": {
+    "dataset": "examples/minimal_dataset.jsonl",
+    "scoring": {
+      "metric": "exact_match"
+    }
+  },
+  "results": [
+    {
+      "case_id": "case-001",
+      "status": "pass",
+      "metrics": {
+        "score": 1.0,
+        "latency_ms": 12
+      },
+      "output": {
+        "prediction": "hello",
+        "reference": "hello"
+      },
+      "started_at": "2025-01-15T12:00:00Z",
+      "ended_at": "2025-01-15T12:00:00.012Z"
+    },
+    {
+      "case_id": "case-002",
+      "status": "fail",
+      "metrics": {
+        "score": 0.0,
+        "latency_ms": 15
+      },
+      "output": {
+        "prediction": "goodbye",
+        "reference": "hello"
+      },
+      "started_at": "2025-01-15T12:00:01Z",
+      "ended_at": "2025-01-15T12:00:01.015Z"
+    },
+    {
+      "case_id": "case-003",
+      "status": "error",
+      "metrics": {
+        "score": null
+      },
+      "error": {
+        "message": "Model request timed out",
+        "type": "TimeoutError"
+      },
+      "started_at": "2025-01-15T12:00:02Z",
+      "ended_at": "2025-01-15T12:00:32Z"
+    }
+  ],
+  "summary": {
+    "num_cases": 3,
+    "num_pass": 1,
+    "num_fail": 1,
+    "num_error": 1,
+    "pass_rate": 0.3333333333,
+    "mean_latency_ms": 13.5
+  },
+  "notes": "This file is intentionally small but exercises pass/fail/error statuses."
+}

@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a canonical-path enforcement + migration step: ensure that artifacts currently generated under runtime/outputs/ (e.g., generated reports, schemas, tools) are copied/synced into the canonical /outputs/ tree, and update references accordingly. Emit a /outputs/qa/path_canonicalization_report.md listing what moved and what remains duplicated.
+Project: canonical-path enforcement + migration step: ensure that artifacts currently generated under runtime/outputs/ (e.g., generated reports, schemas, (python cli_tool)
+
+Target file details:
+- Path: src/cli/_path_canonicalize_lib.py
+- Purpose: Provides reusable library functions for file discovery, copy/sync logic, hashing/duplicate detection, reference rewriting, and markdown report generation used by the CLI command.
+- Category: source
+
+Other planned files (for context only):
+- src/cli/path_canonicalize.py: Implements a Python CLI command that scans runtime/outputs/, syncs artifacts into the canonical outputs/ tree, optionally rewrites in-repo references, and emits outputs/qa/path_canonicalization_report.md summarizing moves, duplicates, and actions taken.
+- src/cli/__init__.py: Defines the cli package entry points and exports the path canonicalization command for integration with the existing CLI tool.
+- tests/test_path_canonicalize.py: End-to-end tests using temporary directories to validate syncing from runtime/outputs to outputs, duplicate handling, optional reference rewriting, and correct markdown report emission.
+- tests/test_path_canonicalize_rewrite.py: Focused tests covering safe reference rewriting behavior (e.g., runtime/outputs to outputs) with allow/deny patterns and dry-run mode.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T23-41-08-888Z_runtime_outputs_CANONICALIZATION_REPORT_md_stage1_attempt1_prompt.txt from code-creation agent agen
+- [CONSOLIDATED] Establish a deterministic scaffold-to-artifact pipeline where a single command generates the project’s report structure and t
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [INTROSPECTION] 2025-12-24T23-48-14-959Z_src_cli_add_case_study_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766620093681_9
+- [FORK:fork_23] Bold aesthetic innovation can treat tradition as a scaffold rather than a shackle: by reworking time-tested forms and techniq
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Provides reusable library functions for file discovery, copy/sync logic, hashing/duplicate detection, reference rewriting, and markdown report generation used by the CLI command.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/cli/_path_canonicalize_lib.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/cli/_path_canonicalize_lib.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/cli/_path_canonicalize_lib.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/lib/plotting.py` with deterministic matplotlib styling plus reusable helpers to create/save figures (PNG/PDF) and write CSV summary tables (supports pandas DataFrames if available, otherwise writes from dict rows).",
+  "reasoning": "",
+  "responseId": "resp_0bca10bea441ca9e006949984f314c8197abddd6fc03cd6ba5",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3152,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1624,
+    "output_tokens_details": {
+      "reasoning_tokens": 1576
+    },
+    "total_tokens": 4776
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0bca10bea441ca9e006949984fdb048197b21af66133fe9629",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0bca10bea441ca9e00694998541b3c8197ab352e2fa0b2201f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, sys, csv\ntarget_path = Path('/mnt/data').joinpath('src/lib/plotting.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"Centralized plotting and table-writing helpers.\n\nDesign goals:\n- Deterministic styling (consistent rcParams).\n- One call to save a figure to PNG/PDF with tight layout.\n- One call to write tabular summaries to CSV (pandas optional).\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Iterable, Mapping, Sequence\n\nimport csv\n\nimport matplotlib as mpl\nimport matplotlib.pyplot as plt\n\"\"\")\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass PlotStyle:\n    \\\"\\\"\\\"Small bundle of style choices for reproducible figures.\\\"\\\"\\\"\n\n    dpi: int = 200\n    figsize: tuple[float, float] = (6.0, 4.0)\n    font_size: int = 11\n    line_width: float = 1.6\n    grid: bool = True\n    color_cycle: Sequence[str] = (\n        \"#4C78A8\", \"#F58518\", \"#54A24B\", \"#E45756\",\n        \"#72B7B2\", \"#B279A2\", \"#FF9DA6\", \"#9D755D\",\n    )\n\n\n_DEFAULT_STYLE = PlotStyle()\n\n\ndef set_mpl_style(style: PlotStyle | None = None) -> PlotStyle:\n    \\\"\\\"\\\"Apply a deterministic matplotlib style and return the applied style.\\\"\\\"\\\"\n    s = style or _DEFAULT_STYLE\n    mpl.rcParams.update(\n        {\n            \"figure.dpi\": s.dpi,\n            \"savefig.dpi\": s.dpi,\n            \"figure.figsize\": s.figsize,\n            \"font.size\": s.font_size,\n            \"axes.titlesize\": s.font_size + 1,\n            \"axes.labelsize\": s.font_size,\n            \"legend.fontsize\": s.font_size - 1,\n            \"xtick.labelsize\": s.font_size - 1,\n            \"ytick.labelsize\": s.font_size - 1,\n            \"axes.grid\": s.grid,\n            \"grid.alpha\": 0.25,\n            \"axes.linewidth\": 0.8,\n            \"lines.linewidth\": s.line_width,\n            \"axes.prop_cycle\": mpl.cycler(color=list(s.color_cycle)),\n            \"savefig.bbox\": \"tight\",\n        }\n    )\n    return s\n\"\"\")\n\nchunks.append(\"\"\"\ndef _as_path(p: str | Path) -> Path:\n    return p if isinstance(p, Path) else Path(p)\n\n\ndef ensure_dir(path: str | Path) -> Path:\n    \\\"\\\"\\\"Create directory if needed and return it as a Path.\\\"\\\"\\\"\n    p = _as_path(path)\n    p.mkdir(parents=True, exist_ok=True)\n    return p\n\n\ndef save_figure(\n    fig: mpl.figure.Figure,\n    out_base: str | Path,\n    formats: Sequence[str] = (\"png\", \"pdf\"),\n    dpi: int | None = None,\n    close: bool = True,\n) -> list[Path]:\n    \\\"\\\"\\\"Save figure to multiple formats.\n\n    Parameters\n    ----------\n    fig:\n        Matplotlib figure.\n    out_base:\n        Output path without extension (e.g., outputs/figures/corr_vs_T).\n    formats:\n        Iterable of extensions to write.\n    dpi:\n        Override DPI for this save call.\n    close:\n        Whether to close the figure after saving (recommended for batch runs).\n    \\\"\\\"\\\"\n    out_base = _as_path(out_base)\n    ensure_dir(out_base.parent)\n    fig.tight_layout()\n    written: list[Path] = []\n    for ext in formats:\n        ext = ext.lstrip(\".\").lower()\n        out = out_base.with_suffix(\".\" + ext)\n        fig.savefig(out, dpi=dpi, bbox_inches=\"tight\")\n        written.append(out)\n    if close:\n        plt.close(fig)\n    return written\n\"\"\")\n\nchunks.append(\"\"\"\ndef new_figure(\n    *,\n    style: PlotStyle | None = None,\n    figsize: tuple[float, float] | None = None,\n) -> tuple[mpl.figure.Figure, mpl.axes.Axes]:\n    \\\"\\\"\\\"Create a new figure+axes with the project default style.\\\"\\\"\\\"\n    s = set_mpl_style(style)\n    fig, ax = plt.subplots(figsize=figsize or s.figsize)\n    return fig, ax\n\"\"\")\n\nchunks.append(\"\"\"\ndef write_csv(\n    rows: Iterable[Mapping[str, Any]] | Any,\n    out_path: str | Path,\n    *,\n    index: bool = False,\n) -> Path:\n    \\\"\\\"\\\"Write a CSV summary table.\n\n    Accepts either:\n    - pandas.DataFrame (if pandas is installed), or\n    - an iterable of dict-like rows.\n\n    Parameters\n    ----------\n    index:\n        Only relevant for pandas DataFrames; ignored otherwise.\n    \\\"\\\"\\\"\n    out_path = _as_path(out_path)\n    ensure_dir(out_path.parent)\n\n    # pandas path (optional dependency at runtime)\n    try:\n        import pandas as pd  # type: ignore\n    except Exception:\n        pd = None  # type: ignore\n\n    if pd is not None and hasattr(rows, \"to_csv\"):\n        rows.to_csv(out_path, index=index)  # type: ignore[attr-defined]\n        return out_path\n\n    rows_list = list(rows)  # type: ignore[arg-type]\n    if not rows_list:\n        out_path.write_text(\"\", encoding=\"utf-8\")\n        return out_path\n\n    fieldnames = sorted({k for r in rows_list for k in r.keys()})\n    with out_path.open(\"w\", newline=\"\", encoding=\"utf-8\") as f:\n        w = csv.DictWriter(f, fieldnames=fieldnames)\n        w.writeheader()\n        for r in rows_list:\n            w.writerow({k: r.get(k, \"\") for k in fieldnames})\n    return out_path\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/lib/plotting.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694996cf1f0881908fd6ebe4e5dd54140c8f193d7d2aa5f8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/lib/plotting.py\nDIR_STATE:[\"src/lib/graphs.py\", \"src/lib/plotting.py\", \"src/lib/quantum_states.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0bca10bea441ca9e00694998684b648197899375b4d4eaee20",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/lib/plotting.py` with deterministic matplotlib styling plus reusable helpers to create/save figures (PNG/PDF) and write CSV summary tables (supports pandas DataFrames if available, otherwise writes from dict rows)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

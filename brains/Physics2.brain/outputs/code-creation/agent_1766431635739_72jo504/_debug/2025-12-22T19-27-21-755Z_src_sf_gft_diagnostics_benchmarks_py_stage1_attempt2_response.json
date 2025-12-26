@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `benchmarks.py` with a compact benchmark-suite API: standardized `BenchmarkSpec` templates (2D Ising, melonic tensor toy criticality, Regge flatness via deficit angles, and generic two-point shape) plus reference values and evaluation/scoring protocols for cross-validation.",
+  "reasoning": "",
+  "responseId": "resp_05b2ecc859e4fd750069499d778d948195b5c4fa78e731ce02",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3737,
+    "input_tokens_details": {
+      "cached_tokens": 1408
+    },
+    "output_tokens": 2129,
+    "output_tokens_details": {
+      "reasoning_tokens": 255
+    },
+    "total_tokens": 5866
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_05b2ecc859e4fd750069499d7854f08195a26f2d4c878d5095",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_05b2ecc859e4fd750069499d7f86bc819588067f2c387cb54d",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, math\ntarget_path = Path('/mnt/data').joinpath('src/sf_gft_diagnostics/benchmarks.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\\\n\\\"\\\"\\\"Benchmark templates and reference comparisons for SF/GFT diagnostics.\n\nThis module provides small, standardized benchmark specifications with\nreference values and evaluation protocols. Benchmarks are intentionally\nmodel-agnostic: they define *what to measure* and *how to score it*, not\nhow to run a particular RG/tensor-network/spinfoam code.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom typing import Any, Callable, Dict, Iterable, Mapping, Optional, Sequence, Tuple, Union\n\nimport math\n\nNumber = Union[int, float]\nArrayLike = Sequence[Number]\nResultDict = Mapping[str, Any]\nScoreDict = Dict[str, float]\n\"\"\")\n\nchunks.append(\"\"\"\\\n@dataclass(frozen=True)\nclass BenchmarkSpec:\n    \\\"\\\"\\\"A benchmark problem with a minimal evaluation protocol.\n\n    - `required`: keys expected in a results dict produced by the user's pipeline.\n    - `reference`: reference values/distributions for comparison.\n    - `scorers`: mapping from score-name to callable(result, reference)->float (lower is better).\n    \\\"\\\"\\\"\n\n    name: str\n    description: str\n    required: Tuple[str, ...]\n    reference: Dict[str, Any]\n    scorers: Dict[str, Callable[[ResultDict, Dict[str, Any]], float]] = field(default_factory=dict)\n\n    def evaluate(self, result: ResultDict) -> ScoreDict:\n        missing = [k for k in self.required if k not in result]\n        if missing:\n            raise KeyError(f\\\"Missing required result keys for {self.name}: {missing}\\\")\n        return {k: float(fn(result, self.reference)) for k, fn in self.scorers.items()}\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef _abs_rel_err(x: float, xref: float, eps: float = 1e-12) -> float:\n    return abs(x - xref) / (abs(xref) + eps)\n\n\ndef _curve_l2(y: ArrayLike, yref: ArrayLike) -> float:\n    if len(y) != len(yref) or len(y) == 0:\n        raise ValueError(\\\"Curve lengths must match and be non-empty\\\")\n    return math.sqrt(sum((float(a) - float(b)) ** 2 for a, b in zip(y, yref)) / len(y))\n\n\ndef _score_critical_point(result: ResultDict, ref: Dict[str, Any]) -> float:\n    return _abs_rel_err(float(result[\\\"critical_point\\\"]), float(ref[\\\"critical_point\\\"]))\n\n\ndef _score_exponents(result: ResultDict, ref: Dict[str, Any]) -> float:\n    exps = result[\\\"exponents\\\"]\n    rexps = ref[\\\"exponents\\\"]\n    keys = sorted(set(rexps) & set(exps))\n    if not keys:\n        raise KeyError(\\\"No overlapping exponent keys between result and reference\\\")\n    return sum(_abs_rel_err(float(exps[k]), float(rexps[k])) for k in keys) / len(keys)\n\n\ndef _score_two_point_shape(result: ResultDict, ref: Dict[str, Any]) -> float:\n    # Compare normalized correlator shapes at common distances/momenta.\n    y = [float(v) for v in result[\\\"two_point\\\"]]\n    yref = [float(v) for v in ref[\\\"two_point_ref\\\"]]\n    sy, sref = sum(abs(v) for v in y), sum(abs(v) for v in yref)\n    y = [v / (sy + 1e-12) for v in y]\n    yref = [v / (sref + 1e-12) for v in yref]\n    return _curve_l2(y, yref)\n\n\ndef _score_flatness(result: ResultDict, ref: Dict[str, Any]) -> float:\n    # Semiclassical Regge-like: deficit angles ~ 0; score mean absolute curvature proxy.\n    deficits = [abs(float(x)) for x in result[\\\"deficit_angles\\\"]]\n    return sum(deficits) / max(1, len(deficits)) / float(ref.get(\\\"scale\\\", 1.0))\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef benchmark_ising2d() -> BenchmarkSpec:\n    \\\"\\\"\\\"2D Ising universality: exact Tc and exponents for RG cross-validation.\\\"\\\"\\\"\n    tc = 2.0 / math.log(1.0 + math.sqrt(2.0))\n    ref = {\n        \\\"critical_point\\\": tc,\n        \\\"exponents\\\": {\\\"nu\\\": 1.0, \\\"beta\\\": 0.125, \\\"gamma\\\": 1.75, \\\"eta\\\": 0.25},\n        # Optional shape reference: power-law at criticality for r=1..8 (normalized).\n        \\\"two_point_ref\\\": [1.0 / (r ** 0.25) for r in range(1, 9)],\n    }\n    return BenchmarkSpec(\n        name=\\\"ising2d\\\",\n        description=\\\"2D Ising exact Tc and exponents; optional correlator-shape check.\\\",\n        required=(\\\"critical_point\\\", \\\"exponents\\\"),\n        reference=ref,\n        scorers={\n            \\\"critical_point_relerr\\\": _score_critical_point,\n            \\\"exponents_mean_relerr\\\": _score_exponents,\n        },\n    )\n\n\ndef benchmark_tensor_melonic() -> BenchmarkSpec:\n    \\\"\\\"\\\"Large-N melonic tensor model: solvable critical coupling and susceptibility exponent.\\\"\\\"\\\"\n    # Quartic melonic in many conventions has g_c=1/4 for the reduced SD equation.\n    ref = {\\\"critical_point\\\": 0.25, \\\"exponents\\\": {\\\"gamma\\\": 0.5}}\n    return BenchmarkSpec(\n        name=\\\"tensor_melonic\\\",\n        description=\\\"Toy melonic tensor/GFT-like model with known critical coupling/exponent.\\\",\n        required=(\\\"critical_point\\\", \\\"exponents\\\"),\n        reference=ref,\n        scorers={\\\"critical_point_relerr\\\": _score_critical_point, \\\"exponents_mean_relerr\\\": _score_exponents},\n    )\n\n\ndef benchmark_regge_flatness() -> BenchmarkSpec:\n    \\\"\\\"\\\"Semiclassical Regge-like limit: deficit angles small for near-flat configurations.\\\"\\\"\\\"\n    ref = {\\\"scale\\\": 1.0}\n    return BenchmarkSpec(\n        name=\\\"regge_flatness\\\",\n        description=\\\"Deficit-angle flatness diagnostic (mean |epsilon_h|, normalized).\\\",\n        required=(\\\"deficit_angles\\\",),\n        reference=ref,\n        scorers={\\\"flatness_mean_abs\\\": _score_flatness},\n    )\n\n\ndef benchmark_two_point_shape() -> BenchmarkSpec:\n    \\\"\\\"\\\"Generic correlator-shape comparison against a reference curve.\\\"\\\"\\\"\n    ref = {\\\"two_point_ref\\\": [1.0 / (r ** 2) for r in range(1, 9)]}\n    return BenchmarkSpec(\n        name=\\\"two_point_shape\\\",\n        description=\\\"Normalized L2 distance between measured and reference 2-pt function shapes.\\\",\n        required=(\\\"two_point\\\",),\n        reference=ref,\n        scorers={\\\"two_point_shape_l2\\\": _score_two_point_shape},\n    )\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef list_benchmarks() -> Tuple[BenchmarkSpec, ...]:\n    \\\"\\\"\\\"Return the default benchmark suite (ordered by broad usefulness).\\\"\\\"\\\"\n    return (\n        benchmark_ising2d(),\n        benchmark_tensor_melonic(),\n        benchmark_regge_flatness(),\n        benchmark_two_point_shape(),\n    )\n\n\ndef get_benchmark(name: str) -> BenchmarkSpec:\n    \\\"\\\"\\\"Fetch a benchmark by name.\\\"\\\"\\\"\n    for b in list_benchmarks():\n        if b.name == name:\n            return b\n    raise KeyError(f\\\"Unknown benchmark: {name!r}. Available: {[b.name for b in list_benchmarks()]}\\\")\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/sf_gft_diagnostics/benchmarks.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499b97284881909e58fb047f14c1e300fdec2b43878464",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/sf_gft_diagnostics/benchmarks.py\nDIR_STATE:[\"src/sf_gft_diagnostics/__init__.py\", \"src/sf_gft_diagnostics/benchmarks.py\", \"src/sf_gft_diagnostics/metrics.py\", \"src/sf_gft_diagnostics/observables.py\", \"src/sf_gft_diagnostics/rg_io.py\", \"src/sf_gft_diagnostics/scaling.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_05b2ecc859e4fd750069499da3aa7c819584b1fa4ede09b219",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `benchmarks.py` with a compact benchmark-suite API: standardized `BenchmarkSpec` templates (2D Ising, melonic tensor toy criticality, Regge flatness via deficit angles, and generic two-point shape) plus reference values and evaluation/scoring protocols for cross-validation."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

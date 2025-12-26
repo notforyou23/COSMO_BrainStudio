@@ -1,0 +1,299 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766619667421_mwcmtu6",
+  "agentType": "code-creation",
+  "goalId": "goal_133",
+  "missionId": "strategic_goal_133_1766619667421",
+  "spawnCycle": 73,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T23:41:20.211Z",
+  "completedAt": "2025-12-24T23:49:15.517Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/canonicalize_outputs.py",
+      "description": "Standalone script that discovers agent-specific deliverables, migrates/copies them into runtime/outputs/ canonical subfolders, updates runtime/outputs/PROJECT_TRACKER.json to point at new paths, and generates runtime/outputs/CANONICALIZATION_REPORT.md with old-to-new mappings and actions taken.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "s/run_scaffold.py\", \"scripts/update_project_tracker.py\", \"scripts/validate_linkcheck_report.py\", \"scripts/validate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_scaffold.py\"]\nSUMMARY: Wrote a standalone canonicalization script that discovers agent outputs, copies/moves them into runtime/outputs/canonical, updates PROJECT_TRACKER.json, and emits CANONICALIZATION_REPORT.md.\n",
+          "timestamp": "2025-12-24T23:42:17.511Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "old.py\", \"scripts/update_project_tracker.py\", \"scripts/validate_linkcheck_report.py\", \"scripts/validate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_scaffold.py\"]\nSUMMARY: Wrote a standalone canonicalization script that discovers agent deliverables, migrates them into runtime/outputs/canonical, updates PROJECT_TRACKER.json paths, and generates CANONICALIZATION_REPORT.md.\n",
+          "timestamp": "2025-12-24T23:43:11.596Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:41:20.211Z",
+      "failedAt": "2025-12-24T23:43:11.596Z"
+    },
+    {
+      "path": "scripts/lib/output_discovery.py",
+      "description": "Library module that scans the repository for deliverables under known agent output roots (e.g., code-creation, document-creation, and other agent-stamped directories) and returns structured records with metadata used for canonicalization.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/lib/output_discovery.py\nDIR_STATE:[\"scripts/lib/output_discovery.py\"]\nSummary: Wrote output_discovery.py to discover agent-rooted deliverables and return structured metadata records for canonicalization.\n",
+          "timestamp": "2025-12-24T23:43:42.494Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/lib/output_discovery.py\nDIR_STATE:[\"scripts/lib/output_discovery.py\"]\nSummary: Implemented output discovery that scans for agent/creation/output-root deliverables and returns structured metadata records for canonicalization.\n",
+          "timestamp": "2025-12-24T23:44:08.889Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:41:20.211Z",
+      "failedAt": "2025-12-24T23:44:08.889Z"
+    },
+    {
+      "path": "scripts/lib/path_canonicalizer.py",
+      "description": "Library module that defines canonical destination rules under runtime/outputs/ (naming, collision handling, hashing, and folder taxonomy) and computes deterministic old->new path mappings.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/lib/path_canonicalizer.py\nDIR_STATE:[\"scripts/lib/output_discovery.py\", \"scripts/lib/path_canonicalizer.py\"]\nSummary: Implemented deterministic canonical path mapping into runtime/outputs with taxonomy, safe naming, and hash-based collision avoidance.\n",
+          "timestamp": "2025-12-24T23:44:40.956Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/lib/path_canonicalizer.py\nDIR_STATE:[\"scripts/lib/output_discovery.py\", \"scripts/lib/path_canonicalizer.py\"]\nSummary: Implemented deterministic canonical destination rules with sanitization, taxonomy, hashing-based collision resolution, and mapping helpers.\n",
+          "timestamp": "2025-12-24T23:45:09.292Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:41:20.211Z",
+      "failedAt": "2025-12-24T23:45:09.292Z"
+    },
+    {
+      "path": "scripts/lib/project_tracker_updater.py",
+      "description": "Library module that loads runtime/outputs/PROJECT_TRACKER.json, rewrites tracked artifact paths to their canonical equivalents, preserves formatting/ordering where possible, and validates that all referenced files exist post-migration.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-24T23:45:32.786Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/lib/project_tracker_updater.py\nDIR_STATE:[\"scripts/lib/output_discovery.py\", \"scripts/lib/path_canonicalizer.py\", \"scripts/lib/project_tracker_updater.py\"]\nSUMMARY: Implemented a project tracker updater module that rewrites tracked artifact paths via a mapping, preserves key ordering, and validates referenced files exist after migration.\n",
+          "timestamp": "2025-12-24T23:46:02.878Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:41:20.211Z",
+      "failedAt": "2025-12-24T23:46:02.878Z"
+    },
+    {
+      "path": "scripts/lib/report_writer.py",
+      "description": "Library module that writes runtime/outputs/CANONICALIZATION_REPORT.md summarizing discovered artifacts, migration decisions (moved/copied/skipped), and a complete mapping table from old paths to new canonical paths.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/lib/report_writer.py\nDIR_STATE:[\"scripts/lib/output_discovery.py\", \"scripts/lib/path_canonicalizer.py\", \"scripts/lib/project_tracker_updater.py\", \"scripts/lib/report_writer.py\"]\nSUMMARY: Implemented a compact report_writer module that generates and writes CANONICALIZATION_REPORT.md with discovery, migration decisions, and tracker rewrite tables.\n",
+          "timestamp": "2025-12-24T23:46:25.493Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/lib/report_writer.py\nDIR_STATE:[\"scripts/lib/output_discovery.py\", \"scripts/lib/path_canonicalizer.py\", \"scripts/lib/project_tracker_updater.py\", \"scripts/lib/report_writer.py\"]\nSUMMARY: Wrote the report_writer library module to generate CANONICALIZATION_REPORT.md with summaries and a complete old→new mapping table.\n",
+          "timestamp": "2025-12-24T23:46:58.272Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:41:20.211Z",
+      "failedAt": "2025-12-24T23:46:58.272Z"
+    },
+    {
+      "path": "scripts/lib/fs_ops.py",
+      "description": "Shared filesystem utilities for safe copy/move, atomic writes, directory creation, checksum calculation, and dry-run support used by the canonicalization pipeline.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/lib/fs_ops.py\nDIR_STATE:[\"scripts/lib/fs_ops.py\", \"scripts/lib/output_discovery.py\", \"scripts/lib/path_canonicalizer.py\", \"scripts/lib/project_tracker_updater.py\", \"scripts/lib/report_writer.py\"]\nSUMMARY:Implemented shared filesystem utilities with atomic writes, safe copy/move/unlink, directory helpers, checksums, and dry-run support for the canonicalization pipeline.\n",
+          "timestamp": "2025-12-24T23:47:19.872Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/lib/fs_ops.py\nDIR_STATE:[\"scripts/lib/fs_ops.py\", \"scripts/lib/output_discovery.py\", \"scripts/lib/path_canonicalizer.py\", \"scripts/lib/project_tracker_updater.py\", \"scripts/lib/report_writer.py\"]\nSUMMARY: Implemented shared fs_ops utilities with dry-run aware directory creation, atomic writes, copy/move, deletion, and SHA-256 helpers for the canonicalization pipeline.\n",
+          "timestamp": "2025-12-24T23:47:41.618Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:41:20.211Z",
+      "failedAt": "2025-12-24T23:47:41.618Z"
+    },
+    {
+      "path": "runtime/outputs/.gitkeep",
+      "description": "Placeholder file ensuring the canonical runtime/outputs/ directory exists in version control for the migration target tree.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runtime/outputs/.gitkeep\nDIR_STATE:[\"runtime/outputs/.gitkeep\"]\nSUMMARY: Created a .gitkeep placeholder so the canonical runtime/outputs/ directory is preserved for migration targets.\n",
+          "timestamp": "2025-12-24T23:47:48.067Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runtime/outputs/.gitkeep\nDIR_STATE:[\"runtime/outputs/.gitkeep\"]\nCreated runtime/outputs/.gitkeep to ensure the canonical outputs directory is retained by version control.\n",
+          "timestamp": "2025-12-24T23:47:58.795Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:41:20.211Z",
+      "failedAt": "2025-12-24T23:47:58.795Z"
+    },
+    {
+      "path": "runtime/outputs/PROJECT_TRACKER.json",
+      "description": "Canonical project tracker JSON file (created if missing) that indexes deliverables under runtime/outputs/ and is updated by the canonicalization script to reference migrated artifact paths.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runtime/outputs/PROJECT_TRACKER.json\nDIR_STATE:[\"runtime/outputs/.gitkeep\", \"runtime/outputs/PROJECT_TRACKER.json\"]\nSUMMARY: Initialized canonical PROJECT_TRACKER.json with an empty artifact index for runtime/outputs/.\n",
+          "timestamp": "2025-12-24T23:48:11.769Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runtime/outputs/PROJECT_TRACKER.json\nDIR_STATE:[\"runtime/outputs/.gitkeep\", \"runtime/outputs/PROJECT_TRACKER.json\"]\nCreated/updated a canonical PROJECT_TRACKER.json under runtime/outputs to index deliverables for subsequent canonicalization.\n",
+          "timestamp": "2025-12-24T23:48:26.246Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:41:20.211Z",
+      "failedAt": "2025-12-24T23:48:26.246Z"
+    },
+    {
+      "path": "runtime/outputs/CANONICALIZATION_REPORT.md",
+      "description": "Generated report file (created if missing) documenting canonicalization results, including old->new path mappings and any errors or skipped items.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runtime/outputs/CANONICALIZATION_REPORT.md\nDIR_STATE:[\"runtime/outputs/.gitkeep\", \"runtime/outputs/CANONICALIZATION_REPORT.md\", \"runtime/outputs/PROJECT_TRACKER.json\"]\nSUMMARY: Generated a Stage 1 canonicalization report with deterministic old-to-suggested-new path mappings based on current filesystem discovery.\n",
+          "timestamp": "2025-12-24T23:48:56.819Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runtime/outputs/CANONICALIZATION_REPORT.md\nDIR_STATE:[\"runtime/outputs/.gitkeep\", \"runtime/outputs/CANONICALIZATION_REPORT.md\", \"runtime/outputs/PROJECT_TRACKER.json\"]\nSUMMARY: Initialized CANONICALIZATION_REPORT.md with a complete report structure and Stage 1 status (no mappings recorded yet).\n",
+          "timestamp": "2025-12-24T23:49:15.516Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:41:20.211Z",
+      "failedAt": "2025-12-24T23:49:15.516Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Canonicalize and migrate deliverables from agent-specific paths (e.g., .../code-creation/... and document-creation outputs) into a single canonical tree under runtime/outputs/. Update runtime/outputs/PROJECT_TRACKER.json to point to the migrated canonical files and generate runtime/outputs/CANONICALIZATION_REPORT.md documenting old->new mappings.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "QA and document analysis could not discover artifacts (0 documents analyzed / QA skipped). Path fragmentation is blocking automation and review."
+  ],
+  "projectName": "generated_script_1766619667635",
+  "language": "json",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-24T23:49:15.517Z",
+  "summary": {
+    "completed": 0,
+    "failed": 9,
+    "total": 9
+  }
+}

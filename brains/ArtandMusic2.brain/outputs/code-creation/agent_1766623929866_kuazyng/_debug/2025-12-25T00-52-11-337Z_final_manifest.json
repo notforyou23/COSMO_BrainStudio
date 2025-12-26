@@ -1,0 +1,243 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766623929866_kuazyng",
+  "agentType": "code-creation",
+  "goalId": "goal_119",
+  "missionId": "strategic_goal_119_1766623929865",
+  "spawnCycle": 108,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-25T00:52:18.147Z",
+  "completedAt": "2025-12-25T00:56:27.360Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "tools/__init__.py",
+      "description": "Defines the tools package so the QA gate harness can be executed via python -m tools.pipeline.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/__init__.py\nDIR_STATE:[\"tools/__init__.py\"]\nSummary: Defined the tools package initializer so the QA gate harness can run via 'python -m tools.pipeline'.\n",
+          "timestamp": "2025-12-25T00:52:22.711Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/__init__.py\nDIR_STATE:[\"tools/__init__.py\"]\nSummary: Created tools package initializer so the QA gate harness can be invoked via python -m tools.pipeline.\n",
+          "timestamp": "2025-12-25T00:52:30.032Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:18.147Z",
+      "failedAt": "2025-12-25T00:52:30.032Z"
+    },
+    {
+      "path": "tools/pipeline.py",
+      "description": "Implements the one-command harness that runs init_outputs then validate_outputs, performs required artifact presence/minimal-completeness checks, and exits nonzero on any failure.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/pipeline.py\nDIR_STATE:[\"tools/__init__.py\", \"tools/pipeline.py\"]\nSUMMARY: Implemented tools/pipeline.py as a single-command QA gate harness that runs init_outputs + validate_outputs and enforces required artifact presence/minimal completeness checks.\n",
+          "timestamp": "2025-12-25T00:52:59.765Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/pipeline.py\nDIR_STATE:[\"tools/__init__.py\", \"tools/pipeline.py\"]\nSUMMARY: Implemented tools/pipeline.py as a one-command QA gate harness that runs init_outputs + validate_outputs, validates required artifacts, and exits nonzero on failure.\n",
+          "timestamp": "2025-12-25T00:53:23.433Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:18.147Z",
+      "failedAt": "2025-12-25T00:53:23.433Z"
+    },
+    {
+      "path": "tools/qa_gate.py",
+      "description": "Provides reusable orchestration helpers for running pipeline stages deterministically, capturing failures, and producing a concise QA gate report/exit code.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/qa_gate.py\nDIR_STATE:[\"tools/__init__.py\", \"tools/metadata_cli.py\", \"tools/pipeline.py\", \"tools/qa_gate.py\"]\nSummary: Added tools/qa_gate.py with deterministic stage orchestration helpers, structured results, and a concise QA gate report/exit flow.\n",
+          "timestamp": "2025-12-25T00:53:47.934Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/qa_gate.py\nDIR_STATE:[\"tools/__init__.py\", \"tools/metadata_cli.py\", \"tools/pipeline.py\", \"tools/qa_gate.py\"]\nSUMMARY: Implemented deterministic QA gate orchestration helpers with command/callable stages, structured results, concise report formatting, and exit code handling.\n",
+          "timestamp": "2025-12-25T00:54:10.236Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:18.147Z",
+      "failedAt": "2025-12-25T00:54:10.236Z"
+    },
+    {
+      "path": "tools/qa_artifacts.py",
+      "description": "Implements concrete checks for TRACKING_RECONCILIATION.md, Claim Cards, and QA gate artifacts including minimal completeness heuristics and canonical path handling.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/qa_artifacts.py\nDIR_STATE:[\"tools/__init__.py\", \"tools/_schema_loader.py\", \"tools/metadata_cli.py\", \"tools/pipeline.py\", \"tools/qa_artifacts.py\", \"tools/qa_gate.py\"]\nSUMMARY: Added concrete, canonical-path-safe QA artifact checks for tracking reconciliation, claim cards, and QA gate reports with minimal completeness heuristics.\n",
+          "timestamp": "2025-12-25T00:54:44.557Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/qa_artifacts.py\nDIR_STATE:[\"tools/__init__.py\", \"tools/_schema_loader.py\", \"tools/_validation.py\", \"tools/metadata_cli.py\", \"tools/pipeline.py\", \"tools/qa_artifacts.py\", \"tools/qa_gate.py\"]\nSUMMARY: Implemented concrete QA artifact checks with canonical path handling and minimal completeness heuristics for tracking reconciliation, claim cards, and QA gate reports.\n",
+          "timestamp": "2025-12-25T00:55:13.266Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:18.147Z",
+      "failedAt": "2025-12-25T00:55:13.266Z"
+    },
+    {
+      "path": "scripts/run_pipeline.sh",
+      "description": "Shell wrapper that invokes the canonical python QA gate command for local and CI usage with strict failure propagation.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "acker.py\", \"scripts/update_tracker.py\", \"scripts/validate_case_studies_schema.py\", \"scripts/validate_linkcheck_report.py\", \"scripts/validate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_rights_and_licensing.py\", \"scripts/validate_scaffold.py\"]\nSummary: Added a strict bash wrapper that invokes the canonical Python QA gate command and propagates failures for CI/local runs.\n",
+          "timestamp": "2025-12-25T00:55:21.017Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "t_tracker.py\", \"scripts/update_tracker.py\", \"scripts/validate_case_studies_schema.py\", \"scripts/validate_linkcheck_report.py\", \"scripts/validate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_rights_and_licensing.py\", \"scripts/validate_scaffold.py\"]\nSUMMARY: Added a strict-failure shell wrapper that runs the canonical Python QA gate pipeline command for local and CI usage.\n",
+          "timestamp": "2025-12-25T00:55:27.758Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:18.147Z",
+      "failedAt": "2025-12-25T00:55:27.758Z"
+    },
+    {
+      "path": ".github/workflows/qa-gate.yml",
+      "description": "CI workflow that runs the canonical QA gate command on pushes and pull requests and fails the build when required outputs/artifacts are missing or incomplete.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/qa-gate.yml\nDIR_STATE:[\".github/workflows/qa-gate.yml\"]\n",
+          "timestamp": "2025-12-25T00:55:36.670Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/qa-gate.yml\nDIR_STATE:[\".github/workflows/qa-gate.yml\"]\nSUMMARY: Added a CI workflow that runs the canonical QA gate command (python -m tools.pipeline) on pushes and pull requests and fails the build if the gate fails.\n",
+          "timestamp": "2025-12-25T00:55:44.818Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:18.147Z",
+      "failedAt": "2025-12-25T00:55:44.818Z"
+    },
+    {
+      "path": "docs/QA_GATE.md",
+      "description": "Documentation describing how to run the one-command QA gate locally and in CI, what artifacts it validates, and common failure modes.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-25T00:56:06.159Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docs/QA_GATE.md\nDIR_STATE:[\"docs/ARTIFACT_INDEX_AND_TRACKER_MAINTENANCE.md\", \"docs/QA_GATE.md\", \"docs/claim_card_workflow.md\", \"docs/intake_checklist.md\", \"docs/path_canonicalization.md\"]\nSUMMARY: Added QA_GATE.md documenting the one-command QA gate, validated artifacts, CI usage, and common failure modes.\n",
+          "timestamp": "2025-12-25T00:56:27.360Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:18.147Z",
+      "failedAt": "2025-12-25T00:56:27.360Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Implement a one-command harness (e.g., scripts/run_pipeline.sh or python -m tools.pipeline) that runs init_outputs + validate_outputs and exits nonzero on failure; ensure it checks for the presence and minimal completeness of TRACKING_RECONCILIATION.md, Claim Cards, and QA gate artifacts.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Automates enforcement: a single command/script that generates scaffolds and validates expected /outputs files makes compliance repeatable and reduces drift between documented process and actual reposi..."
+  ],
+  "projectName": "generated_cli_tool_1766623930114",
+  "language": "python",
+  "type": "cli_tool",
+  "status": "failed",
+  "requirements": [
+    "include_ci_cd"
+  ],
+  "lastSavedAt": "2025-12-25T00:56:27.360Z",
+  "summary": {
+    "completed": 0,
+    "failed": 7,
+    "total": 7
+  }
+}

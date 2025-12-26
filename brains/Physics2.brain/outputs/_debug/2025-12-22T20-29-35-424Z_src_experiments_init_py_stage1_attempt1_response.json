@@ -1,0 +1,74 @@
+{
+  "content": "Implemented `src/experiments/__init__.py` as a lightweight package initializer that exposes a stable public interface (`list_experiments`, `get_experiment`, `run_experiment`, `register_experiment`) via lazy delegation to `experiments.registry` to keep imports fast and avoid unnecessary dependencies until execution time.",
+  "reasoning": "",
+  "responseId": "resp_0b96db2f8f2c33af006949aa7185d88197aa4c545ae01dd1a1",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2772,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1293,
+    "output_tokens_details": {
+      "reasoning_tokens": 443
+    },
+    "total_tokens": 4065
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0b96db2f8f2c33af006949aa7261908197aabdeff13f145453",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0b96db2f8f2c33af006949aa7667d88197800b189eaaf2707b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nlist(base.glob(\"src/experiments/*\"))\n",
+      "container_id": "cntr_6949aa2cd9908190a540c44a4880beb40f550cedb5ceca86",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0b96db2f8f2c33af006949aa78b6fc8197b2876b9024fc60dc",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0b96db2f8f2c33af006949aa7d69608197bdc5f22989bbd884",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/__init__.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Experiments package.\n\nThis package groups small, reproducible numerical/symbolic experiments and exposes a\nstable public interface for discovery and execution via the experiment registry.\n\nThe registry implementation lives in :mod:`experiments.registry` (added in later\nstages). This module keeps imports lightweight by delegating to that module at\ncall time rather than import time.\n\\\"\\\"\\\"\\\"\n\"\"\",\n\"\"\"from __future__ import annotations\n\nfrom importlib import import_module\nfrom types import ModuleType\nfrom typing import Any, Callable, Iterable, Mapping, Sequence, TypeVar, overload\n\n__all__ = [\n    \"registry_module\",\n    \"list_experiments\",\n    \"get_experiment\",\n    \"run_experiment\",\n    \"register_experiment\",\n]\n\"\"\",\n\"\"\"T = TypeVar(\"T\")\n\n\ndef registry_module() -> ModuleType:\n    \\\"\\\"\\\"Return the loaded :mod:`experiments.registry` module.\n\n    The import is performed lazily to keep ``import experiments`` fast and to\n    avoid importing optional heavy dependencies unless an experiment is invoked.\n    \\\"\\\"\\\"\n    return import_module(__name__ + \".registry\")\n\"\"\",\n\"\"\"def _get_attr(mod: ModuleType, *names: str) -> Any:\n    for n in names:\n        if hasattr(mod, n):\n            return getattr(mod, n)\n    raise AttributeError(\n        f\\\"{mod.__name__} does not define any of {names}. \\\"  # pragma: no cover\n        \\\"Ensure src/experiments/registry.py exports the expected symbols.\\\"\n    )\n\n\ndef list_experiments() -> Sequence[str]:\n    \\\"\\\"\\\"List registered experiment identifiers.\\\"\\\"\\\"\n    mod = registry_module()\n    fn = _get_attr(mod, \"list_experiments\", \"available_experiments\")\n    return list(fn())\n\n\ndef get_experiment(experiment_id: str) -> Any:\n    \\\"\\\"\\\"Fetch a registered experiment spec/callable by id.\\\"\\\"\\\"\n    mod = registry_module()\n    fn = _get_attr(mod, \"get_experiment\", \"lookup_experiment\")\n    return fn(experiment_id)\n\n\ndef run_experiment(experiment_id: str, /, **kwargs: Any) -> Mapping[str, Any]:\n    \\\"\\\"\\\"Run an experiment by id and return its structured result.\n\n    Parameters\n    ----------\n    experiment_id:\n        Registry key identifying the experiment.\n    **kwargs:\n        Experiment-specific parameters; forwarded to the registry.\n    \\\"\\\"\\\"\n    mod = registry_module()\n    fn = _get_attr(mod, \"run_experiment\", \"run\")\n    return fn(experiment_id, **kwargs)\n\n\ndef register_experiment(*args: Any, **kwargs: Any) -> Any:\n    \\\"\\\"\\\"Decorator/function to register an experiment with the global registry.\n\n    This delegates to :func:`experiments.registry.register_experiment` (or an\n    equivalent symbol) and is intended to be used by experiment modules.\n    \\\"\\\"\\\"\n    mod = registry_module()\n    reg = _get_attr(mod, \"register_experiment\", \"register\")\n    return reg(*args, **kwargs)\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/experiments/__init__.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949aa2cd9908190a540c44a4880beb40f550cedb5ceca86",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/__init__.py\nDIR_STATE:[\"src/experiments/__init__.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0b96db2f8f2c33af006949aa8a07b881978187f864fce64ade",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/experiments/__init__.py` as a lightweight package initializer that exposes a stable public interface (`list_experiments`, `get_experiment`, `run_experiment`, `register_experiment`) via lazy delegation to `experiments.registry` to keep imports fast and avoid unnecessary dependencies until execution time."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

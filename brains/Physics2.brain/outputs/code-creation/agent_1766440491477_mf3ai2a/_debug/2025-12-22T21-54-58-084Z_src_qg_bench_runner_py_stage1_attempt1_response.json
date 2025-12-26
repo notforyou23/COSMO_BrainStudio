@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/qg_bench/runner.py` as a deterministic CLI-capable benchmark runner that loads a dataset JSON, validates it against the bundled JSON Schema via `jsonschema`, computes a minimal exact-match accuracy over items, and outputs stable, sorted-key JSON results to stdout or a file.",
+  "reasoning": "",
+  "responseId": "resp_0d26cf6fce662f64006949be8d3c1081909a21db91068830a0",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3166,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1319,
+    "output_tokens_details": {
+      "reasoning_tokens": 491
+    },
+    "total_tokens": 4485
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0d26cf6fce662f64006949be8e2334819094daa4ca505246b1",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d26cf6fce662f64006949be9b409c8190905763dc57ac4022",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/qg_bench/runner.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Benchmark runner for qg_bench.\n\nThis module provides a tiny, deterministic runner that:\n- loads a JSON dataset,\n- validates it against the bundled JSON Schema,\n- computes a minimal exact-match score, and\n- emits JSON results (stdout or a file).\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport sys\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Optional, Tuple\n\nimport jsonschema\"\"\",\n\"\"\"try:\n    from importlib.resources import files as _files  # py3.9+\nexcept Exception:  # pragma: no cover\n    from importlib_resources import files as _files  # type: ignore\n\n\ndef _schema() -> Dict[str, Any]:\n    schema_path = _files(\"qg_bench\").joinpath(\"schemas/benchmark.schema.json\")\n    return json.loads(schema_path.read_text(encoding=\"utf-8\"))\n\n\ndef validate_dataset(data: Dict[str, Any]) -> None:\n    \\\"\\\"\\\"Validate a benchmark dataset dict against the bundled schema.\\\"\\\"\\\"\n    schema = _schema()\n    validator = jsonschema.Draft202012Validator(schema)\n    errors = sorted(validator.iter_errors(data), key=lambda e: list(e.absolute_path))\n    if not errors:\n        return\n    e = errors[0]\n    loc = \"$\" + \"\".join(f\"[{p!r}]\" if isinstance(p, str) else f\"[{p}]\" for p in e.absolute_path)\n    msg = f\\\"Dataset validation failed at {loc}: {e.message}\\\"\n    raise ValueError(msg)\"\"\",\n\"\"\"def _normalize(text: str) -> str:\n    return \\\" \\\".join(text.strip().lower().split())\n\n\n@dataclass(frozen=True)\nclass RunResult:\n    dataset_path: str\n    n_items: int\n    accuracy: float\n    scores: List[Dict[str, Any]]\n\n    def as_dict(self) -> Dict[str, Any]:\n        return {\n            \\\"dataset_path\\\": self.dataset_path,\n            \\\"n_items\\\": self.n_items,\n            \\\"accuracy\\\": self.accuracy,\n            \\\"scores\\\": self.scores,\n        }\"\"\",\n\"\"\"def load_dataset(path: Path) -> Dict[str, Any]:\n    data = json.loads(path.read_text(encoding=\\\"utf-8\\\"))\n    if not isinstance(data, dict):\n        raise ValueError(\\\"Dataset JSON must be an object at the top level.\\\")\n    return data\n\n\ndef run_benchmark(dataset_path: Path) -> RunResult:\n    \\\"\\\"\\\"Run the minimal benchmark (exact match on prediction vs reference).\\\"\\\"\\\"\n    dataset = load_dataset(dataset_path)\n    validate_dataset(dataset)\n\n    items = dataset.get(\\\"items\\\") or []\n    scores: List[Dict[str, Any]] = []\n    total = 0.0\n    for it in items:\n        # Schema ensures these exist and are strings.\n        iid = it.get(\\\"id\\\")\n        pred = it.get(\\\"prediction\\\", \\\"\\\")\n        ref = it.get(\\\"reference\\\", \\\"\\\")\n        score = 1.0 if _normalize(pred) == _normalize(ref) else 0.0\n        scores.append({\\\"id\\\": iid, \\\"score\\\": score})\n        total += score\n\n    n = len(items)\n    acc = (total / n) if n else 0.0\n    return RunResult(dataset_path=str(dataset_path), n_items=n, accuracy=acc, scores=scores)\"\"\",\n\"\"\"def _dump_json(obj: Any, fp) -> None:\n    json.dump(obj, fp, ensure_ascii=False, sort_keys=True, indent=2)\n    fp.write(\\\"\\\\n\\\")\n\n\ndef main(argv: Optional[List[str]] = None) -> int:\n    p = argparse.ArgumentParser(prog=\\\"qg-bench\\\", description=\\\"Run qg_bench benchmark on a dataset JSON.\\\")\n    p.add_argument(\\\"dataset\\\", type=Path, help=\\\"Path to benchmark dataset JSON.\\\")\n    p.add_argument(\\\"-o\\\", \\\"--output\\\", type=Path, default=None, help=\\\"Write results JSON to this file.\\\")\n    args = p.parse_args(argv)\n\n    result = run_benchmark(args.dataset).as_dict()\n\n    if args.output:\n        args.output.parent.mkdir(parents=True, exist_ok=True)\n        with args.output.open(\\\"w\\\", encoding=\\\"utf-8\\\") as f:\n            _dump_json(result, f)\n    else:\n        _dump_json(result, sys.stdout)\n    return 0\n\n\nif __name__ == \\\"__main__\\\":  # pragma: no cover\n    raise SystemExit(main())\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/qg_bench/runner.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949be2fa9948190b7fd0f89484479600a95eb5fa105098f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/qg_bench/runner.py\nDIR_STATE:[\"src/qg_bench/__init__.py\", \"src/qg_bench/runner.py\", \"src/qg_bench/validate.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0d26cf6fce662f64006949beb2bc4c819085764fc273340132",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/qg_bench/runner.py` as a deterministic CLI-capable benchmark runner that loads a dataset JSON, validates it against the bundled JSON Schema via `jsonschema`, computes a minimal exact-match accuracy over items, and outputs stable, sorted-key JSON results to stdout or a file."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

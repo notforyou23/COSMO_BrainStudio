@@ -1,0 +1,74 @@
+{
+  "content": "Created `scripts/validate_examples_schema.py`, a CI-friendly validator that discovers example JSON/YAML files, validates them against an auto-discovered (or user-specified) JSON Schema using `jsonschema`, and emits a stable diff-like pointer report with non-zero exit status on violations.",
+  "reasoning": "",
+  "responseId": "resp_01b183001f685e72006949bf851f9481948599720ce2a61405",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3591,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2030,
+    "output_tokens_details": {
+      "reasoning_tokens": 1969
+    },
+    "total_tokens": 5621
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_01b183001f685e72006949bf85eb708194ba6774aebd6796c7",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01b183001f685e72006949bf86e1ec8194a54646454f786be2",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path('/mnt/data')\nsorted([str(p.relative_to(base)) for p in base.rglob('*') if p.is_file()][:50])[:50]\n",
+      "container_id": "cntr_6949bf4d82d48190914ab1de1631f7580f09298ef9bbb62e",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "['.github/workflows/ci.yml', 'scripts/ci_lint_compile.py']"
+        }
+      ]
+    },
+    {
+      "id": "rs_01b183001f685e72006949bf8924148194982f008ca6f25121",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01b183001f685e72006949bf919e288194916f704009ba31ee",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, sys, re\ntarget_path = Path('/mnt/data').joinpath('scripts/validate_examples_schema.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\\\n#!/usr/bin/env python3\n\\\"\\\"\\\"Validate repository example files against a JSON Schema.\n\n- Discovers example files (default: examples/**.json|yml|yaml).\n- Validates each file against a JSON Schema (default: auto-discover schema*.json).\n- Emits a diff-like, pointer-addressed report for any violations and exits non-zero.\n\nIntended for CI usage; output is stable and human-readable.\n\\\"\\\"\\\"\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport sys\nfrom pathlib import Path\nfrom typing import Any, Iterable, Tuple\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef _load_text(path: Path) -> str:\n    return path.read_text(encoding=\"utf-8\")\n\ndef _load_data(path: Path) -> Any:\n    if path.suffix.lower() == \".json\":\n        return json.loads(_load_text(path))\n    if path.suffix.lower() in {\".yml\", \".yaml\"}:\n        try:\n            import yaml  # type: ignore\n        except Exception as e:  # pragma: no cover\n            raise RuntimeError(f\"PyYAML is required to read {path.name}: {e}\") from e\n        return yaml.safe_load(_load_text(path))\n    raise ValueError(f\"Unsupported example file type: {path}\")\n\ndef _json_pointer(parts: Iterable[Any]) -> str:\n    segs = []\n    for p in parts:\n        s = str(p).replace(\"~\", \"~0\").replace(\"/\", \"~1\")\n        segs.append(s)\n    return \"/\" + \"/\".join(segs) if segs else \"/\"\n\ndef _fmt_value(v: Any, limit: int = 240) -> str:\n    try:\n        s = json.dumps(v, ensure_ascii=False, sort_keys=True)\n    except Exception:\n        s = repr(v)\n    if len(s) > limit:\n        s = s[: limit - 3] + \"...\"\n    return s\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef _discover_schema(repo_root: Path) -> Path:\n    candidates = []\n    for rel in (\"schema.json\", \"schemas/schema.json\", \"json_schema.json\"):\n        p = repo_root / rel\n        if p.is_file():\n            candidates.append(p)\n    candidates += sorted(repo_root.glob(\"**/schema*.json\"))\n    for p in candidates:\n        if p.is_file():\n            return p\n    raise FileNotFoundError(\n        \"No schema found; pass --schema PATH (looked for schema.json and **/schema*.json).\"\n    )\n\ndef _discover_examples(repo_root: Path, root: str, patterns: Tuple[str, ...]) -> list[Path]:\n    ex_root = repo_root / root\n    if not ex_root.exists():\n        return []\n    files: list[Path] = []\n    for pat in patterns:\n        files.extend(sorted(ex_root.rglob(pat)))\n    return [p for p in files if p.is_file()]\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef _build_validator(schema: dict) -> Any:\n    try:\n        import jsonschema  # type: ignore\n        from jsonschema.validators import validator_for  # type: ignore\n    except Exception as e:  # pragma: no cover\n        raise RuntimeError(\n            \"jsonschema is required for validation; add it to your CI dependencies.\"\n        ) from e\n    cls = validator_for(schema)\n    cls.check_schema(schema)\n    return cls(schema)\n\ndef _format_error(err: Any, instance: Any) -> str:\n    ptr = _json_pointer(err.absolute_path)\n    # Best-effort lookup of offending value.\n    cur = instance\n    try:\n        for part in err.absolute_path:\n            cur = cur[part]\n        val = _fmt_value(cur)\n    except Exception:\n        val = \"<unavailable>\"\n    schema_ptr = _json_pointer(err.absolute_schema_path)\n    msg = (err.message or str(err)).strip()\n    return \"\\\\n\".join(\n        [\n            f\"@@ {ptr}\",\n            f\"- value: {val}\",\n            f\"+ error: {msg}\",\n            f\"+ schema: {schema_ptr}\",\n        ]\n    )\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef validate_examples(schema_path: Path, example_paths: list[Path]) -> int:\n    schema = json.loads(_load_text(schema_path))\n    validator = _build_validator(schema)\n\n    any_fail = False\n    for ex in example_paths:\n        try:\n            data = _load_data(ex)\n        except Exception as e:\n            any_fail = True\n            sys.stdout.write(f\"--- {ex.as_posix()}\\\\n+++ parse_error\\\\n+ {e}\\\\n\")\n            continue\n\n        errors = sorted(validator.iter_errors(data), key=lambda e: list(e.absolute_path))\n        if not errors:\n            continue\n\n        any_fail = True\n        sys.stdout.write(f\"--- {ex.as_posix()}\\\\n+++ schema_validation\\\\n\")\n        for err in errors:\n            sys.stdout.write(_format_error(err, data) + \"\\\\n\")\n\n    return 1 if any_fail else 0\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef main(argv: list[str] | None = None) -> int:\n    ap = argparse.ArgumentParser(description=__doc__)\n    ap.add_argument(\"--repo-root\", default=None, help=\"Repository root (default: auto).\")\n    ap.add_argument(\"--schema\", default=None, help=\"Path to JSON Schema file.\")\n    ap.add_argument(\"--examples-root\", default=\"examples\", help=\"Examples directory root.\")\n    ap.add_argument(\n        \"--patterns\",\n        nargs=\"*\",\n        default=[\"*.json\", \"*.yml\", \"*.yaml\"],\n        help=\"Example file glob patterns (recursive).\",\n    )\n    args = ap.parse_args(argv)\n\n    repo_root = Path(args.repo_root).resolve() if args.repo_root else Path(__file__).resolve().parents[1]\n    schema_path = Path(args.schema).resolve() if args.schema else _discover_schema(repo_root)\n    example_paths = _discover_examples(repo_root, args.examples_root, tuple(args.patterns))\n\n    if not example_paths:\n        sys.stderr.write(f\"No example files found under {args.examples_root!r}; nothing to validate.\\\\n\")\n        return 0\n\n    try:\n        return validate_examples(schema_path, example_paths)\n    except Exception as e:\n        sys.stderr.write(f\"Schema validation failed to run: {e}\\\\n\")\n        return 2\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:scripts/validate_examples_schema.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bf4d82d48190914ab1de1631f7580f09298ef9bbb62e",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:scripts/validate_examples_schema.py\nDIR_STATE:[\"scripts/ci_lint_compile.py\", \"scripts/validate_examples_schema.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_01b183001f685e72006949bfaa25ec8194b105f587f8300679",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `scripts/validate_examples_schema.py`, a CI-friendly validator that discovers example JSON/YAML files, validates them against an auto-discovered (or user-specified) JSON Schema using `jsonschema`, and emits a stable diff-like pointer report with non-zero exit status on violations."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

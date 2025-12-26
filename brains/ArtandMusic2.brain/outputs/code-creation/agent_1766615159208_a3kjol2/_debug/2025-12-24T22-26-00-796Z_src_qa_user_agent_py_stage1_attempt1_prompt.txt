@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a link-check runner that reads exemplar URLs from case-study JSON and writes results to `runtime/outputs/qa/linkcheck_report.json` (status codes, redirects, last-checked timestamp) and a human-readable summary `runtime/outputs/qa/LINKCHECK_SUMMARY.md`.
+Project: generated_script_1766615159468 (json script)
+
+Target file details:
+- Path: src/qa/user_agent.py
+- Purpose: Shared user-agent and polite request defaults (headers, rate limiting settings) used by the link-check runner.
+- Category: support
+
+Other planned files (for context only):
+- scripts/linkcheck_runner.py: CLI runner that loads exemplar URLs from case-study JSON files, checks them (status/redirects), and writes runtime/outputs/qa/linkcheck_report.json and runtime/outputs/qa/LINKCHECK_SUMMARY.md.
+- src/qa/linkcheck.py: Core link-check library providing URL extraction from case-study JSON, HTTP checking logic (redirect chains, timeouts, retries), and report/summary generation helpers.
+- src/qa/linkcheck_types.py: Dataclasses and type definitions for link-check inputs/outputs to keep report schema consistent and easy to validate.
+- src/qa/linkcheck_io.py: Filesystem utilities for discovering case-study JSON files, reading/writing the report JSON, and emitting the Markdown summary under runtime/outputs/qa.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T22-17-08-971Z_src_templates_case_study_stub_json_stage1_attempt2_prompt.txt from code-creation agent agent_176661
+- [INTROSPECTION] 2025-12-24T22-17-09-292Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766614627657
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] The dominant causal mechanism is a self-reinforcing selection loop: institutions use cheap, hig
+- [INTROSPECTION] 2025-12-24T22-11-55-228Z_outputs_PROJECT_TRACKER_json_stage1_attempt1_prompt.txt from code-creation agent agent_176661431294
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Shared user-agent and polite request defaults (headers, rate limiting settings) used by the link-check runner.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/qa/user_agent.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/qa/user_agent.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/qa/user_agent.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

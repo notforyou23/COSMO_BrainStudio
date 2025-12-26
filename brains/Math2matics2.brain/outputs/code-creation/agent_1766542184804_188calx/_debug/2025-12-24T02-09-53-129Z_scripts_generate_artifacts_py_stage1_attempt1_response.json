@@ -1,0 +1,87 @@
+{
+  "content": "Implemented `scripts/generate_artifacts.py` as a runnable CLI that uses `src.refactor_modularize.utils` to write a deterministic (input-hash-based) artifact directory containing a JSON manifest, a human-readable summary, an optional source listing, and an optional exported prompt file under `docs/prompts/`.",
+  "reasoning": "",
+  "responseId": "resp_05de1e3068b390cf00694b4b8814048190a62e6ff6c96e7c3b",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 5175,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 3549,
+    "output_tokens_details": {
+      "reasoning_tokens": 665
+    },
+    "total_tokens": 8724
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_05de1e3068b390cf00694b4b88a9c88190af31725c30b473e1",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_05de1e3068b390cf00694b4b90a4148190b568ba9708d160d3",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('scripts/generate_artifacts.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"#!/usr/bin/env python3\n\\\"\\\"\\\"Generate refactor/modularization artifacts (CLI).\n\nThis script is intentionally small and reusable: it relies on\n`src.refactor_modularize.utils` for common filesystem/text/json/hashing helpers.\nIt writes deterministic output paths derived from inputs so runs are reproducible.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport os\nimport sys\nfrom pathlib import Path\nfrom typing import Any, Dict, Optional\"\"\")\n\nchunks.append(\"\"\"ROOT = Path(__file__).resolve().parents[1]\nif str(ROOT) not in sys.path:\n    sys.path.insert(0, str(ROOT))\n\ntry:\n    # Shared utilities (created/maintained in the refactor_modularize module).\n    from src.refactor_modularize import utils as U  # type: ignore\nexcept Exception as e:  # pragma: no cover\n    raise SystemExit(\n        \"Failed to import src.refactor_modularize.utils. \"\n        \"Ensure the project root is on PYTHONPATH.\\n\"\n        f\"Import error: {e}\"\n    )\"\"\")\n\nchunks.append(\"\"\"def _read_prompt(args: argparse.Namespace) -> str:\n    if args.prompt_text:\n        return args.prompt_text\n    if args.prompt_file:\n        return Path(args.prompt_file).read_text(encoding=\"utf-8\")\n    if args.prompt_stdin:\n        return sys.stdin.read()\n    return \"\"\"\")\n\nchunks.append(\"\"\"def _run_id(args: argparse.Namespace, prompt: str) -> str:\n    payload = {\n        \"mode\": args.mode,\n        \"stage\": args.stage,\n        \"name\": args.name,\n        \"source\": str(Path(args.source).resolve()) if args.source else None,\n        \"prompt_sha256\": U.sha256_text(prompt) if prompt else None,\n    }\n    return U.sha256_text(json.dumps(payload, sort_keys=True))[:16]\"\"\")\n\nchunks.append(\"\"\"def _default_out_dir(base: Optional[str], run_id: str) -> Path:\n    # Deterministic: run_id is derived from inputs (no timestamps).\n    root = Path(base) if base else ROOT\n    return root / \"docs\" / \"artifacts\" / run_id\"\"\")\n\nchunks.append(\"\"\"def _export_prompt(prompt: str, out_dir: Path, stem: str) -> Optional[Path]:\n    if not prompt.strip():\n        return None\n    prompts_dir = out_dir.parent.parent / \"prompts\"\n    U.ensure_dir(prompts_dir)\n    out_path = prompts_dir / f\"{out_dir.name}_{stem}_prompt.txt\"\n    U.write_text(out_path, prompt)\n    return out_path\"\"\")\n\nchunks.append(\"\"\"def generate_artifacts(args: argparse.Namespace) -> Dict[str, Any]:\n    prompt = _read_prompt(args)\n    run_id = _run_id(args, prompt)\n    out_dir = _default_out_dir(args.out_dir, run_id)\n    U.ensure_dir(out_dir)\n\n    prompt_path = None\n    if args.export_prompt:\n        prompt_path = _export_prompt(prompt, out_dir, f\"{args.name}_{args.stage}\")\n\n    manifest: Dict[str, Any] = {\n        \"run_id\": run_id,\n        \"name\": args.name,\n        \"mode\": args.mode,\n        \"stage\": args.stage,\n        \"cwd\": os.getcwd(),\n        \"source\": str(Path(args.source).resolve()) if args.source else None,\n        \"out_dir\": str(out_dir.resolve()),\n        \"prompt_exported\": str(prompt_path) if prompt_path else None,\n    }\n\n    # Minimal \"artifact\" set: manifest + a stable summary text for auditing.\n    U.write_json(out_dir / \"manifest.json\", manifest, indent=2, sort_keys=True)\n\n    summary_lines = [\n        f\"run_id: {run_id}\",\n        f\"name: {args.name}\",\n        f\"mode: {args.mode}\",\n        f\"stage: {args.stage}\",\n        f\"source: {manifest['source']}\",\n        f\"out_dir: {manifest['out_dir']}\",\n        f\"prompt_exported: {manifest['prompt_exported']}\",\n    ]\n    U.write_text(out_dir / \"summary.txt\", \"\\\\n\".join(summary_lines) + \"\\\\n\")\n\n    # Optional: copy the source file/directory list for traceability.\n    if manifest[\"source\"]:\n        src = Path(manifest[\"source\"])\n        listing = U.list_paths(src) if src.exists() else []\n        U.write_json(out_dir / \"source_listing.json\", listing, indent=2, sort_keys=True)\n\n    return manifest\"\"\")\n\nchunks.append(\"\"\"def _build_parser() -> argparse.ArgumentParser:\n    p = argparse.ArgumentParser(description=__doc__)\n    p.add_argument(\"--name\", default=\"refactor_modularize\", help=\"Artifact set name.\")\n    p.add_argument(\"--mode\", default=\"create\", help=\"Pipeline mode label (for metadata).\")\n    p.add_argument(\"--stage\", default=\"stage1_export\", help=\"Stage label (for metadata).\")\n    p.add_argument(\"--source\", default=\"\", help=\"Optional source file/dir to list for auditing.\")\n    p.add_argument(\"--out-dir\", default=\"\", help=\"Optional base output directory (defaults to project docs/).\")\n\n    g = p.add_mutually_exclusive_group()\n    g.add_argument(\"--prompt-text\", default=\"\", help=\"Prompt text to hash/export.\")\n    g.add_argument(\"--prompt-file\", default=\"\", help=\"Read prompt text from a file.\")\n    g.add_argument(\"--prompt-stdin\", action=\"store_true\", help=\"Read prompt text from stdin.\")\n    p.add_argument(\"--export-prompt\", action=\"store_true\", help=\"If set, write the prompt into docs/prompts/.\")\n\n    return p\"\"\")\n\nchunks.append(\"\"\"def main(argv: Optional[list[str]] = None) -> int:\n    args = _build_parser().parse_args(argv)\n    manifest = generate_artifacts(args)\n    # Print a stable machine-readable location for downstream scripts.\n    print(str(Path(manifest[\"out_dir\"]) / \"manifest.json\"))\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:scripts/generate_artifacts.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4b6fb1608190a6dd5b6e9ba95ca3032ea6b5d55b5cdc",
+      "outputs": []
+    },
+    {
+      "id": "rs_05de1e3068b390cf00694b4b9d8c84819086c7644ff7571510",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_05de1e3068b390cf00694b4b9dfdd4819099f7d3742af6b88a",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data/scripts/generate_artifacts.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"#!/usr/bin/env python3\n\\\"\\\"\\\"Generate refactor/modularization artifacts (CLI).\n\nThis script is intentionally small and reusable: it relies on\n`src.refactor_modularize.utils` for common filesystem/text/json/hashing helpers.\nIt writes deterministic output paths derived from inputs so runs are reproducible.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport os\nimport sys\nfrom pathlib import Path\nfrom typing import Any, Dict, Optional\n\"\"\")\n\nchunks.append(\"\"\"ROOT = Path(__file__).resolve().parents[1]\nif str(ROOT) not in sys.path:\n    sys.path.insert(0, str(ROOT))\n\ntry:\n    # Shared utilities (created/maintained in the refactor_modularize module).\n    from src.refactor_modularize import utils as U  # type: ignore\nexcept Exception as e:  # pragma: no cover\n    raise SystemExit(\n        \"Failed to import src.refactor_modularize.utils. \"\n        \"Ensure the project root is on PYTHONPATH.\\\\n\"\n        f\"Import error: {e}\"\n    )\n\"\"\")\n\nchunks.append(\"\"\"def _read_prompt(args: argparse.Namespace) -> str:\n    if args.prompt_text:\n        return args.prompt_text\n    if args.prompt_file:\n        return Path(args.prompt_file).read_text(encoding=\"utf-8\")\n    if args.prompt_stdin:\n        return sys.stdin.read()\n    return \"\"\n\"\"\")\n\nchunks.append(\"\"\"def _run_id(args: argparse.Namespace, prompt: str) -> str:\n    payload = {\n        \"mode\": args.mode,\n        \"stage\": args.stage,\n        \"name\": args.name,\n        \"source\": str(Path(args.source).resolve()) if args.source else None,\n        \"prompt_sha256\": U.sha256_text(prompt) if prompt else None,\n    }\n    return U.sha256_text(json.dumps(payload, sort_keys=True))[:16]\n\"\"\")\n\nchunks.append(\"\"\"def _default_out_dir(base: Optional[str], run_id: str) -> Path:\n    # Deterministic: run_id is derived from inputs (no timestamps).\n    root = Path(base) if base else ROOT\n    return root / \"docs\" / \"artifacts\" / run_id\n\"\"\")\n\nchunks.append(\"\"\"def _export_prompt(prompt: str, out_dir: Path, stem: str) -> Optional[Path]:\n    if not prompt.strip():\n        return None\n    prompts_dir = out_dir.parent.parent / \"prompts\"\n    U.ensure_dir(prompts_dir)\n    out_path = prompts_dir / f\"{out_dir.name}_{stem}_prompt.txt\"\n    U.write_text(out_path, prompt)\n    return out_path\n\"\"\")\n\nchunks.append(\"\"\"def generate_artifacts(args: argparse.Namespace) -> Dict[str, Any]:\n    prompt = _read_prompt(args)\n    run_id = _run_id(args, prompt)\n    out_dir = _default_out_dir(args.out_dir or None, run_id)\n    U.ensure_dir(out_dir)\n\n    prompt_path = None\n    if args.export_prompt:\n        prompt_path = _export_prompt(prompt, out_dir, f\"{args.name}_{args.stage}\")\n\n    manifest: Dict[str, Any] = {\n        \"run_id\": run_id,\n        \"name\": args.name,\n        \"mode\": args.mode,\n        \"stage\": args.stage,\n        \"cwd\": os.getcwd(),\n        \"source\": str(Path(args.source).resolve()) if args.source else None,\n        \"out_dir\": str(out_dir.resolve()),\n        \"prompt_exported\": str(prompt_path) if prompt_path else None,\n    }\n\n    # Minimal \"artifact\" set: manifest + a stable summary text for auditing.\n    U.write_json(out_dir / \"manifest.json\", manifest, indent=2, sort_keys=True)\n\n    summary_lines = [\n        f\"run_id: {run_id}\",\n        f\"name: {args.name}\",\n        f\"mode: {args.mode}\",\n        f\"stage: {args.stage}\",\n        f\"source: {manifest['source']}\",\n        f\"out_dir: {manifest['out_dir']}\",\n        f\"prompt_exported: {manifest['prompt_exported']}\",\n    ]\n    U.write_text(out_dir / \"summary.txt\", \"\\\\n\".join(summary_lines) + \"\\\\n\")\n\n    # Optional: snapshot the source file/directory listing for traceability.\n    if manifest[\"source\"]:\n        src = Path(manifest[\"source\"])\n        listing = U.list_paths(src) if src.exists() else []\n        U.write_json(out_dir / \"source_listing.json\", listing, indent=2, sort_keys=True)\n\n    return manifest\n\"\"\")\n\nchunks.append(\"\"\"def _build_parser() -> argparse.ArgumentParser:\n    p = argparse.ArgumentParser(description=__doc__)\n    p.add_argument(\"--name\", default=\"refactor_modularize\", help=\"Artifact set name.\")\n    p.add_argument(\"--mode\", default=\"create\", help=\"Pipeline mode label (metadata only).\")\n    p.add_argument(\"--stage\", default=\"stage1_export\", help=\"Stage label (metadata only).\")\n    p.add_argument(\"--source\", default=\"\", help=\"Optional source file/dir to list for auditing.\")\n    p.add_argument(\"--out-dir\", default=\"\", help=\"Optional base output directory (defaults to project docs/).\")\n\n    g = p.add_mutually_exclusive_group()\n    g.add_argument(\"--prompt-text\", default=\"\", help=\"Prompt text to hash/export.\")\n    g.add_argument(\"--prompt-file\", default=\"\", help=\"Read prompt text from a file.\")\n    g.add_argument(\"--prompt-stdin\", action=\"store_true\", help=\"Read prompt text from stdin.\")\n    p.add_argument(\"--export-prompt\", action=\"store_true\", help=\"If set, write the prompt into docs/prompts/.\")\n\n    return p\n\"\"\")\n\nchunks.append(\"\"\"def main(argv: Optional[list[str]] = None) -> int:\n    args = _build_parser().parse_args(argv)\n    manifest = generate_artifacts(args)\n    # Print a stable machine-readable location for downstream scripts.\n    print(str(Path(manifest[\"out_dir\"]) / \"manifest.json\"))\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:scripts/generate_artifacts.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4b6fb1608190a6dd5b6e9ba95ca3032ea6b5d55b5cdc",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:scripts/generate_artifacts.py\nDIR_STATE:[\"scripts/generate_artifacts.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_05de1e3068b390cf00694b4ba6bdbc8190bfb1589012d09bb8",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_05de1e3068b390cf00694b4ba6fe7c819081bc4f78e25a88b9",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\np=Path('/mnt/data/scripts/generate_artifacts.py')\nlen(p.read_text().splitlines())\n",
+      "container_id": "cntr_694b4b6fb1608190a6dd5b6e9ba95ca3032ea6b5d55b5cdc",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "125"
+        }
+      ]
+    },
+    {
+      "id": "msg_05de1e3068b390cf00694b4ba98c948190889166702ccc41de",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `scripts/generate_artifacts.py` as a runnable CLI that uses `src.refactor_modularize.utils` to write a deterministic (input-hash-based) artifact directory containing a JSON manifest, a human-readable summary, an optional source listing, and an optional exported prompt file under `docs/prompts/`."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

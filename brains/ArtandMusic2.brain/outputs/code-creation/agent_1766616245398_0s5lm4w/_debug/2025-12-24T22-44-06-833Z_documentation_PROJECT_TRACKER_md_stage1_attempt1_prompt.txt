@@ -1,0 +1,45 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a minimal tracking system to resolve the 'ACTUALLY PURSUED: 0' inconsistency: create a single source-of-truth progress ledger (e.g., /outputs/PROJECT_TRACKER.json or .csv) plus a small script that updates counts per goal and lists current active goals for each cycle.
+Project: single source-of-truth progress ledger (e.g., /outputs/PROJECT_TRACKER.json or .csv) plus a small (json script)
+
+Target file details:
+- Path: documentation/PROJECT_TRACKER.md
+- Purpose: Usage documentation describing the ledger schema, supported commands (init/goal/cycle/update/status/export), and the intended workflow integration to keep counts consistent across cycles.
+- Category: documentation
+
+Other planned files (for context only):
+- scripts/project_tracker.py: Command-line script that creates and maintains a single source-of-truth progress ledger (JSON/CSV) by updating per-goal counts, recording per-cycle snapshots, and printing current active goals for each cycle to resolve the 'ACTUALLY PURSUED: 0' inconsistency.
+- outputs/PROJECT_TRACKER.json: Single source-of-truth progress ledger storing goals, per-cycle activity, and aggregate counts that the tracker script reads and updates deterministically.
+- outputs/PROJECT_TRACKER.csv: Optional human-readable/exportable mirror of the progress ledger with one row per goal per cycle and computed totals for easy inspection and spreadsheet use.
+
+Reference insights:
+- [CONSOLIDATED] Build a lightweight, automation-first workflow that **produces required artifacts and continuously verifies them**, while **r
+- [INTROSPECTION] 2025-12-24T22-26-00-824Z_plan_attempt1_prompt.txt from code-creation agent agent_1766615159208_l4cgv47: You are planning a j
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] The dominant causal mechanism is a self-reinforcing selection loop: institutions use cheap, hig
+- [INTROSPECTION] 2025-12-24T22-26-00-796Z_scripts_validate_linkcheck_report_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Usage documentation describing the ledger schema, supported commands (init/goal/cycle/update/status/export), and the intended workflow integration to keep counts consistent across cycles.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('documentation/PROJECT_TRACKER.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:documentation/PROJECT_TRACKER.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside documentation/PROJECT_TRACKER.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

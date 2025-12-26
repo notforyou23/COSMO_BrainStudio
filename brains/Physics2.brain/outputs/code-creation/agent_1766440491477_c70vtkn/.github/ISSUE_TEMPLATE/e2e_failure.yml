@@ -1,0 +1,138 @@
+name: "E2E failure (automated)"
+description: "Auto-filed when the end-to-end pipeline fails in CI."
+title: "E2E failure: <workflow>/<job> @ <sha>"
+labels: ["e2e-failure", "ci"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This issue is intended for automated end-to-end (E2E) pipeline failures.
+        Please include links to the uploaded CI artifacts/logs so failures are reproducible and debuggable.
+  - type: input
+    id: run_url
+    attributes:
+      label: CI run URL
+      description: "Link to the failed GitHub Actions run."
+      placeholder: "https://github.com/<org>/<repo>/actions/runs/<run_id>"
+    validations:
+      required: true
+  - type: input
+    id: workflow_job
+    attributes:
+      label: Workflow / job name
+      description: "The workflow file and job that failed (as shown in Actions)."
+      placeholder: "e2e.yml / e2e"
+    validations:
+      required: true
+  - type: input
+    id: commit
+    attributes:
+      label: Commit SHA
+      description: "The commit tested by the failing run."
+      placeholder: "abcdef1234567890..."
+    validations:
+      required: true
+  - type: dropdown
+    id: trigger
+    attributes:
+      label: Trigger
+      description: "How the run was triggered."
+      options:
+        - push
+        - pull_request
+        - workflow_dispatch
+        - schedule
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: failure_summary
+    attributes:
+      label: Failure summary
+      description: "Concise error message(s) and the stage that failed (copy from CI summary)."
+      placeholder: |
+        Stage: tests
+        Exit code: 1
+        Error: AssertionError: ...
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: repro_steps
+    attributes:
+      label: Minimal reproduction steps
+      description: "Exact commands to reproduce locally (or explain why it is CI-only)."
+      value: |
+        1. Checkout the failing commit:
+           git checkout <sha>
+        2. Run the end-to-end pipeline:
+           make e2e
+        3. If it only fails in CI, note the delta (OS, Python version, env vars, secrets availability).
+      render: bash
+    validations:
+      required: true
+  - type: input
+    id: artifacts_url
+    attributes:
+      label: Logs / artifacts URL
+      description: "Direct link to the uploaded artifacts (zip) or artifact page."
+      placeholder: "https://github.com/<org>/<repo>/actions/runs/<run_id>#artifacts"
+    validations:
+      required: true
+  - type: textarea
+    id: artifact_contents
+    attributes:
+      label: Artifact contents (expected paths)
+      description: "List key files produced by the E2E run (helps confirm uploads)."
+      value: |
+        - artifacts/manifest.json
+        - artifacts/e2e.log
+        - artifacts/stages/*.log
+        - artifacts/results/** (if applicable)
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment metadata
+      description: "Paste the environment section from the CI summary/logs."
+      placeholder: |
+        runner_os: ubuntu-latest
+        python: 3.11.x
+        pip_freeze_hash: ...
+        working_directory: .
+        cache_hit: true/false
+      render: yaml
+    validations:
+      required: true
+  - type: textarea
+    id: failure_signature
+    attributes:
+      label: Failure signature / fingerprint
+      description: "Stable identifier emitted by the orchestrator (if available) to deduplicate issues."
+      placeholder: "e2e_signature: stage=tests|err=AssertionError|file=...|line=..."
+      render: text
+    validations:
+      required: false
+  - type: checkboxes
+    id: triage
+    attributes:
+      label: Triage checklist
+      options:
+        - label: "Artifacts uploaded and link included"
+          required: true
+        - label: "Reproduction steps provided or CI-only explained"
+          required: true
+        - label: "Failure summary includes stage + primary error"
+          required: true
+        - label: "Environment metadata included"
+          required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional notes
+      description: "Optional context (recent merges, flaky tests, external outages, etc.)."
+      render: text
+    validations:
+      required: false

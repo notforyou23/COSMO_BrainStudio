@@ -1,0 +1,72 @@
+{
+  "$schema": "outputs/schemas/benchmark_schema.json",
+  "metadata": {
+    "benchmark": {
+      "name": "custom_eval",
+      "suite": "regression",
+      "task": "sanity",
+      "version": "2025.12"
+    },
+    "model": {
+      "name": "gpt-4.1-mini",
+      "parameters": {
+        "max_tokens": 256,
+        "temperature": 0.2,
+        "top_p": 1.0
+      },
+      "provider": "openai",
+      "revision": "2025-12-01"
+    },
+    "notes": "Representative valid benchmark output used for validator and docs tests.",
+    "run": {
+      "command": "python -m benchmarks.run --suite regression --task sanity",
+      "finished_at": "2025-12-22T18:01:23Z",
+      "git": {
+        "commit": "abc1234",
+        "dirty": false
+      },
+      "host": {
+        "hostname": "ci-runner-01",
+        "os": "linux",
+        "python": "3.11.6"
+      },
+      "id": "f6a3e3b3-6ac2-4ab8-9fd2-1d2d6f7d4c2a",
+      "started_at": "2025-12-22T18:00:00Z"
+    },
+    "tags": [
+      "fixture",
+      "unit-test"
+    ]
+  },
+  "results": {
+    "artifacts": [
+      {
+        "path": "outputs/artifacts/f6a3e3b3/preds.jsonl",
+        "role": "raw_predictions"
+      },
+      {
+        "path": "outputs/artifacts/f6a3e3b3/run.log",
+        "role": "run_log"
+      }
+    ],
+    "details": {
+      "by_split": {
+        "easy": {
+          "accuracy": 0.9,
+          "pass_at_1": 0.7
+        },
+        "hard": {
+          "accuracy": 0.6,
+          "pass_at_1": 0.3
+        }
+      }
+    },
+    "metrics": {
+      "accuracy": 0.75,
+      "latency_ms_p50": 123.4,
+      "pass_at_1": 0.5
+    },
+    "status": "ok"
+  },
+  "schema_version": "v1"
+}

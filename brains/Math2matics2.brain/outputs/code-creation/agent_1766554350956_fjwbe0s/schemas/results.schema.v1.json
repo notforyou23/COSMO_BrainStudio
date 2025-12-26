@@ -1,0 +1,256 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/results.schema.v1.json",
+  "title": "results.json (v1)",
+  "description": "Stable, deterministic, versioned results payload written to /outputs/results.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "run",
+    "results"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Results schema version. Must be pinned for regression testing."
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "run_id",
+        "created_utc",
+        "seed",
+        "determinism"
+      ],
+      "properties": {
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Unique identifier for this run (e.g., UUID, timestamp-based string)."
+        },
+        "created_utc": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Run creation time in UTC ISO-8601."
+        },
+        "finished_utc": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Run end time in UTC ISO-8601."
+        },
+        "duration_s": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Optional wall-clock duration in seconds."
+        },
+        "seed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Pinned base seed used for all randomness sources."
+        },
+        "determinism": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "python_hash_seed",
+            "numpy_seeded",
+            "random_seeded",
+            "torch_seeded",
+            "matplotlib_defaults"
+          ],
+          "properties": {
+            "python_hash_seed": {
+              "type": [
+                "integer",
+                "string",
+                "null"
+              ],
+              "description": "Value for PYTHONHASHSEED if set/known; may be null if not applicable."
+            },
+            "numpy_seeded": {
+              "type": "boolean",
+              "description": "Whether numpy RNG was explicitly seeded."
+            },
+            "random_seeded": {
+              "type": "boolean",
+              "description": "Whether Python's random module was explicitly seeded."
+            },
+            "torch_seeded": {
+              "type": "boolean",
+              "description": "Whether torch RNG was seeded (false if torch not installed)."
+            },
+            "matplotlib_defaults": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "backend",
+                "dpi",
+                "style",
+                "rcparams_hash"
+              ],
+              "properties": {
+                "backend": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Matplotlib backend used (e.g., Agg)."
+                },
+                "dpi": {
+                  "type": "number",
+                  "minimum": 1,
+                  "description": "Pinned default figure DPI."
+                },
+                "style": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Pinned matplotlib style name or 'default'."
+                },
+                "rcparams_hash": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$",
+                  "description": "SHA-256 of the effective rcParams relevant to determinism."
+                }
+              }
+            }
+          }
+        },
+        "environment": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Optional environment metadata (python_version, platform, package versions, git commit, etc.)."
+        }
+      }
+    },
+    "results": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "metrics",
+        "artifacts",
+        "summary"
+      ],
+      "properties": {
+        "metrics": {
+          "type": "array",
+          "description": "Named scalar metrics for regression testing and reporting.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "value"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "type": "string"
+              },
+              "context": {
+                "type": "object",
+                "additionalProperties": true,
+                "description": "Optional freeform context (split, dataset, fold, etc.)."
+              }
+            }
+          }
+        },
+        "artifacts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "figures",
+            "files"
+          ],
+          "properties": {
+            "figures": {
+              "type": "array",
+              "description": "Deterministically generated figure outputs (paths relative to /outputs).",
+              "items": {
+                "$ref": "#/$defs/artifact"
+              }
+            },
+            "files": {
+              "type": "array",
+              "description": "Other output files produced by the run (paths relative to /outputs).",
+              "items": {
+                "$ref": "#/$defs/artifact"
+              }
+            }
+          }
+        },
+        "summary": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "status"
+          ],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": [
+                "ok",
+                "error"
+              ]
+            },
+            "message": {
+              "type": "string",
+              "description": "Optional human-readable summary."
+            }
+          }
+        },
+        "payload_hashes": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "results_json_sha256"
+          ],
+          "properties": {
+            "results_json_sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "description": "SHA-256 of the final canonical results.json content (after validation)."
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Path relative to the /outputs directory."
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "SHA-256 of the artifact bytes."
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Size in bytes if known."
+        },
+        "mime": {
+          "type": "string",
+          "description": "Optional MIME type (e.g., image/png)."
+        }
+      }
+    }
+  }
+}

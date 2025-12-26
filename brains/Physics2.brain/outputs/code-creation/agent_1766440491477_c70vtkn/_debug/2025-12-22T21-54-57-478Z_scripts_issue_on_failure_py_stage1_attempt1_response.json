@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `scripts/issue_on_failure.py` to read a JSON failure summary, generate minimal reproduction steps, and create or deduplicate/update GitHub issues (via fingerprint-in-body search) using the GitHub REST API with `GITHUB_TOKEN`/`GITHUB_REPOSITORY`.",
+  "reasoning": "",
+  "responseId": "resp_0911facfd1d05697006949bee54aa081958c1a472b05941120",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4048,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2501,
+    "output_tokens_details": {
+      "reasoning_tokens": 405
+    },
+    "total_tokens": 6549
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0911facfd1d05697006949bee5f6f88195b6e556c62324e3d5",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0911facfd1d05697006949beef487881959356ea21b8233808",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, hashlib, re\n\ntarget_path = Path('/mnt/data').joinpath('scripts/issue_on_failure.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(r\"\"\"#!/usr/bin/env python3\nimport argparse\nimport hashlib\nimport json\nimport os\nimport re\nimport sys\nimport time\nfrom typing import Any, Dict, List, Optional, Tuple\n\nimport requests\n\nLABEL = \"e2e-failure\"\nUA = \"issue_on_failure.py\"\nFINGERPRINT_RE = re.compile(r\"<!--\\s*fingerprint:([a-f0-9]{8,40})\\s*-->\")\n\ndef _jget(d: Any, *keys: str, default=None):\n    for k in keys:\n        if isinstance(d, dict) and k in d:\n            return d[k]\n    return default\n\ndef load_summary(path: str) -> Dict[str, Any]:\n    p = os.path.abspath(path)\n    with open(p, \"r\", encoding=\"utf-8\") as f:\n        data = json.load(f)\n    if isinstance(data, list):\n        data = {\"failures\": data}\n    if not isinstance(data, dict):\n        raise SystemExit(\"failure summary must be a JSON object or list\")\n    failures = data.get(\"failures\")\n    if failures is None and \"stages\" in data:\n        failures = [s for s in data.get(\"stages\", []) if s.get(\"status\") == \"failed\"]\n        data[\"failures\"] = failures\n    if not isinstance(data.get(\"failures\", []), list):\n        data[\"failures\"] = []\n    data[\"_path\"] = p\n    return data\n\ndef normalize_failure(f: Dict[str, Any]) -> Dict[str, Any]:\n    stage = str(_jget(f, \"stage\", \"name\", default=\"unknown\"))\n    msg = str(_jget(f, \"message\", \"error\", \"summary\", default=\"(no message)\"))\n    cmd = _jget(f, \"command\", \"cmd\", default=None)\n    log = _jget(f, \"log_path\", \"log\", \"stderr_path\", default=None)\n    return {\"stage\": stage, \"message\": msg, \"command\": cmd, \"log_path\": log}\n\ndef fingerprint(f: Dict[str, Any]) -> str:\n    stage = f.get(\"stage\", \"unknown\")\n    first = (f.get(\"message\") or \"\").strip().splitlines()[:1]\n    sig = f\"{stage}\\n{first[0] if first else ''}\".encode(\"utf-8\", \"ignore\")\n    return hashlib.sha1(sig).hexdigest()[:12]\n\ndef repro_steps(summary: Dict[str, Any], f: Dict[str, Any]) -> str:\n    sha = _jget(summary, \"sha\", \"git_sha\", default=os.getenv(\"GITHUB_SHA\", \"\"))\n    run_url = _jget(summary, \"run_url\", default=os.getenv(\"GITHUB_SERVER_URL\", \"\") + \"/\" + os.getenv(\"GITHUB_REPOSITORY\", \"\") + \"/actions/runs/\" + os.getenv(\"GITHUB_RUN_ID\", \"\"))\n    cmd = f.get(\"command\") or \"make e2e\"\n    lines = [\n        \"### Minimal reproduction\",\n        \"1. Check out the failing commit:\",\n        f\"   - `{sha}`\" if sha else \"   - (unknown SHA)\",\n        f\"2. Run: `{cmd}`\",\n    ]\n    if f.get(\"log_path\"):\n        lines.append(f\"3. Inspect logs: `{f['log_path']}` (see CI artifacts if available)\")\n    if run_url and run_url.strip(\"/\"):\n        lines.append(\"\")\n        lines.append(f\"CI run: {run_url}\")\n    return \"\\n\".join(lines)\n\ndef gh_request(method: str, url: str, token: str, **kwargs):\n    headers = kwargs.pop(\"headers\", {})\n    headers.update({\n        \"Authorization\": f\"token {token}\",\n        \"Accept\": \"application/vnd.github+json\",\n        \"User-Agent\": UA,\n    })\n    for _ in range(3):\n        r = requests.request(method, url, headers=headers, timeout=30, **kwargs)\n        if r.status_code in (429, 500, 502, 503, 504):\n            time.sleep(2)\n            continue\n        return r\n    return r\n\ndef find_existing_issue(repo: str, token: str, fp: str) -> Optional[Dict[str, Any]]:\n    q = f\"repo:{repo} is:issue is:open label:{LABEL} in:body fingerprint:{fp}\"\n    url = f\"https://api.github.com/search/issues?q={requests.utils.quote(q)}\"\n    r = gh_request(\"GET\", url, token)\n    if r.status_code != 200:\n        return None\n    items = r.json().get(\"items\", []) or []\n    return items[0] if items else None\n\ndef create_issue(repo: str, token: str, title: str, body: str) -> Tuple[int, str]:\n    url = f\"https://api.github.com/repos/{repo}/issues\"\n    payload = {\"title\": title, \"body\": body, \"labels\": [LABEL]}\n    r = gh_request(\"POST\", url, token, json=payload)\n    if r.status_code not in (200, 201):\n        raise SystemExit(f\"failed to create issue: {r.status_code} {r.text[:200]}\")\n    j = r.json()\n    return int(j[\"number\"]), j.get(\"html_url\", \"\")\n\ndef comment_issue(repo: str, token: str, number: int, body: str) -> None:\n    url = f\"https://api.github.com/repos/{repo}/issues/{number}/comments\"\n    r = gh_request(\"POST\", url, token, json={\"body\": body})\n    if r.status_code not in (200, 201):\n        raise SystemExit(f\"failed to comment: {r.status_code} {r.text[:200]}\")\n\"\"\")\n\nchunks.append(r\"\"\"def build_issue(title_prefix: str, summary: Dict[str, Any], f: Dict[str, Any]) -> Tuple[str, str, str]:\n    nf = normalize_failure(f)\n    fp = fingerprint(nf)\n    msg = (nf[\"message\"] or \"\").strip()\n    short = (msg.splitlines()[:1] or [\"(no message)\"])[0]\n    short = short[:120]\n    title = f\"{title_prefix}{nf['stage']}: {short}\"\n    body = \"\\n\".join([\n        f\"<!-- fingerprint:{fp} -->\",\n        \"### Failure\",\n        f\"- Stage: `{nf['stage']}`\",\n        f\"- Message:\\n\\n```text\\n{msg.strip()}\\n```\" if msg else \"- Message: (none)\",\n        \"\",\n        repro_steps(summary, nf),\n        \"\",\n        \"### Context\",\n        f\"- Summary file: `{summary.get('_path','')}`\",\n        f\"- Workflow: `{os.getenv('GITHUB_WORKFLOW','')}` Run ID: `{os.getenv('GITHUB_RUN_ID','')}`\",\n    ]).strip() + \"\\n\"\n    return fp, title, body\n\ndef main(argv: List[str]) -> int:\n    ap = argparse.ArgumentParser(description=\"Open or update GitHub issues for e2e failures.\")\n    ap.add_argument(\"--summary\", default=os.getenv(\"FAILURE_SUMMARY\", \"artifacts/failure_summary.json\"))\n    ap.add_argument(\"--repo\", default=os.getenv(\"GITHUB_REPOSITORY\", \"\"))\n    ap.add_argument(\"--token\", default=os.getenv(\"GITHUB_TOKEN\", \"\"))\n    ap.add_argument(\"--title-prefix\", default=\"[e2e] \")\n    args = ap.parse_args(argv)\n\n    if not args.repo:\n        raise SystemExit(\"GITHUB_REPOSITORY or --repo is required (e.g. owner/repo)\")\n    if not args.token:\n        raise SystemExit(\"GITHUB_TOKEN or --token is required\")\n\n    summary = load_summary(args.summary)\n    failures = summary.get(\"failures\", []) or []\n    if not failures:\n        print(\"No failures found; nothing to do.\")\n        return 0\n\n    created = updated = 0\n    for f in failures:\n        if not isinstance(f, dict):\n            continue\n        fp, title, body = build_issue(args.title_prefix, summary, f)\n        existing = find_existing_issue(args.repo, args.token, fp)\n        if existing and existing.get(\"number\"):\n            num = int(existing[\"number\"])\n            comment = \"\\n\".join([\n                f\"Reproduced in a new CI run.\",\n                repro_steps(summary, normalize_failure(f)),\n            ])\n            comment_issue(args.repo, args.token, num, comment)\n            updated += 1\n            print(f\"UPDATED_ISSUE:{num}\")\n        else:\n            num, url = create_issue(args.repo, args.token, title, body)\n            created += 1\n            print(f\"CREATED_ISSUE:{num}:{url}\")\n    print(f\"STATS:created={created} updated={updated} total={created+updated}\")\n    return 0\n\nif __name__ == \"__main__\":\n    raise SystemExit(main(sys.argv[1:]))\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:scripts/issue_on_failure.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949be2f5f848190a4b8106bfdfa0c4704094e1617bbf644",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:scripts/issue_on_failure.py\nDIR_STATE:[\"scripts/artifacts.py\", \"scripts/e2e.py\", \"scripts/issue_on_failure.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0911facfd1d05697006949bf0d76f881959e4ec04f4ac8a742",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `scripts/issue_on_failure.py` to read a JSON failure summary, generate minimal reproduction steps, and create or deduplicate/update GitHub issues (via fingerprint-in-body search) using the GitHub REST API with `GITHUB_TOKEN`/`GITHUB_REPOSITORY`."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cosmo.local/schemas/qa-diagnostic-log.schema.json",
+  "title": "QA Diagnostic Run Telemetry Log Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run_id", "started_at", "events", "attempts", "outcome"],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^1\\.[0-9]+$" },
+    "run_id": { "type": "string", "minLength": 6 },
+    "project": { "type": "string" },
+    "mode": { "type": "string", "enum": ["diagnostic"] },
+    "started_at": { "type": "string", "format": "date-time" },
+    "ended_at": { "type": ["string", "null"], "format": "date-time" },
+    "duration_ms": { "type": ["integer", "null"], "minimum": 0 },
+
+    "host": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "os": { "type": "string" },
+        "platform": { "type": "string" },
+        "python": { "type": "string" },
+        "cwd": { "type": "string" },
+        "user": { "type": ["string", "null"] },
+        "cpu_count": { "type": ["integer", "null"], "minimum": 1 },
+        "memory_bytes": { "type": ["integer", "null"], "minimum": 0 },
+        "disk_free_bytes": { "type": ["integer", "null"], "minimum": 0 },
+        "ulimits": {
+          "type": ["object", "null"],
+          "additionalProperties": { "type": ["integer", "string", "null"] }
+        },
+        "cgroup": { "type": ["object", "null"], "additionalProperties": true }
+      }
+    },
+
+    "docker": {
+      "type": ["object", "null"],
+      "additionalProperties": true,
+      "properties": {
+        "available": { "type": "boolean" },
+        "client_version": { "type": ["string", "null"] },
+        "server_version": { "type": ["string", "null"] },
+        "context": { "type": ["string", "null"] }
+      }
+    },
+
+    "events": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/event" }
+    },
+
+    "attempts": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/attempt" }
+    },
+
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "logs_dir": { "type": "string" },
+        "files": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/file_ref" }
+        }
+      }
+    },
+
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": { "type": "string", "enum": ["pass", "fail", "error"] },
+        "summary": { "type": ["string", "null"] },
+        "primary_failure": { "$ref": "#/$defs/failure" },
+        "last_attempt_index": { "type": ["integer", "null"], "minimum": 0 }
+      }
+    }
+  },
+
+  "$defs": {
+    "ts": { "type": "string", "format": "date-time" },
+
+    "file_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "kind": { "type": ["string", "null"], "enum": ["stdout", "stderr", "json", "text", "binary", null] },
+        "sha256": { "type": ["string", "null"], "pattern": "^[a-fA-F0-9]{64}$" },
+        "bytes": { "type": ["integer", "null"], "minimum": 0 }
+      }
+    },
+
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ts", "level", "name"],
+      "properties": {
+        "ts": { "$ref": "#/$defs/ts" },
+        "level": { "type": "string", "enum": ["debug", "info", "warn", "error"] },
+        "name": {
+          "type": "string",
+          "enum": [
+            "run_start",
+            "run_end",
+            "docker_check",
+            "container_create",
+            "container_start",
+            "container_die",
+            "container_kill",
+            "container_remove",
+            "container_inspect",
+            "docker_event",
+            "timeout",
+            "remediation_applied",
+            "artifact_written"
+          ]
+        },
+        "message": { "type": ["string", "null"] },
+        "data": { "type": ["object", "null"], "additionalProperties": true }
+      }
+    },
+
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "timeout_s": { "type": ["number", "null"], "minimum": 0 },
+        "cpu_limit": { "type": ["number", "null"], "minimum": 0 },
+        "mem_limit_bytes": { "type": ["integer", "null"], "minimum": 0 },
+        "shm_size_bytes": { "type": ["integer", "null"], "minimum": 0 },
+        "pids_limit": { "type": ["integer", "null"], "minimum": 0 },
+        "ulimits": { "type": ["object", "null"], "additionalProperties": { "type": ["integer", "string", "null"] } }
+      }
+    },
+
+    "mount": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "target", "type"],
+      "properties": {
+        "type": { "type": "string", "enum": ["bind", "volume", "tmpfs"] },
+        "source": { "type": "string" },
+        "target": { "type": "string" },
+        "read_only": { "type": ["boolean", "null"] }
+      }
+    },
+
+    "failure": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": ["string", "null"],
+          "enum": [
+            "timeout",
+            "oom_killed",
+            "docker_unavailable",
+            "image_pull_failed",
+            "container_start_failed",
+            "workdir_missing",
+            "mount_failed",
+            "test_discovery_overload",
+            "test_failed",
+            "unknown",
+            null
+          ]
+        },
+        "exit_code": { "type": ["integer", "null"] },
+        "signal": { "type": ["integer", "null"], "minimum": 0 },
+        "oom_killed": { "type": ["boolean", "null"] },
+        "message": { "type": ["string", "null"] },
+        "evidence": { "type": ["object", "null"], "additionalProperties": true }
+      }
+    },
+
+    "remediation_step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ts", "strategy", "changes"],
+      "properties": {
+        "ts": { "$ref": "#/$defs/ts" },
+        "strategy": {
+          "type": "string",
+          "enum": [
+            "increase_timeout",
+            "increase_memory",
+            "adjust_shm",
+            "ensure_mounts",
+            "set_workdir",
+            "reduce_test_discovery",
+            "use_minimal_test",
+            "retry",
+            "other"
+          ]
+        },
+        "reason": { "type": ["string", "null"] },
+        "changes": { "type": "object", "additionalProperties": true },
+        "result": { "type": ["string", "null"], "enum": ["applied", "skipped", "failed", null] }
+      }
+    },
+
+    "container_state": {
+      "type": ["object", "null"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": ["string", "null"] },
+        "name": { "type": ["string", "null"] },
+        "image": { "type": ["string", "null"] },
+        "created_at": { "type": ["string", "null"] },
+        "started_at": { "type": ["string", "null"] },
+        "finished_at": { "type": ["string", "null"] },
+        "status": { "type": ["string", "null"] },
+        "exit_code": { "type": ["integer", "null"] },
+        "oom_killed": { "type": ["boolean", "null"] },
+        "error": { "type": ["string", "null"] },
+        "inspect": { "type": ["object", "null"], "additionalProperties": true }
+      }
+    },
+
+    "attempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["index", "started_at", "resources", "command", "container", "events", "status"],
+      "properties": {
+        "index": { "type": "integer", "minimum": 0 },
+        "started_at": { "$ref": "#/$defs/ts" },
+        "ended_at": { "type": ["string", "null"], "format": "date-time" },
+        "duration_ms": { "type": ["integer", "null"], "minimum": 0 },
+
+        "resources": { "$ref": "#/$defs/resources" },
+        "mounts": { "type": ["array", "null"], "items": { "$ref": "#/$defs/mount" } },
+        "env": { "type": ["object", "null"], "additionalProperties": { "type": ["string", "null"] } },
+
+        "workdir": { "type": ["string", "null"] },
+        "command": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+
+        "container": { "$ref": "#/$defs/container_state" },
+        "docker_events": { "type": ["array", "null"], "items": { "$ref": "#/$defs/event" } },
+        "events": { "type": "array", "items": { "$ref": "#/$defs/event" } },
+
+        "stdout_log": { "$ref": "#/$defs/file_ref" },
+        "stderr_log": { "$ref": "#/$defs/file_ref" },
+        "telemetry_json": { "$ref": "#/$defs/file_ref" },
+
+        "failure": { "$ref": "#/$defs/failure" },
+        "remediations": { "type": ["array", "null"], "items": { "$ref": "#/$defs/remediation_step" } },
+        "status": { "type": "string", "enum": ["pass", "fail", "error"] }
+      }
+    }
+  }
+}

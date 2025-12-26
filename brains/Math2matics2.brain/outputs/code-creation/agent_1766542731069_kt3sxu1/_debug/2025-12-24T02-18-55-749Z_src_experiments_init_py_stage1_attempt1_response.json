@@ -1,0 +1,92 @@
+{
+  "content": "Created `src/experiments/__init__.py` to expose a lightweight, lazily-imported public API for the `io`, `sweep`, and `plotting` submodules (including a best-effort `__version__`).",
+  "reasoning": "",
+  "responseId": "resp_0b96bad6fc16ebd700694b4da6c0748190a27d730c0fd8af85",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2953,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1319,
+    "output_tokens_details": {
+      "reasoning_tokens": 1266
+    },
+    "total_tokens": 4272
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0b96bad6fc16ebd700694b4da76a5481909f34b20983a3667c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0b96bad6fc16ebd700694b4da99b0c819087b58d9e36d4f98b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nlist(base.glob(\"src/experiments/*.py\"))[:20]\n",
+      "container_id": "cntr_694b4d8e36dc8190b33c31668379700e0f2b66b245dabab1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0b96bad6fc16ebd700694b4dab72b88190bc7fdef8dccb71be",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0b96bad6fc16ebd700694b4dabcfec819097260cdded2957f8",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nbase=Path(\"/mnt/data\")\nsorted([str(p.relative_to(base)) for p in base.rglob(\"*\") if p.is_file()])[:50]\n",
+      "container_id": "cntr_694b4d8e36dc8190b33c31668379700e0f2b66b245dabab1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "['pyproject.toml']"
+        }
+      ]
+    },
+    {
+      "id": "rs_0b96bad6fc16ebd700694b4dadc9348190b0a94784e30f2261",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0b96bad6fc16ebd700694b4db230848190b3187322aa91d395",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/__init__.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\"\"\"\\\"\\\"\\\"Experiments package.\n\nThis package provides reusable building blocks for running parameter sweeps,\npersisting inputs/outputs, and plotting results.\n\nThe public API is exposed at the package root (``experiments``) while keeping\nimplementations in submodules:\n- :mod:`experiments.io`\n- :mod:`experiments.sweep`\n- :mod:`experiments.plotting`\n\nImports are resolved lazily so importing :mod:`experiments` stays lightweight\nand does not require optional heavy dependencies (e.g., plotting backends)\nunless you access them.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom importlib import import_module\nfrom importlib.metadata import PackageNotFoundError, version\nfrom typing import Any\n\n__all__ = [\n    # Submodules\n    \"io\",\n    \"sweep\",\n    \"plotting\",\n    # Metadata\n    \"__version__\",\n]\n\ntry:\n    __version__ = version(\"generated_script_1766542734624\")\nexcept PackageNotFoundError:  # pragma: no cover\n    # When running from a source tree without an installed distribution.\n    __version__ = \"0.0.0\"\n\n\n_LAZY_SUBMODULES = (\"io\", \"sweep\", \"plotting\")\n\n\ndef __getattr__(name: str) -> Any:\n    \\\"\\\"\\\"Lazily import submodules and re-export their public symbols.\n\n    This supports both styles:\n      - ``import experiments; experiments.io``\n      - ``from experiments import write_results`` (if defined in submodules)\n    \\\"\\\"\\\"\n    if name in _LAZY_SUBMODULES:\n        return import_module(f\"{__name__}.{name}\")\n\n    # Re-export submodule attributes at package root if they exist.\n    for mod_name in _LAZY_SUBMODULES:\n        try:\n            mod = import_module(f\"{__name__}.{mod_name}\")\n        except ModuleNotFoundError:\n            continue\n        if hasattr(mod, name):\n            value = getattr(mod, name)\n            globals()[name] = value  # cache for future lookups\n            if name not in __all__:\n                __all__.append(name)\n            return value\n\n    raise AttributeError(f\"module {__name__!r} has no attribute {name!r}\")\n\n\ndef __dir__() -> list[str]:\n    names = set(globals())\n    for mod_name in _LAZY_SUBMODULES:\n        try:\n            mod = import_module(f\"{__name__}.{mod_name}\")\n        except ModuleNotFoundError:\n            continue\n        names.update(getattr(mod, \"__all__\", ()))\n        names.update(getattr(mod, \"__dict__\", {}).keys())\n    return sorted(names)\n\"\"\"]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/experiments/__init__.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4d8e36dc8190b33c31668379700e0f2b66b245dabab1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/__init__.py\nDIR_STATE:[\"src/experiments/__init__.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0b96bad6fc16ebd700694b4db9c8ac819090909309d45df390",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `src/experiments/__init__.py` to expose a lightweight, lazily-imported public API for the `io`, `sweep`, and `plotting` submodules (including a best-effort `__version__`)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

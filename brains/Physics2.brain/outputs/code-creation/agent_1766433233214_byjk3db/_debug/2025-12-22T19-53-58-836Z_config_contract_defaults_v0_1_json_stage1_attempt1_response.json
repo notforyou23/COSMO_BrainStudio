@@ -1,0 +1,200 @@
+{
+  "content": "Created `config/contract_defaults_v0_1.json` defining v0.1 default contract templates (required metadata keys, reference algorithm requirements, output invariants, tolerance policy, canonical test vector shape, and compliance reporting requirements) with an empty `overrides` map ready for per-benchmark specializations.",
+  "reasoning": "",
+  "responseId": "resp_06666155c527a1ed006949a3f5ded08195bf87431478e5e910",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 10055,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2210,
+    "output_tokens_details": {
+      "reasoning_tokens": 1241
+    },
+    "total_tokens": 12265
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_06666155c527a1ed006949a3f6a5648195b671d8d4d93b9181",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06666155c527a1ed006949a3f9f0cc81958781093a57a2a835",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nsorted([str(p.relative_to(base)) for p in base.rglob(\"*\") if p.is_file()])[:50], len(list(base.rglob(\"*\")))\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(['.pytest_cache/.gitignore',\n  '.pytest_cache/CACHEDIR.TAG',\n  '.pytest_cache/README.md',\n  '.pytest_cache/v/cache/lastfailed',\n  '.pytest_cache/v/cache/nodeids',\n  '.pytest_cache/v/cache/stepwise',\n  'docs/contract_spec_v0_1.md',\n  'src/cosmo_contracts/__init__.py',\n  'src/cosmo_contracts/__main__.py',\n  'src/cosmo_contracts/cli.py',\n  'src/cosmo_contracts/contracts.py',\n  'src/cosmo_contracts/markdown.py',\n  'src/cosmo_contracts/runner.py',\n  'src/cosmo_contracts/schema.py',\n  'tests/__pycache__/test_compliance_runner.cpython-311-pytest-8.2.2.pyc',\n  'tests/__pycache__/test_contract_injection.cpython-311-pytest-8.2.2.pyc',\n  'tests/test_compliance_runner.py',\n  'tests/test_contract_injection.py'],\n 26)"
+        }
+      ]
+    },
+    {
+      "id": "rs_06666155c527a1ed006949a3fc44a48195b5c9c5601bf5ef1b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06666155c527a1ed006949a3fd12508195ba13ed9832d19f6c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nspec = Path(\"/mnt/data/docs/contract_spec_v0_1.md\").read_text(encoding=\"utf-8\")\nspec[:4000]\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "'# COSMO v0.1 Benchmark Contract Spec (Contract section)\\n\\nThis document defines the standardized **Contract** section that MUST be present for every benchmark in `benchmarks_v0_1.md` and the compliance reporting required for every contributed implementation.\\n\\n## 1. Contract section placement and shape\\nEach benchmark entry MUST contain a top-level subsection named exactly `## Contract` (or `### Contract` if nested under the benchmark heading) containing a single fenced YAML block:\\n\\n```yaml\\ncontract:\\n  version: \"v0.1\"\\n  benchmark_id: \"...\"\\n  title: \"...\"\\n  scope: \"...\"\\n  io:\\n    inputs: [...]\\n    outputs: [...]\\n  required_metadata: {...}\\n  reference_algorithm:\\n    kind: \"pseudocode\"  # or \"math\"\\n    body: |-\\n      ...\\n  output_invariants:\\n    - id: \"inv_...\"\\n      statement: \"...\"\\n      severity: \"MUST\"  # MUST|SHOULD\\n  tolerance_policy: {...}\\n  canonical_test_vector: {...}\\n  compliance_reporting: {...}\\n```\\n\\nNormative keywords **MUST/SHOULD/MAY** are used as in RFC 2119.\\n\\n## 2. Required fields (schema-level requirements)\\nAll keys below MUST be present unless explicitly marked MAY.\\n\\n- `contract.version` MUST equal `\"v0.1\"`.\\n- `contract.benchmark_id` MUST match the benchmark identifier used in the document (stable, lowercase, `[a-z0-9_]+`).\\n- `contract.title` human-readable name for the benchmark.\\n- `contract.scope` one-paragraph description of what is in/out of scope (include exclusions).\\n- `contract.io.inputs` list of input descriptors, each:\\n  - `name` (string), `type` (string), `units` (string or `null`), `shape` (string), `domain` (string), `required` (bool).\\n- `contract.io.outputs` list of output descriptors, each:\\n  - `name`, `type`, `units`, `shape`, `range` (string), and `determinism` (`deterministic|stochastic`).\\n- `contract.required_metadata` MUST include:\\n  - `dataset` (id or `\"none\"`), `dataset_version` (string or `null`)\\n  - `license` (string), `citation` (string)\\n  - `randomness` (`none|seeded|stochastic`), `required_seed_fields` (list, possibly empty)\\n  - `hardware_assumptions` (string, MAY be `\"none\"`)\\n  - `dependencies` (list of `{name, version_spec}`), MAY be empty\\n- `contract.reference_algorithm` MUST specify the authoritative computation:\\n  - `kind`: `\"pseudocode\"` or `\"math\"`.\\n  - `body`: minimal but complete description sufficient to reproduce outputs.\\n- `contract.output_invariants` list of invariants; each invariant MUST include `id`, `statement`, `severity`.\\n- `contract.tolerance_policy` defines pass/fail semantics for numeric comparisons (see §3).\\n- `contract.canonical_test_vector` defines a small, deterministic test that every implementation MUST pass (see §4).\\n- `contract.compliance_reporting` defines how contributors report compliance (see §5).\\n## 3. Tolerance policy (comparison semantics)\\nImplementations MUST evaluate outputs against the contract using the policy below. The policy is expressed per output field; if absent for a field, `default` applies.\\n\\n```yaml\\ntolerance_policy:\\n  default:\\n    mode: \"exact\"  # exact|abs|rel|abs_rel|ulps|custom\\n    abs: 0.0\\n    rel: 0.0\\n    ulps: 0\\n    nan_equal: false\\n    inf_equal: true\\n  per_output:\\n    output_name:\\n      mode: \"abs_rel\"\\n      abs: 1e-8\\n      rel: 1e-6\\n```\\n\\nModes:\\n- `exact`: values MUST be bitwise-equal for scalars; for arrays, elementwise equality.\\n- `abs`: pass if `|a-b| <= abs`.\\n- `rel`: pass if `|a-b| <= rel*max(|a|,|b|)`.\\n- `abs_rel`: pass if `|a-b| <= max(abs, rel*max(|a|,|b|))`.\\n- `ulps`: pass if ULP distance <= `ulps` (IEEE-754 floats only).\\n- `custom`: allowed only if `reference_algorithm.body` defines the comparator unambiguously.\\n\\nSpecial values:\\n- `nan_equal`: if true, NaN compares equal to NaN; otherwise any NaN yields failure for that element.\\n- `inf_equal`: if true, +inf==+inf and -inf==-inf; otherwise any inf yields failure.\\n\\nAggregation for arrays/tensors:\\n- The comparison MUST be elementwise; failure occurs if ANY element fails unless the policy includes\\n  `aggregate: \"all\"` (default) or `aggregate: \"fraction\"` with `max_fail_fracti'"
+        }
+      ]
+    },
+    {
+      "id": "rs_06666155c527a1ed006949a3ff7c5c8195865130567ff3cdfe",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06666155c527a1ed006949a3fff500819580da32281e544b8b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "spec[4000:8000]\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "'on` in `[0,1]`.\\n- Shape/dtype mismatches are always failures independent of tolerances.\\n\\nNon-numeric outputs:\\n- MUST be compared with `exact` semantics unless `reference_algorithm` defines a different, deterministic canonicalization.\\n## 4. Canonical test vector (CTV) rules\\nEach benchmark MUST include exactly one `canonical_test_vector` with:\\n- `id`: stable id string (e.g., `\"ctv_001\"`).\\n- `purpose`: what the vector validates.\\n- `inputs`: fully specified inputs (no ellipses; no external files).\\n- `expected_outputs`: expected outputs from the reference algorithm.\\n- `notes` (MAY): clarifications, edge cases, or numerical caveats.\\n- `tolerance_overrides` (MAY): per-output overrides that supersede `tolerance_policy` ONLY for the CTV.\\n\\nCTV requirements:\\n1. Deterministic: if randomness exists, the CTV MUST specify seed fields listed in `required_seed_fields`.\\n2. Minimal: small enough to run quickly (seconds) on commodity hardware.\\n3. Representative: exercises at least one non-trivial code path (not a degenerate identity case).\\n4. Self-contained: any constants used MUST be embedded as literals.\\n5. Canonical encoding: numbers in decimal; arrays in JSON-like lists; strings in UTF-8.\\n\\nIf a benchmark is stochastic by design, the CTV MUST specify either:\\n- a fixed seed that makes outputs deterministic, OR\\n- a distributional invariant in `output_invariants` plus a tolerance policy that compares summary statistics (must be defined under `custom`).\\n## 5. Output invariants (required checks)\\nInvariants are additional checks beyond direct output matching. Examples:\\n- shape and dtype constraints (e.g., “output logits shape == (N,K)”)\\n- monotonicity / boundedness (e.g., “all probabilities in [0,1] and sum to 1 within 1e-6”)\\n- conservation constraints, symmetry, ordering, or schema constraints\\n\\nSeverity:\\n- `MUST`: failing invariant => benchmark FAIL even if tolerances pass.\\n- `SHOULD`: failing invariant => benchmark WARN; does not change pass/fail unless an implementation opts-in to stricter mode.\\n\\nEvery benchmark MUST include at least:\\n- one invariant about output shape/schema, and\\n- one invariant about value validity (range, normalization, finiteness, etc.), if applicable.\\n\\n## 6. Compliance reporting (required for contributors)\\nEvery contributed implementation MUST report contract compliance for each benchmark it claims to support.\\n\\nRequired report fields (machine-readable JSON recommended):\\n- `benchmark_id`, `contract_version`\\n- `implementation_id` (name/version), `runtime` (language + version), `platform` (OS/CPU/GPU)\\n- `result`: `pass|fail|warn`\\n- `checks` list, each: `{name, status, details}` where `status` is `pass|fail|warn|skip`\\n- `diagnostics` on failure: mismatched outputs with indices, max abs/rel error, invariant failures, seed used, and input hash.\\n\\nMinimum checks to report:\\n1. Contract parsing/validation of required fields.\\n2. CTV execution and output comparison using tolerance policy (+ overrides).\\n3. Evaluation of all `MUST` invariants (and `SHOULD` if supported).\\n\\nIf an implementation cannot support a benchmark, it MUST report `skip` with a reason (e.g., missing dependency/hardware).\\n## 7. Canonical Contract example (compact)\\n```yaml\\ncontract:\\n  version: \"v0.1\"\\n  benchmark_id: \"example_bench\"\\n  title: \"Example Benchmark\"\\n  scope: \"Compute y = a*x + b for scalar x.\"\\n  io:\\n    inputs:\\n      - {name: x, type: float64, units: null, shape: \"()\", domain: \"finite real\", required: true}\\n      - {name: a, type: float64, units: null, shape: \"()\", domain: \"finite real\", required: true}\\n      - {name: b, type: float64, units: null, shape: \"()\", domain: \"finite real\", required: true}\\n    outputs:\\n      - {name: y, type: float64, units: null, shape: \"()\", range: \"finite real\", determinism: deterministic}\\n  required_metadata:\\n    dataset: \"none\"\\n    dataset_version: null\\n    license: \"CC-BY-4.0\"\\n    citation: \"COSMO Benchmarks v0.1\"\\n    randomness: \"none\"\\n    required_seed_fields: []\\n    hardware_assumptions: \"none\"\\n    dependencies: []\\n  refere'"
+        }
+      ]
+    },
+    {
+      "id": "rs_06666155c527a1ed006949a401c290819590f5ac1f7fceb1a7",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06666155c527a1ed006949a402a704819593dc1c68d2b7799c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nmd = Path(\"/mnt/data/src/cosmo_contracts/markdown.py\").read_text()\nmd[:4000]\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "'from __future__ import annotations\\n\\nfrom dataclasses import dataclass\\nfrom pathlib import Path\\nimport re\\nfrom typing import Callable, Dict, Iterable, List, Optional\\n\\n\\n_CONTRACT_TITLE = \"### Contract\"\\n\\n\\n@dataclass(frozen=True)\\nclass ContractInsertResult:\\n    text: str\\n    updated_ids: List[str]\\n\\n\\ndef _default_contract_md(benchmark_id: str) -> str:\\n    # A deterministic, benchmark-agnostic contract block; other modules may\\n    # provide a richer contract generator via `contract_for_id`.\\n    return \"\\\\n\".join(\\n        [\\n            _CONTRACT_TITLE,\\n            \"\",\\n            \"**Required metadata**\",\\n            \"\",\\n            \"- `benchmark_id`: `\" + benchmark_id + \"`\",\\n            \"- `version`: `v0.1`\",\\n            \"- `name`: human-readable name (must be reported by implementations)\",\\n            \"- `input_spec`: description of inputs and domains\",\\n            \"- `output_spec`: description of outputs, units, and shapes\",\\n            \"\",\\n            \"**Reference algorithm / pseudocode**\",\\n            \"\",\\n            \"Implementations MUST document the algorithm used and MUST match the\",\\n            \"reference behavior on the canonical test vector(s). If an official\",\\n            \"reference is provided for this benchmark, it overrides this generic policy.\",\\n            \"\",\\n            \"**Output invariants**\",\\n            \"\",\\n            \"- Output MUST be deterministic for a fixed input.\",\\n            \"- Output MUST be serializable as JSON (numbers, strings, lists, dicts).\",\\n            \"- NaN/Inf are forbidden unless explicitly specified by the benchmark.\",\\n            \"\",\\n            \"**Tolerance policy**\",\\n            \"\",\\n            \"- Exact match for non-floats (strings, integers, booleans).\",\\n            \"- For floats: absolute tolerance `1e-9` and relative tolerance `1e-9`, unless\",\\n            \"  a benchmark-specific contract states otherwise.\",\\n            \"\",\\n            \"**Canonical test vector**\",\\n            \"\",\\n            \"```json\",\\n            \"{\",\\n            \\'  \"benchmark_id\": \"\\' + benchmark_id + \\'\",\\',\\n            \\'  \"version\": \"v0.1\",\\',\\n            \\'  \"input\": {\"seed\": 0},\\',\\n            \\'  \"expected_output\": null\\',\\n            \"}\",\\n            \"```\",\\n            \"\",\\n            \"**Contract compliance reporting**\",\\n            \"\",\\n            \"Every contributed implementation MUST report contract compliance as:\",\\n            \"\",\\n            \"- `pass`: boolean\",\\n            \"- `diagnostics`: list of human-readable strings (empty when pass is true)\",\\n        ]\\n    )\\n\\n\\ndef _find_headings(lines: List[str], pattern: re.Pattern) -> List[tuple[int, str]]:\\n    out: List[tuple[int, str]] = []\\n    for i, ln in enumerate(lines):\\n        m = pattern.match(ln)\\n        if m:\\n            out.append((i, m.group(1).strip()))\\n    return out\\n\\n\\ndef upsert_contract_sections(\\n    markdown_text: str,\\n    contract_for_id: Optional[Callable[[str], str]] = None,\\n    benchmark_heading_re: str = r\"^##\\\\s+(.+?)\\\\s*$\",\\n) -> ContractInsertResult:\\n    \\\\\"\\\\\"\\\\\"Insert/replace a standardized Contract section per v0.1 benchmark.\\n\\n    Benchmarks are detected as level-2 headings (`## ...`). Within each benchmark\\n    section, a level-3 heading `### Contract` is inserted after the benchmark\\n    heading (or replaced if present). The rewrite is idempotent.\\n    \\\\\"\\\\\"\\\\\"\\n    contract_for_id = contract_for_id or _default_contract_md\\n    lines = markdown_text.splitlines()\\n    bench_pat = re.compile(benchmark_heading_re)\\n    benches = _find_headings(lines, bench_pat)\\n    if not benches:\\n        return ContractInsertResult(text=markdown_text, updated_ids=[])\\n\\n    # Add sentinel end.\\n    benches = benches + [(len(lines), \"__END__\")]\\n    updated: List[str] = []\\n\\n    for (start, bench_id), (end, _) in zip(benches, benches[1:]):\\n        if bench_id == \"__END__\":\\n            continue\\n        section = lines[start:end]\\n        # Locate an existing contract block within this section.\\n        contract_start = None\\n        for j in range(1, len(section)):\\n            if sectio'"
+        }
+      ]
+    },
+    {
+      "id": "rs_06666155c527a1ed006949a4054e688195a145152f978af1fb",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06666155c527a1ed006949a405dd8881959233d9f7082dfc33",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\ntxt=Path(\"/mnt/data/src/cosmo_contracts/contracts.py\").read_text()\ntxt[:4000]\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "'# SPDX-License-Identifier: MIT\\nfrom __future__ import annotations\\n\\nimport json\\nimport re\\nfrom dataclasses import dataclass\\nfrom typing import Any, Dict, Iterable, List, Mapping, MutableMapping, Optional, Sequence, Tuple\\n\\n\\nBENCHMARK_ID_RE = re.compile(r\"^[a-z0-9][a-z0-9\\\\-]*(?:\\\\.[a-z0-9][a-z0-9\\\\-]*)*$\")\\nREQUIRED_METADATA: Tuple[str, ...] = (\\n    \"title\",\\n    \"version\",\\n    \"summary\",\\n    \"inputs\",\\n    \"outputs\",\\n)\\ndef normalize_benchmark_id(raw: str) -> str:\\n    s = (raw or \"\").strip().lower()\\n    s = re.sub(r\"^benchmark\\\\s*[:/]\\\\s*\", \"\", s)\\n    s = s.replace(\"_\", \"-\")\\n    s = re.sub(r\"\\\\s+\", \"-\", s)\\n    s = re.sub(r\"[^a-z0-9\\\\.\\\\-]+\", \"-\", s)\\n    s = re.sub(r\"-{2,}\", \"-\", s).strip(\"-.\")\\n    if not s or not BENCHMARK_ID_RE.match(s):\\n        raise ValueError(f\"Invalid benchmark_id after normalization: {raw!r} -> {s!r}\")\\n    return s\\n\\n\\ndef _jsonable(x: Any) -> Any:\\n    try:\\n        json.dumps(x, sort_keys=True, ensure_ascii=False)\\n        return x\\n    except TypeError:\\n        if hasattr(x, \"__dict__\"):\\n            return _jsonable(vars(x))\\n        if isinstance(x, (set, tuple)):\\n            return [_jsonable(v) for v in x]\\n        raise\\ndef normalize_metadata(meta: Mapping[str, Any]) -> Dict[str, Any]:\\n    m = {str(k).strip(): _jsonable(v) for k, v in dict(meta or {}).items()}\\n    missing = [k for k in REQUIRED_METADATA if not m.get(k)]\\n    if missing:\\n        raise ValueError(f\"Missing required metadata keys: {missing}\")\\n    m[\"version\"] = str(m[\"version\"]).strip()\\n    m[\"title\"] = str(m[\"title\"]).strip()\\n    m[\"summary\"] = str(m[\"summary\"]).strip()\\n    for k in (\"inputs\", \"outputs\"):\\n        if not isinstance(m[k], (dict, list, str)):\\n            raise ValueError(f\"metadata[{k!r}] must be a dict/list/str, got {type(m[k]).__name__}\")\\n    return m\\n\\n\\ndef default_tolerance_policy() -> Dict[str, Any]:\\n    # Conservative default: exact match unless benchmark overrides.\\n    return {\"mode\": \"exact\", \"rtol\": 0.0, \"atol\": 0.0, \"nan_policy\": \"error\"}\\n\\n\\ndef normalize_tolerance_policy(tp: Optional[Mapping[str, Any]]) -> Dict[str, Any]:\\n    t = dict(default_tolerance_policy())\\n    if tp:\\n        t.update({str(k): _jsonable(v) for k, v in dict(tp).items()})\\n    mode = str(t.get(\"mode\", \"exact\")).strip().lower()\\n    if mode not in {\"exact\", \"numeric\"}:\\n        raise ValueError(\"tolerance.mode must be \\'exact\\' or \\'numeric\\'\")\\n    t[\"mode\"] = mode\\n    t[\"rtol\"] = float(t.get(\"rtol\", 0.0))\\n    t[\"atol\"] = float(t.get(\"atol\", 0.0))\\n    nanp = str(t.get(\"nan_policy\", \"error\")).strip().lower()\\n    if nanp not in {\"error\", \"allow\", \"propagate\"}:\\n        raise ValueError(\"tolerance.nan_policy must be \\'error\\', \\'allow\\', or \\'propagate\\'\")\\n    t[\"nan_policy\"] = nanp\\n    return t\\ndef normalize_invariants(invariants: Optional[Iterable[str]]) -> List[str]:\\n    inv: List[str] = []\\n    for x in invariants or []:\\n        s = str(x).strip()\\n        if s:\\n            inv.append(s)\\n    # de-dup while preserving order\\n    seen = set()\\n    out: List[str] = []\\n    for s in inv:\\n        if s not in seen:\\n            out.append(s)\\n            seen.add(s)\\n    return out\\n\\n\\ndef normalize_reference(reference: Mapping[str, Any]) -> Dict[str, Any]:\\n    r = {str(k).strip(): _jsonable(v) for k, v in dict(reference or {}).items()}\\n    if not r.get(\"pseudocode\"):\\n        raise ValueError(\"reference.pseudocode is required\")\\n    r[\"pseudocode\"] = str(r[\"pseudocode\"]).strip()\\n    if r.get(\"notes\") is not None:\\n        r[\"notes\"] = str(r[\"notes\"]).strip()\\n    return r\\ndef normalize_test_vector(tv: Mapping[str, Any]) -> Dict[str, Any]:\\n    if not isinstance(tv, Mapping):\\n        raise ValueError(\"test_vector must be a mapping\")\\n    out = {str(k).strip(): _jsonable(v) for k, v in dict(tv).items()}\\n    if \"inputs\" not in out or \"expected\" not in out:\\n        raise ValueError(\"test_vector must contain \\'inputs\\' and \\'expected\\'\")\\n    return out\\n\\n\\n@dataclass(frozen=True)\\nclass Contract:\\n    benchmark_id: str\\n    metadata: Dict[str, Any]\\n    reference: Dict[str, Any]\\n    invariants: List[str]\\n    to'"
+        }
+      ]
+    },
+    {
+      "id": "rs_06666155c527a1ed006949a40815c48195be33b38d8d7db33d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06666155c527a1ed006949a40914048195a66e89398c24a529",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nPath(\"/mnt/data/src/cosmo_contracts/schema.py\").read_text()[:2000]\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "'\"\"\"Contract data model + JSON Schemas for COSMO benchmark contracts.\\n\\nA contract is attached per v0.1 benchmark and is used to:\\n- declare required metadata\\n- provide a reference algorithm/pseudocode\\n- state output invariants\\n- define tolerance policy for numeric comparisons\\n- ship canonical test vectors\\n\"\"\"\\n\\nfrom __future__ import annotations\\n\\nfrom dataclasses import dataclass, field, asdict\\nfrom typing import Any, Dict, List, Optional, Tuple\\n# JSON Schema (draft 2020-12) for a benchmark contract document.\\nCONTRACT_SCHEMA: Dict[str, Any] = {\\n    \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\\n    \"$id\": \"https://cosmo-benchmarks.dev/schemas/contract.schema.json\",\\n    \"title\": \"COSMO Benchmark Contract\",\\n    \"type\": \"object\",\\n    \"required\": [\"metadata\", \"reference\", \"invariants\", \"tolerance_policy\", \"test_vectors\"],\\n    \"additionalProperties\": False,\\n    \"properties\": {\\n        \"metadata\": {\\n            \"type\": \"object\",\\n            \"required\": [\"benchmark_id\", \"benchmark_version\", \"title\", \"description\"],\\n            \"additionalProperties\": False,\\n            \"properties\": {\\n                \"benchmark_id\": {\"type\": \"string\", \"minLength\": 1},\\n                \"benchmark_version\": {\"type\": \"string\", \"minLength\": 1},\\n                \"title\": {\"type\": \"string\", \"minLength\": 1},\\n                \"description\": {\"type\": \"string\", \"minLength\": 1},\\n                \"tags\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}, \"default\": []},\\n                \"authors\": {\"type\": \"array\", \"items\": {\"type\": \"string\"}, \"default\": []},\\n                \"license\": {\"type\": \"string\"},\\n                \"source\": {\"type\": \"string\", \"description\": \"Citation / URL / paper reference.\"},\\n            },\\n        },\\n        \"reference\": {\\n            \"type\": \"object\",\\n            \"required\": [\"algorithm\", \"pseudocode\"],\\n            \"additionalProperties\": False,\\n            \"properties\": {\\n                \"algorithm\": {\"type\": \"string\", \"minLength\": 1},\\n                \"pseudocode\": {\"type\"'"
+        }
+      ]
+    },
+    {
+      "id": "rs_06666155c527a1ed006949a40b44a8819597568c6aea7394ce",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06666155c527a1ed006949a40c869481958b8840f2fb0ac3f4",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import re, json\nfrom pathlib import Path\ntxt=Path(\"/mnt/data/src/cosmo_contracts/contracts.py\").read_text()\n\"contract_defaults\" in txt, \"contract_defaults_v0_1\" in txt\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(False, False)"
+        }
+      ]
+    },
+    {
+      "id": "rs_06666155c527a1ed006949a40f029c8195bb223395c429d763",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06666155c527a1ed006949a41161048195bb533392399b32de",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, re\nt=Path(\"/mnt/data/tests/test_contract_injection.py\").read_text()\nt\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "'import re\\nfrom textwrap import dedent\\n\\nimport pytest\\n\\nfrom cosmo_contracts.markdown import upsert_contract_sections\\n\\n\\nREQUIRED_SUBSECTIONS = [\\n    r\"^\\\\*\\\\*Required metadata\\\\*\\\\*$\",\\n    r\"^\\\\*\\\\*Reference algorithm / pseudocode\\\\*\\\\*$\",\\n    r\"^\\\\*\\\\*Output invariants\\\\*\\\\*$\",\\n    r\"^\\\\*\\\\*Tolerance policy\\\\*\\\\*$\",\\n    r\"^\\\\*\\\\*Canonical test vector\\\\*\\\\*$\",\\n    r\"^\\\\*\\\\*Contract compliance reporting\\\\*\\\\*$\",\\n]\\n\\n\\ndef _contract_blocks(md: str):\\n    \"\"\"Return list of (benchmark_id, contract_text|None) for each `## ...` section.\"\"\"\\n    bench = re.compile(r\"^##\\\\s+(.+?)\\\\s*$\", re.M)\\n    out = []\\n    starts = [(m.start(), m.end(), m.group(1)) for m in bench.finditer(md)]\\n    if not starts:\\n        return out\\n    starts.append((len(md), len(md), \"__END__\"))\\n    for (_, e, bid), (ns, _, _) in zip(starts, starts[1:]):\\n        section = md[e:ns]\\n        m = re.search(r\"(?m)^###\\\\s+Contract\\\\s*$\", section)\\n        if not m:\\n            out.append((bid, None))\\n            continue\\n        c_start = e + m.start()\\n        rest = md[c_start:ns]\\n        m2 = re.search(r\"(?m)^###\\\\s+(?!Contract\\\\b).+$\", rest)\\n        c_end = c_start + (m2.start() if m2 else len(rest))\\n        out.append((bid, md[c_start:c_end].strip(\"\\\\n\")))\\n    return out\\n\\n\\ndef _assert_contract_has_required_parts(contract: str):\\n    assert contract is not None\\n    lines = contract.splitlines()\\n    assert lines[0].strip() == \"### Contract\"\\n    for pat in REQUIRED_SUBSECTIONS:\\n        assert any(re.match(pat, ln.strip()) for ln in lines), f\"missing subsection {pat}\"\\n    assert \"```json\" in contract\\n    assert contract.count(\"```\") >= 2\\n    assert re.search(r\"(?m)^- `pass`:\\\\s*boolean\\\\s*$\", contract)\\n    assert re.search(r\"(?m)^- `diagnostics`:\\\\s*list of human-readable strings\", contract)\\ndef test_inserts_contracts_and_is_idempotent():\\n    md = dedent(\\'\\'\\'\\n        # COSMO Benchmarks v0.1\\n\\n        ## BM001: toy\\n        Some description.\\n\\n        ### Notes\\n        - blah\\n\\n        ## BM002: other\\n        More text.\\n    \\'\\'\\').strip() + \"\\\\n\"\\n\\n    res1 = upsert_contract_sections(md)\\n    assert set(res1.updated_ids) == {\"BM001: toy\", \"BM002: other\"}\\n    out1 = res1.text\\n    assert \"### Contract\" in out1\\n\\n    blocks = dict(_contract_blocks(out1))\\n    assert set(blocks) == {\"BM001: toy\", \"BM002: other\"}\\n    _assert_contract_has_required_parts(blocks[\"BM001: toy\"])\\n    _assert_contract_has_required_parts(blocks[\"BM002: other\"])\\n\\n    res2 = upsert_contract_sections(out1)\\n    assert res2.text == out1\\n    assert set(res2.updated_ids) == {\"BM001: toy\", \"BM002: other\"}\\ndef test_replaces_existing_contract_deterministically():\\n    md = dedent(\\'\\'\\'\\n        # COSMO Benchmarks v0.1\\n\\n        ## BM003: replace-me\\n\\n        ### Contract\\n        **Required metadata**\\n        - junk: true\\n\\n        ### Details\\n        Something.\\n    \\'\\'\\').lstrip()\\n\\n    out = upsert_contract_sections(md).text\\n    blocks = dict(_contract_blocks(out))\\n    c = blocks[\"BM003: replace-me\"]\\n    _assert_contract_has_required_parts(c)\\n    assert \"junk: true\" not in c\\n\\n    sec = re.search(r\"(?s)##\\\\s+BM003: replace-me\\\\s*(.+)\", out).group(1)\\n    assert sec.index(\"### Contract\") < sec.index(\"### Details\")\\n'"
+        }
+      ]
+    },
+    {
+      "id": "rs_06666155c527a1ed006949a413beac81958fdfdca4e2399e26",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06666155c527a1ed006949a41f5e548195a99c11c356f418de",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('config/contract_defaults_v0_1.json')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\ndata = {\n  \"contract_version\": \"v0.1\",\n  \"purpose\": \"Defaults and benchmark-specific overrides for generating standardized Contract sections for COSMO benchmarks v0.1.\",\n  \"defaults\": {\n    \"required_metadata\": {\n      \"keys\": [\n        \"dataset\",\n        \"dataset_version\",\n        \"license\",\n        \"citation\",\n        \"randomness\",\n        \"required_seed_fields\",\n        \"hardware_assumptions\",\n        \"dependencies\"\n      ],\n      \"randomness_allowed\": [\"none\", \"seeded\", \"stochastic\"],\n      \"dependency_item_schema\": {\"name\": \"string\", \"version_spec\": \"string\"}\n    },\n    \"reference_algorithm\": {\n      \"kind_allowed\": [\"pseudocode\", \"math\"],\n      \"required_fields\": [\"kind\", \"body\"],\n      \"minimum_requirements\": [\n        \"Define authoritative computation unambiguously.\",\n        \"Define any canonicalization for non-numeric outputs.\",\n        \"If using custom tolerances/comparators, define them here.\"\n      ]\n    },\n    \"output_invariants\": [\n      {\n        \"id\": \"inv_schema_json\",\n        \"statement\": \"All outputs MUST be JSON-serializable (numbers, strings, booleans, null, lists, objects) with UTF-8 strings.\",\n        \"severity\": \"MUST\"\n      },\n      {\n        \"id\": \"inv_determinism_for_fixed_seed\",\n        \"statement\": \"If randomness is seedable, outputs MUST be deterministic for fixed inputs and required seed fields.\",\n        \"severity\": \"MUST\"\n      },\n      {\n        \"id\": \"inv_no_nan_inf\",\n        \"statement\": \"NaN/Inf are forbidden in numeric outputs unless explicitly allowed by the benchmark contract.\",\n        \"severity\": \"MUST\"\n      }\n    ],\n    \"tolerance_policy\": {\n      \"default\": {\n        \"mode\": \"abs_rel\",\n        \"abs\": 1e-9,\n        \"rel\": 1e-9,\n        \"ulps\": 0,\n        \"nan_equal\": False,\n        \"inf_equal\": True,\n        \"aggregate\": \"all\"\n      },\n      \"per_output\": {}\n    },\n    \"canonical_test_vector\": {\n      \"id\": \"ctv_001\",\n      \"purpose\": \"Minimal self-contained correctness check for contract compliance.\",\n      \"inputs\": {\"seed\": 0},\n      \"expected_outputs\": None,\n      \"notes\": \"Benchmarks MUST override inputs/expected_outputs with a deterministic, self-contained vector.\"\n    },\n    \"compliance_reporting\": {\n      \"result_allowed\": [\"pass\", \"fail\", \"warn\", \"skip\"],\n      \"required_report_fields\": [\n        \"benchmark_id\",\n        \"contract_version\",\n        \"implementation_id\",\n        \"runtime\",\n        \"platform\",\n        \"result\",\n        \"checks\",\n        \"diagnostics\"\n      ],\n      \"minimum_checks\": [\n        \"contract_schema_validation\",\n        \"canonical_test_vector_execution\",\n        \"output_comparison_with_tolerances\",\n        \"must_invariant_evaluation\"\n      ],\n      \"required_diagnostics_on_failure\": [\n        \"output_field\",\n        \"location/index (if applicable)\",\n        \"max_abs_error\",\n        \"max_rel_error\",\n        \"observed_vs_expected_summary\",\n        \"invariant_failures\",\n        \"seed_used\",\n        \"input_hash\"\n      ]\n    }\n  },\n  \"overrides\": {},\n  \"notes\": [\n    \"Generators should start from defaults then deep-merge any per-benchmark override by normalized benchmark_id.\",\n    \"Non-numeric outputs should use tolerance mode 'exact' and specify canonicalization in the reference algorithm when needed.\"\n  ]\n}\n\nchunks = [json.dumps(data, indent=2, sort_keys=False)]\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:config/contract_defaults_v0_1.json')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:config/contract_defaults_v0_1.json\nDIR_STATE:[\"config/contract_defaults_v0_1.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_06666155c527a1ed006949a43630f48195ae6f96577d3f1485",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `config/contract_defaults_v0_1.json` defining v0.1 default contract templates (required metadata keys, reference algorithm requirements, output invariants, tolerance policy, canonical test vector shape, and compliance reporting requirements) with an empty `overrides` map ready for per-benchmark specializations."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

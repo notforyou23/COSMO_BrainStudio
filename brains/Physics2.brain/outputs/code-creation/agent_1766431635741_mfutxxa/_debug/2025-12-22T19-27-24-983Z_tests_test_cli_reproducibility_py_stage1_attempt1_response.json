@@ -1,0 +1,56 @@
+{
+  "content": "Created `tests/test_cli_reproducibility.py`, a pytest that runs the `qg_bench` CLI twice on the packaged example dataset and asserts the entire results JSON (including the `hash` and `metadata` blocks) is identical across runs.",
+  "reasoning": "",
+  "responseId": "resp_011b7aead8dab3c20069499c860ec881958989605f13a552ac",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2676,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1170,
+    "output_tokens_details": {
+      "reasoning_tokens": 578
+    },
+    "total_tokens": 3846
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_011b7aead8dab3c20069499c872d2c8195bf3856b315eee8c5",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_011b7aead8dab3c20069499c96f0d481958baf24a51a790e85",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_cli_reproducibility.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\nr\"\"\"import json\nimport os\nimport subprocess\nimport sys\nfrom pathlib import Path\n\nimport qg_bench\n\n\ndef _run_cli(output_path: Path) -> dict:\n    pkg_dir = Path(qg_bench.__file__).resolve().parent\n    schema_path = pkg_dir / \"schema.json\"\n    data_path = pkg_dir / \"data\" / \"example_dataset.jsonl\"\n\n    env = os.environ.copy()\n    # Reduce sources of nondeterminism across platforms and runs.\n    env.setdefault(\"PYTHONHASHSEED\", \"0\")\n    env.setdefault(\"TZ\", \"UTC\")\n\n    cmd = [\n        sys.executable,\n        \"-m\",\n        \"qg_bench.cli\",\n        \"--schema\",\n        str(schema_path),\n        \"--dataset\",\n        str(data_path),\n        \"--output\",\n        str(output_path),\n    ]\n    proc = subprocess.run(cmd, capture_output=True, text=True, env=env)\n    assert proc.returncode == 0, f\"CLI failed:\\\\nSTDOUT={proc.stdout}\\\\nSTDERR={proc.stderr}\"\n    assert output_path.exists(), f\"Expected output file not found: {output_path}\"\n    return json.loads(output_path.read_text(encoding=\"utf-8\"))\n\n\ndef test_cli_reproducibility(tmp_path: Path) -> None:\n    out1 = tmp_path / \"results_1.json\"\n    out2 = tmp_path / \"results_2.json\"\n\n    r1 = _run_cli(out1)\n    r2 = _run_cli(out2)\n\n    # Full JSON should be identical for a deterministic benchmark.\n    assert r1 == r2\n\n    # And specifically the metadata/hash block must not include run-local fields.\n    assert \"metadata\" in r1\n    assert \"hash\" in r1\n    assert r1[\"metadata\"] == r2[\"metadata\"]\n    assert r1[\"hash\"] == r2[\"hash\"]\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tests/test_cli_reproducibility.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499b9ae2c081908ccd9fbfec7a37ba019f8e3dd8194ac9",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_cli_reproducibility.py\nDIR_STATE:[\"tests/test_cli_reproducibility.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_011b7aead8dab3c20069499ca3afa88195b682a1f94ac7c79f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/test_cli_reproducibility.py`, a pytest that runs the `qg_bench` CLI twice on the packaged example dataset and asserts the entire results JSON (including the `hash` and `metadata` blocks) is identical across runs."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

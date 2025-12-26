@@ -1,0 +1,43 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Audit the repo for any agent-/script-specific output paths, refactor them to use a shared OUTPUT_DIR helper (repo-relative, env override allowed), then add/extend a pytest that fails if any artifact/log contains an absolute '/outputs' path and verifies key artifacts appear under ./outputs/.
+Project: generated_script_1766554496401 (python script)
+
+Target file details:
+- Path: src/utils/output_dir.py
+- Purpose: Provides a shared repo-relative OUTPUT_DIR with optional environment override plus helper functions to create and resolve output paths consistently across scripts and agents.
+- Category: source
+
+Other planned files (for context only):
+- tests/test_no_absolute_outputs_paths.py: Pytest that scans generated artifacts/logs to fail on any absolute '/outputs' path occurrences and asserts expected key artifacts are created under the repo './outputs/' directory.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T04-45-21-945Z_tests_test_no_absolute_outputs_paths_py_stage1_attempt2_prompt.txt from code-creation agent agent_1
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Invest in infrastructure lemmas: compactness/tightness, decomposition (structured+pseudorandom)
+- [AGENT: agent_1766550864729_p9ds97q] Across the implications-and-consequences, systems-thinking, and psychological perspectives, the dominan
+- [AGENT INSIGHT: agent_1766550864729_t9or71v] Assumptions are design variables and integration dependencies: they must be explicitly chosen, 
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Provides a shared repo-relative OUTPUT_DIR with optional environment override plus helper functions to create and resolve output paths consistently across scripts and agents.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/utils/output_dir.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/utils/output_dir.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/utils/output_dir.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create runtime/outputs/plan_project_scope_and_outline.md and ensure it deterministically maps to runtime/outputs/REPORT_OUTLINE.md and the section skeleton inside runtime/outputs/DRAFT_REPORT_v0.md.
+Project: runtime/outputs/plan_project_scope_and_outline.md and ensure it deterministically maps to runtime/outputs/REPORT_OUTLINE.md and the section skeleton inside runtime/outputs/DRAFT_REPORT_v0.md. (python script)
+
+Target file details:
+- Path: src/outline_schema.py
+- Purpose: Defines the canonical outline data model, deterministic section ID generation, and rendering functions used to produce all three markdown outputs consistently.
+- Category: source
+
+Other planned files (for context only):
+- src/plan_project_scope_and_outline.py: Deterministic generator that creates runtime/outputs/plan_project_scope_and_outline.md and ensures it maps exactly to runtime/outputs/REPORT_OUTLINE.md and the section skeleton in runtime/outputs/DRAFT_REPORT_v0.md.
+- src/md_render.py: Markdown rendering helpers that format headings, tables, checklists, and anchored section skeletons in a stable, deterministic way.
+- src/io_utils.py: File I/O utilities for atomic writes, directory creation, newline normalization, and deterministic content hashing to verify mapping.
+- src/cli.py: Command-line entrypoint that runs the generator with fixed defaults, validates deterministic mappings, and writes all required output files.
+
+Reference insights:
+- [AGENT INSIGHT: agent_1766612082051_146d0k6] Sub-goal 1/6: Define the report scope and structure: specify research questions, intended audie
+- [AGENT INSIGHT: agent_1766612082051_146d0k6] Sub-goal 1/6: Define the report scope and structure: specify research questions, intended audie
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [AGENT INSIGHT: agent_1766612082051_146d0k6] Sub-goal 5/6: Design a 4-week work schedule for agents: break work into weekly milestones, assi
+- [AGENT INSIGHT: agent_1766612082051_146d0k6] Sub-goal 5/6: Design a 4-week work schedule for agents: break work into weekly milestones, assi
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Defines the canonical outline data model, deterministic section ID generation, and rendering functions used to produce all three markdown outputs consistently.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/outline_schema.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/outline_schema.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/outline_schema.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

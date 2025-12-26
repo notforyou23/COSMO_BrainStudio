@@ -1,0 +1,118 @@
+{
+  "content": "Implemented `src/benchmarks/validate.py` with a minimal `jsonschema`-based validator (`validate_run`, `validate_run_file`) plus a `ValidationErrorDetail` dataclass and `format_errors()` for compact, human-readable error reporting.",
+  "reasoning": "",
+  "responseId": "resp_00ecc7a4547205a3006949b690351c8194afa1f6fef0fba3f5",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4487,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1664,
+    "output_tokens_details": {
+      "reasoning_tokens": 1609
+    },
+    "total_tokens": 6151
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_00ecc7a4547205a3006949b691e9ec8194b98130da42f6ebbc",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_00ecc7a4547205a3006949b69450848194b6d05289c78bdfa3",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path('/mnt/data')\nlist((base/'src'/'benchmarks').glob('*'))\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/src/benchmarks/__init__.py'),\n PosixPath('/mnt/data/src/benchmarks/schema.py')]"
+        }
+      ]
+    },
+    {
+      "id": "ci_00ecc7a4547205a3006949b69644d881949fb2bb5dc932899f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((base/'src/benchmarks/__init__.py').read_text()[:400])\nprint(\"---schema.py---\")\nprint((base/'src/benchmarks/schema.py').read_text()[:4000])\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Minimal benchmarks reference implementation.\n\nPublic API:\n- load_schema(): load the benchmark JSON Schema bundled with the package.\n- validate_run(): validate a benchmark run (Python dict) against the schema.\n- validate_run_file(): validate a JSON file on disk.\n- format_errors(): convert jsonschema errors into a readable report.\n\nThe heavy lifting lives in :mod:`benchmarks.schema` and :mod:`ben\n---schema.py---\n\"\"\"Schema loader for the benchmark JSON Schema.\n\nThis module is responsible for locating the repository's schema files (under the\ntop-level ``schema/`` directory), loading the root schema as a Python ``dict``,\nand configuring local reference resolution so that ``$ref`` works across files.\n\nThe primary entry point is :func:`load_schema`.\n\"\"\"\nfrom __future__ import annotations\n\nfrom functools import lru_cache\nimport json\nfrom pathlib import Path\nfrom typing import Any, Dict, Mapping, Optional, Tuple, Union\nfrom urllib.parse import urlparse\n\ntry:\n    # jsonschema < 4.18: present and commonly used\n    from jsonschema import RefResolver  # type: ignore\nexcept Exception:  # pragma: no cover\n    RefResolver = None  # type: ignore\ndef _repo_root() -> Path:\n    \"\"\"Return the repository root (parent of ``src/``).\n\n    Assumes this file lives at ``<root>/src/benchmarks/schema.py``.\n    \"\"\"\n    return Path(__file__).resolve().parents[2]\n\n\ndef _schema_dir() -> Path:\n    return _repo_root() / \"schema\"\n\n\ndef _pick_root_schema(schema_dir: Path) -> Path:\n    \"\"\"Heuristically pick a root schema JSON file.\n\n    Preference order is a small list of common names; otherwise we fall back to\n    the first ``*.schema.json`` / ``*.json`` file in the directory.\n    \"\"\"\n    candidates = [\n        schema_dir / \"benchmark.schema.json\",\n        schema_dir / \"benchmark-run.schema.json\",\n        schema_dir / \"run.schema.json\",\n        schema_dir / \"schema.json\",\n    ]\n    for p in candidates:\n        if p.is_file():\n            return p\n    for pat in (\"*.schema.json\", \"*.json\"):\n        hits = sorted(schema_dir.glob(pat))\n        if hits:\n            return hits[0]\n    raise FileNotFoundError(\n        f\"No schema JSON files found in {schema_dir}. Expected e.g. benchmark.schema.json\"\n    )\ndef _load_json(path: Path) -> Dict[str, Any]:\n    with path.open(\"r\", encoding=\"utf-8\") as f:\n        return json.load(f)\n\n\ndef _file_handler(uri: str) -> Any:\n    \"\"\"Load a referenced schema from disk for the ``file://`` scheme.\"\"\"\n    parsed = urlparse(uri)\n    # urlparse(\"file:///...\").path is percent-decoded on most platforms.\n    path = Path(parsed.path)\n    return _load_json(path)\n\n\ndef _make_resolver(schema: Mapping[str, Any], *, base_uri: str):\n    \"\"\"Create a local-only resolver compatible with ``jsonschema``.\n\n    Returns ``None`` if the installed jsonschema no longer exposes RefResolver.\n    \"\"\"\n    if RefResolver is None:  # pragma: no cover\n        return None\n    return RefResolver(base_uri=base_uri, referrer=schema, handlers={\"file\": _file_handler})\n@lru_cache(maxsize=1)\ndef load_schema(\n    *,\n    schema_path: Optional[Union[str, Path]] = None,\n    return_resolver: bool = False,\n) -> Union[Dict[str, Any], Tuple[Dict[str, Any], Any]]:\n    \"\"\"Load the benchmark JSON Schema.\n\n    Parameters\n    ----------\n    schema_path:\n        Optional explicit path to the root schema JSON. If omitted, the loader\n        looks under ``<repo-root>/schema``.\n    return_resolver:\n        If True, return ``(schema, resolver)`` where ``resolver`` can be passed\n        to ``jsonschema`` validators to resolve local ``$ref``.\n\n    Notes\n    -----\n    The schema dictionary is returned unchanged; callers are expected to pass\n    the returned resolver when constructing a validator.\n    \"\"\"\n    if schema_path is None:\n        schema_dir = _schema_dir()\n        schema_file = _pick_root_schema(schema_dir)\n    else:\n        schema_file = Path(schema_path).expanduser().resolve()\n        if schema_file.is_dir():\n            schema_file = _pick_root_schema(schema_file)\n\n    schema = _load_json(schema_file)\n    base_uri = schema_file.resolve().as_uri()\n    resolver = _make_resolver(schema, base_uri=base_uri)\n\n    return (schema, resolver) if return_resolver else schema\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_00ecc7a4547205a3006949b6992c78819499cc46b8113732b9",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_00ecc7a4547205a3006949b69a359881948b55a1bffbf4573f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((base/'src/benchmarks/__init__.py').read_text())\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Minimal benchmarks reference implementation.\n\nPublic API:\n- load_schema(): load the benchmark JSON Schema bundled with the package.\n- validate_run(): validate a benchmark run (Python dict) against the schema.\n- validate_run_file(): validate a JSON file on disk.\n- format_errors(): convert jsonschema errors into a readable report.\n\nThe heavy lifting lives in :mod:`benchmarks.schema` and :mod:`benchmarks.validate`.\n\"\"\"\nfrom __future__ import annotations\n\nfrom typing import Any, Iterable, Mapping, Optional, Sequence, Tuple\n\n__all__ = [\n    \"load_schema\",\n    \"validate_run\",\n    \"validate_run_file\",\n    \"format_errors\",\n    \"ValidationErrorDetail\",\n]\n# Re-export the stable surface area from submodules.\nfrom .schema import load_schema\nfrom .validate import (\n    ValidationErrorDetail,\n    format_errors,\n    validate_run,\n    validate_run_file,\n)\ndef validate(\n    run: Mapping[str, Any],\n    *,\n    schema: Optional[Mapping[str, Any]] = None,\n    raise_on_error: bool = False,\n) -> Tuple[bool, Sequence[ValidationErrorDetail]]:\n    \"\"\"Backward-compatible convenience wrapper for :func:`validate_run`.\n\n    Returns ``(ok, errors)``. If ``raise_on_error`` is True, a ``ValueError`` is\n    raised with a formatted error report when validation fails.\n    \"\"\"\n    ok, errors = validate_run(run, schema=schema)\n    if (not ok) and raise_on_error:\n        raise ValueError(format_errors(errors))\n    return ok, errors\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_00ecc7a4547205a3006949b69be3a881949708845499387ef3",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_00ecc7a4547205a3006949b6a099788194be42c4477200b65a",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": []
+    },
+    {
+      "id": "rs_00ecc7a4547205a3006949b6a23530819486983a2630ef58ea",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_00ecc7a4547205a3006949b6a433108194a8053148912c6f11",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\ntarget_path = Path('/mnt/data').joinpath('src/benchmarks/validate.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\\\"\\\"\\\"Benchmark run validation helpers.\n\nThis module validates a benchmark run JSON document (loaded into a Python dict)\nagainst the repository's JSON Schema and produces a compact, human-readable\nerror report suitable for CLI use.\n\\\"\\\"\\\"\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nimport json\nfrom pathlib import Path\nfrom typing import Any, Iterable, List, Mapping, Optional, Sequence, Tuple, Union\n\nfrom jsonschema import ValidationError\nfrom jsonschema.validators import validator_for\n\nfrom .schema import load_schema\n\"\"\")\n\nchunks.append(\"\"\"@dataclass(frozen=True)\nclass ValidationErrorDetail:\n    \\\"\\\"\\\"A lightweight, serialisable view of a ``jsonschema`` ValidationError.\\\"\\\"\\\"\n\n    message: str\n    instance_path: str\n    schema_path: str\n    validator: str\n    validator_value: Any = None\n\"\"\")\n\nchunks.append(\"\"\"def _json_pointer(path: Iterable[Union[str, int]]) -> str:\n    parts: List[str] = []\n    for p in path:\n        s = str(p).replace(\"~\", \"~0\").replace(\"/\", \"~1\")\n        parts.append(s)\n    return \"/\" + \"/\".join(parts) if parts else \"/\"\n\"\"\")\n\nchunks.append(\"\"\"def _flatten_error(err: ValidationError) -> List[ValidationError]:\n    \\\"\\\"\\\"Flatten compound errors (e.g. oneOf/anyOf) into leaf errors.\\\"\\\"\\\"\n    if err.context:\n        out: List[ValidationError] = []\n        for c in err.context:\n            out.extend(_flatten_error(c))\n        return out\n    return [err]\n\"\"\")\n\nchunks.append(\"\"\"def _to_detail(err: ValidationError) -> ValidationErrorDetail:\n    return ValidationErrorDetail(\n        message=err.message,\n        instance_path=_json_pointer(err.path),\n        schema_path=_json_pointer(err.schema_path),\n        validator=str(err.validator) if err.validator is not None else \"\",\n        validator_value=err.validator_value,\n    )\n\"\"\")\n\nchunks.append(\"\"\"def validate_run(\n    run: Mapping[str, Any],\n    *,\n    schema: Optional[Mapping[str, Any]] = None,\n) -> Tuple[bool, Sequence[ValidationErrorDetail]]:\n    \\\"\\\"\\\"Validate a benchmark run dict against the benchmark schema.\n\n    Returns ``(ok, errors)`` where ``errors`` is a (possibly empty) list of\n    :class:`ValidationErrorDetail`.\n    \\\"\\\"\\\"\n    resolver = None\n    if schema is None:\n        schema, resolver = load_schema(return_resolver=True)  # type: ignore[misc]\n\n    Validator = validator_for(schema)  # picks Draft based on $schema, defaults safely\n    validator = Validator(schema, resolver=resolver)\n    raw_errors: List[ValidationError] = []\n    for e in validator.iter_errors(run):\n        raw_errors.extend(_flatten_error(e))\n\n    raw_errors.sort(key=lambda e: (list(e.path), e.message))\n    details = [_to_detail(e) for e in raw_errors]\n    return (len(details) == 0), details\n\"\"\")\n\nchunks.append(\"\"\"def validate_run_file(\n    path: Union[str, Path],\n    *,\n    schema: Optional[Mapping[str, Any]] = None,\n) -> Tuple[bool, Sequence[ValidationErrorDetail], Mapping[str, Any]]:\n    \\\"\\\"\\\"Load a JSON file and validate it as a benchmark run.\n\n    Returns ``(ok, errors, run_dict)``.\n    \\\"\\\"\\\"\n    p = Path(path)\n    with p.open(\"r\", encoding=\"utf-8\") as f:\n        run = json.load(f)\n    ok, errors = validate_run(run, schema=schema)\n    return ok, errors, run\n\"\"\")\n\nchunks.append(\"\"\"def format_errors(\n    errors: Sequence[ValidationErrorDetail],\n    *,\n    max_errors: Optional[int] = 50,\n) -> str:\n    \\\"\\\"\\\"Format validation errors as a readable multi-line string.\\\"\\\"\\\"\n    if not errors:\n        return \"OK\"\n\n    shown = errors if max_errors is None else errors[:max_errors]\n    lines: List[str] = []\n    lines.append(f\"{len(errors)} validation error(s):\")\n    for i, e in enumerate(shown, 1):\n        loc = e.instance_path or \"/\"\n        lines.append(f\"{i:>2}. {loc}: {e.message} (schema {e.schema_path})\")\n    if max_errors is not None and len(errors) > max_errors:\n        lines.append(f\"... {len(errors) - max_errors} more not shown\")\n    return \"\\\\n\".join(lines)\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/benchmarks/validate.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/benchmarks/validate.py\nDIR_STATE:[\"src/benchmarks/__init__.py\", \"src/benchmarks/schema.py\", \"src/benchmarks/validate.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_00ecc7a4547205a3006949b6bd3d388194a9c568571d460324",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/benchmarks/validate.py` with a minimal `jsonschema`-based validator (`validate_run`, `validate_run_file`) plus a `ValidationErrorDetail` dataclass and `format_errors()` for compact, human-readable error reporting."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

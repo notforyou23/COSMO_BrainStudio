@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create/standardize the single runner command (e.g., scripts/qa_run.sh or python -m qa.run) with documented flags, stable output locations, and non-zero exit codes on failure; make all workflows call this runner.
+Project: generated_script_1766627258099 (python script)
+
+Target file details:
+- Path: scripts/qa_run.sh
+- Purpose: Shell wrapper that invokes the standardized Python runner with pass-through arguments for use in CI and local workflows.
+- Category: support
+
+Other planned files (for context only):
+- qa/__init__.py: Defines the qa package namespace used by the standardized runner entrypoint.
+- qa/run.py: Implements the single QA runner (python -m qa.run) with documented CLI flags, stable output locations, subprocess orchestration, and non-zero exit codes on failure.
+- qa/paths.py: Provides canonical path resolution utilities for stable output directories and consistent artifact locations across environments.
+- docs/qa_runner.md: Documents the single runner command, all CLI flags, expected exit codes, and stable output/artifact locations for integration into workflows.
+
+Reference insights:
+- [AGENT: agent_1766620093682_0dbi3wj] Document Created: single command (e.g., scripts/qa_run.sh or python -m qa.run) that (1) runs scaffold g
+- [AGENT: agent_1766619476801_dj6dsxw] {"agentId":"agent_1766619476801_dj6dsxw","timestamp":"2025-12-24T23:43:43.594Z","files":[{"filename":"v
+- [AGENT: agent_1766614627657_h1iraii] {"agentId":"agent_1766614627657_h1iraii","timestamp":"2025-12-24T22:18:53.796Z","files":[{"filename":"v
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Shell wrapper that invokes the standardized Python runner with pass-through arguments for use in CI and local workflows.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/qa_run.sh')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/qa_run.sh')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/qa_run.sh.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

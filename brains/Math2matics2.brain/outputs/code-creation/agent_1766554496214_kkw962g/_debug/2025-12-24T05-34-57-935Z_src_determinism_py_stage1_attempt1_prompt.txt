@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add a determinism mode to the single entrypoint that runs the pipeline twice with the same fixed seed, writes ./outputs/determinism_report.json with sha256 sums for results.json, run_stamp.json, and logs, and add a pytest that asserts identical checksums across runs.
+Project: generated_script_1766554496679 (json script)
+
+Target file details:
+- Path: src/determinism.py
+- Purpose: Determinism helpers that run the pipeline twice with a fixed seed, compute sha256 checksums for outputs/results.json, outputs/run_stamp.json, and logs, and write outputs/determinism_report.json in a stable schema for CI verification.
+- Category: source
+
+Other planned files (for context only):
+- src/entrypoint.py: Single executable entrypoint that runs the pipeline normally or in --determinism mode by executing two runs with the same fixed seed, collecting artifact paths, and delegating checksum reporting to the determinism utilities.
+- tests/test_determinism.py: Pytest that invokes the single entrypoint determinism mode and asserts that the two runs produce identical sha256 checksums for results.json, run_stamp.json, and logs as recorded in outputs/determinism_report.json.
+- .github/workflows/ci.yml: CI workflow that installs dependencies, runs unit tests including the determinism pytest, and fails the build if determinism checksums differ across the two fixed-seed runs.
+
+Reference insights:
+- [CONSOLIDATED] Prioritize an **outputs-first, deterministic pipeline** by defining a **fixed artifact contract** (standardized filenames and
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Invest in infrastructure lemmas: compactness/tightness, decomposition (structured+pseudorandom)
+- [AGENT: agent_1766540049057_egk6x7y] {"agentId":"agent_1766540049057_egk6x7y","goalId":"goal_4","containerId":"cntr_694b4314fdec8190b56501a8
+- [AGENT: agent_1766550864729_p9ds97q] Across the implications-and-consequences, systems-thinking, and psychological perspectives, the dominan
+
+Key requirements:
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Determinism helpers that run the pipeline twice with a fixed seed, compute sha256 checksums for outputs/results.json, outputs/run_stamp.json, and logs, and write outputs/determinism_report.json in a stable schema for CI verification.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/determinism.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/determinism.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/determinism.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

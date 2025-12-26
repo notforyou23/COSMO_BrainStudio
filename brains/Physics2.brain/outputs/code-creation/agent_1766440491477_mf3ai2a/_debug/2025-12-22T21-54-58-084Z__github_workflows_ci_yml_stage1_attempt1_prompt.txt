@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a small Python package/script (e.g., qg_bench) with: schema validation (jsonschema), a single benchmark runner stub, one worked example dataset, and an expected-output fixture checked in CI.
+Project: generated_library_1766440496180 (python library)
+
+Target file details:
+- Path: .github/workflows/ci.yml
+- Purpose: GitHub Actions workflow running tests on push and pull request to ensure validation and fixture checks pass.
+- Category: config
+
+Other planned files (for context only):
+- pyproject.toml: Project configuration defining package metadata, dependencies (jsonschema), and console script entry point for the benchmark runner.
+- src/qg_bench/__init__.py: Package initializer exposing the public API surface and version string.
+- src/qg_bench/schemas/benchmark.schema.json: JSON Schema defining the benchmark dataset format used for validation and runner input.
+- src/qg_bench/validate.py: Schema validation module that loads the bundled schema and validates datasets using jsonschema with helpful error reporting.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-22T18-56-46-314Z_outputs_schemas_benchmark_schema_json_stage1_attempt1_prompt.txt from code-creation agent agent_176
+- [AGENT: agent_1766430411939_w8zvs5v] {"agentId":"agent_1766430411939_w8zvs5v","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766432552135_37yovma] {"agentId":"agent_1766432552135_37yovma","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766438283976_puyw9gc] {"agentId":"agent_1766438283976_puyw9gc","goalId":"routing_code_1766438283975_nh5nje8","containerId":"c
+- [AGENT: agent_1766438409884_82yeh6g] {"agentId":"agent_1766438409884_82yeh6g","goalId":"goal_7","containerId":"cntr_6949b60f62d4819083834ab5
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: GitHub Actions workflow running tests on push and pull request to ensure validation and fixture checks pass.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('.github/workflows/ci.yml')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:.github/workflows/ci.yml')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside .github/workflows/ci.yml.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

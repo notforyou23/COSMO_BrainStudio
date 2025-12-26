@@ -1,0 +1,56 @@
+{
+  "content": "Implemented a compact, import-safe `src/experiments/registry.py` providing an in-memory experiments registry with `register`, `get`, and listing utilities, designed to be parse-clean during repo-wide `compileall`.",
+  "reasoning": "",
+  "responseId": "resp_0ce39722e7fb72eb006949bfd2ea24819683c29008ee29c40b",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2816,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1262,
+    "output_tokens_details": {
+      "reasoning_tokens": 148
+    },
+    "total_tokens": 4078
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0ce39722e7fb72eb006949bfd3bb8c8196b3f60ac631d03340",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ce39722e7fb72eb006949bfd7125c8196ab8b28a8d01bc545",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/registry.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Lightweight experiments registry.\n\nThis module is intentionally small and safe to import during `compileall`.\nIt provides a simple in-memory registry for experiment callables plus metadata.\n\nTypical usage:\n\n    from experiments.registry import register, get\n\n    @register(name=\"my_exp\", description=\"Demo\")\n    def run(seed: int = 0):\n        ...\n\n    spec = get(\"my_exp\")\n    spec.fn(seed=123)\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass ExperimentSpec:\n    \\\"\\\"\\\"A registered experiment entry.\\\"\\\"\\\"\n\n    name: str\n    fn: Callable[..., Any]\n    description: str = \"\"\n    tags: Tuple[str, ...] = ()\n    default_params: Mapping[str, Any] = field(default_factory=dict)\n\n    def call(self, **params: Any) -> Any:\n        \\\"\\\"\\\"Call the underlying experiment with merged default parameters.\\\"\\\"\\\"\n        merged: Dict[str, Any] = dict(self.default_params)\n        merged.update(params)\n        return self.fn(**merged)\"\"\",\n\"\"\"_REGISTRY: Dict[str, ExperimentSpec] = {}\n\n\ndef register(\n    fn: Optional[Callable[..., Any]] = None,\n    *,\n    name: Optional[str] = None,\n    description: str = \"\",\n    tags: Sequence[str] = (),\n    default_params: Optional[Mapping[str, Any]] = None,\n    overwrite: bool = False,\n) -> Callable[[Callable[..., Any]], Callable[..., Any]]:\n    \\\"\\\"\\\"Register an experiment function.\n\n    Can be used as a decorator or as a function:\n\n        @register(name=\"exp1\")\n        def exp1(...): ...\n\n        def exp2(...): ...\n        register(exp2, name=\"exp2\")\n\n    Args:\n        fn: The experiment callable (optional when used as a decorator).\n        name: Registry key; defaults to fn.__name__.\n        description: Human readable description.\n        tags: Optional tags for grouping/filters.\n        default_params: Default keyword arguments passed to the callable.\n        overwrite: If True, allow replacing an existing entry.\n    \\\"\\\"\\\"\n\n    def _do_register(func: Callable[..., Any]) -> Callable[..., Any]:\n        exp_name = name or getattr(func, \"__name__\", None) or \"experiment\"\n        if (not overwrite) and exp_name in _REGISTRY:\n            raise KeyError(f\\\"Experiment already registered: {exp_name}\\\")\n        spec = ExperimentSpec(\n            name=exp_name,\n            fn=func,\n            description=description or \"\",\n            tags=tuple(tags) if tags else (),\n            default_params=dict(default_params or {}),\n        )\n        _REGISTRY[exp_name] = spec\n        return func\n\n    return _do_register(fn) if fn is not None else _do_register\"\"\",\n\"\"\"def get(name: str) -> ExperimentSpec:\n    \\\"\\\"\\\"Retrieve a registered experiment spec by name.\\\"\\\"\\\"\n    try:\n        return _REGISTRY[name]\n    except KeyError as e:\n        available = \\\", \\\".join(sorted(_REGISTRY)) or \\\"<none>\\\"\n        raise KeyError(f\\\"Unknown experiment: {name}. Available: {available}\\\") from e\n\n\ndef list_experiments(*, tag: Optional[str] = None) -> List[ExperimentSpec]:\n    \\\"\\\"\\\"List registered experiments, optionally filtered by a single tag.\\\"\\\"\\\"\n    items = sorted(_REGISTRY.values(), key=lambda s: s.name)\n    if tag is None:\n        return items\n    return [s for s in items if tag in s.tags]\n\n\ndef names(*, tag: Optional[str] = None) -> List[str]:\n    \\\"\\\"\\\"List registered experiment names.\\\"\\\"\\\"\n    return [s.name for s in list_experiments(tag=tag)]\n\n\ndef clear() -> None:\n    \\\"\\\"\\\"Clear the registry (primarily for tests).\\\"\\\"\\\"\n    _REGISTRY.clear()\n\n\ndef register_many(\n    specs: Iterable[Callable[..., Any]],\n    *,\n    overwrite: bool = False,\n) -> List[str]:\n    \\\"\\\"\\\"Register multiple callables using their __name__ as the key.\\\"\\\"\\\"\n    out: List[str] = []\n    for fn in specs:\n        register(fn, overwrite=overwrite)\n        out.append(getattr(fn, \\\"__name__\\\", \\\"experiment\\\"))\n    return out\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/experiments/registry.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bf49646c819096b016c3e92a33230ce550ef4271a753",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/registry.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/registry.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0ce39722e7fb72eb006949bfe6b0c4819698b0901f5e258bc0",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented a compact, import-safe `src/experiments/registry.py` providing an in-memory experiments registry with `register`, `get`, and listing utilities, designed to be parse-clean during repo-wide `compileall`."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

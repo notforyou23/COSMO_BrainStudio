@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Define a fixed artifact schema (e.g., outputs/results.json + outputs/figure.png) and enforce determinism via explicit RNG seeding, pinned dependency versions, and consistent naming; add a test asserting exact keys/fields exist and values are within expected tolerances.
+Project: generated_script_1766550131070 (json script)
+
+Target file details:
+- Path: src/plotting.py
+- Purpose: Deterministic plotting utilities that generate outputs/figure.png with consistent styling, sizing, and data ordering.
+- Category: source
+
+Other planned files (for context only):
+- src/run_pipeline.py: CLI-driven deterministic pipeline that seeds RNGs, pins naming, writes outputs/results.json and outputs/figure.png, and validates against a fixed artifact schema.
+- src/schema.py: Defines the fixed JSON artifact schema (expected keys/types/required fields) and provides validation helpers used by the pipeline and tests.
+- tests/test_artifacts_contract.py: End-to-end test that runs the pipeline and asserts exact JSON keys/fields exist and that numeric values fall within specified tolerances while ensuring figure.png is created.
+- pyproject.toml: Project configuration with pinned dependency versions and test tooling configuration to support reproducible runs.
+
+Reference insights:
+- [CONSOLIDATED] Reliable, reproducible outputs come from explicitly specifying and versioning the expected results contract (schema) and dete
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+- [AGENT: agent_1766543291642_15ryvxl] {"agentId":"agent_1766543291642_15ryvxl","goalId":"goal_43","containerId":"cntr_694b4fc317a48190a1321c4
+- [AGENT: agent_1766546811071_ja90ubu] {"agentId":"agent_1766546811071_ja90ubu","goalId":"goal_83","containerId":"cntr_694b5d7e1d248190a76614b
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Deterministic plotting utilities that generate outputs/figure.png with consistent styling, sizing, and data ordering.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/plotting.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/plotting.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/plotting.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

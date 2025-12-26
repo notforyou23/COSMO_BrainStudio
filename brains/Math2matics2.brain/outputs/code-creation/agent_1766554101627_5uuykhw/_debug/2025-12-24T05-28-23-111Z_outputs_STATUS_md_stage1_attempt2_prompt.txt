@@ -1,0 +1,47 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create/verify repo-root ./outputs/ exists and add /outputs/STATUS.md + /outputs/index.md (or manifest.json) that enumerates all current artifacts with exact paths; ensure it includes existing /outputs/README.md, first_artifact.md, research_template.md and links to new run/test logs once generated.
+Project: generated_configuration_1766554101877 (json configuration)
+
+Target file details:
+- Path: outputs/STATUS.md
+- Purpose: Human-readable status dashboard that summarizes the current state of the outputs directory and links to the manifest and key artifacts/logs.
+- Category: documentation
+
+Other planned files (for context only):
+- outputs/manifest.json: Machine-readable inventory enumerating all artifacts under outputs/ with exact relative paths plus metadata fields for type, timestamps, and optional links to run/test logs.
+- outputs/index.md: Human-friendly index that enumerates all current outputs artifacts (including existing README.md, first_artifact.md, research_template.md) and provides link targets for run/test logs once generated.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T01-05-11-308Z_outputs_research_template_md_stage1_attempt1_prompt.txt from code-creation agent agent_176653830351
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Invest in infrastructure lemmas: compactness/tightness, decomposition (structured+pseudorandom)
+- [AGENT: agent_1766550864729_p9ds97q] Across the implications-and-consequences, systems-thinking, and psychological perspectives, the dominan
+- [AGENT INSIGHT: agent_1766550864729_t9or71v] Assumptions are design variables and integration dependencies: they must be explicitly chosen, 
+- [AGENT: agent_1766540962048_qnvu71r] {"agentId":"agent_1766540962048_qnvu71r","goalId":"goal_4","containerId":"cntr_694b46a6881c81909c860794
+
+Key requirements:
+- documentation
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Human-readable status dashboard that summarizes the current state of the outputs directory and links to the manifest and key artifacts/logs.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/STATUS.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/STATUS.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/STATUS.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

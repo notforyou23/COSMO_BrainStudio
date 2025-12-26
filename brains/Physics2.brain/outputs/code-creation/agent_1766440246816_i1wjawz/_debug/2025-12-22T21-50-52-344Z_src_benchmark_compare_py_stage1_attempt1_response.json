@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/benchmark_compare.py` as a CI-friendly JSON comparator that enforces deterministic seeding, uses stable/canonical JSON reporting, and performs recursive expected-vs-actual diffs with configurable absolute/relative numeric tolerances (including per-path overrides) and clear exit codes (0 pass, 1 mismatch, 2 error).",
+  "reasoning": "",
+  "responseId": "resp_0ed1c56c80ffbff6006949bdb22d5081938cd295fd4d9871bb",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4279,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2701,
+    "output_tokens_details": {
+      "reasoning_tokens": 522
+    },
+    "total_tokens": 6980
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0ed1c56c80ffbff6006949bdb2fb8881938666595c4311b76b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ed1c56c80ffbff6006949bdbd8f608193bba6509d870020fd",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, math\n\ntarget_path = Path('/mnt/data').joinpath('src/benchmark_compare.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\nr\"\"\"#!/usr/bin/env python3\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport math\nimport os\nimport random\nimport sys\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Tuple, Union\n\nNumber = Union[int, float]\"\"\",\nr\"\"\"def enforce_determinism(seed: int) -> None:\n    # Best-effort determinism for benchmark runs and comparisons.\n    random.seed(seed)\n    os.environ.setdefault(\"PYTHONHASHSEED\", str(seed))\n    try:\n        import numpy as np  # type: ignore\n        np.random.seed(seed)\n    except Exception:\n        pass\"\"\",\nr\"\"\"def canonical_dumps(obj: Any) -> str:\n    # Stable JSON for CI logs/artifacts (key ordering, normalized whitespace).\n    return json.dumps(obj, sort_keys=True, ensure_ascii=False, indent=2) + \"\\n\"\n\n\ndef _is_number(x: Any) -> bool:\n    return isinstance(x, (int, float)) and not isinstance(x, bool)\n\n\ndef _path_join(base: str, key: Union[str, int]) -> str:\n    if isinstance(key, int):\n        return f\"{base}[{key}]\"\n    # JSON-pointer-ish but human friendly.\n    return f\"{base}.{key}\" if base else str(key)\"\"\",\nr\"\"\"@dataclass\nclass Diff:\n    path: str\n    expected: Any\n    actual: Any\n    message: str\n\n    def as_dict(self) -> Dict[str, Any]:\n        return {\"path\": self.path, \"expected\": self.expected, \"actual\": self.actual, \"message\": self.message}\"\"\",\nr\"\"\"def _tol_for_path(path: str, base_atol: float, base_rtol: float, overrides: Dict[str, Dict[str, float]]) -> Tuple[float, float]:\n    if path in overrides:\n        o = overrides[path]\n        return float(o.get(\"atol\", base_atol)), float(o.get(\"rtol\", base_rtol))\n    return base_atol, base_rtol\n\n\ndef numbers_close(a: Number, b: Number, atol: float, rtol: float) -> bool:\n    # NaN==NaN, inf must match sign.\n    if isinstance(a, bool) or isinstance(b, bool):\n        return a == b\n    if isinstance(a, float) and math.isnan(a):\n        return isinstance(b, float) and math.isnan(b)\n    if isinstance(b, float) and math.isnan(b):\n        return False\n    if isinstance(a, float) and math.isinf(a) or isinstance(b, float) and math.isinf(b):\n        return a == b\n    return abs(a - b) <= (atol + rtol * abs(b))\"\"\",\nr\"\"\"def diff_json(\n    expected: Any,\n    actual: Any,\n    *,\n    atol: float = 1e-8,\n    rtol: float = 1e-6,\n    overrides: Dict[str, Dict[str, float]] | None = None,\n    path: str = \"\",\n) -> List[Diff]:\n    overrides = overrides or {}\n    diffs: List[Diff] = []\n\n    if _is_number(expected) and _is_number(actual):\n        pa_atol, pa_rtol = _tol_for_path(path, atol, rtol, overrides)\n        if not numbers_close(float(expected), float(actual), pa_atol, pa_rtol):\n            diffs.append(Diff(path, expected, actual, f\"numbers differ (atol={pa_atol}, rtol={pa_rtol})\"))\n        return diffs\n\n    if type(expected) != type(actual):\n        diffs.append(Diff(path, expected, actual, f\"type mismatch: {type(expected).__name__} vs {type(actual).__name__}\"))\n        return diffs\n\n    if isinstance(expected, dict):\n        ekeys, akeys = set(expected.keys()), set(actual.keys())  # type: ignore[arg-type]\n        for k in sorted(ekeys - akeys):\n            diffs.append(Diff(_path_join(path, str(k)), expected[k], None, \"missing key in actual\"))  # type: ignore[index]\n        for k in sorted(akeys - ekeys):\n            diffs.append(Diff(_path_join(path, str(k)), None, actual[k], \"extra key in actual\"))  # type: ignore[index]\n        for k in sorted(ekeys & akeys):\n            diffs.extend(diff_json(expected[k], actual[k], atol=atol, rtol=rtol, overrides=overrides, path=_path_join(path, str(k))))  # type: ignore[index]\n        return diffs\n\n    if isinstance(expected, list):\n        if len(expected) != len(actual):  # type: ignore[arg-type]\n            diffs.append(Diff(path, len(expected), len(actual), \"list length differs\"))\n        for i, (e, a) in enumerate(zip(expected, actual)):  # type: ignore[arg-type]\n            diffs.extend(diff_json(e, a, atol=atol, rtol=rtol, overrides=overrides, path=_path_join(path, i)))\n        return diffs\n\n    if expected != actual:\n        diffs.append(Diff(path, expected, actual, \"value differs\"))\n    return diffs\"\"\",\nr\"\"\"def load_json(path: Path) -> Any:\n    with path.open(\"r\", encoding=\"utf-8\") as f:\n        return json.load(f)\n\n\ndef parse_overrides(raw: str | None) -> Dict[str, Dict[str, float]]:\n    if not raw:\n        return {}\n    try:\n        data = json.loads(raw)\n        if isinstance(data, dict):\n            return {str(k): dict(v) for k, v in data.items() if isinstance(v, dict)}\n    except Exception:\n        pass\n    raise ValueError(\"Invalid tolerances JSON; expected object mapping path-> {atol, rtol}\")\n\n\ndef compare_files(\n    actual_path: Path,\n    expected_path: Path,\n    *,\n    seed: int = 0,\n    atol: float = 1e-8,\n    rtol: float = 1e-6,\n    overrides: Dict[str, Dict[str, float]] | None = None,\n    report_path: Path | None = None,\n) -> int:\n    enforce_determinism(seed)\n    try:\n        expected = load_json(expected_path)\n        actual = load_json(actual_path)\n    except Exception as e:\n        sys.stderr.write(f\"ERROR: failed to load JSON: {e}\\n\")\n        return 2\n\n    diffs = diff_json(expected, actual, atol=atol, rtol=rtol, overrides=overrides or {})\n    report = {\n        \"ok\": not diffs,\n        \"seed\": seed,\n        \"atol\": atol,\n        \"rtol\": rtol,\n        \"expected_path\": str(expected_path),\n        \"actual_path\": str(actual_path),\n        \"diff_count\": len(diffs),\n        \"diffs\": [d.as_dict() for d in diffs[:200]],\n        \"truncated\": len(diffs) > 200,\n    }\n    if report_path:\n        report_path.parent.mkdir(parents=True, exist_ok=True)\n        report_path.write_text(canonical_dumps(report), encoding=\"utf-8\")\n\n    if diffs:\n        sys.stderr.write(f\"FAIL: {len(diffs)} diffs\\n\")\n        sys.stderr.write(canonical_dumps(report if len(diffs) <= 20 else {**report, \"diffs\": report[\"diffs\"][:20], \"truncated\": True}))\n        return 1\n    sys.stdout.write(\"PASS\\n\")\n    return 0\"\"\",\nr\"\"\"def main(argv: List[str] | None = None) -> int:\n    here = Path(__file__).resolve()\n    default_expected = here.parents[1] / \"expected\" / \"benchmark_case_001.expected.json\"\n\n    p = argparse.ArgumentParser(description=\"Benchmark expected-vs-actual JSON comparator with determinism + numeric tolerances.\")\n    p.add_argument(\"--actual\", type=Path, required=True, help=\"Path to actual benchmark JSON output.\")\n    p.add_argument(\"--expected\", type=Path, default=default_expected, help=f\"Path to expected JSON (default: {default_expected})\")\n    p.add_argument(\"--seed\", type=int, default=int(os.environ.get(\"BENCHMARK_SEED\", \"0\")))\n    p.add_argument(\"--atol\", type=float, default=float(os.environ.get(\"BENCHMARK_ATOL\", \"1e-8\")))\n    p.add_argument(\"--rtol\", type=float, default=float(os.environ.get(\"BENCHMARK_RTOL\", \"1e-6\")))\n    p.add_argument(\"--tolerances-json\", type=str, default=os.environ.get(\"BENCHMARK_TOLERANCES_JSON\"))\n    p.add_argument(\"--report\", type=Path, default=None, help=\"Optional path to write a canonical JSON report for CI artifacts.\")\n    args = p.parse_args(argv)\n\n    overrides = parse_overrides(args.tolerances_json)\n    return compare_files(\n        args.actual,\n        args.expected,\n        seed=args.seed,\n        atol=args.atol,\n        rtol=args.rtol,\n        overrides=overrides,\n        report_path=args.report,\n    )\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/benchmark_compare.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd39c7008190b2d314f911169a74060596b8e6d512ff",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/benchmark_compare.py\nDIR_STATE:[\"src/benchmark_compare.py\", \"src/determinism.py\", \"src/numeric_tolerance_diff.py\", \"src/stable_json.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0ed1c56c80ffbff6006949bdde7a7c81939d4b93752be2c122",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/benchmark_compare.py` as a CI-friendly JSON comparator that enforces deterministic seeding, uses stable/canonical JSON reporting, and performs recursive expected-vs-actual diffs with configurable absolute/relative numeric tolerances (including per-path overrides) and clear exit codes (0 pass, 1 mismatch, 2 error)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

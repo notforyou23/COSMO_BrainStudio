@@ -1,0 +1,56 @@
+{
+  "content": "Created `docs/e2e/README_e2e_sections/30_running_locally.md`, a reusable “run locally” section covering quick-start commands, run selection patterns, expected outputs, common pytest flags, and practical troubleshooting guidance within the line budget.",
+  "reasoning": "",
+  "responseId": "resp_02825eed0fae8c5a006949c9089af881948ad28c205a60bb4f",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2989,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1459,
+    "output_tokens_details": {
+      "reasoning_tokens": 1404
+    },
+    "total_tokens": 4448
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_02825eed0fae8c5a006949c90a2ab88194941e05496d9eccef",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_02825eed0fae8c5a006949c90e8df48194b6aadd9da4bd33c5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re\ntarget_path = Path('/mnt/data').joinpath('docs/e2e/README_e2e_sections/30_running_locally.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"# Running locally\n\nThis section describes a repeatable way to run the end-to-end (E2E) suite on a developer machine, what “good” output looks like, and how to debug the most common failures.\n\n## Quick start (most common)\n\nFrom the repo root:\n\n```bash\n# (optional) create/activate a virtualenv\npython -m venv .venv\nsource .venv/bin/activate  # on Windows: .venv\\\\Scripts\\\\activate\n\npython -m pip install -U pip\npython -m pip install -r docs/e2e/requirements-ci.txt\n\n# run the full E2E suite\npytest -m e2e -q\n```\n\n## Selecting what to run\n\nRun a single file:\n\n```bash\npytest -m e2e tests/e2e/test_smoke.py -vv\n```\n\nRun a single test (substring match):\n\n```bash\npytest -m e2e -k \"login and happy_path\" -vv\n```\n\nRun “smoke” only (if markers are defined in this repo):\n\n```bash\npytest -m \"e2e and smoke\" -q\n```\n\nRe-run only failures from the last run:\n\n```bash\npytest -m e2e --lf -vv\n```\n\n## Configuration and environment\n\nE2E runs typically depend on config and/or environment variables (see the dedicated configuration section in this doc set). A common local pattern is:\n\n```bash\nexport E2E_CONFIG_PATH=./configs/e2e.local.json\nexport E2E_ARTIFACTS_DIR=./artifacts/e2e\nmkdir -p \"$E2E_ARTIFACTS_DIR\"\n\npytest -m e2e -vv\n```\n\nIf your project uses a `.env` file, load it before running tests (or use your shell’s equivalent).\n\n## Expected outputs\n\nA successful run should include:\n\n- Pytest summary with `passed` and exit code `0`\n- An artifacts directory (logs, screenshots, traces, reports), if enabled\n- No “collection” errors (those indicate import/config problems, not test failures)\n\nExample summary:\n\n```text\n==================== 12 passed, 1 skipped in 03:41 ====================\n```\n\nIf artifacts are enabled, you should see files created under your configured artifacts directory (for example, `artifacts/e2e/…`).\n\n## Common flags (practical)\n\nPytest verbosity and logs:\n\n```bash\npytest -m e2e -vv --log-cli-level=INFO\n```\n\nStop early on the first failure:\n\n```bash\npytest -m e2e --maxfail=1 -x\n```\n\nShow the slowest tests (useful for local tuning):\n\n```bash\npytest -m e2e --durations=10\n```\n\nDisable capturing to see live stdout/stderr (useful when debugging hangs):\n\n```bash\npytest -m e2e -s -vv\n```\n\nParallel execution (requires `pytest-xdist`):\n\n```bash\npytest -m e2e -n auto\n```\n\n## Troubleshooting\n\n### 1) “ImportError / ModuleNotFoundError” during collection\nSymptoms: errors appear before any tests run.\n\nFixes:\n- Ensure the correct venv is activated and dependencies are installed.\n- Reinstall with a clean environment if needed:\n  ```bash\n  python -m pip install -r docs/e2e/requirements-ci.txt --force-reinstall\n  ```\n- Verify you are running from the repository root.\n\n### 2) Config validation / missing keys\nSymptoms: tests fail quickly with a message about missing config/credentials/endpoints.\n\nFixes:\n- Confirm your config path (for example, `E2E_CONFIG_PATH`) points to an existing file.\n- Validate required keys match the configuration section.\n- Ensure secrets are present in your local environment (but do not commit them).\n\n### 3) Network/auth failures (401/403/5xx, timeouts)\nFixes:\n- Confirm you are targeting the intended environment (local/staging/dev).\n- Check VPN/proxy settings and DNS resolution.\n- Retry once to rule out transient issues; if repeatable, capture logs/artifacts and file an issue.\n\n### 4) Browser/UI failures (if applicable)\nFixes:\n- Run headed to observe behavior (framework-specific), or increase logging.\n- Ensure required system dependencies are installed (fonts, display libs, etc.).\n- Collect traces/screenshots from the artifacts directory.\n\n### 5) Flaky tests\nFixes:\n- Re-run the failing test in isolation (`pytest -m e2e -k \"<name>\" -vv`).\n- Use `--lf` to iterate quickly.\n- If the failure is timing-related, prefer explicit waits over arbitrary sleeps; record timings via `--durations`.\n\n## Notes for reproducibility\n\n- Prefer running from a clean working tree to avoid local config drift.\n- Record: git SHA, config file used, and artifacts directory when reporting failures.\n- If CI passes but local fails, compare Python version and dependency versions (`python -V`, `pip freeze`).\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:docs/e2e/README_e2e_sections/30_running_locally.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949c882be7c819088c3caf5ad10e5ac0ab56cad82a1639c",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:docs/e2e/README_e2e_sections/30_running_locally.md\nDIR_STATE:[\"docs/e2e/README_e2e_sections/00_overview.md\", \"docs/e2e/README_e2e_sections/10_prerequisites.md\", \"docs/e2e/README_e2e_sections/20_configuration.md\", \"docs/e2e/README_e2e_sections/30_running_locally.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_02825eed0fae8c5a006949c929df148194ad9f0672169005be",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `docs/e2e/README_e2e_sections/30_running_locally.md`, a reusable “run locally” section covering quick-start commands, run selection patterns, expected outputs, common pytest flags, and practical troubleshooting guidance within the line budget."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

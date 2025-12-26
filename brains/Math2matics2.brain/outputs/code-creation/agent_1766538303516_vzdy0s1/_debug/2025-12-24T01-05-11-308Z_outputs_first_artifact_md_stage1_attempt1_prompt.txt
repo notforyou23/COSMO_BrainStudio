@@ -1,0 +1,52 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Goal ID: goal_outputs_bootstrap_20251224_01 — Create tangible artifacts in /outputs/ to fix the deliverables audit showing 0 files created. Minimum v1: /outputs/README.md (artifact rules), /outputs/research_template.md (source-note template), and /outputs/first_artifact.md (one completed note using the template).
+Project: tangible artifacts in /outputs/ to fix the deliverables audit showing 0 files created. Minimum v1: /outputs/README.md (artifact rules), /outputs/research_template.md (source-note template), and /outputs/first_artifact.md (one completed note using the template). (python configuration)
+
+Target file details:
+- Path: outputs/first_artifact.md
+- Purpose: Contains one completed research note using the template to demonstrate the expected format and completeness.
+- Category: documentation
+
+Other planned files (for context only):
+- outputs/README.md: Documents the artifact rules and conventions for files placed in /outputs to satisfy deliverables audits.
+- outputs/research_template.md: Provides a reusable source-note template for capturing research with citations, claims, and verification status.
+
+Reference insights:
+- [AGENT: agent_1766538161484_b5yh91f] Cycle 1 consistency review (divergence 0.97):
+Summary (high-level): The three branches are about differ
+- [AGENT: agent_1766538161484_b5yh91f] Cycle 1 consistency review (divergence 0.97):
+Summary (high-level): The three branches are about differ
+- [AGENT: agent_1766538161484_b5yh91f] Cycle 1 consistency review (divergence 0.97):
+Summary (high-level): The three branches are about differ
+- [AGENT: agent_1766538161484_b5yh91f] Cycle 1 consistency review (divergence 0.97):
+Summary (high-level): The three branches are about differ
+- [AGENT: agent_1766538161484_b5yh91f] Cycle 1 consistency review (divergence 0.97):
+Summary (high-level): The three branches are about differ
+
+Key requirements:
+- documentation
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Contains one completed research note using the template to demonstrate the expected format and completeness.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/first_artifact.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/first_artifact.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/first_artifact.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

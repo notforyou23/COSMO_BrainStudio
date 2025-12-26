@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/experiments/__init__.py` as a lightweight package initializer that lazily exposes the public API (symbolic derivations, numeric runners, sweep harness, plotting, and I/O utilities) via `__getattr__`, along with an `available()` helper for submodule import checks.",
+  "reasoning": "",
+  "responseId": "resp_0e6a88c9c5b0777b00694b4c0a85ec8190b783148f15a594c5",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2751,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1227,
+    "output_tokens_details": {
+      "reasoning_tokens": 209
+    },
+    "total_tokens": 3978
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0e6a88c9c5b0777b00694b4c0b45f88190844b1ca89b8349ff",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0e6a88c9c5b0777b00694b4c0eb6fc819084e6f17165e92614",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/__init__.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Experiments package public API.\n\nThis package exposes:\n- SymPy-based symbolic derivations\n- NumPy/SciPy numeric runners\n- Parameter sweep harness\n- Plotting and I/O helpers\n\nImports are implemented lazily so that importing :mod:`experiments` is fast and\ndoesn't require heavy optional dependencies until needed.\n\\\"\\\"\\\"\"\"\",\n\"\"\"from __future__ import annotations\n\nfrom importlib import import_module\nfrom types import ModuleType\nfrom typing import Any, Dict, Iterable, List, Tuple\n\n__all__ = [\n    # Submodules\n    \"symbolic\",\n    \"numeric\",\n    \"sweep\",\n    \"plotting\",\n    \"io\",\n    # Helpers\n    \"available\",\n]\"\"\",\n\"\"\"# Map public attributes -> (module, attribute). Populated opportunistically by\n# submodules to keep this initializer lightweight.\n_EXPORTS: Dict[str, Tuple[str, str]] = {\n    # symbolic.py (analytic derivations)\n    \"derive_experiment_1\": (\"experiments.symbolic\", \"derive_experiment_1\"),\n    \"derive_experiment_2\": (\"experiments.symbolic\", \"derive_experiment_2\"),\n    \"derive_experiment_3\": (\"experiments.symbolic\", \"derive_experiment_3\"),\n    \"symbolic_helpers\": (\"experiments.symbolic\", \"helpers\"),\n    # numeric.py (numeric runners)\n    \"run_experiment_1\": (\"experiments.numeric\", \"run_experiment_1\"),\n    \"run_experiment_2\": (\"experiments.numeric\", \"run_experiment_2\"),\n    \"run_experiment_3\": (\"experiments.numeric\", \"run_experiment_3\"),\n    \"numeric_helpers\": (\"experiments.numeric\", \"helpers\"),\n    # sweep.py (parameter sweeps)\n    \"SweepConfig\": (\"experiments.sweep\", \"SweepConfig\"),\n    \"run_sweep\": (\"experiments.sweep\", \"run_sweep\"),\n    \"grid\": (\"experiments.sweep\", \"grid\"),\n    \"latin_hypercube\": (\"experiments.sweep\", \"latin_hypercube\"),\n    # plotting.py\n    \"plot_results\": (\"experiments.plotting\", \"plot_results\"),\n    \"plot_sweep\": (\"experiments.plotting\", \"plot_sweep\"),\n    # io.py\n    \"save_results_csv\": (\"experiments.io\", \"save_results_csv\"),\n    \"load_results_csv\": (\"experiments.io\", \"load_results_csv\"),\n    \"save_figure\": (\"experiments.io\", \"save_figure\"),\n}\"\"\",\n\"\"\"def _lazy_module(name: str) -> ModuleType:\n    \\\"\\\"\\\"Import and return a submodule of :mod:`experiments`.\\\"\\\"\\\"\n    return import_module(f\\\"experiments.{name}\\\")\n\n\ndef available() -> Dict[str, bool]:\n    \\\"\\\"\\\"Return availability of optional submodules (importable or not).\\\"\\\"\\\"\n    out: Dict[str, bool] = {}\n    for mod in (\"symbolic\", \"numeric\", \"sweep\", \"plotting\", \"io\"):\n        try:\n            _lazy_module(mod)\n            out[mod] = True\n        except Exception:\n            out[mod] = False\n    return out\"\"\",\n\"\"\"def __getattr__(name: str) -> Any:  # PEP 562\n    if name in (\"symbolic\", \"numeric\", \"sweep\", \"plotting\", \"io\"):\n        return _lazy_module(name)\n    if name in _EXPORTS:\n        mod_name, attr = _EXPORTS[name]\n        mod = import_module(mod_name)\n        return getattr(mod, attr)\n    raise AttributeError(f\\\"module 'experiments' has no attribute {name!r}\\\")\n\n\ndef __dir__() -> List[str]:\n    base: Iterable[str] = globals().keys()\n    return sorted(set(list(base) + list(__all__) + list(_EXPORTS.keys())))\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/experiments/__init__.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4bd0381081909cae03b5047a4b910a942f49460a0d3d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/__init__.py\nDIR_STATE:[\"src/experiments/__init__.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0e6a88c9c5b0777b00694b4c19d02081908f4a55dae73cc12b",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/experiments/__init__.py` as a lightweight package initializer that lazily exposes the public API (symbolic derivations, numeric runners, sweep harness, plotting, and I/O utilities) via `__getattr__`, along with an `available()` helper for submodule import checks."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

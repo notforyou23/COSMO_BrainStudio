@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a case-study catalog implementation: define a machine-readable schema (JSON Schema or YAML spec) and build a small CLI/script to add a new case study (metadata + tags + citations + rights fields) into /outputs/catalog/ and validate entries against the schema.
+Project: case-study catalog implementation: define a machine-readable schema (JSON Schema or YAML spec) and build a small CLI/script to add a new case study (metadata + tags + citations + rights fields) into /outputs/catalog/ and validate entries against the schema. (json cli_tool)
+
+Target file details:
+- Path: outputs/catalog/README.md
+- Purpose: Documentation describing the outputs/catalog/ directory layout, required fields, and how to use the CLI to add and validate case studies.
+- Category: documentation
+
+Other planned files (for context only):
+- schemas/case-study.schema.json: JSON Schema defining the canonical machine-readable structure for a single case study including metadata, tags, citations, and rights fields.
+- schemas/catalog.schema.json: JSON Schema defining the structure for the catalog index file that references all case study entries under outputs/catalog/.
+- src/catalog_cli.py: Complete Python CLI tool to create/add a new case study JSON file into outputs/catalog/ and validate case study and catalog index against the schemas.
+- src/catalog_lib.py: Library module implementing schema loading, validation, slug/id generation, file I/O, and catalog index updates used by the CLI.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T22-17-08-971Z_README_add_case_study_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766614627659_92
+- [INTROSPECTION] 2025-12-24T22-17-08-971Z_README_add_case_study_md_stage1_attempt2_prompt.txt from code-creation agent agent_1766614627659_92
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [INTROSPECTION] 2025-12-24T22-17-08-971Z_plan_attempt1_prompt.txt from code-creation agent agent_1766614627659_92j3x3t: You are planning a j
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] The dominant causal mechanism is a self-reinforcing selection loop: institutions use cheap, hig
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Documentation describing the outputs/catalog/ directory layout, required fields, and how to use the CLI to add and validate case studies.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/catalog/README.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/catalog/README.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/catalog/README.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

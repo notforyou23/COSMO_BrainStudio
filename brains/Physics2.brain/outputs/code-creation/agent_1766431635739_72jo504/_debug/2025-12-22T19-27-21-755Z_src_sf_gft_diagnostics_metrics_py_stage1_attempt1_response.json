@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/sf_gft_diagnostics/metrics.py` with a small, NumPy-only suite of mutually comparable diagnostics: smoothed PMF normalization; KL/JS/Hellinger/Wasserstein-1 distances for distributions; L1/L2/cosine for vector observables; and curve RMS + DTW distances for comparing RG trajectories, all exposed via a compact metric registry and `get_metric()` API.",
+  "reasoning": "",
+  "responseId": "resp_06bdb816995a7b0f0069499cbcc76481939ac65d2c864772df",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4037,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2473,
+    "output_tokens_details": {
+      "reasoning_tokens": 172
+    },
+    "total_tokens": 6510
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_06bdb816995a7b0f0069499cbdb48c81938925a9a7c7e2aee3",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06bdb816995a7b0f0069499cc28d688193a555354b6cc2e264",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, numpy as np\ntarget_path = Path('/mnt/data').joinpath('src/sf_gft_diagnostics/metrics.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\n\\\"\\\"\\\"sf_gft_diagnostics.metrics\n\nMutually comparable distance/consistency metrics used to cross-validate RG flows\n(tensor-network / lattice RG / spin-foam or GFT coarse-graining logs) and to\nbenchmark semiclassical/continuum expectations.\n\nDesign goals:\n- Robust on small sample sizes and sparse histograms (epsilon smoothing).\n- Works with minimal dependencies (NumPy only).\n- Comparable metrics for (i) distributions, (ii) vectors/observables, (iii) RG trajectories.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Callable, Dict, Iterable, Optional, Sequence, Tuple\n\nimport numpy as np\n\"\"\")\n\nchunks.append(\"\"\"\nArray = np.ndarray\n\n\ndef _as_1d(a: Array) -> Array:\n    a = np.asarray(a, dtype=float)\n    return a.reshape(-1)\n\n\ndef normalize_pmf(p: Array, eps: float = 1e-12) -> Array:\n    \\\"\\\"\\\"Normalize a nonnegative array to a probability mass function with smoothing.\\\"\\\"\\\"\n    p = np.clip(_as_1d(p), 0.0, np.inf) + float(eps)\n    s = p.sum()\n    return p / s if s > 0 else np.full_like(p, 1.0 / max(len(p), 1))\n\"\"\")\n\nchunks.append(\"\"\"\ndef kl_divergence(p: Array, q: Array, eps: float = 1e-12) -> float:\n    \\\"\\\"\\\"KL(p||q) with epsilon-smoothing; returns a finite float.\\\"\\\"\\\"\n    p = normalize_pmf(p, eps)\n    q = normalize_pmf(q, eps)\n    return float(np.sum(p * (np.log(p) - np.log(q))))\n\n\ndef js_divergence(p: Array, q: Array, eps: float = 1e-12, base: float = 2.0) -> float:\n    \\\"\\\"\\\"Jensen-Shannon divergence (bounded, symmetric).\\\"\\\"\\\"\n    p = normalize_pmf(p, eps)\n    q = normalize_pmf(q, eps)\n    m = 0.5 * (p + q)\n    js = 0.5 * kl_divergence(p, m, eps) + 0.5 * kl_divergence(q, m, eps)\n    return float(js / np.log(base))\n\n\ndef hellinger_distance(p: Array, q: Array, eps: float = 1e-12) -> float:\n    p = normalize_pmf(p, eps)\n    q = normalize_pmf(q, eps)\n    return float(np.linalg.norm(np.sqrt(p) - np.sqrt(q)) / np.sqrt(2.0))\n\"\"\")\n\nchunks.append(\"\"\"\ndef wasserstein_1d(p: Array, q: Array, x: Optional[Array] = None, eps: float = 1e-12) -> float:\n    \\\"\\\"\\\"1D Wasserstein-1 (Earth mover) for discrete distributions.\n\n    p,q: histogram counts or pmf on a common grid.\n    x: locations (same length); defaults to unit spacing.\n    \\\"\\\"\\\"\n    p = normalize_pmf(p, eps)\n    q = normalize_pmf(q, eps)\n    if x is None:\n        dx = 1.0\n    else:\n        x = _as_1d(x)\n        if len(x) != len(p):\n            raise ValueError(\\\"x must have same length as p,q\\\")\n        dx = np.diff(x)\n        if np.any(dx <= 0):\n            raise ValueError(\\\"x must be strictly increasing\\\")\n        # For nonuniform spacing, integrate CDF difference piecewise.\n        cdf = np.cumsum(p - q)[:-1]\n        return float(np.sum(np.abs(cdf) * dx))\n    cdf = np.cumsum(p - q)\n    return float(np.sum(np.abs(cdf)) * dx)\n\"\"\")\n\nchunks.append(\"\"\"\ndef l1_distance(a: Array, b: Array) -> float:\n    a, b = _as_1d(a), _as_1d(b)\n    if len(a) != len(b):\n        raise ValueError(\\\"Inputs must have same length\\\")\n    return float(np.sum(np.abs(a - b)))\n\n\ndef l2_distance(a: Array, b: Array) -> float:\n    a, b = _as_1d(a), _as_1d(b)\n    if len(a) != len(b):\n        raise ValueError(\\\"Inputs must have same length\\\")\n    return float(np.linalg.norm(a - b))\n\n\ndef cosine_distance(a: Array, b: Array, eps: float = 1e-12) -> float:\n    a, b = _as_1d(a), _as_1d(b)\n    na = np.linalg.norm(a) + eps\n    nb = np.linalg.norm(b) + eps\n    return float(1.0 - np.dot(a, b) / (na * nb))\n\"\"\")\n\nchunks.append(\"\"\"\ndef _interp_to_grid(x: Array, y: Array, grid: Array) -> Array:\n    x = _as_1d(x)\n    y = np.asarray(y, dtype=float)\n    if y.ndim == 1:\n        y = y[:, None]\n    if len(x) != y.shape[0]:\n        raise ValueError(\\\"x and y must have compatible lengths\\\")\n    out = np.vstack([np.interp(grid, x, y[:, j]) for j in range(y.shape[1])]).T\n    return out.squeeze()\n\n\ndef curve_rms_distance(\n    t1: Array,\n    y1: Array,\n    t2: Array,\n    y2: Array,\n    n_grid: int = 128,\n    weights: Optional[Array] = None,\n) -> float:\n    \\\"\\\"\\\"RMS distance between two parametric curves after interpolation to a common grid.\\\"\\\"\\\"\n    t1, t2 = _as_1d(t1), _as_1d(t2)\n    grid = np.linspace(max(t1.min(), t2.min()), min(t1.max(), t2.max()), int(n_grid))\n    a = _interp_to_grid(t1, y1, grid)\n    b = _interp_to_grid(t2, y2, grid)\n    d = a - b\n    if d.ndim == 1:\n        d = d[:, None]\n    if weights is None:\n        return float(np.sqrt(np.mean(np.sum(d * d, axis=1))))\n    w = normalize_pmf(weights, eps=0.0)\n    if len(w) != len(grid):\n        raise ValueError(\\\"weights must have length n_grid\\\")\n    return float(np.sqrt(np.sum(w * np.sum(d * d, axis=1))))\n\"\"\")\n\nchunks.append(\"\"\"\ndef dtw_distance(seq1: Array, seq2: Array, p: float = 2.0) -> float:\n    \\\"\\\"\\\"Dynamic time warping distance between two sequences (vectors allowed).\n\n    Uses O(nm) DP; intended for short RG trajectories (tens to few hundreds steps).\n    \\\"\\\"\\\"\n    x = np.asarray(seq1, dtype=float)\n    y = np.asarray(seq2, dtype=float)\n    if x.ndim == 1:\n        x = x[:, None]\n    if y.ndim == 1:\n        y = y[:, None]\n    n, m = x.shape[0], y.shape[0]\n    D = np.full((n + 1, m + 1), np.inf, dtype=float)\n    D[0, 0] = 0.0\n    for i in range(1, n + 1):\n        for j in range(1, m + 1):\n            cost = np.linalg.norm(x[i - 1] - y[j - 1], ord=p)\n            D[i, j] = cost + min(D[i - 1, j], D[i, j - 1], D[i - 1, j - 1])\n    return float(D[n, m])\n\"\"\")\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass Metric:\n    name: str\n    kind: str  # 'distribution' | 'vector' | 'trajectory'\n    fn: Callable[..., float]\n    bounded: Optional[Tuple[float, float]] = None\n    notes: str = \\\"\\\"\n\n\nMETRICS: Dict[str, Metric] = {\n    \\\"kl\\\": Metric(\\\"kl\\\", \\\"distribution\\\", kl_divergence, bounded=None, notes=\\\"KL(p||q), asymmetric\\\"),\n    \\\"js\\\": Metric(\\\"js\\\", \\\"distribution\\\", js_divergence, bounded=(0.0, 1.0), notes=\\\"JS divergence base-2\\\"),\n    \\\"hellinger\\\": Metric(\\\"hellinger\\\", \\\"distribution\\\", hellinger_distance, bounded=(0.0, 1.0)),\n    \\\"w1\\\": Metric(\\\"w1\\\", \\\"distribution\\\", wasserstein_1d, bounded=None, notes=\\\"Wasserstein-1 on 1D grid\\\"),\n    \\\"l1\\\": Metric(\\\"l1\\\", \\\"vector\\\", l1_distance),\n    \\\"l2\\\": Metric(\\\"l2\\\", \\\"vector\\\", l2_distance),\n    \\\"cosine\\\": Metric(\\\"cosine\\\", \\\"vector\\\", cosine_distance, bounded=(0.0, 2.0)),\n    \\\"curve_rms\\\": Metric(\\\"curve_rms\\\", \\\"trajectory\\\", curve_rms_distance),\n    \\\"dtw\\\": Metric(\\\"dtw\\\", \\\"trajectory\\\", dtw_distance),\n}\n\n\ndef get_metric(name: str) -> Metric:\n    \\\"\\\"\\\"Return a metric descriptor by name.\\\"\\\"\\\"\n    if name not in METRICS:\n        raise KeyError(f\\\"Unknown metric '{name}'. Available: {sorted(METRICS)}\\\")\n    return METRICS[name]\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/sf_gft_diagnostics/metrics.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499b97284881909e58fb047f14c1e300fdec2b43878464",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/sf_gft_diagnostics/metrics.py\nDIR_STATE:[\"src/sf_gft_diagnostics/__init__.py\", \"src/sf_gft_diagnostics/metrics.py\", \"src/sf_gft_diagnostics/observables.py\", \"src/sf_gft_diagnostics/scaling.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_06bdb816995a7b0f0069499ce8b0cc8193a1729e21e11ade7e",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/sf_gft_diagnostics/metrics.py` with a small, NumPy-only suite of mutually comparable diagnostics: smoothed PMF normalization; KL/JS/Hellinger/Wasserstein-1 distances for distributions; L1/L2/cosine for vector observables; and curve RMS + DTW distances for comparing RG trajectories, all exposed via a compact metric registry and `get_metric()` API."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

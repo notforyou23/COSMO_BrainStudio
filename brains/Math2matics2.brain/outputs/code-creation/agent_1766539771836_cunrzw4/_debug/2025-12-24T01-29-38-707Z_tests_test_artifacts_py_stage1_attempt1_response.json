@@ -1,0 +1,92 @@
+{
+  "content": "Created `tests/test_artifacts.py`, which executes `scripts/run_pipeline.py` and asserts `outputs/run_stamp.json` and `outputs/run.log` exist and that the JSON contains the required schema keys (and reports success).",
+  "reasoning": "",
+  "responseId": "resp_0c0c4fdc645a615600694b421440d881948435b5f2f0f9c764",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3389,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1126,
+    "output_tokens_details": {
+      "reasoning_tokens": 1077
+    },
+    "total_tokens": 4515
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0c0c4fdc645a615600694b4214e75481949c7fd215c9643e6c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c0c4fdc645a615600694b421886d88194816b6e521d683f20",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nroot=Path('/mnt/data')\nsorted([str(p.relative_to(root)) for p in root.rglob('*') if p.is_file()][:50])[:50]\n",
+      "container_id": "cntr_694b4200ed708190b1f3a92b963e36c309abd130e6c8c109",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "['scripts/run_pipeline.py']"
+        }
+      ]
+    },
+    {
+      "id": "rs_0c0c4fdc645a615600694b421ae5808194ad16284f5f81e05b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c0c4fdc645a615600694b421b3c5c8194b17933d9a63e2566",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\np=Path('/mnt/data/scripts/run_pipeline.py')\nprint(p.read_text()[:4000])\n",
+      "container_id": "cntr_694b4200ed708190b1f3a92b963e36c309abd130e6c8c109",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Minimal runnable pipeline that emits reproducible CI artifacts.\n\nCreates an outputs directory and writes:\n- outputs/run_stamp.json (machine-readable run metadata)\n- outputs/run.log        (human-readable execution log)\n\"\"\"\n\nfrom __future__ import annotations\n\nimport json\nimport os\nimport sys\nimport time\nimport uuid\nfrom datetime import datetime, timezone\nfrom pathlib import Path\nREQUIRED_SCHEMA_KEYS = (\n    \"schema_version\",\n    \"run_id\",\n    \"started_at\",\n    \"finished_at\",\n    \"status\",\n    \"outputs_dir\",\n    \"run_stamp_path\",\n    \"run_log_path\",\n)\ndef _utc_now_iso() -> str:\n    return datetime.now(timezone.utc).isoformat()\ndef main(argv: list[str] | None = None) -> int:\n    argv = list(sys.argv[1:] if argv is None else argv)\n\n    project_root = Path(__file__).resolve().parents[1]\n    outputs_dir = project_root / \"outputs\"\n    outputs_dir.mkdir(parents=True, exist_ok=True)\n\n    run_id = uuid.uuid4().hex\n    started_at = _utc_now_iso()\n    t0 = time.time()\n\n    run_log_path = outputs_dir / \"run.log\"\n    run_stamp_path = outputs_dir / \"run_stamp.json\"\n\n    details = {\n        \"schema_version\": 1,\n        \"run_id\": run_id,\n        \"started_at\": started_at,\n        \"finished_at\": None,\n        \"status\": \"running\",\n        \"outputs_dir\": str(outputs_dir),\n        \"run_stamp_path\": str(run_stamp_path),\n        \"run_log_path\": str(run_log_path),\n        \"argv\": argv,\n        \"python\": sys.version.split()[0],\n        \"cwd\": os.getcwd(),\n    }\n\n    # Write an initial stamp early so CI can detect partial runs.\n    run_stamp_path.write_text(json.dumps(details, indent=2, sort_keys=True) + \"\\n\", encoding=\"utf-8\")\n\n    log_lines = [\n        f\"started_at={started_at}\",\n        f\"run_id={run_id}\",\n        f\"project_root={project_root}\",\n        f\"outputs_dir={outputs_dir}\",\n        f\"argv={argv}\",\n    ]\n    status = \"success\"\n    try:\n        # Minimal \"pipeline\" work: ensure we can write artifacts deterministically.\n        (outputs_dir / \".gitkeep\").write_text(\"\", encoding=\"utf-8\")\n        log_lines.append(\"wrote_artifacts=run_stamp.json,run.log\")\n    except Exception as exc:  # pragma: no cover\n        status = \"error\"\n        log_lines.append(f\"error={type(exc).__name__}:{exc}\")\n        raise\n    finally:\n        finished_at = _utc_now_iso()\n        elapsed_s = round(time.time() - t0, 6)\n\n        details[\"finished_at\"] = finished_at\n        details[\"status\"] = status\n        details[\"elapsed_s\"] = elapsed_s\n\n        # Validate required schema keys are present before writing final stamp.\n        missing = [k for k in REQUIRED_SCHEMA_KEYS if k not in details]\n        if missing:  # pragma: no cover\n            raise RuntimeError(f\"Missing required schema keys: {missing}\")\n\n        run_stamp_path.write_text(json.dumps(details, indent=2, sort_keys=True) + \"\\n\", encoding=\"utf-8\")\n        log_lines.append(f\"finished_at={finished_at}\")\n        log_lines.append(f\"status={status}\")\n        log_lines.append(f\"elapsed_s={elapsed_s}\")\n\n        run_log_path.write_text(\"\\n\".join(log_lines) + \"\\n\", encoding=\"utf-8\")\n\n    return 0 if status == \"success\" else 1\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0c0c4fdc645a615600694b421dcde88194909ac23acaf8882a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c0c4fdc645a615600694b422032248194bd5d0056da79bd66",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_artifacts.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"from __future__ import annotations\n\nimport json\nimport subprocess\nimport sys\nfrom pathlib import Path\n\n\nREQUIRED_SCHEMA_KEYS = (\n    \"schema_version\",\n    \"run_id\",\n    \"started_at\",\n    \"finished_at\",\n    \"status\",\n    \"outputs_dir\",\n    \"run_stamp_path\",\n    \"run_log_path\",\n)\n\n\ndef test_pipeline_emits_expected_artifacts(tmp_path):\n    project_root = Path(__file__).resolve().parents[1]\n    script_path = project_root / \"scripts\" / \"run_pipeline.py\"\n    assert script_path.is_file(), f\"Missing pipeline script: {script_path}\"\n\n    proc = subprocess.run(\n        [sys.executable, str(script_path)],\n        cwd=str(project_root),\n        capture_output=True,\n        text=True,\n        check=False,\n    )\n    assert proc.returncode == 0, f\"Pipeline failed\\\\nSTDOUT:\\\\n{proc.stdout}\\\\nSTDERR:\\\\n{proc.stderr}\"\n\n    outputs_dir = project_root / \"outputs\"\n    run_stamp_path = outputs_dir / \"run_stamp.json\"\n    run_log_path = outputs_dir / \"run.log\"\n\n    assert outputs_dir.is_dir(), f\"Missing outputs dir: {outputs_dir}\"\n    assert run_stamp_path.is_file(), f\"Missing run stamp: {run_stamp_path}\"\n    assert run_log_path.is_file(), f\"Missing run log: {run_log_path}\"\n\n    data = json.loads(run_stamp_path.read_text(encoding=\"utf-8\"))\n    missing = [k for k in REQUIRED_SCHEMA_KEYS if k not in data]\n    assert not missing, f\"run_stamp.json missing keys: {missing}\"\n\n    assert data[\"status\"] == \"success\"\n    assert isinstance(data[\"schema_version\"], int)\n    assert isinstance(data[\"run_id\"], str) and data[\"run_id\"]\n    assert isinstance(data[\"started_at\"], str) and data[\"started_at\"]\n    assert isinstance(data[\"finished_at\"], str) and data[\"finished_at\"]\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:tests/test_artifacts.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4200ed708190b1f3a92b963e36c309abd130e6c8c109",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_artifacts.py\nDIR_STATE:[\"tests/test_artifacts.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0c0c4fdc645a615600694b4225ad108194803c60a27af1c060",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/test_artifacts.py`, which executes `scripts/run_pipeline.py` and asserts `outputs/run_stamp.json` and `outputs/run.log` exist and that the JSON contains the required schema keys (and reports success)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

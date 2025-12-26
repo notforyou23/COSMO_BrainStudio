@@ -1,0 +1,56 @@
+{
+  "content": "Created a strict JSON Schema (Draft 2020-12) for `qg_bench` benchmark datasets, defining required dataset header fields and per-example structure for validation and runner input.",
+  "reasoning": "",
+  "responseId": "resp_0706707e9a9a1797006949be63ee648197ae6fb33ffb446d46",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2591,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1082,
+    "output_tokens_details": {
+      "reasoning_tokens": 1040
+    },
+    "total_tokens": 3673
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0706707e9a9a1797006949be649da481978a3e7fc8c6e66a20",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0706707e9a9a1797006949be680b748197b7c4a3b07c618dc4",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap\n\ntarget_path = Path('/mnt/data').joinpath('src/qg_bench/schemas/benchmark.schema.json')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"$id\": \"https://example.com/qg-bench/benchmark.schema.json\",\n  \"title\": \"qg_bench benchmark dataset\",\n  \"description\": \"Schema for a simple question-generation benchmark dataset consumed by qg_bench.validate and qg_bench.runner.\",\n  \"type\": \"object\",\n  \"additionalProperties\": false,\n  \"required\": [\"benchmark_id\", \"dataset_version\", \"examples\"],\n  \"properties\": {\n    \"benchmark_id\": {\n      \"type\": \"string\",\n      \"description\": \"Stable identifier for the benchmark dataset.\",\n      \"minLength\": 1\n    },\n    \"dataset_version\": {\n      \"type\": \"string\",\n      \"description\": \"Dataset format or content version (free-form semantic version recommended).\",\n      \"minLength\": 1\n    },\n    \"license\": {\n      \"type\": \"string\",\n      \"description\": \"Optional license identifier or URL.\",\n      \"minLength\": 1\n    },\n    \"source\": {\n      \"type\": \"string\",\n      \"description\": \"Optional provenance string or URL for the dataset.\",\n      \"minLength\": 1\n    },\n    \"description\": {\n      \"type\": \"string\",\n      \"description\": \"Optional human-readable dataset description.\"\n    },\n    \"metadata\": {\n      \"type\": \"object\",\n      \"description\": \"Optional arbitrary metadata for the dataset header.\",\n      \"additionalProperties\": true\n    },\n    \"examples\": {\n      \"type\": \"array\",\n      \"description\": \"List of benchmark examples.\",\n      \"minItems\": 1,\n      \"items\": { \"$ref\": \"#/$defs/example\" }\n    }\n  },\n  \"$defs\": {\n    \"nonEmptyString\": {\n      \"type\": \"string\",\n      \"minLength\": 1\n    },\n    \"example\": {\n      \"type\": \"object\",\n      \"additionalProperties\": false,\n      \"required\": [\"id\", \"context\", \"question\", \"reference_answers\"],\n      \"properties\": {\n        \"id\": {\n          \"$ref\": \"#/$defs/nonEmptyString\",\n          \"description\": \"Unique example identifier (unique within the dataset).\"\n        },\n        \"context\": {\n          \"type\": \"string\",\n          \"description\": \"Context passage from which the question is generated/answered.\",\n          \"minLength\": 1\n        },\n        \"question\": {\n          \"type\": \"string\",\n          \"description\": \"The question to be evaluated.\",\n          \"minLength\": 1\n        },\n        \"reference_answers\": {\n          \"type\": \"array\",\n          \"description\": \"One or more acceptable reference answers for scoring.\",\n          \"minItems\": 1,\n          \"items\": { \"$ref\": \"#/$defs/nonEmptyString\" }\n        },\n        \"tags\": {\n          \"type\": \"array\",\n          \"description\": \"Optional tags or categories for filtering/analysis.\",\n          \"items\": { \"$ref\": \"#/$defs/nonEmptyString\" },\n          \"uniqueItems\": true\n        },\n        \"difficulty\": {\n          \"type\": \"string\",\n          \"description\": \"Optional difficulty label.\",\n          \"enum\": [\"easy\", \"medium\", \"hard\"]\n        },\n        \"metadata\": {\n          \"type\": \"object\",\n          \"description\": \"Optional per-example metadata.\",\n          \"additionalProperties\": true\n        }\n      }\n    }\n  }\n}\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/qg_bench/schemas/benchmark.schema.json')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949be2fa9948190b7fd0f89484479600a95eb5fa105098f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/qg_bench/schemas/benchmark.schema.json\nDIR_STATE:[\"src/qg_bench/schemas/benchmark.schema.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0706707e9a9a1797006949be73b1c081978d95ecde61546755",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a strict JSON Schema (Draft 2020-12) for `qg_bench` benchmark datasets, defining required dataset header fields and per-example structure for validation and runner input."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

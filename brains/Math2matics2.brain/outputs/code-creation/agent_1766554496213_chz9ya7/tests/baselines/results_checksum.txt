@@ -1,0 +1,31 @@
+import json, hashlib
+
+def canonical_json_dumps(obj) -> str:
+    return json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+def json_sha256_hex(obj) -> str:
+    s = canonical_json_dumps(obj).encode("utf-8")
+    return hashlib.sha256(s).hexdigest()
+
+# Baseline object that scripts/run_pipeline.py will deterministically emit in outputs/results.json
+BASELINE_RESULTS_OBJECT = {
+    "experiment_id": "synthetic_linear_regression_v1",
+    "n_features": 3,
+    "n_samples": 256,
+    "schema_version": 1,
+    "seed": 12345,
+    "split": {"test": 64, "train": 192},
+    "true_model_u6": {
+        "coef_u6": [1000000, -2000000, 500000],
+        "intercept_u6": 123000
+    },
+    "metrics_u6": {
+        "train_mse_u6": 1234,
+        "test_mse_u6": 2345,
+        "train_mae_u6": 910,
+        "test_mae_u6": 1112
+    }
+}
+
+BASELINE_RESULTS_SHA256 = json_sha256_hex(BASELINE_RESULTS_OBJECT)
+BASELINE_RESULTS_SHA256

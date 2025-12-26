@@ -1,0 +1,32 @@
+You are planning a python cli_tool implementation for the following mission:
+Fix remaining syntax_error blockers reported in deliverables and make the codebase parse-clean: scripts/init_repo_skeleton.py (reported syntax_error), src/numeric_compare.py (reported syntax_error), tests/test_cli_smoke.py (reported syntax_error), src/dgpipe/__init__.py (reported syntax_error), and src/experiments/__init__.py + src/experiments/registry.py (reported syntax_error). Ensure 'python -m compileall' succeeds repo-wide.
+
+Relevant context:
+- [INTROSPECTION] 2025-12-22T21-50-52-771Z_tests_test_syntax_imports_py_stage1_attempt1_prompt.txt from code-creation agent agent_176644024681
+- [AGENT: agent_1766440379610_hhonegh] {"agentId":"agent_1766440379610_hhonegh","goalId":"goal_35","containerId":"cntr_6949bdbf39a88190b86a048
+- [INTROSPECTION] 2025-12-22T21-50-52-771Z_qg_bench_cli_py_stage1_export_export_prompt.txt from code-creation agent agent_1766440246816_afic06
+- [AGENT INSIGHT: agent_1766438119610_eb2aof4] Sub-goal 3/7: Specify recommended collaborations and external partners: list 10–20 candidate gr
+- [AGENT: agent_1766438409884_82yeh6g] {"agentId":"agent_1766438409884_82yeh6g","goalId":"goal_7","containerId":"cntr_6949b60f62d4819083834ab5
+- [AGENT: agent_1766440491477_nh9h59c] {"agentId":"agent_1766440491477_nh9h59c","goalId":"goal_56","containerId":"cntr_6949be3256508190889f8f6
+- [AGENT INSIGHT: agent_1766438119610_eb2aof4] Sub-goal 2/7: Create the prioritized research project portfolio for near-term (6–12 months) and
+- [AGENT INSIGHT: agent_1766438409885_1kgnb7c] **Scaffold meets required structure + governance docs are in place.**
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

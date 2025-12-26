@@ -1,0 +1,86 @@
+name: e2e-on-failure
+description: Collect and upload E2E diagnostics as an artifact, but only when the job is failing.
+inputs:
+  artifact-name:
+    description: Artifact name to upload diagnostics under.
+    required: false
+    default: e2e-diagnostics
+  diagnostics-dir:
+    description: Directory where diagnostics will be assembled.
+    required: false
+    default: e2e-diagnostics
+  collect-script:
+    description: Optional path to a repo script that collects diagnostics (preferred).
+    required: false
+    default: scripts/e2e/collect_diagnostics.sh
+  retention-days:
+    description: Artifact retention in days.
+    required: false
+    default: "14"
+  upload:
+    description: Set to false to skip artifact upload (collection still runs).
+    required: false
+    default: "true"
+runs:
+  using: composite
+  steps:
+    - name: Validate inputs
+      if: ${{ failure() }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        [[ -n "${{ inputs.artifact-name }}" ]] || { echo "artifact-name is empty"; exit 2; }
+        [[ -n "${{ inputs.diagnostics-dir }}" ]] || { echo "diagnostics-dir is empty"; exit 2; }
+        [[ "${{ inputs.upload }}" == "true" || "${{ inputs.upload }}" == "false" ]] || { echo "upload must be true/false"; exit 2; }
+        [[ "${{ inputs.retention-days }}" =~ ^[0-9]+$ ]] || { echo "retention-days must be an integer"; exit 2; }
+
+    - name: Collect diagnostics
+      if: ${{ failure() }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        diag="${{ inputs.diagnostics-dir }}"
+        mkdir -p "$diag"
+        echo "Diagnostics dir: $diag"
+        # Prefer a dedicated repo script if present.
+        if [[ -f "${{ inputs.collect-script }}" ]]; then
+          chmod +x "${{ inputs.collect-script }}" || true
+          "${{ inputs.collect-script }}" "$diag" || true
+        else
+          # Minimal inline collection fallback (kept intentionally small/robust).
+          {
+            echo "date_utc=$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+            echo "runner_os=${RUNNER_OS:-}"
+            echo "runner_arch=${RUNNER_ARCH:-}"
+            echo "workflow=${GITHUB_WORKFLOW:-}"
+            echo "job=${GITHUB_JOB:-}"
+            echo "run_id=${GITHUB_RUN_ID:-}"
+            echo "run_attempt=${GITHUB_RUN_ATTEMPT:-}"
+            echo "sha=${GITHUB_SHA:-}"
+            echo "ref=${GITHUB_REF:-}"
+          } > "$diag/metadata.env"
+          (git rev-parse HEAD 2>/dev/null || true) > "$diag/git_head.txt"
+          (git status --porcelain=v1 2>/dev/null || true) > "$diag/git_status.txt"
+          (env | sort) > "$diag/env.txt"
+          (uname -a 2>/dev/null || true) > "$diag/uname.txt"
+          (df -h 2>/dev/null || true) > "$diag/df.txt"
+          (free -h 2>/dev/null || true) > "$diag/free.txt"
+          (docker ps -a 2>/dev/null || true) > "$diag/docker_ps.txt"
+          (docker logs $(docker ps -aq) 2>/dev/null || true) > "$diag/docker_logs_all.txt"
+          # Collect common E2E outputs if they exist.
+          for p in playwright-report test-results cypress/videos cypress/screenshots artifacts logs; do
+            [[ -e "$p" ]] && tar -czf "$diag/${p//\//_}.tgz" "$p" 2>/dev/null || true
+          done
+        fi
+        echo "Collected files:"
+        (find "$diag" -maxdepth 2 -type f -printf "%p
+" 2>/dev/null || ls -R "$diag") | head -n 200
+
+    - name: Upload diagnostics artifact
+      if: ${{ failure() && inputs.upload == 'true' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.diagnostics-dir }}
+        if-no-files-found: warn
+        retention-days: ${{ inputs.retention-days }}

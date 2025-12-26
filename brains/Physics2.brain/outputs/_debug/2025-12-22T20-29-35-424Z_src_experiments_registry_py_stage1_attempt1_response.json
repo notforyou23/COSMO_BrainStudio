@@ -1,0 +1,56 @@
+{
+  "content": "Implemented a lightweight experiment registry in `src/experiments/registry.py` providing dataclass-based metadata, registration/decorator helpers, minimal parameter defaulting/validation, entrypoint loading, standardized `run()` execution, and JSON-ready metadata export for CLI discovery.",
+  "reasoning": "",
+  "responseId": "resp_0ab8150a266afa84006949aa8c7a9881958bbc4811bdc2d68d",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3291,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1798,
+    "output_tokens_details": {
+      "reasoning_tokens": 341
+    },
+    "total_tokens": 5089
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0ab8150a266afa84006949aa8d48d08195a94a4712026d3f3b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ab8150a266afa84006949aa9601248195a8eed5f8f3b4f47b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/registry.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Experiment registry with CLI-discoverable metadata.\n\nThis module defines a small, dependency-light registry so experiments (numerical\ntoy models or symbolic derivations) can expose standardized metadata and a\nuniform execution interface.\n\nAn experiment entrypoint is a dotted path: \\\"pkg.mod:function\\\". The function is\ncalled as: fn(params: dict, *, seed: int|None=None, out_dir: Path|None=None) -> dict\nand should return a JSON-serializable dict with results/artifacts.\n\\\"\\\"\\\"\\\"\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom importlib import import_module\nfrom pathlib import Path\nfrom typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass ExperimentSpec:\n    name: str\n    summary: str\n    entrypoint: str  # \\\"module:function\\\"\n    inputs: Dict[str, Dict[str, Any]] = field(default_factory=dict)\n    outputs: Dict[str, Any] = field(default_factory=dict)\n    tags: Tuple[str, ...] = ()\n    details: str = \\\"\\\"\n    version: str = \\\"0\\\"\n\n    def as_dict(self) -> Dict[str, Any]:\n        return {\n            \\\"name\\\": self.name,\n            \\\"summary\\\": self.summary,\n            \\\"details\\\": self.details,\n            \\\"version\\\": self.version,\n            \\\"entrypoint\\\": self.entrypoint,\n            \\\"inputs\\\": self.inputs,\n            \\\"outputs\\\": self.outputs,\n            \\\"tags\\\": list(self.tags),\n        }\"\"\",\n\"\"\"_REGISTRY: Dict[str, ExperimentSpec] = {}\n\n\ndef register(spec: ExperimentSpec) -> ExperimentSpec:\n    \\\"\\\"\\\"Register an experiment spec (idempotent by name).\\\"\\\"\\\"\n    if not spec.name or \\\"/\\\" in spec.name or \\\" \\\" in spec.name:\n        raise ValueError(f\\\"Invalid experiment name: {spec.name!r}\\\")\n    _REGISTRY[spec.name] = spec\n    return spec\n\n\ndef registered(name: str, summary: str, entrypoint: str, **kwargs: Any) -> Callable[[Callable[..., Any]], Callable[..., Any]]:\n    \\\"\\\"\\\"Decorator to register a function as an experiment entrypoint.\\\"\\\"\\\"\n    def deco(fn: Callable[..., Any]) -> Callable[..., Any]:\n        mod = fn.__module__\n        ep = entrypoint or f\\\"{mod}:{fn.__name__}\\\"\n        register(ExperimentSpec(name=name, summary=summary, entrypoint=ep, **kwargs))\n        return fn\n    return deco\"\"\",\n\"\"\"def list_specs(*, tag: Optional[str] = None) -> List[ExperimentSpec]:\n    specs = sorted(_REGISTRY.values(), key=lambda s: s.name)\n    return [s for s in specs if (tag is None or tag in s.tags)]\n\n\ndef get_spec(name: str) -> ExperimentSpec:\n    try:\n        return _REGISTRY[name]\n    except KeyError as e:\n        raise KeyError(f\\\"Unknown experiment {name!r}. Available: {sorted(_REGISTRY)}\\\") from e\n\n\ndef _load_callable(entrypoint: str) -> Callable[..., Any]:\n    if \\\":\\\" not in entrypoint:\n        raise ValueError(f\\\"Invalid entrypoint {entrypoint!r}; expected 'module:function'\\\")\n    mod, fn = entrypoint.split(\\\":\\\", 1)\n    return getattr(import_module(mod), fn)\"\"\",\n\"\"\"def _apply_defaults(inputs: Mapping[str, Mapping[str, Any]], params: Mapping[str, Any]) -> Dict[str, Any]:\n    out = dict(params)\n    for k, spec in inputs.items():\n        if k not in out and \\\"default\\\" in spec:\n            out[k] = spec[\\\"default\\\"]\n    return out\n\n\ndef _validate_minimal(inputs: Mapping[str, Mapping[str, Any]], params: Mapping[str, Any]) -> None:\n    for k, spec in inputs.items():\n        if spec.get(\\\"required\\\") and k not in params:\n            raise ValueError(f\\\"Missing required param: {k}\\\")\n        if k in params and \\\"type\\\" in spec:\n            t = spec[\\\"type\\\"]\n            ok = True\n            v = params[k]\n            if t == \\\"int\\\": ok = isinstance(v, int) and not isinstance(v, bool)\n            elif t == \\\"float\\\": ok = isinstance(v, (int, float)) and not isinstance(v, bool)\n            elif t == \\\"str\\\": ok = isinstance(v, str)\n            elif t == \\\"bool\\\": ok = isinstance(v, bool)\n            elif t == \\\"list\\\": ok = isinstance(v, list)\n            elif t == \\\"dict\\\": ok = isinstance(v, dict)\n            if not ok:\n                raise TypeError(f\\\"Param {k} expected {t}, got {type(v).__name__}\\\")\"\"\",\n\"\"\"def run(name: str, params: Optional[Mapping[str, Any]] = None, *, seed: Optional[int] = None, out_dir: Optional[Path] = None) -> Dict[str, Any]:\n    \\\"\\\"\\\"Run an experiment by name and return a standardized result dict.\\\"\\\"\\\"\n    spec = get_spec(name)\n    call = _load_callable(spec.entrypoint)\n    p = _apply_defaults(spec.inputs, params or {})\n    _validate_minimal(spec.inputs, p)\n    res = call(p, seed=seed, out_dir=Path(out_dir) if out_dir is not None else None)\n    if not isinstance(res, dict):\n        raise TypeError(f\\\"Experiment {name!r} returned {type(res).__name__}, expected dict\\\")\n    return {\\\"experiment\\\": spec.as_dict(), \\\"params\\\": p, \\\"result\\\": res}\n\n\ndef export_metadata() -> List[Dict[str, Any]]:\n    \\\"\\\"\\\"JSON-ready metadata list for CLI discovery.\\\"\\\"\\\"\n    return [s.as_dict() for s in list_specs()]\n\n\n__all__ = [\\\"ExperimentSpec\\\", \\\"register\\\", \\\"registered\\\", \\\"list_specs\\\", \\\"get_spec\\\", \\\"run\\\", \\\"export_metadata\\\"]\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/experiments/registry.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949aa2cd9908190a540c44a4880beb40f550cedb5ceca86",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/registry.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/registry.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0ab8150a266afa84006949aaa93588819589c79ff2049022c2",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented a lightweight experiment registry in `src/experiments/registry.py` providing dataclass-based metadata, registration/decorator helpers, minimal parameter defaulting/validation, entrypoint loading, standardized `run()` execution, and JSON-ready metadata export for CLI discovery."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

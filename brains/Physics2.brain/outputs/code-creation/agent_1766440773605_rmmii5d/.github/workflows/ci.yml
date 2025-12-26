@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python -m pip install --upgrade pip
+          if [ -f requirements-dev.txt ]; then
+            pip install -r requirements-dev.txt
+          elif [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          elif [ -f pyproject.toml ]; then
+            pip install -e ".[dev]" || pip install -e .
+          else
+            pip install -e .
+          fi
+          python -m pip install pytest
+      - name: Prepare artifact directory
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p ci_artifacts
+
+      - name: Lint + compile
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python scripts/ci_lint_compile.py 2>&1 | tee ci_artifacts/lint_compile.log
+
+      - name: Validate example schemas
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python scripts/validate_examples_schema.py 2>&1 | tee ci_artifacts/schema_validation.log
+
+      - name: Pytest
+        shell: bash
+        run: |
+          set -euxo pipefail
+          pytest -q 2>&1 | tee ci_artifacts/pytest.log
+
+      - name: Benchmark reproduction check
+        shell: bash
+        run: |
+          set -euxo pipefail
+          python scripts/bench_repro_check.py 2>&1 | tee ci_artifacts/bench_repro_check.log
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-artifacts-py${{ matrix.python-version }}
+          path: ci_artifacts/
+          if-no-files-found: ignore
+          retention-days: 14

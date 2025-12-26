@@ -1,0 +1,92 @@
+{
+  "content": "Created `tests/test_cli_import.py` with regression tests that import `qg_bench.cli` (failing explicitly on `SyntaxError`) and assert it exposes at least one conventional callable CLI entrypoint attribute.",
+  "reasoning": "",
+  "responseId": "resp_09070fd8d8e52e42006949be3ad3888197a43719a0b58c80f6",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2518,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1026,
+    "output_tokens_details": {
+      "reasoning_tokens": 492
+    },
+    "total_tokens": 3544
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_09070fd8d8e52e42006949be3b75ec8197ae24c365ff7fb9ba",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_09070fd8d8e52e42006949be3c0aa88197a272db6f72769cf8",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nsorted([str(p.relative_to(base)) for p in base.glob(\"**/*\") if p.is_file()][:50])[:50]\n",
+      "container_id": "cntr_6949be3256508190889f8f69e6a44abd081e1e0c9ef3588b",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_09070fd8d8e52e42006949be3e3f648197a23e379e35116958",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_09070fd8d8e52e42006949be3e881c8197a878d94908084666",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import os, glob, json\nos.listdir(\"/mnt/data\")\n",
+      "container_id": "cntr_6949be3256508190889f8f69e6a44abd081e1e0c9ef3588b",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_09070fd8d8e52e42006949be40712c8197976707b1436c47a1",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_09070fd8d8e52e42006949be4719908197a3e028d977564ecb",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_cli_import.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Regression tests for importing the CLI module.\n\nThese tests ensure the project CLI can be imported without syntax errors and\nexposes a callable entrypoint suitable for console_scripts / python -m usage.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport importlib\nimport inspect\n\nimport pytest\"\"\",\n\"\"\"def test_cli_module_importable() -> None:\n    \\\"\\\"\\\"Importing qg_bench.cli should not raise (e.g., SyntaxError).\\\"\\\"\\\"\n    try:\n        importlib.import_module(\"qg_bench.cli\")\n    except SyntaxError as e:  # pragma: no cover\n        pytest.fail(f\"SyntaxError importing qg_bench.cli: {e}\")\"\"\",\n\"\"\"@pytest.mark.parametrize(\n    \"candidates\",\n    [\n        (\"main\", \"cli\", \"app\", \"entrypoint\", \"run\"),\n        (\"get_parser\", \"build_parser\"),\n    ],\n)\ndef test_cli_exposes_expected_entrypoints(candidates: tuple[str, ...]) -> None:\n    \\\"\\\"\\\"qg_bench.cli should expose at least one conventional entrypoint.\n\n    We accept multiple common patterns (argparse/click/typer) to avoid coupling\n    to the implementation details while still preventing regressions.\n    \\\"\\\"\\\"\n    mod = importlib.import_module(\"qg_bench.cli\")\n\n    found = []\n    for name in candidates:\n        if hasattr(mod, name):\n            obj = getattr(mod, name)\n            if callable(obj) or inspect.isfunction(obj):\n                found.append(name)\n\n    assert found, (\n        \"qg_bench.cli imported but does not expose any expected entrypoint \"\n        f\"attributes from {candidates}. Found none.\"\n    )\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:tests/test_cli_import.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949be3256508190889f8f69e6a44abd081e1e0c9ef3588b",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_cli_import.py\nDIR_STATE:[\"tests/test_cli_import.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_09070fd8d8e52e42006949be4f04d08197ad5dc3f8a3ace261",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/test_cli_import.py` with regression tests that import `qg_bench.cli` (failing explicitly on `SyntaxError`) and assert it exposes at least one conventional callable CLI entrypoint attribute."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

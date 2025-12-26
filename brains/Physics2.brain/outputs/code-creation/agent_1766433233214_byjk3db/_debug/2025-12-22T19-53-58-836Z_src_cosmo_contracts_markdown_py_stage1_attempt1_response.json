@@ -1,0 +1,56 @@
+{
+  "content": "Wrote `src/cosmo_contracts/markdown.py`, implementing an idempotent Markdown rewriter that detects each v0.1 benchmark section (by `## ...` headings) and inserts or replaces a standardized `### Contract` block (with required metadata, reference algorithm/pseudocode policy, output invariants, tolerance policy, canonical test vector, and compliance reporting requirements).",
+  "reasoning": "",
+  "responseId": "resp_0a467093098c1320006949a2180ad08194a59b9e26ddfa3741",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3772,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2273,
+    "output_tokens_details": {
+      "reasoning_tokens": 612
+    },
+    "total_tokens": 6045
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0a467093098c1320006949a218efa481948a8e5cf38be04d93",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a467093098c1320006949a225c26c8194aa89cf4c6fa5e046",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, re\n\ntarget_path = Path('/mnt/data').joinpath('src/cosmo_contracts/markdown.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(r\"\"\"from __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nimport re\nfrom typing import Callable, Dict, Iterable, List, Optional\n\n\n_CONTRACT_TITLE = \"### Contract\"\n\n\n@dataclass(frozen=True)\nclass ContractInsertResult:\n    text: str\n    updated_ids: List[str]\n\n\ndef _default_contract_md(benchmark_id: str) -> str:\n    # A deterministic, benchmark-agnostic contract block; other modules may\n    # provide a richer contract generator via `contract_for_id`.\n    return \"\\n\".join(\n        [\n            _CONTRACT_TITLE,\n            \"\",\n            \"**Required metadata**\",\n            \"\",\n            \"- `benchmark_id`: `\" + benchmark_id + \"`\",\n            \"- `version`: `v0.1`\",\n            \"- `name`: human-readable name (must be reported by implementations)\",\n            \"- `input_spec`: description of inputs and domains\",\n            \"- `output_spec`: description of outputs, units, and shapes\",\n            \"\",\n            \"**Reference algorithm / pseudocode**\",\n            \"\",\n            \"Implementations MUST document the algorithm used and MUST match the\",\n            \"reference behavior on the canonical test vector(s). If an official\",\n            \"reference is provided for this benchmark, it overrides this generic policy.\",\n            \"\",\n            \"**Output invariants**\",\n            \"\",\n            \"- Output MUST be deterministic for a fixed input.\",\n            \"- Output MUST be serializable as JSON (numbers, strings, lists, dicts).\",\n            \"- NaN/Inf are forbidden unless explicitly specified by the benchmark.\",\n            \"\",\n            \"**Tolerance policy**\",\n            \"\",\n            \"- Exact match for non-floats (strings, integers, booleans).\",\n            \"- For floats: absolute tolerance `1e-9` and relative tolerance `1e-9`, unless\",\n            \"  a benchmark-specific contract states otherwise.\",\n            \"\",\n            \"**Canonical test vector**\",\n            \"\",\n            \"```json\",\n            \"{\",\n            '  \"benchmark_id\": \"' + benchmark_id + '\",',\n            '  \"version\": \"v0.1\",',\n            '  \"input\": {\"seed\": 0},',\n            '  \"expected_output\": null',\n            \"}\",\n            \"```\",\n            \"\",\n            \"**Contract compliance reporting**\",\n            \"\",\n            \"Every contributed implementation MUST report contract compliance as:\",\n            \"\",\n            \"- `pass`: boolean\",\n            \"- `diagnostics`: list of human-readable strings (empty when pass is true)\",\n        ]\n    )\n\n\ndef _find_headings(lines: List[str], pattern: re.Pattern) -> List[tuple[int, str]]:\n    out: List[tuple[int, str]] = []\n    for i, ln in enumerate(lines):\n        m = pattern.match(ln)\n        if m:\n            out.append((i, m.group(1).strip()))\n    return out\n\n\ndef upsert_contract_sections(\n    markdown_text: str,\n    contract_for_id: Optional[Callable[[str], str]] = None,\n    benchmark_heading_re: str = r\"^##\\s+(.+?)\\s*$\",\n) -> ContractInsertResult:\n    \\\"\\\"\\\"Insert/replace a standardized Contract section per v0.1 benchmark.\n\n    Benchmarks are detected as level-2 headings (`## ...`). Within each benchmark\n    section, a level-3 heading `### Contract` is inserted after the benchmark\n    heading (or replaced if present). The rewrite is idempotent.\n    \\\"\\\"\\\"\n    contract_for_id = contract_for_id or _default_contract_md\n    lines = markdown_text.splitlines()\n    bench_pat = re.compile(benchmark_heading_re)\n    benches = _find_headings(lines, bench_pat)\n    if not benches:\n        return ContractInsertResult(text=markdown_text, updated_ids=[])\n\n    # Add sentinel end.\n    benches = benches + [(len(lines), \"__END__\")]\n    updated: List[str] = []\n\n    for (start, bench_id), (end, _) in zip(benches, benches[1:]):\n        if bench_id == \"__END__\":\n            continue\n        section = lines[start:end]\n        # Locate an existing contract block within this section.\n        contract_start = None\n        for j in range(1, len(section)):\n            if section[j].strip() == _CONTRACT_TITLE:\n                contract_start = j\n                break\n\n        new_block = contract_for_id(bench_id).splitlines()\n        if not new_block or new_block[0].strip() != _CONTRACT_TITLE:\n            raise ValueError(\"contract_for_id must return markdown starting with '### Contract'\")\n\n        if contract_start is None:\n            # Insert after heading and an optional following blank line.\n            insert_at = 1\n            while insert_at < len(section) and section[insert_at].strip() == \"\":\n                insert_at += 1\n            section = section[:insert_at] + [\"\"] + new_block + [\"\"] + section[insert_at:]\n            updated.append(bench_id)\n        else:\n            # Replace until next level-3 heading or end-of-section.\n            contract_end = len(section)\n            h3 = re.compile(r\"^###\\s+\")\n            for k in range(contract_start + 1, len(section)):\n                if h3.match(section[k]) and section[k].strip() != _CONTRACT_TITLE:\n                    contract_end = k\n                    break\n            before = section[:contract_start]\n            after = section[contract_end:]\n            # Normalize surrounding blank lines.\n            while before and before[-1].strip() == \"\":\n                before.pop()\n            while after and after[0].strip() == \"\":\n                after.pop(0)\n            section = before + [\"\"] + new_block + [\"\"] + after\n            updated.append(bench_id)\n\n        lines[start:end] = section\n        # Adjust subsequent indices by recomputing headings would be expensive; instead\n        # restart scan by recomputing benches on the mutated lines.\n        # The number of benchmarks is small; simplicity > micro-optimizations.\n        benches = _find_headings(lines, bench_pat) + [(len(lines), \"__END__\")]\n\n    return ContractInsertResult(text=\"\\\\n\".join(lines) + (\"\" if markdown_text.endswith(\"\\\\n\") else \"\"), updated_ids=updated)\n\n\ndef rewrite_benchmarks_file(\n    input_path: Path,\n    output_path: Optional[Path] = None,\n    contract_for_id: Optional[Callable[[str], str]] = None,\n) -> List[str]:\n    \\\"\\\"\\\"Rewrite `input_path` inserting/updating Contract sections; returns updated ids.\\\"\\\"\\\"\n    md = input_path.read_text(encoding=\"utf-8\")\n    res = upsert_contract_sections(md, contract_for_id=contract_for_id)\n    outp = output_path or input_path\n    outp.write_text(res.text if res.text.endswith(\"\\\\n\") else res.text + \"\\\\n\", encoding=\"utf-8\")\n    return res.updated_ids\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/cosmo_contracts/markdown.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/cosmo_contracts/markdown.py\nDIR_STATE:[\"src/cosmo_contracts/__init__.py\", \"src/cosmo_contracts/markdown.py\", \"src/cosmo_contracts/schema.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0a467093098c1320006949a23e6c648194913f71a01d3b795a",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Wrote `src/cosmo_contracts/markdown.py`, implementing an idempotent Markdown rewriter that detects each v0.1 benchmark section (by `## ...` headings) and inserts or replaces a standardized `### Contract` block (with required metadata, reference algorithm/pseudocode policy, output invariants, tolerance policy, canonical test vector, and compliance reporting requirements)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

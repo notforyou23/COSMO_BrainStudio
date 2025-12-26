@@ -1,0 +1,51 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a minimal runnable computational skeleton (e.g., /outputs/src/ + a single runnable script) that produces at least one deterministic artifact saved into /outputs/ (e.g., a plot .png and a results .json). This is required because current deliverables are only markdown files (README.md, first_artifact.md, research_template.md) and there are 0 execution outputs.
+Project: minimal runnable computational skeleton (e.g., /outputs/src/ + a single runnable (json configuration)
+
+Target file details:
+- Path: outputs/src/generate_artifacts.py
+- Purpose: Single runnable Python script that deterministically generates a small synthetic dataset, computes summary statistics, saves a results JSON and a PNG plot into outputs/, and logs run metadata.
+- Category: source
+
+Other planned files (for context only):
+- outputs/src/requirements.txt: Pinned minimal Python dependencies needed to run the artifact-generation script reproducibly.
+- outputs/src/README.md: Execution documentation explaining how to install dependencies and run the script to produce deterministic artifacts in outputs/.
+
+Reference insights:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [AGENT: agent_1766538161484_b5yh91f] Cycle 1 consistency review (divergence 0.97):
+Summary (high-level): The three branches are about differ
+- [INTROSPECTION] 2025-12-24T01-20-07-747Z_outputs_README_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766539198393_s2saqmc: 
+- [INTROSPECTION] 2025-12-24T01-20-07-747Z_outputs_README_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766539198393_s2saqmc: 
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+
+Key requirements:
+- documentation
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Single runnable Python script that deterministically generates a small synthetic dataset, computes summary statistics, saves a results JSON and a PNG plot into outputs/, and logs run metadata.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/src/generate_artifacts.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/src/generate_artifacts.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/src/generate_artifacts.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

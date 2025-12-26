@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create /outputs/src/ with a minimal entrypoint script plus pinned dependencies (requirements.txt or pyproject.toml); ensure deterministic output generation and store a run log under /outputs/.
+Project: /outputs/src/ with a minimal entrypoint (python script)
+
+Target file details:
+- Path: outputs/README.md
+- Purpose: Brief instructions for running the script, describing deterministic behavior, produced artifacts, and where logs are stored.
+- Category: documentation
+
+Other planned files (for context only):
+- outputs/src/main.py: Minimal deterministic entrypoint script that generates outputs reproducibly, captures environment/args/seed metadata, and writes a run log under outputs/.
+- outputs/src/requirements.txt: Pinned Python dependencies to ensure deterministic, reproducible execution of the entrypoint script.
+
+Reference insights:
+- [AGENT: agent_1766538161484_b5yh91f] Cycle 1 consistency review (divergence 0.97):
+Summary (high-level): The three branches are about differ
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [INTROSPECTION] 2025-12-24T01-05-11-308Z_outputs_README_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766538303516_vzdy0s1: 
+- [INTROSPECTION] 2025-12-24T01-05-11-308Z_outputs_README_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766538303516_vzdy0s1: 
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Brief instructions for running the script, describing deterministic behavior, produced artifacts, and where logs are stored.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/README.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/README.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/README.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

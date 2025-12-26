@@ -1,0 +1,141 @@
+{
+  "content": "Created `tests/test_benchmark_case_001.py`, a self-contained pytest that locates the `benchmark_case_001` input/expected JSONs, runs the reference script into `tests/ci_outputs/benchmark_case_001`, and recursively compares produced vs expected outputs using configurable numeric tolerances.",
+  "reasoning": "",
+  "responseId": "resp_06c595e29be91c2a006949a23f13a48194ba67bbc66d726098",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4205,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2519,
+    "output_tokens_details": {
+      "reasoning_tokens": 2455
+    },
+    "total_tokens": 6724
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_06c595e29be91c2a006949a240025c8194b7a5c8dc6bd9417c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06c595e29be91c2a006949a2416e048194b6e84545f28ed878",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nroot=Path('/mnt/data')\nsorted([str(p.relative_to(root)) for p in root.rglob('*') if p.is_file()])[:200], len(list(root.rglob('*')))\n",
+      "container_id": "cntr_6949a1f4d2c881908a8c0b7968ab83a502e1863ff81ebb71",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(['.github/workflows/ci.yml', 'tests/test_schema_conformance.py'], 5)"
+        }
+      ]
+    },
+    {
+      "id": "rs_06c595e29be91c2a006949a243c6288194a6810d3dda26337a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06c595e29be91c2a006949a24478848194bedbfd378b73c339",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import os, json\nfor dirpath, dirnames, filenames in os.walk('/mnt/data'):\n    print(dirpath, dirnames, filenames)\n",
+      "container_id": "cntr_6949a1f4d2c881908a8c0b7968ab83a502e1863ff81ebb71",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "/mnt/data ['.github', 'tests'] []\n/mnt/data/.github ['workflows'] []\n/mnt/data/.github/workflows [] ['ci.yml']\n/mnt/data/tests [] ['test_schema_conformance.py']\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_06c595e29be91c2a006949a2466cd08194b473a229f57fdbc0",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06c595e29be91c2a006949a24a3f588194a230fc23a0aab96d",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import subprocess, textwrap, os, re, sys, json\nfrom pathlib import Path\nroot=Path('/mnt/data')\nmatches=[]\nfor p in root.rglob('*.py'):\n    txt=p.read_text(encoding='utf-8')\n    if 'benchmark_case_001' in txt:\n        matches.append(str(p))\nmatches\n",
+      "container_id": "cntr_6949a1f4d2c881908a8c0b7968ab83a502e1863ff81ebb71",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_06c595e29be91c2a006949a24ddcec8194b6e2f5bc482e7c1d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06c595e29be91c2a006949a262a374819494a103783a1d1103",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\ntarget_path = Path('/mnt/data/tests/test_benchmark_case_001.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n",
+      "container_id": "cntr_6949a1f4d2c881908a8c0b7968ab83a502e1863ff81ebb71",
+      "outputs": []
+    },
+    {
+      "id": "rs_06c595e29be91c2a006949a264c5d48194806bb2ea330611db",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06c595e29be91c2a006949a265093c8194b7e6c16624c2e4f9",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "chunks = []\nchunks.append(r\"\"\"import json\nimport os\nimport re\nimport shutil\nimport subprocess\nimport sys\nfrom pathlib import Path\n\nimport pytest\"\"\")\n\nchunks.append(r\"\"\"def _repo_root() -> Path:\n    return Path(__file__).resolve().parents[1]\n\n\ndef _find_file(patterns):\n    root = _repo_root()\n    for pat in patterns:\n        hits = list(root.rglob(pat))\n        if hits:\n            return sorted(hits)[0]\n    return None\n\n\ndef _find_expected_files():\n    root = _repo_root()\n    cands = sorted(\n        p for p in root.rglob(\"*.json\")\n        if re.search(r\"benchmark_case_001.*expected\", p.name)\n    )\n    if cands:\n        return cands\n    # fallback: dedicated expected directory\n    expected_dir = _find_file([\"**/expected/**/benchmark_case_001*.json\", \"**/expected*benchmark_case_001*.json\"])\n    return [expected_dir] if expected_dir else []\n\n\ndef _find_input_file():\n    return _find_file([\n        \"**/examples/**/benchmark_case_001*.json\",\n        \"**/example/**/benchmark_case_001*.json\",\n        \"**/inputs/**/benchmark_case_001*.json\",\n        \"**/benchmark_case_001*.json\",\n    ])\"\"\")\n\nchunks.append(r\"\"\"def _json_load(path: Path):\n    with path.open(\"r\", encoding=\"utf-8\") as f:\n        return json.load(f)\n\n\ndef _is_number(x):\n    return isinstance(x, (int, float)) and not isinstance(x, bool)\n\n\ndef _compare(a, b, *, atol=1e-6, rtol=1e-6, path=\"root\"):\n    if _is_number(a) and _is_number(b):\n        diff = abs(a - b)\n        tol = atol + rtol * abs(b)\n        if diff <= tol:\n            return\n        raise AssertionError(f\"{path}: {a} != {b} (diff={diff}, tol={tol})\")\n    if type(a) != type(b):\n        raise AssertionError(f\"{path}: type {type(a).__name__} != {type(b).__name__}\")\n    if isinstance(a, dict):\n        if set(a) != set(b):\n            missing = sorted(set(b) - set(a))\n            extra = sorted(set(a) - set(b))\n            raise AssertionError(f\"{path}: key mismatch missing={missing} extra={extra}\")\n        for k in a:\n            _compare(a[k], b[k], atol=atol, rtol=rtol, path=f\"{path}.{k}\")\n        return\n    if isinstance(a, list):\n        if len(a) != len(b):\n            raise AssertionError(f\"{path}: len {len(a)} != {len(b)}\")\n        for i, (ai, bi) in enumerate(zip(a, b)):\n            _compare(ai, bi, atol=atol, rtol=rtol, path=f\"{path}[{i}]\")\n        return\n    if a != b:\n        raise AssertionError(f\"{path}: {a!r} != {b!r}\")\"\"\")\n\nchunks.append(r\"\"\"def _run_reference(input_path: Path, output_dir: Path):\n    root = _repo_root()\n\n    # Prefer an explicit CLI module if present; fall back to a generated_script_*.py.\n    script = _find_file([\"generated_script_*.py\", \"src/**/main.py\", \"main.py\", \"run.py\"])\n    if script is None:\n        raise FileNotFoundError(\"Could not locate reference implementation script (e.g., generated_script_*.py).\")\n\n    cmd = [sys.executable, str(script), \"--input\", str(input_path), \"--output\", str(output_dir)]\n    env = os.environ.copy()\n    env.setdefault(\"PYTHONUTF8\", \"1\")\n    proc = subprocess.run(cmd, cwd=str(root), env=env, capture_output=True, text=True)\n    if proc.returncode != 0:\n        raise RuntimeError(\n            \"Reference run failed.\\n\"\n            f\"CMD: {' '.join(cmd)}\\n\"\n            f\"STDOUT:\\n{proc.stdout}\\nSTDERR:\\n{proc.stderr}\"\n        )\"\"\")\n\nchunks.append(r\"\"\"@pytest.mark.benchmark\ndef test_benchmark_case_001_reference_matches_expected():\n    input_path = _find_input_file()\n    if input_path is None:\n        pytest.skip(\"benchmark_case_001 input JSON not found in repository.\")\n\n    expected_files = _find_expected_files()\n    if not expected_files:\n        pytest.skip(\"benchmark_case_001 expected output JSON not found in repository.\")\n\n    out_dir = _repo_root() / \"tests\" / \"ci_outputs\" / \"benchmark_case_001\"\n    if out_dir.exists():\n        shutil.rmtree(out_dir)\n    out_dir.mkdir(parents=True, exist_ok=True)\n\n    _run_reference(input_path, out_dir)\n\n    produced = sorted(out_dir.rglob(\"*.json\"))\n    assert produced, f\"No JSON outputs produced under {out_dir}\"\n\n    if len(expected_files) == 1 and len(produced) == 1:\n        exp, act = expected_files[0], produced[0]\n        _compare(_json_load(act), _json_load(exp), atol=1e-6, rtol=1e-6)\n        return\n\n    produced_by_name = {p.name: p for p in produced}\n    for exp in expected_files:\n        # Match either exact name or name with '_expected' removed.\n        act = produced_by_name.get(exp.name)\n        if act is None:\n            alt = re.sub(r\"(_|-)?expected\", \"\", exp.name, flags=re.IGNORECASE)\n            act = produced_by_name.get(alt)\n        assert act is not None, f\"Missing produced output for expected file {exp.name}\"\n        _compare(_json_load(act), _json_load(exp), atol=1e-6, rtol=1e-6)\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\nlen(final_text.splitlines()), final_text[:200]\n",
+      "container_id": "cntr_6949a1f4d2c881908a8c0b7968ab83a502e1863ff81ebb71",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(128,\n 'import json\\nimport os\\nimport re\\nimport shutil\\nimport subprocess\\nimport sys\\nfrom pathlib import Path\\n\\nimport pytest\\ndef _repo_root() -> Path:\\n    return Path(__file__).resolve().parents[1]\\n\\n\\ndef _find_')"
+        }
+      ]
+    },
+    {
+      "id": "rs_06c595e29be91c2a006949a27615408194bfa43dc8b59f2cfa",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06c595e29be91c2a006949a27666cc8194a6bccbae6a6a4b20",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import json\nfrom pathlib import Path\ntarget_path = Path('/mnt/data').joinpath('tests/test_benchmark_case_001.py')\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tests/test_benchmark_case_001.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949a1f4d2c881908a8c0b7968ab83a502e1863ff81ebb71",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_benchmark_case_001.py\nDIR_STATE:[\"tests/test_benchmark_case_001.py\", \"tests/test_schema_conformance.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_06c595e29be91c2a006949a278e2648194b8e877c7f68bfa0a",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/test_benchmark_case_001.py`, a self-contained pytest that locates the `benchmark_case_001` input/expected JSONs, runs the reference script into `tests/ci_outputs/benchmark_case_001`, and recursively compares produced vs expected outputs using configurable numeric tolerances."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

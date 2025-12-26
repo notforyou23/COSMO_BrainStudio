@@ -1,0 +1,37 @@
+{
+  "content": "[\n  {\n    \"path\": \"src/run.py\",\n    \"description\": \"Single CLI entrypoint that sets all RNG seeds, runs the canonical pipeline end-to-end, writes outputs/results.json and outputs/figure.png with a fixed schema, and writes outputs/hashes.json containing SHA256 hashes for determinism verification.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/pipeline.py\",\n    \"description\": \"Deterministic canonical pipeline implementation (data generation/loading, computation, and figure creation) invoked by the CLI with a stable artifact contract.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/determinism.py\",\n    \"description\": \"Utilities for setting and validating deterministic behavior (seed setting across libraries, environment flags, and stable serialization helpers).\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/artifacts.py\",\n    \"description\": \"Artifact contract utilities defining fixed output paths, JSON schema construction, atomic writes, and SHA256 hashing for each produced artifact.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/plotting.py\",\n    \"description\": \"Figure generation routines that produce a deterministic PNG (fixed size, style, and rendering parameters) from pipeline results.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"tests/test_cli_determinism.py\",\n    \"description\": \"End-to-end test that runs the CLI twice in a temporary workspace and asserts identical hashes.json and byte-for-byte identical artifacts for determinism.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \"tests/test_results_schema.py\",\n    \"description\": \"Test that validates outputs/results.json matches the fixed schema (required keys, types, and stable ordering) and that hashes.json contains expected entries.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \".github/workflows/ci.yml\",\n    \"description\": \"CI workflow that installs dependencies, runs formatting/lint checks if configured, and executes tests to enforce deterministic artifact generation on each push/PR.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"pyproject.toml\",\n    \"description\": \"Project configuration defining dependencies, optional CLI entrypoint configuration, and test tooling settings to support local runs and CI.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"README.md\",\n    \"description\": \"Documentation describing the deterministic outputs-first artifact contract, how to run src/run.py, and how to verify determinism via outputs/hashes.json.\",\n    \"category\": \"documentation\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_0d809c8a5c25e94600694b738c6860819087152cae53836563",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 635,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 547,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 1182
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "msg_0d809c8a5c25e94600694b738ca15081908ca7bed6d1007038",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"src/run.py\",\n    \"description\": \"Single CLI entrypoint that sets all RNG seeds, runs the canonical pipeline end-to-end, writes outputs/results.json and outputs/figure.png with a fixed schema, and writes outputs/hashes.json containing SHA256 hashes for determinism verification.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/pipeline.py\",\n    \"description\": \"Deterministic canonical pipeline implementation (data generation/loading, computation, and figure creation) invoked by the CLI with a stable artifact contract.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/determinism.py\",\n    \"description\": \"Utilities for setting and validating deterministic behavior (seed setting across libraries, environment flags, and stable serialization helpers).\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/artifacts.py\",\n    \"description\": \"Artifact contract utilities defining fixed output paths, JSON schema construction, atomic writes, and SHA256 hashing for each produced artifact.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/plotting.py\",\n    \"description\": \"Figure generation routines that produce a deterministic PNG (fixed size, style, and rendering parameters) from pipeline results.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"tests/test_cli_determinism.py\",\n    \"description\": \"End-to-end test that runs the CLI twice in a temporary workspace and asserts identical hashes.json and byte-for-byte identical artifacts for determinism.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \"tests/test_results_schema.py\",\n    \"description\": \"Test that validates outputs/results.json matches the fixed schema (required keys, types, and stable ordering) and that hashes.json contains expected entries.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \".github/workflows/ci.yml\",\n    \"description\": \"CI workflow that installs dependencies, runs formatting/lint checks if configured, and executes tests to enforce deterministic artifact generation on each push/PR.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"pyproject.toml\",\n    \"description\": \"Project configuration defining dependencies, optional CLI entrypoint configuration, and test tooling settings to support local runs and CI.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"README.md\",\n    \"description\": \"Documentation describing the deterministic outputs-first artifact contract, how to run src/run.py, and how to verify determinism via outputs/hashes.json.\",\n    \"category\": \"documentation\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

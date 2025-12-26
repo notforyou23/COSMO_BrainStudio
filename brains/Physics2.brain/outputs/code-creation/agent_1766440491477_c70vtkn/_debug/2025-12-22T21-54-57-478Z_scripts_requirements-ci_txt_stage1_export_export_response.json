@@ -1,0 +1,56 @@
+{
+  "content": "FILE_EXPORT:{\"path\":\"scripts/requirements-ci.txt\",\"size\":356,\"encoding\":\"base64\",\"sha256\":\"dc6d8e861a3d5882ff91857a9ebb9aebb1545ee997ca4a78ff444789e9b12350\",\"content\":\"IyBNaW5pbWFsLCBwaW5uZWQgZGVwZW5kZW5jaWVzIGZvciBDSS9lMmUgYXV0b21hdGlvbiBzY3JpcHRzLgojIEtlZXAgdGhpcyBmaWxlIHNtYWxsIGFuZCBzdGFibGU7IGFkZCBkZXBzIG9ubHkgd2hlbiByZXF1aXJlZCBieSBzY3JpcHRzLy4KcmVxdWVzdHM9PTIuMzIuMwpQeVlBTUw9PTYuMC4yCgojIFV0aWxpdHkgbGlicyBjb21tb25seSB1c2VkIGJ5IENJIG9yY2hlc3RyYXRvcnMgKHR5cGluZywgcmV0cmllcywgdmVyc2lvbiBwYXJzaW5nKS4KcGFja2FnaW5nPT0yNC4yCnRlbmFjaXR5PT05LjAuMAoKIyBTYWZlLCBwcmVkaWN0YWJsZSBDTEkgb3V0cHV0IGFuZCBwcm9ncmVzcyByZXBvcnRpbmcuCnJpY2g9PTEzLjkuNAo=\"}\nDIR_STATE:[\"scripts/README_e2e.md\",\"scripts/artifacts.py\",\"scripts/e2e.py\",\"scripts/issue_on_failure.py\",\"scripts/repro_steps.py\",\"scripts/requirements-ci.txt\"]",
+  "reasoning": "",
+  "responseId": "resp_02bde0f3d6cefd35006949c19c48e4819592cd8434f038984f",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 1721,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 691,
+    "output_tokens_details": {
+      "reasoning_tokens": 39
+    },
+    "total_tokens": 2412
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_02bde0f3d6cefd35006949c19cfb8881959e0bc68b851a1425",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_02bde0f3d6cefd35006949c19db300819590d8868eb359edf9",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport base64, json, hashlib, gzip\n\ntarget_path = Path('/mnt/data').joinpath('scripts/requirements-ci.txt')\nassert target_path.is_file(), 'Expected scripts/requirements-ci.txt to exist before export'\ndata = target_path.read_bytes()\npayload = {\n  'path': 'scripts/requirements-ci.txt',\n  'size': len(data),\n  'encoding': 'base64',\n  'sha256': hashlib.sha256(data).hexdigest(),\n  'content': None\n}\nif len(data) > 20000:\n    compressed = gzip.compress(data)\n    payload['encoding'] = 'gzip+base64'\n    payload['content'] = base64.b64encode(compressed).decode('ascii')\nelse:\n    payload['content'] = base64.b64encode(data).decode('ascii')\n\nprint('FILE_EXPORT:' + json.dumps(payload, separators=(',', ':')))\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949be2f5f848190a4b8106bfdfa0c4704094e1617bbf644",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_EXPORT:{\"path\":\"scripts/requirements-ci.txt\",\"size\":356,\"encoding\":\"base64\",\"sha256\":\"dc6d8e861a3d5882ff91857a9ebb9aebb1545ee997ca4a78ff444789e9b12350\",\"content\":\"IyBNaW5pbWFsLCBwaW5uZWQgZGVwZW5kZW5jaWVzIGZvciBDSS9lMmUgYXV0b21hdGlvbiBzY3JpcHRzLgojIEtlZXAgdGhpcyBmaWxlIHNtYWxsIGFuZCBzdGFibGU7IGFkZCBkZXBzIG9ubHkgd2hlbiByZXF1aXJlZCBieSBzY3JpcHRzLy4KcmVxdWVzdHM9PTIuMzIuMwpQeVlBTUw9PTYuMC4yCgojIFV0aWxpdHkgbGlicyBjb21tb25seSB1c2VkIGJ5IENJIG9yY2hlc3RyYXRvcnMgKHR5cGluZywgcmV0cmllcywgdmVyc2lvbiBwYXJzaW5nKS4KcGFja2FnaW5nPT0yNC4yCnRlbmFjaXR5PT05LjAuMAoKIyBTYWZlLCBwcmVkaWN0YWJsZSBDTEkgb3V0cHV0IGFuZCBwcm9ncmVzcyByZXBvcnRpbmcuCnJpY2g9PTEzLjkuNAo=\"}\nDIR_STATE:[\"scripts/README_e2e.md\", \"scripts/artifacts.py\", \"scripts/e2e.py\", \"scripts/issue_on_failure.py\", \"scripts/repro_steps.py\", \"scripts/requirements-ci.txt\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_02bde0f3d6cefd35006949c1a151c08195b9d00bed4a8705e9",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_EXPORT:{\"path\":\"scripts/requirements-ci.txt\",\"size\":356,\"encoding\":\"base64\",\"sha256\":\"dc6d8e861a3d5882ff91857a9ebb9aebb1545ee997ca4a78ff444789e9b12350\",\"content\":\"IyBNaW5pbWFsLCBwaW5uZWQgZGVwZW5kZW5jaWVzIGZvciBDSS9lMmUgYXV0b21hdGlvbiBzY3JpcHRzLgojIEtlZXAgdGhpcyBmaWxlIHNtYWxsIGFuZCBzdGFibGU7IGFkZCBkZXBzIG9ubHkgd2hlbiByZXF1aXJlZCBieSBzY3JpcHRzLy4KcmVxdWVzdHM9PTIuMzIuMwpQeVlBTUw9PTYuMC4yCgojIFV0aWxpdHkgbGlicyBjb21tb25seSB1c2VkIGJ5IENJIG9yY2hlc3RyYXRvcnMgKHR5cGluZywgcmV0cmllcywgdmVyc2lvbiBwYXJzaW5nKS4KcGFja2FnaW5nPT0yNC4yCnRlbmFjaXR5PT05LjAuMAoKIyBTYWZlLCBwcmVkaWN0YWJsZSBDTEkgb3V0cHV0IGFuZCBwcm9ncmVzcyByZXBvcnRpbmcuCnJpY2g9PTEzLjkuNAo=\"}\nDIR_STATE:[\"scripts/README_e2e.md\",\"scripts/artifacts.py\",\"scripts/e2e.py\",\"scripts/issue_on_failure.py\",\"scripts/repro_steps.py\",\"scripts/requirements-ci.txt\"]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

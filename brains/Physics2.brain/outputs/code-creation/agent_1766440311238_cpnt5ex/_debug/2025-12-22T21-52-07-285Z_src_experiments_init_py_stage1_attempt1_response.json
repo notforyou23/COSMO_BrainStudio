@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/experiments/__init__.py` as a complete experiment registry initializer, providing registration, lookup, listing, and description utilities with a small `ExperimentSpec` metadata wrapper.",
+  "reasoning": "",
+  "responseId": "resp_0d094036b28247c2006949be0363548194a24180bc2ebe0b83",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2587,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1109,
+    "output_tokens_details": {
+      "reasoning_tokens": 72
+    },
+    "total_tokens": 3696
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0d094036b28247c2006949be0420308194b17c160beae0a5f3",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d094036b28247c2006949be0681d88194a6e56abba8db5422",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/__init__.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Experiment package initializer.\n\nThis module exposes a lightweight registry for numerical/symbolic experiment\nroutines. Experiments are ordinary callables (typically functions) registered\nunder a string name.\n\nTypical usage:\n\n    from experiments import register_experiment, get_experiment, list_experiments\n\n    @register_experiment(\"my_experiment\")\n    def run(...):\n        ...\n\n    get_experiment(\"my_experiment\")(...)\n\\\"\\\"\\\"\"\"\",\n\"\"\"from __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Any, Callable, Dict, Iterable, Mapping, Optional, Sequence, Tuple\"\"\",\n\"\"\"ExperimentFn = Callable[..., Any]\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass ExperimentSpec:\n    \\\"\\\"\\\"Metadata + callable for a registered experiment.\\\"\\\"\\\"\n\n    name: str\n    fn: ExperimentFn\n    description: str = \"\"\n    tags: Tuple[str, ...] = ()\"\"\",\n\"\"\"_REGISTRY: Dict[str, ExperimentSpec] = {}\"\"\",\n\"\"\"def register_experiment(\n    name: str,\n    *,\n    description: str = \"\",\n    tags: Sequence[str] = (),\n    overwrite: bool = False,\n) -> Callable[[ExperimentFn], ExperimentFn]:\n    \\\"\\\"\\\"Decorator to register an experiment.\n\n    Parameters\n    ----------\n    name:\n        Unique experiment identifier.\n    description:\n        Short human-readable description.\n    tags:\n        Optional categorization tags.\n    overwrite:\n        If True, replace an existing registration.\n    \\\"\\\"\\\"\n\n    def _decorator(fn: ExperimentFn) -> ExperimentFn:\n        if not overwrite and name in _REGISTRY:\n            raise KeyError(f\\\"Experiment already registered: {name}\\\")\n        _REGISTRY[name] = ExperimentSpec(\n            name=name, fn=fn, description=description, tags=tuple(tags)\n        )\n        return fn\n\n    return _decorator\"\"\",\n\"\"\"def add_experiment(\n    name: str,\n    fn: ExperimentFn,\n    *,\n    description: str = \"\",\n    tags: Sequence[str] = (),\n    overwrite: bool = False,\n) -> None:\n    \\\"\\\"\\\"Register an experiment without using decorator syntax.\\\"\\\"\\\"\n    register_experiment(\n        name, description=description, tags=tags, overwrite=overwrite\n    )(fn)\"\"\",\n\"\"\"def get_experiment(name: str) -> ExperimentFn:\n    \\\"\\\"\\\"Return the callable for *name* or raise KeyError.\\\"\\\"\\\"\n    return _REGISTRY[name].fn\"\"\",\n\"\"\"def get_spec(name: str) -> ExperimentSpec:\n    \\\"\\\"\\\"Return the ExperimentSpec for *name* or raise KeyError.\\\"\\\"\\\"\n    return _REGISTRY[name]\"\"\",\n\"\"\"def list_experiments(*, tag: Optional[str] = None) -> Tuple[str, ...]:\n    \\\"\\\"\\\"List registered experiment names, optionally filtered by tag.\\\"\\\"\\\"\n    if tag is None:\n        return tuple(sorted(_REGISTRY))\n    return tuple(sorted(n for n, s in _REGISTRY.items() if tag in s.tags))\"\"\",\n\"\"\"def registry() -> Mapping[str, ExperimentSpec]:\n    \\\"\\\"\\\"Read-only view of the current registry.\\\"\\\"\\\"\n    return _REGISTRY\"\"\",\n\"\"\"def describe_experiments(names: Optional[Iterable[str]] = None) -> Dict[str, Dict[str, Any]]:\n    \\\"\\\"\\\"Return structured descriptions suitable for printing/JSON.\\\"\\\"\\\"\n    if names is None:\n        items = _REGISTRY.items()\n    else:\n        items = ((n, _REGISTRY[n]) for n in names)\n    return {\n        n: {\\\"description\\\": s.description, \\\"tags\\\": list(s.tags), \\\"callable\\\": getattr(s.fn, \\\"__name__\\\", \\\"<callable>\\\")}\n        for n, s in items\n    }\"\"\",\n\"\"\"__all__ = [\n    \\\"ExperimentSpec\\\",\n    \\\"ExperimentFn\\\",\n    \\\"add_experiment\\\",\n    \\\"describe_experiments\\\",\n    \\\"get_experiment\\\",\n    \\\"get_spec\\\",\n    \\\"list_experiments\\\",\n    \\\"register_experiment\\\",\n    \\\"registry\\\",\n]\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/experiments/__init__.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949bd84af8481908e931e87d628d2450d02f5accc7ac937",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/__init__.py\nDIR_STATE:[\"src/experiments/__init__.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0d094036b28247c2006949be1366c4819493e29c207a9e439e",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/experiments/__init__.py` as a complete experiment registry initializer, providing registration, lookup, listing, and description utilities with a small `ExperimentSpec` metadata wrapper."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

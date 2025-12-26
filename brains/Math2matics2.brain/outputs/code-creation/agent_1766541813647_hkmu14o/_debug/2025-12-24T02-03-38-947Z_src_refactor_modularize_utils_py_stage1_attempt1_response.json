@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/refactor_modularize/utils.py` with compact, reusable helpers for directory/file operations, text normalization/slugging/hashing, and common validations (including safe path handling and atomic writes) to support the refactoring pipeline.",
+  "reasoning": "",
+  "responseId": "resp_05e99d7c9b85ecd900694b4a29aff48193847816704f4c6b4a",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2940,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1361,
+    "output_tokens_details": {
+      "reasoning_tokens": 1309
+    },
+    "total_tokens": 4301
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_05e99d7c9b85ecd900694b4a2a531081939afe76c519a50a34",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_05e99d7c9b85ecd900694b4a2bc564819393e754a0f76f2c97",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\r\nimport json, textwrap, re, hashlib, os, unicodedata\r\n\r\ntarget_path = Path('/mnt/data').joinpath('src/refactor_modularize/utils.py')\r\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\r\n\r\nchunks = []\r\n\r\nchunks.append(\"\"\"\\\r\n\\\"\\\"\\\"refactor_modularize.utils\r\n\r\nSmall, dependency-light helpers shared across the refactoring pipeline:\r\nfilesystem convenience, text normalization, and simple validations.\r\n\\\"\\\"\\\"\r\n\r\nfrom __future__ import annotations\r\n\r\nfrom dataclasses import dataclass\r\nfrom pathlib import Path\r\nfrom typing import Any, Iterable, Mapping, Sequence\r\nimport hashlib\r\nimport os\r\nimport re\r\nimport unicodedata\r\n\"\"\")\r\n\r\nchunks.append(\"\"\"\\\r\n# ----------------------------- Filesystem helpers -----------------------------\r\n\r\n\r\ndef ensure_dir(path: Path) -> Path:\r\n    \\\"\\\"\\\"Create *path* (a directory) if it doesn't exist and return it.\\\"\\\"\\\"\r\n    path.mkdir(parents=True, exist_ok=True)\r\n    return path\r\n\r\n\r\ndef read_text(path: Path, encoding: str = \"utf-8\") -> str:\r\n    \\\"\\\"\\\"Read a UTF-8 (by default) text file.\\\"\\\"\\\"\r\n    return path.read_text(encoding=encoding)\r\n\r\n\r\ndef write_text(path: Path, text: str, encoding: str = \"utf-8\") -> None:\r\n    \\\"\\\"\\\"Write text to *path*, creating parent directories as needed.\\\"\\\"\\\"\r\n    ensure_dir(path.parent)\r\n    path.write_text(text, encoding=encoding)\r\n\r\n\r\ndef list_files(root: Path, pattern: str = \"*\") -> list[Path]:\r\n    \\\"\\\"\\\"Return sorted files under *root* matching *pattern* (non-recursive).\\\"\\\"\\\"\r\n    return sorted(p for p in root.glob(pattern) if p.is_file())\r\n\r\n\r\ndef safe_relpath(path: Path, root: Path) -> str:\r\n    \\\"\\\"\\\"Return POSIX relative path; if unrelated, fall back to filename.\\\"\\\"\\\"\r\n    try:\r\n        return path.resolve().relative_to(root.resolve()).as_posix()\r\n    except Exception:\r\n        return path.name\r\n\"\"\")\r\n\r\nchunks.append(\"\"\"\\\r\n# ------------------------------ Text utilities -------------------------------\r\n\r\n\r\n_NEWLINE_RE = re.compile(r\"\\\\r\\\\n?|\\\\n\")\r\n\r\n\r\ndef normalize_newlines(text: str, newline: str = \"\\\\n\") -> str:\r\n    \\\"\\\"\\\"Normalize CRLF/CR newlines to *newline* (default: \\\\n).\\\"\\\"\\\"\r\n    return _NEWLINE_RE.sub(newline, text)\r\n\r\n\r\ndef strip_trailing_whitespace(text: str) -> str:\r\n    \\\"\\\"\\\"Strip trailing spaces/tabs on each line (preserves line count).\\\"\\\"\\\"\r\n    return \"\\\\n\".join(line.rstrip(\" \\\\t\") for line in normalize_newlines(text).split(\"\\\\n\"))\r\n\r\n\r\ndef stable_hash(text: str) -> str:\r\n    \\\"\\\"\\\"Short, stable content hash used for deterministic naming.\\\"\\\"\\\"\r\n    return hashlib.sha256(text.encode(\"utf-8\")).hexdigest()[:12]\r\n\r\n\r\n_SLUG_SEP_RE = re.compile(r\"[^a-z0-9]+\")\r\n\r\n\r\ndef slugify(value: str, max_len: int = 80) -> str:\r\n    \\\"\\\"\\\"Convert *value* to a filesystem-friendly slug.\\\"\\\"\\\"\r\n    value = unicodedata.normalize(\"NFKD\", value).encode(\"ascii\", \"ignore\").decode(\"ascii\")\r\n    value = value.lower().strip()\r\n    value = _SLUG_SEP_RE.sub(\"-\", value).strip(\"-\")\r\n    if not value:\r\n        value = \"item\"\r\n    return value[:max_len].rstrip(\"-\")\r\n\"\"\")\r\n\r\nchunks.append(\"\"\"\\\r\n# ------------------------------- Validations --------------------------------\r\n\r\n\r\n_IDENT_RE = re.compile(r\"^[A-Za-z_][A-Za-z0-9_]*$\")\r\n\r\n\r\nclass ValidationError(ValueError):\r\n    \\\"\\\"\\\"Raised when an input does not satisfy expected constraints.\\\"\\\"\\\"\r\n\r\n\r\ndef require(condition: bool, message: str) -> None:\r\n    if not condition:\r\n        raise ValidationError(message)\r\n\r\n\r\ndef validate_identifier(name: str, *, what: str = \"identifier\") -> str:\r\n    \\\"\\\"\\\"Validate Python identifier-ish names used in generated modules.\\\"\\\"\\\"\r\n    require(bool(name), f\\\"{what} is empty\\\")\r\n    require(bool(_IDENT_RE.match(name)), f\\\"invalid {what}: {name!r}\\\")\r\n    return name\r\n\r\n\r\ndef require_keys(mapping: Mapping[str, Any], keys: Sequence[str], *, what: str = \"mapping\") -> None:\r\n    missing = [k for k in keys if k not in mapping]\r\n    require(not missing, f\\\"{what} missing keys: {', '.join(missing)}\\\")\r\n\r\n\r\ndef within_root(path: Path, root: Path) -> bool:\r\n    \\\"\\\"\\\"True if *path* resolves under *root* (prevents path traversal).\\\"\\\"\\\"\r\n    try:\r\n        path.resolve().relative_to(root.resolve())\r\n        return True\r\n    except Exception:\r\n        return False\r\n\r\n\r\ndef atomic_write(path: Path, text: str, encoding: str = \"utf-8\") -> None:\r\n    \\\"\\\"\\\"Best-effort atomic write: write to temp file then replace.\\\"\\\"\\\"\r\n    ensure_dir(path.parent)\r\n    tmp = path.with_suffix(path.suffix + f\\\".tmp.{os.getpid()}\\\")\r\n    tmp.write_text(text, encoding=encoding)\r\n    os.replace(tmp, path)\r\n\"\"\")\r\n\r\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\r\ntarget_path.write_text(final_text, encoding='utf-8')\r\n\r\nprint('FILE_WRITTEN:src/refactor_modularize/utils.py')\r\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_694b49f988e88190b0cbb25ca37056a608ca97619881281d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/refactor_modularize/utils.py\nDIR_STATE:[\"src/refactor_modularize/__init__.py\", \"src/refactor_modularize/utils.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_05e99d7c9b85ecd900694b4a38c96081938cdfa62ef685b10f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/refactor_modularize/utils.py` with compact, reusable helpers for directory/file operations, text normalization/slugging/hashing, and common validations (including safe path handling and atomic writes) to support the refactoring pipeline."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

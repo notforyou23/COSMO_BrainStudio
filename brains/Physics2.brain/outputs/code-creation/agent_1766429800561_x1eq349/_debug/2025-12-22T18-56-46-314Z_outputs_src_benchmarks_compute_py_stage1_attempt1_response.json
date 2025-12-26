@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `outputs/src/benchmarks/compute.py` as a deterministic benchmark runner that reads an input JSON, validates it against an optional JSON Schema, computes normalized per-case and overall summary statistics, and writes a stable, sorted output JSON via a small CLI entrypoint.",
+  "reasoning": "",
+  "responseId": "resp_03c71e5e4e8f9323006949950cb9c48196a7c0be39b4e55264",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3272,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1839,
+    "output_tokens_details": {
+      "reasoning_tokens": 1781
+    },
+    "total_tokens": 5111
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_03c71e5e4e8f9323006949950db4508196857a2fb8b52f3679",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_03c71e5e4e8f93230069499514c6d081969a6cecea20293d1d",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, hashlib, math\ntarget_path = Path('/mnt/data').joinpath('outputs/src/benchmarks/compute.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"Deterministic benchmark computation.\n\nThis module reads a benchmark input JSON, validates it (optionally via JSON\nSchema), computes deterministic summary statistics, and writes a normalized\noutput JSON.\n\nThe intention is to provide a stable end-to-end artifact for CI.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport hashlib\nimport json\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple\n\ntry:  # Optional dependency; tests/CI are expected to install it.\n    import jsonschema  # type: ignore\nexcept Exception:  # pragma: no cover\n    jsonschema = None  # type: ignore\n\"\"\")\nchunks.append(\"\"\"\nNumber = float\n\n\ndef _read_json(path: Path) -> Any:\n    return json.loads(path.read_text(encoding=\"utf-8\"))\n\n\ndef _write_json(path: Path, obj: Any) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    path.write_text(json.dumps(obj, indent=2, sort_keys=True) + \"\\\\n\", encoding=\"utf-8\")\n\n\ndef _default_schema_path() -> Path:\n    # outputs/src/benchmarks/compute.py -> outputs/schemas/benchmark.schema.json\n    return Path(__file__).resolve().parents[2] / \"schemas\" / \"benchmark.schema.json\"\n\n\ndef _validate_with_schema(instance: Any, schema_path: Path) -> None:\n    if jsonschema is None:\n        raise RuntimeError(\"jsonschema is required for validation but is not installed.\")\n    schema = _read_json(schema_path)\n    jsonschema.validate(instance=instance, schema=schema)\n\"\"\")\nchunks.append(\"\"\"\ndef _as_number_list(values: Any, case_id: str) -> List[Number]:\n    if not isinstance(values, list) or not values:\n        raise ValueError(f\"case {case_id!r} must have non-empty list 'values'\")\n    out: List[Number] = []\n    for v in values:\n        if isinstance(v, bool) or not isinstance(v, (int, float)):\n            raise ValueError(f\"case {case_id!r} contains non-numeric value: {v!r}\")\n        out.append(float(v))\n    return out\n\n\ndef _stats(values: Sequence[Number]) -> Dict[str, Any]:\n    n = len(values)\n    s = float(sum(values))\n    mn = float(min(values))\n    mx = float(max(values))\n    mean = s / n\n    # Deterministic \"signature\" so tests can detect any ordering changes.\n    h = hashlib.sha256((\",\".join(f\"{x:.12g}\" for x in values)).encode(\"utf-8\")).hexdigest()\n    return {\n        \"count\": n,\n        \"sum\": s,\n        \"mean\": mean,\n        \"min\": mn,\n        \"max\": mx,\n        \"sha256\": h,\n    }\n\"\"\")\nchunks.append(\"\"\"\ndef compute(input_obj: Mapping[str, Any]) -> Dict[str, Any]:\n    \\\"\\\"\\\"Compute a normalized output artifact from an input artifact.\\\"\\\"\\\"\n    if not isinstance(input_obj, Mapping):\n        raise TypeError(\"benchmark input must be a JSON object\")\n\n    benchmark = input_obj.get(\"benchmark\")\n    if not isinstance(benchmark, Mapping):\n        raise ValueError(\"input must contain object field 'benchmark'\")\n    name = benchmark.get(\"name\")\n    if not isinstance(name, str) or not name:\n        raise ValueError(\"benchmark.name must be a non-empty string\")\n    cases = benchmark.get(\"cases\")\n    if not isinstance(cases, list) or not cases:\n        raise ValueError(\"benchmark.cases must be a non-empty list\")\n\n    out_cases: List[Dict[str, Any]] = []\n    for i, c in enumerate(cases):\n        if not isinstance(c, Mapping):\n            raise ValueError(f\"case at index {i} must be an object\")\n        cid = c.get(\"id\", str(i))\n        if not isinstance(cid, str) or not cid:\n            raise ValueError(f\"case at index {i} has invalid 'id'\")\n        values = _as_number_list(c.get(\"values\"), cid)\n        out_cases.append({\"id\": cid, \"values\": values, \"stats\": _stats(values)})\n\n    # Normalize: stable ordering and canonical floats (via json dumps later).\n    out_cases.sort(key=lambda x: x[\"id\"])\n\n    total_values = [v for c in out_cases for v in c[\"values\"]]\n    output: Dict[str, Any] = {\n        \"schema_version\": input_obj.get(\"schema_version\", 1),\n        \"artifact\": \"benchmark_output\",\n        \"benchmark\": {\n            \"name\": name,\n            \"case_count\": len(out_cases),\n            \"cases\": out_cases,\n            \"overall\": _stats(total_values),\n        },\n    }\n    return output\n\"\"\")\nchunks.append(\"\"\"\ndef run(\n    input_path: Path,\n    output_path: Path,\n    schema_path: Optional[Path] = None,\n    validate_output: bool = True,\n) -> Dict[str, Any]:\n    input_obj = _read_json(input_path)\n    schema_path = schema_path or _default_schema_path()\n    if schema_path.exists():\n        _validate_with_schema(input_obj, schema_path)\n    output_obj = compute(input_obj)\n    if validate_output and schema_path.exists():\n        _validate_with_schema(output_obj, schema_path)\n    _write_json(output_path, output_obj)\n    return output_obj\n\n\ndef main(argv: Optional[Sequence[str]] = None) -> int:\n    p = argparse.ArgumentParser(description=__doc__)\n    p.add_argument(\"input\", type=Path, help=\"Path to benchmark input JSON\")\n    p.add_argument(\"output\", type=Path, help=\"Path to write benchmark output JSON\")\n    p.add_argument(\"--schema\", type=Path, default=None, help=\"Optional JSON Schema path\")\n    p.add_argument(\"--no-validate-output\", action=\"store_true\", help=\"Skip output validation\")\n    args = p.parse_args(argv)\n    run(args.input, args.output, schema_path=args.schema, validate_output=not args.no_validate_output)\n    return 0\n\n\nif __name__ == \"__main__\":  # pragma: no cover\n    raise SystemExit(main())\n\"\"\")\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:outputs/src/benchmarks/compute.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:outputs/src/benchmarks/compute.py\nDIR_STATE:[\"outputs/src/benchmarks/__init__.py\", \"outputs/src/benchmarks/compute.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_03c71e5e4e8f93230069499529da648196ae981920d7cd455b",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `outputs/src/benchmarks/compute.py` as a deterministic benchmark runner that reads an input JSON, validates it against an optional JSON Schema, computes normalized per-case and overall summary statistics, and writes a stable, sorted output JSON via a small CLI entrypoint."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

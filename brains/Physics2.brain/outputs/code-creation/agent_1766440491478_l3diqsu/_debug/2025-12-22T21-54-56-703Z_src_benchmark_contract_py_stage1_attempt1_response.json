@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/benchmark_contract.py` with a v0.1 benchmark contract schema validator, tolerance model, reference algorithm protocol, and path/artifact resolution helpers to standardize benchmark metadata and I/O handling.",
+  "reasoning": "",
+  "responseId": "resp_09a7cfa7f3528a6a006949be560800819699dd0c2f39070d86",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3134,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1597,
+    "output_tokens_details": {
+      "reasoning_tokens": 234
+    },
+    "total_tokens": 4731
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_09a7cfa7f3528a6a006949be56c3f08196a16ea1688feb96f0",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_09a7cfa7f3528a6a006949be5bd2a881969dde9a270ccdc0c5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/benchmark_contract.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\"\"\"\n\\\"\\\"\\\"Benchmark contract helpers for v0.1 tasks.\n\nThis module standardizes how benchmarks describe:\n- metadata (task id/name, contract version)\n- I/O artifact paths (inputs, outputs, golden references)\n- reference algorithm selection/interface\n- tolerance rules for numeric diffs\n\nIt is intentionally small and dependency-free so both tests and CLIs can share it.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Mapping, Optional, Protocol, Tuple\n\n\nCONTRACT_VERSION = \"v0.1\"\n\n# Canonical relative locations (used by the default contract JSON and CLI).\nDEFAULT_CONTRACT_PATH = Path(\"benchmarks/contracts/v0_1.json\")\nDEFAULT_RUN_DIR = Path(\"benchmarks/runs/latest\")\nDEFAULT_GOLDEN_DIR = Path(\"benchmarks/golden/v0_1\")\nDEFAULT_OUTPUT_FILE = Path(\"outputs.json\")\n\n\nclass ReferenceAlgorithm(Protocol):\n    \\\"\\\"\\\"Reference algorithm interface used by the benchmark runner.\n\n    Implementations should be pure with respect to the provided input mapping.\n    \\\"\\\"\\\"\n\n    def __call__(self, inputs: Mapping[str, Any]) -> Any: ...\n\n\n@dataclass(frozen=True)\nclass Tolerance:\n    \\\"\\\"\\\"Absolute/relative tolerance settings for numeric comparisons.\\\"\\\"\\\"\n\n    abs: float = 0.0\n    rel: float = 0.0\n    nan_equal: bool = False\n\n    @classmethod\n    def from_obj(cls, obj: Any) -> \"Tolerance\":\n        if obj is None:\n            return cls()\n        if isinstance(obj, (int, float)):\n            return cls(abs=float(obj), rel=0.0)\n        if not isinstance(obj, Mapping):\n            raise TypeError(\"tolerance must be a number or mapping\")\n        return cls(\n            abs=float(obj.get(\"abs\", 0.0) or 0.0),\n            rel=float(obj.get(\"rel\", 0.0) or 0.0),\n            nan_equal=bool(obj.get(\"nan_equal\", False)),\n        )\n\n    def to_obj(self) -> Dict[str, Any]:\n        return {\"abs\": self.abs, \"rel\": self.rel, \"nan_equal\": self.nan_equal}\n\n\ndef _require(m: Mapping[str, Any], key: str) -> Any:\n    if key not in m:\n        raise ValueError(f\"contract missing required field: {key}\")\n    return m[key]\n\n\ndef load_contract(path: Path) -> Dict[str, Any]:\n    \\\"\\\"\\\"Load a benchmark contract JSON file.\\\"\\\"\\\"\n    data = json_load(path)\n    validate_contract(data)\n    return data\n\n\ndef json_load(path: Path) -> Any:\n    text = Path(path).read_text(encoding=\"utf-8\")\n    return __import__(\"json\").loads(text)\n\n\ndef validate_contract(contract: Mapping[str, Any]) -> None:\n    \\\"\\\"\\\"Validate minimum schema for a v0.1 benchmark contract.\\\"\\\"\\\"\n    version = _require(contract, \"contract_version\")\n    if version != CONTRACT_VERSION:\n        raise ValueError(f\"unsupported contract_version={version!r} (expected {CONTRACT_VERSION})\")\n\n    meta = _require(contract, \"metadata\")\n    if not isinstance(meta, Mapping):\n        raise TypeError(\"metadata must be an object\")\n    _require(meta, \"task_id\")\n    _require(meta, \"task_name\")\n\n    io = _require(contract, \"io\")\n    if not isinstance(io, Mapping):\n        raise TypeError(\"io must be an object\")\n    # Inputs may be absent for some tasks, but output/golden paths must be present.\n    _require(io, \"output_file\")\n    _require(io, \"golden_file\")\n\n    tol = contract.get(\"tolerance\", {})\n    Tolerance.from_obj(tol)  # type-check only\n\n    ref = _require(contract, \"reference\")\n    if not isinstance(ref, Mapping):\n        raise TypeError(\"reference must be an object\")\n    _require(ref, \"algorithm\")\n\n\ndef resolve_io_paths(\n    contract: Mapping[str, Any],\n    project_root: Path,\n    run_dir: Optional[Path] = None,\n) -> Tuple[Path, Path, Optional[Path]]:\n    \\\"\\\"\\\"Resolve I/O paths from a contract.\n\n    Returns (output_path, golden_path, inputs_path_or_None).\n    \\\"\\\"\\\"\n    io = contract[\"io\"]\n    out_rel = Path(io[\"output_file\"])\n    gold_rel = Path(io[\"golden_file\"])\n    inp = io.get(\"input_file\")\n    inputs_rel = Path(inp) if inp else None\n\n    run_dir = run_dir or DEFAULT_RUN_DIR\n    output_path = (project_root / run_dir / out_rel).resolve()\n    golden_path = (project_root / gold_rel).resolve()\n    inputs_path = (project_root / inputs_rel).resolve() if inputs_rel else None\n    return output_path, golden_path, inputs_path\n\n\ndef get_tolerance(contract: Mapping[str, Any]) -> Tolerance:\n    \\\"\\\"\\\"Return the contract's tolerance settings.\\\"\\\"\\\"\n    return Tolerance.from_obj(contract.get(\"tolerance\", {}))\n\n\ndef validate_artifact_paths(\n    output_path: Path,\n    golden_path: Path,\n    inputs_path: Optional[Path] = None,\n) -> None:\n    \\\"\\\"\\\"Validate benchmark artifact file existence/parent dirs.\\\"\\\"\\\"\n    output_path.parent.mkdir(parents=True, exist_ok=True)\n    if not golden_path.exists():\n        raise FileNotFoundError(f\"golden file not found: {golden_path}\")\n    if inputs_path is not None and not inputs_path.exists():\n        raise FileNotFoundError(f\"input file not found: {inputs_path}\")\n\"\"\"]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/benchmark_contract.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949be2e3cc88190ba383d17f1aa1c440ba8e9f08a4be3b1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/benchmark_contract.py\nDIR_STATE:[\"src/benchmark_contract.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_09a7cfa7f3528a6a006949be6c22308196bbb55713abbf40e2",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/benchmark_contract.py` with a v0.1 benchmark contract schema validator, tolerance model, reference algorithm protocol, and path/artifact resolution helpers to standardize benchmark metadata and I/O handling."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

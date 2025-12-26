@@ -1,0 +1,164 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://example.org/schemas/claim_card.schema.yaml
+title: CLAIM_CARD Schema
+description: Schema for CLAIM_CARD artifacts used by the QA gate; validates required inputs, formats, enums, and status lifecycle transitions.
+type: object
+additionalProperties: false
+required:
+  - schema_version
+  - claim_id
+  - verbatim_claim
+  - source_context
+  - provenance_anchor
+  - status
+properties:
+  schema_version:
+    type: string
+    const: "1.0"
+  claim_id:
+    type: string
+    description: Stable identifier for the claim card.
+    minLength: 6
+    maxLength: 128
+    pattern: "^[A-Za-z0-9][A-Za-z0-9._:-]{4,126}[A-Za-z0-9]$"
+  title:
+    type: string
+    minLength: 3
+    maxLength: 200
+  verbatim_claim:
+    type: string
+    description: The exact claim text to be verified (verbatim).
+    minLength: 10
+    maxLength: 5000
+  source_context:
+    type: object
+    additionalProperties: false
+    description: Where the claim came from and the minimal surrounding context needed to interpret it.
+    required: [source_type, citation, excerpt]
+    properties:
+      source_type:
+        type: string
+        enum: [paper, book, website, dataset, interview, internal_note, other]
+      citation:
+        type: string
+        description: Human-readable citation or link; must be present even if provenance_anchor is used.
+        minLength: 5
+        maxLength: 2000
+      excerpt:
+        type: string
+        description: The snippet/quote surrounding the claim for interpretability.
+        minLength: 10
+        maxLength: 8000
+      location:
+        type: string
+        description: Optional location pointer (e.g., page/section/timestamp).
+        maxLength: 200
+      accessed_at:
+        type: string
+        format: date-time
+  provenance_anchor:
+    type: object
+    additionalProperties: false
+    description: Machine-actionable anchor to the provenance (URL/DOI/file hash/etc.); required for QA gate.
+    required: [anchor_type, anchor_value]
+    properties:
+      anchor_type:
+        type: string
+        enum: [url, doi, urn, file_sha256, citation_key, internal_ref]
+      anchor_value:
+        type: string
+        minLength: 6
+        maxLength: 4096
+        pattern: "^(https?://\S+|doi:\S+|urn:\S+|sha256:[a-f0-9]{64}|[A-Za-z0-9._:-]{3,})$"
+      notes:
+        type: string
+        maxLength: 1000
+  status:
+    type: string
+    description: Lifecycle status enforced by QA gating.
+    enum: [drafted, submitted, in_review, verified, disputed, rejected, superseded]
+  status_history:
+    type: array
+    description: Optional audit trail of status changes.
+    items:
+      type: object
+      additionalProperties: false
+      required: [from, to, changed_at]
+      properties:
+        from: {type: string, enum: [drafted, submitted, in_review, verified, disputed, rejected, superseded]}
+        to: {type: string, enum: [drafted, submitted, in_review, verified, disputed, rejected, superseded]}
+        changed_at: {type: string, format: date-time}
+        changed_by: {type: string, maxLength: 200}
+        reason: {type: string, maxLength: 2000}
+  verifier:
+    type: object
+    additionalProperties: false
+    description: Optional information about who verified/disputed/rejected.
+    properties:
+      name: {type: string, maxLength: 200}
+      role: {type: string, maxLength: 200}
+      method: {type: string, enum: [manual, automated, mixed]}
+  verification:
+    type: object
+    additionalProperties: false
+    description: Optional structured verification results.
+    properties:
+      outcome:
+        type: string
+        enum: [supports, refutes, mixed, insufficient]
+      rationale:
+        type: string
+        maxLength: 12000
+      evidence:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [summary, provenance_anchor]
+          properties:
+            summary: {type: string, minLength: 5, maxLength: 2000}
+            provenance_anchor:
+              type: object
+              additionalProperties: false
+              required: [anchor_type, anchor_value]
+              properties:
+                anchor_type: {type: string, enum: [url, doi, urn, file_sha256, citation_key, internal_ref]}
+                anchor_value:
+                  type: string
+                  minLength: 6
+                  maxLength: 4096
+                  pattern: "^(https?://\S+|doi:\S+|urn:\S+|sha256:[a-f0-9]{64}|[A-Za-z0-9._:-]{3,})$"
+            quote: {type: string, maxLength: 8000}
+            notes: {type: string, maxLength: 2000}
+  created_at:
+    type: string
+    format: date-time
+  updated_at:
+    type: string
+    format: date-time
+  tags:
+    type: array
+    items: {type: string, maxLength: 64}
+    maxItems: 50
+  qa:
+    type: object
+    additionalProperties: false
+    description: QA gate integration metadata (non-authoritative).
+    properties:
+      required_inputs_present:
+        type: boolean
+      schema_valid:
+        type: boolean
+      lifecycle_valid:
+        type: boolean
+x-status-lifecycle:
+  initial: drafted
+  terminal: [verified, rejected, superseded]
+x-status-transitions:
+  drafted: [drafted, submitted]
+  submitted: [in_review, drafted]
+  in_review: [verified, disputed, rejected, submitted]
+  verified: [superseded]
+  disputed: [in_review, rejected, superseded]
+  rejected: [superseded]
+  superseded: []

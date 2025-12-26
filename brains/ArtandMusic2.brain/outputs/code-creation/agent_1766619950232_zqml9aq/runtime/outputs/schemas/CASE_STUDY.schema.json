@@ -1,0 +1,314 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schemas/CASE_STUDY.schema.json",
+  "title": "CASE_STUDY",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "slug",
+    "title",
+    "summary",
+    "status",
+    "dates",
+    "domains",
+    "context",
+    "problem",
+    "intervention",
+    "outcomes",
+    "evidence",
+    "sources",
+    "rights",
+    "metadata"
+  ],
+  "properties": {
+    "schema_version": { "type": "string", "pattern": "^1\\.0\\.0$" },
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "title": { "type": "string", "minLength": 3, "maxLength": 200 },
+    "subtitle": { "type": "string", "minLength": 0, "maxLength": 300 },
+    "summary": { "type": "string", "minLength": 20, "maxLength": 2000 },
+    "status": { "type": "string", "enum": ["draft", "review", "published", "archived"] },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "maxLength": 50 },
+      "uniqueItems": true,
+      "maxItems": 50,
+      "default": []
+    },
+    "dates": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["created", "updated"],
+      "properties": {
+        "created": { "type": "string", "format": "date" },
+        "updated": { "type": "string", "format": "date" },
+        "start": { "type": "string", "format": "date" },
+        "end": { "type": "string", "format": "date" }
+      }
+    },
+    "domains": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 2,
+        "maxLength": 80
+      },
+      "uniqueItems": true
+    },
+    "actors": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "organizations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/org" },
+          "default": []
+        },
+        "people": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/person" },
+          "default": []
+        },
+        "stakeholders": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "default": []
+        }
+      },
+      "default": {}
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["setting", "constraints"],
+      "properties": {
+        "setting": { "type": "string", "minLength": 10, "maxLength": 3000 },
+        "constraints": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 3, "maxLength": 300 },
+          "default": []
+        },
+        "assumptions": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 3, "maxLength": 300 },
+          "default": []
+        }
+      }
+    },
+    "problem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["statement", "why_now"],
+      "properties": {
+        "statement": { "type": "string", "minLength": 10, "maxLength": 5000 },
+        "why_now": { "type": "string", "minLength": 10, "maxLength": 2000 },
+        "baseline": { "type": "string", "minLength": 0, "maxLength": 4000 },
+        "risks": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 3, "maxLength": 400 },
+          "default": []
+        }
+      }
+    },
+    "intervention": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description", "steps"],
+      "properties": {
+        "description": { "type": "string", "minLength": 10, "maxLength": 7000 },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/step" },
+          "maxItems": 50
+        },
+        "inputs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1, "maxLength": 200 },
+          "default": []
+        },
+        "outputs": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1, "maxLength": 200 },
+          "default": []
+        }
+      }
+    },
+    "outcomes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["results", "limitations"],
+      "properties": {
+        "results": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/outcome" },
+          "maxItems": 50
+        },
+        "limitations": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 3, "maxLength": 800 },
+          "default": []
+        },
+        "next_steps": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 3, "maxLength": 800 },
+          "default": []
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["quality", "methods"],
+      "properties": {
+        "quality": { "type": "string", "enum": ["anecdotal", "observational", "quasi_experimental", "experimental", "mixed"] },
+        "methods": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 3, "maxLength": 120 },
+          "uniqueItems": true,
+          "maxItems": 20
+        },
+        "metrics": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/metric" },
+          "default": []
+        },
+        "artifacts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/artifact" },
+          "default": []
+        }
+      }
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bibliography_file", "citations"],
+      "properties": {
+        "bibliography_file": { "type": "string", "pattern": "^sources\\.bib$" },
+        "citations": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[A-Za-z0-9_:\\-]+$" },
+          "uniqueItems": true,
+          "default": []
+        },
+        "notes": { "type": "string", "minLength": 0, "maxLength": 3000 }
+      }
+    },
+    "rights": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["rights_file", "license"],
+      "properties": {
+        "rights_file": { "type": "string", "pattern": "^rights\\.md$" },
+        "license": { "type": "string", "minLength": 3, "maxLength": 200 },
+        "consent": { "type": "string", "enum": ["not_applicable", "obtained", "unknown", "restricted"] }
+      }
+    },
+    "links": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/link" },
+      "uniqueItems": true,
+      "default": []
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_id", "created_by", "generator"],
+      "properties": {
+        "record_id": { "type": "string", "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$" },
+        "created_by": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "generator": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "version_notes": { "type": "string", "minLength": 0, "maxLength": 2000 }
+      }
+    }
+  },
+  "$defs": {
+    "person": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "role": { "type": "string", "minLength": 0, "maxLength": 120 },
+        "affiliation": { "type": "string", "minLength": 0, "maxLength": 200 },
+        "orcid": { "type": "string", "pattern": "^\\d{4}-\\d{4}-\\d{4}-\\d{3}[\\dX]$" }
+      }
+    },
+    "org": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "type": { "type": "string", "minLength": 0, "maxLength": 80 },
+        "location": { "type": "string", "minLength": 0, "maxLength": 120 },
+        "website": { "type": "string", "format": "uri" }
+      }
+    },
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "details"],
+      "properties": {
+        "title": { "type": "string", "minLength": 3, "maxLength": 200 },
+        "details": { "type": "string", "minLength": 5, "maxLength": 5000 },
+        "duration": { "type": "string", "minLength": 0, "maxLength": 80 },
+        "owner": { "type": "string", "minLength": 0, "maxLength": 120 }
+      }
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["claim", "direction"],
+      "properties": {
+        "claim": { "type": "string", "minLength": 5, "maxLength": 2000 },
+        "direction": { "type": "string", "enum": ["improved", "worsened", "no_change", "mixed", "unknown"] },
+        "magnitude": { "type": "string", "minLength": 0, "maxLength": 200 },
+        "evidence_refs": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[A-Za-z0-9_:\\-]+$" },
+          "uniqueItems": true,
+          "default": []
+        }
+      }
+    },
+    "metric": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type"],
+      "properties": {
+        "name": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "type": { "type": "string", "enum": ["count", "rate", "score", "duration", "cost", "other"] },
+        "unit": { "type": "string", "minLength": 0, "maxLength": 40 },
+        "baseline": { "type": ["number", "string", "null"] },
+        "target": { "type": ["number", "string", "null"] },
+        "observed": { "type": ["number", "string", "null"] },
+        "notes": { "type": "string", "minLength": 0, "maxLength": 1000 }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label"],
+      "properties": {
+        "label": { "type": "string", "minLength": 2, "maxLength": 120 },
+        "path": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "mime": { "type": "string", "minLength": 0, "maxLength": 80 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "link": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "url"],
+      "properties": {
+        "label": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "url": { "type": "string", "format": "uri" }
+      }
+    }
+  }
+}

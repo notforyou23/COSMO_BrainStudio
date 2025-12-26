@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "name": "COSMO outputs directory structure",
+  "root": "outputs",
+  "description": "Declarative expected outputs tree for scaffolding and verification. Paths are relative to project root.",
+  "directories": [
+    {
+      "path": "outputs",
+      "required": true,
+      "description": "Top-level outputs directory."
+    },
+    {
+      "path": "outputs/qa",
+      "required": true,
+      "description": "QA artifacts, verification results, and run logs."
+    },
+    {
+      "path": "outputs/qa/logs",
+      "required": true,
+      "description": "Timestamped run logs for init_outputs and QA checks."
+    },
+    {
+      "path": "outputs/templates",
+      "required": true,
+      "description": "Reusable templates (e.g., report skeletons, prompts, checklists)."
+    },
+    {
+      "path": "outputs/reports",
+      "required": true,
+      "description": "Generated reports and human-readable deliverables."
+    }
+  ],
+  "verification": {
+    "must_exist": [
+      "outputs",
+      "outputs/qa",
+      "outputs/qa/logs",
+      "outputs/templates",
+      "outputs/reports"
+    ],
+    "notes": "Scaffold creation should be idempotent; verification should confirm all required paths exist."
+  }
+}

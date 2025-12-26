@@ -1,0 +1,35 @@
+#!/bin/sh
+# Git pre-commit hook: validate case studies metadata schema.
+# To install: copy/symlink this file to .git/hooks/pre-commit and chmod +x it.
+
+set -u
+
+if [ "${CASE_STUDIES_SKIP_VALIDATE:-}" = "1" ]; then
+  exit 0
+fi
+
+PY_BIN=""
+if command -v python3 >/dev/null 2>&1; then
+  PY_BIN="python3"
+elif command -v python >/dev/null 2>&1; then
+  PY_BIN="python"
+else
+  echo "case_studies pre-commit: python not found; skipping validation." 1>&2
+  exit 0
+fi
+
+# Ensure we're at the repo root if possible.
+ROOT="$PWD"
+if command -v git >/dev/null 2>&1; then
+  ROOT="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
+fi
+cd "$ROOT" 2>/dev/null || true
+
+"$PY_BIN" -m case_studies.validate
+rc=$?
+if [ $rc -ne 0 ]; then
+  echo "case_studies pre-commit: schema validation failed; commit blocked." 1>&2
+  exit $rc
+fi
+
+exit 0

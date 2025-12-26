@@ -1,0 +1,56 @@
+{
+  "content": "Created a GitHub Issue Form template for automated E2E failures that requires CI run details, failure summary, minimal repro steps, artifact/log links, and environment metadata.",
+  "reasoning": "",
+  "responseId": "resp_0b0bc3ad5cadc4f7006949bf45813481968ad8f1e244e7f4fb",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2850,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1278,
+    "output_tokens_details": {
+      "reasoning_tokens": 71
+    },
+    "total_tokens": 4128
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0b0bc3ad5cadc4f7006949bf46201c819687eeef85f54fbc2d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0b0bc3ad5cadc4f7006949bf47b348819683dc55a5bc3933b6",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('.github/ISSUE_TEMPLATE/e2e_failure.yml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"name: \"E2E failure (automated)\"\ndescription: \"Auto-filed when the end-to-end pipeline fails in CI.\"\ntitle: \"E2E failure: <workflow>/<job> @ <sha>\"\nlabels: [\"e2e-failure\", \"ci\"]\nbody:\n  - type: markdown\n    attributes:\n      value: |\n        This issue is intended for automated end-to-end (E2E) pipeline failures.\n        Please include links to the uploaded CI artifacts/logs so failures are reproducible and debuggable.\n  - type: input\n    id: run_url\n    attributes:\n      label: CI run URL\n      description: \"Link to the failed GitHub Actions run.\"\n      placeholder: \"https://github.com/<org>/<repo>/actions/runs/<run_id>\"\n    validations:\n      required: true\n  - type: input\n    id: workflow_job\n    attributes:\n      label: Workflow / job name\n      description: \"The workflow file and job that failed (as shown in Actions).\"\n      placeholder: \"e2e.yml / e2e\"\n    validations:\n      required: true\n  - type: input\n    id: commit\n    attributes:\n      label: Commit SHA\n      description: \"The commit tested by the failing run.\"\n      placeholder: \"abcdef1234567890...\"\n    validations:\n      required: true\n  - type: dropdown\n    id: trigger\n    attributes:\n      label: Trigger\n      description: \"How the run was triggered.\"\n      options:\n        - push\n        - pull_request\n        - workflow_dispatch\n        - schedule\n        - other\n    validations:\n      required: true\n  - type: textarea\n    id: failure_summary\n    attributes:\n      label: Failure summary\n      description: \"Concise error message(s) and the stage that failed (copy from CI summary).\"\n      placeholder: |\n        Stage: tests\n        Exit code: 1\n        Error: AssertionError: ...\n      render: text\n    validations:\n      required: true\n  - type: textarea\n    id: repro_steps\n    attributes:\n      label: Minimal reproduction steps\n      description: \"Exact commands to reproduce locally (or explain why it is CI-only).\"\n      value: |\n        1. Checkout the failing commit:\n           git checkout <sha>\n        2. Run the end-to-end pipeline:\n           make e2e\n        3. If it only fails in CI, note the delta (OS, Python version, env vars, secrets availability).\n      render: bash\n    validations:\n      required: true\n  - type: input\n    id: artifacts_url\n    attributes:\n      label: Logs / artifacts URL\n      description: \"Direct link to the uploaded artifacts (zip) or artifact page.\"\n      placeholder: \"https://github.com/<org>/<repo>/actions/runs/<run_id>#artifacts\"\n    validations:\n      required: true\n  - type: textarea\n    id: artifact_contents\n    attributes:\n      label: Artifact contents (expected paths)\n      description: \"List key files produced by the E2E run (helps confirm uploads).\"\n      value: |\n        - artifacts/manifest.json\n        - artifacts/e2e.log\n        - artifacts/stages/*.log\n        - artifacts/results/** (if applicable)\n      render: text\n    validations:\n      required: true\n  - type: textarea\n    id: environment\n    attributes:\n      label: Environment metadata\n      description: \"Paste the environment section from the CI summary/logs.\"\n      placeholder: |\n        runner_os: ubuntu-latest\n        python: 3.11.x\n        pip_freeze_hash: ...\n        working_directory: .\n        cache_hit: true/false\n      render: yaml\n    validations:\n      required: true\n  - type: textarea\n    id: failure_signature\n    attributes:\n      label: Failure signature / fingerprint\n      description: \"Stable identifier emitted by the orchestrator (if available) to deduplicate issues.\"\n      placeholder: \"e2e_signature: stage=tests|err=AssertionError|file=...|line=...\"\n      render: text\n    validations:\n      required: false\n  - type: checkboxes\n    id: triage\n    attributes:\n      label: Triage checklist\n      options:\n        - label: \"Artifacts uploaded and link included\"\n          required: true\n        - label: \"Reproduction steps provided or CI-only explained\"\n          required: true\n        - label: \"Failure summary includes stage + primary error\"\n          required: true\n        - label: \"Environment metadata included\"\n          required: true\n  - type: textarea\n    id: notes\n    attributes:\n      label: Additional notes\n      description: \"Optional context (recent merges, flaky tests, external outages, etc.).\"\n      render: text\n    validations:\n      required: false\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:.github/ISSUE_TEMPLATE/e2e_failure.yml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949be2f5f848190a4b8106bfdfa0c4704094e1617bbf644",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:.github/ISSUE_TEMPLATE/e2e_failure.yml\nDIR_STATE:[\".github/ISSUE_TEMPLATE/e2e_failure.yml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0b0bc3ad5cadc4f7006949bf5d39cc8196a63f781f622c9d10",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a GitHub Issue Form template for automated E2E failures that requires CI run details, failure summary, minimal repro steps, artifact/log links, and environment metadata."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

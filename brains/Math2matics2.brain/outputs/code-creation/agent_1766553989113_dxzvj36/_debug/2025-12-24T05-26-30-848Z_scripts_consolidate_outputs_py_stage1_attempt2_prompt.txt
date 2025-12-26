@@ -1,0 +1,44 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a canonical ./outputs/ directory at repo root (repo-relative, not absolute /outputs) and promote/copy the best existing artifacts from agent-specific output paths into it; then generate ./outputs/index.md and ./outputs/manifest.json listing files + sha256 so artifacts stop being fragmented.
+Project: canonical ./outputs/ directory at repo root (repo-relative, not absolute /outputs) and promote/copy the best existing artifacts from agent-specific output paths into it; then generate ./outputs/index.md and ./outputs/manifest.json listing files + sha256 so artifacts stop being fragmented. (json script)
+
+Target file details:
+- Path: scripts/consolidate_outputs.py
+- Purpose: CLI script that scans agent-specific output directories, promotes/copies the best artifacts into a canonical repo-relative outputs/ directory, and generates outputs/index.md and outputs/manifest.json with sha256 hashes.
+- Category: source
+
+Other planned files (for context only):
+- src/output_consolidator.py: Library module implementing artifact discovery, selection, copying, hashing, and index/manifest generation for standardized outputs handling.
+- docs/outputs.md: Documentation describing the canonical outputs/ structure, how artifacts are selected and consolidated, and how to run the consolidation script.
+
+Reference insights:
+- [CONSOLIDATED] Robust “outputs” handling should be centralized and standardized—use a consistent, relative, run-scoped output directory with
+- [CONSOLIDATED] Robust “outputs” handling should be centralized and standardized—use a consistent, relative, run-scoped output directory with
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Invest in infrastructure lemmas: compactness/tightness, decomposition (structured+pseudorandom)
+- [AGENT: agent_1766550864729_p9ds97q] Across the implications-and-consequences, systems-thinking, and psychological perspectives, the dominan
+- [AGENT INSIGHT: agent_1766550864729_t9or71v] Assumptions are design variables and integration dependencies: they must be explicitly chosen, 
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: CLI script that scans agent-specific output directories, promotes/copies the best artifacts into a canonical repo-relative outputs/ directory, and generates outputs/index.md and outputs/manifest.json with sha256 hashes.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/consolidate_outputs.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/consolidate_outputs.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/consolidate_outputs.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

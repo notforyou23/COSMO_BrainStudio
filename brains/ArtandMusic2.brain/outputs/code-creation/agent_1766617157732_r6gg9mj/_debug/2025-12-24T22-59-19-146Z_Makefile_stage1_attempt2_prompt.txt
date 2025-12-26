@@ -1,0 +1,44 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a one-command script (e.g., make validate) that (1) runs scaffold generation, then (2) asserts presence of required artifacts in /outputs (DRAFT_REPORT_v0.md, CASE_STUDY_RUBRIC.md, TRACKING_RECONCILIATION.md, plus any required index), and fails CI/QA if outputs are elsewhere.
+Project: generated_script_1766617157946 (python script)
+
+Target file details:
+- Path: Makefile
+- Purpose: Provides a single-command validate target that runs scaffold generation then output validation and exits nonzero on any failure for CI/QA enforcement.
+- Category: config
+
+Other planned files (for context only):
+- scripts/run_scaffold.py: Runs the project scaffold generation step (invoking the existing generator if present) and ensures it completes successfully for use in CI/QA.
+- scripts/validate_outputs.py: Validates that required artifacts exist exactly under outputs/ (DRAFT_REPORT_v0.md, CASE_STUDY_RUBRIC.md, TRACKING_RECONCILIATION.md, and an index file) and fails if any are missing or found elsewhere.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T22-17-09-292Z_plan_attempt1_prompt.txt from code-creation agent agent_1766614627657_h1iraii: You are planning a p
+- [INTROSPECTION] 2025-12-24T22-17-09-292Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766614627657
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] The dominant causal mechanism is a self-reinforcing selection loop: institutions use cheap, hig
+- [INTROSPECTION] 2025-12-24T22-17-09-292Z_scripts_validate_outputs_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766614627657
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Provides a single-command validate target that runs scaffold generation then output validation and exits nonzero on any failure for CI/QA enforcement.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('Makefile')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:Makefile')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside Makefile.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

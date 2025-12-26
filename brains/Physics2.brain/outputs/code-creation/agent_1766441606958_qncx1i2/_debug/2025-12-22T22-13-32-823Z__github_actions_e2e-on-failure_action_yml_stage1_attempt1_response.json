@@ -1,0 +1,56 @@
+{
+  "content": "Created `.github/actions/e2e-on-failure/action.yml` as a composite GitHub Action that (on failure by default) collects system/git/python/docker diagnostics plus common e2e outputs, optionally bundles them into a `.tar.gz`, uploads them as an artifact, and writes a concise triage summary to `GITHUB_STEP_SUMMARY`.",
+  "reasoning": "",
+  "responseId": "resp_090cf190e0a49d14006949c2c912ac819786dcbfb0fa355b67",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3711,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2136,
+    "output_tokens_details": {
+      "reasoning_tokens": 507
+    },
+    "total_tokens": 5847
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_090cf190e0a49d14006949c2c9f87881978e78b194390abd63",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_090cf190e0a49d14006949c2d5df8881978c7323b567cc1b85",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('.github/actions/e2e-on-failure/action.yml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"name: e2e-on-failure\ndescription: Collects diagnostics/logs and uploads artifacts when an e2e job fails.\ninputs:\n  run-on:\n    description: When to run collection inside this action (failure|always).\n    required: false\n    default: failure\n  logs-dir:\n    description: Directory (relative to workspace) to write diagnostics into.\n    required: false\n    default: e2e_failure_artifacts\n  artifact-name:\n    description: Artifact name for uploaded diagnostics.\n    required: false\n    default: e2e-failure-diagnostics\n  upload:\n    description: Whether to upload artifacts via actions/upload-artifact.\n    required: false\n    default: \"true\"\n  bundle:\n    description: Whether to create a tar.gz bundle of the diagnostics directory.\n    required: false\n    default: \"true\"\nruns:\n  using: composite\n  steps:\n    - name: Collect diagnostics\n      if: ${{ inputs.run-on == 'always' || failure() }}\n      shell: bash\n      env:\n        LOGS_DIR: ${{ inputs.logs-dir }}\n      run: |\n        set -euo pipefail\n        mkdir -p \"$LOGS_DIR\"\n\n        echo \"workspace: $GITHUB_WORKSPACE\" | tee \"$LOGS_DIR/meta.txt\"\n        echo \"runner: ${RUNNER_NAME:-} (${RUNNER_OS:-})\" | tee -a \"$LOGS_DIR/meta.txt\"\n        echo \"ref: ${GITHUB_REF:-} sha: ${GITHUB_SHA:-}\" | tee -a \"$LOGS_DIR/meta.txt\"\n        echo \"run: ${GITHUB_RUN_ID:-} attempt: ${GITHUB_RUN_ATTEMPT:-}\" | tee -a \"$LOGS_DIR/meta.txt\"\n        date -u +\"utc: %Y-%m-%dT%H:%M:%SZ\" | tee -a \"$LOGS_DIR/meta.txt\"\n\n        {\n          echo \"== uname ==\"; uname -a || true\n          echo; echo \"== whoami ==\"; whoami || true\n          echo; echo \"== id ==\"; id || true\n          echo; echo \"== pwd ==\"; pwd || true\n        } > \"$LOGS_DIR/system.txt\" 2>&1 || true\n\n        {\n          echo \"== disk ==\"; df -h || true\n          echo; echo \"== memory ==\"; (free -h 2>/dev/null || vm_stat 2>/dev/null) || true\n          echo; echo \"== ulimit ==\"; ulimit -a || true\n        } > \"$LOGS_DIR/resources.txt\" 2>&1 || true\n\n        {\n          echo \"== python ==\"; (python -V || true); (python -m pip -V || true)\n          echo; echo \"== pip freeze ==\"; (python -m pip freeze || true)\n        } > \"$LOGS_DIR/python.txt\" 2>&1 || true\n\n        {\n          echo \"== git ==\"; (git --version || true)\n          echo; (git status --porcelain=v1 || true)\n          echo; (git log -1 --oneline --decorate=short || true)\n        } > \"$LOGS_DIR/git.txt\" 2>&1 || true\n\n        {\n          echo \"== processes ==\"; (ps aux 2>/dev/null || ps -ef 2>/dev/null) || true\n        } > \"$LOGS_DIR/processes.txt\" 2>&1 || true\n\n        {\n          echo \"== env (redacted) ==\";\n          (env | sort | sed -E 's/(TOKEN|PASSWORD|SECRET|KEY)=.*/\\\\1=[REDACTED]/I') || true\n        } > \"$LOGS_DIR/env.txt\" 2>&1 || true\n\n        if command -v docker >/dev/null 2>&1; then\n          {\n            echo \"== docker info ==\"; docker info || true\n            echo; echo \"== docker ps ==\"; docker ps -a || true\n            echo; echo \"== docker images ==\"; docker images || true\n          } > \"$LOGS_DIR/docker.txt\" 2>&1 || true\n        fi\n\n        # Common e2e outputs (if present). Copy, don't fail if missing.\n        for p in playwright-report test-results coverage .pytest_cache; do\n          if [ -e \"$p\" ]; then\n            mkdir -p \"$LOGS_DIR/captured\"\n            cp -R \"$p\" \"$LOGS_DIR/captured/\" 2>/dev/null || true\n          fi\n        done\n\n        # Basic directory listing for quick triage\n        (ls -la . && echo && find \"$LOGS_DIR\" -maxdepth 3 -type f -print) > \"$LOGS_DIR/tree.txt\" 2>&1 || true\n\n    - name: Bundle diagnostics\n      if: ${{ (inputs.run-on == 'always' || failure()) && inputs.bundle == 'true' }}\n      shell: bash\n      env:\n        LOGS_DIR: ${{ inputs.logs-dir }}\n      run: |\n        set -euo pipefail\n        tar -czf \"${LOGS_DIR}.tar.gz\" \"$LOGS_DIR\" 2>/dev/null || true\n\n    - name: Upload diagnostics artifact\n      if: ${{ (inputs.run-on == 'always' || failure()) && inputs.upload == 'true' }}\n      uses: actions/upload-artifact@v4\n      with:\n        name: ${{ inputs.artifact-name }}\n        path: |\n          ${{ inputs.logs-dir }}\n          ${{ inputs.logs-dir }}.tar.gz\n        if-no-files-found: ignore\n        retention-days: 14\n\n    - name: Write summary\n      if: ${{ inputs.run-on == 'always' || failure() }}\n      shell: bash\n      env:\n        LOGS_DIR: ${{ inputs.logs-dir }}\n      run: |\n        set -euo pipefail\n        {\n          echo \"## e2e failure diagnostics\"\n          echo\n          echo \"Collected into \\`$LOGS_DIR\\` and uploaded as artifact \\`${{ inputs.artifact-name }}\\` (if enabled).\"\n          echo\n          echo \"**Files captured:**\"\n          echo\n          if [ -d \"$LOGS_DIR\" ]; then\n            echo '```'\n            find \"$LOGS_DIR\" -maxdepth 3 -type f -print | sed 's#^#- #' || true\n            echo '```'\n          else\n            echo \"_No diagnostics directory found._\"\n          fi\n          echo\n          echo \"To reproduce locally, run the same e2e command with verbose logs and inspect the saved reports (e.g., Playwright).\"\n        } >> \"$GITHUB_STEP_SUMMARY\"\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:.github/actions/e2e-on-failure/action.yml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949c289d32c81909670b17a73e06bb5058924e5a7d358e0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:.github/actions/e2e-on-failure/action.yml\nDIR_STATE:[\".github/actions/e2e-on-failure/action.yml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_090cf190e0a49d14006949c2f0eb8081979aee2cc962fd4766",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `.github/actions/e2e-on-failure/action.yml` as a composite GitHub Action that (on failure by default) collects system/git/python/docker diagnostics plus common e2e outputs, optionally bundles them into a `.tar.gz`, uploads them as an artifact, and writes a concise triage summary to `GITHUB_STEP_SUMMARY`."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

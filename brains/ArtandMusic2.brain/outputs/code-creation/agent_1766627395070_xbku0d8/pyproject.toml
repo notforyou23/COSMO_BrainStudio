@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "generated_script_1766617727708"
+version = "0.1.0"
+description = "Intake task normalization and blocking validation (checklist + JSON Schema)."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "Proprietary"}
+dependencies = [
+  "jsonschema>=4.22.0",
+  "typer>=0.12.3",
+  "rich>=13.7.1",
+]
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.2.0",
+  "pytest-cov>=5.0.0",
+  "ruff>=0.6.0",
+]
+[tool.setuptools]
+package-dir = {"" = "src"}
+[tool.setuptools.packages.find]
+where = ["src"]
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-q"
+testpaths = ["tests"]
+pythonpath = ["src"]
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["dist", "build", ".venv"]
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]

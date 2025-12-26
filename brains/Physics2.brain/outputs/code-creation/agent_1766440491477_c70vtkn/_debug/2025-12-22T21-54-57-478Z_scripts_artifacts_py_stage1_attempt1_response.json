@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `scripts/artifacts.py` with secret redaction, deterministic staging/copying, stable manifest generation (sha256/size), and reproducible `.tar.gz`/`.zip` packaging via a single `prepare_artifacts()` entrypoint.",
+  "reasoning": "",
+  "responseId": "resp_0548b6b55f4ee69a006949beba02cc81909708ec6f2787128b",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4008,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2472,
+    "output_tokens_details": {
+      "reasoning_tokens": 486
+    },
+    "total_tokens": 6480
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0548b6b55f4ee69a006949bebad3888190a754b9dbac33198f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0548b6b55f4ee69a006949bec4f18c81908f0968295fdd2ead",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re, hashlib, fnmatch, tarfile, zipfile, shutil, stat\n\ntarget_path = Path('/mnt/data').joinpath('scripts/artifacts.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\\\n\\\"\\\"\\\"Artifact utilities: redact secrets, build deterministic manifests, and package logs/results.\n\nDesigned for CI: create a staging tree with redaction applied, emit a stable manifest,\nand package into .tar.gz or .zip with normalized metadata for reproducible uploads.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nimport fnmatch\nimport hashlib\nimport json\nimport os\nimport re\nimport shutil\nimport stat\nimport tarfile\nimport zipfile\nfrom typing import Iterable, Iterator, List, Optional, Sequence, Tuple\n\"\"\")\n\nchunks.append(\"\"\"\\\n# Regexes tuned to catch common CI secrets without being overly expensive.\n_SECRET_PATTERNS: List[Tuple[re.Pattern, str]] = [\n    (re.compile(r\"(?i)\\\\bghp_[A-Za-z0-9]{20,}\\\\b\"), \"REDACTED_GH_TOKEN\"),\n    (re.compile(r\"(?i)\\\\bgithub_pat_[A-Za-z0-9_]{20,}\\\\b\"), \"REDACTED_GH_PAT\"),\n    (re.compile(r\"\\\\bAKIA[0-9A-Z]{16}\\\\b\"), \"REDACTED_AWS_ACCESS_KEY_ID\"),\n    (re.compile(r\"(?is)-----BEGIN (?:RSA )?PRIVATE KEY-----.*?-----END (?:RSA )?PRIVATE KEY-----\"),\n     \"REDACTED_PRIVATE_KEY_BLOCK\"),\n    (re.compile(r\"(?im)^(\\\\s*(?:\\\\w+_)?(?:token|secret|password|passwd|api[_-]?key)\\\\s*=\\\\s*).+$\"),\n     r\"\\\\1REDACTED\"),\n]\n_TEXT_EXTS = {\".log\", \".txt\", \".json\", \".yml\", \".yaml\", \".env\", \".ini\", \".cfg\", \".md\"}\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef redact_text(text: str) -> str:\n    for rx, repl in _SECRET_PATTERNS:\n        text = rx.sub(repl, text)\n    return text\n\n\ndef redact_bytes(data: bytes) -> bytes:\n    try:\n        s = data.decode(\"utf-8\")\n    except UnicodeDecodeError:\n        s = data.decode(\"utf-8\", errors=\"ignore\")\n    return redact_text(s).encode(\"utf-8\")\n\n\ndef sha256_file(path: Path) -> str:\n    h = hashlib.sha256()\n    with path.open(\"rb\") as f:\n        for chunk in iter(lambda: f.read(1024 * 1024), b\"\"):\n            h.update(chunk)\n    return h.hexdigest()\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef _rel_posix(path: Path, root: Path) -> str:\n    return path.relative_to(root).as_posix()\n\n\ndef iter_files(\n    root: Path,\n    includes: Sequence[str] = (\"**/*\",),\n    excludes: Sequence[str] = (),\n) -> Iterator[Path]:\n    root = root.resolve()\n    for p in sorted(root.rglob(\"*\")):\n        if not p.is_file():\n            continue\n        rel = _rel_posix(p, root)\n        if includes and not any(fnmatch.fnmatch(rel, pat) for pat in includes):\n            continue\n        if excludes and any(fnmatch.fnmatch(rel, pat) for pat in excludes):\n            continue\n        yield p\n\"\"\")\n\nchunks.append(\"\"\"\\\n@dataclass(frozen=True)\nclass ManifestEntry:\n    path: str\n    size: int\n    sha256: str\n\n\ndef build_manifest(root: Path, files: Iterable[Path]) -> List[ManifestEntry]:\n    root = root.resolve()\n    entries: List[ManifestEntry] = []\n    for p in files:\n        entries.append(ManifestEntry(_rel_posix(p, root), p.stat().st_size, sha256_file(p)))\n    entries.sort(key=lambda e: e.path)\n    return entries\n\n\ndef write_manifest(path: Path, entries: Sequence[ManifestEntry]) -> None:\n    payload = {\n        \"version\": 1,\n        \"entries\": [e.__dict__ for e in entries],\n    }\n    path.parent.mkdir(parents=True, exist_ok=True)\n    path.write_text(json.dumps(payload, sort_keys=True, indent=2) + \"\\\\n\", encoding=\"utf-8\")\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef stage_tree(\n    src_root: Path,\n    dst_root: Path,\n    includes: Sequence[str] = (\"**/*\",),\n    excludes: Sequence[str] = (),\n) -> List[Path]:\n    \\\"\\\"\\\"Copy src_root -> dst_root applying redaction to likely-text files.\n\n    Returns a list of staged file paths (in dst_root), deterministically ordered.\n    \\\"\\\"\\\"\n    src_root = src_root.resolve()\n    dst_root = dst_root.resolve()\n    if dst_root.exists():\n        shutil.rmtree(dst_root)\n    dst_root.mkdir(parents=True, exist_ok=True)\n\n    staged: List[Path] = []\n    for src in iter_files(src_root, includes=includes, excludes=excludes):\n        rel = src.relative_to(src_root)\n        dst = dst_root / rel\n        dst.parent.mkdir(parents=True, exist_ok=True)\n        if src.suffix.lower() in _TEXT_EXTS:\n            dst.write_bytes(redact_bytes(src.read_bytes()))\n        else:\n            shutil.copy2(src, dst)\n        os.utime(dst, (0, 0))  # normalize mtimes for reproducible archives\n        staged.append(dst)\n    staged.sort(key=lambda p: p.relative_to(dst_root).as_posix())\n    return staged\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef create_tar_gz(staged_root: Path, out_path: Path) -> Path:\n    staged_root = staged_root.resolve()\n    out_path.parent.mkdir(parents=True, exist_ok=True)\n\n    def _filter(ti: tarfile.TarInfo) -> tarfile.TarInfo:\n        ti.uid = ti.gid = 0\n        ti.uname = ti.gname = \"\"\n        ti.mtime = 0\n        if ti.mode:\n            ti.mode = 0o644 if ti.isfile() else 0o755\n        return ti\n\n    with tarfile.open(out_path, \"w:gz\") as tf:\n        tf.add(staged_root, arcname=\".\", filter=_filter)\n    return out_path\n\n\ndef create_zip(staged_root: Path, out_path: Path) -> Path:\n    staged_root = staged_root.resolve()\n    out_path.parent.mkdir(parents=True, exist_ok=True)\n    epoch = (1980, 1, 1, 0, 0, 0)\n\n    with zipfile.ZipFile(out_path, \"w\", compression=zipfile.ZIP_DEFLATED) as zf:\n        for p in iter_files(staged_root):\n            rel = _rel_posix(p, staged_root)\n            zi = zipfile.ZipInfo(rel, date_time=epoch)\n            mode = 0o644\n            zi.external_attr = (mode & 0xFFFF) << 16\n            zf.writestr(zi, p.read_bytes())\n    return out_path\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef prepare_artifacts(\n    src_root: Path,\n    work_dir: Path,\n    *,\n    includes: Sequence[str] = (\"**/*\",),\n    excludes: Sequence[str] = (\"**/__pycache__/**\", \"**/*.pyc\"),\n    archive_name: str = \"artifacts\",\n    fmt: str = \"tar.gz\",\n) -> Tuple[Path, Path]:\n    \\\"\\\"\\\"Stage+manifest+archive. Returns (archive_path, manifest_path).\\\"\\\"\\\"\n    work_dir = work_dir.resolve()\n    staged_root = work_dir / \"staged\"\n    staged_files = stage_tree(src_root, staged_root, includes=includes, excludes=excludes)\n    manifest_entries = build_manifest(staged_root, staged_files)\n    manifest_path = work_dir / \"manifest.json\"\n    write_manifest(manifest_path, manifest_entries)\n    # Include manifest inside the staged tree for easier debugging.\n    shutil.copy2(manifest_path, staged_root / \"manifest.json\")\n    os.utime(staged_root / \"manifest.json\", (0, 0))\n\n    if fmt == \"zip\":\n        archive_path = work_dir / f\"{archive_name}.zip\"\n        return create_zip(staged_root, archive_path), manifest_path\n    archive_path = work_dir / f\"{archive_name}.tar.gz\"\n    return create_tar_gz(staged_root, archive_path), manifest_path\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:scripts/artifacts.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949be2f5f848190a4b8106bfdfa0c4704094e1617bbf644",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:scripts/artifacts.py\nDIR_STATE:[\"scripts/artifacts.py\", \"scripts/e2e.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0548b6b55f4ee69a006949bee29adc819084dc96b9f92bc5ef",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `scripts/artifacts.py` with secret redaction, deterministic staging/copying, stable manifest generation (sha256/size), and reproducible `.tar.gz`/`.zip` packaging via a single `prepare_artifacts()` entrypoint."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

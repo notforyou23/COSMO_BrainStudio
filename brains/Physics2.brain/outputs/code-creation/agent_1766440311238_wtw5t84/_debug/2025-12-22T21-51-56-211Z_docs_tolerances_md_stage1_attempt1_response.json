@@ -1,0 +1,56 @@
+{
+  "content": "Created `docs/tolerances.md` documenting the centralized tolerance policy (atol/rtol), structural/type rules, NaN/Inf handling, and a per-observable tolerance table with guidance for justifying tolerance choices per v0.1 task.",
+  "reasoning": "",
+  "responseId": "resp_01c11baa13a86d17006949be9a570481959b805c133f2e0e7f",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3134,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1599,
+    "output_tokens_details": {
+      "reasoning_tokens": 198
+    },
+    "total_tokens": 4733
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_01c11baa13a86d17006949be9b322081959e20fbe47194f6cd",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01c11baa13a86d17006949bea00f648195af34373134b4c876",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('docs/tolerances.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"# Tolerance policy (v0.1 benchmarks)\n\nThis project uses **centralized comparison utilities** to decide whether a candidate run matches the reference run.\nEvery v0.1 task must declare **per-observable tolerance choices** in its benchmark contract; CI enforces that contract.\n\n## Core concepts\n\n### Observables and paths\nAn *observable* is any value produced by a benchmark that is compared (e.g., `metrics.rmse`, `state.positions`, `summary.score`).\nObservables are addressed by a stable **path** (dot / index notation) and compared independently, each with its own tolerance spec.\n\n### Absolute vs relative tolerance\nNumeric comparisons use both:\n- **Absolute tolerance** `atol`: allowed absolute error.\n- **Relative tolerance** `rtol`: allowed error relative to the reference magnitude.\n\nA value `x` (candidate) is considered equal to `y` (reference) when:\n\n`|x - y| <= atol + rtol * |y|`\n\nNotes:\n- Use `atol` for small-magnitude values where relative error is unstable.\n- Use `rtol` for scale-proportional error where values vary in magnitude.\n\n### Defaults and overrides\nPolicy:\n- Each observable must explicitly declare `atol` and `rtol` (no silent global defaults in CI).\n- Nested/structured observables may provide **per-field overrides** (e.g., `state.positions.atol` differs from `state.velocities.atol`).\n- Non-numeric types (strings, booleans, enums) use **exact equality** unless the observable is explicitly excluded from comparison.\n\n## Type/shape and structural rules\n\nBefore applying tolerances, comparisons enforce:\n- **Type compatibility**: numeric vs non-numeric mismatches fail (except where the contract defines coercion; v0.1 assumes no coercion).\n- **Shape equality** for arrays/tensors (rank and dimensions must match).\n- **Key-set equality** for mappings/dicts (unless the contract declares an allowlist/ignorelist for keys).\n\nThese structural checks produce deterministic, CI-friendly mismatch messages (first mismatch path + a short diff summary).\n\n## NaN/Inf handling\n\nFloating-point special values are handled explicitly per observable via a `nan_policy` field:\n\n- `nan_policy: \"forbid\"` (recommended default)\n  - Any NaN in either candidate or reference fails the comparison.\n- `nan_policy: \"allow_equal\"`\n  - NaN is allowed **only if both** candidate and reference are NaN at the same positions.\n- `nan_policy: \"allow_any\"`\n  - NaNs are ignored for that observable (use sparingly; must be justified).\n\nInfinity handling:\n- `+inf` and `-inf` are treated as valid numeric values, but must match exactly in sign and location.\n- A finite number never matches an infinity, regardless of tolerances.\n\n## Choosing tolerances (how to justify)\n\nTolerances should be **tight enough to catch regressions** and **loose enough to be stable** across platforms, BLAS/LAPACK variants, and minor nondeterminism.\n\nRecommended workflow:\n1. Run the reference algorithm across representative seeds/inputs and record typical numeric variability.\n2. Identify the observable’s scale (units/range). Prefer `rtol` when scale varies; prefer `atol` when values can be near zero.\n3. Set tolerances slightly above observed variability (e.g., 2–10× the maximum observed deviation), then re-run in CI.\n4. If tolerances must be large, add a note explaining *why* (stochasticity, ill-conditioning, chaotic dynamics, GPU nondeterminism, etc.).\n5. Prefer tightening tolerances on **aggregate metrics** (scores, losses) and allowing slightly larger tolerances on **raw intermediate fields** (states, gradients).\n\nAnti-patterns:\n- Using `allow_any` to “make tests pass” without a domain reason.\n- Setting huge `atol`/`rtol` without stating expected range/units.\n- Relying on a single global tolerance for all outputs.\n\n## Per-observable tolerance table (to include in each task’s docs)\n\nUse a table like the following in each v0.1 task’s documentation (or in the contract’s `tolerances` section), and keep it updated when observables change.\n\n| Observable path | Type / shape | Units / scale | Expected range | atol | rtol | nan_policy | Rationale / notes |\n|---|---|---:|---:|---:|---:|---|---|\n| `metrics.rmse` | float | same as target | ~1e-3–1e0 | 1e-6 | 1e-4 | forbid | Deterministic metric; small platform drift only. |\n| `state.positions` | array (N,3) | meters | ~1e-2–1e2 | 1e-7 | 1e-5 | forbid | ODE solver differences; compare per-element. |\n| `debug.intermediate` | array (...) | n/a | n/a | 0.0 | 0.0 | allow_equal | NaNs represent masked regions; must match exactly. |\n\nInterpretation:\n- “Expected range” should reflect typical magnitudes; it anchors whether `atol`/`rtol` are sensible.\n- If an observable is stochastic, document the seed control strategy; prefer comparing *statistics* (mean/quantiles) over raw samples.\n\n## CI enforcement expectations\n\nCI will fail a benchmark when:\n- A task omits tolerance specs for an observable that is compared.\n- Any observable violates its declared tolerance or special-value policy.\n- The output structure changes (missing/extra keys, shape mismatch) unless the contract explicitly permits it.\n\nThis ensures tolerance choices are reviewed, traceable, and consistent across tasks.\"\"\"]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:docs/tolerances.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd7a484c8190a2c35d8222ddd72e01ed19761adadc33",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:docs/tolerances.md\nDIR_STATE:[\"docs/tolerances.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_01c11baa13a86d17006949beb9375c81959591b56cae7388ec",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `docs/tolerances.md` documenting the centralized tolerance policy (atol/rtol), structural/type rules, NaN/Inf handling, and a per-observable tolerance table with guidance for justifying tolerance choices per v0.1 task."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

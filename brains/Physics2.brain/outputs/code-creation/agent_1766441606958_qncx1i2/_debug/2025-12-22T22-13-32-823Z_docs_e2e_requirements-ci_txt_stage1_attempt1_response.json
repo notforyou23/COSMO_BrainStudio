@@ -1,0 +1,56 @@
+{
+  "content": "Created `docs/e2e/requirements-ci.txt` as a concise, CI-focused, fully pinned e2e dependency set with inline comments mapping each package to its e2e/CI usage.",
+  "reasoning": "",
+  "responseId": "resp_05aa95c2e8df3874006949c31999908194aad75bb695b1a720",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2198,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 597,
+    "output_tokens_details": {
+      "reasoning_tokens": 102
+    },
+    "total_tokens": 2795
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_05aa95c2e8df3874006949c31a3c9881948a6641365664e015",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_05aa95c2e8df3874006949c31ce0588194ace8675b69217d34",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('docs/e2e/requirements-ci.txt')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"# CI-only Python dependencies for end-to-end (e2e) test runs.\n# - Pinned versions keep CI reproducible.\n# - Keep this file small: only what CI needs (not full dev deps).\n# - Comments describe the feature/module that requires each dependency.\"\"\",\n\"\"\"# Core test runner\npytest==8.3.4\npytest-xdist==3.6.1          # parallel e2e execution in CI\npytest-timeout==2.3.1        # hard-stop hung tests\npytest-rerunfailures==14.0   # rerun flaky tests when enabled\npytest-html==4.1.1           # optional HTML report artifact\npytest-metadata==3.1.1       # extra context in reports (build, platform, etc.)\"\"\",\n\"\"\"# HTTP / API helpers commonly used in e2e suites\nrequests==2.32.3\ntenacity==9.0.0              # retry/backoff for eventually-consistent systems\"\"\",\n\"\"\"# Configuration & structured output\nPyYAML==6.0.2                # parse workflow/test config files\npython-dotenv==1.0.1         # load CI-provided .env files when present\nrich==13.9.4                 # readable CLI logs in CI output\"\"\",\n\"\"\"# Browser-driven e2e (install browser binaries separately in CI)\nplaywright==1.49.1           # UI e2e automation (Chromium/Firefox/WebKit)\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:docs/e2e/requirements-ci.txt')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949c289d32c81909670b17a73e06bb5058924e5a7d358e0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:docs/e2e/requirements-ci.txt\nDIR_STATE:[\"docs/e2e/README_e2e.md\", \"docs/e2e/requirements-ci.txt\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_05aa95c2e8df3874006949c32805708194b0ba8e157b334c88",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `docs/e2e/requirements-ci.txt` as a concise, CI-focused, fully pinned e2e dependency set with inline comments mapping each package to its e2e/CI usage."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

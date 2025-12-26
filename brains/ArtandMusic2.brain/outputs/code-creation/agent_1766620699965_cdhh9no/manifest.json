@@ -1,0 +1,212 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766620699965_cdhh9no",
+  "agentType": "code-creation",
+  "goalId": "goal_113",
+  "missionId": "strategic_goal_113_1766620699965",
+  "spawnCycle": 84,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T23:58:29.498Z",
+  "completedAt": "2025-12-25T00:04:27.011Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "src/cli/path_canonicalize.py",
+      "description": "Implements a Python CLI command that scans runtime/outputs/, syncs artifacts into the canonical outputs/ tree, optionally rewrites in-repo references, and emits outputs/qa/path_canonicalization_report.md summarizing moves, duplicates, and actions taken.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/cli/path_canonicalize.py\nDIR_STATE:[\"src/cli/add_case_study.py\", \"src/cli/path_canonicalize.py\"]\nSummary: Implemented a standalone CLI command to sync runtime/outputs into outputs/, optionally rewrite references, and generate a QA markdown report.\n",
+          "timestamp": "2025-12-24T23:59:12.194Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/cli/path_canonicalize.py\nDIR_STATE:[\"src/cli/add_case_study.py\", \"src/cli/path_canonicalize.py\"]\nSummary: Implemented a self-contained CLI command to sync runtime/outputs into outputs, optionally rewrite references, and emit a QA markdown report.\n",
+          "timestamp": "2025-12-24T23:59:46.706Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:58:29.498Z",
+      "failedAt": "2025-12-24T23:59:46.706Z"
+    },
+    {
+      "path": "src/cli/__init__.py",
+      "description": "Defines the cli package entry points and exports the path canonicalization command for integration with the existing CLI tool.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/cli/__init__.py\nDIR_STATE:[\"src/cli/__init__.py\", \"src/cli/add_case_study.py\", \"src/cli/path_canonicalize.py\"]\nSummary: Exported the path canonicalization CLI subcommand entry point from the cli package with safe lazy importing.\n",
+          "timestamp": "2025-12-25T00:00:01.453Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/cli/__init__.py\nDIR_STATE:[\"src/cli/__init__.py\", \"src/cli/add_case_study.py\", \"src/cli/path_canonicalize.py\"]\nSummary: Added lazy-loaded exports in src.cli to integrate the path canonicalization CLI command safely.\n",
+          "timestamp": "2025-12-25T00:00:14.708Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:58:29.498Z",
+      "failedAt": "2025-12-25T00:00:14.708Z"
+    },
+    {
+      "path": "src/cli/_path_canonicalize_lib.py",
+      "description": "Provides reusable library functions for file discovery, copy/sync logic, hashing/duplicate detection, reference rewriting, and markdown report generation used by the CLI command.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/cli/_path_canonicalize_lib.py\nDIR_STATE:[\"src/cli/__init__.py\", \"src/cli/_path_canonicalize_lib.py\", \"src/cli/add_case_study.py\", \"src/cli/path_canonicalize.py\"]\nSummary: Wrote a compact path canonicalization utility library for discovery, hashing, syncing, reference rewriting, and report generation.\n",
+          "timestamp": "2025-12-25T00:00:47.699Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/cli/_path_canonicalize_lib.py\nDIR_STATE:[\"src/cli/__init__.py\", \"src/cli/_path_canonicalize_lib.py\", \"src/cli/add_case_study.py\", \"src/cli/path_canonicalize.py\"]\nSUMMARY: Implemented reusable library functions for discovering artifacts, syncing to canonical outputs, hashing/duplicate detection, optional reference rewriting, and markdown report generation.\n",
+          "timestamp": "2025-12-25T00:01:25.842Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:58:29.498Z",
+      "failedAt": "2025-12-25T00:01:25.842Z"
+    },
+    {
+      "path": "tests/test_path_canonicalize.py",
+      "description": "End-to-end tests using temporary directories to validate syncing from runtime/outputs to outputs, duplicate handling, optional reference rewriting, and correct markdown report emission.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "File not found after execution",
+          "timestamp": "2025-12-25T00:02:01.285Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/test_path_canonicalize.py\nDIR_STATE:[\"tests/test_claim_card_validation.py\", \"tests/test_intake_validation.py\", \"tests/test_path_canonicalize.py\"]\nSummary: Added end-to-end pytest coverage for syncing runtime/outputs into outputs/, duplicate handling, optional reference rewriting, and markdown report emission.\n",
+          "timestamp": "2025-12-25T00:02:35.625Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:58:29.498Z",
+      "failedAt": "2025-12-25T00:02:35.625Z"
+    },
+    {
+      "path": "tests/test_path_canonicalize_rewrite.py",
+      "description": "Focused tests covering safe reference rewriting behavior (e.g., runtime/outputs to outputs) with allow/deny patterns and dry-run mode.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-25T00:03:04.969Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-25T00:03:35.106Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:58:29.498Z",
+      "failedAt": "2025-12-25T00:03:35.106Z"
+    },
+    {
+      "path": "docs/path_canonicalization.md",
+      "description": "Documents the canonical-path enforcement command usage, options, safety guarantees, expected report contents, and migration guidance for developers and CI.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docs/path_canonicalization.md\nDIR_STATE:[\"docs/ARTIFACT_INDEX_AND_TRACKER_MAINTENANCE.md\", \"docs/claim_card_workflow.md\", \"docs/intake_checklist.md\", \"docs/path_canonicalization.md\"]\nSummary: Added documentation describing the canonical-path enforcement command, its safety/overwrite behaviors, reference rewriting, QA report contents, and CI/developer migration guidance.\n",
+          "timestamp": "2025-12-25T00:03:59.960Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docs/path_canonicalization.md\nDIR_STATE:[\"docs/ARTIFACT_INDEX_AND_TRACKER_MAINTENANCE.md\", \"docs/claim_card_workflow.md\", \"docs/intake_checklist.md\", \"docs/path_canonicalization.md\"]\nSUMMARY: Added documentation describing the canonical-path enforcement command, its safety guarantees, report expectations, and migration guidance for dev and CI.\n",
+          "timestamp": "2025-12-25T00:04:27.011Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:58:29.498Z",
+      "failedAt": "2025-12-25T00:04:27.011Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Create a canonical-path enforcement + migration step: ensure that artifacts currently generated under runtime/outputs/ (e.g., generated reports, schemas, tools) are copied/synced into the canonical /outputs/ tree, and update references accordingly. Emit a /outputs/qa/path_canonicalization_report.md listing what moved and what remains duplicated.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Multiple agents failed to discover artifacts (0 documents analyzed) due to runtime/outputs vs /outputs ambiguity. Without a mechanical sync/enforcement step, QA and indexing will keep failing."
+  ],
+  "projectName": "canonical-path enforcement + migration step: ensure that artifacts currently generated under runtime/outputs/ (e.g., generated reports, schemas,",
+  "language": "python",
+  "type": "cli_tool",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-25T00:04:27.011Z",
+  "summary": {
+    "completed": 0,
+    "failed": 6,
+    "total": 6
+  }
+}

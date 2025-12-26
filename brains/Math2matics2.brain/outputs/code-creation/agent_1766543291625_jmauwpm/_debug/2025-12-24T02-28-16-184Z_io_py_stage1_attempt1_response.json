@@ -1,0 +1,56 @@
+{
+  "content": "Created `io.py` as a backwards-compatible shim that re-exports the public API from `src.experiments.io` while emitting a `DeprecationWarning` guiding users to update legacy imports.",
+  "reasoning": "",
+  "responseId": "resp_04bdd9450342d83100694b503f0e8081978687bac7c624ce52",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2424,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 855,
+    "output_tokens_details": {
+      "reasoning_tokens": 810
+    },
+    "total_tokens": 3279
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_04bdd9450342d83100694b503fa7d88197a983c7f8f715a393",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_04bdd9450342d83100694b50428eec8197aa8033e25ce807f8",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re, sys\ntarget_path = Path('/mnt/data').joinpath('io.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\\\"\\\"\\\"Backwards-compatible shim for legacy imports.\n\nThis project refactored experiment I/O utilities into the reusable package\n``src.experiments.io``. Importing from the top-level ``io`` module is\ndeprecated and will be removed in a future version.\n\nUse:\n    from src.experiments.io import ...\n\nThis shim re-exports the public API to keep older code working while emitting\ndeprecation guidance.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport warnings\nfrom importlib import import_module\nfrom types import ModuleType\nfrom typing import Any, List\n\n_DEPRECATION_MESSAGE = (\n    \"Importing experiment IO utilities from 'io' is deprecated. \"\n    \"Please update imports to 'from src.experiments.io import ...' (or \"\n    \"'import src.experiments.io as exp_io'). This shim will be removed in a \"\n    \"future release.\"\n)\n\nwarnings.warn(_DEPRECATION_MESSAGE, DeprecationWarning, stacklevel=2)\n\n_io: ModuleType = import_module(\"src.experiments.io\")\n\"\"\")\n\nchunks.append(\"\"\"def __getattr__(name: str) -> Any:\n    \\\"\\\"\\\"Forward attribute access to ``src.experiments.io``.\\\"\\\"\\\"\n    try:\n        return getattr(_io, name)\n    except AttributeError as e:\n        raise AttributeError(f\"module {__name__!r} has no attribute {name!r}\") from e\n\n\ndef __dir__() -> List[str]:\n    \\\"\\\"\\\"Expose a merged directory listing for IDEs and introspection.\\\"\\\"\\\"\n    public = set(getattr(_io, \"__all__\", [])) or {n for n in dir(_io) if not n.startswith(\"_\")}\n    return sorted(set(globals().keys()) | public)\n\"\"\")\n\nchunks.append(\"\"\"# Re-export public names eagerly for common star-import / help() use-cases.\n__all__ = list(getattr(_io, \"__all__\", [])) or [n for n in dir(_io) if not n.startswith(\"_\")]\n\nfor _name in __all__:\n    # Avoid overriding shim-specific globals.\n    if _name not in globals():\n        globals()[_name] = getattr(_io, _name)\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:io.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4fbeb5a8819082ef6cca0e8e962a0289c9c218902ef0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:io.py\nDIR_STATE:[\"io.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_04bdd9450342d83100694b5049f26c8197a7a00b3904fbf275",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `io.py` as a backwards-compatible shim that re-exports the public API from `src.experiments.io` while emitting a `DeprecationWarning` guiding users to update legacy imports."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

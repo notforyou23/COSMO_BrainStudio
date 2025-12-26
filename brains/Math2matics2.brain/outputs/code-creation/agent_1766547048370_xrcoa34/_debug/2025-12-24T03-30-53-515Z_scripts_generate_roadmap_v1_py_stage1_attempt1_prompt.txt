@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Complete /outputs/roadmap_v1.md to match the stated acceptance criteria and add a checklist at the bottom to self-verify (scope/timebox/targets/definition present).
+Project: generated_automation_script_1766547052032 (python automation_script)
+
+Target file details:
+- Path: scripts/generate_roadmap_v1.py
+- Purpose: Python automation script that generates or updates outputs/roadmap_v1.md to satisfy the stated acceptance criteria including adding a self-verification checklist at the bottom.
+- Category: source
+
+Other planned files (for context only):
+- scripts/validate_roadmap_v1.py: Command-line validator that checks outputs/roadmap_v1.md for required sections (scope, timebox, targets, definition) and presence of the bottom checklist, failing with actionable messages if criteria are unmet.
+- outputs/roadmap_v1.md: Completed roadmap document updated to match the acceptance criteria and containing a bottom-of-file checklist to self-verify required elements are present.
+- README.md: Project usage documentation explaining how to run the generation and validation scripts and how the acceptance criteria are enforced.
+
+Reference insights:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_scripts_run_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766539771836_cun
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT INSIGHT: agent_1766541262901_0ssitn4] Sub-goal 7/7: Run consistency and completeness validation: ensure every requirement has a cell 
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Python automation script that generates or updates outputs/roadmap_v1.md to satisfy the stated acceptance criteria including adding a self-verification checklist at the bottom.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/generate_roadmap_v1.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/generate_roadmap_v1.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/generate_roadmap_v1.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

@@ -1,0 +1,37 @@
+{
+  "content": "[\n  {\n    \"path\": \"scripts/canonicalize_outputs.py\",\n    \"description\": \"Standalone script that discovers agent-specific deliverables, migrates/copies them into runtime/outputs/ canonical subfolders, updates runtime/outputs/PROJECT_TRACKER.json to point at new paths, and generates runtime/outputs/CANONICALIZATION_REPORT.md with old-to-new mappings and actions taken.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/lib/output_discovery.py\",\n    \"description\": \"Library module that scans the repository for deliverables under known agent output roots (e.g., code-creation, document-creation, and other agent-stamped directories) and returns structured records with metadata used for canonicalization.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/lib/path_canonicalizer.py\",\n    \"description\": \"Library module that defines canonical destination rules under runtime/outputs/ (naming, collision handling, hashing, and folder taxonomy) and computes deterministic old->new path mappings.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/lib/project_tracker_updater.py\",\n    \"description\": \"Library module that loads runtime/outputs/PROJECT_TRACKER.json, rewrites tracked artifact paths to their canonical equivalents, preserves formatting/ordering where possible, and validates that all referenced files exist post-migration.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/lib/report_writer.py\",\n    \"description\": \"Library module that writes runtime/outputs/CANONICALIZATION_REPORT.md summarizing discovered artifacts, migration decisions (moved/copied/skipped), and a complete mapping table from old paths to new canonical paths.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/lib/fs_ops.py\",\n    \"description\": \"Shared filesystem utilities for safe copy/move, atomic writes, directory creation, checksum calculation, and dry-run support used by the canonicalization pipeline.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"runtime/outputs/.gitkeep\",\n    \"description\": \"Placeholder file ensuring the canonical runtime/outputs/ directory exists in version control for the migration target tree.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"runtime/outputs/PROJECT_TRACKER.json\",\n    \"description\": \"Canonical project tracker JSON file (created if missing) that indexes deliverables under runtime/outputs/ and is updated by the canonicalization script to reference migrated artifact paths.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"runtime/outputs/CANONICALIZATION_REPORT.md\",\n    \"description\": \"Generated report file (created if missing) documenting canonicalization results, including old->new path mappings and any errors or skipped items.\",\n    \"category\": \"documentation\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_090918d4620d823700694c7a14ff3c8190b40bff5479dcb7ea",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 638,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 592,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 1230
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "msg_090918d4620d823700694c7a154ef48190a0893f9d118ac7b8",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"scripts/canonicalize_outputs.py\",\n    \"description\": \"Standalone script that discovers agent-specific deliverables, migrates/copies them into runtime/outputs/ canonical subfolders, updates runtime/outputs/PROJECT_TRACKER.json to point at new paths, and generates runtime/outputs/CANONICALIZATION_REPORT.md with old-to-new mappings and actions taken.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/lib/output_discovery.py\",\n    \"description\": \"Library module that scans the repository for deliverables under known agent output roots (e.g., code-creation, document-creation, and other agent-stamped directories) and returns structured records with metadata used for canonicalization.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/lib/path_canonicalizer.py\",\n    \"description\": \"Library module that defines canonical destination rules under runtime/outputs/ (naming, collision handling, hashing, and folder taxonomy) and computes deterministic old->new path mappings.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/lib/project_tracker_updater.py\",\n    \"description\": \"Library module that loads runtime/outputs/PROJECT_TRACKER.json, rewrites tracked artifact paths to their canonical equivalents, preserves formatting/ordering where possible, and validates that all referenced files exist post-migration.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/lib/report_writer.py\",\n    \"description\": \"Library module that writes runtime/outputs/CANONICALIZATION_REPORT.md summarizing discovered artifacts, migration decisions (moved/copied/skipped), and a complete mapping table from old paths to new canonical paths.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/lib/fs_ops.py\",\n    \"description\": \"Shared filesystem utilities for safe copy/move, atomic writes, directory creation, checksum calculation, and dry-run support used by the canonicalization pipeline.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"runtime/outputs/.gitkeep\",\n    \"description\": \"Placeholder file ensuring the canonical runtime/outputs/ directory exists in version control for the migration target tree.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"runtime/outputs/PROJECT_TRACKER.json\",\n    \"description\": \"Canonical project tracker JSON file (created if missing) that indexes deliverables under runtime/outputs/ and is updated by the canonicalization script to reference migrated artifact paths.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"runtime/outputs/CANONICALIZATION_REPORT.md\",\n    \"description\": \"Generated report file (created if missing) documenting canonicalization results, including old->new path mappings and any errors or skipped items.\",\n    \"category\": \"documentation\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

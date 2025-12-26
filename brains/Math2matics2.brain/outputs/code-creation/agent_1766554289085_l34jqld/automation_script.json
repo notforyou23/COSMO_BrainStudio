@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "name": "outputs_bootstrap_workflow",
+  "purpose": "Generate outputs/coverage_matrix.csv and outputs/eval_loop.md, then update outputs/index.md and outputs/manifest.json to link both artifacts.",
+  "root_dir": "outputs",
+  "artifacts": [
+    {
+      "path": "outputs/coverage_matrix.csv",
+      "type": "table/csv",
+      "columns": [
+        "domain",
+        "subtopic",
+        "artifact_types",
+        "status",
+        "cycle_target",
+        "links"
+      ],
+      "initial_rows": [
+        {
+          "domain": "infrastructure",
+          "subtopic": "coverage-tracking",
+          "artifact_types": "csv,index,manifest",
+          "status": "planned",
+          "cycle_target": "cycle_1",
+          "links": "outputs/index.md;outputs/manifest.json"
+        },
+        {
+          "domain": "infrastructure",
+          "subtopic": "eval-loop",
+          "artifact_types": "md,criteria",
+          "status": "planned",
+          "cycle_target": "cycle_1",
+          "links": "outputs/eval_loop.md"
+        },
+        {
+          "domain": "meta",
+          "subtopic": "release-gating",
+          "artifact_types": "rules,acceptance",
+          "status": "planned",
+          "cycle_target": "cycle_1",
+          "links": "outputs/eval_loop.md#shipping-rules"
+        },
+        {
+          "domain": "meta",
+          "subtopic": "artifact-manifest",
+          "artifact_types": "json",
+          "status": "planned",
+          "cycle_target": "cycle_1",
+          "links": "outputs/manifest.json"
+        }
+      ]
+    },
+    {
+      "path": "outputs/eval_loop.md",
+      "type": "text/markdown",
+      "sections": [
+        "shipping_rules",
+        "acceptance_criteria",
+        "cycle_plan"
+      ]
+    },
+    {
+      "path": "outputs/index.md",
+      "type": "text/markdown"
+    },
+    {
+      "path": "outputs/manifest.json",
+      "type": "application/json"
+    }
+  ],
+  "steps": [
+    {
+      "id": "write_coverage_matrix",
+      "action": "write_file",
+      "path": "outputs/coverage_matrix.csv",
+      "content": "domain,subtopic,artifact_types,status,cycle_target,links\ninfrastructure,coverage-tracking,\"csv;index;manifest\",planned,cycle_1,\"outputs/index.md; outputs/manifest.json\"\ninfrastructure,eval-loop,\"md;criteria\",planned,cycle_1,outputs/eval_loop.md\nmeta,release-gating,\"rules;acceptance\",planned,cycle_1,outputs/eval_loop.md#shipping-rules\nmeta,artifact-manifest,json,planned,cycle_1,outputs/manifest.json\n"
+    },
+    {
+      "id": "write_eval_loop",
+      "action": "write_file",
+      "path": "outputs/eval_loop.md",
+      "content": "# Evaluation & Shipping Loop\n\nThis document defines the per-cycle loop, explicit shipping rules, and acceptance criteria.\n\n## Definitions\n- **Cycle**: A bounded iteration that produces shippable artifacts.\n- **Shipped**: Artifacts are written, linked from `outputs/index.md`, recorded in `outputs/manifest.json`, and meet acceptance criteria.\n- **Stable ontology** (coverage matrix columns): `domain`, `subtopic`, `artifact_types`, `status`, `cycle_target`, `links`.\n\n## Shipping Rules (apply every cycle)\n1. Outputs are created/updated under `outputs/` only.\n2. `outputs/index.md` links every shipped artifact.\n3. `outputs/manifest.json` records every shipped artifact with path, type, and minimal metadata.\n4. `outputs/coverage_matrix.csv` is updated to reflect current status and cycle target.\n5. No placeholders (e.g., TODO) in shipped artifacts.\n6. Filenames and column ontology remain stable across cycles.\n\n## Acceptance Criteria (apply every cycle)\n- Coverage matrix exists and has exactly the stable ontology columns.\n- Eval loop document exists and includes shipping rules + acceptance criteria.\n- Index links both the coverage matrix and eval loop.\n- Manifest lists both artifacts and matches paths in index.\n\n## Cycle Plan\n### Cycle 1 (Bootstrap)\n- Ship: `coverage_matrix.csv`, `eval_loop.md`, update `index.md`, update `manifest.json`.\n- Gate: All acceptance criteria must pass.\n\n### Cycle 2 (Expansion)\n- Ship: Add rows/links for new domains/subtopics while preserving ontology columns.\n- Gate: No schema changes; links resolve within repo.\n\n### Cycle 3 (Hardening)\n- Ship: Refine statuses, add audit notes via links (no new columns).\n- Gate: Manifest completeness and consistency checks pass.\n"
+    },
+    {
+      "id": "update_index",
+      "action": "write_file",
+      "path": "outputs/index.md",
+      "content": "# Outputs Index\n\n- [Coverage Matrix](coverage_matrix.csv)\n- [Evaluation & Shipping Loop](eval_loop.md)\n"
+    },
+    {
+      "id": "update_manifest",
+      "action": "write_file",
+      "path": "outputs/manifest.json",
+      "content": "{\n  \"schema_version\": 1,\n  \"generated_by\": \"outputs_bootstrap_workflow\",\n  \"artifacts\": [\n    {\n      \"path\": \"outputs/coverage_matrix.csv\",\n      \"type\": \"table/csv\",\n      \"description\": \"Initial coverage matrix with stable ontology columns for tracking work across cycles.\"\n    },\n    {\n      \"path\": \"outputs/eval_loop.md\",\n      \"type\": \"text/markdown\",\n      \"description\": \"Per-cycle evaluation and shipping rules with acceptance criteria.\"\n    },\n    {\n      \"path\": \"outputs/index.md\",\n      \"type\": \"text/markdown\",\n      \"description\": \"Human-readable landing page linking shipped artifacts.\"\n    }\n  ]\n}\n"
+    }
+  ],
+  "notes": {
+    "idempotency": "All steps overwrite target files to ensure deterministic regeneration.",
+    "linking": "Index and manifest must reference the exact relative paths used in artifact outputs."
+  }
+}

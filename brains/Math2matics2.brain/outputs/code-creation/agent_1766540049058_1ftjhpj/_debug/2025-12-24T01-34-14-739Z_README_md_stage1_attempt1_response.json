@@ -1,0 +1,56 @@
+{
+  "content": "Created `README.md` documenting local and CI/CD execution (`python -m src.cli run`) and clearly describing the canonical `/outputs` artifacts (index, per-run evidence, and a domain artifact stub) produced by each pipeline run.",
+  "reasoning": "",
+  "responseId": "resp_07697c5658f21aa700694b43a7be548190a23ca9ecaf7f93f6",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2589,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1092,
+    "output_tokens_details": {
+      "reasoning_tokens": 107
+    },
+    "total_tokens": 3681
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_07697c5658f21aa700694b43a85ebc81909c1c8edcf2cea90b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_07697c5658f21aa700694b43a9c254819096c3c90094327aff",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('README.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"# Minimal canonical outputs pipeline\n\nThis repo contains a tiny, runnable pipeline that produces a canonical `/outputs` folder on every run:\n1) an outputs index, 2) per-run evidence, and 3) at least one domain artifact stub. It also re-attempts a previously blocked “survey” step while recording the outcome into run evidence.\n\n## Quickstart (local)\n\nPrereqs: Python 3.10+.\n\n```bash\npython -m venv .venv\nsource .venv/bin/activate  # Windows: .venv\\\\Scripts\\\\activate\npython -m pip install -U pip\n# If requirements exist in your environment, install them; otherwise stdlib is sufficient.\npython -m src.cli run\n```\n\nOptional flags (see `--help`):\n```bash\npython -m src.cli --help\npython -m src.cli run --outputs-dir outputs\n```\n\n## What a run produces (canonical artifacts)\n\nAll artifacts are written under the outputs directory (default: `./outputs`). Paths are deterministic and discoverable via the index.\n\n### 1) Outputs index (cross-run registry)\n\n- **Path:** `outputs/index.json`\n- **Purpose:** Registry of runs and pointers to their evidence/artifacts.\n- **Typical contents:** schema/version, `latest_run_id`, and a list/map of runs with timestamps and relative paths.\n\n### 2) Run evidence (per-run provenance + results)\n\n- **Path:** `outputs/runs/<run_id>/run_evidence.json`\n- **Purpose:** Single source of truth for “what happened” in a run: start/end time, parameters, environment info, step statuses, errors, and the survey retry result.\n- **Notes:** The survey retry logic is expected to write a structured result (success/failure, reason, and any payload) into this file so CI and humans can audit the run.\n\n### 3) Domain artifact stub (example deliverable)\n\n- **Path (example):** `outputs/runs/<run_id>/artifacts/domain_artifact_stub.json`\n- **Purpose:** Demonstrates how domain outputs should be emitted in a stable location with metadata.\n- **Typical contents:** minimal metadata (run id, created time, content type) plus an empty/seed structure representing the domain deliverable.\n\n## Re-attempted survey task (why it’s here)\n\nThe pipeline includes a “survey retry” step that previously failed due to missing canonical artifacts.\nNow it:\n- reads/writes via the canonical paths above,\n- records attempt count and outcome in `run_evidence.json`,\n- and ensures artifacts exist even when the survey cannot complete (so runs remain auditable).\n\n## CI/CD usage\n\nA minimal CI job should:\n1) set up Python,\n2) run the pipeline once,\n3) upload `outputs/` as an artifact.\n\nExample (GitHub Actions):\n\n```yaml\nname: pipeline\non: [push, pull_request]\njobs:\n  run:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-python@v5\n        with:\n          python-version: '3.11'\n      - run: python -m pip install -U pip\n      - run: python -m src.cli run\n      - uses: actions/upload-artifact@v4\n        with:\n          name: outputs\n          path: outputs\n```\n\nIn other CI systems, the same pattern applies: run `python -m src.cli run` and persist the `outputs/` directory for later inspection.\n\n## How to inspect results\n\nAfter a run, start with:\n- `outputs/index.json` to find the latest run id,\n- then open `outputs/runs/<run_id>/run_evidence.json` for step-by-step results,\n- and check `outputs/runs/<run_id>/artifacts/` for domain artifacts produced by the pipeline.\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:README.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_694b4314d77c819084b238f98e62933e01fe1adc72e44fe7",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:README.md\nDIR_STATE:[\"README.md\", \"pyproject.toml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_07697c5658f21aa700694b43b4cab08190b4a04a7258fd1872",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `README.md` documenting local and CI/CD execution (`python -m src.cli run`) and clearly describing the canonical `/outputs` artifacts (index, per-run evidence, and a domain artifact stub) produced by each pipeline run."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

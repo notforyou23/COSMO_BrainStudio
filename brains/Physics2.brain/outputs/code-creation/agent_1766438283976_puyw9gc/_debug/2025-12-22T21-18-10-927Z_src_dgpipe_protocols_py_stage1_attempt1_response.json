@@ -1,0 +1,74 @@
+{
+  "content": "Implemented `src/dgpipe/protocols.py` with runtime-checkable typed Protocols for artifact IO (`ArtifactStore`), logging (`Logger`), stage context (`StageContext`), sync/async stages, pipelines, runners, serialization codecs, and lifecycle callbacks, plus a `null_logger()` helper for default no-op logging.",
+  "reasoning": "",
+  "responseId": "resp_0ebf808ec1815e93006949b5eb7b3c8190874023830932020f",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3238,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1652,
+    "output_tokens_details": {
+      "reasoning_tokens": 496
+    },
+    "total_tokens": 4890
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0ebf808ec1815e93006949b5ec57b88190818b05f8b7955270",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ebf808ec1815e93006949b5eeef908190b06756ab0a0b209f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nlist(base.glob(\"src/dgpipe/*.py\"))[:20], [p.name for p in base.glob(\"src/dgpipe/*\")]",
+      "container_id": "cntr_6949b590d1548190ae21728e2f723cbf0045b034ab97adc3",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "([PosixPath('/mnt/data/src/dgpipe/__init__.py')], ['__init__.py'])"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ebf808ec1815e93006949b5f2047c8190914b547df3b8c0e5",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ebf808ec1815e93006949b5f8bd248190bd010503acdf8a47",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/dgpipe/protocols.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"dgpipe.protocols\n\nLightweight, typed protocols (structural interfaces) used across dgpipe.\n\nThese protocols define the minimal contracts for stages, pipelines, runners,\nand IO backends so that user extensions can plug in without inheriting from\nframework base classes.\n\\\"\\\"\\\"\"\"\",\n\"\"\"from __future__ import annotations\n\nfrom typing import (\n    Any,\n    Callable,\n    Iterable,\n    Mapping,\n    Optional,\n    Protocol,\n    Sequence,\n    TypeVar,\n    runtime_checkable,\n)\n\nInT = TypeVar(\"InT\")\nOutT = TypeVar(\"OutT\")\nT_co = TypeVar(\"T_co\", covariant=True)\nT_contra = TypeVar(\"T_contra\", contravariant=True)\"\"\",\n\"\"\"@runtime_checkable\nclass ArtifactStore(Protocol):\n    \\\"\\\"\\\"Minimal IO abstraction for reading/writing pipeline artifacts.\n\n    Implementations may map keys to files, object storage, databases, etc.\n    Keys are treated as opaque identifiers (often a relative path).\n    \\\"\\\"\\\"\n\n    def read_bytes(self, key: str) -> bytes: ...\n    def write_bytes(self, key: str, data: bytes) -> None: ...\n    def exists(self, key: str) -> bool: ...\n    def list(self, prefix: str = \"\") -> Iterable[str]: ...\"\"\",\n\"\"\"@runtime_checkable\nclass Logger(Protocol):\n    \\\"\\\"\\\"Structured-logging compatible callable.\\\"\\\"\\\"\n\n    def __call__(self, message: str, /, **fields: Any) -> None: ...\"\"\",\n\"\"\"@runtime_checkable\nclass StageContext(Protocol):\n    \\\"\\\"\\\"Context passed to stages.\n\n    The context is intentionally small: stages can use the artifact store for IO,\n    a logger for diagnostics, and arbitrary config values.\n    \\\"\\\"\\\"\n\n    artifacts: ArtifactStore\n    log: Logger\n    config: Mapping[str, Any]\"\"\",\n\"\"\"@runtime_checkable\nclass Stage(Protocol[InT, OutT]):\n    \\\"\\\"\\\"Synchronous stage contract.\\\"\\\"\\\"\n\n    name: str\n\n    def run(self, ctx: StageContext, data: InT) -> OutT: ...\"\"\",\n\"\"\"@runtime_checkable\nclass AsyncStage(Protocol[InT, OutT]):\n    \\\"\\\"\\\"Asynchronous stage contract.\\\"\\\"\\\"\n\n    name: str\n\n    async def arun(self, ctx: StageContext, data: InT) -> OutT: ...\"\"\",\n\"\"\"@runtime_checkable\nclass Pipeline(Protocol[InT, OutT]):\n    \\\"\\\"\\\"A pipeline is an executable composition of one or more stages.\\\"\\\"\\\"\n\n    name: str\n    stages: Sequence[object]\n\n    def run(self, ctx: StageContext, data: InT) -> OutT: ...\"\"\",\n\"\"\"@runtime_checkable\nclass Runner(Protocol):\n    \\\"\\\"\\\"Executes pipelines, providing common concerns (retries, metrics, etc.).\\\"\\\"\\\"\n\n    def run(self, pipeline: Pipeline[Any, Any], ctx: StageContext, data: Any) -> Any: ...\"\"\",\n\"\"\"@runtime_checkable\nclass Serializer(Protocol[T_contra]):\n    \\\"\\\"\\\"Converts a value into bytes (for ArtifactStore).\\\"\\\"\\\"\n\n    content_type: str\n\n    def dumps(self, value: T_contra) -> bytes: ...\"\"\",\n\"\"\"@runtime_checkable\nclass Deserializer(Protocol[T_co]):\n    \\\"\\\"\\\"Converts bytes into a value (from ArtifactStore).\\\"\\\"\\\"\n\n    content_type: str\n\n    def loads(self, data: bytes) -> T_co: ...\"\"\",\n\"\"\"@runtime_checkable\nclass Codec(Serializer[T_contra], Deserializer[T_co], Protocol[T_contra, T_co]):\n    \\\"\\\"\\\"Bidirectional serialization protocol.\\\"\\\"\\\"\"\"\",\n\"\"\"@runtime_checkable\nclass Callback(Protocol):\n    \\\"\\\"\\\"Hook for observing lifecycle events without coupling to implementations.\\\"\\\"\\\"\n\n    def on_stage_start(self, stage_name: str, *, ctx: StageContext) -> None: ...\n    def on_stage_end(self, stage_name: str, *, ctx: StageContext, result: Any) -> None: ...\n    def on_stage_error(self, stage_name: str, *, ctx: StageContext, error: BaseException) -> None: ...\"\"\",\n\"\"\"def null_logger() -> Logger:\n    \\\"\\\"\\\"Return a no-op logger that matches the Logger protocol.\\\"\\\"\\\"\n\n    def _log(message: str, /, **fields: Any) -> None:\n        return None\n\n    return _log\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/dgpipe/protocols.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949b590d1548190ae21728e2f723cbf0045b034ab97adc3",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/dgpipe/protocols.py\nDIR_STATE:[\"src/dgpipe/__init__.py\", \"src/dgpipe/protocols.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0ebf808ec1815e93006949b609ca148190aef6466d9587a14f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/dgpipe/protocols.py` with runtime-checkable typed Protocols for artifact IO (`ArtifactStore`), logging (`Logger`), stage context (`StageContext`), sync/async stages, pipelines, runners, serialization codecs, and lifecycle callbacks, plus a `null_logger()` helper for default no-op logging."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

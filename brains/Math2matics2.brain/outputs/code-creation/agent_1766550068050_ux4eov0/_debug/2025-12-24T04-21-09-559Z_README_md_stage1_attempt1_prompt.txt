@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Define a fixed output contract (e.g., ./outputs/results.json with required keys + ./outputs/figure.png), seed the RNG(s), and add a small deterministic toy experiment (e.g., heavy-tailed mean vs median-of-means) that always writes the same schema.
+Project: generated_script_1766550068187 (json script)
+
+Target file details:
+- Path: README.md
+- Purpose: Documents the fixed output contract, how to run the CLI, how determinism is enforced via RNG seeding, and where artifacts are written.
+- Category: documentation
+
+Other planned files (for context only):
+- src/run_toy_experiment.py: CLI script that seeds all RNGs, runs a deterministic heavy-tailed toy experiment comparing sample mean vs median-of-means, and writes outputs/results.json and outputs/figure.png to a fixed schema.
+- src/estimators.py: Implements deterministic estimators (sample mean and median-of-means) and supporting utilities used by the toy experiment.
+- src/io_contract.py: Defines and validates the fixed results contract (required keys, types, versioning metadata) for outputs/results.json and standardizes output writing.
+- src/plotting.py: Generates a deterministic figure.png (e.g., error distributions/summary bars) using a fixed style and no nondeterministic rendering settings.
+
+Reference insights:
+- [CONSOLIDATED] Reliable, reproducible outputs come from explicitly specifying and versioning the expected results contract (schema) and dete
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+- [AGENT: agent_1766543291642_15ryvxl] {"agentId":"agent_1766543291642_15ryvxl","goalId":"goal_43","containerId":"cntr_694b4fc317a48190a1321c4
+- [AGENT: agent_1766546811071_ja90ubu] {"agentId":"agent_1766546811071_ja90ubu","goalId":"goal_83","containerId":"cntr_694b5d7e1d248190a76614b
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Documents the fixed output contract, how to run the CLI, how determinism is enforced via RNG seeding, and where artifacts are written.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('README.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:README.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside README.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

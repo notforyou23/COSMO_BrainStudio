@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create /outputs/index.md (or manifest.json) that records: command run, inputs, produced files, sha256 checksums for results.json/figure.png/logs; update it after each run.
+Project: /outputs/index.md (or manifest.json) that records: command run, inputs, produced files, sha256 checksums for results.json/figure.png/logs; update it after each run. (json script)
+
+Target file details:
+- Path: scripts/update_outputs_index.py
+- Purpose: CLI utility that appends/updates outputs/index.md (and optional outputs/manifest.json) with the command run, declared inputs, produced files, and sha256 checksums for results.json/figure.png/logs after each run.
+- Category: source
+
+Other planned files (for context only):
+- outputs/index.md: Human-readable run ledger that records each pipeline execution (timestamp, command, inputs, outputs, and sha256 checksums) and is updated by the update_outputs_index script.
+- outputs/manifest.json: Machine-readable manifest of runs including command, inputs, produced files, and sha256 checksums for key artifacts, maintained by the update_outputs_index script.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T03-22-01-307Z_outputs_index_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766546515206_c0mvcq0: Y
+- [INTROSPECTION] 2025-12-24T03-22-01-307Z_outputs_index_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766546515206_c0mvcq0: Y
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+- [AGENT: agent_1766539516432_lwvqffa] Cycle 13 consistency review (divergence 0.97):
+Summary of agreement
+- All branches aim to improve predi
+- [INTROSPECTION] 2025-12-24T03-39-48-400Z_scripts_run_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766547586803_y8e7q9t: You
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: CLI utility that appends/updates outputs/index.md (and optional outputs/manifest.json) with the command run, declared inputs, produced files, and sha256 checksums for results.json/figure.png/logs after each run.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/update_outputs_index.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/update_outputs_index.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/update_outputs_index.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

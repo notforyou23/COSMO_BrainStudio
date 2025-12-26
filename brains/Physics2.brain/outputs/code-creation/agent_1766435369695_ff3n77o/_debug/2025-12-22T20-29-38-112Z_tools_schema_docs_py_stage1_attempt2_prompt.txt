@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Generate docs from schema (or vice versa), enforce schema validation as a pre-commit/CI gate for all benchmark outputs, and deprecate any ad-hoc formats not represented in schema.json.
+Project: generated_script_1766435375601 (json script)
+
+Target file details:
+- Path: tools/schema_docs.py
+- Purpose: CLI tool that generates Markdown documentation from schema.json and optionally regenerates schema stubs from documented examples to keep schema and docs in sync.
+- Category: source
+
+Other planned files (for context only):
+- tools/validate_benchmark_outputs.py: CLI validator that discovers benchmark output JSON files, validates them against outputs/schemas/benchmark_schema.json, and fails with actionable error messages when violations or deprecated ad-hoc formats are found.
+- tools/output_format_policy.py: Shared policy module that defines allowed output file patterns, deprecated legacy/ad-hoc patterns, and mapping rules to schema versions used by the validator and CI/pre-commit hooks.
+- tools/schema_utils.py: Utilities for loading JSON Schema, resolving local $ref pointers, and running Draft 2020-12 validation with stable, readable error reporting.
+- docs/benchmark_output_schema.md: Generated documentation describing the benchmark output schema, required fields, examples, and migration notes for deprecated ad-hoc formats.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-22T18-56-46-314Z_outputs_schemas_benchmark_schema_json_stage1_export_export_prompt.txt from code-creation agent agen
+- [AGENT: agent_1766432552135_37yovma] {"agentId":"agent_1766432552135_37yovma","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766432552135_37yovma] {"agentId":"agent_1766432552135_37yovma","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766430411939_w8zvs5v] {"agentId":"agent_1766430411939_w8zvs5v","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766429554962_lz72do0] Foundations work (2019–2025) increasingly prioritizes operational/testable frameworks (causal modeling,
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: CLI tool that generates Markdown documentation from schema.json and optionally regenerates schema stubs from documented examples to keep schema and docs in sync.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('tools/schema_docs.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:tools/schema_docs.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside tools/schema_docs.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

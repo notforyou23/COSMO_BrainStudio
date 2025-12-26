@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Run the full entrypoint end-to-end locally/CI, capture stdout/stderr to /outputs/run.log, and commit the generated artifacts; add a simple CI command (pytest) to enforce it stays runnable.
+Project: generated_script_1766548034507 (python script)
+
+Target file details:
+- Path: scripts/run_pipeline.py
+- Purpose: Entrypoint runner that executes the full pipeline end-to-end, captures stdout/stderr to outputs/run.log, and writes canonical run artifacts into outputs/ for commit.
+- Category: source
+
+Other planned files (for context only):
+- tests/test_pipeline_runnable.py: Pytest that runs the entrypoint locally (lightweight mode) and asserts outputs/run.log and expected artifacts are created and well-formed.
+- .github/workflows/ci.yml: GitHub Actions workflow that installs dependencies and runs pytest to enforce the pipeline remains runnable in CI.
+- pytest.ini: Pytest configuration to standardize test discovery and output for CI execution.
+- outputs/.gitkeep: Placeholder file to ensure the outputs directory is present in the repository for log/artifact generation.
+
+Reference insights:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [CONSOLIDATED] Establish a minimal, reproducible pipeline workflow that always generates a canonical set of run artifacts (structured JSON “
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_scripts_run_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766539771836_cun
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Entrypoint runner that executes the full pipeline end-to-end, captures stdout/stderr to outputs/run.log, and writes canonical run artifacts into outputs/ for commit.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/run_pipeline.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/run_pipeline.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/run_pipeline.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

@@ -1,0 +1,56 @@
+{
+  "content": "Implemented a compact inference module providing Gaussian likelihoods with analytic marginalization over additive linear nuisance/systematics, configurable priors, a Metropolis–Hastings posterior sampler, and a simple MAP/random-search fitter to translate measured data into constraints on discrete-structure parameters.",
+  "reasoning": "",
+  "responseId": "resp_02ce5ee6df0e707b006949b2286ff881978093a4e82eb191e5",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4323,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2717,
+    "output_tokens_details": {
+      "reasoning_tokens": 426
+    },
+    "total_tokens": 7040
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_02ce5ee6df0e707b006949b2292d9c819792ca5a38526d9824",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_02ce5ee6df0e707b006949b235bf2081979576a1d83dd6023f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, numpy as np\ntarget_path = Path('/mnt/data').joinpath('src/dgpipe/inference.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"dgpipe.inference\n\nLightweight statistical inference utilities to translate measured correlator /\nentanglement data into constraints on discrete-structure parameters.\n\nDesign goals: minimal dependencies (numpy only), support for Gaussian\nlikelihoods, additive linear systematics with analytic marginalization, and a\nbasic Metropolis-Hastings posterior sampler.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Callable, Dict, Iterable, Mapping, Optional, Sequence, Tuple, Union\n\nimport numpy as np\n\nArray = np.ndarray\nPriorSpec = Union[Tuple[str, float, float], Tuple[str, Array, Array]]  # uniform/gaussian\n\"\"\",\n\"\"\"def _as_1d(x: Union[Array, Sequence[float]]) -> Array:\n    x = np.asarray(x, dtype=float)\n    return x.reshape(-1)\n\n\ndef _cov_from_sigma(sigma: Union[float, Array], n: int) -> Array:\n    s = np.asarray(sigma, dtype=float)\n    if s.ndim == 0:\n        return np.eye(n) * float(s) ** 2\n    s = s.reshape(-1)\n    if s.size != n:\n        raise ValueError(f\"sigma has size {s.size}, expected {n}\")\n    return np.diag(s ** 2)\n\n\ndef _loglike_gaussian(resid: Array, cov: Array) -> float:\n    cov = np.asarray(cov, dtype=float)\n    n = resid.size\n    try:\n        L = np.linalg.cholesky(cov)\n        sol = np.linalg.solve(L, resid)\n        quad = float(sol @ sol)\n        logdet = 2.0 * float(np.log(np.diag(L)).sum())\n    except np.linalg.LinAlgError:\n        covi = np.linalg.pinv(cov)\n        quad = float(resid @ covi @ resid)\n        sign, logdet = np.linalg.slogdet(cov + 1e-12 * np.eye(n))\n        logdet = float(logdet) if sign > 0 else float(np.log(np.abs(np.linalg.det(cov) + 1e-30)))\n    return -0.5 * (quad + logdet + n * np.log(2.0 * np.pi))\n\"\"\",\n\"\"\"def marginal_loglike_additive_linear(\n    y: Array,\n    mu: Array,\n    cov_y: Array,\n    A: Optional[Array] = None,\n    nu_mean: Optional[Array] = None,\n    nu_cov: Optional[Array] = None,\n) -> float:\n    \\\"\\\"\\\"Gaussian log-likelihood with analytic marginalization over nuisance.\n\n    Model: y = mu(theta) + A nu + eps,  eps~N(0,cov_y),  nu~N(nu_mean,nu_cov).\n    The marginalized distribution is Gaussian with mean mu + A nu_mean and\n    covariance cov_y + A nu_cov A^T.\n    \\\"\\\"\\\"\n    y = _as_1d(y)\n    mu = _as_1d(mu)\n    if y.size != mu.size:\n        raise ValueError(\"y and mu must have same length\")\n    cov_eff = np.asarray(cov_y, dtype=float)\n    mean_eff = mu\n    if A is not None and nu_cov is not None:\n        A = np.asarray(A, dtype=float)\n        nu_mean = np.zeros(A.shape[1]) if nu_mean is None else _as_1d(nu_mean)\n        nu_cov = np.asarray(nu_cov, dtype=float)\n        mean_eff = mu + A @ nu_mean\n        cov_eff = cov_eff + A @ nu_cov @ A.T\n    return _loglike_gaussian(y - mean_eff, cov_eff)\n\"\"\",\n\"\"\"def logprior(theta: Array, priors: Optional[Mapping[str, PriorSpec]] = None, names: Optional[Sequence[str]] = None) -> float:\n    \\\"\\\"\\\"Compute log prior for parameter vector theta.\n\n    priors maps parameter name -> ('uniform', low, high) or ('gaussian', mean, cov).\n    For gaussian: mean and cov can be scalars (interpreted as diagonal variance) or arrays.\n    \\\"\\\"\\\"\n    if not priors:\n        return 0.0\n    theta = _as_1d(theta)\n    if names is None:\n        names = [f\"p{i}\" for i in range(theta.size)]\n    lp = 0.0\n    for i, nm in enumerate(names):\n        if nm not in priors:\n            continue\n        spec = priors[nm]\n        if spec[0] == \"uniform\":\n            lo, hi = float(spec[1]), float(spec[2])\n            if not (lo <= theta[i] <= hi):\n                return -np.inf\n        elif spec[0] == \"gaussian\":\n            mean = np.asarray(spec[1], dtype=float)\n            cov = np.asarray(spec[2], dtype=float)\n            m = float(mean) if mean.ndim == 0 else float(mean.reshape(-1)[0])\n            v = float(cov) if cov.ndim == 0 else float(np.diag(cov).reshape(-1)[0])\n            lp += -0.5 * ((theta[i] - m) ** 2 / v + np.log(2.0 * np.pi * v))\n        else:\n            raise ValueError(f\"Unknown prior type: {spec[0]}\")\n    return float(lp)\n\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass InferenceProblem:\n    \\\"\\\"\\\"Bundle a dataset, a forward model, and systematics for inference.\\\"\\\"\\\"\n\n    x: Array\n    y: Array\n    sigma: Union[float, Array]\n    model: Callable[[Array, Array], Array]  # model(theta, x)->mu\n    param_names: Tuple[str, ...] = ()\n    priors: Optional[Dict[str, PriorSpec]] = None\n    A_nuisance: Optional[Array] = None\n    nuisance_mean: Optional[Array] = None\n    nuisance_cov: Optional[Array] = None\n\n    def loglike(self, theta: Array) -> float:\n        mu = _as_1d(self.model(_as_1d(theta), np.asarray(self.x)))\n        y = _as_1d(self.y)\n        cov_y = _cov_from_sigma(self.sigma, y.size)\n        return marginal_loglike_additive_linear(\n            y=y, mu=mu, cov_y=cov_y, A=self.A_nuisance, nu_mean=self.nuisance_mean, nu_cov=self.nuisance_cov\n        )\n\n    def logpost(self, theta: Array) -> float:\n        lp = logprior(theta, self.priors, self.param_names or None)\n        if not np.isfinite(lp):\n            return -np.inf\n        return lp + self.loglike(theta)\n\"\"\",\n\"\"\"def metropolis_hastings(\n    logp: Callable[[Array], float],\n    x0: Array,\n    nsteps: int,\n    proposal_scale: Union[float, Array] = 0.1,\n    rng: Optional[np.random.Generator] = None,\n) -> Tuple[Array, Array, float]:\n    \\\"\\\"\\\"Random-walk Metropolis-Hastings sampler (Gaussian proposals).\\\"\\\"\\\"\n    rng = np.random.default_rng() if rng is None else rng\n    x = _as_1d(x0).copy()\n    d = x.size\n    s = np.asarray(proposal_scale, dtype=float)\n    step = (np.ones(d) * float(s)) if s.ndim == 0 else s.reshape(-1)\n    if step.size != d:\n        raise ValueError(\"proposal_scale has wrong dimension\")\n    chain = np.empty((nsteps, d), dtype=float)\n    lps = np.empty(nsteps, dtype=float)\n    lp = float(logp(x))\n    acc = 0\n    for t in range(nsteps):\n        prop = x + rng.normal(scale=step, size=d)\n        lpp = float(logp(prop))\n        if np.isfinite(lpp) and np.log(rng.random()) < (lpp - lp):\n            x, lp = prop, lpp\n            acc += 1\n        chain[t], lps[t] = x, lp\n    return chain, lps, acc / max(1, nsteps)\n\"\"\",\n\"\"\"def summarize_chain(chain: Array, qs: Sequence[float] = (0.16, 0.5, 0.84)) -> Dict[str, Array]:\n    chain = np.asarray(chain, dtype=float)\n    if chain.ndim != 2:\n        raise ValueError(\"chain must be (nsteps, ndim)\")\n    mean = chain.mean(axis=0)\n    cov = np.cov(chain.T)\n    quant = np.quantile(chain, qs, axis=0)\n    return {\"mean\": mean, \"cov\": cov, \"quantiles\": quant}\n\n\ndef map_fit_random(\n    logpost: Callable[[Array], float],\n    bounds: Sequence[Tuple[float, float]],\n    nsamples: int = 2000,\n    rng: Optional[np.random.Generator] = None,\n) -> Tuple[Array, float]:\n    \\\"\\\"\\\"Crude frequentist/MAP fit by random search within bounds.\\\"\\\"\\\"\n    rng = np.random.default_rng() if rng is None else rng\n    lo = np.array([b[0] for b in bounds], dtype=float)\n    hi = np.array([b[1] for b in bounds], dtype=float)\n    best_x = lo.copy()\n    best_lp = -np.inf\n    for _ in range(int(nsamples)):\n        x = lo + (hi - lo) * rng.random(size=lo.size)\n        lp = float(logpost(x))\n        if lp > best_lp:\n            best_x, best_lp = x, lp\n    return best_x, best_lp\n\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/dgpipe/inference.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949aff88f24819097f165c497ce475e074f2320f5d510c4",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/dgpipe/inference.py\nDIR_STATE:[\"src/dgpipe/__init__.py\", \"src/dgpipe/cli.py\", \"src/dgpipe/inference.py\", \"src/dgpipe/models.py\", \"src/dgpipe/protocols.py\", \"src/dgpipe/simulations.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_02ce5ee6df0e707b006949b266b160819781c4d957869f5514",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented a compact inference module providing Gaussian likelihoods with analytic marginalization over additive linear nuisance/systematics, configurable priors, a Metropolis–Hastings posterior sampler, and a simple MAP/random-search fitter to translate measured data into constraints on discrete-structure parameters."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

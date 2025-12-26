@@ -1,0 +1,137 @@
+name: e2e-on-failure
+description: Collects diagnostics/logs and uploads artifacts when an e2e job fails.
+inputs:
+  run-on:
+    description: When to run collection inside this action (failure|always).
+    required: false
+    default: failure
+  logs-dir:
+    description: Directory (relative to workspace) to write diagnostics into.
+    required: false
+    default: e2e_failure_artifacts
+  artifact-name:
+    description: Artifact name for uploaded diagnostics.
+    required: false
+    default: e2e-failure-diagnostics
+  upload:
+    description: Whether to upload artifacts via actions/upload-artifact.
+    required: false
+    default: "true"
+  bundle:
+    description: Whether to create a tar.gz bundle of the diagnostics directory.
+    required: false
+    default: "true"
+runs:
+  using: composite
+  steps:
+    - name: Collect diagnostics
+      if: ${{ inputs.run-on == 'always' || failure() }}
+      shell: bash
+      env:
+        LOGS_DIR: ${{ inputs.logs-dir }}
+      run: |
+        set -euo pipefail
+        mkdir -p "$LOGS_DIR"
+
+        echo "workspace: $GITHUB_WORKSPACE" | tee "$LOGS_DIR/meta.txt"
+        echo "runner: ${RUNNER_NAME:-} (${RUNNER_OS:-})" | tee -a "$LOGS_DIR/meta.txt"
+        echo "ref: ${GITHUB_REF:-} sha: ${GITHUB_SHA:-}" | tee -a "$LOGS_DIR/meta.txt"
+        echo "run: ${GITHUB_RUN_ID:-} attempt: ${GITHUB_RUN_ATTEMPT:-}" | tee -a "$LOGS_DIR/meta.txt"
+        date -u +"utc: %Y-%m-%dT%H:%M:%SZ" | tee -a "$LOGS_DIR/meta.txt"
+
+        {
+          echo "== uname =="; uname -a || true
+          echo; echo "== whoami =="; whoami || true
+          echo; echo "== id =="; id || true
+          echo; echo "== pwd =="; pwd || true
+        } > "$LOGS_DIR/system.txt" 2>&1 || true
+
+        {
+          echo "== disk =="; df -h || true
+          echo; echo "== memory =="; (free -h 2>/dev/null || vm_stat 2>/dev/null) || true
+          echo; echo "== ulimit =="; ulimit -a || true
+        } > "$LOGS_DIR/resources.txt" 2>&1 || true
+
+        {
+          echo "== python =="; (python -V || true); (python -m pip -V || true)
+          echo; echo "== pip freeze =="; (python -m pip freeze || true)
+        } > "$LOGS_DIR/python.txt" 2>&1 || true
+
+        {
+          echo "== git =="; (git --version || true)
+          echo; (git status --porcelain=v1 || true)
+          echo; (git log -1 --oneline --decorate=short || true)
+        } > "$LOGS_DIR/git.txt" 2>&1 || true
+
+        {
+          echo "== processes =="; (ps aux 2>/dev/null || ps -ef 2>/dev/null) || true
+        } > "$LOGS_DIR/processes.txt" 2>&1 || true
+
+        {
+          echo "== env (redacted) ==";
+          (env | sort | sed -E 's/(TOKEN|PASSWORD|SECRET|KEY)=.*/\1=[REDACTED]/I') || true
+        } > "$LOGS_DIR/env.txt" 2>&1 || true
+
+        if command -v docker >/dev/null 2>&1; then
+          {
+            echo "== docker info =="; docker info || true
+            echo; echo "== docker ps =="; docker ps -a || true
+            echo; echo "== docker images =="; docker images || true
+          } > "$LOGS_DIR/docker.txt" 2>&1 || true
+        fi
+
+        # Common e2e outputs (if present). Copy, don't fail if missing.
+        for p in playwright-report test-results coverage .pytest_cache; do
+          if [ -e "$p" ]; then
+            mkdir -p "$LOGS_DIR/captured"
+            cp -R "$p" "$LOGS_DIR/captured/" 2>/dev/null || true
+          fi
+        done
+
+        # Basic directory listing for quick triage
+        (ls -la . && echo && find "$LOGS_DIR" -maxdepth 3 -type f -print) > "$LOGS_DIR/tree.txt" 2>&1 || true
+
+    - name: Bundle diagnostics
+      if: ${{ (inputs.run-on == 'always' || failure()) && inputs.bundle == 'true' }}
+      shell: bash
+      env:
+        LOGS_DIR: ${{ inputs.logs-dir }}
+      run: |
+        set -euo pipefail
+        tar -czf "${LOGS_DIR}.tar.gz" "$LOGS_DIR" 2>/dev/null || true
+
+    - name: Upload diagnostics artifact
+      if: ${{ (inputs.run-on == 'always' || failure()) && inputs.upload == 'true' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: |
+          ${{ inputs.logs-dir }}
+          ${{ inputs.logs-dir }}.tar.gz
+        if-no-files-found: ignore
+        retention-days: 14
+
+    - name: Write summary
+      if: ${{ inputs.run-on == 'always' || failure() }}
+      shell: bash
+      env:
+        LOGS_DIR: ${{ inputs.logs-dir }}
+      run: |
+        set -euo pipefail
+        {
+          echo "## e2e failure diagnostics"
+          echo
+          echo "Collected into \`$LOGS_DIR\` and uploaded as artifact \`${{ inputs.artifact-name }}\` (if enabled)."
+          echo
+          echo "**Files captured:**"
+          echo
+          if [ -d "$LOGS_DIR" ]; then
+            echo '```'
+            find "$LOGS_DIR" -maxdepth 3 -type f -print | sed 's#^#- #' || true
+            echo '```'
+          else
+            echo "_No diagnostics directory found._"
+          fi
+          echo
+          echo "To reproduce locally, run the same e2e command with verbose logs and inspect the saved reports (e.g., Playwright)."
+        } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,56 @@
+{
+  "content": "Generated `/mnt/data/outputs/coverage_matrix.csv` containing a populated coverage matrix with clear headers and at least one example row per Mathematics domain (including subtopics, tracked artifact types, cross-links, prerequisites, and notes) to guide further expansion.",
+  "reasoning": "",
+  "responseId": "resp_09eafd5cacad24f700694b435b80188197b827d85cb682fdde",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3356,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1864,
+    "output_tokens_details": {
+      "reasoning_tokens": 1810
+    },
+    "total_tokens": 5220
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_09eafd5cacad24f700694b435c336c81979c07576d33472065",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_09eafd5cacad24f700694b435ef64481979df67912ad32d1d8",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('outputs/coverage_matrix.csv')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"Domain,Subtopic,Artifact_Types_Tracked,Example_Artifacts,Coverage_Status,Cross_Link_Targets,Prerequisites,Notes\nAlgebra,Linear equations & inequalities,\"lesson,worked_example,practice_set,quiz,solution_key\",\"Lesson: solving 1-variable linear equations; Worked example set; Practice set (20); Quiz (10 Q) + key\",seeded,\"Number Theory: integers; Geometry: coordinate plane\",Arithmetic operations; order of operations,Includes both symbolic manipulation and word problems.\nAlgebra,Quadratic functions & equations,\"lesson,worked_example,practice_set,quiz,solution_key\",\"Lesson: factoring/completing square; Worked examples; Practice set; Quiz + key\",seeded,\"Calculus: limits (polynomials); Geometry: parabolas\",Linear equations; factoring basics,Track multiple solution methods (factoring/quadratic formula/completing square).\nGeometry,Triangle congruence & similarity,\"lesson,diagram_set,worked_example,practice_set,quiz,solution_key\",\"Lesson: SSS/SAS/ASA/AAS; Similarity ratios; Diagram set; Practice; Quiz + key\",seeded,\"Trigonometry: ratios; Algebra: proportions\",Angle facts; basic proofs,Include reasoning-focused proof prompts and diagram interpretation.\nGeometry,Circle theorems,\"lesson,diagram_set,worked_example,practice_set,quiz,solution_key\",\"Lesson: central/inscribed angles; chords/tangents; Diagram set; Practice; Quiz + key\",seeded,\"Trigonometry: arcs; Algebra: coordinate geometry\",Similarity; angle properties,Use consistent notation (arc measures, angle subtensions).\nTrigonometry,Right-triangle trigonometry,\"lesson,worked_example,practice_set,quiz,solution_key\",\"Lesson: sin/cos/tan; inverse trig; Worked examples; Practice; Quiz + key\",seeded,\"Geometry: similarity; Algebra: solving equations\",Similarity; Pythagorean theorem,Include unit consistency and angle-mode reminders.\nTrigonometry,Unit circle & radian measure,\"lesson,visual_aid,worked_example,practice_set,quiz,solution_key\",\"Lesson: radians; special angles; Visual aid (unit circle); Practice; Quiz + key\",seeded,\"Calculus: derivatives of trig; Geometry: circle basics\",Right-triangle trig; angles,Track both exact values and approximations; include reference-angle strategy.\nCalculus,Limits & continuity,\"lesson,worked_example,practice_set,quiz,solution_key\",\"Lesson: limit laws; one-sided limits; continuity; Worked examples; Practice; Quiz + key\",seeded,\"Analysis: epsilon ideas; Algebra: function manipulation\",Functions; factoring; rational expressions,Include graphical, numerical, and algebraic limit estimation artifacts.\nCalculus,Differentiation (rules & applications),\"lesson,worked_example,practice_set,quiz,solution_key\",\"Lesson: power/product/quotient/chain; optimization; Related rates; Practice; Quiz + key\",seeded,\"Linear Algebra: tangent approximations; Probability: density basics\",Limits; trig basics,Tag application contexts (physics/economics) for reuse.\nCalculus,Integration (techniques & applications),\"lesson,worked_example,practice_set,quiz,solution_key\",\"Lesson: antiderivatives; substitution; area/accumulation; Practice; Quiz + key\",seeded,\"Probability & Statistics: continuous distributions; Differential Equations: separable\",Differentiation; algebraic manipulation,Include both definite/indefinite integrals and interpretation of units.\nProbability & Statistics,Descriptive statistics & data visualization,\"lesson,worksheet,worked_example,practice_set,quiz,solution_key\",\"Lesson: mean/median/variance; histograms/boxplots; Worksheet; Practice; Quiz + key\",seeded,\"Algebra: formulas; Discrete Math: counting tables\",Arithmetic; basic algebra,Track real datasets and plotting conventions as reusable assets.\nProbability & Statistics,Probability rules & conditional probability,\"lesson,worked_example,practice_set,quiz,solution_key\",\"Lesson: addition/multiplication; Bayes; independence; Practice; Quiz + key\",seeded,\"Discrete Math: combinatorics; Calculus: integrals (continuous prob)\",Set notation; fractions,Include tree diagrams and contingency-table artifacts for cross-linking.\nNumber Theory,Divisibility, primes, and gcd/lcm,\"lesson,worked_example,practice_set,quiz,solution_key\",\"Lesson: divisibility tests; Euclid algorithm; Practice; Quiz + key\",seeded,\"Algebra: factoring; Discrete Math: modular arithmetic\",Integer arithmetic,Track common misconceptions (e.g., gcd vs lcm) as error-check items.\nNumber Theory,Congruences & modular arithmetic,\"lesson,worked_example,practice_set,quiz,solution_key\",\"Lesson: mod operations; modular inverses; Practice; Quiz + key\",seeded,\"Discrete Math: cryptography; Algebra: remainders\",Divisibility; gcd,Include artifacts for solving linear congruences and interpreting residues.\nDiscrete Mathematics,Counting (permutations, combinations, inclusion–exclusion),\"lesson,worked_example,practice_set,quiz,solution_key\",\"Lesson: counting principles; nCr/nPr; inclusion–exclusion; Practice; Quiz + key\",seeded,\"Probability & Statistics: probability; Algebra: binomial theorem\",Basic algebra,Tag problem types (arrangements, distributions, set unions) for coverage checks.\nDiscrete Mathematics,Graph theory basics,\"lesson,visual_aid,worked_example,practice_set,quiz,solution_key\",\"Lesson: graphs/trees; degrees; paths; Visual aid; Practice; Quiz + key\",seeded,\"Linear Algebra: adjacency matrices; Algorithms: BFS/DFS\",Set notation; counting basics,Include canonical example graphs for consistent referencing.\nLinear Algebra,Vectors, dot product, and projections,\"lesson,worked_example,practice_set,quiz,solution_key\",\"Lesson: vectors; dot product; projections; Practice; Quiz + key\",seeded,\"Calculus: gradients; Geometry: coordinates\",Algebra; geometry basics,Include geometric interpretation diagrams and computational exercises.\nLinear Algebra,Matrices, systems, and determinants,\"lesson,worked_example,practice_set,quiz,solution_key\",\"Lesson: Gaussian elimination; inverses; determinants; Practice; Quiz + key\",seeded,\"Algebra: linear systems; Discrete Math: adjacency matrices\",Vectors; solving linear equations,Track both row-reduction steps and conceptual meaning (invertibility, rank).\nReal Analysis,Sequences/series & convergence,\"lesson,worked_example,practice_set,quiz,solution_key\",\"Lesson: sequence limits; series tests; Practice; Quiz + key\",seeded,\"Calculus: power series; Probability: expectations (series)\",Calculus limits; algebra,Include comparison/ratio/root tests and counterexample artifacts.\nReal Analysis,Continuity & differentiability (rigor),\"lesson,worked_example,proof_prompt,practice_set,quiz,solution_key\",\"Lesson: epsilon-delta; differentiability; Proof prompts; Practice; Quiz + key\",seeded,\"Calculus: derivatives; Topology: open sets (optional)\",Sequences; basic logic,Track proof templates (definition unpacking, contraposition) as reusable artifacts.\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:outputs/coverage_matrix.csv')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4314fdec8190b56501a80ae3346b0e5138156ce3fb37",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:outputs/coverage_matrix.csv\nDIR_STATE:[\"outputs/coverage_matrix.csv\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_09eafd5cacad24f700694b4371de948197be0f340a104b622a",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Generated `/mnt/data/outputs/coverage_matrix.csv` containing a populated coverage matrix with clear headers and at least one example row per Mathematics domain (including subtopics, tracked artifact types, cross-links, prerequisites, and notes) to guide further expansion."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

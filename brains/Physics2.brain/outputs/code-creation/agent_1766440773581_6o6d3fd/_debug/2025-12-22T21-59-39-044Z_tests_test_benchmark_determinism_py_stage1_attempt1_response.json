@@ -1,0 +1,175 @@
+{
+  "content": "Created `tests/test_benchmark_determinism.py`, a pytest that runs the same RNG-driven benchmark twice under `DeterminismPolicy` and asserts byte-identical canonical JSON outputs (and exact structural equality), including a file-IO roundtrip check.",
+  "reasoning": "",
+  "responseId": "resp_075af6021cf25306006949bfc7c08c8195926f7d7006da663f",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 6354,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1441,
+    "output_tokens_details": {
+      "reasoning_tokens": 701
+    },
+    "total_tokens": 7795
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_075af6021cf25306006949bfc86d8081959e09abc595649bf6",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_075af6021cf25306006949bfc9554c8195b659c74b2bb05fe6",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nlist(base.iterdir())[:20]\n",
+      "container_id": "cntr_6949bf4905a48190a8b8f9c9497ab5080ae2bb7dc1b948aa",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/src')]"
+        }
+      ]
+    },
+    {
+      "id": "ci_075af6021cf25306006949bfcb4f888195a9dcbed55b67f8b1",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "sorted([str(p.relative_to(base)) for p in base.rglob(\"*\") if p.is_file()])[:50]\n",
+      "container_id": "cntr_6949bf4905a48190a8b8f9c9497ab5080ae2bb7dc1b948aa",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "['src/benchmark_compare.py',\n 'src/benchmark_determinism.py',\n 'src/benchmark_runner.py']"
+        }
+      ]
+    },
+    {
+      "id": "ci_075af6021cf25306006949bfcdb46c8195bc4c12ffa07cdb14",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path(\"/mnt/data/src/benchmark_runner.py\").read_text()[:4000])\n",
+      "container_id": "cntr_6949bf4905a48190a8b8f9c9497ab5080ae2bb7dc1b948aa",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Benchmark execution with a single deterministic policy.\n\nThe runner's responsibilities are:\n- Apply the shared DeterminismPolicy (seed handling across common RNGs).\n- Produce canonical JSON output (stable key ordering + float formatting) so\n  repeated runs can be compared byte-for-byte.\n\nThis module intentionally avoids embedding non-deterministic fields (e.g. wall\nclock timestamps) unless explicitly requested.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom time import perf_counter\nfrom typing import Any, Callable, Dict, Mapping, Optional\n\nfrom .benchmark_determinism import DeterminismPolicy\n@dataclass(frozen=True)\nclass BenchmarkRunConfig:\n    \"\"\"Configuration for executing a benchmark callable.\"\"\"\n\n    repeats: int = 1\n    include_timings: bool = False\n\n\ndef run_benchmark(\n    benchmark_fn: Callable[..., Any],\n    *,\n    policy: Optional[DeterminismPolicy] = None,\n    config: Optional[BenchmarkRunConfig] = None,\n    kwargs: Optional[Mapping[str, Any]] = None,\n) -> Dict[str, Any]:\n    \"\"\"Execute *benchmark_fn* under *policy* and return a deterministic result dict.\n\n    The returned dict is designed to be canonical-JSON serialized via\n    DeterminismPolicy.dumps()/dump_bytes().\n\n    Parameters\n    ----------\n    benchmark_fn:\n        Callable returning JSON-serializable data.\n    policy:\n        Determinism policy. Defaults to DeterminismPolicy().\n    config:\n        Repeat/timing configuration. Defaults to BenchmarkRunConfig().\n    kwargs:\n        Keyword arguments passed to benchmark_fn.\n\n    Returns\n    -------\n    dict\n        Deterministic structured results. Timings are included only when\n        config.include_timings=True.\n    \"\"\"\n    policy = policy or DeterminismPolicy()\n    config = config or BenchmarkRunConfig()\n    if config.repeats < 1:\n        raise ValueError(\"repeats must be >= 1\")\n    call_kwargs = dict(kwargs or {})\n\n    runs = []\n    for i in range(config.repeats):\n        # Derive a deterministic per-repeat seed.\n        per_run_policy = DeterminismPolicy(\n            seed=policy.seed + i,\n            float_format=policy.float_format,\n            sort_keys=policy.sort_keys,\n            ensure_ascii=policy.ensure_ascii,\n        )\n        per_run_policy.apply()\n\n        if config.include_timings:\n            t0 = perf_counter()\n            out = benchmark_fn(**call_kwargs)\n            elapsed_s = perf_counter() - t0\n            runs.append({\"output\": out, \"elapsed_s\": elapsed_s})\n        else:\n            out = benchmark_fn(**call_kwargs)\n            runs.append({\"output\": out})\n\n    # Make the common 1-repeat case simple and deterministic.\n    result: Dict[str, Any] = {\n        \"policy\": {\n            \"seed\": policy.seed,\n            \"float_format\": policy.float_format if isinstance(policy.float_format, str) else \"<callable>\",\n            \"sort_keys\": policy.sort_keys,\n            \"ensure_ascii\": policy.ensure_ascii,\n        },\n        \"repeats\": config.repeats,\n        \"result\": runs[0][\"output\"] if config.repeats == 1 else [r[\"output\"] for r in runs],\n    }\n    if config.include_timings:\n        result[\"timings_s\"] = [r[\"elapsed_s\"] for r in runs]\n    return result\ndef write_benchmark_result(\n    path: str,\n    data: Mapping[str, Any],\n    *,\n    policy: Optional[DeterminismPolicy] = None,\n) -> None:\n    \"\"\"Write *data* to *path* as canonical JSON bytes using *policy*.\"\"\"\n    policy = policy or DeterminismPolicy()\n    b = policy.dump_bytes(data)\n    with open(path, \"wb\") as f:\n        f.write(b)\n\n"
+        }
+      ]
+    },
+    {
+      "id": "ci_075af6021cf25306006949bfcfc3f48195a7e132d6e299b13e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path(\"/mnt/data/src/benchmark_compare.py\").read_text()[:4000])\n",
+      "container_id": "cntr_6949bf4905a48190a8b8f9c9497ab5080ae2bb7dc1b948aa",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Benchmark result comparison with deterministic canonicalization.\n\nThis module is shared by the benchmark runner/tests to ensure comparisons are\nstable across runs and environments. It provides:\n\n- canonical_json_bytes(obj): deterministic JSON bytes (sorted keys, stable float repr)\n- compare_results(a, b, tolerance=None): structural compare with optional numeric tolerance\n- compare_files(path_a, path_b, tolerance=None): convenience for JSON files\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Iterable, Mapping, Sequence, Tuple, Union\nimport json\nimport math\nimport sys\n@dataclass(frozen=True)\nclass CompareMismatch(Exception):\n    path: Tuple[Union[str, int], ...]\n    message: str\n\n    def __str__(self) -> str:\n        p = \"\".join(f\"[{k!r}]\" if isinstance(k, str) else f\"[{k}]\" for k in self.path)\n        return f\"Mismatch at {p or '<root>'}: {self.message}\"\ndef _float_token(x: float) -> str:\n    # Stable, round-trippable formatting policy.\n    if math.isnan(x):\n        return \"NaN\"\n    if math.isinf(x):\n        return \"Infinity\" if x > 0 else \"-Infinity\"\n    # repr() is deterministic in modern Python and round-trippable for floats.\n    return repr(float(x))\n\n\ndef _normalize(obj: Any) -> Any:\n    \"\"\"Normalize to a JSON-safe, canonical structure.\n\n    - dict keys are coerced to str and sorted\n    - tuples/sets become lists\n    - floats become tagged strings to enforce formatting policy\n    \"\"\"\n    if obj is None or isinstance(obj, (bool, str)):\n        return obj\n    if isinstance(obj, int):\n        return obj\n    if isinstance(obj, float):\n        return {\"__float__\": _float_token(obj)}\n    if isinstance(obj, Mapping):\n        items = ((str(k), _normalize(v)) for k, v in obj.items())\n        return {k: v for k, v in sorted(items, key=lambda kv: kv[0])}\n    if isinstance(obj, (list, tuple, set)):\n        return [_normalize(v) for v in obj]\n    # Fallback: attempt to JSON-encode via string conversion.\n    return str(obj)\ndef canonical_json_bytes(obj: Any) -> bytes:\n    \"\"\"Deterministically serialize an object to canonical JSON bytes.\"\"\"\n    norm = _normalize(obj)\n    txt = json.dumps(norm, sort_keys=True, separators=(\",\", \":\"), ensure_ascii=False)\n    return (txt + \"\\n\").encode(\"utf-8\")\n\n\ndef load_json(path: Union[str, Path]) -> Any:\n    p = Path(path)\n    with p.open(\"r\", encoding=\"utf-8\") as f:\n        return json.load(f)\ndef _is_number(x: Any) -> bool:\n    return isinstance(x, (int, float)) and not isinstance(x, bool)\n\n\ndef _compare(a: Any, b: Any, tolerance: float | None, path: Tuple[Union[str, int], ...]) -> None:\n    # Handle numeric tolerance first (only for finite numbers).\n    if tolerance is not None and _is_number(a) and _is_number(b):\n        af, bf = float(a), float(b)\n        if math.isnan(af) and math.isnan(bf):\n            return\n        if math.isinf(af) or math.isinf(bf):\n            if af == bf:\n                return\n            raise CompareMismatch(path, f\"{af!r} != {bf!r}\")\n        if abs(af - bf) <= float(tolerance):\n            return\n        raise CompareMismatch(path, f\"{af!r} != {bf!r} (tolerance={tolerance})\")\n\n    # Canonical float tokens compare exactly when no tolerance provided.\n    if isinstance(a, float) or isinstance(b, float):\n        if isinstance(a, float) and isinstance(b, float):\n            if _float_token(a) == _float_token(b):\n                return\n        raise CompareMismatch(path, f\"{a!r} != {b!r}\")\n\n    if type(a) != type(b):\n        raise CompareMismatch(path, f\"type {type(a).__name__} != {type(b).__name__}\")\n\n    if isinstance(a, Mapping):\n        ak, bk = set(a.keys()), set(b.keys())\n        if ak != bk:\n            missing = sorted(ak - bk)\n            extra = sorted(bk - ak)\n            raise CompareMismatch(path, f\"keys differ missing={missing} extra={extra}\")\n        for k in sorted(a.keys(), key=lambda x: str(x)):\n            _compare(a[k], b[k], tolerance, path + (str(k),))\n        return\n\n    if \n"
+        }
+      ]
+    },
+    {
+      "id": "ci_075af6021cf25306006949bfd23f348195a825963ed24feaa5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path(\"/mnt/data/src/benchmark_compare.py\").read_text()[4000:8000])\n",
+      "container_id": "cntr_6949bf4905a48190a8b8f9c9497ab5080ae2bb7dc1b948aa",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "isinstance(a, Sequence) and not isinstance(a, (str, bytes, bytearray)):\n        if len(a) != len(b):\n            raise CompareMismatch(path, f\"len {len(a)} != {len(b)}\")\n        for i, (av, bv) in enumerate(zip(a, b)):\n            _compare(av, bv, tolerance, path + (i,))\n        return\n\n    if a != b:\n        raise CompareMismatch(path, f\"{a!r} != {b!r}\")\ndef compare_results(a: Any, b: Any, tolerance: float | None = None) -> None:\n    \"\"\"Raise CompareMismatch if results differ.\n\n    If tolerance is None, comparison is exact (and should match canonical JSON bytes).\n    If tolerance is set, numeric leaves are compared within absolute tolerance.\n    \"\"\"\n    _compare(a, b, tolerance, ())\n\n\ndef compare_files(path_a: Union[str, Path], path_b: Union[str, Path], tolerance: float | None = None) -> None:\n    a = load_json(path_a)\n    b = load_json(path_b)\n    compare_results(a, b, tolerance=tolerance)\ndef _main(argv: list[str]) -> int:\n    if len(argv) < 3 or len(argv) > 4:\n        print(\"Usage: python -m benchmark_compare <a.json> <b.json> [tolerance]\", file=sys.stderr)\n        return 2\n    tol = float(argv[3]) if len(argv) == 4 else None\n    try:\n        compare_files(argv[1], argv[2], tolerance=tol)\n    except CompareMismatch as e:\n        print(str(e), file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == \"__main__\":  # pragma: no cover\n    raise SystemExit(_main(sys.argv))\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_075af6021cf25306006949bfd432008195bcf321a7c753e772",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_075af6021cf25306006949bfd4788081958630577502f3cd6b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path(\"/mnt/data/src/benchmark_determinism.py\").read_text()[:4000])\n",
+      "container_id": "cntr_6949bf4905a48190a8b8f9c9497ab5080ae2bb7dc1b948aa",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Deterministic policy shared by benchmark runner and comparator.\n\nThis module centralizes two pieces of determinism:\n1) Seed setting across common RNGs (random / numpy / torch when available).\n2) Canonical JSON serialization (stable key ordering + stable float formatting).\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nimport json\nimport os\nimport random\nfrom typing import Any, Optional, Union, Callable\ndef set_global_determinism(seed: int) -> None:\n    \"\"\"Best-effort deterministic seeding across common libraries.\n\n    Note: PYTHONHASHSEED must be set before interpreter start to fully take\n    effect. We still set it here for subprocesses and for documentation.\n    \"\"\"\n    os.environ.setdefault(\"PYTHONHASHSEED\", str(seed))\n    random.seed(seed)\n\n    # numpy\n    try:\n        import numpy as np  # type: ignore\n        np.random.seed(seed)\n    except Exception:\n        pass\n\n    # torch\n    try:\n        import torch  # type: ignore\n        torch.manual_seed(seed)\n        if torch.cuda.is_available():\n            torch.cuda.manual_seed_all(seed)\n        # Best-effort deterministic behavior.\n        try:\n            torch.use_deterministic_algorithms(True)\n        except Exception:\n            pass\n        try:\n            import torch.backends.cudnn as cudnn  # type: ignore\n            cudnn.deterministic = True\n            cudnn.benchmark = False\n        except Exception:\n            pass\n    except Exception:\n        pass\nclass CanonicalJSONEncoder(json.JSONEncoder):\n    \"\"\"JSON encoder with stable float formatting and key ordering.\"\"\"\n\n    def __init__(\n        self,\n        *,\n        float_format: Union[str, Callable[[float], str]] = \".12g\",\n        **kwargs: Any,\n    ) -> None:\n        super().__init__(**kwargs)\n        self._float_format = float_format\n\n    def iterencode(self, o: Any, _one_shot: bool = False):\n        # Inspired by CPython's json.encoder, but with a custom floatstr.\n        if isinstance(self._float_format, str):\n            def _fmt(x: float) -> str:\n                # Normalize negative zero.\n                if x == 0.0:\n                    x = 0.0\n                s = format(x, self._float_format)\n                # Ensure JSON number validity (no NaN/Infinity).\n                if s in {\"nan\", \"NaN\", \"inf\", \"Inf\", \"-inf\", \"-Inf\"}:\n                    raise ValueError(\"Out of range float values are not JSON compliant\")\n                return s\n        else:\n            _fmt = self._float_format\n\n        def floatstr(\n            o: float,\n            allow_nan: bool = self.allow_nan,\n            _repr: Any = float.__repr__,\n        ) -> str:\n            # We ignore _repr and use the deterministic formatter.\n            if not allow_nan and (o != o or o in (float(\"inf\"), float(\"-inf\"))):\n                raise ValueError(\"Out of range float values are not JSON compliant\")\n            return _fmt(float(o))\n\n        from json.encoder import _make_iterencode  # type: ignore\n\n        _iterencode = _make_iterencode(\n            markers={},\n            _default=self.default,\n            _encoder=json.encoder.encode_basestring_ascii if self.ensure_ascii else json.encoder.encode_basestring,\n            _indent=self.indent,\n            _floatstr=floatstr,\n            _key_separator=self.key_separator,\n            _item_separator=self.item_separator,\n            _sort_keys=self.sort_keys,\n            _skipkeys=self.skipkeys,\n            _one_shot=_one_shot,\n        )\n        return _iterencode(o, 0)\ndef dumps_canonical(\n    data: Any,\n    *,\n    float_format: Union[str, Callable[[float], str]] = \".12g\",\n    sort_keys: bool = True,\n    ensure_ascii: bool = False,\n) -> str:\n    \"\"\"Serialize *data* to canonical JSON with stable formatting.\"\"\"\n    return json.dumps(\n        data,\n        cls=CanonicalJSONEncoder,\n        float_format=float_format,\n        sort_keys=sort_keys,\n        ensure_ascii=ensure_ascii,\n        separators=(\",\", \":\"),\n        allow_nan=False,\n    )\n\n\ndef dump_canonical_b\n"
+        }
+      ]
+    },
+    {
+      "id": "ci_075af6021cf25306006949bfd6a6988195873b100f794a6b28",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path(\"/mnt/data/src/benchmark_determinism.py\").read_text()[4000:8000])\n",
+      "container_id": "cntr_6949bf4905a48190a8b8f9c9497ab5080ae2bb7dc1b948aa",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "ytes(\n    data: Any,\n    *,\n    float_format: Union[str, Callable[[float], str]] = \".12g\",\n    sort_keys: bool = True,\n    ensure_ascii: bool = False,\n) -> bytes:\n    return dumps_canonical(\n        data, float_format=float_format, sort_keys=sort_keys, ensure_ascii=ensure_ascii\n    ).encode(\"utf-8\")\n@dataclass(frozen=True)\nclass DeterminismPolicy:\n    \"\"\"Single source of truth for deterministic benchmark behavior.\"\"\"\n\n    seed: int = 0\n    float_format: Union[str, Callable[[float], str]] = \".12g\"\n    sort_keys: bool = True\n    ensure_ascii: bool = False\n\n    def apply(self) -> None:\n        set_global_determinism(self.seed)\n\n    def dumps(self, data: Any) -> str:\n        return dumps_canonical(\n            data,\n            float_format=self.float_format,\n            sort_keys=self.sort_keys,\n            ensure_ascii=self.ensure_ascii,\n        )\n\n    def dump_bytes(self, data: Any) -> bytes:\n        return self.dumps(data).encode(\"utf-8\")\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_075af6021cf25306006949bfd8cb8881958fcc27a9f2a70a6d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_075af6021cf25306006949bfdad4c48195b507063a7c1f69ca",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "sorted([p.name for p in Path(\"/mnt/data/src\").iterdir()])\n",
+      "container_id": "cntr_6949bf4905a48190a8b8f9c9497ab5080ae2bb7dc1b948aa",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "['benchmark_compare.py', 'benchmark_determinism.py', 'benchmark_runner.py']"
+        }
+      ]
+    },
+    {
+      "id": "rs_075af6021cf25306006949bfdcefe88195a15322c49ad29c5c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_075af6021cf25306006949bfe45d188195b22d4c1e02a065f7",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_benchmark_determinism.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(r\"\"\"\nfrom __future__ import annotations\n\nimport json\nimport sys\nfrom pathlib import Path\n\nimport pytest\n\n\n# Allow importing the project modules when the package isn't installed.\nSRC = Path(__file__).resolve().parents[1] / \"src\"\nif str(SRC) not in sys.path:\n    sys.path.insert(0, str(SRC))\n\nfrom benchmark_compare import compare_files, compare_results  # noqa: E402\nfrom benchmark_determinism import DeterminismPolicy  # noqa: E402\nfrom benchmark_runner import run_benchmark, write_benchmark_result  # noqa: E402\n\n\ndef _benchmark_payload() -> dict:\n    \\\"\\\"\\\"Produce RNG-driven output to validate deterministic seeding.\\\"\\\"\\\"\n    import random\n\n    out = {\n        \"py_random\": [random.random() for _ in range(5)],\n        \"nested\": {\"a\": random.randint(0, 10), \"b\": [random.random(), 1.0 / 3.0]},\n    }\n\n    # If numpy exists in the environment, include it too (best-effort).\n    try:\n        import numpy as np  # type: ignore\n\n        out[\"np_random\"] = np.random.RandomState().rand(3).tolist()\n    except Exception:\n        out[\"np_random\"] = None\n\n    return out\n\n\ndef test_benchmark_deterministic_bytes_and_json(tmp_path: Path) -> None:\n    policy = DeterminismPolicy(seed=123, float_format=\".12g\", sort_keys=True, ensure_ascii=False)\n\n    r1 = run_benchmark(_benchmark_payload, policy=policy)\n    r2 = run_benchmark(_benchmark_payload, policy=policy)\n\n    b1 = policy.dump_bytes(r1)\n    b2 = policy.dump_bytes(r2)\n    assert b1 == b2  # byte-identical canonical JSON under the deterministic policy\n\n    # Structural equality under shared comparator rules (exact comparison).\n    compare_results(r1, r2, tolerance=None)\n\n    # Also verify determinism across file IO (canonical bytes are identical).\n    p1 = tmp_path / \"run1.json\"\n    p2 = tmp_path / \"run2.json\"\n    write_benchmark_result(str(p1), r1, policy=policy)\n    write_benchmark_result(str(p2), r2, policy=policy)\n    assert p1.read_bytes() == p2.read_bytes()\n    compare_files(p1, p2, tolerance=None)\n\n    # Sanity: files are valid JSON and re-load to the same structure.\n    assert json.loads(p1.read_text(encoding=\"utf-8\")) == r1\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tests/test_benchmark_determinism.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bf4905a48190a8b8f9c9497ab5080ae2bb7dc1b948aa",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_benchmark_determinism.py\nDIR_STATE:[\"tests/test_benchmark_determinism.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_075af6021cf25306006949bfefda8c8195b801e9815dfdfc1f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/test_benchmark_determinism.py`, a pytest that runs the same RNG-driven benchmark twice under `DeterminismPolicy` and asserts byte-identical canonical JSON outputs (and exact structural equality), including a file-IO roundtrip check."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

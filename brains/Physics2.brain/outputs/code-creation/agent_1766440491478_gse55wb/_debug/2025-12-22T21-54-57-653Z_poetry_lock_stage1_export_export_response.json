@@ -1,0 +1,74 @@
+{
+  "content": "FILE_EXPORT:{\"path\":\"poetry.lock\",\"size\":331,\"encoding\":\"base64\",\"sha256\":\"dd7db3dfdb828595231f9f8e8bb50e8e06e1b4068fe2e1393eef664d176f3d51\",\"content\":\"IyBUaGlzIGZpbGUgaXMgZ2VuZXJhdGVkIGJ5IFBvZXRyeSBhbmQgaXMgaW50ZW5kZWQgdG8gYmUgY29tbWl0dGVkIHRvIHZlcnNpb24gY29udHJvbAojIHRvIHBpbiBhbGwgdHJhbnNpdGl2ZSBkZXBlbmRlbmN5IHZlcnNpb25zIGFuZCBoYXNoZXMgZm9yIHJlcHJvZHVjaWJsZSBpbnN0YWxscy4KW21ldGFkYXRhXQpsb2NrLXZlcnNpb24gPSAiMi4wIgpweXRob24tdmVyc2lvbnMgPSAiPj0zLjExLDw0LjAiCmNvbnRlbnQtaGFzaCA9ICIwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIgpbbWV0YWRhdGEuZmlsZXNdCg==\"}\nDIR_STATE:[\".dockerignore\",\"Dockerfile\",\"poetry.lock\",\"pyproject.toml\"]",
+  "reasoning": "",
+  "responseId": "resp_04677785e939d384006949bf3cd954819091c3f835dd489d3b",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 1772,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 687,
+    "output_tokens_details": {
+      "reasoning_tokens": 306
+    },
+    "total_tokens": 2459
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_04677785e939d384006949bf3d82648190b599c913c3171d79",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_04677785e939d384006949bf3e43a08190aa10214415f1fcde",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport base64, json, hashlib, gzip\n\ntarget_path = Path('/mnt/data').joinpath('poetry.lock')\nassert target_path.is_file(), 'Expected poetry.lock to exist before export'\ndata = target_path.read_bytes()\npayload = {\n   'path': 'poetry.lock',\n   'size': len(data),\n   'encoding': 'base64',\n   'sha256': hashlib.sha256(data).hexdigest(),\n   'content': None\n }\nif len(data) > 20000:\n    compressed = gzip.compress(data)\n    payload['encoding'] = 'gzip+base64'\n    payload['content'] = base64.b64encode(compressed).decode('ascii')\nelse:\n    payload['content'] = base64.b64encode(data).decode('ascii')\nfile_export = 'FILE_EXPORT:' + json.dumps(payload, separators=(',', ':'))\ndir_state = 'DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file()))\nfile_export[:100], dir_state",
+      "container_id": "cntr_6949be2fd1108190a4d8a6e21b630b5104ad172254e2add5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "('FILE_EXPORT:{\"path\":\"poetry.lock\",\"size\":331,\"encoding\":\"base64\",\"sha256\":\"dd7db3dfdb828595231f9f8e8',\n 'DIR_STATE:[\".dockerignore\", \"Dockerfile\", \"poetry.lock\", \"pyproject.toml\"]')"
+        }
+      ]
+    },
+    {
+      "id": "rs_04677785e939d384006949bf428dcc819085b16eb4a84f9576",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_04677785e939d384006949bf42ed98819088b03003ff53b68d",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "file_export, dir_state",
+      "container_id": "cntr_6949be2fd1108190a4d8a6e21b630b5104ad172254e2add5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "('FILE_EXPORT:{\"path\":\"poetry.lock\",\"size\":331,\"encoding\":\"base64\",\"sha256\":\"dd7db3dfdb828595231f9f8e8bb50e8e06e1b4068fe2e1393eef664d176f3d51\",\"content\":\"IyBUaGlzIGZpbGUgaXMgZ2VuZXJhdGVkIGJ5IFBvZXRyeSBhbmQgaXMgaW50ZW5kZWQgdG8gYmUgY29tbWl0dGVkIHRvIHZlcnNpb24gY29udHJvbAojIHRvIHBpbiBhbGwgdHJhbnNpdGl2ZSBkZXBlbmRlbmN5IHZlcnNpb25zIGFuZCBoYXNoZXMgZm9yIHJlcHJvZHVjaWJsZSBpbnN0YWxscy4KW21ldGFkYXRhXQpsb2NrLXZlcnNpb24gPSAiMi4wIgpweXRob24tdmVyc2lvbnMgPSAiPj0zLjExLDw0LjAiCmNvbnRlbnQtaGFzaCA9ICIwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIgpbbWV0YWRhdGEuZmlsZXNdCg==\"}',\n 'DIR_STATE:[\".dockerignore\", \"Dockerfile\", \"poetry.lock\", \"pyproject.toml\"]')"
+        }
+      ]
+    },
+    {
+      "id": "msg_04677785e939d384006949bf4547308190ba8310788c78e275",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_EXPORT:{\"path\":\"poetry.lock\",\"size\":331,\"encoding\":\"base64\",\"sha256\":\"dd7db3dfdb828595231f9f8e8bb50e8e06e1b4068fe2e1393eef664d176f3d51\",\"content\":\"IyBUaGlzIGZpbGUgaXMgZ2VuZXJhdGVkIGJ5IFBvZXRyeSBhbmQgaXMgaW50ZW5kZWQgdG8gYmUgY29tbWl0dGVkIHRvIHZlcnNpb24gY29udHJvbAojIHRvIHBpbiBhbGwgdHJhbnNpdGl2ZSBkZXBlbmRlbmN5IHZlcnNpb25zIGFuZCBoYXNoZXMgZm9yIHJlcHJvZHVjaWJsZSBpbnN0YWxscy4KW21ldGFkYXRhXQpsb2NrLXZlcnNpb24gPSAiMi4wIgpweXRob24tdmVyc2lvbnMgPSAiPj0zLjExLDw0LjAiCmNvbnRlbnQtaGFzaCA9ICIwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIgpbbWV0YWRhdGEuZmlsZXNdCg==\"}\nDIR_STATE:[\".dockerignore\",\"Dockerfile\",\"poetry.lock\",\"pyproject.toml\"]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

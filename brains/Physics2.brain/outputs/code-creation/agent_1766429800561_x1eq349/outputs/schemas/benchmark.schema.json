@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schemas/benchmark.schema.json",
+  "title": "Benchmark Artifact Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "case_id",
+    "input",
+    "expected_output"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Version of this benchmark artifact schema.",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "case_id": {
+      "type": "string",
+      "description": "Stable identifier for this benchmark case.",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_\\-\\.]{2,128}$"
+    },
+    "description": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Free-form metadata not used for computation; values must be JSON-serializable scalars.",
+      "additionalProperties": {
+        "type": [
+          "string",
+          "number",
+          "integer",
+          "boolean",
+          "null"
+        ]
+      }
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "numbers"
+      ],
+      "properties": {
+        "numbers": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 1,
+          "description": "Numeric inputs to the reference computation."
+        }
+      }
+    },
+    "expected_output": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sum",
+        "mean"
+      ],
+      "properties": {
+        "sum": {
+          "type": "number"
+        },
+        "mean": {
+          "type": "number"
+        },
+        "tolerance": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Optional absolute tolerance to use when comparing floating-point outputs."
+        }
+      }
+    },
+    "computed_output": {
+      "type": "object",
+      "description": "Optional field for storing locally computed outputs; not required for conformance.",
+      "additionalProperties": true
+    }
+  }
+}

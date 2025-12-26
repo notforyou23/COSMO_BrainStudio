@@ -1,0 +1,56 @@
+{
+  "content": "Created `tests/conftest.py` with shared pytest fixtures to reliably locate the project root, ensure/create an `outputs/` directory, and provide consistent JSON loading plus lightweight schema/structure assertions for smoke tests.",
+  "reasoning": "",
+  "responseId": "resp_0e3b81f2e414b0a600694b3fe7c4e08197b8a667c8ce7f7e58",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2553,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1132,
+    "output_tokens_details": {
+      "reasoning_tokens": 1085
+    },
+    "total_tokens": 3685
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0e3b81f2e414b0a600694b3fe852a48197b141c110f27ecfec",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0e3b81f2e414b0a600694b3fea96308197b4babf7331b1d5d8",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os\n\ntarget_path = Path('/mnt/data').joinpath('tests/conftest.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Pytest shared fixtures and helpers.\n\nProvides consistent ways to locate the project root, the outputs directory,\nand to load/validate JSON artifacts across smoke tests.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport json\nfrom pathlib import Path\nfrom typing import Any, Iterable, Mapping, Optional\n\nimport pytest\n\"\"\",\n\"\"\"def _find_project_root(start: Path) -> Path:\n    \\\"\\\"\\\"Walk upward from *start* to find a likely project root.\\\"\\\"\\\"\n    markers = (\"pyproject.toml\", \"pytest.ini\", \"setup.cfg\", \".git\")\n    cur = start.resolve()\n    for parent in (cur, *cur.parents):\n        if any((parent / m).exists() for m in markers):\n            return parent\n        # In the Code Interpreter environment, /mnt/data is the effective root.\n        if parent.name == \"data\" and parent.parent.name == \"mnt\":\n            return parent\n    return cur\n\"\"\",\n\"\"\"@pytest.fixture(scope=\"session\")\ndef project_root() -> Path:\n    \\\"\\\"\\\"Session-scoped project root path.\\\"\\\"\\\"\n    return _find_project_root(Path(__file__).parent)\n\"\"\",\n\"\"\"@pytest.fixture(scope=\"session\")\ndef outputs_dir(project_root: Path) -> Path:\n    \\\"\\\"\\\"Outputs directory used for artifacts/logs; created if missing.\\\"\\\"\\\"\n    out = project_root / \"outputs\"\n    out.mkdir(parents=True, exist_ok=True)\n    return out\n\"\"\",\n\"\"\"def load_json(path: Path) -> Any:\n    \\\"\\\"\\\"Load JSON from *path* with a helpful error message.\\\"\\\"\\\"\n    try:\n        text = path.read_text(encoding=\"utf-8\")\n    except FileNotFoundError as e:\n        raise AssertionError(f\"Expected JSON file to exist: {path}\") from e\n    try:\n        return json.loads(text)\n    except json.JSONDecodeError as e:\n        raise AssertionError(f\"Invalid JSON in {path}: {e}\") from e\n\"\"\",\n\"\"\"def assert_mapping_has_keys(obj: Any, keys: Iterable[str], *, where: str = \"object\") -> None:\n    \\\"\\\"\\\"Assert *obj* is a mapping with all required keys.\\\"\\\"\\\"\n    if not isinstance(obj, Mapping):\n        raise AssertionError(f\"Expected {where} to be a JSON object (mapping), got {type(obj).__name__}\")\n    missing = [k for k in keys if k not in obj]\n    if missing:\n        raise AssertionError(f\"Missing keys in {where}: {missing}\")\n\"\"\",\n\"\"\"def assert_list_of_mappings(obj: Any, *, where: str = \"array\") -> None:\n    \\\"\\\"\\\"Assert *obj* is a list of JSON objects.\\\"\\\"\\\"\n    if not isinstance(obj, list):\n        raise AssertionError(f\"Expected {where} to be a JSON array, got {type(obj).__name__}\")\n    for i, item in enumerate(obj):\n        if not isinstance(item, Mapping):\n            raise AssertionError(f\"Expected {where}[{i}] to be a JSON object, got {type(item).__name__}\")\n\"\"\",\n\"\"\"@pytest.fixture()\ndef json_loader():\n    \\\"\\\"\\\"Fixture returning the load_json helper for convenience.\\\"\\\"\\\"\n    return load_json\n\"\"\",\n\"\"\"@pytest.fixture()\ndef json_assertions():\n    \\\"\\\"\\\"Fixture exposing lightweight JSON structure assertions.\\\"\\\"\\\"\n    return {\n        \"has_keys\": assert_mapping_has_keys,\n        \"list_of_mappings\": assert_list_of_mappings,\n    }\n\"\"\",\n\"\"\"@pytest.fixture(scope=\"session\")\ndef artifact_path(project_root: Path):\n    \\\"\\\"\\\"Factory to build absolute paths under the project root.\\\"\\\"\\\"\n    def _artifact(rel: str | Path) -> Path:\n        return (project_root / Path(rel)).resolve()\n    return _artifact\n\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:tests/conftest.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b3fc1a2f08190b1bb7adda7e48c5308db4d7f2887ec56",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/conftest.py\nDIR_STATE:[\"tests/conftest.py\", \"tests/test_smoke_artifacts.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0e3b81f2e414b0a600694b3ff321988197a148f685ea7ac391",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/conftest.py` with shared pytest fixtures to reliably locate the project root, ensure/create an `outputs/` directory, and provide consistent JSON loading plus lightweight schema/structure assertions for smoke tests."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

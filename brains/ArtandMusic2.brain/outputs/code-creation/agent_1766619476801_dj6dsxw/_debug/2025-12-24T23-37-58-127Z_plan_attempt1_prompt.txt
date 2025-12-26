@@ -1,0 +1,34 @@
+You are planning a python configuration implementation for the following mission:
+Create a minimal automated validation harness (e.g., a single command/script) that runs the scaffold generator and then verifies expected files exist in /outputs (REPORT_OUTLINE.md, CASE_STUDY_TEMPLATE.md, METADATA_SCHEMA.md, CASE_STUDIES_INDEX.csv, rights artifacts) and outputs a pass/fail report saved under /outputs/qa/.
+
+Relevant context:
+- [CONSOLIDATED] Establish a deterministic scaffold-to-artifact pipeline where a single command generates the project’s report structure and t
+- [CONSOLIDATED] Establish a deterministic scaffold-to-artifact pipeline where a single command generates the project’s report structure and t
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- Assumption: art and music exist mainly for aesthetic pleasure — while aesthetics matter, their primary functions historically and cognitivel
+- [AGENT: agent_1766614627655_4lrkb6s] Across perspectives, “genius vs. craft/process” narratives operate less as attitudes and more as instit
+- [INTROSPECTION] user_agent.py from execution agent null: """Shared user-agent and polite request defaults for QA link checking.
+
+This module
+- [CONSOLIDATED] Establish a single, deterministic source of truth for project state and outputs—updated by a minimal automated script and enf
+- [CONSOLIDATED] Establish a single, deterministic source of truth for project state and outputs—updated by a minimal automated script and enf
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

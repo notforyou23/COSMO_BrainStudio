@@ -1,0 +1,104 @@
+{
+  "content": "Implemented `src/experiments/_common.py` with lightweight, dependency-free shared utilities for path coercion/creation, suffix handling, validation helpers, and safe JSON-serialization (`jsonable`) to reduce duplication across I/O, sweep, and plotting modules.",
+  "reasoning": "",
+  "responseId": "resp_03014493919b47a100694b4dbbe2a481978d17c93f1d928a37",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3886,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1505,
+    "output_tokens_details": {
+      "reasoning_tokens": 1449
+    },
+    "total_tokens": 5391
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_03014493919b47a100694b4dbc7e348197bd384af9fd63f4db",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_03014493919b47a100694b4dbe7d0c819788dd24c42f804329",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nlist(base.glob(\"**/*\"))[:20]\n",
+      "container_id": "cntr_694b4d8e36dc8190b33c31668379700e0f2b66b245dabab1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/pyproject.toml'),\n PosixPath('/mnt/data/src'),\n PosixPath('/mnt/data/src/experiments'),\n PosixPath('/mnt/data/src/experiments/__init__.py')]"
+        }
+      ]
+    },
+    {
+      "id": "ci_03014493919b47a100694b4dc07fe88197944363f98fd75ff7",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((base/\"src/experiments/__init__.py\").read_text()[:400])\n",
+      "container_id": "cntr_694b4d8e36dc8190b33c31668379700e0f2b66b245dabab1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Experiments package.\n\nThis package provides reusable building blocks for running parameter sweeps,\npersisting inputs/outputs, and plotting results.\n\nThe public API is exposed at the package root (``experiments``) while keeping\nimplementations in submodules:\n- :mod:`experiments.io`\n- :mod:`experiments.sweep`\n- :mod:`experiments.plotting`\n\nImports are resolved lazily so importing :mod:`experiment\n"
+        }
+      ]
+    },
+    {
+      "id": "ci_03014493919b47a100694b4dc279c48197baf0474fbd6ff30b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((base/\"src/experiments/__init__.py\").read_text())\n",
+      "container_id": "cntr_694b4d8e36dc8190b33c31668379700e0f2b66b245dabab1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Experiments package.\n\nThis package provides reusable building blocks for running parameter sweeps,\npersisting inputs/outputs, and plotting results.\n\nThe public API is exposed at the package root (``experiments``) while keeping\nimplementations in submodules:\n- :mod:`experiments.io`\n- :mod:`experiments.sweep`\n- :mod:`experiments.plotting`\n\nImports are resolved lazily so importing :mod:`experiments` stays lightweight\nand does not require optional heavy dependencies (e.g., plotting backends)\nunless you access them.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom importlib import import_module\nfrom importlib.metadata import PackageNotFoundError, version\nfrom typing import Any\n\n__all__ = [\n    # Submodules\n    \"io\",\n    \"sweep\",\n    \"plotting\",\n    # Metadata\n    \"__version__\",\n]\n\ntry:\n    __version__ = version(\"generated_script_1766542734624\")\nexcept PackageNotFoundError:  # pragma: no cover\n    # When running from a source tree without an installed distribution.\n    __version__ = \"0.0.0\"\n\n\n_LAZY_SUBMODULES = (\"io\", \"sweep\", \"plotting\")\n\n\ndef __getattr__(name: str) -> Any:\n    \"\"\"Lazily import submodules and re-export their public symbols.\n\n    This supports both styles:\n      - ``import experiments; experiments.io``\n      - ``from experiments import write_results`` (if defined in submodules)\n    \"\"\"\n    if name in _LAZY_SUBMODULES:\n        return import_module(f\"{__name__}.{name}\")\n\n    # Re-export submodule attributes at package root if they exist.\n    for mod_name in _LAZY_SUBMODULES:\n        try:\n            mod = import_module(f\"{__name__}.{mod_name}\")\n        except ModuleNotFoundError:\n            continue\n        if hasattr(mod, name):\n            value = getattr(mod, name)\n            globals()[name] = value  # cache for future lookups\n            if name not in __all__:\n                __all__.append(name)\n            return value\n\n    raise AttributeError(f\"module {__name__!r} has no attribute {name!r}\")\n\n\ndef __dir__() -> list[str]:\n    names = set(globals())\n    for mod_name in _LAZY_SUBMODULES:\n        try:\n            mod = import_module(f\"{__name__}.{mod_name}\")\n        except ModuleNotFoundError:\n            continue\n        names.update(getattr(mod, \"__all__\", ()))\n        names.update(getattr(mod, \"__dict__\", {}).keys())\n    return sorted(names)\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_03014493919b47a100694b4dc4349881978e580d29b6b8592f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_03014493919b47a100694b4dc687f481978426cb12f5b0a6fc",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re\ntarget_path = Path('/mnt/data').joinpath('src/experiments/_common.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\\\"\\\"\\\"Shared helpers for the :mod:`experiments` package.\n\nThe project keeps these utilities small and dependency-free so they can be\nimported by I/O, sweep, and plotting modules without introducing heavy imports.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import is_dataclass, asdict\nfrom pathlib import Path\nfrom typing import Any, Iterable, Mapping, MutableMapping, Sequence, TypeVar, Union, overload\n\nPathLike = Union[str, Path]\nT = TypeVar(\"T\")\n\n__all__ = [\n    \"PathLike\",\n    \"as_path\",\n    \"ensure_dir\",\n    \"ensure_parent_dir\",\n    \"ensure_suffix\",\n    \"require\",\n    \"check_one_of\",\n    \"jsonable\",\n]\n\"\"\")\n\nchunks.append(\"\"\"@overload\ndef as_path(path: None) -> None: ...\n@overload\ndef as_path(path: PathLike) -> Path: ...\n\n\ndef as_path(path: PathLike | None) -> Path | None:\n    \\\"\\\"\\\"Coerce a path-like value to :class:`~pathlib.Path`.\n\n    Returns ``None`` if ``path`` is ``None``.\n    \\\"\\\"\\\"\n    if path is None:\n        return None\n    return path if isinstance(path, Path) else Path(path)\n\"\"\")\n\nchunks.append(\"\"\"def ensure_dir(path: PathLike) -> Path:\n    \\\"\\\"\\\"Ensure a directory exists and return it as a :class:`~pathlib.Path`.\\\"\\\"\\\"\n    p = as_path(path)\n    assert p is not None\n    p.mkdir(parents=True, exist_ok=True)\n    return p\n\n\ndef ensure_parent_dir(file_path: PathLike) -> Path:\n    \\\"\\\"\\\"Ensure the parent directory of a file exists; return the file path.\\\"\\\"\\\"\n    p = as_path(file_path)\n    assert p is not None\n    if p.parent != p:\n        p.parent.mkdir(parents=True, exist_ok=True)\n    return p\n\n\ndef ensure_suffix(path: PathLike, suffix: str) -> Path:\n    \\\"\\\"\\\"Return *path* as a :class:`~pathlib.Path` with the given suffix.\n\n    ``suffix`` may be provided with or without a leading dot.\n    \\\"\\\"\\\"\n    p = as_path(path)\n    assert p is not None\n    suf = suffix if suffix.startswith(\".\") else f\".{suffix}\"\n    return p if p.suffix == suf else p.with_suffix(suf)\n\"\"\")\n\nchunks.append(\"\"\"def require(condition: bool, message: str, exc: type[Exception] = ValueError) -> None:\n    \\\"\\\"\\\"Raise *exc* with *message* if *condition* is falsy.\\\"\\\"\\\"\n    if not condition:\n        raise exc(message)\n\n\ndef check_one_of(name: str, value: Any, options: Iterable[Any]) -> Any:\n    \\\"\\\"\\\"Validate that ``value`` is in ``options`` and return it.\\\"\\\"\\\"\n    opts = tuple(options)\n    if value not in opts:\n        raise ValueError(f\\\"{name} must be one of {opts!r}; got {value!r}\\\")\n    return value\n\"\"\")\n\nchunks.append(\"\"\"def jsonable(obj: Any) -> Any:\n    \\\"\\\"\\\"Convert common Python objects into JSON-serializable structures.\n\n    This is intended for metadata/config persistence and errs on the side of\n    preserving information (e.g., converting :class:`~pathlib.Path` to ``str``).\n    \\\"\\\"\\\"\n    if obj is None or isinstance(obj, (str, int, float, bool)):\n        return obj\n    if isinstance(obj, Path):\n        return str(obj)\n    if is_dataclass(obj):\n        return {k: jsonable(v) for k, v in asdict(obj).items()}\n    if isinstance(obj, Mapping):\n        return {str(k): jsonable(v) for k, v in obj.items()}\n    if isinstance(obj, (list, tuple)):\n        return [jsonable(v) for v in obj]\n    if isinstance(obj, set):\n        return sorted(jsonable(v) for v in obj)\n    # Numpy scalars / pandas types often define ``item``.\n    item = getattr(obj, \"item\", None)\n    if callable(item):\n        try:\n            return jsonable(item())\n        except Exception:\n            pass\n    # Fall back to string representation (safe for logs/metadata).\n    return str(obj)\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/experiments/_common.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\nlen(final_text.splitlines()), final_text[:200]\n",
+      "container_id": "cntr_694b4d8e36dc8190b33c31668379700e0f2b66b245dabab1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/_common.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/_common.py\"]\n"
+        },
+        {
+          "type": "logs",
+          "logs": "(104,\n '\"\"\"Shared helpers for the :mod:`experiments` package.\\n\\nThe project keeps these utilities small and dependency-free so they can be\\nimported by I/O, sweep, and plotting modules without introducing heavy')"
+        }
+      ]
+    },
+    {
+      "id": "msg_03014493919b47a100694b4dd09f788197a879d3274d8f643e",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/experiments/_common.py` with lightweight, dependency-free shared utilities for path coercion/creation, suffix handling, validation helpers, and safe JSON-serialization (`jsonable`) to reduce duplication across I/O, sweep, and plotting modules."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

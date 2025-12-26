@@ -1,0 +1,56 @@
+{
+  "content": "Created `src/cosmo_contracts/__init__.py` as a lazy-importing package initializer that exposes the public API for contract generation, validation, markdown insertion/updating, and compliance reporting while remaining import-safe in partial installs.",
+  "reasoning": "",
+  "responseId": "resp_0d3b5de1c02efce8006949a1e45a188196aec16d710236abb5",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2683,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1185,
+    "output_tokens_details": {
+      "reasoning_tokens": 252
+    },
+    "total_tokens": 3868
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0d3b5de1c02efce8006949a1e56a3081969c10afb95fe2f137",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d3b5de1c02efce8006949a1eb13788196b099d81ef5c97079",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/cosmo_contracts/__init__.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"COSMO benchmark contracts package.\n\nPublic API for:\n- Contract data model + JSON schema validation\n- Idempotent markdown rewriting to add/update 'Contract' sections\n- Canonical contract generation + normalization helpers\n- Compliance runner producing pass/fail + diagnostics per implementation\n\nThis module intentionally uses lazy imports so the package can be imported\neven when optional submodules are not yet available in a partial install.\n\\\"\\\"\\\"\"\"\",\n\"\"\"from __future__ import annotations\n\nfrom importlib import import_module\nfrom typing import Any, Dict, Tuple\n\n__all__ = [\n    \"__version__\",\n    # schema/model\n    \"Contract\",\n    \"ContractValidationError\",\n    \"load_contract\",\n    \"dump_contract\",\n    \"validate_contract\",\n    \"contract_json_schema\",\n    # markdown rewriting\n    \"rewrite_benchmarks_markdown\",\n    \"parse_contract_blocks\",\n    # contract generation/helpers\n    \"default_contract\",\n    \"normalize_contract\",\n    \"render_contract_markdown\",\n    # compliance runner\n    \"run_compliance\",\n    \"ComplianceReport\",\n]\n\n__version__ = \"0.1.0\"\n\"\"\",\n\"\"\"_EXPORTS: Dict[str, Tuple[str, str]] = {\n    # schema/model\n    \"Contract\": (\"cosmo_contracts.schema\", \"Contract\"),\n    \"ContractValidationError\": (\"cosmo_contracts.schema\", \"ContractValidationError\"),\n    \"load_contract\": (\"cosmo_contracts.schema\", \"load_contract\"),\n    \"dump_contract\": (\"cosmo_contracts.schema\", \"dump_contract\"),\n    \"validate_contract\": (\"cosmo_contracts.schema\", \"validate_contract\"),\n    \"contract_json_schema\": (\"cosmo_contracts.schema\", \"contract_json_schema\"),\n    # markdown rewriting\n    \"rewrite_benchmarks_markdown\": (\"cosmo_contracts.markdown\", \"rewrite_benchmarks_markdown\"),\n    \"parse_contract_blocks\": (\"cosmo_contracts.markdown\", \"parse_contract_blocks\"),\n    # contract generation/helpers\n    \"default_contract\": (\"cosmo_contracts.contracts\", \"default_contract\"),\n    \"normalize_contract\": (\"cosmo_contracts.contracts\", \"normalize_contract\"),\n    \"render_contract_markdown\": (\"cosmo_contracts.contracts\", \"render_contract_markdown\"),\n    # compliance runner\n    \"run_compliance\": (\"cosmo_contracts.runner\", \"run_compliance\"),\n    \"ComplianceReport\": (\"cosmo_contracts.runner\", \"ComplianceReport\"),\n}\n\"\"\",\n\"\"\"def _lazy_import(module: str, name: str) -> Any:\n    try:\n        mod = import_module(module)\n    except Exception as e:  # pragma: no cover\n        raise ImportError(\n            f\"cosmo_contracts: failed to import '{module}' required for '{name}'. \"\n            f\"Install/ship the corresponding module. Original error: {e}\"\n        ) from e\n    try:\n        return getattr(mod, name)\n    except AttributeError as e:  # pragma: no cover\n        raise ImportError(\n            f\"cosmo_contracts: module '{module}' does not export '{name}'.\"\n        ) from e\n\"\"\",\n\"\"\"def __getattr__(attr: str) -> Any:\n    if attr in _EXPORTS:\n        module, name = _EXPORTS[attr]\n        value = _lazy_import(module, name)\n        globals()[attr] = value  # cache\n        return value\n    raise AttributeError(attr)\n\"\"\",\n\"\"\"def __dir__() -> list[str]:\n    return sorted(set(list(globals().keys()) + list(_EXPORTS.keys())))\n\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/cosmo_contracts/__init__.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/cosmo_contracts/__init__.py\nDIR_STATE:[\"src/cosmo_contracts/__init__.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0d3b5de1c02efce8006949a1f79e3c8196bcf612c88b30ff0f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `src/cosmo_contracts/__init__.py` as a lazy-importing package initializer that exposes the public API for contract generation, validation, markdown insertion/updating, and compliance reporting while remaining import-safe in partial installs."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

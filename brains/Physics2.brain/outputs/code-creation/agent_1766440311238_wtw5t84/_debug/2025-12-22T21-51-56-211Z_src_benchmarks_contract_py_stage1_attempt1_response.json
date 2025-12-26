@@ -1,0 +1,159 @@
+{
+  "content": "Implemented a compact benchmark contract schema with per-observable tolerance specifications (including per-field overrides and NaN/Inf policies) plus a strict JSON loader/validator that enforces required metadata and documented tolerance rationale for each observable.",
+  "reasoning": "",
+  "responseId": "resp_0eb4873168d32401006949bdaab214819698d4a5497ddcf545",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 7340,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 3796,
+    "output_tokens_details": {
+      "reasoning_tokens": 816
+    },
+    "total_tokens": 11136
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0eb4873168d32401006949bdab989481969b0be2e8d878bad8",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0eb4873168d32401006949bdac8f2081969c8a9567df7f6762",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nlist(base.glob(\"src/benchmarks/*.py\"))[:10]\n",
+      "container_id": "cntr_6949bd7a484c8190a2c35d8222ddd72e01ed19761adadc33",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/src/benchmarks/compare.py')]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0eb4873168d32401006949bdaf0a348196bd19d7040cb13a0b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0eb4873168d32401006949bdb00190819685041078f8726d59",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\np=Path(\"/mnt/data/src/benchmarks/compare.py\")\nprint(p.read_text()[:4000])\n",
+      "container_id": "cntr_6949bd7a484c8190a2c35d8222ddd72e01ed19761adadc33",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Centralized comparison utilities for benchmark outputs.\n\nSupports absolute/relative tolerances, per-field overrides, NaN/Inf handling,\nstructured results, and mismatch reporting suitable for CI logs.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple, Union\n\nimport math\n\ntry:  # optional\n    import numpy as _np  # type: ignore\nexcept Exception:  # pragma: no cover\n    _np = None\nNumber = Union[int, float]\n\n@dataclass(frozen=True)\nclass CompareSpec:\n    atol: float = 0.0\n    rtol: float = 0.0\n    nan_equal: bool = True\n    inf_equal: bool = True\n    per_field: Dict[str, \"CompareSpec\"] = field(default_factory=dict)\n\n    def for_path(self, path: str) -> \"CompareSpec\":\n        # Exact match on full dotted path, falling back to default spec.\n        return self.per_field.get(path, self)\n\n@dataclass(frozen=True)\nclass Mismatch:\n    path: str\n    reason: str\n    a: Any = None\n    b: Any = None\n    details: str = \"\"\n\n@dataclass(frozen=True)\nclass CompareResult:\n    ok: bool\n    mismatches: Tuple[Mismatch, ...] = ()\n\n    def raise_on_mismatch(self, prefix: str = \"Comparison failed\") -> None:\n        if self.ok:\n            return\n        lines = [prefix + \":\"]\n        for m in self.mismatches[:50]:\n            det = f\" ({m.details})\" if m.details else \"\"\n            lines.append(f\"- {m.path}: {m.reason}{det}; a={_short(m.a)} b={_short(m.b)}\")\n        if len(self.mismatches) > 50:\n            lines.append(f\"... and {len(self.mismatches) - 50} more mismatches\")\n        raise AssertionError(\"\\n\".join(lines))\ndef compare(a: Any, b: Any, spec: Optional[CompareSpec] = None) -> CompareResult:\n    \"\"\"Compare two benchmark outputs and return a structured result.\"\"\"\n    spec = spec or CompareSpec()\n    mism: List[Mismatch] = []\n    _cmp(a, b, spec, path=\"$\", mismatches=mism)\n    return CompareResult(ok=not mism, mismatches=tuple(mism))\n\n\ndef _cmp(a: Any, b: Any, spec: CompareSpec, path: str, mismatches: List[Mismatch]) -> None:\n    specp = spec.for_path(path)\n\n    # Fast path for exact identity / both None.\n    if a is b:\n        return\n    if a is None or b is None:\n        mismatches.append(Mismatch(path, \"one is None\", a, b))\n        return\n\n    # Numpy array handling (if available).\n    if _np is not None and isinstance(a, _np.ndarray) and isinstance(b, _np.ndarray):\n        if a.shape != b.shape:\n            mismatches.append(Mismatch(path, \"shape mismatch\", a.shape, b.shape))\n            return\n        if a.dtype != b.dtype and (a.dtype.kind in \"SUO\" or b.dtype.kind in \"SUO\"):\n            mismatches.append(Mismatch(path, \"dtype mismatch\", str(a.dtype), str(b.dtype)))\n            return\n        _cmp_array(a, b, specp, path, mismatches)\n        return\n\n    # Mappings.\n    if isinstance(a, dict) and isinstance(b, dict):\n        ka, kb = set(a.keys()), set(b.keys())\n        if ka != kb:\n            missing_a, missing_b = sorted(kb - ka), sorted(ka - kb)\n            mismatches.append(Mismatch(path, \"key mismatch\", missing_b, missing_a,\n                                       details=f\"missing_in_a={missing_a} missing_in_b={missing_b}\"))\n            return\n        for k in sorted(ka, key=str):\n            _cmp(a[k], b[k], spec, f\"{path}.{k}\", mismatches)\n        return\n\n    # Sequences (but not strings/bytes).\n    if _is_seq(a) and _is_seq(b):\n        if len(a) != len(b):\n            mismatches.append(Mismatch(path, \"length mismatch\", len(a), len(b)))\n            return\n        for i, (xa, xb) in enumerate(zip(a, b)):\n            _cmp(xa, xb, spec, f\"{path}[{i}]\", mismatches)\n        return\n\n    # Numbers.\n    if _is_number(a) and _is_number(b):\n        if not _close(float(a), float(b), specp):\n            mismatches.append(Mismatch(path, \"number mismatch\", a, b,\n                                       details=f\"atol={specp.atol} rtol={specp.rtol}\"))\n        return\n\n    # Fallback equality with type guard.\n    if type(a) != type(b):\n        mi\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0eb4873168d32401006949bdb24fd081969e3242fef6e43039",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0eb4873168d32401006949bdb392c081968dfda8483f33f82b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(p.read_text()[4000:8000])\n",
+      "container_id": "cntr_6949bd7a484c8190a2c35d8222ddd72e01ed19761adadc33",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "smatches.append(Mismatch(path, \"type mismatch\", type(a).__name__, type(b).__name__))\n        return\n    if a != b:\n        mismatches.append(Mismatch(path, \"value mismatch\", a, b))\ndef _cmp_array(a: Any, b: Any, spec: CompareSpec, path: str, mismatches: List[Mismatch]) -> None:\n    # Object/string arrays: compare elementwise via Python recursion.\n    if a.dtype.kind in \"OSU\" or b.dtype.kind in \"OSU\":\n        a_list, b_list = a.tolist(), b.tolist()\n        _cmp(a_list, b_list, spec, path, mismatches)\n        return\n    af, bf = a.astype(float, copy=False), b.astype(float, copy=False)\n    # Compute mask of mismatching entries.\n    if spec.nan_equal:\n        nanmask = _np.isnan(af) & _np.isnan(bf)\n    else:\n        nanmask = _np.zeros_like(af, dtype=bool)\n    if spec.inf_equal:\n        infmask = _np.isinf(af) & _np.isinf(bf) & (_np.sign(af) == _np.sign(bf))\n    else:\n        infmask = _np.zeros_like(af, dtype=bool)\n\n    finite = ~(nanmask | infmask | _np.isnan(af) | _np.isnan(bf) | _np.isinf(af) | _np.isinf(bf))\n    diff = _np.abs(af - bf)\n    tol = spec.atol + spec.rtol * _np.abs(bf)\n    ok = nanmask | infmask | (finite & (diff <= tol))\n    if bool(ok.all()):\n        return\n    # Report up to 10 mismatching indices with diffs.\n    bad = _np.argwhere(~ok)\n    for idx in bad[:10]:\n        idx_t = tuple(int(x) for x in idx)\n        va, vb = a[idx_t].item(), b[idx_t].item()\n        da = float(af[idx_t] - bf[idx_t]) if finite[idx_t] else float(\"nan\")\n        mismatches.append(Mismatch(f\"{path}{list(idx_t)}\", \"array element mismatch\", va, vb,\n                                   details=f\"diff={da} atol={spec.atol} rtol={spec.rtol}\"))\n    if bad.shape[0] > 10:\n        mismatches.append(Mismatch(path, \"array has more mismatches\", int(bad.shape[0]), \"\",\n                                   details=\"reported first 10\"))\ndef _close(a: float, b: float, spec: CompareSpec) -> bool:\n    if math.isnan(a) or math.isnan(b):\n        return spec.nan_equal and math.isnan(a) and math.isnan(b)\n    if math.isinf(a) or math.isinf(b):\n        return spec.inf_equal and (a == b)\n    return abs(a - b) <= (spec.atol + spec.rtol * abs(b))\n\n\ndef _is_seq(x: Any) -> bool:\n    return isinstance(x, (list, tuple)) and not isinstance(x, (str, bytes, bytearray))\n\n\ndef _is_number(x: Any) -> bool:\n    return isinstance(x, (int, float)) and not isinstance(x, bool)\n\n\ndef _short(x: Any, n: int = 200) -> str:\n    s = repr(x)\n    return s if len(s) <= n else s[: n - 3] + \"...\"\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0eb4873168d32401006949bdb5d94081969fef80f93e41f9ca",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0eb4873168d32401006949bdbeca448196877c25f132882184",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re\ntarget_path = Path('/mnt/data').joinpath('src/benchmarks/contract.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\\\"\\\"\\\"Benchmark contract schema and loaders.\n\nA contract documents what a benchmark task produces and, crucially, the\ntolerance policy used to compare each observable in CI.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom pathlib import Path\nfrom typing import Any, Dict, Mapping, Optional, Union\n\nfrom .compare import CompareSpec\n\n\n@dataclass(frozen=True)\nclass ToleranceSpec:\n    \\\"\\\"\\\"Tolerance policy for numeric comparisons.\n\n    `per_field` keys are dotted/Indexed paths as used by compare(), e.g.:\n      $.metric, $.outputs[0].loss, $.state.weights\n    \\\"\\\"\\\"\n\n    atol: float = 0.0\n    rtol: float = 0.0\n    nan_equal: bool = True\n    inf_equal: bool = True\n    per_field: Dict[str, \\\"ToleranceSpec\\\"] = field(default_factory=dict)\n\n    def to_compare_spec(self) -> CompareSpec:\n        return CompareSpec(\n            atol=float(self.atol),\n            rtol=float(self.rtol),\n            nan_equal=bool(self.nan_equal),\n            inf_equal=bool(self.inf_equal),\n            per_field={k: v.to_compare_spec() for k, v in self.per_field.items()},\n        )\n\n    @staticmethod\n    def from_dict(d: Mapping[str, Any]) -> \\\"ToleranceSpec\\\":\n        if not isinstance(d, Mapping):\n            raise TypeError(\\\"tolerance must be a mapping\\\")\n        per = d.get(\\\"per_field\\\", {}) or {}\n        if not isinstance(per, Mapping):\n            raise TypeError(\\\"tolerance.per_field must be a mapping\\\")\n        return ToleranceSpec(\n            atol=float(d.get(\\\"atol\\\", 0.0)),\n            rtol=float(d.get(\\\"rtol\\\", 0.0)),\n            nan_equal=bool(d.get(\\\"nan_equal\\\", True)),\n            inf_equal=bool(d.get(\\\"inf_equal\\\", True)),\n            per_field={str(k): ToleranceSpec.from_dict(v) for k, v in per.items()},\n        )\n\n    def validate(self, ctx: str = \\\"tolerance\\\") -> None:\n        if self.atol < 0 or self.rtol < 0:\n            raise ValueError(f\\\"{ctx}: atol/rtol must be >= 0 (got atol={self.atol} rtol={self.rtol})\\\")\n        for k, v in self.per_field.items():\n            if not k or not isinstance(k, str):\n                raise ValueError(f\\\"{ctx}.per_field: keys must be non-empty strings\\\")\n            v.validate(ctx=f\\\"{ctx}.per_field[{k!r}]\\\")\\n\"\"\")\n\nchunks.append(\"\"\"@dataclass(frozen=True)\nclass ObservableContract:\n    \\\"\\\"\\\"One named observable produced by a task (e.g. 'loss', 'trajectory').\\\"\\\"\\\"\n\n    description: str\n    tolerance: ToleranceSpec\n    tolerance_notes: str\n\n    @staticmethod\n    def from_dict(d: Mapping[str, Any]) -> \\\"ObservableContract\\\":\n        if not isinstance(d, Mapping):\n            raise TypeError(\\\"observable spec must be a mapping\\\")\n        tol = d.get(\\\"tolerance\\\")\n        if tol is None:\n            raise ValueError(\\\"observable is missing required field 'tolerance'\\\")\n        notes = str(d.get(\\\"tolerance_notes\\\", \\\"\\\")).strip()\n        return ObservableContract(\n            description=str(d.get(\\\"description\\\", \\\"\\\")).strip(),\n            tolerance=ToleranceSpec.from_dict(tol),\n            tolerance_notes=notes,\n        )\n\n    def validate(self, name: str) -> None:\n        if not self.tolerance_notes:\n            raise ValueError(\n                f\\\"observable '{name}' must document tolerance rationale in 'tolerance_notes'\\\"\n            )\n        self.tolerance.validate(ctx=f\\\"observables[{name}].tolerance\\\")\\n\"\"\")\n\nchunks.append(\"\"\"@dataclass(frozen=True)\nclass BenchmarkContract:\n    \\\"\\\"\\\"Contract for a benchmark task.\\\"\\\"\\\"\n\n    task_id: str\n    version: str\n    description: str\n    reference: Dict[str, Any]\n    observables: Dict[str, ObservableContract]\n\n    @staticmethod\n    def from_dict(d: Mapping[str, Any]) -> \\\"BenchmarkContract\\\":\n        if not isinstance(d, Mapping):\n            raise TypeError(\\\"contract must be a mapping\\\")\n        obs = d.get(\\\"observables\\\")\n        if not isinstance(obs, Mapping) or not obs:\n            raise ValueError(\\\"contract must define non-empty 'observables' mapping\\\")\n        return BenchmarkContract(\n            task_id=str(d.get(\\\"task_id\\\", \\\"\\\")).strip(),\n            version=str(d.get(\\\"version\\\", \\\"\\\")).strip(),\n            description=str(d.get(\\\"description\\\", \\\"\\\")).strip(),\n            reference=dict(d.get(\\\"reference\\\", {}) or {}),\n            observables={str(k): ObservableContract.from_dict(v) for k, v in obs.items()},\n        )\n\n    def validate(self) -> None:\n        if not self.task_id:\n            raise ValueError(\\\"contract missing required field 'task_id'\\\")\n        if not self.version:\n            raise ValueError(\\\"contract missing required field 'version'\\\")\n        if not self.description:\n            raise ValueError(\\\"contract missing required field 'description'\\\")\n        if not isinstance(self.reference, dict) or not self.reference:\n            raise ValueError(\\\"contract missing required non-empty field 'reference'\\\")\n        for name, oc in self.observables.items():\n            if not name:\n                raise ValueError(\\\"observable name must be non-empty\\\")\n            oc.validate(name)\n\n    def compare_spec_for(self, observable: str) -> CompareSpec:\n        return self.observables[observable].tolerance.to_compare_spec()\\n\"\"\")\n\nchunks.append(\"\"\"def load_contract(path: Union[str, Path]) -> BenchmarkContract:\n    \\\"\\\"\\\"Load a BenchmarkContract from a JSON file and validate it.\\\"\\\"\\\"\n\n    p = Path(path)\n    data = json_load(p)\n    c = BenchmarkContract.from_dict(data)\n    c.validate()\n    return c\n\n\ndef json_load(path: Path) -> Dict[str, Any]:\n    if path.suffix.lower() != \\\".json\\\":\n        raise ValueError(f\\\"unsupported contract format {path.suffix!r}; expected .json\\\")\n    try:\n        txt = path.read_text(encoding=\\\"utf-8\\\")\n    except FileNotFoundError as e:\n        raise FileNotFoundError(f\\\"contract file not found: {path}\\\") from e\n    try:\n        obj = __import__(\\\"json\\\").loads(txt)\n    except Exception as e:\n        raise ValueError(f\\\"invalid JSON in contract file: {path}\\\") from e\n    if not isinstance(obj, dict):\n        raise TypeError(\\\"top-level contract JSON must be an object\\\")\n    return obj\\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/benchmarks/contract.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd7a484c8190a2c35d8222ddd72e01ed19761adadc33",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/benchmarks/contract.py\nDIR_STATE:[\"src/benchmarks/compare.py\", \"src/benchmarks/contract.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0eb4873168d32401006949bdd61c50819685032d696bdd9d3f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0eb4873168d32401006949bdd656ec81969013a5c489b1264e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "text=Path(\"/mnt/data/src/benchmarks/contract.py\").read_text().splitlines()\nlen(text), text[:5], text[-5:]\n",
+      "container_id": "cntr_6949bd7a484c8190a2c35d8222ddd72e01ed19761adadc33",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(153,\n ['\"\"\"Benchmark contract schema and loaders.',\n  '',\n  'A contract documents what a benchmark task produces and, crucially, the',\n  'tolerance policy used to compare each observable in CI.',\n  '\"\"\"'],\n ['    except Exception as e:',\n  '        raise ValueError(f\"invalid JSON in contract file: {path}\") from e',\n  '    if not isinstance(obj, dict):',\n  '        raise TypeError(\"top-level contract JSON must be an object\")',\n  '    return obj'])"
+        }
+      ]
+    },
+    {
+      "id": "rs_0eb4873168d32401006949bdd848008196bd0acfbedcba5471",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0eb4873168d32401006949bdda982c8196a9c6a593e3fcb6dc",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\ntarget_path = Path('/mnt/data/src/benchmarks/contract.py')\n\nchunks = []\nchunks.append(\"\"\"\\\"\\\"\\\"Benchmark contract schema + JSON loader/validator.\\\"\\\"\\\"\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom pathlib import Path\nfrom typing import Any, Dict, Mapping, Union\n\nfrom .compare import CompareSpec\n\n\n@dataclass(frozen=True)\nclass ToleranceSpec:\n    \\\"\\\"\\\"Numeric comparison policy; per_field keys use compare() paths (e.g. $.x[0]).\\\"\\\"\\\"\n    atol: float = 0.0\n    rtol: float = 0.0\n    nan_equal: bool = True\n    inf_equal: bool = True\n    per_field: Dict[str, \\\"ToleranceSpec\\\"] = field(default_factory=dict)\n\n    def to_compare_spec(self) -> CompareSpec:\n        return CompareSpec(self.atol, self.rtol, self.nan_equal, self.inf_equal,\n                           {k: v.to_compare_spec() for k, v in self.per_field.items()})\n\n    @staticmethod\n    def from_dict(d: Mapping[str, Any]) -> \\\"ToleranceSpec\\\":\n        if not isinstance(d, Mapping):\n            raise TypeError(\\\"tolerance must be a mapping\\\")\n        per = d.get(\\\"per_field\\\") or {}\n        if not isinstance(per, Mapping):\n            raise TypeError(\\\"tolerance.per_field must be a mapping\\\")\n        return ToleranceSpec(float(d.get(\\\"atol\\\", 0.0)), float(d.get(\\\"rtol\\\", 0.0)),\n                             bool(d.get(\\\"nan_equal\\\", True)), bool(d.get(\\\"inf_equal\\\", True)),\n                             {str(k): ToleranceSpec.from_dict(v) for k, v in per.items()})\n\n    def validate(self, ctx: str) -> None:\n        if self.atol < 0 or self.rtol < 0:\n            raise ValueError(f\\\"{ctx}: atol/rtol must be >= 0 (got atol={self.atol} rtol={self.rtol})\\\")\n        for k, v in self.per_field.items():\n            if not k:\n                raise ValueError(f\\\"{ctx}.per_field: keys must be non-empty strings\\\")\n            v.validate(f\\\"{ctx}.per_field[{k!r}]\\\")\\n\"\"\")\n\nchunks.append(\"\"\"@dataclass(frozen=True)\nclass ObservableContract:\n    description: str\n    tolerance: ToleranceSpec\n    tolerance_notes: str\n\n    @staticmethod\n    def from_dict(d: Mapping[str, Any]) -> \\\"ObservableContract\\\":\n        if not isinstance(d, Mapping):\n            raise TypeError(\\\"observable spec must be a mapping\\\")\n        if d.get(\\\"tolerance\\\") is None:\n            raise ValueError(\\\"observable is missing required field 'tolerance'\\\")\n        return ObservableContract(\n            description=str(d.get(\\\"description\\\", \\\"\\\")).strip(),\n            tolerance=ToleranceSpec.from_dict(d[\\\"tolerance\\\"]),\n            tolerance_notes=str(d.get(\\\"tolerance_notes\\\", \\\"\\\")).strip(),\n        )\n\n    def validate(self, name: str) -> None:\n        if not self.tolerance_notes:\n            raise ValueError(f\\\"observable '{name}' must set non-empty 'tolerance_notes'\\\")\n        self.tolerance.validate(f\\\"observables[{name}].tolerance\\\")\\n\"\"\")\n\nchunks.append(\"\"\"@dataclass(frozen=True)\nclass BenchmarkContract:\n    task_id: str\n    version: str\n    description: str\n    reference: Dict[str, Any]\n    observables: Dict[str, ObservableContract]\n\n    @staticmethod\n    def from_dict(d: Mapping[str, Any]) -> \\\"BenchmarkContract\\\":\n        if not isinstance(d, Mapping):\n            raise TypeError(\\\"contract must be a mapping\\\")\n        obs = d.get(\\\"observables\\\")\n        if not isinstance(obs, Mapping) or not obs:\n            raise ValueError(\\\"contract must define non-empty 'observables' mapping\\\")\n        return BenchmarkContract(\n            task_id=str(d.get(\\\"task_id\\\", \\\"\\\")).strip(),\n            version=str(d.get(\\\"version\\\", \\\"\\\")).strip(),\n            description=str(d.get(\\\"description\\\", \\\"\\\")).strip(),\n            reference=dict(d.get(\\\"reference\\\", {}) or {}),\n            observables={str(k): ObservableContract.from_dict(v) for k, v in obs.items()},\n        )\n\n    def validate(self) -> None:\n        if not self.task_id:\n            raise ValueError(\\\"contract missing required field 'task_id'\\\")\n        if not self.version:\n            raise ValueError(\\\"contract missing required field 'version'\\\")\n        if not self.description:\n            raise ValueError(\\\"contract missing required field 'description'\\\")\n        if not isinstance(self.reference, dict) or not self.reference:\n            raise ValueError(\\\"contract missing required non-empty field 'reference'\\\")\n        for name, oc in self.observables.items():\n            if not name:\n                raise ValueError(\\\"observable name must be non-empty\\\")\n            oc.validate(name)\n\n    def compare_spec_for(self, observable: str) -> CompareSpec:\n        return self.observables[observable].tolerance.to_compare_spec()\\n\"\"\")\n\nchunks.append(\"\"\"def load_contract(path: Union[str, Path]) -> BenchmarkContract:\n    \\\"\\\"\\\"Load a BenchmarkContract from a .json file and validate it.\\\"\\\"\\\"\n    p = Path(path)\n    if p.suffix.lower() != \\\".json\\\":\n        raise ValueError(f\\\"unsupported contract format {p.suffix!r}; expected .json\\\")\n    try:\n        obj = __import__(\\\"json\\\").loads(p.read_text(encoding=\\\"utf-8\\\"))\n    except FileNotFoundError as e:\n        raise FileNotFoundError(f\\\"contract file not found: {p}\\\") from e\n    except Exception as e:\n        raise ValueError(f\\\"invalid JSON in contract file: {p}\\\") from e\n    if not isinstance(obj, dict):\n        raise TypeError(\\\"top-level contract JSON must be an object\\\")\n    c = BenchmarkContract.from_dict(obj)\n    c.validate()\n    return c\\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/benchmarks/contract.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd7a484c8190a2c35d8222ddd72e01ed19761adadc33",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/benchmarks/contract.py\nDIR_STATE:[\"src/benchmarks/compare.py\", \"src/benchmarks/contract.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "ci_0eb4873168d32401006949bde7210881969661d3087d1f3246",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nlen(Path(\"/mnt/data/src/benchmarks/contract.py\").read_text().splitlines())\n",
+      "container_id": "cntr_6949bd7a484c8190a2c35d8222ddd72e01ed19761adadc33",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "118"
+        }
+      ]
+    },
+    {
+      "id": "msg_0eb4873168d32401006949bde8f95c8196a3531ad3660368dc",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented a compact benchmark contract schema with per-observable tolerance specifications (including per-field overrides and NaN/Inf policies) plus a strict JSON loader/validator that enforces required metadata and documented tolerance rationale for each observable."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

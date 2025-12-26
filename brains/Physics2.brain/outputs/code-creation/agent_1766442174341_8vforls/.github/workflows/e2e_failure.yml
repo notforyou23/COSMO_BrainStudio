@@ -1,0 +1,52 @@
+name: e2e-failure-diagnostics
+
+on:
+  workflow_call:
+    inputs:
+      artifact_name:
+        description: Name of the uploaded diagnostics artifact.
+        required: false
+        type: string
+        default: e2e-diagnostics
+      diagnostics_dir:
+        description: Directory to write collected diagnostics into (relative to repository root).
+        required: false
+        type: string
+        default: e2e-diagnostics
+      retention_days:
+        description: Artifact retention period in days.
+        required: false
+        type: number
+        default: 7
+      runner:
+        description: Runner label to execute diagnostics collection on.
+        required: false
+        type: string
+        default: ubuntu-latest
+      checkout_ref:
+        description: Optional ref to checkout (defaults to the workflow SHA).
+        required: false
+        type: string
+    secrets:
+      GITHUB_TOKEN:
+        required: false
+
+jobs:
+  collect:
+    name: Collect E2E failure diagnostics
+    runs-on: ${{ inputs.runner }}
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.checkout_ref || github.sha }}
+
+      - name: Collect + upload diagnostics (only when prior job failed)
+        uses: ./.github/actions/e2e-on-failure
+        with:
+          diagnostics_dir: ${{ inputs.diagnostics_dir }}
+          artifact_name: ${{ inputs.artifact_name }}
+          retention_days: ${{ inputs.retention_days }}

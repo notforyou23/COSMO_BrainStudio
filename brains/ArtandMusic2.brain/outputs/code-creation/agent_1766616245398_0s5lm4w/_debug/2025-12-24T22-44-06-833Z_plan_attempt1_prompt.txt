@@ -1,0 +1,32 @@
+You are planning a json script implementation for the following mission:
+Implement a minimal tracking system to resolve the 'ACTUALLY PURSUED: 0' inconsistency: create a single source-of-truth progress ledger (e.g., /outputs/PROJECT_TRACKER.json or .csv) plus a small script that updates counts per goal and lists current active goals for each cycle.
+
+Relevant context:
+- [CONSOLIDATED] Build a lightweight, automation-first workflow that **produces required artifacts and continuously verifies them**, while **r
+- [INTROSPECTION] 2025-12-24T22-26-00-824Z_plan_attempt1_prompt.txt from code-creation agent agent_1766615159208_l4cgv47: You are planning a j
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] The dominant causal mechanism is a self-reinforcing selection loop: institutions use cheap, hig
+- [INTROSPECTION] 2025-12-24T22-26-00-796Z_scripts_validate_linkcheck_report_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766
+- Assumption: art and music exist mainly for aesthetic pleasure — while aesthetics matter, their primary functions historically and cognitivel
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 4: Mentorship allocation should be treated like a compounding-investment policy—and
+- [AGENT: agent_1766614627655_4lrkb6s] Across perspectives, “genius vs. craft/process” narratives operate less as attitudes and more as instit
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

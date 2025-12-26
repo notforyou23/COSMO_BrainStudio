@@ -1,0 +1,65 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766550068051_exsedl9",
+  "agentType": "code-creation",
+  "goalId": "goal_133",
+  "missionId": "strategic_goal_133_1766550068051",
+  "spawnCycle": 112,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T04:21:15.867Z",
+  "completedAt": null,
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/run_pipeline.py",
+      "description": "Single CLI entrypoint that creates outputs/, runs a deterministic toy experiment producing artifacts, writes outputs/index.md manifest, and exits with nonzero status on any failure.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "pending",
+      "attempts": 0,
+      "errors": [],
+      "createdAt": "2025-12-24T04:21:15.867Z"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "description": "CI workflow that checks out the repo, runs scripts/run_pipeline.py on pushes/PRs, and fails the build if the pipeline exits nonzero or expected outputs are missing.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "pending",
+      "attempts": 0,
+      "errors": [],
+      "createdAt": "2025-12-24T04:21:15.867Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Create/standardize scripts/run_pipeline.py as the sole entrypoint; ensure it creates ./outputs, runs the toy experiment, writes the manifest (./outputs/index.md), and exits nonzero on failure.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Reinforces the single deterministic entrypoint requirement (scripts/run_pipeline.py or python -m package.run) so a fresh clone can generate artifacts predictably and populate ./outputs without manual ..."
+  ],
+  "projectName": "generated_script_1766550068298",
+  "language": "python",
+  "type": "script",
+  "status": "in_progress",
+  "requirements": [
+    "include_ci_cd"
+  ],
+  "lastSavedAt": "2025-12-24T04:21:15.867Z"
+}

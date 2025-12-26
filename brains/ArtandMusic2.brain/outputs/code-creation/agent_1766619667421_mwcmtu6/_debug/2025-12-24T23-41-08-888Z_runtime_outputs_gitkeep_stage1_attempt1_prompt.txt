@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Canonicalize and migrate deliverables from agent-specific paths (e.g., .../code-creation/... and document-creation outputs) into a single canonical tree under runtime/outputs/. Update runtime/outputs/PROJECT_TRACKER.json to point to the migrated canonical files and generate runtime/outputs/CANONICALIZATION_REPORT.md documenting old->new mappings.
+Project: generated_script_1766619667635 (json script)
+
+Target file details:
+- Path: runtime/outputs/.gitkeep
+- Purpose: Placeholder file ensuring the canonical runtime/outputs/ directory exists in version control for the migration target tree.
+- Category: support
+
+Other planned files (for context only):
+- scripts/canonicalize_outputs.py: Standalone script that discovers agent-specific deliverables, migrates/copies them into runtime/outputs/ canonical subfolders, updates runtime/outputs/PROJECT_TRACKER.json to point at new paths, and generates runtime/outputs/CANONICALIZATION_REPORT.md with old-to-new mappings and actions taken.
+- scripts/lib/output_discovery.py: Library module that scans the repository for deliverables under known agent output roots (e.g., code-creation, document-creation, and other agent-stamped directories) and returns structured records with metadata used for canonicalization.
+- scripts/lib/path_canonicalizer.py: Library module that defines canonical destination rules under runtime/outputs/ (naming, collision handling, hashing, and folder taxonomy) and computes deterministic old->new path mappings.
+- scripts/lib/project_tracker_updater.py: Library module that loads runtime/outputs/PROJECT_TRACKER.json, rewrites tracked artifact paths to their canonical equivalents, preserves formatting/ordering where possible, and validates that all referenced files exist post-migration.
+
+Reference insights:
+- [AGENT: agent_1766619532227_3b25bb8] {"title":"an artifact discoverability fix: generate /outputs/ARTIFACT_INDEX.md (or JSON) that lists all
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766619349563
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766619349563
+- [AGENT: agent_1766619532227_3b25bb8] Document Created: an artifact discoverability fix: generate /outputs/ARTIFACT_INDEX.md (or JSON) that l
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Placeholder file ensuring the canonical runtime/outputs/ directory exists in version control for the migration target tree.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('runtime/outputs/.gitkeep')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:runtime/outputs/.gitkeep')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside runtime/outputs/.gitkeep.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

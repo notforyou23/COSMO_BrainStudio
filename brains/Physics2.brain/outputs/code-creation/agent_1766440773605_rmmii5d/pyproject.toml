@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "generated_script_1766440781994"
+version = "0.0.0"
+description = "CI-tooled Python script repository."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Unknown"}]
+dependencies = []
+
+[project.optional-dependencies]
+ci = [
+  "ruff>=0.6.0",
+  "black>=24.0.0",
+  "pytest>=7.4.0",
+  "pytest-cov>=4.1.0",
+  "jsonschema>=4.20.0",
+  "PyYAML>=6.0.1",
+]
+bench = []
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+extend-exclude = ["artifacts", "build", "dist", ".venv", "venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+extend-exclude = '''
+/(
+  artifacts
+  | build
+  | dist
+  | \.venv
+  | venv
+)/
+'''
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-q"
+testpaths = ["tests"]
+xfail_strict = true
+filterwarnings = [
+  "error::DeprecationWarning",
+  "error::PendingDeprecationWarning",
+]

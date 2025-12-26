@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/qg-bench/benchmark.schema.json",
+  "title": "qg_bench benchmark dataset",
+  "description": "Schema for a simple question-generation benchmark dataset consumed by qg_bench.validate and qg_bench.runner.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["benchmark_id", "dataset_version", "examples"],
+  "properties": {
+    "benchmark_id": {
+      "type": "string",
+      "description": "Stable identifier for the benchmark dataset.",
+      "minLength": 1
+    },
+    "dataset_version": {
+      "type": "string",
+      "description": "Dataset format or content version (free-form semantic version recommended).",
+      "minLength": 1
+    },
+    "license": {
+      "type": "string",
+      "description": "Optional license identifier or URL.",
+      "minLength": 1
+    },
+    "source": {
+      "type": "string",
+      "description": "Optional provenance string or URL for the dataset.",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional human-readable dataset description."
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional arbitrary metadata for the dataset header.",
+      "additionalProperties": true
+    },
+    "examples": {
+      "type": "array",
+      "description": "List of benchmark examples.",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/example" }
+    }
+  },
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "example": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "context", "question", "reference_answers"],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/nonEmptyString",
+          "description": "Unique example identifier (unique within the dataset)."
+        },
+        "context": {
+          "type": "string",
+          "description": "Context passage from which the question is generated/answered.",
+          "minLength": 1
+        },
+        "question": {
+          "type": "string",
+          "description": "The question to be evaluated.",
+          "minLength": 1
+        },
+        "reference_answers": {
+          "type": "array",
+          "description": "One or more acceptable reference answers for scoring.",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/nonEmptyString" }
+        },
+        "tags": {
+          "type": "array",
+          "description": "Optional tags or categories for filtering/analysis.",
+          "items": { "$ref": "#/$defs/nonEmptyString" },
+          "uniqueItems": true
+        },
+        "difficulty": {
+          "type": "string",
+          "description": "Optional difficulty label.",
+          "enum": ["easy", "medium", "hard"]
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Optional per-example metadata.",
+          "additionalProperties": true
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "content": "Created a reusable GitHub Actions CI documentation section that explains where workflows live, common triggers, expected job structure, required secrets/environment patterns, and concrete steps to reproduce CI runs locally (including optional `act` usage).",
+  "reasoning": "",
+  "responseId": "resp_0c09d6b842a4a3bc006949c92cc0108196b1566c5fcef7d31b",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2998,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1419,
+    "output_tokens_details": {
+      "reasoning_tokens": 1372
+    },
+    "total_tokens": 4417
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0c09d6b842a4a3bc006949c92d720081968681d761e7f00824",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c09d6b842a4a3bc006949c932b81c8196b3e6b29e4bb9537d",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re, itertools\ntarget_path = Path('/mnt/data').joinpath('docs/e2e/README_e2e_sections/40_ci_github_actions.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"# CI: GitHub Actions\n\nThis project’s E2E checks are designed to run both in GitHub Actions (CI) and locally using the same commands/config, so CI failures can be reproduced deterministically.\n\n## Where the workflows live\n\nGitHub Actions workflows are defined in `.github/workflows/*.yml`. Look for workflows/jobs that call the E2E entrypoints (for example, a `run_all` shell script or a Python module/CLI used for end-to-end runs).\n\n## When CI runs (common triggers)\n\nMost repositories wire E2E workflows to a subset of these triggers:\n- **Pull requests**: validate changes before merge (`pull_request`).\n- **Push to protected branches**: e.g., `main`/`master` (`push`).\n- **Manual runs**: run on demand from the Actions UI (`workflow_dispatch`).\n- **Scheduled runs** (optional): periodic health checks (`schedule`).\n\nIf you need to confirm the exact triggers, open the relevant workflow YAML and inspect the top-level `on:` block.\n\n## Typical CI shape (what to expect)\n\nA minimal, reproducible E2E workflow usually does the following:\n1. **Checkout** the repository.\n2. **Set up Python** (pin a version to match local expectations).\n3. **Install dependencies** (often from a CI-focused lock/requirements file).\n4. **Prepare configuration/secrets** (via GitHub Secrets, environment variables, or checked-in sample configs).\n5. **Run E2E** using the same entrypoint used locally.\n6. **Upload artifacts** (logs, reports, screenshots) when runs fail.\n\n### Dependency install convention\n\nIf present, `docs/e2e/requirements-ci.txt` is intended to mirror CI installs for E2E (pins/constraints suitable for runners). Install it locally with:\n\n```bash\npython -m pip install -r docs/e2e/requirements-ci.txt\n```\n\n## Secrets, permissions, and environment\n\nCI frequently requires non-repo inputs. Common patterns:\n- **GitHub Secrets**: referenced in workflow YAML via `${{ secrets.NAME }}` and mapped to environment variables.\n- **Repository Variables**: `${{ vars.NAME }}` for non-sensitive toggles.\n- **OIDC / cloud auth**: workflow `permissions:` and an identity provider instead of long-lived credentials.\n\nTo reproduce locally, export the same environment variables the workflow provides (avoid printing secrets in logs). If a workflow uses OIDC, prefer a local developer credential flow for the same cloud account/project.\n\n## Reproducing CI locally\n\n### 1) Match the runner environment\n\nUse the same Python version as CI (see workflow `setup-python` step), then:\n\n```bash\npython -m venv .venv\nsource .venv/bin/activate\npython -m pip install -U pip\npython -m pip install -r docs/e2e/requirements-ci.txt\n```\n\n### 2) Use the same configuration inputs\n\nSet environment variables and configuration files exactly as CI does. A quick way to discover them is to search the workflow YAML for `env:`, `secrets.`, and any config file writes.\n\n### 3) Run the same entrypoint as CI\n\nIf the repository provides a wrapper script (common for E2E), run it directly. For example, if CI calls `scripts/run_all.sh`:\n\n```bash\nbash scripts/run_all.sh\n```\n\nIf CI runs a Python module/CLI, run the same command locally (copy/paste from the workflow logs).\n\n### 4) Optional: run GitHub Actions locally with `act`\n\nFor a closer approximation of the GitHub runner, you can use [`act`](https://github.com/nektos/act) to execute workflows in Docker:\n\n```bash\nact -W .github/workflows/<workflow>.yml -j <job>\n```\n\nNotes:\n- `act` may require you to provide secrets (`-s NAME=value`) and a runner image compatible with your workflow.\n- Not all hosted-runner features (especially OIDC integrations) reproduce perfectly under `act`.\n\n## Debugging CI-only failures\n\n- **Print versions**: add/inspect `python --version`, `pip freeze`, OS info.\n- **Check working directory**: ensure paths are relative to the repo root.\n- **Artifacts**: upload logs/reports on failure to avoid “works on my machine” blind spots.\n- **Determinism**: prefer pinned deps and fixed seeds; avoid time- or network-dependent tests unless explicitly required.\n\"\"\"\n]\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\n# line count\nline_count = final_text.count('\\n')\nline_count\n",
+      "container_id": "cntr_6949c882be7c819088c3caf5ad10e5ac0ab56cad82a1639c",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "90"
+        }
+      ]
+    },
+    {
+      "id": "rs_0c09d6b842a4a3bc006949c94b87388196a03ee278ba4befb3",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c09d6b842a4a3bc006949c94c08dc8196bf016971a93361b1",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "target_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:docs/e2e/README_e2e_sections/40_ci_github_actions.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949c882be7c819088c3caf5ad10e5ac0ab56cad82a1639c",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:docs/e2e/README_e2e_sections/40_ci_github_actions.md\nDIR_STATE:[\"docs/e2e/README_e2e_sections/00_overview.md\", \"docs/e2e/README_e2e_sections/10_prerequisites.md\", \"docs/e2e/README_e2e_sections/20_configuration.md\", \"docs/e2e/README_e2e_sections/30_running_locally.md\", \"docs/e2e/README_e2e_sections/40_ci_github_actions.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0c09d6b842a4a3bc006949c94e777c8196b1b5d88ea4bf0c53",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a reusable GitHub Actions CI documentation section that explains where workflows live, common triggers, expected job structure, required secrets/environment patterns, and concrete steps to reproduce CI runs locally (including optional `act` usage)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

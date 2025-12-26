@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Execute init_outputs.py to generate the /outputs structure; verify expected paths exist (e.g., /outputs/qa/, templates, reports) and record the run log under /outputs/qa/logs/.
+Project: generated_configuration_1766627459964 (python configuration)
+
+Target file details:
+- Path: config/outputs_structure.json
+- Purpose: Declarative configuration defining the expected outputs directory tree (e.g., outputs/qa/, templates, reports, logs) for scaffold creation and verification.
+- Category: config
+
+Other planned files (for context only):
+- init_outputs.py: CLI script that creates the required outputs directory scaffold, verifies expected paths, and writes a timestamped run log under outputs/qa/logs/.
+- src/outputs_scaffold.py: Library module that loads the desired outputs structure, creates directories idempotently, performs existence verification, and returns a structured result for logging.
+- src/path_utils.py: Utility helpers for safe path canonicalization and project-root-relative resolution to prevent accidental creation outside the repository.
+- src/run_log.py: Small logging helper that formats and writes a run log (JSONL and/or text) into outputs/qa/logs/ with environment and verification details.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T23-08-49-021Z_outputs_REPORT_OUTLINE_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766617727478_z
+- [INTROSPECTION] 2025-12-24T23-20-08-705Z_config_qa_gates_yaml_stage1_attempt1_prompt.txt from code-creation agent agent_1766618407426_jbwdhc
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-08-49-021Z_outputs_REPORT_OUTLINE_md_stage1_attempt2_prompt.txt from code-creation agent agent_1766617727478_z
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Declarative configuration defining the expected outputs directory tree (e.g., outputs/qa/, templates, reports, logs) for scaffold creation and verification.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('config/outputs_structure.json')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:config/outputs_structure.json')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside config/outputs_structure.json.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

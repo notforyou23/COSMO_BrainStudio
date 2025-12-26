@@ -1,0 +1,56 @@
+{
+  "content": "Implemented deterministic I/O helpers in `src/io_utils.py` to create directories and atomically write normalized text/JSON outputs for stable, reproducible artifact generation.",
+  "reasoning": "",
+  "responseId": "resp_0f420fc63bf4e51e00694b46eb3de88190b17ba0bed50fffed",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2666,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1084,
+    "output_tokens_details": {
+      "reasoning_tokens": 157
+    },
+    "total_tokens": 3750
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0f420fc63bf4e51e00694b46ec0c5c8190a269b89c81c85d1a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0f420fc63bf4e51e00694b46ee3124819092c7f5999ec0ea17",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, os, tempfile\n\ntarget_path = Path('/mnt/data').joinpath('src/io_utils.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"I/O utilities for deterministic artifact generation.\n\nProvides small helpers to create output directories and write files in a way that\nis stable for diffs (normalized newlines) and safe against partial writes\n(atomic replace).\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nimport json\nimport os\nimport tempfile\nfrom typing import Any, Optional\"\"\",\n\"\"\"def ensure_dir(path: Path) -> Path:\n    \\\"\\\"\\\"Create *path* as a directory (including parents) and return it.\\\"\\\"\\\"\n    path.mkdir(parents=True, exist_ok=True)\n    return path\"\"\",\n\"\"\"def normalize_newlines(text: str, newline: str = \\\"\\\\n\\\") -> str:\n    \\\"\\\"\\\"Normalize CRLF/CR newlines to *newline* for stable diffs.\\\"\\\"\\\"\n    if not text:\n        return \\\"\\\"\n    # Replace CRLF first, then any remaining CR.\n    text = text.replace(\\\"\\\\r\\\\n\\\", \\\"\\\\n\\\").replace(\\\"\\\\r\\\", \\\"\\\\n\\\")\n    if newline != \\\"\\\\n\\\":\n        text = text.replace(\\\"\\\\n\\\", newline)\n    return text\"\"\",\n\"\"\"def _atomic_replace(target: Path, tmp_path: Path) -> None:\n    \\\"\\\"\\\"Replace *target* with *tmp_path* atomically where supported.\\\"\\\"\\\"\n    # os.replace is atomic on POSIX and Windows when source/target are on same fs.\n    os.replace(str(tmp_path), str(target))\"\"\",\n\"\"\"def atomic_write_bytes(target: Path, data: bytes) -> None:\n    \\\"\\\"\\\"Atomically write bytes to *target*, creating parent directories.\\\"\\\"\\\"\n    target = Path(target)\n    ensure_dir(target.parent)\n    fd, tmp_name = tempfile.mkstemp(prefix=target.name + \\\".\\\", dir=str(target.parent))\n    tmp_path = Path(tmp_name)\n    try:\n        with os.fdopen(fd, \\\"wb\\\") as f:\n            f.write(data)\n            f.flush()\n            os.fsync(f.fileno())\n        _atomic_replace(target, tmp_path)\n    finally:\n        # If replace failed, clean up the temp file.\n        if tmp_path.exists():\n            try:\n                tmp_path.unlink()\n            except OSError:\n                pass\"\"\",\n\"\"\"def atomic_write_text(\n    target: Path,\n    text: str,\n    *,\n    encoding: str = \\\"utf-8\\\",\n    newline: str = \\\"\\\\n\\\",\n    ensure_trailing_newline: bool = True,\n) -> None:\n    \\\"\\\"\\\"Atomically write text to *target* with normalized line endings.\\\"\\\"\\\"\n    text = normalize_newlines(text, newline=newline)\n    if ensure_trailing_newline and text and not text.endswith(newline):\n        text += newline\n    atomic_write_bytes(target, text.encode(encoding))\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass JsonWriteOptions:\n    sort_keys: bool = True\n    indent: int = 2\n    ensure_ascii: bool = False\"\"\",\n\"\"\"def atomic_write_json(\n    target: Path,\n    obj: Any,\n    *,\n    opts: Optional[JsonWriteOptions] = None,\n    newline: str = \\\"\\\\n\\\",\n) -> None:\n    \\\"\\\"\\\"Serialize *obj* to JSON deterministically and atomically write it.\\\"\\\"\\\"\n    options = opts or JsonWriteOptions()\n    text = json.dumps(\n        obj,\n        sort_keys=options.sort_keys,\n        indent=options.indent,\n        ensure_ascii=options.ensure_ascii,\n    )\n    atomic_write_text(target, text, newline=newline)\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/io_utils.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b46a6881c81909c860794a76234b305db56a8985c57db",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/io_utils.py\nDIR_STATE:[\"src/io_utils.py\", \"src/math_coverage_cli.py\", \"src/math_taxonomy.py\", \"src/renderers.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0f420fc63bf4e51e00694b46f643448190a91f3bf6753bf348",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented deterministic I/O helpers in `src/io_utils.py` to create directories and atomically write normalized text/JSON outputs for stable, reproducible artifact generation."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

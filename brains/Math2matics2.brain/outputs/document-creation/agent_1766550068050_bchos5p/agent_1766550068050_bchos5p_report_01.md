@@ -1,0 +1,51 @@
+# Generated report
+
+*Auto-compiled from COSMO memory (GPT-5.2 unavailable)*
+
+## Summary
+
+Based on 42 memory nodes about Generate the missing steering artifacts as tangible files in /outputs/: coverage:
+
+1. [INTROSPECTION] 2025-12-24T01-42-52-338Z_plan_attempt1_prompt.txt from code-creation agent agent_1766540568432_0u1x4ih: You are planning a python script implementation for the following mission:
+Generate two output artifacts in the repository: (1) /outputs/coverage_matrix.csv (or .md table) that enumerates the Mathematics domain, its subtopics, and artifact types with an initial population of cells (coverage status, counts, and cross-link pointers); and (2) /outputs/eval_loop.md defining a 5-cycle review cadence, m
+
+2. If n points are i.i.d. uniformly in the unit square, the nearest-neighbor distance R (away from boundary) is approximately Rayleigh with parameter σ = 1/√(2π n), so E[R] ≈ 1/(2√n). Thus typical spacing scales as Θ(n^{-1/2}), shrinking like the inverse square root of the sample size.
+
+3. The derivative is the best linear approximation to a function at a point, quantifying instantaneous rate of change and enabling local-to-global techniques like Newton's method and linearization of differential equations. The integral accumulates those infinitesimal changes, and the Fundamental Theorem of Calculus ties the local derivative to global accumulation.
+
+4. [FORK:fork_4] Existence is the indispensable first pillar of well-posedness: before worrying about uniqueness or stability, ensure a solution actually exists—typically by constructing weak/variational solutions or using fixed‑point/compactness methods. Actionable idea: if existence fails, regularize the model (add viscous/diffusive terms or relax constraints) to restore existence while tracking the limit as regularization is removed.
+
+5. [CONSOLIDATED] Eigenanalysis identifies a linear system’s intrinsic “modes” (invariant directions/subspaces) and their scalar evolution rates, allowing the transformation’s behavior—iteration, continuous-time dynamics, stability, and approximation—to be understood and computed by decoupling it into simple independent one-dimensional actions.
+
+6. [FORK:fork_4] Existence is the indispensable first pillar of well-posedness: without a solution, uniqueness and stability are moot. Actionable idea: prioritize an existence proof (e.g., via energy estimates, fixed‑point theorems, or compactness/approximation methods) before tackling uniqueness and continuous dependence.
+
+7. [FORK:fork_3] Mathematical models (e.g., differential equations) are not purely objective abstractions but embed modeling choices, approximations, and parameterizations that reflect assumptions and context. A key limitation is that if those assumptions or parameters are wrong or oversimplified, the model can give precise but misleading predictions, so results must be validated against data and sensitivity-tested.
+
+8. [FORK:fork_8] As model complexity rises it can fit training data better (bias falls) but becomes more sensitive to idiosyncrasies (variance rises), so predictive error is minimized at a sweet‑spot between under‑ and over‑fitting. Novel connection: it's like choosing vocabulary—more obscure words let you capture subtle meaning (lower bias) but make your message brittle across audiences (higher variance).
+
+9. [AGENT INSIGHT: agent_1766542995043_wl8xxyr] **Primary issue is pipeline/output capture failure (not a model metric anomaly).**
+
+10. Question: If n points are sampled uniformly at random in the unit square, what is the expected total length of the minimum spanning tree (MST) connecting them? Insight: By subadditivity and scaling arguments (Beardwood–Halton–Hammersley type results) the expected MST length grows like Θ(n^{1/2})—more precisely E[L_MST] ≈ c·n^{1/2} for a constant c depending only on the plane metric.
+
+11. [AGENT: agent_1766547691646_05b5wbg] {"title":"Generated report","type":"report","format":"markdown","filePath":"/Users/jtr/_JTR23_/COSMO/runtime/outputs/document-creation/agent_1766547691646_05b5wbg/agent_1766547691646_05b5wbg_report_01.md","createdAt":"2025-12-24T03:42:01.973Z","wordCount":5535,"mode":"fallback_compilation"}
+
+12. [AGENT: agent_1766547586805_xu1xbub] {"title":"Generated report","type":"report","format":"markdown","filePath":"/Users/jtr/_JTR23_/COSMO/runtime/outputs/document-creation/agent_1766547586805_xu1xbub/agent_1766547586805_xu1xbub_report_01.md","createdAt":"2025-12-24T03:40:25.674Z","wordCount":735,"mode":"fallback_compilation"}
+
+13. [AGENT: agent_1766547792969_sdrhuco] {"title":"Generated report","type":"report","format":"markdown","filePath":"/Users/jtr/_JTR23_/COSMO/runtime/outputs/document-creation/agent_1766547792969_sdrhuco/agent_1766547792969_sdrhuco_report_01.md","createdAt":"2025-12-24T03:43:51.962Z","wordCount":330,"mode":"fallback_compilation"}
+
+14. [AGENT: agent_1766547586803_n7dv7h2] {"title":"Generated report","type":"report","format":"markdown","filePath":"/Users/jtr/_JTR23_/COSMO/runtime/outputs/document-creation/agent_1766547586803_n7dv7h2/agent_1766547586803_n7dv7h2_report_01.md","createdAt":"2025-12-24T03:40:15.032Z","wordCount":818,"mode":"fallback_compilation"}
+
+15. [AGENT: agent_1766549022554_67e33o4] {"title":"Generated report","type":"report","format":"markdown","filePath":"/Users/jtr/_JTR23_/COSMO/runtime/outputs/document-creation/agent_1766549022554_67e33o4/agent_1766549022554_67e33o4_report_01.md","createdAt":"2025-12-24T04:04:20.000Z","wordCount":2853,"mode":"fallback_compilation"}
+
+16. [AGENT: agent_1766549332773_bw4x7j4] {"title":"Generated report","type":"report","format":"markdown","filePath":"/Users/jtr/_JTR23_/COSMO/runtime/outputs/document-creation/agent_1766549332773_bw4x7j4/agent_1766549332773_bw4x7j4_report_01.md","createdAt":"2025-12-24T04:09:20.155Z","wordCount":792,"mode":"fallback_compilation"}
+
+17. [AGENT: agent_1766549644610_z0t9xm4] {"title":"Generated report","type":"report","format":"markdown","filePath":"/Users/jtr/_JTR23_/COSMO/runtime/outputs/document-creation/agent_1766549644610_z0t9xm4/agent_1766549644610_z0t9xm4_report_01.md","createdAt":"2025-12-24T04:14:35.254Z","wordCount":546,"mode":"fallback_compilation"}
+
+18. [AGENT: agent_1766550000183_pbubgys] {"title":"Generated report","type":"report","format":"markdown","filePath":"/Users/jtr/_JTR23_/COSMO/runtime/outputs/document-creation/agent_1766550000183_pbubgys/agent_1766550000183_pbubgys_report_01.md","createdAt":"2025-12-24T04:20:24.290Z","wordCount":3853,"mode":"fallback_compilation"}
+
+19. [AGENT: agent_1766547691645_z7snq02] {"title":"Generated report","type":"report","format":"markdown","filePath":"/Users/jtr/_JTR23_/COSMO/runtime/outputs/document-creation/agent_1766547691645_z7snq02/agent_1766547691645_z7snq02_report_01.md","createdAt":"2025-12-24T03:41:59.662Z","wordCount":844,"mode":"memory_based"}
+
+20. [AGENT INSIGHT: agent_1766541933972_wy8k3gj] Found 2 related computational results in memory. This execution will provide fresh validation or explore different parameters.
+
+
+*... and 22 more findings in memory*

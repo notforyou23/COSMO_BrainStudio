@@ -1,0 +1,68 @@
+name: Reproducibility
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+  workflow_dispatch: {}
+permissions:
+  contents: read
+concurrency:
+  group: reproducibility-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  reproducibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f package-lock.json ]; then
+            npm ci
+          elif [ -f package.json ]; then
+            npm install
+          else
+            echo "package.json not found; cannot install Node dependencies" >&2
+            exit 1
+          fi
+
+      - name: Run pipeline (baseline)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f Makefile ] && make -n pipeline >/dev/null 2>&1; then
+            make pipeline
+          elif npm run -s | grep -qE '^  pipeline$'; then
+            npm run pipeline
+          elif npm run -s | grep -qE '^  build$'; then
+            npm run build
+          else
+            echo "No pipeline command found (expected: 'make pipeline' or 'npm run pipeline')." >&2
+            exit 1
+          fi
+
+      - name: Reproducibility check (two runs + hash regression)
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/reproducibility_check.js
+
+      - name: Upload outputs (debug)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: outputs
+          path: outputs/
+          if-no-files-found: warn

@@ -1,0 +1,61 @@
+{
+  "content": "Created `scripts/e2e/collect_diagnostics.sh`, a reusable strict-mode Bash utility that aggregates common E2E logs/reports/media plus CI/environment/tooling metadata into a single timestamped diagnostics directory (with optional env-driven path overrides) ready for artifact upload.",
+  "reasoning": "",
+  "responseId": "resp_0543bfff9a91d518006949c4f3ce508194a407fa169d8a4c18",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4278,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2721,
+    "output_tokens_details": {
+      "reasoning_tokens": 404
+    },
+    "total_tokens": 6999
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0543bfff9a91d518006949c4f478e88194bbc5195c3731badc",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0543bfff9a91d518006949c4fc177081948cb2c1d490882caf",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('scripts/e2e/collect_diagnostics.sh')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(r\"\"\"#!/usr/bin/env bash\nset -euo pipefail\n\n# Collect E2E diagnostics (logs, screenshots, videos, reports, and environment metadata)\n# into a single directory suitable for upload as a CI artifact.\n#\n# Usage:\n#   scripts/e2e/collect_diagnostics.sh [output_dir]\n#\n# Environment variables (optional, colon-separated path lists):\n#   E2E_LOG_PATHS        Additional log files/dirs to copy\n#   E2E_REPORT_PATHS     Additional test report files/dirs to copy\n#   E2E_MEDIA_PATHS      Additional media (screenshots/videos) files/dirs to copy\n#   E2E_DIAG_ROOT        Root directory where diagnostics dir will be created (default: .)\n#   E2E_DIAG_NAME        Directory name (default: e2e-diagnostics-<timestamp>)\n#   E2E_MAX_FILE_MB      Skip copying individual files larger than this (default: 200)\n#   E2E_VERBOSE          Set to 1 for more logs\n\"\"\")\n\nchunks.append(r\"\"\"log() { echo \"[collect_diagnostics] $*\"; }\nvlog() { [[ \"${E2E_VERBOSE:-0}\" == \"1\" ]] && log \"$@\"; }\n\nts_utc() { date -u +\"%Y%m%dT%H%M%SZ\"; }\n\nhave() { command -v \"$1\" >/dev/null 2>&1; }\n\n# Copy a path (file/dir) into a destination subdir, preserving basename.\ncopy_path() {\n  local src=\"$1\" dest_dir=\"$2\" max_mb=\"$3\"\n  [[ -e \"$src\" ]] || return 0\n  mkdir -p \"$dest_dir\"\n  if [[ -f \"$src\" ]]; then\n    local size_mb=0\n    if have stat; then\n      # GNU stat: -c, BSD stat: -f\n      size_mb=$(( ( $(stat -c '%s' \"$src\" 2>/dev/null || stat -f '%z' \"$src\") + 1048575 ) / 1048576 ))\n    fi\n    if [[ \"$size_mb\" -gt \"$max_mb\" ]]; then\n      log \"Skipping large file (> ${max_mb}MB): $src (${size_mb}MB)\"\n      return 0\n    fi\n    cp -p \"$src\" \"$dest_dir/$(basename \"$src\")\" 2>/dev/null || cp \"$src\" \"$dest_dir/$(basename \"$src\")\"\n  else\n    # Directory\n    if have rsync; then\n      rsync -a --delete-excluded --exclude='.git/' \"$src\"/ \"$dest_dir/$(basename \"$src\")\"/ 2>/dev/null || rsync -a \"$src\"/ \"$dest_dir/$(basename \"$src\")\"/\n    else\n      cp -R \"$src\" \"$dest_dir/\" 2>/dev/null || true\n    fi\n  fi\n}\n\n# Expand globs safely: if glob doesn't match, nothing is copied.\ncopy_glob() {\n  local pattern=\"$1\" dest_dir=\"$2\" max_mb=\"$3\"\n  shopt -s nullglob dotglob\n  local matches=( $pattern )\n  shopt -u nullglob dotglob\n  for m in \"${matches[@]}\"; do copy_path \"$m\" \"$dest_dir\" \"$max_mb\"; done\n}\n\nsplit_colon_list() {\n  local s=\"${1:-}\"\n  [[ -n \"$s\" ]] || return 0\n  local IFS=\":\"\n  read -r -a _parts <<< \"$s\"\n  for p in \"${_parts[@]}\"; do [[ -n \"$p\" ]] && echo \"$p\"; done\n}\n\"\"\")\n\nchunks.append(r\"\"\"OUT_ARG=\"${1:-}\"\nDIAG_ROOT=\"${E2E_DIAG_ROOT:-.}\"\nDIAG_NAME=\"${E2E_DIAG_NAME:-e2e-diagnostics-$(ts_utc)}\"\nMAX_MB=\"${E2E_MAX_FILE_MB:-200}\"\n\nOUT_DIR=\"${OUT_ARG:-$DIAG_ROOT/$DIAG_NAME}\"\nmkdir -p \"$OUT_DIR\"/{logs,reports,media,metadata}\n\nlog \"Writing diagnostics to: $OUT_DIR\"\n\n# Common defaults (copy only if present)\nDEFAULT_LOGS=(\n  \"logs\"\n  \"**/*.log\"\n  \"npm-debug.log\"\n  \"yarn-error.log\"\n  \"pnpm-debug.log\"\n  \"playwright/.cache/ms-playwright/*.log\"\n)\nDEFAULT_REPORTS=(\n  \"test-results\"\n  \"playwright-report\"\n  \"coverage\"\n  \"junit.xml\"\n  \"**/junit*.xml\"\n  \"**/test-results*.xml\"\n  \"**/test-report*.xml\"\n  \"**/cypress/results*\"\n)\nDEFAULT_MEDIA=(\n  \"cypress/screenshots\"\n  \"cypress/videos\"\n  \"playwright-report/data\"\n  \"test-results/**/trace.zip\"\n  \"test-results/**/video.*\"\n  \"test-results/**/screenshot.*\"\n  \"test-results/**/screenshots\"\n)\n\n# Enable ** globs when supported (bash >=4); if not, patterns still work for non-** cases.\nshopt -s globstar 2>/dev/null || true\n\"\"\")\n\nchunks.append(r\"\"\"# Copy defaults\nfor pat in \"${DEFAULT_LOGS[@]}\"; do copy_glob \"$pat\" \"$OUT_DIR/logs\" \"$MAX_MB\"; done\nfor pat in \"${DEFAULT_REPORTS[@]}\"; do copy_glob \"$pat\" \"$OUT_DIR/reports\" \"$MAX_MB\"; done\nfor pat in \"${DEFAULT_MEDIA[@]}\"; do copy_glob \"$pat\" \"$OUT_DIR/media\" \"$MAX_MB\"; done\n\n# Copy additional paths from env vars\nwhile IFS= read -r p; do vlog \"Copy log path: $p\"; copy_path \"$p\" \"$OUT_DIR/logs\" \"$MAX_MB\"; done < <(split_colon_list \"${E2E_LOG_PATHS:-}\")\nwhile IFS= read -r p; do vlog \"Copy report path: $p\"; copy_path \"$p\" \"$OUT_DIR/reports\" \"$MAX_MB\"; done < <(split_colon_list \"${E2E_REPORT_PATHS:-}\")\nwhile IFS= read -r p; do vlog \"Copy media path: $p\"; copy_path \"$p\" \"$OUT_DIR/media\" \"$MAX_MB\"; done < <(split_colon_list \"${E2E_MEDIA_PATHS:-}\")\n\"\"\")\n\nchunks.append(r\"\"\"# Metadata\n{\n  echo \"timestamp_utc=$(ts_utc)\"\n  echo \"pwd=$(pwd)\"\n  echo \"user=$(id -un 2>/dev/null || true)\"\n  echo \"uid=$(id -u 2>/dev/null || true)\"\n  echo \"gid=$(id -g 2>/dev/null || true)\"\n  echo \"shell=${SHELL:-}\"\n  echo \"ci=${CI:-}\"\n  echo \"github_run_id=${GITHUB_RUN_ID:-}\"\n  echo \"github_job=${GITHUB_JOB:-}\"\n  echo \"github_sha=${GITHUB_SHA:-}\"\n  echo \"github_ref=${GITHUB_REF:-}\"\n  echo \"runner_os=${RUNNER_OS:-}\"\n  echo \"runner_arch=${RUNNER_ARCH:-}\"\n} > \"$OUT_DIR/metadata/context.txt\"\n\n( uname -a || true ) > \"$OUT_DIR/metadata/uname.txt\" 2>&1\n( df -h || true ) > \"$OUT_DIR/metadata/df.txt\" 2>&1\n( free -h || true ) > \"$OUT_DIR/metadata/memory.txt\" 2>&1\n\n# Tool versions (best-effort)\n{\n  have node && echo \"node: $(node -v 2>/dev/null || true)\"\n  have npm && echo \"npm: $(npm -v 2>/dev/null || true)\"\n  have pnpm && echo \"pnpm: $(pnpm -v 2>/dev/null || true)\"\n  have yarn && echo \"yarn: $(yarn -v 2>/dev/null || true)\"\n  have python && echo \"python: $(python --version 2>&1 || true)\"\n  have python3 && echo \"python3: $(python3 --version 2>&1 || true)\"\n  have pip && echo \"pip: $(pip --version 2>&1 || true)\"\n  have pip3 && echo \"pip3: $(pip3 --version 2>&1 || true)\"\n} > \"$OUT_DIR/metadata/tool-versions.txt\" 2>&1\n\n# Git info (if available)\nif have git && git rev-parse --is-inside-work-tree >/dev/null 2>&1; then\n  ( git status --porcelain=v1 || true ) > \"$OUT_DIR/metadata/git-status.txt\" 2>&1\n  ( git rev-parse HEAD || true ) > \"$OUT_DIR/metadata/git-head.txt\" 2>&1\n  ( git log -1 --oneline --decorate || true ) > \"$OUT_DIR/metadata/git-last-commit.txt\" 2>&1\nfi\n\n# Full environment (sorted) can include secrets; prefer a filtered subset by default.\n# If you explicitly want everything, set E2E_INCLUDE_FULL_ENV=1.\nif [[ \"${E2E_INCLUDE_FULL_ENV:-0}\" == \"1\" ]]; then\n  ( printenv | sort ) > \"$OUT_DIR/metadata/env.full.txt\" 2>/dev/null || true\nelse\n  ( printenv | sort | grep -E '^(CI|GITHUB_|RUNNER_|NODE_|NPM_|PNPM_|YARN_|PLAYWRIGHT_|CYPRESS_|E2E_)' ) \\\n    > \"$OUT_DIR/metadata/env.filtered.txt\" 2>/dev/null || true\nfi\n\n# Inventory of collected files\nif have find; then\n  ( cd \"$OUT_DIR\" && find . -type f -maxdepth 4 -print | sort ) > \"$OUT_DIR/metadata/inventory.txt\" 2>/dev/null || true\nfi\n\nlog \"Diagnostics collection complete.\"\necho \"$OUT_DIR\"\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:scripts/e2e/collect_diagnostics.sh')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949c4c596008190acfa409a64608da20b039f16c5820fcb",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:scripts/e2e/collect_diagnostics.sh\nDIR_STATE:[\"scripts/e2e/collect_diagnostics.sh\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0543bfff9a91d518006949c51782e48194a2242aec92e6b1df",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0543bfff9a91d518006949c517ac6881948c738db7a8abe3a0",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `scripts/e2e/collect_diagnostics.sh`, a reusable strict-mode Bash utility that aggregates common E2E logs/reports/media plus CI/environment/tooling metadata into a single timestamped diagnostics directory (with optional env-driven path overrides) ready for artifact upload."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

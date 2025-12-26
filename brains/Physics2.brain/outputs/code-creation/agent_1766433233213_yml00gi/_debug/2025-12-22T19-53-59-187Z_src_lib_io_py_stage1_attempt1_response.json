@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/lib/io.py` with compact utilities for loading JSON/YAML configs, lightweight schema validation (types/defaults/choices/ranges/nesting), atomic JSON/CSV artifact writing, and reproducible experiment run directory bookkeeping via an `ExperimentRun` helper (artifacts + event logging).",
+  "reasoning": "",
+  "responseId": "resp_044f56cd81a41139006949a3ee368c819381aa9addb28ee5c6",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4002,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2470,
+    "output_tokens_details": {
+      "reasoning_tokens": 285
+    },
+    "total_tokens": 6472
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_044f56cd81a41139006949a3ef23ac81939cdf5988dc3e6452",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_044f56cd81a41139006949a3f5452881939b6d2432ad0437a0",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, csv, hashlib, datetime, tempfile\n\ntarget_path = Path('/mnt/data').joinpath('src/lib/io.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\nr\"\"\"from __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Union\nimport csv\nimport datetime as _dt\nimport hashlib\nimport json\nimport os\"\"\",\nr\"\"\"JsonLike = Union[None, bool, int, float, str, List[\"JsonLike\"], Dict[str, \"JsonLike\"]]\n\n\ndef _deep_update(base: Dict[str, Any], upd: Mapping[str, Any]) -> Dict[str, Any]:\n    for k, v in upd.items():\n        if isinstance(v, Mapping) and isinstance(base.get(k), Mapping):\n            base[k] = _deep_update(dict(base[k]), v)\n        else:\n            base[k] = v\n    return base\n\n\ndef _stable_dumps(obj: Any) -> str:\n    return json.dumps(obj, sort_keys=True, separators=(\",\", \":\"), ensure_ascii=False)\n\n\ndef config_hash(cfg: Mapping[str, Any]) -> str:\n    h = hashlib.sha256(_stable_dumps(cfg).encode(\"utf-8\")).hexdigest()\n    return h[:12]\"\"\",\nr\"\"\"def load_config(path: Union[str, Path], schema: Any = None, overrides: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:\n    p = Path(path)\n    if not p.exists():\n        raise FileNotFoundError(str(p))\n    if p.suffix.lower() in {\".json\"}:\n        cfg = json.loads(p.read_text(encoding=\"utf-8\"))\n    elif p.suffix.lower() in {\".yml\", \".yaml\"}:\n        try:\n            import yaml  # type: ignore\n        except Exception as e:  # pragma: no cover\n            raise RuntimeError(\"YAML config requested but PyYAML is not installed\") from e\n        cfg = yaml.safe_load(p.read_text(encoding=\"utf-8\"))\n    else:\n        raise ValueError(f\"Unsupported config extension: {p.suffix}\")\n    if not isinstance(cfg, dict):\n        raise TypeError(\"Config root must be a JSON/YAML object (dict).\")\n    if overrides:\n        cfg = _deep_update(cfg, overrides)\n    if schema is not None:\n        cfg = validate_config(cfg, schema)\n    return cfg\"\"\",\nr\"\"\"def _type_name(t: Any) -> str:\n    if isinstance(t, tuple):\n        return \" | \".join(_type_name(x) for x in t)\n    return getattr(t, \"__name__\", str(t))\n\n\ndef validate_config(cfg: Dict[str, Any], schema: Any, path: str = \"cfg\") -> Dict[str, Any]:\n    # schema supports:\n    # - type or tuple(types)\n    # - dict: nested schema or rich spec via keys {type, required, default, choices, min, max}\n    # - [elem_schema] for homogeneous sequences\n    def err(msg: str) -> None:\n        raise ValueError(f\"{path}: {msg}\")\n\n    if isinstance(schema, (type, tuple)):\n        if not isinstance(cfg, schema):\n            err(f\"expected {_type_name(schema)}, got {type(cfg).__name__}\")\n        return cfg\n\n    if isinstance(schema, list):\n        if len(schema) != 1:\n            err(\"list schema must have exactly one element spec\")\n        if not isinstance(cfg, list):\n            err(f\"expected list, got {type(cfg).__name__}\")\n        for i, item in enumerate(cfg):\n            validate_config(item, schema[0], f\"{path}[{i}]\")\n        return cfg\n\n    if not isinstance(schema, Mapping):\n        err(\"invalid schema object\")\n\n    # rich spec for a scalar field\n    if \"type\" in schema:\n        t = schema.get(\"type\")\n        if not isinstance(cfg, t):\n            err(f\"expected {_type_name(t)}, got {type(cfg).__name__}\")\n        if \"choices\" in schema and cfg not in schema[\"choices\"]:\n            err(f\"value {cfg!r} not in choices {list(schema['choices'])!r}\")\n        if isinstance(cfg, (int, float)):\n            if \"min\" in schema and cfg < schema[\"min\"]:\n                err(f\"value {cfg} < min {schema['min']}\")\n            if \"max\" in schema and cfg > schema[\"max\"]:\n                err(f\"value {cfg} > max {schema['max']}\")\n        return cfg\n\n    # object schema: keys -> subschema / rich spec\n    if not isinstance(cfg, dict):\n        err(f\"expected object, got {type(cfg).__name__}\")\n\n    out: Dict[str, Any] = dict(cfg)\n    for key, spec in schema.items():\n        required = True\n        default = None\n        if isinstance(spec, Mapping) and \"type\" in spec:\n            required = bool(spec.get(\"required\", True))\n            default = spec.get(\"default\", None)\n        if key not in out:\n            if required:\n                if isinstance(spec, Mapping) and \"type\" in spec and \"default\" in spec:\n                    out[key] = default\n                else:\n                    raise ValueError(f\"{path}: missing required key {key!r}\")\n            else:\n                if isinstance(spec, Mapping) and \"default\" in spec:\n                    out[key] = default\n                continue\n        out[key] = validate_config(out[key], spec, f\"{path}.{key}\")\n    return out\"\"\",\nr\"\"\"def _atomic_write_text(path: Path, text: str, encoding: str = \"utf-8\") -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    tmp = path.with_suffix(path.suffix + \".tmp\")\n    tmp.write_text(text, encoding=encoding)\n    os.replace(tmp, path)\n\n\ndef save_json(path: Union[str, Path], obj: Any, indent: int = 2) -> Path:\n    p = Path(path)\n    _atomic_write_text(p, json.dumps(obj, indent=indent, ensure_ascii=False, sort_keys=True) + \"\\n\")\n    return p\n\n\ndef save_csv(path: Union[str, Path], rows: Sequence[Mapping[str, Any]]) -> Path:\n    p = Path(path)\n    p.parent.mkdir(parents=True, exist_ok=True)\n    if len(rows) == 0:\n        _atomic_write_text(p, \"\")\n        return p\n    cols: List[str] = sorted({k for r in rows for k in r.keys()})\n    tmp = p.with_suffix(p.suffix + \".tmp\")\n    with tmp.open(\"w\", newline=\"\", encoding=\"utf-8\") as f:\n        w = csv.DictWriter(f, fieldnames=cols)\n        w.writeheader()\n        for r in rows:\n            w.writerow({k: r.get(k, \"\") for k in cols})\n    os.replace(tmp, p)\n    return p\"\"\",\nr\"\"\"@dataclass(frozen=True)\nclass ExperimentRun:\n    run_dir: Path\n    config: Dict[str, Any]\n    meta: Dict[str, Any]\n\n    @property\n    def artifacts_dir(self) -> Path:\n        return self.run_dir / \"artifacts\"\n\n    def save_artifact(self, name: str, obj: Any, fmt: str = \"json\") -> Path:\n        fmt = fmt.lower()\n        out = self.artifacts_dir / f\"{name}.{fmt}\"\n        if fmt == \"json\":\n            return save_json(out, obj)\n        if fmt == \"csv\":\n            if not isinstance(obj, Sequence):\n                raise TypeError(\"CSV artifact expects a sequence of row mappings\")\n            return save_csv(out, obj)  # type: ignore[arg-type]\n        raise ValueError(f\"Unsupported artifact format: {fmt}\")\n\n    def log_event(self, event: Mapping[str, Any]) -> Path:\n        e = dict(event)\n        e.setdefault(\"ts\", _dt.datetime.utcnow().isoformat() + \"Z\")\n        path = self.run_dir / \"events.jsonl\"\n        path.parent.mkdir(parents=True, exist_ok=True)\n        with path.open(\"a\", encoding=\"utf-8\") as f:\n            f.write(_stable_dumps(e) + \"\\n\")\n        return path\"\"\",\nr\"\"\"def create_run_dir(\n    base_dir: Union[str, Path],\n    config: Mapping[str, Any],\n    name: Optional[str] = None,\n    tag: Optional[str] = None,\n    extra_meta: Optional[Mapping[str, Any]] = None,\n) -> ExperimentRun:\n    base = Path(base_dir)\n    base.mkdir(parents=True, exist_ok=True)\n    ts = _dt.datetime.utcnow().strftime(\"%Y%m%dT%H%M%SZ\")\n    h = config_hash(config)\n    stem = name or \"run\"\n    parts = [stem, ts, h]\n    if tag:\n        parts.insert(1, tag)\n    run_dir = base / \"_\".join(parts)\n    run_dir.mkdir(parents=True, exist_ok=False)\n    (run_dir / \"artifacts\").mkdir(parents=True, exist_ok=True)\n\n    meta = {\n        \"created_utc\": ts,\n        \"config_hash\": h,\n        \"name\": stem,\n        \"tag\": tag,\n        \"cwd\": str(Path.cwd()),\n    }\n    if extra_meta:\n        meta.update(dict(extra_meta))\n\n    save_json(run_dir / \"config.json\", dict(config))\n    save_json(run_dir / \"meta.json\", meta)\n    return ExperimentRun(run_dir=run_dir, config=dict(config), meta=meta)\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/lib/io.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949a1d497e081909a00da1af070d618029e616ce667a0de",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/lib/io.py\nDIR_STATE:[\"src/lib/io.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_044f56cd81a41139006949a40f9804819393fd6b3e62d8e500",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/lib/io.py` with compact utilities for loading JSON/YAML configs, lightweight schema validation (types/defaults/choices/ranges/nesting), atomic JSON/CSV artifact writing, and reproducible experiment run directory bookkeeping via an `ExperimentRun` helper (artifacts + event logging)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,156 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766554496214_kkw962g",
+  "agentType": "code-creation",
+  "goalId": "goal_236",
+  "missionId": "strategic_goal_236_1766554496214",
+  "spawnCycle": 151,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T05:35:10.005Z",
+  "completedAt": "2025-12-24T05:38:54.988Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "src/entrypoint.py",
+      "description": "Single executable entrypoint that runs the pipeline normally or in --determinism mode by executing two runs with the same fixed seed, collecting artifact paths, and delegating checksum reporting to the determinism utilities.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "ing.py\", \"src/repro_json_pipeline.py\", \"src/results_io.py\", \"src/results_schema.py\", \"src/run.py\", \"src/run_artifacts.py\", \"src/run_pipeline.py\", \"src/run_toy_experiment.py\", \"src/schema.py\", \"src/simulate.py\", \"src/toy_experiment.py\"]\nSUMMARY: Wrote a single entrypoint with --determinism mode that runs two fixed-seed pipeline runs and writes outputs/determinism_report.json with sha256 checksums.\n",
+          "timestamp": "2025-12-24T05:35:57.302Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "plotting.py\", \"src/repro_json_pipeline.py\", \"src/results_io.py\", \"src/results_schema.py\", \"src/run.py\", \"src/run_artifacts.py\", \"src/run_pipeline.py\", \"src/run_toy_experiment.py\", \"src/schema.py\", \"src/simulate.py\", \"src/toy_experiment.py\"]\nSUMMARY: Implemented a single entrypoint supporting normal execution and --determinism mode that delegates fixed-seed double-run reporting to src.determinism.\n",
+          "timestamp": "2025-12-24T05:36:22.000Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:35:10.005Z",
+      "failedAt": "2025-12-24T05:36:22.000Z"
+    },
+    {
+      "path": "src/determinism.py",
+      "description": "Determinism helpers that run the pipeline twice with a fixed seed, compute sha256 checksums for outputs/results.json, outputs/run_stamp.json, and logs, and write outputs/determinism_report.json in a stable schema for CI verification.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "on_pipeline.py\", \"src/results_io.py\", \"src/results_schema.py\", \"src/run.py\", \"src/run_artifacts.py\", \"src/run_pipeline.py\", \"src/run_toy_experiment.py\", \"src/schema.py\", \"src/simulate.py\", \"src/toy_experiment.py\"]\nSUMMARY: Added determinism utilities to run a runner twice with a fixed seed and write a stable determinism_report.json with sha256 checksums for results.json, run_stamp.json, and logs.\n",
+          "timestamp": "2025-12-24T05:36:58.956Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": ".py\", \"src/repro_json_pipeline.py\", \"src/results_io.py\", \"src/results_schema.py\", \"src/run.py\", \"src/run_artifacts.py\", \"src/run_pipeline.py\", \"src/run_toy_experiment.py\", \"src/schema.py\", \"src/simulate.py\", \"src/toy_experiment.py\"]\nSUMMARY: Added determinism utilities to hash pipeline artifacts, generate a stable determinism report, and optionally run a provided pipeline twice with a fixed seed.\n",
+          "timestamp": "2025-12-24T05:37:34.975Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:35:10.005Z",
+      "failedAt": "2025-12-24T05:37:34.975Z"
+    },
+    {
+      "path": "tests/test_determinism.py",
+      "description": "Pytest that invokes the single entrypoint determinism mode and asserts that the two runs produce identical sha256 checksums for results.json, run_stamp.json, and logs as recorded in outputs/determinism_report.json.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "s.py\", \"tests/test_pipeline_outputs_schema.py\", \"tests/test_pipeline_runnable.py\", \"tests/test_repro_json_pipeline_import_and_run.py\", \"tests/test_reproducibility.py\", \"tests/test_results_schema.py\", \"tests/test_results_schema_validation.py\", \"tests/test_stability.py\"]\nSummary: Added a pytest that runs the entrypoint in --determinism mode and asserts identical artifact checksums across both runs.\n",
+          "timestamp": "2025-12-24T05:38:06.844Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "s/test_pipeline_outputs_schema.py\", \"tests/test_pipeline_runnable.py\", \"tests/test_repro_json_pipeline_import_and_run.py\", \"tests/test_reproducibility.py\", \"tests/test_results_schema.py\", \"tests/test_results_schema_validation.py\", \"tests/test_stability.py\"]\nSummary: Added a determinism pytest that runs the entrypoint in --determinism mode and asserts identical artifact checksums across both runs.\n",
+          "timestamp": "2025-12-24T05:38:30.065Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:35:10.005Z",
+      "failedAt": "2025-12-24T05:38:30.065Z"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "description": "CI workflow that installs dependencies, runs unit tests including the determinism pytest, and fails the build if determinism checksums differ across the two fixed-seed runs.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/pipeline-ci.yml\", \".github/workflows/reproducibility.yml\", \".github/workflows/tests-and-capture-artifacts.yml\"]\nSummary: Added a GitHub Actions CI workflow that installs Python dependencies and runs pytest, including the determinism test to fail on checksum mismatches.\n",
+          "timestamp": "2025-12-24T05:38:41.752Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/pipeline-ci.yml\", \".github/workflows/reproducibility.yml\", \".github/workflows/tests-and-capture-artifacts.yml\"]\nWrote a GitHub Actions CI workflow that installs dependencies and runs pytest so the determinism test can fail the build on non-reproducible outputs.\n",
+          "timestamp": "2025-12-24T05:38:54.987Z"
+        }
+      ],
+      "createdAt": "2025-12-24T05:35:10.005Z",
+      "failedAt": "2025-12-24T05:38:54.987Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Add a determinism mode to the single entrypoint that runs the pipeline twice with the same fixed seed, writes ./outputs/determinism_report.json with sha256 sums for results.json, run_stamp.json, and logs, and add a pytest that asserts identical checksums across runs.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Implements 'determinism as a gate' by operationalizing a repeat-run check and hashing artifacts. This turns determinism from an aspiration into an enforceable contract and produces machine-verifiable ..."
+  ],
+  "projectName": "generated_script_1766554496679",
+  "language": "json",
+  "type": "script",
+  "status": "failed",
+  "requirements": [
+    "include_ci_cd"
+  ],
+  "lastSavedAt": "2025-12-24T05:38:54.988Z",
+  "summary": {
+    "completed": 0,
+    "failed": 4,
+    "total": 4
+  }
+}

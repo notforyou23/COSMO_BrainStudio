@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "purpose": "Declarative expectations for smoke-test output artifacts; used to determine success vs hard escalation when artifacts are missing.",
+  "defaults": {
+    "missing_severity": "hard",
+    "min_bytes": 1,
+    "allow_empty": false,
+    "max_bytes": null,
+    "required_when": "always"
+  },
+  "hard_escalation": {
+    "on_any_missing_with_severity": ["hard"],
+    "on_validation_error": true,
+    "notes": "If any artifact with severity=hard is missing (or fails validation), the smoke test must escalate immediately after retries are exhausted."
+  },
+  "artifacts": [
+    {
+      "id": "stdout",
+      "path": "artifacts/stdout.txt",
+      "description": "Full captured stdout from the executed command (single run attempt).",
+      "required_when": "always",
+      "missing_severity": "hard",
+      "validation": { "type": "file", "min_bytes": 1, "allow_empty": false }
+    },
+    {
+      "id": "stderr",
+      "path": "artifacts/stderr.txt",
+      "description": "Full captured stderr from the executed command (single run attempt).",
+      "required_when": "always",
+      "missing_severity": "hard",
+      "validation": { "type": "file", "min_bytes": 0, "allow_empty": true }
+    },
+    {
+      "id": "run_metadata",
+      "path": "artifacts/run_metadata.json",
+      "description": "Run metadata including command, start/end times, exit code, timeout flags, retry attempt, and versions.",
+      "required_when": "always",
+      "missing_severity": "hard",
+      "validation": { "type": "json", "must_parse": true, "required_keys": ["command", "attempt", "started_at", "ended_at", "exit_code"] }
+    },
+    {
+      "id": "env_snapshot",
+      "path": "artifacts/env_snapshot.json",
+      "description": "Environment snapshot (selected env vars, python version, platform, cwd, uid/gid, container hints).",
+      "required_when": "always",
+      "missing_severity": "hard",
+      "validation": { "type": "json", "must_parse": true, "required_keys": ["python", "platform", "cwd"] }
+    },
+    {
+      "id": "resource_stats",
+      "path": "artifacts/resource_stats.json",
+      "description": "Resource stats collected before/after execution (cpu/mem/disk, ulimits, cgroup hints when available).",
+      "required_when": "always",
+      "missing_severity": "hard",
+      "validation": { "type": "json", "must_parse": true, "required_keys": ["disk", "memory", "cpu"] }
+    },
+    {
+      "id": "smoketest_log",
+      "path": "artifacts/smoketest.log",
+      "description": "High-level smoke test log with retries/backoff decisions and validation outcomes.",
+      "required_when": "always",
+      "missing_severity": "hard",
+      "validation": { "type": "file", "min_bytes": 1, "allow_empty": false }
+    },
+    {
+      "id": "artifacts_index",
+      "path": "artifacts/artifacts_index.json",
+      "description": "Index of artifacts produced (paths, sizes, sha256) to aid debugging and missing-artifact diagnosis.",
+      "required_when": "always",
+      "missing_severity": "hard",
+      "validation": { "type": "json", "must_parse": true, "required_keys": ["artifacts", "root"] }
+    }
+  ],
+  "optional_artifacts": [
+    {
+      "id": "minimal_case_stdout",
+      "path": "artifacts/minimal_case_stdout.txt",
+      "description": "Captured stdout from minimal failing case (when executed as target).",
+      "required_when": "when_minimal_case",
+      "missing_severity": "soft",
+      "validation": { "type": "file", "min_bytes": 0, "allow_empty": true }
+    },
+    {
+      "id": "minimal_case_stderr",
+      "path": "artifacts/minimal_case_stderr.txt",
+      "description": "Captured stderr from minimal failing case (when executed as target).",
+      "required_when": "when_minimal_case",
+      "missing_severity": "soft",
+      "validation": { "type": "file", "min_bytes": 0, "allow_empty": true }
+    }
+  ],
+  "validation_rules": {
+    "path_root_is_repo_or_workdir": true,
+    "disallow_absolute_paths": true,
+    "normalize_path_separators": true,
+    "notes": "All paths are relative to the runtime output root; absolute paths are forbidden to avoid writing outside the artifact volume."
+  }
+}

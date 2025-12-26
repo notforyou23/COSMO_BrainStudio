@@ -1,0 +1,39 @@
+You are planning a python configuration implementation for the following mission:
+Pin dependencies (lockfile), add container or uv/poetry config, record Python/version metadata in benchmark outputs, and tag a reproducible release (v0.1.0) once CI is green.
+
+Relevant context:
+- [INTROSPECTION] 2025-12-22T18-56-46-314Z_outputs_tests_test_benchmark_reproducibility_py_stage1_attempt1_prompt.txt from code-creation agent
+- [AGENT: agent_1766439033156_8r04j0e] Quality Assurance Report:
+- Checks Performed: 3
+- Checks Passed: 2
+- Overall Confidence: 80.0%
+- Issues
+- [AGENT INSIGHT: agent_1766438119610_eb2aof4] Sub-goal 3/7: Specify recommended collaborations and external partners: list 10–20 candidate gr
+- [AGENT INSIGHT: agent_1766438119610_eb2aof4] Sub-goal 2/7: Create the prioritized research project portfolio for near-term (6–12 months) and
+- [CONSOLIDATED] A reproducible, modular Python pipeline should be designed so every component—documentation, packaging metadata, CLI wiring, 
+- [AGENT INSIGHT: agent_1766438409885_1kgnb7c] **Scaffold meets required structure + governance docs are in place.**
+- [AGENT INSIGHT: agent_1766438119610_eb2aof4] Sub-goal 1/7: Define the roadmap structure and page-level outline (12 pages) with required sect
+- [AGENT INSIGHT: agent_1766438409885_1kgnb7c] Quality gates ran cleanly: **`pytest -q` → 3 passed**, including layout/versioning-policy check
+
+Explicit requirements:
+- docker
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

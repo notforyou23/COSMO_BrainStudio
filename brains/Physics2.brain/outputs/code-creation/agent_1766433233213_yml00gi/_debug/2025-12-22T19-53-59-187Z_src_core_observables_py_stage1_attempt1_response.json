@@ -1,0 +1,64 @@
+{
+  "content": "Implemented `src/core/observables.py` as a backend-agnostic observable calculator that ingests dict-like model trajectories and outputs consolidated predictions for slow-roll (ns, r, running, optional As), non-Gaussianity (local/equilateral), reheating (Nre/Tre), trans-Planckian oscillation proxies, and late-time dark-energy CPL (w0, wa) fits.",
+  "reasoning": "",
+  "responseId": "resp_0b04d2e4919306e9006949a29961488193a931aac0b2acb306",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3878,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2316,
+    "output_tokens_details": {
+      "reasoning_tokens": 195
+    },
+    "total_tokens": 6194
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0b04d2e4919306e9006949a29a2c448193a43fd0fd279d3477",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0b04d2e4919306e9006949a29edcbc81939b7530afd0bd86df",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, numpy as np",
+      "container_id": "cntr_6949a1d497e081909a00da1af070d618029e616ce667a0de",
+      "outputs": []
+    },
+    {
+      "id": "ci_0b04d2e4919306e9006949a2a0a0c08193aafed691cdebc352",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/core/observables.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"Cosmological observable calculators from model trajectories.\n\nThis module stays backend-agnostic: a *trajectory* is a mapping (dict-like)\ncontaining time/efold series and/or horizon-exit values for key quantities.\nReturned observables are plain dicts of floats suitable for downstream tests.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Any, Mapping, Optional, Dict\nimport numpy as np\n\n\ndef _get(traj: Mapping[str, Any], key: str, default: Any = None) -> Any:\n    if key in traj:\n        return traj[key]\n    if default is not None:\n        return default\n    raise ValueError(f\\\"trajectory missing required key '{key}'\\\")\n\n\ndef _horizon_value(traj: Mapping[str, Any], name: str) -> float:\n    \\\"\\\"\\\"Best-effort: prefer '{name}_star', then last element of series '{name}'.\\\"\\\"\\\"\n    if f\\\"{name}_star\\\" in traj:\n        return float(traj[f\\\"{name}_star\\\"])\n    if name in traj:\n        v = np.asarray(traj[name])\n        return float(v[-1]) if v.ndim else float(v)\n    raise ValueError(f\\\"trajectory missing '{name}' or '{name}_star'\\\")\n\n\n@dataclass(frozen=True)\nclass ObservableSet:\n    ns: float\n    r: float\n    alpha_s: float\n    A_s: Optional[float] = None\n    fNL_local: Optional[float] = None\n    fNL_equil: Optional[float] = None\n    reheating_Nre: Optional[float] = None\n    reheating_Tre_GeV: Optional[float] = None\n    tp_osc_amp: Optional[float] = None\n    tp_osc_freq: Optional[float] = None\n    w0: Optional[float] = None\n    wa: Optional[float] = None\n\n    def asdict(self) -> Dict[str, Optional[float]]:\n        return {k: getattr(self, k) for k in self.__dataclass_fields__}\n\"\"\")\n\nchunks.append(\"\"\"\ndef slow_roll_observables(traj: Mapping[str, Any]) -> Dict[str, float]:\n    \\\"\\\"\\\"Compute (n_s, r, alpha_s, A_s) from slow-roll style inputs.\n\n    Expected keys (star = horizon-exit): eps_star, eta_star, xi2_star (optional),\n    H_star (optional, for A_s), Mpl (optional, default 1).\n    \\\"\\\"\\\"\n    eps = _horizon_value(traj, \\\"eps\\\")\n    eta = _horizon_value(traj, \\\"eta\\\")\n    xi2 = float(traj.get(\\\"xi2_star\\\", traj.get(\\\"xi2\\\", 0.0)))\n    ns = 1.0 - 6.0 * eps + 2.0 * eta\n    r = 16.0 * eps\n    alpha_s = -24.0 * eps**2 + 16.0 * eps * eta - 2.0 * xi2\n    out = {\\\"ns\\\": float(ns), \\\"r\\\": float(r), \\\"alpha_s\\\": float(alpha_s)}\n    if \\\"H_star\\\" in traj or \\\"H\\\" in traj:\n        H = _horizon_value(traj, \\\"H\\\")\n        Mpl = float(traj.get(\\\"Mpl\\\", 1.0))\n        As = (H**2) / (8.0 * np.pi**2 * Mpl**2 * eps)\n        out[\\\"A_s\\\"] = float(As)\n    return out\n\n\ndef non_gaussianity(traj: Mapping[str, Any]) -> Dict[str, float]:\n    \\\"\\\"\\\"Estimate leading f_NL amplitudes.\n\n    - For canonical slow-roll, fNL_local ~ (5/12)(1-n_s).\n    - For reduced sound speed c_s, equilateral fNL ~ (35/108)(c_s^{-2}-1).\n    \\\"\\\"\\\"\n    sr = slow_roll_observables(traj)\n    cs = float(traj.get(\\\"cs_star\\\", traj.get(\\\"cs\\\", 1.0)))\n    f_local = (5.0 / 12.0) * (1.0 - sr[\\\"ns\\\"])\n    f_equil = (35.0 / 108.0) * (cs**-2 - 1.0) if cs > 0 else np.nan\n    return {\\\"fNL_local\\\": float(f_local), \\\"fNL_equil\\\": float(f_equil), \\\"cs\\\": float(cs)}\n\"\"\")\n\nchunks.append(\"\"\"\ndef reheating_signatures(traj: Mapping[str, Any]) -> Dict[str, float]:\n    \\\"\\\"\\\"Compute simple reheating observables.\n\n    Accepts: Nre (efolds during reheating) and/or rho_re, T_re_GeV, wre.\n    If rho_re provided (in GeV^4), convert to T_re using g_* (default 100).\n    \\\"\\\"\\\"\n    out: Dict[str, float] = {}\n    if \\\"Nre\\\" in traj:\n        out[\\\"reheating_Nre\\\"] = float(traj[\\\"Nre\\\"])\n    if \\\"T_re_GeV\\\" in traj:\n        out[\\\"reheating_Tre_GeV\\\"] = float(traj[\\\"T_re_GeV\\\"])\n        return out\n    if \\\"rho_re\\\" in traj:\n        rho = float(traj[\\\"rho_re\\\"])\n        g = float(traj.get(\\\"gstar_re\\\", 100.0))\n        Tre = (30.0 * rho / (np.pi**2 * g)) ** 0.25\n        out[\\\"reheating_Tre_GeV\\\"] = float(Tre)\n    return out\n\n\ndef transplanckian_signatures(traj: Mapping[str, Any]) -> Dict[str, float]:\n    \\\"\\\"\\\"Phenomenological trans-Planckian oscillation parameters.\n\n    Uses beta_tp (Bogoliubov amplitude proxy) and scale ratio Lambda/H.\n    Returns amplitude ~ 2|beta| and frequency ~ Lambda/H if available.\n    \\\"\\\"\\\"\n    beta = float(traj.get(\\\"beta_tp\\\", 0.0))\n    lam_over_H = traj.get(\\\"Lambda_over_H\\\", traj.get(\\\"Lambda_H\\\", None))\n    out = {\\\"tp_osc_amp\\\": float(2.0 * abs(beta))}\n    if lam_over_H is not None:\n        out[\\\"tp_osc_freq\\\"] = float(lam_over_H)\n    return out\n\n\ndef dark_energy_evolution(traj: Mapping[str, Any]) -> Dict[str, float]:\n    \\\"\\\"\\\"Late-time DE parameterization from w(a) series or w0/wa inputs.\n\n    If provided w_of_a as (a, w) arrays, fit CPL: w(a)=w0+wa(1-a) by LSQ.\n    \\\"\\\"\\\"\n    if \\\"w0\\\" in traj and \\\"wa\\\" in traj:\n        return {\\\"w0\\\": float(traj[\\\"w0\\\"]), \\\"wa\\\": float(traj[\\\"wa\\\"])}\n    if \\\"w_of_a\\\" not in traj:\n        return {}\n    a, w = traj[\\\"w_of_a\\\"]\n    a = np.asarray(a, dtype=float)\n    w = np.asarray(w, dtype=float)\n    X = np.column_stack([np.ones_like(a), (1.0 - a)])\n    coef, *_ = np.linalg.lstsq(X, w, rcond=None)\n    return {\\\"w0\\\": float(coef[0]), \\\"wa\\\": float(coef[1])}\n\"\"\")\n\nchunks.append(\"\"\"\ndef compute_observables(traj: Mapping[str, Any]) -> ObservableSet:\n    \\\"\\\"\\\"Compute a consolidated ObservableSet from a trajectory mapping.\\\"\\\"\\\"\n    sr = slow_roll_observables(traj)\n    ng = non_gaussianity(traj)\n    rh = reheating_signatures(traj)\n    tp = transplanckian_signatures(traj)\n    de = dark_energy_evolution(traj)\n    return ObservableSet(\n        ns=sr[\\\"ns\\\"],\n        r=sr[\\\"r\\\"],\n        alpha_s=sr[\\\"alpha_s\\\"],\n        A_s=sr.get(\\\"A_s\\\"),\n        fNL_local=ng.get(\\\"fNL_local\\\"),\n        fNL_equil=ng.get(\\\"fNL_equil\\\"),\n        reheating_Nre=rh.get(\\\"reheating_Nre\\\"),\n        reheating_Tre_GeV=rh.get(\\\"reheating_Tre_GeV\\\"),\n        tp_osc_amp=tp.get(\\\"tp_osc_amp\\\"),\n        tp_osc_freq=tp.get(\\\"tp_osc_freq\\\"),\n        w0=de.get(\\\"w0\\\"),\n        wa=de.get(\\\"wa\\\"),\n    )\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/core/observables.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949a1d497e081909a00da1af070d618029e616ce667a0de",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/core/observables.py\nDIR_STATE:[\"src/core/conjectures.py\", \"src/core/models.py\", \"src/core/observables.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0b04d2e4919306e9006949a2c186d081938364925a5369699f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/core/observables.py` as a backend-agnostic observable calculator that ingests dict-like model trajectories and outputs consolidated predictions for slow-roll (ns, r, running, optional As), non-Gaussianity (local/equilateral), reheating (Nre/Tre), trans-Planckian oscillation proxies, and late-time dark-energy CPL (w0, wa) fits."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

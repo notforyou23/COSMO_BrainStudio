@@ -1,0 +1,55 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add a single command/script (e.g., validate_outputs.py or Makefile target) that (1) runs the scaffold generator and (2) asserts presence of required files (REPORT_OUTLINE.md, CASE_STUDY_TEMPLATE.md, METADATA_SCHEMA.json, WORKLOG.md), emitting a validation summary to /outputs/logs/validation.txt.
+Project: generated_configuration_1766614628172 (python configuration)
+
+Target file details:
+- Path: scripts/validate_outputs.py
+- Purpose: Single runnable script that executes the scaffold generator and validates required output files, then writes a human-readable validation summary to outputs/logs/validation.txt.
+- Category: source
+
+Other planned files (for context only):
+- scripts/run_scaffold.py: Self-contained scaffold generator that creates/updates required project output files and directories deterministically for validation.
+
+Reference insights:
+- [AGENT: agent_1766612184767_sso1aiw] Quality Assurance Report:
+- Checks Performed: 3
+- Checks Passed: 1
+- Overall Confidence: 56.0%
+- Issues
+- [AGENT: agent_1766614312948_29y9703] Document Created: /outputs/report/ and write DRAFT_REPORT_v0.md plus one fully filled pilot case study 
+- [AGENT: agent_1766614312949_82r5unl] Document Created: Generated report
+
+# Generated report
+
+*Auto-compiled from COSMO memory (GPT-5.2 unava
+- [AGENT: agent_1766612184766_dws3uvx] Quality Assurance Report:
+- Checks Performed: 3
+- Checks Passed: 1
+- Overall Confidence: 56.0%
+- Issues
+- [INTROSPECTION] 2025-12-24T21-56-41-741Z_plan_attempt1_prompt.txt from code-creation agent agent_1766613398846_yr1euha: You are planning a p
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Single runnable script that executes the scaffold generator and validates required output files, then writes a human-readable validation summary to outputs/logs/validation.txt.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/validate_outputs.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/validate_outputs.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/validate_outputs.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

@@ -1,0 +1,67 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766620015213_16rsnxw",
+  "agentType": "code-creation",
+  "goalId": "goal_79",
+  "missionId": "strategic_goal_79_1766620015213",
+  "spawnCycle": 77,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T23:47:02.114Z",
+  "completedAt": "2025-12-24T23:48:08.411Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/run_outputs_qa.py",
+      "description": "Orchestrates the outputs QA run by creating outputs/qa/logs, running init_outputs and validate_outputs as subprocesses, teeing stdout/stderr to outputs/qa/logs/<timestamp>_run.log, and writing outputs/qa/SUMMARY.md with PASS/FAIL plus missing/failed items parsed from the validators’ output.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-24T23:47:33.793Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "cripts/run_scaffold.py\", \"scripts/update_project_tracker.py\", \"scripts/validate_linkcheck_report.py\", \"scripts/validate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_scaffold.py\"]\nSummary: Created scripts/run_outputs_qa.py to run init_outputs and validate_outputs, tee logs to outputs/qa/logs, and write outputs/qa/SUMMARY.md with PASS/FAIL plus parsed missing/failed items.\n",
+          "timestamp": "2025-12-24T23:48:08.411Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:47:02.114Z",
+      "failedAt": "2025-12-24T23:48:08.411Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Create /outputs/qa/logs/ and run init_outputs + validate_outputs, saving stdout/stderr to /outputs/qa/logs/<timestamp>_run.log and writing /outputs/qa/SUMMARY.md with PASS/FAIL and missing/failed items.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Turns scaffolding/validation into an auditable process by producing timestamped execution logs and a canonical PASS/FAIL summary—critical for reliability and for tracking progress across cycles...."
+  ],
+  "projectName": "/outputs/qa/logs/ and run init_outputs + validate_outputs, saving stdout/stderr to /outputs/qa/logs/<timestamp>_run.log and writing /outputs/qa/SUMMARY.md with PASS/FAIL and missing/failed items.",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-24T23:48:08.411Z",
+  "summary": {
+    "completed": 0,
+    "failed": 1,
+    "total": 1
+  }
+}

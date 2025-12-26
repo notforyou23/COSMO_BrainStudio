@@ -1,0 +1,74 @@
+{
+  "content": "Created `tests/test_cli_smoke.py`, a minimal pytest smoke test that imports `qg_bench.cli` and exercises the `--help` and `--version` CLI paths (handling both `main(argv)` and `main()` styles) to ensure end-to-end invocation runs without errors.",
+  "reasoning": "",
+  "responseId": "resp_0d0f086605aced0e006949bda0ceb88194b7c3292cee7138e3",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2513,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1015,
+    "output_tokens_details": {
+      "reasoning_tokens": 535
+    },
+    "total_tokens": 3528
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0d0f086605aced0e006949bda198b48194947cef47547a5ad4",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d0f086605aced0e006949bda3cfc481948f8053b400cb50d9",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nsorted([str(p.relative_to(base)) for p in base.glob(\"**/*\") if p.is_file()][:50])[:50]\n",
+      "container_id": "cntr_6949bd3ad3008190ae5a8c57bd6f39a6057985b8d7003fbc",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "['qg_bench/cli.py',\n 'src/cosmo_contracts/markdown.py',\n 'tests/test_syntax_imports.py']"
+        }
+      ]
+    },
+    {
+      "id": "rs_0d0f086605aced0e006949bda65afc81949294701d8454df1e",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d0f086605aced0e006949bdae17bc8194b4c6cabf43c48f62",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_cli_smoke.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"import inspect\nimport sys\n\nimport pytest\n\n\ndef _invoke_cli(monkeypatch, args):\n    # Import inside to ensure import-time errors are surfaced by this test.\n    import qg_bench.cli as cli\n\n    main = getattr(cli, \"main\", None)\n    assert callable(main), \"qg_bench.cli.main must be callable\"\n\n    sig = inspect.signature(main)\n    if len(sig.parameters) >= 1:\n        return main(args)\n\n    monkeypatch.setattr(sys, \"argv\", [\"qg-bench\", *args], raising=False)\n    return main()\"\"\",\n\"\"\"def test_qg_bench_help(monkeypatch, capsys):\n    with pytest.raises(SystemExit) as exc:\n        _invoke_cli(monkeypatch, [\"--help\"])\n    assert exc.value.code in (0, None)\n\n    out = capsys.readouterr().out.lower()\n    assert \"usage\" in out or \"help\" in out\"\"\",\n\"\"\"def test_qg_bench_version(monkeypatch, capsys):\n    with pytest.raises(SystemExit) as exc:\n        _invoke_cli(monkeypatch, [\"--version\"])\n    assert exc.value.code in (0, None)\n\n    out = capsys.readouterr().out.strip()\n    # Accept any non-empty version string as long as the path executes.\n    assert out != \"\"\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:tests/test_cli_smoke.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd3ad3008190ae5a8c57bd6f39a6057985b8d7003fbc",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_cli_smoke.py\nDIR_STATE:[\"tests/test_cli_smoke.py\", \"tests/test_syntax_imports.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0d0f086605aced0e006949bdb74f78819495db8f9957eb109b",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/test_cli_smoke.py`, a minimal pytest smoke test that imports `qg_bench.cli` and exercises the `--help` and `--version` CLI paths (handling both `main(argv)` and `main()` styles) to ensure end-to-end invocation runs without errors."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

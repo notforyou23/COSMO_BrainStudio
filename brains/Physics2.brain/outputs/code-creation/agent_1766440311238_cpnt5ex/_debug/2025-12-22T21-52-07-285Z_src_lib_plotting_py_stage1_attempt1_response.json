@@ -1,0 +1,64 @@
+{
+  "content": "Implemented `src/lib/plotting.py` with optional matplotlib support (Agg backend), publication-friendly styling, JSON/JSONL record loading, and helper functions to build/save basic metric plots while safely no-oping when matplotlib is unavailable.",
+  "reasoning": "",
+  "responseId": "resp_0dbbe394e20406bb006949be997574819781b933dbd7f01d8d",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3154,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1607,
+    "output_tokens_details": {
+      "reasoning_tokens": 1623
+    },
+    "total_tokens": 4761
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0dbbe394e20406bb006949be9a2548819796fb37c7652a2c0a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0dbbe394e20406bb006949be9c0bdc8197966d4942caf98ffc",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re, math",
+      "container_id": "cntr_6949bd84af8481908e931e87d628d2450d02f5accc7ac937",
+      "outputs": []
+    },
+    {
+      "id": "ci_0dbbe394e20406bb006949be9e36c08197bf2476687553bb21",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\ntarget_path = Path('/mnt/data').joinpath('src/lib/plotting.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\\\n\\\"\\\"\\\"Plotting utilities with graceful degradation.\n\nThe project treats plotting as optional: if matplotlib is unavailable, helpers\nsilently skip figure generation (returning False) while allowing experiments\nto complete and still emit numeric/text outputs.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Iterable, Mapping, Sequence\nimport json\nimport math\nimport os\n\"\"\")\n\nchunks.append(\"\"\"\\\n# Optional matplotlib import -------------------------------------------------\n\n_MPL_ERR: str | None = None\nplt = None  # set when matplotlib is available\n\n\ndef matplotlib_available() -> bool:\n    \\\"\\\"\\\"Return True if matplotlib can be imported and configured.\\\"\\\"\\\"\n    global plt, _MPL_ERR\n    if plt is not None:\n        return True\n    if _MPL_ERR is not None:\n        return False\n    try:\n        import matplotlib  # type: ignore\n\n        matplotlib.use(\\\"Agg\\\", force=True)  # headless / CI safe\n        import matplotlib.pyplot as _plt  # type: ignore\n\n        plt = _plt\n        return True\n    except Exception as e:  # pragma: no cover - environment-dependent\n        _MPL_ERR = f\\\"{type(e).__name__}: {e}\\\"\n        return False\n\"\"\")\n\nchunks.append(\"\"\"\\\n# Styling & filesystem helpers ----------------------------------------------\n\n\n@dataclass(frozen=True)\nclass FigSpec:\n    \\\"\\\"\\\"Figure spec tuned for publication-friendly defaults.\\\"\\\"\\\"\n\n    width: float = 6.0\n    height: float = 4.0\n    dpi: int = 200\n    tight: bool = True\n\n\ndef ensure_parent(path: os.PathLike[str] | str) -> Path:\n    p = Path(path)\n    p.parent.mkdir(parents=True, exist_ok=True)\n    return p\n\n\ndef set_pub_style() -> None:\n    \\\"\\\"\\\"Apply a clean, readable style (no-op if matplotlib missing).\\\"\\\"\\\"\n    if not matplotlib_available():\n        return\n    plt.rcParams.update(\n        {\n            \\\"figure.dpi\\\": 120,\n            \\\"savefig.dpi\\\": 300,\n            \\\"font.size\\\": 11,\n            \\\"axes.grid\\\": True,\n            \\\"grid.alpha\\\": 0.25,\n            \\\"axes.spines.top\\\": False,\n            \\\"axes.spines.right\\\": False,\n            \\\"legend.frameon\\\": False,\n        }\n    )\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef save_figure(fig, out_path: os.PathLike[str] | str, spec: FigSpec | None = None) -> bool:\n    \\\"\\\"\\\"Save a matplotlib figure; return False if matplotlib is unavailable.\\\"\\\"\\\"\n    if not matplotlib_available():\n        return False\n    spec = spec or FigSpec()\n    out = ensure_parent(out_path)\n    if spec.tight:\n        fig.tight_layout()\n    fig.savefig(out, dpi=spec.dpi, bbox_inches=\\\"tight\\\" if spec.tight else None)\n    return True\n\n\ndef _as_float(x: Any) -> float | None:\n    try:\n        if x is None:\n            return None\n        v = float(x)\n        if math.isfinite(v):\n            return v\n        return None\n    except Exception:\n        return None\n\"\"\")\n\nchunks.append(\"\"\"\\\n# Data loading ---------------------------------------------------------------\n\n\ndef load_json_records(path: os.PathLike[str] | str) -> list[dict[str, Any]]:\n    \\\"\\\"\\\"Load experiment outputs from JSON or JSONL (list of dict records).\\\"\\\"\\\"\n    p = Path(path)\n    text = p.read_text(encoding=\\\"utf-8\\\").strip()\n    if not text:\n        return []\n    if text.lstrip().startswith(\\\"[\\\"):\n        data = json.loads(text)\n        if not isinstance(data, list):\n            raise ValueError(\\\"Expected a JSON list of records\\\")\n        return [r for r in data if isinstance(r, dict)]\n    records: list[dict[str, Any]] = []\n    for line in text.splitlines():\n        line = line.strip()\n        if not line:\n            continue\n        rec = json.loads(line)\n        if isinstance(rec, dict):\n            records.append(rec)\n    return records\n\"\"\")\n\nchunks.append(\"\"\"\\\n# Plot constructors ----------------------------------------------------------\n\n\ndef plot_xy(\n    xs: Sequence[float],\n    ys: Sequence[float],\n    *,\n    xlabel: str = \\\"x\\\",\n    ylabel: str = \\\"y\\\",\n    title: str | None = None,\n    label: str | None = None,\n    marker: str | None = None,\n):\n    \\\"\\\"\\\"Create a simple x-y line plot; returns a matplotlib Figure or None.\\\"\\\"\\\"\n    if not matplotlib_available():\n        return None\n    set_pub_style()\n    fig, ax = plt.subplots(figsize=(6.0, 4.0))\n    ax.plot(xs, ys, label=label, marker=marker)\n    ax.set_xlabel(xlabel)\n    ax.set_ylabel(ylabel)\n    if title:\n        ax.set_title(title)\n    if label:\n        ax.legend()\n    return fig\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef plot_metric_from_records(\n    records: Iterable[Mapping[str, Any]],\n    *,\n    x_key: str,\n    y_key: str,\n    group_key: str | None = None,\n    xlabel: str | None = None,\n    ylabel: str | None = None,\n    title: str | None = None,\n):\n    \\\"\\\"\\\"Plot y_key vs x_key from record dicts; optionally grouped into series.\\\"\\\"\\\"\n    if not matplotlib_available():\n        return None\n    set_pub_style()\n    fig, ax = plt.subplots(figsize=(6.0, 4.0))\n    series: dict[str, list[tuple[float, float]]] = {}\n    for r in records:\n        x = _as_float(r.get(x_key))\n        y = _as_float(r.get(y_key))\n        if x is None or y is None:\n            continue\n        g = str(r.get(group_key)) if group_key else \\\"series\\\"\n        series.setdefault(g, []).append((x, y))\n    for name, pts in sorted(series.items(), key=lambda kv: kv[0]):\n        pts.sort(key=lambda t: t[0])\n        ax.plot([p[0] for p in pts], [p[1] for p in pts], label=name if group_key else None)\n    ax.set_xlabel(xlabel or x_key)\n    ax.set_ylabel(ylabel or y_key)\n    if title:\n        ax.set_title(title)\n    if group_key:\n        ax.legend()\n    return fig\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/lib/plotting.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd84af8481908e931e87d628d2450d02f5accc7ac937",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/lib/plotting.py\nDIR_STATE:[\"src/lib/io.py\", \"src/lib/plotting.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0dbbe394e20406bb006949beb1717481979a17e411c6cf5955",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/lib/plotting.py` with optional matplotlib support (Agg backend), publication-friendly styling, JSON/JSONL record loading, and helper functions to build/save basic metric plots while safely no-oping when matplotlib is unavailable."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

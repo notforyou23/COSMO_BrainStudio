@@ -1,0 +1,56 @@
+{
+  "content": "Created a syntax-valid, dependency-light `toy_ising_emergent_classicality` experiment module with deterministic defaults and a minimal `run_experiment()` API that returns JSON-serializable observables from a small 1D Ising Metropolis simulation.",
+  "reasoning": "",
+  "responseId": "resp_00cd511fcd69aec9006949bd6f57888190ae0e5beb7169fa2a",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3178,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1585,
+    "output_tokens_details": {
+      "reasoning_tokens": 163
+    },
+    "total_tokens": 4763
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_00cd511fcd69aec9006949bd7007288190aa14d94e934e841b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_00cd511fcd69aec9006949bd740c588190b3e8c68c88bdea0b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/toy_ising_emergent_classicality.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Toy Ising emergent classicality experiment.\n\nThis module is intentionally lightweight: it has deterministic defaults, avoids\nheavy dependencies, and exposes a tiny API used by the benchmark pipeline.\n\nPublic API:\n- ExperimentConfig: dataclass holding parameters.\n- default_config(): returns a deterministic config.\n- run_experiment(config=None): runs a small 1D Ising Monte Carlo and returns a\n  JSON-serializable dict of observables.\n\\\"\\\"\\\"\"\"\",\n\"\"\"from __future__ import annotations\n\nfrom dataclasses import dataclass, asdict\nfrom random import Random\nfrom typing import Any, Dict, Optional, Union\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass ExperimentConfig:\n    \\\"\\\"\\\"Configuration for the toy 1D Ising experiment.\\\"\\\"\\\"\n\n    n_spins: int = 32\n    temperature: float = 2.0\n    coupling: float = 1.0  # J\n    field: float = 0.0  # h\n    sweeps: int = 200\n    burn_in: int = 50\n    seed: int = 0\n\n    def to_dict(self) -> Dict[str, Any]:\n        return asdict(self)\"\"\",\n\"\"\"def default_config() -> ExperimentConfig:\n    \\\"\\\"\\\"Return a deterministic default configuration.\\\"\\\"\\\"\n    return ExperimentConfig()\"\"\",\n\"\"\"def _validate(cfg: ExperimentConfig) -> None:\n    if cfg.n_spins <= 1:\n        raise ValueError(\\\"n_spins must be > 1\\\")\n    if cfg.temperature <= 0:\n        raise ValueError(\\\"temperature must be > 0\\\")\n    if cfg.sweeps <= 0:\n        raise ValueError(\\\"sweeps must be > 0\\\")\n    if cfg.burn_in < 0 or cfg.burn_in >= cfg.sweeps:\n        raise ValueError(\\\"burn_in must satisfy 0 <= burn_in < sweeps\\\")\"\"\",\n\"\"\"def _energy(spins: list[int], J: float, h: float) -> float:\n    \\\"\\\"\\\"Energy for periodic 1D Ising: E = -J sum s_i s_{i+1} - h sum s_i.\\\"\\\"\\\"\n    n = len(spins)\n    pair = sum(spins[i] * spins[(i + 1) % n] for i in range(n))\n    mag = sum(spins)\n    return -J * pair - h * mag\"\"\",\n\"\"\"def _metropolis_sweep(\n    rng: Random, spins: list[int], beta: float, J: float, h: float\n) -> None:\n    n = len(spins)\n    # Random sequential updates (n proposals per sweep)\n    for _ in range(n):\n        i = rng.randrange(n)\n        s = spins[i]\n        left = spins[(i - 1) % n]\n        right = spins[(i + 1) % n]\n        # Local energy change for flipping s -> -s\n        dE = 2.0 * s * (J * (left + right) + h)\n        if dE <= 0.0 or rng.random() < (2.718281828459045 ** (-beta * dE)):\n            spins[i] = -s\"\"\",\n\"\"\"def run_experiment(\n    config: Optional[Union[ExperimentConfig, Dict[str, Any]]] = None\n) -> Dict[str, Any]:\n    \\\"\\\"\\\"Run the toy experiment and return JSON-serializable results.\\\"\\\"\\\"\n    if config is None:\n        cfg = default_config()\n    elif isinstance(config, ExperimentConfig):\n        cfg = config\n    elif isinstance(config, dict):\n        cfg = ExperimentConfig(**config)\n    else:\n        raise TypeError(\\\"config must be None, ExperimentConfig, or dict\\\")\n\n    _validate(cfg)\n    rng = Random(cfg.seed)\n    spins = [1 if rng.random() < 0.5 else -1 for _ in range(cfg.n_spins)]\n    beta = 1.0 / cfg.temperature\n\n    mags: list[float] = []\n    energies: list[float] = []\n    for sweep in range(cfg.sweeps):\n        _metropolis_sweep(rng, spins, beta, cfg.coupling, cfg.field)\n        if sweep >= cfg.burn_in:\n            mags.append(sum(spins) / cfg.n_spins)\n            energies.append(_energy(spins, cfg.coupling, cfg.field) / cfg.n_spins)\n\n    # A simple \\\"classicality\\\" proxy: low magnetization variance indicates\n    # stable macroscopic behavior (in this toy setting).\n    if mags:\n        m_mean = sum(mags) / len(mags)\n        m2_mean = sum(m * m for m in mags) / len(mags)\n        m_var = max(0.0, m2_mean - m_mean * m_mean)\n    else:\n        m_mean = 0.0\n        m_var = 0.0\n\n    e_mean = sum(energies) / len(energies) if energies else 0.0\n    # Normalize to [0,1] with a soft scale to keep deterministic numbers.\n    classicality = 1.0 / (1.0 + 10.0 * m_var)\n\n    return {\n        \\\"experiment\\\": \\\"toy_ising_emergent_classicality\\\",\n        \\\"config\\\": cfg.to_dict(),\n        \\\"observables\\\": {\n            \\\"magnetization_mean\\\": m_mean,\n            \\\"magnetization_variance\\\": m_var,\n            \\\"energy_per_spin_mean\\\": e_mean,\n            \\\"classicality_score\\\": classicality,\n            \\\"n_measurements\\\": len(mags),\n        },\n    }\"\"\",\n\"\"\"__all__ = [\\\"ExperimentConfig\\\", \\\"default_config\\\", \\\"run_experiment\\\"]\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/experiments/toy_ising_emergent_classicality.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/toy_ising_emergent_classicality.py\nDIR_STATE:[\"src/experiments/toy_ising_emergent_classicality.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_00cd511fcd69aec9006949bd882bb481908d192dff992ba14f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a syntax-valid, dependency-light `toy_ising_emergent_classicality` experiment module with deterministic defaults and a minimal `run_experiment()` API that returns JSON-serializable observables from a small 1D Ising Metropolis simulation."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

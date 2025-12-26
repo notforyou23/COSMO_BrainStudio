@@ -1,0 +1,141 @@
+{
+  "content": "Created a focused pytest suite that exercises `src.benchmark_contract` end-to-end: minimal valid contract acceptance, schema/type violations raising the right exceptions, contract JSON load round-trip, I/O path resolution rules, and artifact path enforcement (including output dir creation and missing golden/inputs failures).",
+  "reasoning": "",
+  "responseId": "resp_0ea06a60596f14db006949bf1c01a481909ab35c76d910f5b1",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 6309,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1946,
+    "output_tokens_details": {
+      "reasoning_tokens": 847
+    },
+    "total_tokens": 8255
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0ea06a60596f14db006949bf1cd96c8190bcb09687b12dd297",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ea06a60596f14db006949bf1ec54881909dae9f92ee51ca7d",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import os, json, pathlib, textwrap, re\nbase=pathlib.Path(\"/mnt/data\")\nsorted([str(p.relative_to(base)) for p in base.rglob(\"*\")])[:50], len(list(base.rglob(\"*\")))\n",
+      "container_id": "cntr_6949be2e3cc88190ba383d17f1aa1c440ba8e9f08a4be3b1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(['README.md',\n  'benchmarks',\n  'benchmarks/contracts',\n  'benchmarks/contracts/v0_1.json',\n  'benchmarks/golden',\n  'benchmarks/golden/v0_1_output.json',\n  'src',\n  'src/benchmark_contract.py',\n  'src/diff.py',\n  'src/run_benchmark.py'],\n 10)"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ea06a60596f14db006949bf2182388190879536095e942c90",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ea06a60596f14db006949bf21eb348190ad71958368d422aa",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nprint(Path(\"/mnt/data/src/benchmark_contract.py\").read_text()[:4000])\n",
+      "container_id": "cntr_6949be2e3cc88190ba383d17f1aa1c440ba8e9f08a4be3b1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Benchmark contract helpers for v0.1 tasks.\n\nThis module standardizes how benchmarks describe:\n- metadata (task id/name, contract version)\n- I/O artifact paths (inputs, outputs, golden references)\n- reference algorithm selection/interface\n- tolerance rules for numeric diffs\n\nIt is intentionally small and dependency-free so both tests and CLIs can share it.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Mapping, Optional, Protocol, Tuple\n\n\nCONTRACT_VERSION = \"v0.1\"\n\n# Canonical relative locations (used by the default contract JSON and CLI).\nDEFAULT_CONTRACT_PATH = Path(\"benchmarks/contracts/v0_1.json\")\nDEFAULT_RUN_DIR = Path(\"benchmarks/runs/latest\")\nDEFAULT_GOLDEN_DIR = Path(\"benchmarks/golden/v0_1\")\nDEFAULT_OUTPUT_FILE = Path(\"outputs.json\")\n\n\nclass ReferenceAlgorithm(Protocol):\n    \"\"\"Reference algorithm interface used by the benchmark runner.\n\n    Implementations should be pure with respect to the provided input mapping.\n    \"\"\"\n\n    def __call__(self, inputs: Mapping[str, Any]) -> Any: ...\n\n\n@dataclass(frozen=True)\nclass Tolerance:\n    \"\"\"Absolute/relative tolerance settings for numeric comparisons.\"\"\"\n\n    abs: float = 0.0\n    rel: float = 0.0\n    nan_equal: bool = False\n\n    @classmethod\n    def from_obj(cls, obj: Any) -> \"Tolerance\":\n        if obj is None:\n            return cls()\n        if isinstance(obj, (int, float)):\n            return cls(abs=float(obj), rel=0.0)\n        if not isinstance(obj, Mapping):\n            raise TypeError(\"tolerance must be a number or mapping\")\n        return cls(\n            abs=float(obj.get(\"abs\", 0.0) or 0.0),\n            rel=float(obj.get(\"rel\", 0.0) or 0.0),\n            nan_equal=bool(obj.get(\"nan_equal\", False)),\n        )\n\n    def to_obj(self) -> Dict[str, Any]:\n        return {\"abs\": self.abs, \"rel\": self.rel, \"nan_equal\": self.nan_equal}\n\n\ndef _require(m: Mapping[str, Any], key: str) -> Any:\n    if key not in m:\n        raise ValueError(f\"contract missing required field: {key}\")\n    return m[key]\n\n\ndef load_contract(path: Path) -> Dict[str, Any]:\n    \"\"\"Load a benchmark contract JSON file.\"\"\"\n    data = json_load(path)\n    validate_contract(data)\n    return data\n\n\ndef json_load(path: Path) -> Any:\n    text = Path(path).read_text(encoding=\"utf-8\")\n    return __import__(\"json\").loads(text)\n\n\ndef validate_contract(contract: Mapping[str, Any]) -> None:\n    \"\"\"Validate minimum schema for a v0.1 benchmark contract.\"\"\"\n    version = _require(contract, \"contract_version\")\n    if version != CONTRACT_VERSION:\n        raise ValueError(f\"unsupported contract_version={version!r} (expected {CONTRACT_VERSION})\")\n\n    meta = _require(contract, \"metadata\")\n    if not isinstance(meta, Mapping):\n        raise TypeError(\"metadata must be an object\")\n    _require(meta, \"task_id\")\n    _require(meta, \"task_name\")\n\n    io = _require(contract, \"io\")\n    if not isinstance(io, Mapping):\n        raise TypeError(\"io must be an object\")\n    # Inputs may be absent for some tasks, but output/golden paths must be present.\n    _require(io, \"output_file\")\n    _require(io, \"golden_file\")\n\n    tol = contract.get(\"tolerance\", {})\n    Tolerance.from_obj(tol)  # type-check only\n\n    ref = _require(contract, \"reference\")\n    if not isinstance(ref, Mapping):\n        raise TypeError(\"reference must be an object\")\n    _require(ref, \"algorithm\")\n\n\ndef resolve_io_paths(\n    contract: Mapping[str, Any],\n    project_root: Path,\n    run_dir: Optional[Path] = None,\n) -> Tuple[Path, Path, Optional[Path]]:\n    \"\"\"Resolve I/O paths from a contract.\n\n    Returns (output_path, golden_path, inputs_path_or_None).\n    \"\"\"\n    io = contract[\"io\"]\n    out_rel = Path(io[\"output_file\"])\n    gold_rel = Path(io[\"golden_file\"])\n    inp = io.get(\"input_file\")\n    inputs_rel = Path(inp) if inp else None\n\n    run_dir = run_dir or DEFAULT_RUN_DIR\n    output_path = (project_root / run_dir / out_rel).resolve()\n    golden_path = (project_root / gold_rel).resolve()\n"
+        }
+      ]
+    },
+    {
+      "id": "ci_0ea06a60596f14db006949bf2449108190a651e08c8a8bb12c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path(\"/mnt/data/src/benchmark_contract.py\").read_text()[4000:8000])\n",
+      "container_id": "cntr_6949be2e3cc88190ba383d17f1aa1c440ba8e9f08a4be3b1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\n    inputs_path = (project_root / inputs_rel).resolve() if inputs_rel else None\n    return output_path, golden_path, inputs_path\n\n\ndef get_tolerance(contract: Mapping[str, Any]) -> Tolerance:\n    \"\"\"Return the contract's tolerance settings.\"\"\"\n    return Tolerance.from_obj(contract.get(\"tolerance\", {}))\n\n\ndef validate_artifact_paths(\n    output_path: Path,\n    golden_path: Path,\n    inputs_path: Optional[Path] = None,\n) -> None:\n    \"\"\"Validate benchmark artifact file existence/parent dirs.\"\"\"\n    output_path.parent.mkdir(parents=True, exist_ok=True)\n    if not golden_path.exists():\n        raise FileNotFoundError(f\"golden file not found: {golden_path}\")\n    if inputs_path is not None and not inputs_path.exists():\n        raise FileNotFoundError(f\"input file not found: {inputs_path}\")\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ea06a60596f14db006949bf263528819097ef299ea8cee95b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ea06a60596f14db006949bf27464c81908f1dc5cb14e4e3e9",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nimport json\ncontract_path=Path(\"/mnt/data/benchmarks/contracts/v0_1.json\")\nprint(contract_path.read_text())\n",
+      "container_id": "cntr_6949be2e3cc88190ba383d17f1aa1c440ba8e9f08a4be3b1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "{\n  \"acceptance_criteria\": {\n    \"benchmark_diff_within_tolerance\": true,\n    \"diff_failure_policy\": \"fail_if_any_task_exceeds_tolerance\",\n    \"pytest_must_pass\": true\n  },\n  \"artifacts\": {\n    \"diff_report_filename\": \"diff_report.json\",\n    \"input_manifest\": \"manifest.json\",\n    \"output_filename\": \"output.json\",\n    \"summary_filename\": \"summary.json\"\n  },\n  \"contract_version\": \"0.1\",\n  \"diff\": {\n    \"numeric\": {\n      \"absolute_tolerance\": 1e-08,\n      \"inf_equal\": true,\n      \"nan_equal\": true,\n      \"relative_tolerance\": 1e-06\n    },\n    \"structured\": {\n      \"float_format\": \"full_precision\",\n      \"ignore_paths\": [],\n      \"unordered_collections\": true\n    }\n  },\n  \"invocation\": {\n    \"benchmark\": \"python -m src.run_benchmark --contract benchmarks/contracts/v0_1.json\",\n    \"pytest\": \"pytest -q\"\n  },\n  \"name\": \"v0.1 benchmark contract\",\n  \"paths\": {\n    \"contracts_dir\": \"benchmarks/contracts\",\n    \"data_root\": \"benchmarks/data/v0_1\",\n    \"golden_root\": \"benchmarks/golden/v0_1\",\n    \"project_root\": \".\",\n    \"runs_root\": \"benchmarks/runs/v0_1\"\n  },\n  \"purpose\": \"Canonical contract describing required metadata, I/O paths, reference algorithm selection, and tolerance thresholds for v0.1 benchmark tasks.\",\n  \"reference_algorithm\": {\n    \"callable\": \"run\",\n    \"description\": \"Deterministic reference implementation used to generate benchmark outputs for v0.1 tasks.\",\n    \"id\": \"reference\",\n    \"module\": \"src.reference\"\n  },\n  \"tasks\": [\n    {\n      \"description\": \"Default v0.1 task; concrete inputs are discovered from the input_manifest under data_root.\",\n      \"golden_outputs\": [\n        \"{golden_dir}/{output_filename}\"\n      ],\n      \"io\": {\n        \"golden_dir\": \"{golden_root}/default\",\n        \"inputs_dir\": \"{data_root}\",\n        \"run_dir\": \"{runs_root}/default\"\n      },\n      \"outputs\": [\n        \"{run_dir}/{output_filename}\"\n      ],\n      \"task_id\": \"default\",\n      \"tolerance_overrides\": {}\n    }\n  ]\n}\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ea06a60596f14db006949bf29e9548190a80fc7a54a3237a4",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ea06a60596f14db006949bf2d8bd481908a5b8332fb90acb2",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path(\"/mnt/data/src/run_benchmark.py\").read_text()[:4000])\n",
+      "container_id": "cntr_6949be2e3cc88190ba383d17f1aa1c440ba8e9f08a4be3b1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"CLI to run a benchmark contract, write outputs, and diff against golden.\n\nThis runner is intentionally dependency-free and relies on src.benchmark_contract.\n\"\"\"\nfrom __future__ import annotations\n\nimport argparse\nimport importlib\nimport json\nimport math\nfrom pathlib import Path\nfrom typing import Any, Mapping, Tuple\n\nfrom . import benchmark_contract as bc\ndef _project_root() -> Path:\n    return Path(__file__).resolve().parents[1]\ndef _load_inputs(path: Path | None) -> Mapping[str, Any]:\n    if path is None:\n        return {}\n    return json.loads(path.read_text(encoding=\"utf-8\"))\ndef _load_callable(spec: str):\n    \"\"\"Load a callable from 'mod:attr' or 'mod.attr' strings.\"\"\"\n    mod_name, attr = None, None\n    if \":\" in spec:\n        mod_name, attr = spec.split(\":\", 1)\n    elif \".\" in spec:\n        mod_name, attr = spec.rsplit(\".\", 1)\n    if mod_name:\n        mod = importlib.import_module(mod_name)\n        fn = getattr(mod, attr)\n        if not callable(fn):\n            raise TypeError(f\"reference '{spec}' is not callable\")\n        return fn\n    # Fallback built-ins.\n    if spec == \"echo\":\n        return lambda inputs: inputs\n    raise ValueError(f\"unrecognized reference algorithm spec: {spec!r}\")\ndef _is_number(x: Any) -> bool:\n    return isinstance(x, (int, float)) and not isinstance(x, bool)\ndef _num_ok(a: float, b: float, tol: bc.Tolerance) -> bool:\n    if math.isnan(a) or math.isnan(b):\n        return tol.nan_equal and math.isnan(a) and math.isnan(b)\n    return abs(a - b) <= tol.abs + tol.rel * abs(b)\ndef _diff(a: Any, b: Any, tol: bc.Tolerance, path: str = \"$\") -> Tuple[bool, str]:\n    \"\"\"Return (ok, message). Message is non-empty only on first failure.\"\"\"\n    if _is_number(a) and _is_number(b):\n        ok = _num_ok(float(a), float(b), tol)\n        if ok:\n            return True, \"\"\n        return False, f\"numeric mismatch at {path}: got {a!r}, expected {b!r}\"\n    if isinstance(a, str) or isinstance(a, bool) or a is None:\n        return (a == b), (\"\" if a == b else f\"value mismatch at {path}: got {a!r}, expected {b!r}\")\n    if isinstance(a, list) and isinstance(b, list):\n        if len(a) != len(b):\n            return False, f\"length mismatch at {path}: got {len(a)}, expected {len(b)}\"\n        for i, (ai, bi) in enumerate(zip(a, b)):\n            ok, msg = _diff(ai, bi, tol, f\"{path}[{i}]\")\n            if not ok:\n                return False, msg\n        return True, \"\"\n    if isinstance(a, dict) and isinstance(b, dict):\n        ak, bk = set(a.keys()), set(b.keys())\n        if ak != bk:\n            missing = sorted(bk - ak)\n            extra = sorted(ak - bk)\n            return False, f\"key mismatch at {path}: missing={missing}, extra={extra}\"\n        for k in sorted(ak):\n            ok, msg = _diff(a[k], b[k], tol, f\"{path}.{k}\")\n            if not ok:\n                return False, msg\n        return True, \"\"\n    return (a == b), (\"\" if a == b else f\"type/value mismatch at {path}: got {a!r}, expected {b!r}\")\ndef run(contract_path: Path, run_dir: Path | None = None) -> int:\n    root = _project_root()\n    contract = bc.load_contract(contract_path)\n    out_path, gold_path, in_path = bc.resolve_io_paths(contract, root, run_dir=run_dir)\n    bc.validate_artifact_paths(out_path, gold_path, in_path)\n\n    inputs = _load_inputs(in_path)\n    algo_spec = str(contract[\"reference\"][\"algorithm\"])\n    algo = _load_callable(algo_spec)\n    outputs = algo(inputs)\n\n    out_path.parent.mkdir(parents=True, exist_ok=True)\n    out_path.write_text(json.dumps(outputs, indent=2, sort_keys=True) + \"\\n\", encoding=\"utf-8\")\n\n    golden = json.loads(gold_path.read_text(encoding=\"utf-8\"))\n    tol = bc.get_tolerance(contract)\n    ok, msg = _diff(outputs, golden, tol)\n    if ok:\n        print(f\"PASS diff within tolerance (abs={tol.abs}, rel={tol.rel})\")\n        print(f\"wrote: {out_path.relative_to(root)}\")\n        return 0\n    print(\"FAIL diff outside tolerance\")\n    print(msg)\n    print(f\"wrote: {out_path.relative_to(root)}\")\n    return 2\ndef main(argv\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ea06a60596f14db006949bf2f82d88190bef1179a8676c5aa",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ea06a60596f14db006949bf3952988190b58e5d1a6b009b12",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap\ntarget_path = Path('/mnt/data').joinpath('tests/test_benchmark_contract.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\nfrom __future__ import annotations\n\nfrom pathlib import Path\n\nimport pytest\n\nfrom src import benchmark_contract as bc\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\ndef _minimal_contract(*, output_file: str = \"outputs.json\", golden_file: str = \"golden.json\", input_file: str | None = None):\n    io = {\"output_file\": output_file, \"golden_file\": golden_file}\n    if input_file is not None:\n        io[\"input_file\"] = input_file\n    return {\n        \"contract_version\": bc.CONTRACT_VERSION,\n        \"metadata\": {\"task_id\": \"t0\", \"task_name\": \"task\"},\n        \"io\": io,\n        \"reference\": {\"algorithm\": \"echo\"},\n        \"tolerance\": {\"abs\": 1e-8, \"rel\": 1e-6, \"nan_equal\": True},\n    }\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\ndef test_validate_contract_accepts_minimal_schema():\n    c = _minimal_contract()\n    bc.validate_contract(c)  # should not raise\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\n@pytest.mark.parametrize(\n    \"mutator, exc\",\n    [\n        (lambda c: c.pop(\"contract_version\"), ValueError),\n        (lambda c: c.__setitem__(\"contract_version\", \"v9.9\"), ValueError),\n        (lambda c: c.pop(\"metadata\"), ValueError),\n        (lambda c: c.__setitem__(\"metadata\", \"nope\"), TypeError),\n        (lambda c: c[\"metadata\"].pop(\"task_id\"), ValueError),\n        (lambda c: c.pop(\"io\"), ValueError),\n        (lambda c: c[\"io\"].pop(\"output_file\"), ValueError),\n        (lambda c: c[\"io\"].pop(\"golden_file\"), ValueError),\n        (lambda c: c.pop(\"reference\"), ValueError),\n        (lambda c: c.__setitem__(\"reference\", []), TypeError),\n        (lambda c: c[\"reference\"].pop(\"algorithm\"), ValueError),\n        (lambda c: c.__setitem__(\"tolerance\", \"bad\"), TypeError),\n    ],\n)\ndef test_validate_contract_rejects_schema_violations(mutator, exc):\n    c = _minimal_contract()\n    mutator(c)\n    with pytest.raises(exc):\n        bc.validate_contract(c)\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\ndef test_load_contract_round_trip(tmp_path: Path):\n    p = tmp_path / \"contract.json\"\n    p.write_text(__import__(\"json\").dumps(_minimal_contract()), encoding=\"utf-8\")\n    loaded = bc.load_contract(p)\n    assert loaded[\"contract_version\"] == bc.CONTRACT_VERSION\n    assert loaded[\"metadata\"][\"task_id\"] == \"t0\"\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\ndef test_resolve_io_paths_places_output_under_run_dir_and_resolves(tmp_path: Path):\n    project_root = tmp_path\n    run_dir = Path(\"runs/x\")\n    c = _minimal_contract(output_file=\"out/output.json\", golden_file=\"golden/g.json\", input_file=\"inputs/i.json\")\n\n    out_p, gold_p, in_p = bc.resolve_io_paths(c, project_root, run_dir=run_dir)\n\n    assert out_p.is_absolute() and gold_p.is_absolute()\n    assert str(out_p).endswith(str(run_dir / \"out/output.json\"))\n    assert gold_p == (project_root / \"golden/g.json\").resolve()\n    assert in_p == (project_root / \"inputs/i.json\").resolve()\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\ndef test_validate_artifact_paths_enforces_file_existence_and_creates_output_dir(tmp_path: Path):\n    out_p = tmp_path / \"runs/latest/out/output.json\"\n    gold_p = tmp_path / \"golden.json\"\n    in_p = tmp_path / \"inputs.json\"\n\n    with pytest.raises(FileNotFoundError):\n        bc.validate_artifact_paths(out_p, gold_p)\n\n    gold_p.write_text(\"{}\", encoding=\"utf-8\")\n    with pytest.raises(FileNotFoundError):\n        bc.validate_artifact_paths(out_p, gold_p, in_p)\n\n    in_p.write_text(\"{}\", encoding=\"utf-8\")\n    bc.validate_artifact_paths(out_p, gold_p, in_p)\n\n    assert out_p.parent.exists()\n\"\"\".strip(\"\\n\"))\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tests/test_benchmark_contract.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949be2e3cc88190ba383d17f1aa1c440ba8e9f08a4be3b1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_benchmark_contract.py\nDIR_STATE:[\"tests/test_benchmark_contract.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0ea06a60596f14db006949bf4c655c8190bb670c234029cb50",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a focused pytest suite that exercises `src.benchmark_contract` end-to-end: minimal valid contract acceptance, schema/type violations raising the right exceptions, contract JSON load round-trip, I/O path resolution rules, and artifact path enforcement (including output dir creation and missing golden/inputs failures)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

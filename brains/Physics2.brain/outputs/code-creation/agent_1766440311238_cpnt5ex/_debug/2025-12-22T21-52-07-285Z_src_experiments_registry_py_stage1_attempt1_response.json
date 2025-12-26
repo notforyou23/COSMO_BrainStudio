@@ -1,0 +1,74 @@
+{
+  "content": "Implemented a self-contained experiment registry (`ExperimentSpec` + helpers) that maps three runnable prototype experiments to their callables and default parameter sets for CLI use.",
+  "reasoning": "",
+  "responseId": "resp_0a47dedbd9573ffe006949be158e6c8196be2317fed4685659",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3453,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1932,
+    "output_tokens_details": {
+      "reasoning_tokens": 482
+    },
+    "total_tokens": 5385
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0a47dedbd9573ffe006949be1642d88196abe1d5ff64441501",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a47dedbd9573ffe006949be1889e881968fbd88ea2a7ccfb2",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path('/mnt/data')\nlist(base.glob('src/experiments/*'))\n",
+      "container_id": "cntr_6949bd84af8481908e931e87d628d2450d02f5accc7ac937",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/src/experiments/__init__.py')]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0a47dedbd9573ffe006949be1aab648196bf6748723bbbb32b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a47dedbd9573ffe006949be2141c08196816ff08dac9fc508",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/registry.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Experiment registry used by the CLI.\n\nThe registry maps stable experiment names to callables plus a default parameter\nset. Callables are plain Python functions that accept keyword parameters and\nreturn a JSON-serializable dict (recommended keys: 'summary', 'artifacts').\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Any, Callable, Dict, Mapping, List, Optional, Tuple\n\n\nJSONDict = Dict[str, Any]\nExperimentFn = Callable[..., JSONDict]\n\n\n@dataclass(frozen=True)\nclass ExperimentSpec:\n    \\\"\\\"\\\"Metadata for one experiment.\\\"\\\"\\\"\n\n    name: str\n    fn: ExperimentFn\n    defaults: Mapping[str, Any]\n    description: str = \\\"\\\"\n\n\ndef _require(pkg: str) -> None:\n    try:\n        __import__(pkg)\n    except Exception as e:  # pragma: no cover\n        raise RuntimeError(\n            f\\\"Experiment requires optional dependency '{pkg}'. Install it first.\\\"\n        ) from e\n\n\ndef exp_logistic_map(r: float = 3.7, x0: float = 0.2, n: int = 2000, burn: int = 200) -> JSONDict:\n    \\\"\\\"\\\"Iterate the logistic map and report basic statistics after burn-in.\\\"\\\"\\\"\n    _require(\\\"numpy\\\")\n    import numpy as np\n\n    x = float(x0)\n    xs = np.empty(int(n), dtype=float)\n    for i in range(int(n)):\n        x = float(r) * x * (1.0 - x)\n        xs[i] = x\n    tail = xs[int(burn) :]\n    return {\n        \\\"summary\\\": {\n            \\\"r\\\": float(r),\n            \\\"x0\\\": float(x0),\n            \\\"n\\\": int(n),\n            \\\"burn\\\": int(burn),\n            \\\"mean\\\": float(np.mean(tail)),\n            \\\"std\\\": float(np.std(tail)),\n            \\\"min\\\": float(np.min(tail)),\n            \\\"max\\\": float(np.max(tail)),\n        }\n    }\n\n\ndef exp_taylor_sin(order: int = 9, x: float = 1.0) -> JSONDict:\n    \\\"\\\"\\\"Symbolically form the Taylor polynomial for sin(x) and compare numerically.\\\"\\\"\\\"\n    _require(\\\"sympy\\\")\n    import sympy as sp\n\n    x_sym = sp.Symbol(\\\"x\\\")\n    poly = sp.series(sp.sin(x_sym), x_sym, 0, int(order) + 1).removeO()\n    approx = float(poly.subs({x_sym: float(x)}).evalf())\n    true = float(sp.sin(float(x)))\n    return {\n        \\\"summary\\\": {\n            \\\"order\\\": int(order),\n            \\\"x\\\": float(x),\n            \\\"poly\\\": str(sp.simplify(poly)),\n            \\\"approx\\\": approx,\n            \\\"true\\\": true,\n            \\\"abs_error\\\": abs(true - approx),\n        }\n    }\n\n\ndef exp_newton_sqrt(a: float = 2.0, x0: float = 1.0, n: int = 8) -> JSONDict:\n    \\\"\\\"\\\"Newton iterations for sqrt(a) and the observed quadratic convergence.\\\"\\\"\\\"\n    a = float(a)\n    x = float(x0)\n    iters: List[Tuple[int, float, float]] = []\n    for k in range(int(n)):\n        err = abs(x - a ** 0.5)\n        iters.append((k, x, err))\n        x = 0.5 * (x + a / x)\n    err = abs(x - a ** 0.5)\n    iters.append((int(n), x, err))\n    return {\n        \\\"summary\\\": {\\\"a\\\": a, \\\"x0\\\": float(x0), \\\"n\\\": int(n)},\n        \\\"iterations\\\": [{\\\"k\\\": k, \\\"x\\\": xv, \\\"abs_error\\\": ev} for k, xv, ev in iters],\n    }\n\n\n_REGISTRY: Dict[str, ExperimentSpec] = {\n    \\\"logistic_map\\\": ExperimentSpec(\n        name=\\\"logistic_map\\\",\n        fn=exp_logistic_map,\n        defaults={\\\"r\\\": 3.7, \\\"x0\\\": 0.2, \\\"n\\\": 2000, \\\"burn\\\": 200},\n        description=\\\"Iterate x_{n+1}=r x_n (1-x_n) and summarize tail statistics.\\\",\n    ),\n    \\\"taylor_sin\\\": ExperimentSpec(\n        name=\\\"taylor_sin\\\",\n        fn=exp_taylor_sin,\n        defaults={\\\"order\\\": 9, \\\"x\\\": 1.0},\n        description=\\\"Symbolic Taylor polynomial for sin(x) with numeric error.\\\",\n    ),\n    \\\"newton_sqrt\\\": ExperimentSpec(\n        name=\\\"newton_sqrt\\\",\n        fn=exp_newton_sqrt,\n        defaults={\\\"a\\\": 2.0, \\\"x0\\\": 1.0, \\\"n\\\": 8},\n        description=\\\"Newton iterations for sqrt(a) with per-iteration error.\\\",\n    ),\n}\n\n\ndef list_experiments() -> List[str]:\n    \\\"\\\"\\\"Return experiment names in a stable order.\\\"\\\"\\\"\n    return sorted(_REGISTRY.keys())\n\n\ndef get_spec(name: str) -> ExperimentSpec:\n    \\\"\\\"\\\"Return the ExperimentSpec for a registered name.\\\"\\\"\\\"\n    try:\n        return _REGISTRY[name]\n    except KeyError as e:\n        raise KeyError(f\\\"Unknown experiment '{name}'. Available: {', '.join(list_experiments())}\\\") from e\n\n\ndef get_callable(name: str) -> ExperimentFn:\n    \\\"\\\"\\\"Return the experiment callable for a registered name.\\\"\\\"\\\"\n    return get_spec(name).fn\n\n\ndef get_defaults(name: str) -> Mapping[str, Any]:\n    \\\"\\\"\\\"Return default parameters for a registered name.\\\"\\\"\\\"\n    return dict(get_spec(name).defaults)\n\n\n__all__ = [\n    \\\"ExperimentSpec\\\",\n    \\\"ExperimentFn\\\",\n    \\\"list_experiments\\\",\n    \\\"get_spec\\\",\n    \\\"get_callable\\\",\n    \\\"get_defaults\\\",\n]\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/experiments/registry.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd84af8481908e931e87d628d2450d02f5accc7ac937",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/registry.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/registry.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0a47dedbd9573ffe006949be36c5908196a235903e48df486d",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented a self-contained experiment registry (`ExperimentSpec` + helpers) that maps three runnable prototype experiments to their callables and default parameter sets for CLI use."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

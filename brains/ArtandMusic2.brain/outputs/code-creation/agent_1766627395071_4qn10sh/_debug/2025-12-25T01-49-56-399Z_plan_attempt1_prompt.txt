@@ -1,0 +1,32 @@
+You are planning a json script implementation for the following mission:
+Create a CI/regression safeguard that runs the canonical QA command on every change (or on a scheduled cadence) and stores QA_REPORT.json as an artifact; fail CI if QA gate fails or if outputs are written outside the canonical /outputs tree.
+
+Relevant context:
+- [CONSOLIDATED] A robust QA/CI harness should be a single, deterministic entrypoint that first generates the required scaffold, then verifies
+- [CONSOLIDATED] A robust QA/CI harness should be a single, deterministic entrypoint that first generates the required scaffold, then verifies
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766619349563
+- [INTROSPECTION] 2025-12-24T22-59-19-146Z_scripts_validate_outputs_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766617157732
+- [CONSOLIDATED] Centralizing all generated deliverables into a single, enforced canonical structure—via automated scanning, normalization, de
+- [CONSOLIDATED] Successful exemplar/report pipelines start by scaffolding a standardized, automation-friendly project structure—clear templat
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

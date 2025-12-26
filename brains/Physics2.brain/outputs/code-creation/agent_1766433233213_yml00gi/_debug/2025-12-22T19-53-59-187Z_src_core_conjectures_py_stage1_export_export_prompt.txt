@@ -1,0 +1,33 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Task: Export the existing file at src/core/conjectures.py so it can be reconstructed outside the container.
+Context:
+- Stage: Stage 1
+- Purpose: Defines swampland conjecture objects, parameterizations, priors, and consistency-check evaluators used to map theory constraints into model-level bounds.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import base64, json, hashlib, gzip
+3. target_path = Path('/mnt/data').joinpath('src/core/conjectures.py')
+4. assert target_path.is_file(), 'Expected src/core/conjectures.py to exist before export'
+5. data = target_path.read_bytes()
+6. payload = {
+   'path': 'src/core/conjectures.py',
+   'size': len(data),
+   'encoding': 'base64',
+   'sha256': hashlib.sha256(data).hexdigest(),
+   'content': None
+ }
+7. if len(data) > 20000:
+      compressed = gzip.compress(data)
+      payload['encoding'] = 'gzip+base64'
+      payload['content'] = base64.b64encode(compressed).decode('ascii')
+   else:
+      payload['content'] = base64.b64encode(data).decode('ascii')
+8. print('FILE_EXPORT:' + json.dumps(payload, separators=(',', ':')))
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Output ONLY the FILE_EXPORT line plus DIR_STATE; avoid echoing file contents.
+- Keep console output minimal.
+- Do not modify the file contents.

@@ -1,0 +1,56 @@
+{
+  "content": "Created a pytest reproducibility test that runs the seeded toy experiment twice in isolated temp directories and asserts deterministic `results.json` (via stable-field digest) and identical `figure.png` checksums for CI/CD regression protection.",
+  "reasoning": "",
+  "responseId": "resp_05462e966733671f00694b421a9be0819095eeb68e21ef1ff8",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2878,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1359,
+    "output_tokens_details": {
+      "reasoning_tokens": 516
+    },
+    "total_tokens": 4237
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_05462e966733671f00694b421b3a948190a4fcaaf21494b62f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_05462e966733671f00694b4222bf04819083395144607f83a9",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_goal_33_reproducibility.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"import hashlib\nimport json\nimport os\nimport subprocess\nimport sys\nfrom pathlib import Path\n\nimport pytest\n\n\ndef _sha256_bytes(b: bytes) -> str:\n    h = hashlib.sha256()\n    h.update(b)\n    return h.hexdigest()\n\n\ndef _stable_json_payload(d: dict) -> dict:\n    \\\"\\\"\\\"Return a subset of fields expected to be reproducible across runs.\\\"\\\"\\\"\n    # Keep summary/stat fields + config-like metadata; drop timestamps / host info if present.\n    drop = {\n        \"timestamp\",\n        \"created_at\",\n        \"datetime\",\n        \"run_id\",\n        \"hostname\",\n        \"platform\",\n        \"python\",\n        \"argv\",\n    }\n    out = {}\n    for k, v in d.items():\n        if k in drop:\n            continue\n        out[k] = v\n    return out\n\n\ndef _stable_json_digest(path: Path) -> str:\n    data = json.loads(path.read_text(encoding=\"utf-8\"))\n    payload = _stable_json_payload(data)\n    canonical = json.dumps(payload, sort_keys=True, separators=(\",\", \":\"), ensure_ascii=True)\n    return _sha256_bytes(canonical.encode(\"utf-8\"))\n\n\ndef _run_toy_experiment(outdir: Path, seed: int = 123) -> None:\n    repo_root = Path(__file__).resolve().parents[1]\n    script = repo_root / \"src\" / \"goal_33_toy_experiment.py\"\n    assert script.is_file(), f\"Missing toy experiment script at {script}\"\n    outdir.mkdir(parents=True, exist_ok=True)\n\n    env = os.environ.copy()\n    env.setdefault(\"PYTHONHASHSEED\", \"0\")\n    env.setdefault(\"MPLBACKEND\", \"Agg\")\n\n    cmd = [\n        sys.executable,\n        str(script),\n        \"--outdir\",\n        str(outdir),\n        \"--seed\",\n        str(seed),\n    ]\n    subprocess.run(cmd, cwd=str(repo_root), env=env, check=True)\"\"\",\n\"\"\"def test_goal_33_reproducibility(tmp_path: Path) -> None:\n    run1 = tmp_path / \"run1\"\n    run2 = tmp_path / \"run2\"\n\n    _run_toy_experiment(run1, seed=123)\n    _run_toy_experiment(run2, seed=123)\n\n    r1 = run1 / \"results.json\"\n    r2 = run2 / \"results.json\"\n    f1 = run1 / \"figure.png\"\n    f2 = run2 / \"figure.png\"\n\n    assert r1.is_file() and r2.is_file()\n    assert f1.is_file() and f2.is_file()\n\n    # Compare deterministic summary fields via a canonical digest.\n    assert _stable_json_digest(r1) == _stable_json_digest(r2)\n\n    # Optional: if the PNG is produced deterministically, this will hold; it is a strong\n    # regression signal in CI. If you later need to relax this, compare only existence/size.\n    assert _sha256_bytes(f1.read_bytes()) == _sha256_bytes(f2.read_bytes())\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:tests/test_goal_33_reproducibility.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b41ff56cc8190b260d1e31434cec50ba283afbb9de0d9",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_goal_33_reproducibility.py\nDIR_STATE:[\"tests/test_goal_33_reproducibility.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_05462e966733671f00694b422a44d08190a752ec2b00ce679d",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a pytest reproducibility test that runs the seeded toy experiment twice in isolated temp directories and asserts deterministic `results.json` (via stable-field digest) and identical `figure.png` checksums for CI/CD regression protection."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "generated_script_1766539775726"
+version = "0.1.0"
+description = "Seeded toy experiment that generates deterministic JSON + PNG artifacts for CI reproducibility checks."
+readme = ""
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [{name = "OpenAI", email = "noreply@example.com"}]
+dependencies = [
+  "numpy>=1.22",
+  "matplotlib>=3.6",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.0",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = ["goal_33_toy_experiment"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"

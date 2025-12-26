@@ -1,0 +1,270 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766616245398_f83i41d",
+  "agentType": "code-creation",
+  "goalId": "goal_20",
+  "missionId": "strategic_goal_20_1766616245398",
+  "spawnCycle": 42,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T22:44:13.812Z",
+  "completedAt": "2025-12-24T22:49:15.617Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "schemas/case-study.schema.json",
+      "description": "JSON Schema defining the canonical machine-readable structure for a single case study including metadata, tags, citations, and rights fields.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:schemas/case-study.schema.json\nDIR_STATE:[\"schemas/METADATA_SCHEMA.json\", \"schemas/case-study.schema.json\"]\nSummary: Wrote a Draft 2020-12 JSON Schema defining the canonical structure for a single case study with metadata, tags, citations, and rights.\n",
+          "timestamp": "2025-12-24T22:44:40.550Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:schemas/case-study.schema.json\nDIR_STATE:[\"schemas/METADATA_SCHEMA.json\", \"schemas/case-study.schema.json\"]\nSummary: Wrote a strict JSON Schema for a single case study entry covering core metadata, tags, citations, and rights fields.\n",
+          "timestamp": "2025-12-24T22:45:11.916Z"
+        }
+      ],
+      "createdAt": "2025-12-24T22:44:13.812Z",
+      "failedAt": "2025-12-24T22:45:11.916Z"
+    },
+    {
+      "path": "schemas/catalog.schema.json",
+      "description": "JSON Schema defining the structure for the catalog index file that references all case study entries under outputs/catalog/.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:schemas/catalog.schema.json\nDIR_STATE:[\"schemas/METADATA_SCHEMA.json\", \"schemas/case-study.schema.json\", \"schemas/catalog.schema.json\"]\nSummary: Wrote a strict JSON Schema for the catalog index that enumerates case study entry references under outputs/catalog/.\n",
+          "timestamp": "2025-12-24T22:45:29.238Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:schemas/catalog.schema.json\nDIR_STATE:[\"schemas/METADATA_SCHEMA.json\", \"schemas/case-study.schema.json\", \"schemas/catalog.schema.json\"]\nSummary: Created a strict JSON Schema for the catalog index that lists case study entry references under outputs/catalog/ with validated identifiers, paths, tags, timestamps, and optional citations/rights summaries.\n",
+          "timestamp": "2025-12-24T22:45:48.950Z"
+        }
+      ],
+      "createdAt": "2025-12-24T22:44:13.812Z",
+      "failedAt": "2025-12-24T22:45:48.950Z"
+    },
+    {
+      "path": "src/catalog_cli.py",
+      "description": "Complete Python CLI tool to create/add a new case study JSON file into outputs/catalog/ and validate case study and catalog index against the schemas.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/catalog_cli.py\nDIR_STATE:[\"src/catalog_cli.py\", \"src/csv_utils.py\", \"src/init_outputs.py\", \"src/path_utils.py\", \"src/templates.py\"]\nSummary: Implemented a Python CLI to add and validate case-study JSON entries and update/validate the catalog index using JSON Schemas.\n",
+          "timestamp": "2025-12-24T22:46:50.518Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/catalog_cli.py\nDIR_STATE:[\"src/catalog_cli.py\", \"src/csv_utils.py\", \"src/init_outputs.py\", \"src/path_utils.py\", \"src/templates.py\"]\nSummary: Implemented a self-contained CLI to create case study JSON entries, update the catalog index, and validate all files against JSON Schemas.\n",
+          "timestamp": "2025-12-24T22:47:26.521Z"
+        }
+      ],
+      "createdAt": "2025-12-24T22:44:13.812Z",
+      "failedAt": "2025-12-24T22:47:26.521Z"
+    },
+    {
+      "path": "src/catalog_lib.py",
+      "description": "Library module implementing schema loading, validation, slug/id generation, file I/O, and catalog index updates used by the CLI.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/catalog_lib.py\nDIR_STATE:[\"src/catalog_cli.py\", \"src/catalog_lib.py\", \"src/csv_utils.py\", \"src/init_outputs.py\", \"src/path_utils.py\", \"src/templates.py\"]\nSUMMARY: Implemented catalog_lib with schema loading/validation, slug/id generation, JSON I/O, and catalog index add/update helpers.\n",
+          "timestamp": "2025-12-24T22:47:47.123Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/catalog_lib.py\nDIR_STATE:[\"src/catalog_cli.py\", \"src/catalog_lib.py\", \"src/csv_utils.py\", \"src/init_outputs.py\", \"src/path_utils.py\", \"src/templates.py\"]\nSUMMARY: Wrote catalog_lib.py providing schema-based validation, slug/id generation, case-study file I/O, and catalog index updates for the CLI.\n",
+          "timestamp": "2025-12-24T22:48:04.654Z"
+        }
+      ],
+      "createdAt": "2025-12-24T22:44:13.812Z",
+      "failedAt": "2025-12-24T22:48:04.654Z"
+    },
+    {
+      "path": "src/templates/case_study.stub.json",
+      "description": "Fillable JSON template for a new case study entry used by the CLI when creating entries interactively or from defaults.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/templates/case_study.stub.json\nDIR_STATE:[\"src/templates/case_study.stub.json\", \"src/templates/case_study.stub.md\"]\nSUMMARY:Created a fillable JSON stub template for new case study entries with metadata, tags, citations, and rights fields.\n",
+          "timestamp": "2025-12-24T22:48:11.393Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/templates/case_study.stub.json\nDIR_STATE:[\"src/templates/case_study.stub.json\", \"src/templates/case_study.stub.md\"]\nSummary: Wrote a fillable JSON stub template for new case study entries with metadata, tags, citations, and rights fields.\n",
+          "timestamp": "2025-12-24T22:48:23.847Z"
+        }
+      ],
+      "createdAt": "2025-12-24T22:44:13.812Z",
+      "failedAt": "2025-12-24T22:48:23.847Z"
+    },
+    {
+      "path": "outputs/catalog/README.md",
+      "description": "Documentation describing the outputs/catalog/ directory layout, required fields, and how to use the CLI to add and validate case studies.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/catalog/README.md\nDIR_STATE:[\"outputs/catalog/README.md\"]\nSummary: Wrote concise catalog documentation covering layout, required field groups, and CLI add/validate usage.\n",
+          "timestamp": "2025-12-24T22:48:39.194Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/catalog/README.md\nDIR_STATE:[\"outputs/catalog/README.md\"]\nSummary: Wrote documentation for the outputs/catalog/ layout, required case-study fields, and CLI add/validate usage.\n",
+          "timestamp": "2025-12-24T22:48:50.512Z"
+        }
+      ],
+      "createdAt": "2025-12-24T22:44:13.812Z",
+      "failedAt": "2025-12-24T22:48:50.512Z"
+    },
+    {
+      "path": "outputs/catalog/catalog.json",
+      "description": "Catalog index file listing all case study entries and basic metadata, maintained/updated by the CLI.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/catalog/catalog.json\nDIR_STATE:[\"outputs/catalog/README.md\", \"outputs/catalog/catalog.json\"]\nSUMMARY: Created an initial, schema-linked case-study catalog index file with an empty entries list.\n",
+          "timestamp": "2025-12-24T22:48:59.673Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/catalog/catalog.json\nDIR_STATE:[\"outputs/catalog/README.md\", \"outputs/catalog/catalog.json\"]\nSUMMARY: Initialized an empty case study catalog index JSON file ready for CLI-managed entry updates.\n",
+          "timestamp": "2025-12-24T22:49:07.035Z"
+        }
+      ],
+      "createdAt": "2025-12-24T22:44:13.812Z",
+      "failedAt": "2025-12-24T22:49:07.035Z"
+    },
+    {
+      "path": "requirements.txt",
+      "description": "Python dependency list including jsonschema for validation and any CLI helper libraries required by the tool.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:requirements.txt\nDIR_STATE:[\"README.md\", \"README_LINKCHECK.md\", \"README_add_case_study.md\", \"exec_1766616551098_uu87eam.py\", \"requirements.txt\"]\nSUMMARY: Added Python dependencies for JSON Schema validation and a small CLI helper stack.\n",
+          "timestamp": "2025-12-24T22:49:11.154Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:requirements.txt\nDIR_STATE:[\"README.md\", \"README_LINKCHECK.md\", \"README_add_case_study.md\", \"exec_1766616555554_n1l0174.py\", \"requirements.txt\"]\nSUMMARY: Wrote requirements.txt with core dependencies for JSON Schema validation and CLI support.\n",
+          "timestamp": "2025-12-24T22:49:15.616Z"
+        }
+      ],
+      "createdAt": "2025-12-24T22:44:13.812Z",
+      "failedAt": "2025-12-24T22:49:15.616Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Create a case-study catalog implementation: define a machine-readable schema (JSON Schema or YAML spec) and build a small CLI/script to add a new case study (metadata + tags + citations + rights fields) into /outputs/catalog/ and validate entries against the schema.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Multimedia exemplar collection is planned but cannot proceed safely or consistently without a standardized, validated intake pipeline; audit shows no code artifacts supporting cataloging or validation."
+  ],
+  "projectName": "case-study catalog implementation: define a machine-readable schema (JSON Schema or YAML spec) and build a small CLI/script to add a new case study (metadata + tags + citations + rights fields) into /outputs/catalog/ and validate entries against the schema.",
+  "language": "json",
+  "type": "cli_tool",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-24T22:49:15.617Z",
+  "summary": {
+    "completed": 0,
+    "failed": 8,
+    "total": 8
+  }
+}

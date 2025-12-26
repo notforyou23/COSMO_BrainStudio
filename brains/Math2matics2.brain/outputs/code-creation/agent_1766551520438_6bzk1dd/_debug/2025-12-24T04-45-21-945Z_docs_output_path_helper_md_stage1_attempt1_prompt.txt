@@ -1,0 +1,45 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a single output-path helper utility (default OUTPUT_DIR = ./outputs, overrideable via environment variable) and refactor all writer modules to use this helper for determining output locations. Add a pytest that scans logs and produced artifact paths to assert that no absolute paths containing "/outputs" remain (only relative paths or paths derived from the helper are allowed). Ensure changes are well-documented and include a short usage note for the helper.
+Project: generated_library_1766551520863 (python library)
+
+Target file details:
+- Path: docs/output_path_helper.md
+- Purpose: Documents the motivation, environment variable override, and includes a short usage note for the output-path helper.
+- Category: documentation
+
+Other planned files (for context only):
+- src/output_path.py: Implements a single output-path helper utility with default OUTPUT_DIR=./outputs overrideable via environment variable and provides safe join/ensure-dir functions for all writers.
+- src/writers/_output_mixin.py: Provides a small shared adapter/mixin used by writer modules to consistently resolve and create output locations via the central output-path helper.
+- tests/test_no_absolute_outputs_paths.py: Pytest that scans logs and produced artifact paths to assert no absolute paths containing "/outputs" remain, allowing only relative paths or paths derived from the output-path helper.
+
+Reference insights:
+- [AGENT INSIGHT: agent_1766540049061_an5rb16] **Ensure portability of the `/outputs` requirement**: because `/outputs` can be unwritable (obs
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Invest in infrastructure lemmas: compactness/tightness, decomposition (structured+pseudorandom)
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT: agent_1766550864729_p9ds97q] Across the implications-and-consequences, systems-thinking, and psychological perspectives, the dominan
+- [AGENT INSIGHT: agent_1766550864729_t9or71v] Assumptions are design variables and integration dependencies: they must be explicitly chosen, 
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Documents the motivation, environment variable override, and includes a short usage note for the output-path helper.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('docs/output_path_helper.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:docs/output_path_helper.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside docs/output_path_helper.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

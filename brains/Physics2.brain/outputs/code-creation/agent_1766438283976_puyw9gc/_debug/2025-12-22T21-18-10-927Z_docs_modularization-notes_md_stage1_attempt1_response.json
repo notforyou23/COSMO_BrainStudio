@@ -1,0 +1,56 @@
+{
+  "content": "Created `docs/modularization-notes.md` documenting the Stage 1 refactor rationale, module boundaries (`models`, `protocols`, `__init__`), CLI/library separation, import-cycle rules, and guidance for migrating the exported prompt artifacts into reusable modules.",
+  "reasoning": "",
+  "responseId": "resp_0c2d41db12abb955006949b5b446208197bb54a92a072c0d4f",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2943,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1395,
+    "output_tokens_details": {
+      "reasoning_tokens": 52
+    },
+    "total_tokens": 4338
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0c2d41db12abb955006949b5b509e88197b676d414147bead9",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c2d41db12abb955006949b5b680f88197a42ca88f231af3b3",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('docs/modularization-notes.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"# Modularization notes (Stage 1)\n\nThis document captures the refactor decisions used to turn the initial “single-file / coupled” CLI prototype into a small, reusable `dgpipe` package with clear module boundaries and an API suitable for extension.\n\n## Goals of the refactor\n\n- **Stability of public API**: expose a minimal, intentional surface from `dgpipe.__init__`.\n- **Extensibility**: allow users to plug in new stages/runners without editing core files.\n- **Testability**: move side-effectful CLI and IO to the edges; keep models/protocols pure.\n- **Documentation as an artifact**: README and developer notes explain where to add code.\n\n## Module boundaries (what goes where)\n\n### `src/dgpipe/models.py` (domain dataclasses)\nHolds “nouns” and durable structures shared across the codebase:\n\n- Pipeline/spec/config objects (e.g., stage definitions, pipeline definition, run configuration).\n- Result objects (e.g., per-stage result, pipeline run summary).\n- Lightweight validation helpers that do not import CLI/FS/network.\n\n**Why**: models are imported broadly; keeping them dependency-light avoids import cycles and allows reuse by CLI, plugins, and tests.\n\n### `src/dgpipe/protocols.py` (interfaces / contracts)\nDefines typed interfaces for extensibility:\n\n- `Stage` protocol: “given inputs + context, produce output/result”.\n- `Runner` protocol: “orchestrate execution of stages”.\n- IO abstractions (if used): e.g., readers/writers, artifact stores.\n\n**Why**: protocols decouple implementations from callers (CLI can depend on the contract, not concrete classes). This is the main seam for plugins.\n\n### `src/dgpipe/__init__.py` (public package entrypoint)\nExports the intended public API and version, without side effects:\n\n- `__version__`\n- Convenience imports (selected models/protocols only).\n- No CLI parsing, no reading environment variables, no logging configuration at import time.\n\n**Why**: importing `dgpipe` should be safe in any environment (REPL, tests, plugin discovery).\n\n### `README.md` (project-level guide)\nFocuses on user-facing tasks:\n\n- What dgpipe is, how to install, core CLI usage.\n- Small examples and “extension points” pointing to `protocols.py` and `models.py`.\n- Minimal internal implementation details (those live here in this file).\n\n## CLI vs library separation\n\n- **CLI layer** (e.g., `src/dgpipe/cli.py` or console entrypoint) should:\n  - parse args, load config, call library functions/classes, format output.\n- **Library layer** should:\n  - accept explicit parameters; return structured results (models).\n  - avoid printing; leave that to CLI.\n\nThis separation makes it possible to reuse `dgpipe` in notebooks/other apps and keeps the CLI thin.\n\n## Import/cycle rules (practical guidance)\n\n- `models.py` should not import from other `dgpipe` modules (except stdlib/typing).\n- `protocols.py` may reference model types (via forward refs if needed) but should avoid importing implementations.\n- CLI and concrete implementations may import both models and protocols.\n- If two modules start importing each other, move shared types into `models.py` (data) or `protocols.py` (behavioral contracts).\n\n## Migration guide: from exported prompt artifacts to real modules\n\nThe repository contains exported “stage1_export” prompt artifacts (e.g., `*_export_prompt.txt`). Treat these as **design snapshots**. The migration approach is:\n\n1. **Extract stable definitions** into `models.py` / `protocols.py`.\n   - If a type is referenced across multiple places → it belongs in `models.py` (data) or `protocols.py` (contract).\n2. **Collapse duplicated logic** into single helpers close to the domain:\n   - parsing/normalization of pipeline specs → `models.py` (or `dgpipe/spec.py` later).\n   - orchestration logic → a runner implementation module (later stage).\n3. **Keep CLI-specific behavior out of core**:\n   - printing, exit codes, argparse/typer, filesystem layout decisions.\n4. **Expose only what you want supported** via `dgpipe.__init__`.\n   - internal helpers remain unexported to preserve refactor freedom.\n\n## Rationale for “models + protocols first”\n\nStarting with models/protocols provides a backbone that other modules can depend on without entanglement. It also enables incremental replacement: implementations can change without forcing changes in the CLI or downstream users as long as the contracts remain stable.\n\n## Reuse patterns encouraged\n\n- Define new stages by implementing the `Stage` protocol and returning standard result models.\n- Introduce new runners by implementing the `Runner` protocol; keep execution policy (parallelism, retries) out of stage logic.\n- Use dataclasses/immutable configs for reproducible runs (e.g., serialize configs, compare runs).\n\n## What to change when adding features\n\n- **New data fields / outputs**: extend `models.py` (with backward-compatible defaults when possible).\n- **New extension point**: add a new Protocol in `protocols.py` and update README “Extension points”.\n- **New CLI command**: add to CLI module; call into library APIs; do not add domain logic to CLI.\n- **Breaking changes**: reflect in `__init__.py` exports and document in README; consider aliasing old names temporarily.\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:docs/modularization-notes.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949b590d1548190ae21728e2f723cbf0045b034ab97adc3",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:docs/modularization-notes.md\nDIR_STATE:[\"docs/modularization-notes.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0c2d41db12abb955006949b5d1a7388197b2acd5678eeac0b3",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `docs/modularization-notes.md` documenting the Stage 1 refactor rationale, module boundaries (`models`, `protocols`, `__init__`), CLI/library separation, import-cycle rules, and guidance for migrating the exported prompt artifacts into reusable modules."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

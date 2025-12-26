@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add a deterministic-run policy and numeric tolerance harness integrated with the existing expected-vs-actual comparison: enforce fixed RNG seeds, stable serialization ordering, and tolerance-based numeric diffs when comparing outputs to `expected/benchmark_case_001.expected.json`; ensure CI uses the same settings.
+Project: generated_script_1766440250541 (json script)
+
+Target file details:
+- Path: config/benchmark_determinism_and_tolerance.json
+- Purpose: Defines the single source of truth for RNG seeds, serialization options, and numeric tolerance thresholds (including optional per-field overrides) used locally and in CI.
+- Category: config
+
+Other planned files (for context only):
+- src/determinism.py: Implements a deterministic-run policy that sets and validates fixed RNG seeds across Python/random, NumPy, and any supported frameworks and provides context managers to enforce determinism during benchmark runs.
+- src/stable_json.py: Provides stable JSON serialization utilities (canonical key ordering, normalized floats, consistent indentation/newlines) to ensure byte-for-byte reproducible output files across machines and CI.
+- src/numeric_tolerance_diff.py: Implements a numeric-tolerance comparison engine for expected-vs-actual JSON that supports absolute/relative tolerances, per-path overrides, NaN/inf handling, and produces a structured diff report.
+- src/benchmark_compare.py: Integrates deterministic policy, stable serialization, and tolerance-based numeric diffs into the existing expected-vs-actual comparison against expected/benchmark_case_001.expected.json and returns CI-friendly exit codes and reports.
+
+Reference insights:
+- [CONSOLIDATED] Turn a static benchmark into a seedable, configurable simulation-to-real calibration harness that systematically sweeps scena
+- [AGENT: agent_1766432552135_37yovma] {"agentId":"agent_1766432552135_37yovma","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766430411939_w8zvs5v] {"agentId":"agent_1766430411939_w8zvs5v","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766438283976_puyw9gc] {"agentId":"agent_1766438283976_puyw9gc","goalId":"routing_code_1766438283975_nh5nje8","containerId":"c
+- [AGENT: agent_1766438409884_82yeh6g] {"agentId":"agent_1766438409884_82yeh6g","goalId":"goal_7","containerId":"cntr_6949b60f62d4819083834ab5
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Defines the single source of truth for RNG seeds, serialization options, and numeric tolerance thresholds (including optional per-field overrides) used locally and in CI.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('config/benchmark_determinism_and_tolerance.json')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:config/benchmark_determinism_and_tolerance.json')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside config/benchmark_determinism_and_tolerance.json.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/core/models.py` with a compact registry of model-specific cosmology backends (slow-roll inflation, ekpyrotic proxy, reheating proxy, trans-Planckian modulation proxy, and CPL dark energy) that compute key observables (tilt/tensors/running, simple non-Gaussianity proxies, reheating imprints, trans-Planckian power modulation, and late-time EOS/growth proxies).",
+  "reasoning": "",
+  "responseId": "resp_094dff9c0f733421006949a26ac86081939d5664f4ea33f3c7",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4405,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2878,
+    "output_tokens_details": {
+      "reasoning_tokens": 606
+    },
+    "total_tokens": 7283
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_094dff9c0f733421006949a26b8f048193a0b68c811edfbf8c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_094dff9c0f733421006949a278d1748193ad0b11ffd8431d1f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap\n\ntarget_path = Path('/mnt/data').joinpath('src/core/models.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\n\\\"\\\"\\\"Model-specific cosmology backends with lightweight observable calculators.\n\nThis module provides compact, model-level maps from theory parameters to\ncosmological observables used elsewhere for conjecture/constraint tests.\n\\\"\\\"\\\"\n\"\"\")\n\nchunks.append(\"\"\"\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom math import exp, log, pi, sin\nfrom typing import Any, Dict, Mapping, Optional\n\"\"\")\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass ModelResult:\n    name: str\n    params: Dict[str, Any]\n    observables: Dict[str, float]\n    meta: Dict[str, Any] = field(default_factory=dict)\n\"\"\")\n\nchunks.append(\"\"\"\nclass BaseCosmoModel:\n    \\\"\\\"\\\"Base interface: subclasses implement `compute_observables`.\\\"\\\"\\\"\n\n    name: str = \"base\"\n\n    def __init__(self, **params: Any) -> None:\n        self.params = dict(params)\n\n    def compute_observables(self) -> Dict[str, float]:\n        raise NotImplementedError\n\n    def run(self) -> ModelResult:\n        obs = self.compute_observables()\n        return ModelResult(self.name, dict(self.params), obs, meta={})\n\"\"\")\n\nchunks.append(\"\"\"\ndef _sr_from_N(p: float, N: float) -> Dict[str, float]:\n    # Monomial slow-roll (V ∝ φ^p) at horizon exit.\n    ns = 1.0 - (p + 2.0) / (2.0 * N)\n    r = 4.0 * p / N\n    alpha_s = -(p + 2.0) / (2.0 * N * N)\n    return {\"ns\": ns, \"r\": r, \"alpha_s\": alpha_s}\n\ndef _starobinsky_from_N(N: float) -> Dict[str, float]:\n    ns = 1.0 - 2.0 / N\n    r = 12.0 / (N * N)\n    alpha_s = -2.0 / (N * N)\n    return {\"ns\": ns, \"r\": r, \"alpha_s\": alpha_s}\n\ndef _single_field_fnl(ns: float, r: float) -> Dict[str, float]:\n    # Standard consistency estimates (order-of-magnitude, model-agnostic).\n    f_local = (5.0 / 12.0) * (1.0 - ns)\n    f_eq = 0.1 * (r / 16.0)  # O(ε)\n    return {\"fNL_local\": f_local, \"fNL_equil\": f_eq}\n\"\"\")\n\nchunks.append(\"\"\"\nclass InflationSRModel(BaseCosmoModel):\n    \\\"\\\"\\\"Slow-roll inflation families (monomial/plateau) with derived observables.\\\"\\\"\\\"\n\n    name = \"inflation_slowroll\"\n\n    def compute_observables(self) -> Dict[str, float]:\n        N = float(self.params.get(\"N\", 55.0))\n        pot = str(self.params.get(\"potential\", \"m2phi2\")).lower()\n        As = float(self.params.get(\"As\", 2.1e-9))\n\n        if pot in {\"plateau\", \"starobinsky\"}:\n            base = _starobinsky_from_N(N)\n        else:\n            p = {\"m2phi2\": 2.0, \"lambda_phi4\": 4.0, \"phi_p\": float(self.params.get(\"p\", 2.0))}.get(pot, 2.0)\n            base = _sr_from_N(p, N)\n\n        ns, r = base[\"ns\"], base[\"r\"]\n        eps = r / 16.0\n        # Amplitude fixes H_* (M_pl=1 units): As = H^2/(8π^2 ε)\n        H = (8.0 * pi * pi * eps * As) ** 0.5 if eps > 0 else 0.0\n        V = 3.0 * H * H\n\n        obs = dict(base)\n        obs.update(_single_field_fnl(ns, r))\n        obs.update({\"As\": As, \"H_star\": H, \"V_star\": V, \"eps\": eps})\n        return obs\n\"\"\")\n\nchunks.append(\"\"\"\nclass ReheatingProxyModel(BaseCosmoModel):\n    \\\"\\\"\\\"Reheating proxy: maps (w_re, T_re) + inflation amplitude into N_re etc.\\\"\\\"\\\"\n\n    name = \"reheating_proxy\"\n\n    def compute_observables(self) -> Dict[str, float]:\n        w = float(self.params.get(\"w_re\", 0.0))\n        T = float(self.params.get(\"T_re\", 1e9))  # GeV-like scale proxy\n        g = float(self.params.get(\"g_re\", 100.0))\n        infl = InflationSRModel(**{k: self.params.get(k) for k in (\"N\", \"potential\", \"p\", \"As\") if k in self.params}).compute_observables()\n        rho_end = float(self.params.get(\"rho_end\", infl[\"V_star\"]))  # proxy\n        rho_re = (pi * pi / 30.0) * g * (T ** 4)\n        denom = 3.0 * (1.0 + w)\n        N_re = (log(max(rho_end, 1e-300)) - log(max(rho_re, 1e-300))) / denom if denom != 0 else 0.0\n        # Convert to a simple effective \"reheating imprint\" scale shift\n        k_shift = exp(-N_re)\n\n        return {\"N_re\": N_re, \"a_re_over_a_end\": exp(N_re), \"k_reheat_shift\": k_shift, \"w_re\": w, \"T_re\": T}\n\"\"\")\n\nchunks.append(\"\"\"\nclass TransPlanckianModulationModel(BaseCosmoModel):\n    \\\"\\\"\\\"Trans-Planckian-inspired oscillatory modulation parameters (proxy-level).\\\"\\\"\\\"\n\n    name = \"transplanckian_modulation\"\n\n    def compute_observables(self) -> Dict[str, float]:\n        beta = float(self.params.get(\"beta\", 0.01))  # modulation amplitude\n        k_tp = float(self.params.get(\"k_tp\", 0.05))  # 1/Mpc pivot-ish\n        phase = float(self.params.get(\"phase\", 0.0))\n        k_pivot = float(self.params.get(\"k_pivot\", 0.05))\n        delta = beta * sin(2.0 * (k_pivot / max(k_tp, 1e-30)) + phase)\n        return {\"tp_beta\": beta, \"tp_k_tp\": k_tp, \"tp_phase\": phase, \"deltaP_over_P_pivot\": delta}\n\"\"\")\n\nchunks.append(\"\"\"\nclass NonInflationEkpyroticProxyModel(BaseCosmoModel):\n    \\\"\\\"\\\"Ekpyrotic-like contraction proxy (tilt + local NG), not a full solver.\\\"\\\"\\\"\n\n    name = \"ekpyrotic_proxy\"\n\n    def compute_observables(self) -> Dict[str, float]:\n        # Parameterize by fast-roll ε_c >> 1; ns-1 ~ 2/ε_c in minimal setups (proxy).\n        eps_c = float(self.params.get(\"eps_c\", 50.0))\n        ns = 1.0 + 2.0 / eps_c\n        r = float(self.params.get(\"r\", 0.0))  # typically negligible\n        f_local = float(self.params.get(\"fNL_local\", 10.0))  # often sizable/sign-changing\n        return {\"ns\": ns, \"r\": r, \"alpha_s\": -2.0 / (eps_c * eps_c), \"fNL_local\": f_local, \"eps_c\": eps_c}\n\"\"\")\n\nchunks.append(\"\"\"\nclass DarkEnergyCPLModel(BaseCosmoModel):\n    \\\"\\\"\\\"Late-time dark energy with CPL equation of state w(a)=w0+wa(1-a).\\\"\\\"\\\"\n\n    name = \"dark_energy_cpl\"\n\n    def compute_observables(self) -> Dict[str, float]:\n        w0 = float(self.params.get(\"w0\", -1.0))\n        wa = float(self.params.get(\"wa\", 0.0))\n        z_p = float(self.params.get(\"z_pivot\", 0.5))\n        a_p = 1.0 / (1.0 + z_p)\n        w_p = w0 + wa * (1.0 - a_p)\n        # Proxy growth index (Linder-like) around ΛCDM.\n        gamma = 0.55 + 0.05 * (1.0 + w0 + 0.5 * wa)\n        return {\"w0\": w0, \"wa\": wa, \"w_pivot\": w_p, \"gamma_growth\": gamma}\n\"\"\")\n\nchunks.append(\"\"\"\n_REGISTRY = {\n    InflationSRModel.name: InflationSRModel,\n    ReheatingProxyModel.name: ReheatingProxyModel,\n    TransPlanckianModulationModel.name: TransPlanckianModulationModel,\n    NonInflationEkpyroticProxyModel.name: NonInflationEkpyroticProxyModel,\n    DarkEnergyCPLModel.name: DarkEnergyCPLModel,\n}\n\ndef create_model(name: str, **params: Any) -> BaseCosmoModel:\n    \\\"\\\"\\\"Factory for configured backends.\\\"\\\"\\\"\n    cls = _REGISTRY.get(name)\n    if cls is None:\n        raise KeyError(f\"Unknown model '{name}'. Known: {sorted(_REGISTRY)}\")\n    return cls(**params)\n\ndef available_models() -> Mapping[str, Any]:\n    return dict(_REGISTRY)\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/core/models.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949a1d497e081909a00da1af070d618029e616ce667a0de",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/core/models.py\nDIR_STATE:[\"src/core/conjectures.py\", \"src/core/models.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_094dff9c0f733421006949a295d990819387475469d863833f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/core/models.py` with a compact registry of model-specific cosmology backends (slow-roll inflation, ekpyrotic proxy, reheating proxy, trans-Planckian modulation proxy, and CPL dark energy) that compute key observables (tilt/tensors/running, simple non-Gaussianity proxies, reheating imprints, trans-Planckian power modulation, and late-time EOS/growth proxies)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

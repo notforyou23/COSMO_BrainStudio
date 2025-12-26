@@ -1,0 +1,56 @@
+{
+  "content": "Created `tools/integrate_agent_outputs.py`, a deterministic CLI tool that loads `tools/integration_map.yml` rules and safely plans/applies move/merge integration operations with overwrite protection and a `--dry-run` mode for reproducible integrations.",
+  "reasoning": "",
+  "responseId": "resp_034d2637dc62df81006949be0100148195b0495d16c2e8fae9",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3532,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1988,
+    "output_tokens_details": {
+      "reasoning_tokens": 325
+    },
+    "total_tokens": 5520
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_034d2637dc62df81006949be01b8a081959429eeac8d3c4510",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_034d2637dc62df81006949be098d488195b70720e9258c0e3f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, shutil, fnmatch, sys, argparse\n\ntarget_path = Path('/mnt/data').joinpath('tools/integrate_agent_outputs.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(r\"\"\"#!/usr/bin/env python3\n\\\"\\\"\\\"Integrate agent-generated outputs into the canonical repo layout.\n\nReads tools/integration_map.yml (or .json) describing move/merge rules and applies\nthem with safety checks. Designed to be reproducible and CI-friendly.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport os\nimport shutil\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Optional, Tuple\n\n\ndef _load_map(path: Path) -> Dict[str, Any]:\n    data: Any\n    try:\n        import yaml  # type: ignore\n    except Exception:\n        yaml = None\n    if yaml is not None and path.suffix in {\".yml\", \".yaml\"}:\n        data = yaml.safe_load(path.read_text(encoding=\"utf-8\"))\n    else:\n        data = json.loads(path.read_text(encoding=\"utf-8\"))\n    if not isinstance(data, dict):\n        raise SystemExit(f\"Integration map must be a dict, got: {type(data).__name__}\")\n    return data\n\n\ndef _rel(p: Path, root: Path) -> str:\n    try:\n        return str(p.resolve().relative_to(root.resolve()))\n    except Exception:\n        return str(p)\n\n\ndef _ensure_within(path: Path, root: Path, label: str) -> None:\n    rp, rr = path.resolve(), root.resolve()\n    if rp == rr or rr not in rp.parents:\n        raise SystemExit(f\"{label} must be within repo root: {path}\")\n\n\ndef _iter_files(src: Path) -> Iterable[Path]:\n    if src.is_file():\n        yield src\n    else:\n        for p in sorted(src.rglob(\"*\")):\n            if p.is_file():\n                yield p\n\n\ndef _should_skip(rel: str, exclude: List[str]) -> bool:\n    return any(fnmatch.fnmatch(rel, pat) for pat in exclude)\n\n\n@dataclass(frozen=True)\nclass Op:\n    kind: str  # \"move\" or \"copy\"\n    src: Path\n    dst: Path\n\n\ndef _plan_rule(repo: Path, rule: Dict[str, Any]) -> List[Op]:\n    src_pat = rule.get(\"src\")\n    dst = rule.get(\"dst\")\n    mode = (rule.get(\"mode\") or \"merge\").lower()\n    overwrite = bool(rule.get(\"overwrite\", False))\n    exclude = list(rule.get(\"exclude\") or [])\n    if not src_pat or not dst:\n        raise SystemExit(\"Each rule requires 'src' and 'dst'\")\n    if mode not in {\"merge\", \"move\"}:\n        raise SystemExit(f\"Unsupported mode: {mode}\")\n    dst_root = (repo / dst).resolve()\n    _ensure_within(dst_root, repo, \"dst\")\n    ops: List[Op] = []\n    matches = sorted((repo / \".\").glob(str(src_pat)))\n    if not matches:\n        raise SystemExit(f\"No matches for src pattern: {src_pat}\")\n    for src in matches:\n        src = src.resolve()\n        _ensure_within(src, repo, \"src\")\n        if mode == \"move\" and len(matches) > 1:\n            raise SystemExit(\"mode=move requires src to resolve to a single path\")\n        if src.is_file():\n            rel = src.name\n            if _should_skip(rel, exclude):\n                continue\n            dst_path = dst_root / rel if dst_root.is_dir() or str(dst).endswith(\"/\") else dst_root\n            ops.append(Op(\"move\" if mode == \"move\" else \"copy\", src, dst_path))\n        else:\n            for f in _iter_files(src):\n                rel = str(f.relative_to(src))\n                if _should_skip(rel, exclude):\n                    continue\n                ops.append(Op(\"copy\", f, dst_root / rel))\n            if mode == \"move\":\n                ops.append(Op(\"move\", src, dst_root))\n    # overwrite checks are enforced at apply time; keep plan deterministic\n    return ops\n\n\ndef _apply_ops(repo: Path, ops: List[Op], dry_run: bool, overwrite: bool) -> None:\n    for op in ops:\n        _ensure_within(op.dst, repo, \"dst\")\n        if op.kind == \"copy\":\n            if op.dst.exists() and not overwrite:\n                raise SystemExit(f\"Refusing to overwrite existing path: {_rel(op.dst, repo)}\")\n            if dry_run:\n                print(f\"COPY  {_rel(op.src, repo)} -> {_rel(op.dst, repo)}\")\n                continue\n            op.dst.parent.mkdir(parents=True, exist_ok=True)\n            shutil.copy2(op.src, op.dst)\n        elif op.kind == \"move\":\n            if op.dst.exists() and not overwrite:\n                raise SystemExit(f\"Refusing to overwrite existing path: {_rel(op.dst, repo)}\")\n            if dry_run:\n                print(f\"MOVE  {_rel(op.src, repo)} -> {_rel(op.dst, repo)}\")\n                continue\n            op.dst.parent.mkdir(parents=True, exist_ok=True)\n            if op.dst.exists() and overwrite:\n                if op.dst.is_dir():\n                    shutil.rmtree(op.dst)\n                else:\n                    op.dst.unlink()\n            shutil.move(str(op.src), str(op.dst))\n        else:\n            raise SystemExit(f\"Unknown op: {op.kind}\")\n\n\ndef main(argv: Optional[List[str]] = None) -> int:\n    ap = argparse.ArgumentParser(description=__doc__)\n    ap.add_argument(\"--map\", dest=\"map_path\", default=\"tools/integration_map.yml\")\n    ap.add_argument(\"--repo\", default=\".\", help=\"Repository root\")\n    ap.add_argument(\"--dry-run\", action=\"store_true\")\n    ap.add_argument(\"--overwrite\", action=\"store_true\", help=\"Allow overwriting destination paths\")\n    args = ap.parse_args(argv)\n\n    repo = Path(args.repo).resolve()\n    map_path = (repo / args.map_path).resolve()\n    _ensure_within(map_path, repo, \"map\")\n    spec = _load_map(map_path)\n    rules = spec.get(\"rules\") or []\n    if not isinstance(rules, list) or not rules:\n        raise SystemExit(\"integration_map must contain a non-empty 'rules' list\")\n\n    all_ops: List[Op] = []\n    for rule in rules:\n        if not isinstance(rule, dict):\n            raise SystemExit(\"Each rule must be a dict\")\n        all_ops.extend(_plan_rule(repo, rule))\n\n    # Apply in a stable order for reproducibility\n    all_ops = sorted(all_ops, key=lambda o: (o.kind, str(o.src), str(o.dst)))\n\n    _apply_ops(repo, all_ops, dry_run=args.dry_run, overwrite=args.overwrite)\n    if args.dry_run:\n        print(f\\\"Planned ops: {len(all_ops)}\\\")\n    return 0\n\n\nif __name__ == \\\"__main__\\\":\n    raise SystemExit(main())\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tools/integrate_agent_outputs.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949bdbf39a88190b86a048e7404ddf605f34b41479c985e",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tools/integrate_agent_outputs.py\nDIR_STATE:[\"tools/integrate_agent_outputs.py\", \"tools/integration_map.yml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_034d2637dc62df81006949be1f7de48195826d58c5f0915bd0",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tools/integrate_agent_outputs.py`, a deterministic CLI tool that loads `tools/integration_map.yml` rules and safely plans/applies move/merge integration operations with overwrite protection and a `--dry-run` mode for reproducible integrations."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

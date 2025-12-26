@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "name": "qa_harness",
+  "description": "Canonical QA/CI harness configuration: command to run, outputs root, write-policy allowlists, and report/artifact paths.",
+  "canonical_qa_command": {
+    "shell": false,
+    "cwd": ".",
+    "argv": ["python", "-m", "scripts.ci_qa_harness"],
+    "env": {
+      "QA_HARNESS": "1",
+      "PYTHONUNBUFFERED": "1"
+    }
+  },
+  "outputs": {
+    "root": "outputs",
+    "scaffold_dirs": ["outputs", "outputs/artifacts", "outputs/logs", "outputs/tmp"],
+    "report_path": "outputs/QA_REPORT.json",
+    "artifact_paths": ["outputs/QA_REPORT.json"]
+  },
+  "write_policy": {
+    "mode": "outputs_only",
+    "outputs_root": "outputs",
+    "allowlist_globs": [
+      "outputs/**",
+      ".git/**",
+      ".github/**",
+      ".gitignore",
+      ".gitattributes",
+      ".gitmodules",
+      ".pytest_cache/**",
+      ".mypy_cache/**",
+      ".ruff_cache/**",
+      ".cache/**",
+      ".tox/**",
+      ".nox/**",
+      ".venv/**",
+      "venv/**",
+      "env/**",
+      ".env",
+      ".DS_Store",
+      "coverage.xml",
+      ".coverage",
+      "pytest.xml",
+      "junit.xml"
+    ],
+    "allowlist_notes": "Only allow writes under outputs/ plus common ephemeral CI/tooling caches; everything else is considered a policy violation."
+  },
+  "failure_conditions": {
+    "fail_on_qa_gate_failure": true,
+    "fail_on_write_policy_violation": true
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "content": "FILE_EXPORT:{\"path\":\"outputs/examples/benchmark_case_002.json\",\"size\":281,\"encoding\":\"base64\",\"sha256\":\"e0ce90cfbc8d61b13d70f1f3c6ac67dda76cf6547ce92d33d55d78b76f08a216\",\"content\":\"ewogICJzY2hlbWFfdmVyc2lvbiI6ICIxLjAuMCIsCiAgImJlbmNobWFya19jYXNlX2lkIjogImJlbmNobWFya19jYXNlXzAwMiIsCiAgImRlc2NyaXB0aW9uIjogIlNlY29uZCBzY2hlbWEtY29uZm9ybWFudCBiZW5jaG1hcmsgcGF5bG9hZCBleGFtcGxlIGZvciB2YWxpZGF0aW9uIHRlc3RzLiIsCiAgImRhdGEiOiB7CiAgICAibmFtZSI6ICJDYXNlIDA wMiIsCiAgICAibWV0YWRhdGEiOiB7CiAgICAgICJjb2hvcnQiOiAiQiIsCiAgICAgICJzY2VuYXJpbyI6ICJyZXByZXNlbnRhdGl2ZS1jYXNlLTIiCiAgICB9CiAgfQp9Cg==\"}\rDIR_STATE:[\"outputs/examples/benchmark_case_001.json\",\"outputs/examples/benchmark_case_002.json\"]",
+  "reasoning": "",
+  "responseId": "resp_07e34b00ac83200d006949bfe588988194b6726a20704ed089",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 1378,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 637,
+    "output_tokens_details": {
+      "reasoning_tokens": 294
+    },
+    "total_tokens": 2015
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_07e34b00ac83200d006949bfe640548194bd9627f250cb9f42",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_07e34b00ac83200d006949bfe70a4881949b7de6743739ec98",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport base64, json, hashlib, gzip\n\ntarget_path = Path('/mnt/data').joinpath('outputs/examples/benchmark_case_002.json')\nassert target_path.is_file(), 'Expected outputs/examples/benchmark_case_002.json to exist before export'\ndata = target_path.read_bytes()\npayload = {\n   'path': 'outputs/examples/benchmark_case_002.json',\n   'size': len(data),\n   'encoding': 'base64',\n   'sha256': hashlib.sha256(data).hexdigest(),\n   'content': None\n}\nif len(data) > 20000:\n    compressed = gzip.compress(data)\n    payload['encoding'] = 'gzip+base64'\n    payload['content'] = base64.b64encode(compressed).decode('ascii')\nelse:\n    payload['content'] = base64.b64encode(data).decode('ascii')\nfile_export_line = 'FILE_EXPORT:' + json.dumps(payload, separators=(',', ':'))\ndir_state_line = 'DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file()))\nfile_export_line[:100], dir_state_line\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "('FILE_EXPORT:{\"path\":\"outputs/examples/benchmark_case_002.json\",\"size\":281,\"encoding\":\"base64\",\"sha25',\n 'DIR_STATE:[\"outputs/examples/benchmark_case_001.json\", \"outputs/examples/benchmark_case_002.json\"]')"
+        }
+      ]
+    },
+    {
+      "id": "msg_07e34b00ac83200d006949bfeb0030819480b219fc375aa05b",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_EXPORT:{\"path\":\"outputs/examples/benchmark_case_002.json\",\"size\":281,\"encoding\":\"base64\",\"sha256\":\"e0ce90cfbc8d61b13d70f1f3c6ac67dda76cf6547ce92d33d55d78b76f08a216\",\"content\":\"ewogICJzY2hlbWFfdmVyc2lvbiI6ICIxLjAuMCIsCiAgImJlbmNobWFya19jYXNlX2lkIjogImJlbmNobWFya19jYXNlXzAwMiIsCiAgImRlc2NyaXB0aW9uIjogIlNlY29uZCBzY2hlbWEtY29uZm9ybWFudCBiZW5jaG1hcmsgcGF5bG9hZCBleGFtcGxlIGZvciB2YWxpZGF0aW9uIHRlc3RzLiIsCiAgImRhdGEiOiB7CiAgICAibmFtZSI6ICJDYXNlIDA wMiIsCiAgICAibWV0YWRhdGEiOiB7CiAgICAgICJjb2hvcnQiOiAiQiIsCiAgICAgICJzY2VuYXJpbyI6ICJyZXByZXNlbnRhdGl2ZS1jYXNlLTIiCiAgICB9CiAgfQp9Cg==\"}\rDIR_STATE:[\"outputs/examples/benchmark_case_001.json\",\"outputs/examples/benchmark_case_002.json\"]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

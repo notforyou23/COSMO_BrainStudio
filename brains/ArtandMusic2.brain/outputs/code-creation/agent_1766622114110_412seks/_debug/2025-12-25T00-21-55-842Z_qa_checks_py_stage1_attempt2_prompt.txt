@@ -1,0 +1,50 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a single command that (a) runs the QA gate against DRAFT_REPORT_v0.md + pilot artifacts, then (b) emits QA_REPORT.json and QA_REPORT.md with per-check status, error messages, and remediation pointers.
+Project: generated_script_1766622114585 (json script)
+
+Target file details:
+- Path: qa/checks.py
+- Purpose: Defines the catalog of QA checks and executes them over the report and artifact inputs, returning normalized per-check results and remediation guidance.
+- Category: source
+
+Other planned files (for context only):
+- qa/run.py: Implements a single CLI entrypoint that runs the QA gate against DRAFT_REPORT_v0.md plus pilot artifacts and emits QA_REPORT.json and QA_REPORT.md with per-check status, errors, and remediation pointers.
+- qa/io.py: Provides robust filesystem discovery and loading utilities for DRAFT_REPORT_v0.md and pilot artifacts with path canonicalization and safe reads.
+- qa/report.py: Renders and writes QA_REPORT.json and QA_REPORT.md from normalized check results including summary, per-check status, and remediation pointers.
+- qa/schema.py: Defines the JSON schema (as Python structures) and validation helpers for the QA report output format to ensure machine-validated structure.
+
+Reference insights:
+- [AGENT: agent_1766620699948_ark1uxa] Document Created: Generated report
+
+# Generated report
+
+*Auto-compiled from COSMO memory (GPT-5.2 unava
+- [AGENT: agent_1766619476801_dj6dsxw] {"agentId":"agent_1766619476801_dj6dsxw","timestamp":"2025-12-24T23:43:43.594Z","files":[{"filename":"v
+- [AGENT: agent_1766620093682_0dbi3wj] Document Created: single command (e.g., scripts/qa_run.sh or python -m qa.run) that (1) runs scaffold g
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Defines the catalog of QA checks and executes them over the report and artifact inputs, returning normalized per-check results and remediation guidance.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('qa/checks.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:qa/checks.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside qa/checks.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

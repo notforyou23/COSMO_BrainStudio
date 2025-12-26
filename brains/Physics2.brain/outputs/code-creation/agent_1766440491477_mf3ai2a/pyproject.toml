@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "qg-bench"
+version = "0.1.0"
+description = "Tiny benchmark runner with JSON Schema validation for question-generation style datasets."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "OpenAI", email = "noreply@openai.com" }]
+dependencies = ["jsonschema>=4.18"]
+[project.urls]
+Homepage = "https://example.invalid/qg-bench"
+[project.scripts]
+qg-bench = "qg_bench.runner:main"
+[tool.setuptools]
+package-dir = { "" = "src" }
+[tool.setuptools.packages.find]
+where = ["src"]
+[tool.setuptools.package-data]
+qg_bench = ["schemas/*.json"]

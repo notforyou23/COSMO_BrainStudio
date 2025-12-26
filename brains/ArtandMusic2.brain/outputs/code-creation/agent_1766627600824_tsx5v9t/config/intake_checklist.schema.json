@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/intake_checklist.schema.json",
+  "title": "Intake Checklist Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["project_title", "claims", "request"],
+  "properties": {
+    "project_title": { "type": "string", "minLength": 3 },
+    "claims": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "enum": [
+          "dataset_verification_pilot",
+          "primary_source_verification",
+          "fact_check",
+          "other"
+        ]
+      },
+      "uniqueItems": true
+    },
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["research_area"],
+      "properties": {
+        "research_area": { "type": "string", "minLength": 3 },
+        "claim_statement": { "type": "string", "minLength": 10 },
+        "research_question": { "type": "string", "minLength": 10 }
+      },
+      "description": "At least one of claim_statement or research_question must be provided; research_area alone is not sufficient."
+    },
+    "dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 2 },
+        "doi_or_url": {
+          "type": "string",
+          "minLength": 6,
+          "pattern": "^(https?://|doi:|10\.)"
+        }
+      },
+      "required": ["name", "doi_or_url"]
+    },
+    "notes": { "type": "string" }
+  },
+  "allOf": [
+    {
+      "description": "Block work when only a vague research area is provided (must include a concrete claim or question).",
+      "anyOf": [
+        { "properties": { "request": { "required": ["claim_statement"] } } },
+        { "properties": { "request": { "required": ["research_question"] } } }
+      ]
+    },
+    {
+      "description": "Hard-require dataset identifier (name + DOI/link) when dataset-verification pilot is claimed.",
+      "if": {
+        "properties": {
+          "claims": { "contains": { "const": "dataset_verification_pilot" } }
+        },
+        "required": ["claims"]
+      },
+      "then": {
+        "required": ["dataset"],
+        "properties": {
+          "dataset": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "doi_or_url"],
+            "properties": {
+              "name": { "type": "string", "minLength": 2 },
+              "doi_or_url": {
+                "type": "string",
+                "minLength": 6,
+                "pattern": "^(https?://|doi:|10\.)"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

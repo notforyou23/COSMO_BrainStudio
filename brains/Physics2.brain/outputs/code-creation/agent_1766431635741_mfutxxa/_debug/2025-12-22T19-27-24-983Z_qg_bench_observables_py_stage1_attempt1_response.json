@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `qg_bench/observables.py` with dependency-free, deterministic functions to compute exact-match accuracy and mean latency (ms) from ingested JSONL records, plus a `compute_observables()` helper that packages metrics and record counts into a JSON-serializable structure.",
+  "reasoning": "",
+  "responseId": "resp_0d53f150e04f9ca70069499bd185f481948e3fcc33e211dd41",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2822,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1300,
+    "output_tokens_details": {
+      "reasoning_tokens": 243
+    },
+    "total_tokens": 4122
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0d53f150e04f9ca70069499bd238d48194b265bfa26f1e6073",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d53f150e04f9ca70069499bd8cd6481949e7e2cce46d9b9dc",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('qg_bench/observables.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Benchmark observables.\n\nThis module computes small, deterministic summary metrics from a list of\ningested per-example records (dicts). It is intentionally dependency-free\nand tolerant to minor key-name variations in the input records.\n\\\"\\\"\\\"\"\"\",\n\"\"\"from __future__ import annotations\n\nfrom typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple\"\"\",\n\"\"\"def _first_present(record: Dict[str, Any], keys: Sequence[str]) -> Tuple[bool, Any]:\n    \\\"\\\"\\\"Return (found, value) for the first key present in record.\\\"\\\"\\\"\n    for k in keys:\n        if k in record:\n            return True, record[k]\n    return False, None\"\"\",\n\"\"\"def _as_float(x: Any) -> Optional[float]:\n    \\\"\\\"\\\"Best-effort conversion to float; returns None on failure.\\\"\\\"\\\"\n    if x is None:\n        return None\n    if isinstance(x, (int, float)):\n        return float(x)\n    if isinstance(x, str):\n        s = x.strip()\n        if not s:\n            return None\n        try:\n            return float(s)\n        except ValueError:\n            return None\n    return None\"\"\",\n\"\"\"def accuracy(\n    records: Iterable[Dict[str, Any]],\n    *,\n    prediction_keys: Sequence[str] = (\\\"prediction\\\", \\\"pred\\\", \\\"y_pred\\\"),\n    label_keys: Sequence[str] = (\\\"label\\\", \\\"gold\\\", \\\"y_true\\\", \\\"answer\\\"),\n) -> Dict[str, Any]:\n    \\\"\\\"\\\"Compute exact-match accuracy over records.\n\n    A record is counted as scorable if both prediction and label are present.\n    Values are compared after stringification to avoid type quirks.\n    \\\"\\\"\\\"\n    n = 0\n    n_correct = 0\n    for r in records:\n        has_p, p = _first_present(r, prediction_keys)\n        has_y, y = _first_present(r, label_keys)\n        if not (has_p and has_y):\n            continue\n        n += 1\n        if str(p) == str(y):\n            n_correct += 1\n\n    value = (n_correct / n) if n else None\n    return {\n        \\\"name\\\": \\\"accuracy\\\",\n        \\\"value\\\": None if value is None else round(float(value), 12),\n        \\\"n\\\": n,\n        \\\"n_correct\\\": n_correct,\n    }\"\"\",\n\"\"\"def mean_latency_ms(\n    records: Iterable[Dict[str, Any]],\n    *,\n    latency_keys: Sequence[str] = (\\\"latency_ms\\\", \\\"latency\\\", \\\"elapsed_ms\\\", \\\"duration_ms\\\"),\n) -> Dict[str, Any]:\n    \\\"\\\"\\\"Compute mean latency (milliseconds) over records.\n\n    A record contributes if a latency field is present and parseable as float.\n    \\\"\\\"\\\"\n    n = 0\n    total = 0.0\n    for r in records:\n        has_l, l = _first_present(r, latency_keys)\n        if not has_l:\n            continue\n        v = _as_float(l)\n        if v is None:\n            continue\n        n += 1\n        total += v\n\n    value = (total / n) if n else None\n    return {\n        \\\"name\\\": \\\"mean_latency_ms\\\",\n        \\\"value\\\": None if value is None else round(float(value), 12),\n        \\\"n\\\": n,\n    }\"\"\",\n\"\"\"def compute_observables(records: List[Dict[str, Any]]) -> Dict[str, Any]:\n    \\\"\\\"\\\"Compute the default observable set for the benchmark run.\n\n    Returns a JSON-serializable dict intended to be embedded into the\n    standardized results document.\n    \\\"\\\"\\\"\n    acc = accuracy(records)\n    lat = mean_latency_ms(records)\n    return {\n        \\\"observables\\\": {\n            acc[\\\"name\\\"]: acc,\n            lat[\\\"name\\\"]: lat,\n        },\n        \\\"record_counts\\\": {\n            \\\"total\\\": len(records),\n            \\\"scorable\\\": acc[\\\"n\\\"],\n            \\\"with_latency\\\": lat[\\\"n\\\"],\n        },\n    }\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:qg_bench/observables.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499b9ae2c081908ccd9fbfec7a37ba019f8e3dd8194ac9",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:qg_bench/observables.py\nDIR_STATE:[\"qg_bench/__init__.py\", \"qg_bench/observables.py\", \"qg_bench/schema.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0d53f150e04f9ca70069499becb9888194a711e277864af38a",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `qg_bench/observables.py` with dependency-free, deterministic functions to compute exact-match accuracy and mean latency (ms) from ingested JSONL records, plus a `compute_observables()` helper that packages metrics and record counts into a JSON-serializable structure."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

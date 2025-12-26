@@ -1,0 +1,56 @@
+{
+  "content": "Implemented a portable `scripts/e2e/collect_diagnostics.sh` that aggregates common E2E artifacts (reports, screenshots, videos, logs) plus system/CI/toolchain/git metadata into a single output directory suitable for CI artifact upload.",
+  "reasoning": "",
+  "responseId": "resp_03b6f28e10369faf006949c357f6b8819687bdba556c2c611e",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3932,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2334,
+    "output_tokens_details": {
+      "reasoning_tokens": 376
+    },
+    "total_tokens": 6266
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_03b6f28e10369faf006949c358b0cc8196bb91bcf1a31fba4a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_03b6f28e10369faf006949c36375c88196b86140644c114dbe",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, datetime\n\ntarget_path = Path('/mnt/data').joinpath('scripts/e2e/collect_diagnostics.sh')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\nr\"\"\"#!/usr/bin/env sh\n# Portable E2E diagnostics collector.\n# Gathers common test artifacts (logs, screenshots, reports) and system metadata\n# into a single directory suitable for CI artifact upload.\nset -eu\n\ntimestamp() { date -u +\"%Y%m%dT%H%M%SZ\" 2>/dev/null || date; }\nnow=\"$(timestamp)\"\nout_dir=\"${1:-}\"\nif [ -z \"${out_dir}\" ]; then\n  out_dir=\"artifacts/e2e-diagnostics-${now}\"\nfi\n\nworkspace=\"${GITHUB_WORKSPACE:-$(pwd)}\"\nmkdir -p \"${out_dir}\"\n\nsay() { printf '%s\\n' \"$*\" >&2; }\nhave() { command -v \"$1\" >/dev/null 2>&1; }\n\ncopy_path() {\n  src=\"$1\"\n  dest=\"${out_dir}/$2\"\n  [ -e \"${src}\" ] || return 0\n  mkdir -p \"$(dirname \"${dest}\")\"\n  # Prefer tar for portability with dirs; fall back to cp.\n  if have tar; then\n    (cd \"$(dirname \"${src}\")\" && tar -cf - \"$(basename \"${src}\")\") | (cd \"$(dirname \"${dest}\")\" && tar -xf -) 2>/dev/null || true\n  else\n    cp -R \"${src}\" \"${dest}\" 2>/dev/null || true\n  fi\n}\n\ncopy_tree_if_exists() {\n  src=\"$1\"\n  name=\"$2\"\n  [ -e \"${src}\" ] || return 0\n  copy_path \"${src}\" \"${name}\"\n}\n\nwrite_file() {\n  rel=\"$1\"\n  shift\n  mkdir -p \"$(dirname \"${out_dir}/${rel}\")\"\n  # shellcheck disable=SC2129\n  : > \"${out_dir}/${rel}\"\n  for cmd in \"$@\"; do\n    printf '\\n### %s\\n' \"${cmd}\" >> \"${out_dir}/${rel}\"\n    sh -c \"${cmd}\" >> \"${out_dir}/${rel}\" 2>&1 || true\n  done\n}\"\"\",\nr\"\"\"say \"Collecting diagnostics into: ${out_dir}\"\nsay \"Workspace: ${workspace}\"\n\n# System + environment metadata\nwrite_file \"metadata/system.txt\" \\\n  \"date -u || date\" \\\n  \"uname -a || true\" \\\n  \"id || whoami || true\" \\\n  \"pwd\" \\\n  \"umask || true\" \\\n  \"sh --version 2>/dev/null || true\" \\\n  \"env | sort\"\n\nwrite_file \"metadata/ci.txt\" \\\n  \"printf 'CI=%s\\n' \\\"${CI:-}\\\"\" \\\n  \"printf 'GITHUB_ACTIONS=%s\\n' \\\"${GITHUB_ACTIONS:-}\\\"\" \\\n  \"printf 'RUNNER_OS=%s\\n' \\\"${RUNNER_OS:-}\\\"\" \\\n  \"printf 'RUNNER_ARCH=%s\\n' \\\"${RUNNER_ARCH:-}\\\"\" \\\n  \"printf 'GITHUB_WORKFLOW=%s\\n' \\\"${GITHUB_WORKFLOW:-}\\\"\" \\\n  \"printf 'GITHUB_RUN_ID=%s\\n' \\\"${GITHUB_RUN_ID:-}\\\"\" \\\n  \"printf 'GITHUB_RUN_ATTEMPT=%s\\n' \\\"${GITHUB_RUN_ATTEMPT:-}\\\"\" \\\n  \"printf 'GITHUB_SHA=%s\\n' \\\"${GITHUB_SHA:-}\\\"\"\n\nwrite_file \"metadata/resources.txt\" \\\n  \"df -h || true\" \\\n  \"df -i || true\" \\\n  \"ulimit -a || true\" \\\n  \"ps -eo pid,ppid,etime,%cpu,%mem,command 2>/dev/null | head -n 200 || true\"\n\n# Toolchain versions (best effort)\nwrite_file \"metadata/versions.txt\" \\\n  \"node --version 2>/dev/null || true\" \\\n  \"npm --version 2>/dev/null || true\" \\\n  \"pnpm --version 2>/dev/null || true\" \\\n  \"yarn --version 2>/dev/null || true\" \\\n  \"python --version 2>/dev/null || true\" \\\n  \"python3 --version 2>/dev/null || true\" \\\n  \"pip --version 2>/dev/null || true\" \\\n  \"pip3 --version 2>/dev/null || true\" \\\n  \"java -version 2>&1 || true\"\n\n# Git context (if available)\nif have git && [ -d \"${workspace}/.git\" ]; then\n  (cd \"${workspace}\" && write_file \"metadata/git.txt\" \\\n    \"git rev-parse --show-toplevel\" \\\n    \"git status --porcelain=v1 -b\" \\\n    \"git log -1 --oneline --decorate\" \\\n    \"git diff --stat || true\")\nfi\"\"\",\nr\"\"\"# Common E2E artifact locations (Playwright/Cypress/WebdriverIO/Jest/JUnit, etc.)\n# Copy directories if present.\ncopy_tree_if_exists \"${workspace}/playwright-report\" \"reports/playwright-report\"\ncopy_tree_if_exists \"${workspace}/test-results\" \"reports/test-results\"\ncopy_tree_if_exists \"${workspace}/reports\" \"reports/reports\"\ncopy_tree_if_exists \"${workspace}/allure-results\" \"reports/allure-results\"\ncopy_tree_if_exists \"${workspace}/allure-report\" \"reports/allure-report\"\ncopy_tree_if_exists \"${workspace}/cypress/videos\" \"media/cypress/videos\"\ncopy_tree_if_exists \"${workspace}/cypress/screenshots\" \"media/cypress/screenshots\"\ncopy_tree_if_exists \"${workspace}/screenshots\" \"media/screenshots\"\ncopy_tree_if_exists \"${workspace}/videos\" \"media/videos\"\ncopy_tree_if_exists \"${workspace}/logs\" \"logs/logs\"\n\n# Copy common single files if present.\ncopy_path \"${workspace}/package.json\" \"metadata/package.json\"\ncopy_path \"${workspace}/package-lock.json\" \"metadata/package-lock.json\"\ncopy_path \"${workspace}/pnpm-lock.yaml\" \"metadata/pnpm-lock.yaml\"\ncopy_path \"${workspace}/yarn.lock\" \"metadata/yarn.lock\"\ncopy_path \"${workspace}/pytest.ini\" \"metadata/pytest.ini\"\ncopy_path \"${workspace}/playwright.config.ts\" \"metadata/playwright.config.ts\"\ncopy_path \"${workspace}/playwright.config.js\" \"metadata/playwright.config.js\"\ncopy_path \"${workspace}/cypress.config.ts\" \"metadata/cypress.config.ts\"\ncopy_path \"${workspace}/cypress.config.js\" \"metadata/cypress.config.js\"\n\n# Find and copy common report/log files (bounded to workspace).\n# We store them under logs/found and reports/found (preserving relative paths).\nif have find; then\n  (cd \"${workspace}\" && \\\n    find . -type f \\( \\\n      -name \"*.log\" -o -name \"*debug*.log\" -o -name \"*trace*.zip\" -o -name \"*.har\" -o \\\n      -name \"junit*.xml\" -o -name \"*junit*.xml\" -o -name \"test-results*.xml\" -o \\\n      -name \"report.html\" -o -name \"*report*.html\" -o -name \"*.png\" -o -name \"*.jpg\" -o -name \"*.jpeg\" \\\n    \\) -print 2>/dev/null | while IFS= read -r p; do\n      case \"${p}\" in\n        ./node_modules/*|./.git/*) continue ;;\n      esac\n      ext=\"${p##*.}\"\n      dest_base=\"logs/found\"\n      case \"${ext}\" in\n        xml|html) dest_base=\"reports/found\" ;;\n        png|jpg|jpeg) dest_base=\"media/found\" ;;\n      esac\n      copy_path \"${workspace}/${p#./}\" \"${dest_base}/${p#./}\"\n    done)\nfi\n\n# Runner logs that are sometimes helpful (best-effort, may not exist).\ncopy_tree_if_exists \"/tmp/playwright\" \"runner/tmp/playwright\"\ncopy_tree_if_exists \"/tmp/cypress\" \"runner/tmp/cypress\"\ncopy_tree_if_exists \"/var/log\" \"runner/var-log\" || true\n\n# Summarize what we collected.\nif have find; then\n  write_file \"metadata/manifest.txt\" \"cd \\\"${out_dir}\\\" && find . -type f -maxdepth 6 -print | sort\"\nfi\n\nsay \"Diagnostics collection complete.\"\nprintf '%s\\n' \"${out_dir}\" > \"${out_dir}/ARTIFACT_ROOT.txt\"\n\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:scripts/e2e/collect_diagnostics.sh')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949c289d32c81909670b17a73e06bb5058924e5a7d358e0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:scripts/e2e/collect_diagnostics.sh\nDIR_STATE:[\"scripts/e2e/collect_diagnostics.sh\", \"scripts/e2e/validate_config.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_03b6f28e10369faf006949c384d3d081968209855dcd7f5e9c",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented a portable `scripts/e2e/collect_diagnostics.sh` that aggregates common E2E artifacts (reports, screenshots, videos, logs) plus system/CI/toolchain/git metadata into a single output directory suitable for CI artifact upload."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

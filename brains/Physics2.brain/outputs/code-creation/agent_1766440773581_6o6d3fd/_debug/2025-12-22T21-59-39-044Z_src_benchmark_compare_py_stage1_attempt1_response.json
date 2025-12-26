@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/benchmark_compare.py` with deterministic canonical JSON serialization (stable key ordering + stable float tokenization) and a recursive comparator that supports exact comparisons or optional absolute numeric tolerance, plus a small CLI entrypoint for file-to-file comparisons.",
+  "reasoning": "",
+  "responseId": "resp_0412066b50cc2e61006949bfa3036c8196972fd4826276bf54",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3576,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2076,
+    "output_tokens_details": {
+      "reasoning_tokens": 452
+    },
+    "total_tokens": 5652
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0412066b50cc2e61006949bfa3c4e88196a976e63de2600dd0",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0412066b50cc2e61006949bfad495c819693251c2f703b56f3",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, math\n\ntarget_path = Path('/mnt/data').joinpath('src/benchmark_compare.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Benchmark result comparison with deterministic canonicalization.\n\nThis module is shared by the benchmark runner/tests to ensure comparisons are\nstable across runs and environments. It provides:\n\n- canonical_json_bytes(obj): deterministic JSON bytes (sorted keys, stable float repr)\n- compare_results(a, b, tolerance=None): structural compare with optional numeric tolerance\n- compare_files(path_a, path_b, tolerance=None): convenience for JSON files\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Iterable, Mapping, Sequence, Tuple, Union\nimport json\nimport math\nimport sys\n\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass CompareMismatch(Exception):\n    path: Tuple[Union[str, int], ...]\n    message: str\n\n    def __str__(self) -> str:\n        p = \"\".join(f\"[{k!r}]\" if isinstance(k, str) else f\"[{k}]\" for k in self.path)\n        return f\\\"Mismatch at {p or '<root>'}: {self.message}\\\"\n\"\"\",\n\"\"\"def _float_token(x: float) -> str:\n    # Stable, round-trippable formatting policy.\n    if math.isnan(x):\n        return \"NaN\"\n    if math.isinf(x):\n        return \"Infinity\" if x > 0 else \"-Infinity\"\n    # repr() is deterministic in modern Python and round-trippable for floats.\n    return repr(float(x))\n\n\ndef _normalize(obj: Any) -> Any:\n    \\\"\\\"\\\"Normalize to a JSON-safe, canonical structure.\n\n    - dict keys are coerced to str and sorted\n    - tuples/sets become lists\n    - floats become tagged strings to enforce formatting policy\n    \\\"\\\"\\\"\n    if obj is None or isinstance(obj, (bool, str)):\n        return obj\n    if isinstance(obj, int):\n        return obj\n    if isinstance(obj, float):\n        return {\"__float__\": _float_token(obj)}\n    if isinstance(obj, Mapping):\n        items = ((str(k), _normalize(v)) for k, v in obj.items())\n        return {k: v for k, v in sorted(items, key=lambda kv: kv[0])}\n    if isinstance(obj, (list, tuple, set)):\n        return [_normalize(v) for v in obj]\n    # Fallback: attempt to JSON-encode via string conversion.\n    return str(obj)\n\"\"\",\n\"\"\"def canonical_json_bytes(obj: Any) -> bytes:\n    \\\"\\\"\\\"Deterministically serialize an object to canonical JSON bytes.\\\"\\\"\\\"\n    norm = _normalize(obj)\n    txt = json.dumps(norm, sort_keys=True, separators=(\",\", \":\"), ensure_ascii=False)\n    return (txt + \"\\\\n\").encode(\"utf-8\")\n\n\ndef load_json(path: Union[str, Path]) -> Any:\n    p = Path(path)\n    with p.open(\"r\", encoding=\"utf-8\") as f:\n        return json.load(f)\n\"\"\",\n\"\"\"def _is_number(x: Any) -> bool:\n    return isinstance(x, (int, float)) and not isinstance(x, bool)\n\n\ndef _compare(a: Any, b: Any, tolerance: float | None, path: Tuple[Union[str, int], ...]) -> None:\n    # Handle numeric tolerance first (only for finite numbers).\n    if tolerance is not None and _is_number(a) and _is_number(b):\n        af, bf = float(a), float(b)\n        if math.isnan(af) and math.isnan(bf):\n            return\n        if math.isinf(af) or math.isinf(bf):\n            if af == bf:\n                return\n            raise CompareMismatch(path, f\\\"{af!r} != {bf!r}\\\")\n        if abs(af - bf) <= float(tolerance):\n            return\n        raise CompareMismatch(path, f\\\"{af!r} != {bf!r} (tolerance={tolerance})\\\")\n\n    # Canonical float tokens compare exactly when no tolerance provided.\n    if isinstance(a, float) or isinstance(b, float):\n        if isinstance(a, float) and isinstance(b, float):\n            if _float_token(a) == _float_token(b):\n                return\n        raise CompareMismatch(path, f\\\"{a!r} != {b!r}\\\")\n\n    if type(a) != type(b):\n        raise CompareMismatch(path, f\\\"type {type(a).__name__} != {type(b).__name__}\\\")\n\n    if isinstance(a, Mapping):\n        ak, bk = set(a.keys()), set(b.keys())\n        if ak != bk:\n            missing = sorted(ak - bk)\n            extra = sorted(bk - ak)\n            raise CompareMismatch(path, f\\\"keys differ missing={missing} extra={extra}\\\")\n        for k in sorted(a.keys(), key=lambda x: str(x)):\n            _compare(a[k], b[k], tolerance, path + (str(k),))\n        return\n\n    if isinstance(a, Sequence) and not isinstance(a, (str, bytes, bytearray)):\n        if len(a) != len(b):\n            raise CompareMismatch(path, f\\\"len {len(a)} != {len(b)}\\\")\n        for i, (av, bv) in enumerate(zip(a, b)):\n            _compare(av, bv, tolerance, path + (i,))\n        return\n\n    if a != b:\n        raise CompareMismatch(path, f\\\"{a!r} != {b!r}\\\")\n\"\"\",\n\"\"\"def compare_results(a: Any, b: Any, tolerance: float | None = None) -> None:\n    \\\"\\\"\\\"Raise CompareMismatch if results differ.\n\n    If tolerance is None, comparison is exact (and should match canonical JSON bytes).\n    If tolerance is set, numeric leaves are compared within absolute tolerance.\n    \\\"\\\"\\\"\n    _compare(a, b, tolerance, ())\n\n\ndef compare_files(path_a: Union[str, Path], path_b: Union[str, Path], tolerance: float | None = None) -> None:\n    a = load_json(path_a)\n    b = load_json(path_b)\n    compare_results(a, b, tolerance=tolerance)\n\"\"\",\n\"\"\"def _main(argv: list[str]) -> int:\n    if len(argv) < 3 or len(argv) > 4:\n        print(\\\"Usage: python -m benchmark_compare <a.json> <b.json> [tolerance]\\\", file=sys.stderr)\n        return 2\n    tol = float(argv[3]) if len(argv) == 4 else None\n    try:\n        compare_files(argv[1], argv[2], tolerance=tol)\n    except CompareMismatch as e:\n        print(str(e), file=sys.stderr)\n        return 1\n    return 0\n\n\nif __name__ == \\\"__main__\\\":  # pragma: no cover\n    raise SystemExit(_main(sys.argv))\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/benchmark_compare.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bf4905a48190a8b8f9c9497ab5080ae2bb7dc1b948aa",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/benchmark_compare.py\nDIR_STATE:[\"src/benchmark_compare.py\", \"src/benchmark_determinism.py\", \"src/benchmark_runner.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0412066b50cc2e61006949bfc4fb508196ac1fe36835dc6de5",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/benchmark_compare.py` with deterministic canonical JSON serialization (stable key ordering + stable float tokenization) and a recursive comparator that supports exact comparisons or optional absolute numeric tolerance, plus a small CLI entrypoint for file-to-file comparisons."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

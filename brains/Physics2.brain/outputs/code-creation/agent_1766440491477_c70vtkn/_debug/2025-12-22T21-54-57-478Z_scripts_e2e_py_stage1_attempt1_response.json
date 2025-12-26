@@ -1,0 +1,146 @@
+{
+  "content": "Implemented `scripts/e2e.py` as a CI-friendly end-to-end orchestrator that runs configurable stages, captures per-stage stdout/stderr and timing into an output artifact directory, writes `summary.json`/`manifest.json`, and emits `failure_summary.json` plus a compact console failure line for CI parsing.",
+  "reasoning": "",
+  "responseId": "resp_05fce6f0eb0855ef006949be73204c8193b964db34d8f11bfc",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 5382,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 3194,
+    "output_tokens_details": {
+      "reasoning_tokens": 1463
+    },
+    "total_tokens": 8576
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_05fce6f0eb0855ef006949be7410ec8193b3172fecda59a07e",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_05fce6f0eb0855ef006949be7789f48193a89098bad43813bc",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import os, json, pathlib, textwrap, re, sys\nroot=pathlib.Path(\"/mnt/data\")\nsorted([str(p.relative_to(root)) for p in root.rglob(\"*\") if p.is_file()][:50]), len(list(root.rglob(\"*\")))\n",
+      "container_id": "cntr_6949be2f5f848190a4b8106bfdfa0c4704094e1617bbf644",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(['.github/workflows/e2e.yml', 'Makefile'], 4)"
+        }
+      ]
+    },
+    {
+      "id": "rs_05fce6f0eb0855ef006949be7a24dc819395a9939b78de2dc0",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_05fce6f0eb0855ef006949be7a73bc81938a4be85b6086633a",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "sorted([str(p.relative_to(root)) for p in root.rglob(\"*\")])\n",
+      "container_id": "cntr_6949be2f5f848190a4b8106bfdfa0c4704094e1617bbf644",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "['.github', '.github/workflows', '.github/workflows/e2e.yml', 'Makefile']"
+        }
+      ]
+    },
+    {
+      "id": "rs_05fce6f0eb0855ef006949be7c527c81938a783f8c0fad3062",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_05fce6f0eb0855ef006949be840c5881939af44a6c3b6b7611",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((root/\"Makefile\").read_text())\n",
+      "container_id": "cntr_6949be2f5f848190a4b8106bfdfa0c4704094e1617bbf644",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "SHELL := bash\n.ONESHELL:\n.SHELLFLAGS := -euo pipefail -c\n\nPYTHON ?= python3\nRUN_ID ?= $(shell date -u +%Y%m%dT%H%M%SZ)\nARTIFACT_ROOT ?= artifacts\nE2E_OUT ?= $(ARTIFACT_ROOT)/e2e-$(RUN_ID)\n\n.DEFAULT_GOAL := help\n\n.PHONY: help e2e clean\n\nhelp:\n\t@printf \"%s\\n\" \\\n\t\t\"Targets:\" \\\n\t\t\"  make e2e   Run full pipeline, capture logs, and prepare artifacts in $(E2E_OUT)\" \\\n\t\t\"  make clean Remove artifacts/\"\n\nclean:\n\trm -rf \"$(ARTIFACT_ROOT)\ne2e:\n\tmkdir -p \"$(E2E_OUT)\"\n\t# Record environment basics for debugging (safe, non-secret)\n\t( \\\n\t  echo \"run_id=$(RUN_ID)\"; \\\n\t  echo \"utc_start=$$(date -u +%Y-%m-%dT%H:%M:%SZ)\"; \\\n\t  echo \"pwd=$$(pwd)\"; \\\n\t  echo \"python=$$($(PYTHON) -V 2>&1)\"; \\\n\t) > \"$(E2E_OUT)/env.txt\"\n\n\t# Run orchestrator with full stdout/stderr capture.\n\tset +e\n\t$(PYTHON) scripts/e2e.py --out-dir \"$(E2E_OUT)\" 2>&1 | tee \"$(E2E_OUT)/e2e.log\"\n\te2e_status=$${PIPESTATUS[0]}\n\tset -e\n\n\t# Always package artifacts (even on failure) for CI upload.\n\t$(PYTHON) scripts/artifacts.py --in-dir \"$(E2E_OUT)\" --out \"$(E2E_OUT).zip\" 1>>\"$(E2E_OUT)/artifacts.log\" 2>&1 || true\n\t$(PYTHON) scripts/artifacts.py --in-dir \"$(E2E_OUT)\" --out \"$(E2E_OUT).tar.gz\" 1>>\"$(E2E_OUT)/artifacts.log\" 2>&1 || true\n\n\t# Surface failure summary path for CI/issue automation (if produced by scripts/e2e.py).\n\tif [[ -f \"$(E2E_OUT)/failure_summary.json\" ]]; then \\\n\t  echo \"FAILURE_SUMMARY=$(E2E_OUT)/failure_summary.json\" | tee \"$(E2E_OUT)/ci_exports.env\"; \\\n\tfi\n\n\texit $$e2e_status\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_05fce6f0eb0855ef006949be8608448193ad2b3daf023c292b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_05fce6f0eb0855ef006949be94a0d48193929ef5d798655aad",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import subprocess, textwrap, os, pathlib, sys, json, shlex, re\ntry:\n    r=subprocess.run([\"make\",\"help\"], cwd=\"/mnt/data\", capture_output=True, text=True)\n    print(r.returncode)\n    print(r.stdout)\n    print(r.stderr)\nexcept Exception as e:\n    print(e)\n",
+      "container_id": "cntr_6949be2f5f848190a4b8106bfdfa0c4704094e1617bbf644",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "0\nTargets:\n  make e2e   Run full pipeline, capture logs, and prepare artifacts in artifacts/e2e-20251222T215638Z\n  make clean Remove artifacts/\n\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_05fce6f0eb0855ef006949be9784788193a36fbd8bf06e519a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_05fce6f0eb0855ef006949be9865d48193a0264e1cbb88d543",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "mf=(root/\"Makefile\").read_text().splitlines()\nfor i,l in enumerate(mf,1):\n    if \"rm -rf\" in l: print(i,repr(l))\n",
+      "container_id": "cntr_6949be2f5f848190a4b8106bfdfa0c4704094e1617bbf644",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "21 '\\trm -rf \"$(ARTIFACT_ROOT)'\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_05fce6f0eb0855ef006949be9acc888193902e15f2463403f0",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_05fce6f0eb0855ef006949be9f5b5081938ed83c30fd6e535a",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, hashlib, os, shlex, subprocess, time, datetime\n\ntarget_path = Path('/mnt/data').joinpath('scripts/e2e.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"#!/usr/bin/env python3\n\\\"\\\"\\\"End-to-end pipeline orchestrator for CI.\n\nRuns a sequence of stages, captures stdout/stderr and timing, writes structured\nJSON logs/artifacts, and emits a failure summary for downstream CI automation.\n\\\"\\\"\\\"\nfrom __future__ import annotations\n\nimport argparse\nimport datetime as _dt\nimport hashlib\nimport json\nimport os\nimport shlex\nimport subprocess\nimport sys\nimport time\nfrom pathlib import Path\"\"\",\n\"\"\"def _utc_now() -> str:\n    return _dt.datetime.now(tz=_dt.timezone.utc).isoformat(timespec=\"seconds\")\n\n\ndef _sha256(path: Path) -> str:\n    h = hashlib.sha256()\n    with path.open(\"rb\") as f:\n        for chunk in iter(lambda: f.read(1024 * 1024), b\"\"):\n            h.update(chunk)\n    return h.hexdigest()\n\n\ndef _write_json(path: Path, obj) -> None:\n    path.write_text(json.dumps(obj, indent=2, sort_keys=True) + \"\\\\n\", encoding=\"utf-8\")\"\"\",\n\"\"\"def _parse_stages(args) -> list[dict]:\n    # Priority: CLI --stage, env E2E_STAGES_JSON, file e2e_stages.json, defaults.\n    stages: list[dict] = []\n    for s in args.stage or []:\n        name, cmd = (s.split(\"::\", 1) + [\"\"])[:2]\n        name, cmd = name.strip(), cmd.strip()\n        if not name or not cmd:\n            raise SystemExit(f\"Invalid --stage {s!r}. Expected 'name::command'.\")\n        stages.append({\"name\": name, \"cmd\": cmd})\n\n    if not stages and os.getenv(\"E2E_STAGES_JSON\"):\n        try:\n            stages = json.loads(os.environ[\"E2E_STAGES_JSON\"])\n        except json.JSONDecodeError as e:\n            raise SystemExit(f\"Invalid E2E_STAGES_JSON: {e}\") from e\n\n    if not stages:\n        cfg = Path(\"e2e_stages.json\")\n        if cfg.is_file():\n            stages = json.loads(cfg.read_text(encoding=\"utf-8\"))\n\n    if not stages:\n        stages = [\n            {\"name\": \"python_version\", \"cmd\": f\"{sys.executable} -V\"},\n            {\"name\": \"compileall\", \"cmd\": f\"{sys.executable} -m compileall -q .\"},\n        ]\n    # Normalize/validate.\n    out = []\n    for st in stages:\n        if not isinstance(st, dict) or \"name\" not in st or \"cmd\" not in st:\n            raise SystemExit(\"Stages must be objects with 'name' and 'cmd'.\")\n        out.append({\"name\": str(st[\"name\"]), \"cmd\": str(st[\"cmd\"])})\n    return out\"\"\",\n\"\"\"def _run_stage(stage: dict, out_dir: Path, idx: int) -> dict:\n    safe = \"\".join(c if (c.isalnum() or c in \"-_.\") else \"_\" for c in stage[\"name\"])\n    prefix = f\"{idx:02d}_{safe}\"\n    log_dir = out_dir / \"stages\"\n    log_dir.mkdir(parents=True, exist_ok=True)\n    stdout_path = log_dir / f\"{prefix}.stdout.log\"\n    stderr_path = log_dir / f\"{prefix}.stderr.log\"\n\n    t0 = time.time()\n    start = _utc_now()\n    p = subprocess.Popen(\n        stage[\"cmd\"],\n        shell=True,\n        stdout=subprocess.PIPE,\n        stderr=subprocess.PIPE,\n        text=True,\n        env=os.environ.copy(),\n    )\n    stdout, stderr = p.communicate()\n    end = _utc_now()\n    dur_s = round(time.time() - t0, 3)\n\n    stdout_path.write_text(stdout or \"\", encoding=\"utf-8\")\n    stderr_path.write_text(stderr or \"\", encoding=\"utf-8\")\n\n    return {\n        \"name\": stage[\"name\"],\n        \"cmd\": stage[\"cmd\"],\n        \"returncode\": p.returncode,\n        \"started_at\": start,\n        \"ended_at\": end,\n        \"duration_s\": dur_s,\n        \"stdout_path\": str(stdout_path.relative_to(out_dir)),\n        \"stderr_path\": str(stderr_path.relative_to(out_dir)),\n    }\"\"\",\n\"\"\"def _manifest(out_dir: Path) -> dict:\n    files = []\n    for p in sorted(out_dir.rglob(\"*\")):\n        if p.is_file():\n            rel = p.relative_to(out_dir).as_posix()\n            files.append({\"path\": rel, \"bytes\": p.stat().st_size, \"sha256\": _sha256(p)})\n    return {\"generated_at\": _utc_now(), \"file_count\": len(files), \"files\": files}\"\"\",\n\"\"\"def main(argv: list[str]) -> int:\n    ap = argparse.ArgumentParser()\n    ap.add_argument(\"--out-dir\", required=True, help=\"Artifact output directory.\")\n    ap.add_argument(\n        \"--stage\",\n        action=\"append\",\n        help=\"Stage in form 'name::command' (repeatable). Overrides defaults.\",\n    )\n    ap.add_argument(\"--continue-on-failure\", action=\"store_true\")\n    args = ap.parse_args(argv)\n\n    out_dir = Path(args.out_dir)\n    out_dir.mkdir(parents=True, exist_ok=True)\n\n    run_meta = {\n        \"started_at\": _utc_now(),\n        \"cwd\": str(Path.cwd()),\n        \"python\": sys.version.split()[0],\n        \"argv\": [sys.executable, *argv],\n    }\n\n    stages = _parse_stages(args)\n    results, failures = [], []\n    for i, st in enumerate(stages, 1):\n        res = _run_stage(st, out_dir, i)\n        results.append(res)\n        if res[\"returncode\"] != 0:\n            failures.append(res)\n            if not args.continue_on_failure:\n                break\n\n    run_meta[\"ended_at\"] = _utc_now()\n    run_meta[\"ok\"] = len(failures) == 0\n    summary = {\"run\": run_meta, \"stages\": results}\n    _write_json(out_dir / \"summary.json\", summary)\n\n    if failures:\n        f = failures[0]\n        repro = [\n            \"git clone <repo_url>\",\n            \"cd <repo>\",\n            f\"python3 scripts/e2e.py --out-dir /tmp/e2e --stage {shlex.quote(f['name'] + '::' + f['cmd'])}\",\n        ]\n        failure_summary = {\n            \"failed\": True,\n            \"failed_stage\": f,\n            \"repro_steps\": repro,\n            \"summary_path\": str((out_dir / \"summary.json\").resolve()),\n        }\n        _write_json(out_dir / \"failure_summary.json\", failure_summary)\n        # Print a short, CI-friendly summary.\n        print(f\"E2E_FAILED stage={f['name']} rc={f['returncode']} stdout={f['stdout_path']} stderr={f['stderr_path']}\")\n    else:\n        print(\"E2E_OK\")\n\n    _write_json(out_dir / \"manifest.json\", _manifest(out_dir))\n    return 1 if failures else 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main(sys.argv[1:]))\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:scripts/e2e.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949be2f5f848190a4b8106bfdfa0c4704094e1617bbf644",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:scripts/e2e.py\nDIR_STATE:[\"scripts/e2e.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_05fce6f0eb0855ef006949beb7414481938f1e02d173ddca1f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `scripts/e2e.py` as a CI-friendly end-to-end orchestrator that runs configurable stages, captures per-stage stdout/stderr and timing into an output artifact directory, writes `summary.json`/`manifest.json`, and emits `failure_summary.json` plus a compact console failure line for CI parsing."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

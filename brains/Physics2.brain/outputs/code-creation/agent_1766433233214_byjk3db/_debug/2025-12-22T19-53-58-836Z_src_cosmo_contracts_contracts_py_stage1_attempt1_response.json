@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/cosmo_contracts/contracts.py` with benchmark-id normalization, required-metadata validation, reference/invariants/tolerance/test-vector normalization, a `Contract` dataclass builder, and a canonical Markdown renderer for standardized per-benchmark Contract sections.",
+  "reasoning": "",
+  "responseId": "resp_065fc51073c55130006949a24154908196b2adc314205d398c",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3779,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2260,
+    "output_tokens_details": {
+      "reasoning_tokens": 425
+    },
+    "total_tokens": 6039
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_065fc51073c55130006949a24236f48196954c507a4e1b499c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_065fc51073c55130006949a24a0f788196acada763b81bbab5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, re\ntarget_path = Path('/mnt/data').joinpath('src/cosmo_contracts/contracts.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(r\"\"\"# SPDX-License-Identifier: MIT\n\"\"\"\n)\n\nchunks.append(r\"\"\"from __future__ import annotations\n\nimport json\nimport re\nfrom dataclasses import dataclass\nfrom typing import Any, Dict, Iterable, List, Mapping, MutableMapping, Optional, Sequence, Tuple\n\n\nBENCHMARK_ID_RE = re.compile(r\"^[a-z0-9][a-z0-9\\-]*(?:\\.[a-z0-9][a-z0-9\\-]*)*$\")\nREQUIRED_METADATA: Tuple[str, ...] = (\n    \"title\",\n    \"version\",\n    \"summary\",\n    \"inputs\",\n    \"outputs\",\n)\n\"\"\")\n\nchunks.append(r\"\"\"def normalize_benchmark_id(raw: str) -> str:\n    s = (raw or \"\").strip().lower()\n    s = re.sub(r\"^benchmark\\s*[:/]\\s*\", \"\", s)\n    s = s.replace(\"_\", \"-\")\n    s = re.sub(r\"\\s+\", \"-\", s)\n    s = re.sub(r\"[^a-z0-9\\.\\-]+\", \"-\", s)\n    s = re.sub(r\"-{2,}\", \"-\", s).strip(\"-.\")\n    if not s or not BENCHMARK_ID_RE.match(s):\n        raise ValueError(f\"Invalid benchmark_id after normalization: {raw!r} -> {s!r}\")\n    return s\n\n\ndef _jsonable(x: Any) -> Any:\n    try:\n        json.dumps(x, sort_keys=True, ensure_ascii=False)\n        return x\n    except TypeError:\n        if hasattr(x, \"__dict__\"):\n            return _jsonable(vars(x))\n        if isinstance(x, (set, tuple)):\n            return [_jsonable(v) for v in x]\n        raise\n\"\"\")\n\nchunks.append(r\"\"\"def normalize_metadata(meta: Mapping[str, Any]) -> Dict[str, Any]:\n    m = {str(k).strip(): _jsonable(v) for k, v in dict(meta or {}).items()}\n    missing = [k for k in REQUIRED_METADATA if not m.get(k)]\n    if missing:\n        raise ValueError(f\"Missing required metadata keys: {missing}\")\n    m[\"version\"] = str(m[\"version\"]).strip()\n    m[\"title\"] = str(m[\"title\"]).strip()\n    m[\"summary\"] = str(m[\"summary\"]).strip()\n    for k in (\"inputs\", \"outputs\"):\n        if not isinstance(m[k], (dict, list, str)):\n            raise ValueError(f\"metadata[{k!r}] must be a dict/list/str, got {type(m[k]).__name__}\")\n    return m\n\n\ndef default_tolerance_policy() -> Dict[str, Any]:\n    # Conservative default: exact match unless benchmark overrides.\n    return {\"mode\": \"exact\", \"rtol\": 0.0, \"atol\": 0.0, \"nan_policy\": \"error\"}\n\n\ndef normalize_tolerance_policy(tp: Optional[Mapping[str, Any]]) -> Dict[str, Any]:\n    t = dict(default_tolerance_policy())\n    if tp:\n        t.update({str(k): _jsonable(v) for k, v in dict(tp).items()})\n    mode = str(t.get(\"mode\", \"exact\")).strip().lower()\n    if mode not in {\"exact\", \"numeric\"}:\n        raise ValueError(\"tolerance.mode must be 'exact' or 'numeric'\")\n    t[\"mode\"] = mode\n    t[\"rtol\"] = float(t.get(\"rtol\", 0.0))\n    t[\"atol\"] = float(t.get(\"atol\", 0.0))\n    nanp = str(t.get(\"nan_policy\", \"error\")).strip().lower()\n    if nanp not in {\"error\", \"allow\", \"propagate\"}:\n        raise ValueError(\"tolerance.nan_policy must be 'error', 'allow', or 'propagate'\")\n    t[\"nan_policy\"] = nanp\n    return t\n\"\"\")\n\nchunks.append(r\"\"\"def normalize_invariants(invariants: Optional[Iterable[str]]) -> List[str]:\n    inv: List[str] = []\n    for x in invariants or []:\n        s = str(x).strip()\n        if s:\n            inv.append(s)\n    # de-dup while preserving order\n    seen = set()\n    out: List[str] = []\n    for s in inv:\n        if s not in seen:\n            out.append(s)\n            seen.add(s)\n    return out\n\n\ndef normalize_reference(reference: Mapping[str, Any]) -> Dict[str, Any]:\n    r = {str(k).strip(): _jsonable(v) for k, v in dict(reference or {}).items()}\n    if not r.get(\"pseudocode\"):\n        raise ValueError(\"reference.pseudocode is required\")\n    r[\"pseudocode\"] = str(r[\"pseudocode\"]).strip()\n    if r.get(\"notes\") is not None:\n        r[\"notes\"] = str(r[\"notes\"]).strip()\n    return r\n\"\"\")\n\nchunks.append(r\"\"\"def normalize_test_vector(tv: Mapping[str, Any]) -> Dict[str, Any]:\n    if not isinstance(tv, Mapping):\n        raise ValueError(\"test_vector must be a mapping\")\n    out = {str(k).strip(): _jsonable(v) for k, v in dict(tv).items()}\n    if \"inputs\" not in out or \"expected\" not in out:\n        raise ValueError(\"test_vector must contain 'inputs' and 'expected'\")\n    return out\n\n\n@dataclass(frozen=True)\nclass Contract:\n    benchmark_id: str\n    metadata: Dict[str, Any]\n    reference: Dict[str, Any]\n    invariants: List[str]\n    tolerance: Dict[str, Any]\n    canonical_test_vector: Dict[str, Any]\n\n    def as_dict(self) -> Dict[str, Any]:\n        return {\n            \"benchmark_id\": self.benchmark_id,\n            \"metadata\": self.metadata,\n            \"reference\": self.reference,\n            \"invariants\": self.invariants,\n            \"tolerance\": self.tolerance,\n            \"canonical_test_vector\": self.canonical_test_vector,\n        }\n\"\"\")\n\nchunks.append(r\"\"\"def build_contract(\n    benchmark_id: str,\n    *,\n    metadata: Mapping[str, Any],\n    reference: Mapping[str, Any],\n    invariants: Optional[Iterable[str]] = None,\n    tolerance: Optional[Mapping[str, Any]] = None,\n    canonical_test_vector: Mapping[str, Any],\n) -> Contract:\n    return Contract(\n        benchmark_id=normalize_benchmark_id(benchmark_id),\n        metadata=normalize_metadata(metadata),\n        reference=normalize_reference(reference),\n        invariants=normalize_invariants(invariants),\n        tolerance=normalize_tolerance_policy(tolerance),\n        canonical_test_vector=normalize_test_vector(canonical_test_vector),\n    )\n\n\ndef render_contract_markdown(contract: Contract) -> str:\n    c = contract.as_dict()\n    meta = json.dumps(c[\"metadata\"], indent=2, sort_keys=True, ensure_ascii=False)\n    ref = c[\"reference\"].get(\"pseudocode\", \"\")\n    inv = \"\\n\".join(f\"- {s}\" for s in c[\"invariants\"]) or \"- (none)\"\n    tol = json.dumps(c[\"tolerance\"], indent=2, sort_keys=True, ensure_ascii=False)\n    tv = json.dumps(c[\"canonical_test_vector\"], indent=2, sort_keys=True, ensure_ascii=False)\n    return (\n        \"## Contract\\n\\n\"\n        \"### Required metadata\\n\\n```json\\n\" + meta + \"\\n```\\n\\n\"\n        \"### Reference algorithm / pseudocode\\n\\n```text\\n\" + ref + \"\\n```\\n\\n\"\n        \"### Output invariants\\n\\n\" + inv + \"\\n\\n\"\n        \"### Tolerance policy\\n\\n```json\\n\" + tol + \"\\n```\\n\\n\"\n        \"### Canonical test vector\\n\\n```json\\n\" + tv + \"\\n```\\n\"\n    )\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/cosmo_contracts/contracts.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949a1d5445881908092d2723527a8b207f782e9910e8fd5",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/cosmo_contracts/contracts.py\nDIR_STATE:[\"src/cosmo_contracts/__init__.py\", \"src/cosmo_contracts/contracts.py\", \"src/cosmo_contracts/markdown.py\", \"src/cosmo_contracts/schema.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_065fc51073c55130006949a25fc1d8819695bf229b18bd51ec",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/cosmo_contracts/contracts.py` with benchmark-id normalization, required-metadata validation, reference/invariants/tolerance/test-vector normalization, a `Contract` dataclass builder, and a canonical Markdown renderer for standardized per-benchmark Contract sections."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

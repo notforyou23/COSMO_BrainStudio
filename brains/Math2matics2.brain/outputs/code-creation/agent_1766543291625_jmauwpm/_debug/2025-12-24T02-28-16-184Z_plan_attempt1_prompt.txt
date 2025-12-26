@@ -1,0 +1,37 @@
+You are planning a python script implementation for the following mission:
+Refactor and modularize reusable code artifacts: 2025-12-24T02-18-55-749Z_src_experiments_io_py_stage1_export_export_prompt.txt, 2025-12-24T02-18-55-749Z_src_experiments_common_py_stage1_export_export_prompt.txt, io.py, 2025-12-24T02-18-55-749Z_src_experiments_plotting_py_stage1_export_export_prompt.txt, 2025-12-24T02-18-55-749Z_src_experiments_sweep_py_stage1_export_export_prompt.txt
+
+Relevant context:
+- [INTROSPECTION] 2025-12-24T01-56-08-639Z_src_refactor_modularize_export_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766541
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [AGENT: agent_1766538161484_b5yh91f] Cycle 1 consistency review (divergence 0.97):
+Summary (high-level): The three branches are about differ
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_scripts_run_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766539771836_cun
+- [AGENT: agent_1766539871589_7i2wiq6] Cycle 16 consistency review (divergence 0.96):
+Summary: these three branches share a common reliance on
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+- [AGENT: agent_1766539198393_s2saqmc] {"agentId":"agent_1766539198393_s2saqmc","goalId":"goal_35","containerId":"cntr_694b3fc5e9348190afa41c8
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

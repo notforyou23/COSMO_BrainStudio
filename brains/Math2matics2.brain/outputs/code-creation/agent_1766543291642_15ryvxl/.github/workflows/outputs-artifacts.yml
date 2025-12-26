@@ -1,0 +1,54 @@
+name: outputs-artifacts
+
+on:
+  push:
+    paths:
+      - "scripts/generate_outputs.py"
+      - "outputs/**"
+      - ".github/workflows/outputs-artifacts.yml"
+  pull_request:
+    paths:
+      - "scripts/generate_outputs.py"
+      - "outputs/**"
+      - ".github/workflows/outputs-artifacts.yml"
+
+permissions:
+  contents: read
+jobs:
+  generate-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Generate /outputs
+        run: python scripts/generate_outputs.py
+
+      - name: Verify determinism (repeat + hash compare)
+        shell: bash
+        run: |
+          set -euo pipefail
+          find outputs -type f -print0 | sort -z | xargs -0 sha256sum > /tmp/outputs.sha1
+          python scripts/generate_outputs.py
+          find outputs -type f -print0 | sort -z | xargs -0 sha256sum > /tmp/outputs.sha2
+          diff -u /tmp/outputs.sha1 /tmp/outputs.sha2
+
+      - name: Ensure no unintended repo changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git status --porcelain
+          test -z "$(git status --porcelain)"
+
+      - name: Upload outputs artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: outputs
+          path: outputs/
+          if-no-files-found: error
+          retention-days: 14

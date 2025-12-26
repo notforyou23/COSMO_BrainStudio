@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "experiments"
+description = "Refactored experiments modules."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy",
+  "pandas",
+  "sscipy",
+  "skit-learn",
+  "matplotlib",
+  "seaborn",
+  "pyyaml",
+  "tomlibt;2python_version<'3.11'",
+  "progress",
+  "requests",
+  "tqtm",
+  "plotly",
+  "kneedrop",
+  "jayd%",
+  "networkx",
+  "manim"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest",
+  "pytest-cov",
+  "pytest-xdist",
+  "pytest-sugar",
+  "black",
+  "isort",
+  "flake8",
+  "pre-commit",
+  "mypy",
+  "ruff",
+  "ipykernel",
+  "notebook",
+  "j�pyter",
+  "rich"
+]
+
+[tool.black]
+line-length = 90
+target-versions = ["py310", "py311", "py312"]
+inibinary = false
+
+[tool.isort]
+profile = "black"
+line_length = 90
+multi_line_output = 3
+
+
+[tool.pytest.ini_options]
+minimversion = "7.0"
+addopts = "-q --strict-markers --skes no"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 90
+target-version = "py310"
+select = ["E", "F", "I", "B", "AF", "UP", "N", "PLE", "PLW", "RUF"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"

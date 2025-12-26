@@ -1,0 +1,270 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766627257933_dolo3mq",
+  "agentType": "code-creation",
+  "goalId": "goal_237",
+  "missionId": "strategic_goal_237_1766627257933",
+  "spawnCycle": 137,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-25T01:47:45.525Z",
+  "completedAt": "2025-12-25T01:52:51.034Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "src/claims/intake_fields.py",
+      "description": "Defines the required intake fields and their semantics (including claim text and dataset anchor) in a single, importable Python configuration module.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claims/intake_fields.py\nDIR_STATE:[\"src/claims/intake_fields.py\"]\nSummary: Added a single-source intake field configuration that marks claim_text and dataset_anchor as hard-fail required and includes compliant/non-compliant examples.\n",
+          "timestamp": "2025-12-25T01:48:05.328Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claims/intake_fields.py\nDIR_STATE:[\"src/claims/intake_fields.py\"]\nSummary: Added a canonical, importable intake-field configuration with hard-fail requirements for claim_text and dataset_anchor plus compliant/non-compliant examples for primary-source verification.\n",
+          "timestamp": "2025-12-25T01:48:30.188Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:47:45.525Z",
+      "failedAt": "2025-12-25T01:48:30.188Z"
+    },
+    {
+      "path": "src/claims/intake_schema.py",
+      "description": "Implements a machine-validated schema (e.g., JSON Schema as a Python dict) for claim card intake, encoding required fields and structural constraints.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claims/intake_schema.py\nDIR_STATE:[\"src/claims/intake_fields.py\", \"src/claims/intake_schema.py\"]\nSUMMARY: Wrote a strict JSON Schema requiring non-empty claim_text and a dataset_anchor with at least one concrete locator, plus compliant/non-compliant verification examples.\n",
+          "timestamp": "2025-12-25T01:48:48.463Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claims/intake_schema.py\nDIR_STATE:[\"src/claims/intake_fields.py\", \"src/claims/intake_schema.py\"]\nSummary: Added a strict JSON Schema requiring non-empty claim_text and dataset_anchor plus compliant/non-compliant primary-source templates.\n",
+          "timestamp": "2025-12-25T01:49:04.178Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:47:45.525Z",
+      "failedAt": "2025-12-25T01:49:04.178Z"
+    },
+    {
+      "path": "src/claims/intake_validator.py",
+      "description": "Provides hard-fail validation functions that reject claim cards missing required claim text or dataset anchor and emits clear error messages.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claims/intake_validator.py\nDIR_STATE:[\"src/claims/intake_fields.py\", \"src/claims/intake_schema.py\", \"src/claims/intake_validator.py\"]\nSUMMARY: Added hard-fail intake validators that require non-empty claim_text and a present dataset_anchor with clear, field-specific errors.\n",
+          "timestamp": "2025-12-25T01:49:23.107Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claims/intake_validator.py\nDIR_STATE:[\"src/claims/intake_fields.py\", \"src/claims/intake_schema.py\", \"src/claims/intake_validator.py\"]\nSummary: Added hard-fail intake validation enforcing non-blank claim_text and dataset_anchor with clear, structured error reporting.\n",
+          "timestamp": "2025-12-25T01:49:39.122Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:47:45.525Z",
+      "failedAt": "2025-12-25T01:49:39.122Z"
+    },
+    {
+      "path": "src/claims/templates.py",
+      "description": "Contains example compliant vs non-compliant primary-source verification templates as structured strings/data for reuse in docs and tests.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claims/templates.py\nDIR_STATE:[\"src/claims/intake_fields.py\", \"src/claims/intake_schema.py\", \"src/claims/intake_validator.py\", \"src/claims/templates.py\"]\nSummary: Added reusable compliant vs non-compliant primary-source verification templates highlighting required claim_text and dataset_anchor.\n",
+          "timestamp": "2025-12-25T01:49:50.778Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claims/templates.py\nDIR_STATE:[\"src/claims/intake_fields.py\", \"src/claims/intake_schema.py\", \"src/claims/intake_validator.py\", \"src/claims/templates.py\"]\nSummary: Added structured compliant vs non-compliant primary-source verification templates emphasizing required claim_text and dataset_anchor.\n",
+          "timestamp": "2025-12-25T01:50:11.851Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:47:45.525Z",
+      "failedAt": "2025-12-25T01:50:11.851Z"
+    },
+    {
+      "path": "docs/intake_checklist.md",
+      "description": "Updates the intake checklist to codify claim text and dataset anchor as explicitly required fields and mirrors the validator hard-fail rules.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-25T01:50:37.308Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-25T01:50:56.219Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:47:45.525Z",
+      "failedAt": "2025-12-25T01:50:56.219Z"
+    },
+    {
+      "path": "docs/CLAIM_CARD_TEMPLATE.md",
+      "description": "Updates the claim card template to include required claim text and dataset anchor fields and adds an inline compliant vs non-compliant example section for primary-source verification.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "INDEX_AND_TRACKER_MAINTENANCE.md\", \"docs/CLAIM_CARD_TEMPLATE.md\", \"docs/QA_GATE.md\", \"docs/claim_card_workflow.md\", \"docs/intake_checklist.md\", \"docs/path_canonicalization.md\", \"docs/qa.md\", \"docs/qa_runner.md\", \"docs/tracker.md\"]\nSummary: Updated the claim card template to hard-require claim_text and dataset_anchor and added inline compliant vs non-compliant primary-source verification examples.\n",
+          "timestamp": "2025-12-25T01:51:12.305Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "EX_AND_TRACKER_MAINTENANCE.md\", \"docs/CLAIM_CARD_TEMPLATE.md\", \"docs/QA_GATE.md\", \"docs/claim_card_workflow.md\", \"docs/intake_checklist.md\", \"docs/path_canonicalization.md\", \"docs/qa.md\", \"docs/qa_runner.md\", \"docs/tracker.md\"]\nSUMMARY:Updated the claim card template to require Claim Text and Dataset Anchor fields and added an inline compliant vs non-compliant primary-source verification example.\n",
+          "timestamp": "2025-12-25T01:51:29.429Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:47:45.525Z",
+      "failedAt": "2025-12-25T01:51:29.429Z"
+    },
+    {
+      "path": "docs/primary_source_verification_examples.md",
+      "description": "Standalone examples showing compliant vs non-compliant inputs focused on primary-source verification, highlighting missing claim text or dataset anchor as hard failures.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-25T01:51:45.246Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-25T01:52:01.509Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:47:45.525Z",
+      "failedAt": "2025-12-25T01:52:01.509Z"
+    },
+    {
+      "path": "tests/test_intake_validator_required_fields.py",
+      "description": "Unit tests asserting the validator hard-fails when claim text or dataset anchor is missing and passes when both are present and well-formed.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/test_intake_validator_required_fields.py\nDIR_STATE:[\"tests/test_claim_card_validation.py\", \"tests/test_intake_validation.py\", \"tests/test_intake_validator_required_fields.py\", \"tests/test_path_canonicalize.py\"]\nSummary: Added unit tests that require claim_text and dataset_anchor and demonstrate compliant vs non-compliant primary-source verification inputs.\n",
+          "timestamp": "2025-12-25T01:52:22.546Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/test_intake_validator_required_fields.py\nDIR_STATE:[\"tests/test_claim_card_validation.py\", \"tests/test_intake_validation.py\", \"tests/test_intake_validator_required_fields.py\", \"tests/test_path_canonicalize.py\"]\nSUMMARY: Added unit tests that hard-fail validation when claim_text or dataset_anchor is missing/blank and pass when both are present.\n",
+          "timestamp": "2025-12-25T01:52:51.033Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:47:45.525Z",
+      "failedAt": "2025-12-25T01:52:51.033Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Codify these as required fields in the intake checklist + validator rules (hard-fail if claim text or dataset anchor is missing) and add an example template showing compliant vs non-compliant inputs for primary-source verification.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Defines minimum viable intake requirements for primary-source verification (2019–2025), directly strengthening the standardized intake checklist and enabling evidence-targeted search plans by ensuring..."
+  ],
+  "projectName": "generated_configuration_1766627258175",
+  "language": "python",
+  "type": "configuration",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-25T01:52:51.034Z",
+  "summary": {
+    "completed": 0,
+    "failed": 8,
+    "total": 8
+  }
+}

@@ -1,0 +1,158 @@
+# integration_map.yml
+# Deterministic mapping for integrating agent-generated output trees into the
+# canonical repository layout.
+schema_version: 1
+apply_order: rules_in_list_order
+path_sort: posix_lexicographic
+conflict_policy_default: error
+symlink_policy: reject
+special_files_policy:
+  deny:
+    - ".git/**"
+    - ".github/workflows/*.yml~"
+    - "**/.DS_Store"
+    - "**/__pycache__/**"
+    - "**/*.pyc"
+    - "**/*.pyo"
+    - "**/*.pyd"
+    - "**/.pytest_cache/**"
+    - "**/.mypy_cache/**"
+    - "**/.ruff_cache/**"
+    - "**/.venv/**"
+    - "**/venv/**"
+    - "**/node_modules/**"
+    - "**/dist/**"
+    - "**/build/**"
+
+canonical_layout:
+  roots:
+    - ".github/workflows"
+    - "tools"
+    - "src"
+    - "tests"
+    - "docs"
+    - "scripts"
+  allow_write:
+    - ".github/workflows/**"
+    - "tools/**"
+    - "src/**"
+    - "tests/**"
+    - "docs/**"
+    - "scripts/**"
+    - "pyproject.toml"
+    - "requirements.txt"
+    - ".pre-commit-config.yaml"
+    - "README.md"
+    - "LICENSE"
+    - "CHANGELOG.md"
+    - "RELEASE/**"
+
+sources:
+  # Directories where code-creation agents commonly emit files. The integration
+  # tool should scan these roots (if present) and apply rules below.
+  roots:
+    - "agent_outputs"
+    - "agent_output"
+    - "outputs"
+    - "output"
+    - "generated"
+    - "artifacts"
+    - "workspace"
+    - "repo"
+  # Optional extra roots may be passed by CLI; they are appended after these.
+
+rules:
+  # --- GitHub Actions / CI ---
+  - id: gh_workflows
+    from_glob:
+      - "**/.github/workflows/*.yml"
+      - "**/.github/workflows/*.yaml"
+    to_dir: ".github/workflows"
+    strategy: merge_files
+    conflict: keep_newest_by_mtime
+
+  # --- Tooling / integration scripts ---
+  - id: tools_dir
+    from_glob:
+      - "**/tools/**"
+    to_dir: "tools"
+    strategy: merge_tree
+    conflict: error
+
+  # --- Python package code ---
+  - id: src_dir
+    from_glob:
+      - "**/src/**"
+    to_dir: "src"
+    strategy: merge_tree
+    conflict: error
+
+  - id: tests_dir
+    from_glob:
+      - "**/tests/**"
+    to_dir: "tests"
+    strategy: merge_tree
+    conflict: error
+
+  # --- Project meta / root files ---
+  - id: pyproject
+    from_glob:
+      - "**/pyproject.toml"
+    to_path: "pyproject.toml"
+    strategy: move_file
+    conflict: keep_newest_by_mtime
+
+  - id: requirements
+    from_glob:
+      - "**/requirements.txt"
+      - "**/requirements/*.txt"
+    to_dir: "requirements"
+    strategy: merge_files
+    conflict: keep_newest_by_mtime
+
+  - id: precommit
+    from_glob:
+      - "**/.pre-commit-config.yaml"
+    to_path: ".pre-commit-config.yaml"
+    strategy: move_file
+    conflict: keep_newest_by_mtime
+
+  - id: readme
+    from_glob:
+      - "**/README.md"
+    to_path: "README.md"
+    strategy: move_file
+    conflict: keep_newest_by_mtime
+
+  - id: license
+    from_glob:
+      - "**/LICENSE"
+      - "**/LICENSE.*"
+    to_dir: "."
+    strategy: merge_files
+    conflict: keep_newest_by_mtime
+
+  - id: changelog
+    from_glob:
+      - "**/CHANGELOG.md"
+    to_path: "CHANGELOG.md"
+    strategy: move_file
+    conflict: keep_newest_by_mtime
+
+  - id: release_docs
+    from_glob:
+      - "**/RELEASE/**"
+      - "**/release/**"
+    to_dir: "RELEASE"
+    strategy: merge_tree
+    conflict: error
+
+notes:
+  deterministic_behavior:
+    - "The integrator must compute candidate matches per rule, then apply rules in listed order."
+    - "Within each rule, matched paths are processed in lexicographic (POSIX) order for repeatability."
+    - "A match is only eligible if its final destination path matches canonical_layout.allow_write and does not match special_files_policy.deny."
+  safety:
+    - "Reject symlinks to avoid unexpected writes outside the repository."
+    - "By default, any destination collision is an error unless rule conflict policy allows resolution."
+    - "Rules are intended to be conservative: unknown files remain in the source tree unless explicitly mapped."

@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a focused remediation patch that adds a 'no-container/failsafe execution mode' to the QA runner scripts (e.g., graceful degradation, reduced test set, clear error capture) so that execution does not terminate with 'container lost' without producing logs and partial results; document the run command in /outputs/qa/RUN_INSTRUCTIONS.md.
+Project: focused remediation patch that adds a 'no-container/failsafe execution mode' to the QA runner (python script)
+
+Target file details:
+- Path: scripts/qa/detect.py
+- Purpose: Environment and failure detection helpers that identify docker availability, container runtime health, and common 'container lost' patterns to decide when to degrade gracefully.
+- Category: source
+
+Other planned files (for context only):
+- scripts/qa/qa_gate.py: Canonical QA gate entrypoint that attempts containerized execution first and transparently falls back to a no-container failsafe mode while always writing logs and partial results to /outputs/qa.
+- scripts/qa/docker_runner.py: Docker-based QA execution helper that runs the intended full QA command in a container, captures stdout/stderr and exit codes, and detects container-loss scenarios for failsafe triggering.
+- scripts/qa/failsafe_runner.py: No-container failsafe QA runner that executes a reduced, deterministic test subset locally with strict timeouts and structured error capture to ensure logs and partial results are produced.
+- scripts/qa/artifacts.py: Utility module for creating /outputs/qa directories and writing standardized artifacts (run metadata, logs, partial results, and error reports) in a consistent schema.
+
+Reference insights:
+- [CONSOLIDATED] A robust delivery pipeline should include a single, canonical “QA gate” command that deterministically verifies required outp
+- [CONSOLIDATED] A robust delivery pipeline should include a single, canonical “QA gate” command that deterministically verifies required outp
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+
+Key requirements:
+- docker
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Environment and failure detection helpers that identify docker availability, container runtime health, and common 'container lost' patterns to decide when to degrade gracefully.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/qa/detect.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/qa/detect.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/qa/detect.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/cli.py` as a lightweight, reproducible CLI with `list`/`run` commands, seed control, parameter loading (JSON string or file), structured output directories under `outputs/`, and automatic `manifest.json` recording for each run.",
+  "reasoning": "",
+  "responseId": "resp_0fbc745840a34067006949971376b48196ae95a6fc8013f99f",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3280,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1765,
+    "output_tokens_details": {
+      "reasoning_tokens": 293
+    },
+    "total_tokens": 5045
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0fbc745840a3406700694997143e988196a519bfccf65b5821",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0fbc745840a34067006949971aa5d08196911ef8407a8ee6e2",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, sys, datetime, importlib, argparse, random\ntarget_path = Path('/mnt/data').joinpath('src/cli.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\n\\\"\\\"\\\"Command-line interface to run prototype experiments.\n\nThis CLI is intentionally lightweight: it standardizes seeding, output directories,\nand writing a run manifest for reproducibility.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport importlib\nimport json\nimport os\nimport random\nfrom dataclasses import dataclass\nfrom datetime import datetime, timezone\nfrom pathlib import Path\nfrom typing import Any, Dict, Optional\n\n\nPROJECT_ROOT = Path(__file__).resolve().parents[1]\nDEFAULT_OUTDIR = PROJECT_ROOT / \"outputs\"\nDEFAULT_EXPERIMENTS = {\n    \"ising\": \"src.experiments.toy_ising_emergent_classicality\",\n    \"entanglement\": \"src.experiments.entanglement_graph_geometry\",\n}\n\n\ndef _utc_run_id() -> str:\n    return datetime.now(timezone.utc).strftime(\"%Y%m%dT%H%M%SZ\")\n\n\ndef _read_params(params_json: Optional[str], params_file: Optional[str]) -> Dict[str, Any]:\n    if params_json and params_file:\n        raise SystemExit(\"Provide only one of --params-json or --params-file.\")\n    if params_file:\n        return json.loads(Path(params_file).read_text(encoding=\"utf-8\"))\n    if params_json:\n        return json.loads(params_json)\n    return {}\n\n\ndef _ensure_dir(p: Path) -> Path:\n    p.mkdir(parents=True, exist_ok=True)\n    return p\n\n\ndef _resolve_experiment(name_or_module: str) -> str:\n    return DEFAULT_EXPERIMENTS.get(name_or_module, name_or_module)\n\n\ndef _seed_everything(seed: int) -> None:\n    random.seed(seed)\n    os.environ[\"PYTHONHASHSEED\"] = str(seed)\n    try:\n        import numpy as np  # type: ignore\n\n        np.random.seed(seed)\n    except Exception:\n        pass\n\"\"\")\n\nchunks.append(\"\"\"\ndef _write_manifest(outdir: Path, payload: Dict[str, Any]) -> Path:\n    path = outdir / \"manifest.json\"\n    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + \"\\\\n\", encoding=\"utf-8\")\n    return path\n\n\ndef _call_experiment(module_name: str, *, outdir: Path, seed: int, params: Dict[str, Any]) -> Any:\n    mod = importlib.import_module(module_name)\n    if hasattr(mod, \"run_cli\"):\n        # Preferred: run_cli(namespace) for maximal flexibility\n        ns = argparse.Namespace(outdir=str(outdir), seed=seed, **params)\n        return mod.run_cli(ns)\n    if hasattr(mod, \"run\"):\n        return mod.run(outdir=outdir, seed=seed, **params)\n    if hasattr(mod, \"main\"):\n        ns = argparse.Namespace(outdir=str(outdir), seed=seed, **params)\n        return mod.main(ns)\n    raise SystemExit(f\"Experiment module '{module_name}' has no run/run_cli/main entry point.\")\n\n\ndef build_parser() -> argparse.ArgumentParser:\n    p = argparse.ArgumentParser(prog=\"generated_script_1766430415667\", add_help=True)\n    sub = p.add_subparsers(dest=\"cmd\", required=True)\n\n    lp = sub.add_parser(\"list\", help=\"List known experiment aliases.\")\n    lp.add_argument(\"--json\", action=\"store_true\", help=\"Print as JSON.\")\n\n    rp = sub.add_parser(\"run\", help=\"Run an experiment by alias or module path.\")\n    rp.add_argument(\"experiment\", help=\"Alias (e.g. 'ising') or module path (e.g. 'src.experiments.x').\")\n    rp.add_argument(\"--seed\", type=int, default=0, help=\"Random seed (0 means auto).\")\n    rp.add_argument(\"--outdir\", type=str, default=str(DEFAULT_OUTDIR), help=\"Output directory base.\")\n    rp.add_argument(\"--run-id\", type=str, default=\"\", help=\"Override run id (default: UTC timestamp).\")\n    rp.add_argument(\"--params-json\", type=str, default=None, help=\"JSON dict of experiment parameters.\")\n    rp.add_argument(\"--params-file\", type=str, default=None, help=\"Path to JSON file of parameters.\")\n    rp.add_argument(\"--no-manifest\", action=\"store_true\", help=\"Do not write manifest.json.\")\n\n    return p\n\"\"\")\n\nchunks.append(\"\"\"\ndef main(argv: Optional[list[str]] = None) -> int:\n    args = build_parser().parse_args(argv)\n\n    if args.cmd == \"list\":\n        if args.json:\n            print(json.dumps(DEFAULT_EXPERIMENTS, indent=2, sort_keys=True))\n        else:\n            for k, v in sorted(DEFAULT_EXPERIMENTS.items()):\n                print(f\"{k}\\\\t{v}\")\n        return 0\n\n    # run\n    module_name = _resolve_experiment(args.experiment)\n    seed = args.seed if args.seed != 0 else (abs(hash(_utc_run_id())) % (2**31 - 1))\n    run_id = args.run_id or _utc_run_id()\n    params = _read_params(args.params_json, args.params_file)\n\n    base = Path(args.outdir).expanduser().resolve()\n    outdir = _ensure_dir(base / module_name.split(\".\")[-1] / run_id)\n\n    _seed_everything(seed)\n\n    if not args.no_manifest:\n        _write_manifest(\n            outdir,\n            {\n                \"run_id\": run_id,\n                \"seed\": seed,\n                \"experiment\": args.experiment,\n                \"module\": module_name,\n                \"params\": params,\n                \"outdir\": str(outdir),\n                \"timestamp_utc\": run_id,\n                \"cwd\": os.getcwd(),\n            },\n        )\n\n    result = _call_experiment(module_name, outdir=outdir, seed=seed, params=params)\n\n    # Keep console output short but informative for automation.\n    print(str(outdir))\n    if isinstance(result, dict) and result:\n        print(json.dumps(result, indent=2, sort_keys=True))\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/cli.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694996cf1f0881908fd6ebe4e5dd54140c8f193d7d2aa5f8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/cli.py\nDIR_STATE:[\"src/cli.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0fbc745840a34067006949972f705c819691cf7bcc4dfc5ade",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/cli.py` as a lightweight, reproducible CLI with `list`/`run` commands, seed control, parameter loading (JSON string or file), structured output directories under `outputs/`, and automatic `manifest.json` recording for each run."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

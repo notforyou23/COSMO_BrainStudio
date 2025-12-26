@@ -1,0 +1,54 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a single script/Make target that runs scaffold generation and asserts presence/content of required files (REPORT_OUTLINE.md, CASE_STUDY_TEMPLATE, QA reports), failing fast and writing results into /outputs/qa/.
+Project: single (python configuration)
+
+Target file details:
+- Path: outputs/qa/.gitkeep
+- Purpose: Keeps the outputs/qa directory present in version control while QA reports are generated into it at runtime.
+- Category: support
+
+Other planned files (for context only):
+- tools/qa_run.py: Single entrypoint script that generates scaffolding, validates required artifacts/content, fails fast on suggests fixes, and writes QA results into outputs/qa/.
+- src/scaffold.py: Scaffolding generator that creates required directories and materializes REPORT_OUTLINE.md, CASE_STUDY_TEMPLATE, and baseline QA report stubs from templates.
+- src/specs.py: Machine-checkable specification of required files plus content assertions (markers/sections) used by qa_run to validate the scaffold deterministically.
+- templates/REPORT_OUTLINE.md: Canonical report outline template used by the scaffolder and asserted by QA for required headings/markers.
+
+Reference insights:
+- [AGENT: agent_1766621262307_inueelj] Document Created: Generated report
+
+# Generated report
+
+*Auto-compiled from COSMO memory (GPT-5.2 unava
+- [CONSOLIDATED] Establish explicit, machine-checkable specifications (schemas, expected artifacts, checklists) and enforce them with automate
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [AGENT: agent_1766624151433_lob2bdo] Document Created: Generated report
+
+# Generated report
+
+*Auto-compiled from COSMO memory (GPT-5.2 unava
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Keeps the outputs/qa directory present in version control while QA reports are generated into it at runtime.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/qa/.gitkeep')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/qa/.gitkeep')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/qa/.gitkeep.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

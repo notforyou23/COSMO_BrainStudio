@@ -1,0 +1,56 @@
+{
+  "content": "FILE_EXPORT:{\"path\":\"qg_bench/data/example_dataset.jsonl\",\"size\":829,\"encoding\":\"base64\",\"sha256\":\"69a90b3bbd8d3cdeb06c30a4fa3418867adc86e7086f3c038c3614cba39b122d\",\"content\":\"eyJpZCI6ImV4LTAwMDEiLCJ0YXNrIjoicWEiLCJpbnB1dCI6eyJxdWVzdGlvbiI6IldoYXQgaXMgMiArIDI/In0sInJlZmVyZW5jZSI6eyJhbnN3ZXIiOiI0In0sIm91dHB1dCI6eyJhbnN3ZXIiOiI0In0sIm1ldHJpY3MiOnsibGF0ZW5jeV9tcyI6MTIuMH19CnsiaWQiOiJleC0wMDAyIiwidGFzayI6InFhIiwiaW5wdXQiOnsicXVlc3Rpb24iOiJXaGF0IGNvbG9yIGlzIHRoZSBkYXl0aW1lIHNreSBvbiBhIGNsZWFyIGRheT8ifSwicmVmZXJlbmNlIjp7ImFuc3dlciI6ImJsdWUifSwib3V0cHV0Ijp7ImFuc3dlciI6ImJsdWUifSwibWV0cmljcyI6eyJsYXRlbmN5X21zIjoyMC41fX0KeyJpZCI6ImV4LTAwMDMiLCJ0YXNrIjoicWEiLCJpbnB1dCI6eyJxdWVzdGlvbiI6IldoYXQgaXMgdGhlIGNhcGl0YWwgb2YgRnJhbmNlPyJ9LCJyZWZlcmVuY2UiOnsiYW5zd2VyIjoiUGFyaXMifSwib3V0cHV0Ijp7ImFuc3dlciI6Ikx5b24ifSwibWV0cmljcyI6eyJsYXRlbmN5X21zIjoxOC4wfX0KeyJpZCI6ImV4LTAwMDQiLCJ0YXNrIjoicWEiLCJpbnB1dCI6eyJxdWVzdGlvbiI6IlNwZWxsIHRoZSB3b3JkICdiZW5jaG1hcmsnLiJ9LCJyZWZlcmVuY2UiOnsiYW5zd2VyIjoiYmVuY2htYXJrIn0sIm91dHB1dCI6eyJhbnN3ZXIiOiJiZW5jaG1hcmsifSwibWV0cmljcyI6eyJsYXRlbmN5X21zIjo5LjV9fQp7ImlkIjoiZXgtMDAwNSIsInRhc2siOiJxYSIsImlucHV0Ijp7InF1ZXN0aW9uIjoiV2hhdCBpcyAxMCAvIDI/In0sInJlZmVyZW5jZSI6eyJhbnN3ZXIiOiI1In0sIm91dHB1dCI6eyJhbnN3ZXIiOiI1In0sIm1ldHJpY3MiOnsibGF0ZW5jeV9tcyI6MTUuMH19Cg==\"}\nDIR_STATE:[\"qg_bench/data/example_dataset.jsonl\"]",
+  "reasoning": "",
+  "responseId": "resp_02aed5d20a1707890069499cdfdfd881969dd4d3f4c622cde4",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2137,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1108,
+    "output_tokens_details": {
+      "reasoning_tokens": 53
+    },
+    "total_tokens": 3245
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_02aed5d20a1707890069499ce0c92c8196a4c14ac91e46b836",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_02aed5d20a1707890069499ce2165881968d2f8bd4b530984e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport base64, json, hashlib, gzip\n\ntarget_path = Path('/mnt/data').joinpath('qg_bench/data/example_dataset.jsonl')\nassert target_path.is_file(), 'Expected qg_bench/data/example_dataset.jsonl to exist before export'\ndata = target_path.read_bytes()\npayload = {\n    'path': 'qg_bench/data/example_dataset.jsonl',\n    'size': len(data),\n    'encoding': 'base64',\n    'sha256': hashlib.sha256(data).hexdigest(),\n    'content': None\n}\nif len(data) > 20000:\n    compressed = gzip.compress(data)\n    payload['encoding'] = 'gzip+base64'\n    payload['content'] = base64.b64encode(compressed).decode('ascii')\nelse:\n    payload['content'] = base64.b64encode(data).decode('ascii')\n\nprint('FILE_EXPORT:' + json.dumps(payload, separators=(',', ':')))\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_69499b9ae2c081908ccd9fbfec7a37ba019f8e3dd8194ac9",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_EXPORT:{\"path\":\"qg_bench/data/example_dataset.jsonl\",\"size\":829,\"encoding\":\"base64\",\"sha256\":\"69a90b3bbd8d3cdeb06c30a4fa3418867adc86e7086f3c038c3614cba39b122d\",\"content\":\"eyJpZCI6ImV4LTAwMDEiLCJ0YXNrIjoicWEiLCJpbnB1dCI6eyJxdWVzdGlvbiI6IldoYXQgaXMgMiArIDI/In0sInJlZmVyZW5jZSI6eyJhbnN3ZXIiOiI0In0sIm91dHB1dCI6eyJhbnN3ZXIiOiI0In0sIm1ldHJpY3MiOnsibGF0ZW5jeV9tcyI6MTIuMH19CnsiaWQiOiJleC0wMDAyIiwidGFzayI6InFhIiwiaW5wdXQiOnsicXVlc3Rpb24iOiJXaGF0IGNvbG9yIGlzIHRoZSBkYXl0aW1lIHNreSBvbiBhIGNsZWFyIGRheT8ifSwicmVmZXJlbmNlIjp7ImFuc3dlciI6ImJsdWUifSwib3V0cHV0Ijp7ImFuc3dlciI6ImJsdWUifSwibWV0cmljcyI6eyJsYXRlbmN5X21zIjoyMC41fX0KeyJpZCI6ImV4LTAwMDMiLCJ0YXNrIjoicWEiLCJpbnB1dCI6eyJxdWVzdGlvbiI6IldoYXQgaXMgdGhlIGNhcGl0YWwgb2YgRnJhbmNlPyJ9LCJyZWZlcmVuY2UiOnsiYW5zd2VyIjoiUGFyaXMifSwib3V0cHV0Ijp7ImFuc3dlciI6Ikx5b24ifSwibWV0cmljcyI6eyJsYXRlbmN5X21zIjoxOC4wfX0KeyJpZCI6ImV4LTAwMDQiLCJ0YXNrIjoicWEiLCJpbnB1dCI6eyJxdWVzdGlvbiI6IlNwZWxsIHRoZSB3b3JkICdiZW5jaG1hcmsnLiJ9LCJyZWZlcmVuY2UiOnsiYW5zd2VyIjoiYmVuY2htYXJrIn0sIm91dHB1dCI6eyJhbnN3ZXIiOiJiZW5jaG1hcmsifSwibWV0cmljcyI6eyJsYXRlbmN5X21zIjo5LjV9fQp7ImlkIjoiZXgtMDAwNSIsInRhc2siOiJxYSIsImlucHV0Ijp7InF1ZXN0aW9uIjoiV2hhdCBpcyAxMCAvIDI/In0sInJlZmVyZW5jZSI6eyJhbnN3ZXIiOiI1In0sIm91dHB1dCI6eyJhbnN3ZXIiOiI1In0sIm1ldHJpY3MiOnsibGF0ZW5jeV9tcyI6MTUuMH19Cg==\"}\nDIR_STATE:[\"qg_bench/data/example_dataset.jsonl\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_02aed5d20a1707890069499ce68c44819697cf09316fd05758",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_EXPORT:{\"path\":\"qg_bench/data/example_dataset.jsonl\",\"size\":829,\"encoding\":\"base64\",\"sha256\":\"69a90b3bbd8d3cdeb06c30a4fa3418867adc86e7086f3c038c3614cba39b122d\",\"content\":\"eyJpZCI6ImV4LTAwMDEiLCJ0YXNrIjoicWEiLCJpbnB1dCI6eyJxdWVzdGlvbiI6IldoYXQgaXMgMiArIDI/In0sInJlZmVyZW5jZSI6eyJhbnN3ZXIiOiI0In0sIm91dHB1dCI6eyJhbnN3ZXIiOiI0In0sIm1ldHJpY3MiOnsibGF0ZW5jeV9tcyI6MTIuMH19CnsiaWQiOiJleC0wMDAyIiwidGFzayI6InFhIiwiaW5wdXQiOnsicXVlc3Rpb24iOiJXaGF0IGNvbG9yIGlzIHRoZSBkYXl0aW1lIHNreSBvbiBhIGNsZWFyIGRheT8ifSwicmVmZXJlbmNlIjp7ImFuc3dlciI6ImJsdWUifSwib3V0cHV0Ijp7ImFuc3dlciI6ImJsdWUifSwibWV0cmljcyI6eyJsYXRlbmN5X21zIjoyMC41fX0KeyJpZCI6ImV4LTAwMDMiLCJ0YXNrIjoicWEiLCJpbnB1dCI6eyJxdWVzdGlvbiI6IldoYXQgaXMgdGhlIGNhcGl0YWwgb2YgRnJhbmNlPyJ9LCJyZWZlcmVuY2UiOnsiYW5zd2VyIjoiUGFyaXMifSwib3V0cHV0Ijp7ImFuc3dlciI6Ikx5b24ifSwibWV0cmljcyI6eyJsYXRlbmN5X21zIjoxOC4wfX0KeyJpZCI6ImV4LTAwMDQiLCJ0YXNrIjoicWEiLCJpbnB1dCI6eyJxdWVzdGlvbiI6IlNwZWxsIHRoZSB3b3JkICdiZW5jaG1hcmsnLiJ9LCJyZWZlcmVuY2UiOnsiYW5zd2VyIjoiYmVuY2htYXJrIn0sIm91dHB1dCI6eyJhbnN3ZXIiOiJiZW5jaG1hcmsifSwibWV0cmljcyI6eyJsYXRlbmN5X21zIjo5LjV9fQp7ImlkIjoiZXgtMDAwNSIsInRhc2siOiJxYSIsImlucHV0Ijp7InF1ZXN0aW9uIjoiV2hhdCBpcyAxMCAvIDI/In0sInJlZmVyZW5jZSI6eyJhbnN3ZXIiOiI1In0sIm91dHB1dCI6eyJhbnN3ZXIiOiI1In0sIm1ldHJpY3MiOnsibGF0ZW5jeV9tcyI6MTUuMH19Cg==\"}\nDIR_STATE:[\"qg_bench/data/example_dataset.jsonl\"]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

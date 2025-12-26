@@ -1,0 +1,56 @@
+{
+  "content": "Created a self-contained, reproducible `notebooks/experiments.ipynb` implementing three SymPy-derived analytic experiments with NumPy/SciPy numerics, parameter sweeps to CSV, PNG/SVG figure export hooks, and pytest-compatible unit-test assertions runnable inside the notebook.",
+  "reasoning": "",
+  "responseId": "resp_028710e764d2f54200694b5ad3007081948394123464a270d6",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4946,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 3340,
+    "output_tokens_details": {
+      "reasoning_tokens": 549
+    },
+    "total_tokens": 8286
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_028710e764d2f54200694b5ad3e33081948fa3fbfa6b6cb30a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_028710e764d2f54200694b5adc79e48194bd73df2cb856a99b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap\n\ntarget_path = Path('/mnt/data').joinpath('notebooks/experiments.ipynb')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\n# Build notebook JSON (compact to keep line count low)\ncells = []\n\ndef md(s):\n    cells.append({\n        \"cell_type\":\"markdown\",\"metadata\":{},\n        \"source\": s.splitlines(keepends=True)\n    })\n\ndef code(s):\n    cells.append({\n        \"cell_type\":\"code\",\"metadata\":{},\n        \"execution_count\": None,\n        \"outputs\":[],\n        \"source\": s.splitlines(keepends=True)\n    })\n\nmd(\"# Three Experiments: SymPy analytics + NumPy/SciPy numerics\\n\"\n   \"This notebook is self-contained and reproducible: it includes analytic derivations (SymPy), numeric implementations (NumPy/SciPy), a parameter sweep harness (pandas), pytest-compatible unit tests, and plotting plus CSV/PNG/SVG save/load hooks.\\n\")\n\ncode(textwrap.dedent(r\"\"\"\n# Core imports + deterministic settings\nfrom __future__ import annotations\nimport math, os\nfrom dataclasses import dataclass\nfrom pathlib import Path\nimport numpy as np\nimport pandas as pd\nimport sympy as sp\nfrom sympy import Eq\nfrom sympy.utilities.lambdify import lambdify\nfrom scipy import integrate, optimize\nimport matplotlib.pyplot as plt\n\nRNG = np.random.default_rng(0)\nOUTDIR = Path(\"outputs\"); OUTDIR.mkdir(exist_ok=True)\nplt.rcParams.update({\"figure.dpi\": 120})\n\"\"\").strip())\n\nmd(\"## Helpers: I/O, plotting, sweeps, and tests\")\n\ncode(textwrap.dedent(r\"\"\"\ndef save_df(df: pd.DataFrame, name: str) -> Path:\n    p = OUTDIR / f\"{name}.csv\"; df.to_csv(p, index=False); return p\n\ndef load_df(name: str) -> pd.DataFrame:\n    return pd.read_csv(OUTDIR / f\"{name}.csv\")\n\ndef save_fig(fig, name: str) -> tuple[Path, Path]:\n    png = OUTDIR / f\"{name}.png\"; svg = OUTDIR / f\"{name}.svg\"\n    fig.savefig(png, bbox_inches=\"tight\"); fig.savefig(svg, bbox_inches=\"tight\")\n    return png, svg\n\ndef sweep(grid: list[dict], fn, seed: int = 0) -> pd.DataFrame:\n    rng = np.random.default_rng(seed)\n    rows = []\n    for g in grid:\n        rows.append({**g, **fn(rng=rng, **g)})\n    return pd.DataFrame(rows)\n\ndef run_unit_tests():\n    # pytest-compatible style: plain asserts.\n    # Experiment 1: sin Taylor error decreases with order near 0\n    x = 0.2\n    e3 = float(abs(exp1_sin_error(x, 3))); e7 = float(abs(exp1_sin_error(x, 7)))\n    assert e7 < e3\n\n    # Experiment 2: resonance peak near omega0 for low damping\n    w = np.linspace(0.1, 5.0, 2000)\n    H = exp2_mag(w, omega0=2.0, zeta=0.05)\n    wpk = float(w[np.argmax(H)])\n    assert abs(wpk - 2.0) < 0.2\n\n    # Experiment 3: Gaussian integral ~ sqrt(pi)\n    est = exp3_quad(a=1.0)\n    assert abs(est - math.sqrt(math.pi)) < 1e-10\n\"\"\").strip())\n\nmd(\"## Experiment 1 — Taylor approximation error for $\\\\sin(x)$\\n\"\n   \"**Analytic:** symbolic Taylor polynomial and exact remainder error.\\n\"\n   \"**Numeric:** vectorized evaluation.\\n\")\n\ncode(textwrap.dedent(r\"\"\"\n# Analytic derivation with SymPy\nx, n = sp.symbols(\"x n\", real=True)\ndef exp1_taylor_sin(order: int):\n    return sp.series(sp.sin(x), x, 0, order+1).removeO()\n\ndef exp1_error_expr(order: int):\n    P = exp1_taylor_sin(order)\n    return sp.simplify(sp.sin(x) - P)\n\n# Deterministic simplification + LaTeX-friendly outputs\nP5 = exp1_taylor_sin(5)\nE5 = exp1_error_expr(5)\ndisplay(Eq(sp.Symbol(\"P_5(x)\"), P5))\ndisplay(Eq(sp.Symbol(\"E_5(x)\"), E5))\n\"\"\").strip())\n\ncode(textwrap.dedent(r\"\"\"\n# Numeric implementations\ndef exp1_sin_approx(xv, order: int):\n    xv = np.asarray(xv, dtype=float)\n    # Use the exact SymPy polynomial and lambdify once per order for stability\n    poly = exp1_taylor_sin(order)\n    f = lambdify(x, poly, \"numpy\")\n    return f(xv)\n\ndef exp1_sin_error(xv, order: int):\n    xv = np.asarray(xv, dtype=float)\n    return np.sin(xv) - exp1_sin_approx(xv, order)\n\n# Plot + export\nxs = np.linspace(-2*np.pi, 2*np.pi, 2000)\nfig, ax = plt.subplots(figsize=(7,3))\nfor order in [1,3,5,7,9]:\n    ax.plot(xs, np.abs(exp1_sin_error(xs, order)), label=f\"order {order}\")\nax.set_yscale(\"log\"); ax.set_title(\"Experiment 1: |sin(x) - Taylor|\"); ax.set_xlabel(\"x\"); ax.set_ylabel(\"abs error\")\nax.legend(ncol=3, fontsize=8)\nsave_fig(fig, \"exp1_sin_taylor_error\")\nplt.show()\n\"\"\").strip())\n\nmd(\"## Experiment 2 — Frequency response of a damped oscillator\\n\"\n   \"Model: $x'' + 2\\\\zeta\\\\omega_0 x' + \\\\omega_0^2 x = \\\\cos(\\\\omega t)$.\\n\"\n   \"Steady-state amplitude: $|H(i\\\\omega)| = 1/\\\\sqrt{(\\\\omega_0^2-\\\\omega^2)^2+(2\\\\zeta\\\\omega_0\\\\omega)^2}$.\\n\")\n\ncode(textwrap.dedent(r\"\"\"\n# Analytic derivation in SymPy\nomega, omega0, zeta = sp.symbols(\"omega omega0 zeta\", positive=True, real=True)\nH = 1/sp.sqrt((omega0**2-omega**2)**2 + (2*zeta*omega0*omega)**2)\nH_simplified = sp.simplify(H)\ndisplay(Eq(sp.Symbol(\"|H(i\\\\omega)|\"), H_simplified))\n\n# Optional: symbolic peak frequency (for zeta < 1/sqrt(2))\nwpk = sp.simplify(sp.sqrt(omega0**2*(1-2*zeta**2)))\ndisplay(Eq(sp.Symbol(\"\\\\omega_{peak}\"), wpk))\n\"\"\").strip())\n\ncode(textwrap.dedent(r\"\"\"\n# Numeric implementations\ndef exp2_mag(omega_vals, omega0: float, zeta: float):\n    w = np.asarray(omega_vals, dtype=float)\n    return 1.0/np.sqrt((omega0**2-w**2)**2 + (2*zeta*omega0*w)**2)\n\ndef exp2_peak_numeric(omega0: float, zeta: float):\n    f = lambda w: -exp2_mag(w, omega0=omega0, zeta=zeta)\n    res = optimize.minimize_scalar(f, bounds=(0, 5*omega0), method=\"bounded\")\n    return float(res.x), float(-res.fun)\n\n# Sweep + export\ngrid = [{\"omega0\":2.0, \"zeta\":z} for z in [0.02,0.05,0.1,0.2,0.4]]\ndef exp2_run(omega0: float, zeta: float, rng=None):\n    wpk, Hpk = exp2_peak_numeric(omega0, zeta)\n    return {\"w_peak\": wpk, \"H_peak\": Hpk}\ndf2 = sweep(grid, exp2_run, seed=0)\nsave_df(df2, \"exp2_peak_sweep\")\ndf2\n\"\"\").strip())\n\ncode(textwrap.dedent(r\"\"\"\n# Plot frequency responses for sweep set\nw = np.linspace(0, 6, 2000)\nfig, ax = plt.subplots(figsize=(7,3))\nfor z in df2[\"zeta\"]:\n    ax.plot(w, exp2_mag(w, omega0=2.0, zeta=float(z)), label=f\"zeta={z:g}\")\nax.set_title(\"Experiment 2: Damped oscillator magnitude response (ω0=2)\")\nax.set_xlabel(\"ω\"); ax.set_ylabel(\"|H(iω)|\"); ax.set_ylim(0, np.nanpercentile(exp2_mag(w, 2.0, 0.02), 99.5))\nax.legend(fontsize=8)\nsave_fig(fig, \"exp2_frequency_response\")\nplt.show()\n\"\"\").strip())\n\nmd(\"## Experiment 3 — Gaussian integral and truncation error\\n\"\n   \"Compute $\\\\int_{-\\\\infty}^{\\\\infty} e^{-a x^2}\\\\,dx = \\\\sqrt{\\\\pi/a}$.\\n\"\n   \"Compare analytic closed form vs numeric quadrature on truncated domain.\\n\")\n\ncode(textwrap.dedent(r\"\"\"\n# Analytic derivation (closed form)\na = sp.symbols(\"a\", positive=True, real=True)\nI = sp.integrate(sp.exp(-a*x**2), (x, -sp.oo, sp.oo))\ndisplay(Eq(sp.Symbol(\"I(a)\"), sp.simplify(I)))\n\nI_s = sp.simplify(I)\nI_np = lambdify(a, I_s, \"numpy\")\n\"\"\").strip())\n\ncode(textwrap.dedent(r\"\"\"\n# Numeric implementations\ndef exp3_closed_form(a: float) -> float:\n    return float(I_np(a))\n\ndef exp3_quad(a: float, L: float = 10.0) -> float:\n    f = lambda t: np.exp(-a*t*t)\n    val, err = integrate.quad(f, -L, L, limit=200)\n    return float(val)\n\ndef exp3_trunc_error(a: float, L: float) -> float:\n    return abs(exp3_closed_form(a) - exp3_quad(a, L=L))\n\n# Sweep over (a, L)\ngrid = [{\"a\":av, \"L\":Lv} for av in [0.5, 1.0, 2.0] for Lv in [2,3,4,5,6,8,10]]\ndef exp3_run(a: float, L: float, rng=None):\n    return {\"closed\": exp3_closed_form(a), \"quad\": exp3_quad(a, L), \"abs_err\": exp3_trunc_error(a, L)}\ndf3 = sweep(grid, exp3_run, seed=0)\nsave_df(df3, \"exp3_gaussian_trunc_sweep\")\ndf3.head()\n\"\"\").strip())\n\ncode(textwrap.dedent(r\"\"\"\n# Plot truncation error vs L\nfig, ax = plt.subplots(figsize=(6,3))\nfor av in sorted(df3[\"a\"].unique()):\n    sub = df3[df3[\"a\"]==av].sort_values(\"L\")\n    ax.plot(sub[\"L\"], sub[\"abs_err\"], marker=\"o\", label=f\"a={av:g}\")\nax.set_yscale(\"log\"); ax.set_xlabel(\"L (truncation half-width)\"); ax.set_ylabel(\"abs error\")\nax.set_title(\"Experiment 3: truncation error in Gaussian integral\")\nax.legend(fontsize=8)\nsave_fig(fig, \"exp3_truncation_error\")\nplt.show()\n\"\"\").strip())\n\nmd(\"## Automated unit tests (run in-notebook)\")\n\ncode(textwrap.dedent(r\"\"\"\nrun_unit_tests()\nprint(\"All unit-test assertions passed.\")\n\"\"\").strip())\n\n# Notebook object\nnb = {\n \"cells\": cells,\n \"metadata\": {\n  \"kernelspec\": {\"display_name\":\"Python 3\",\"language\":\"python\",\"name\":\"python3\"},\n  \"language_info\": {\"name\":\"python\",\"version\":\"3.11\"}\n },\n \"nbformat\": 4,\n \"nbformat_minor\": 5\n}\n\n# Write as compact JSON to minimize line count\nfinal_text = json.dumps(nb, ensure_ascii=False, separators=(\",\",\":\")) + \"\\n\"\ntarget_path.write_text(final_text, encoding=\"utf-8\")\n\nprint(\"FILE_WRITTEN:notebooks/experiments.ipynb\")\nprint(\"DIR_STATE:\" + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob(\"*\") if p.is_file())))\n",
+      "container_id": "cntr_694b5aca46a08190837471b6a8b1f41e0a4013e4cc7137e1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:notebooks/experiments.ipynb\nDIR_STATE:[\"notebooks/experiments.ipynb\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_028710e764d2f54200694b5afa20d481948872927c46a6a17e",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a self-contained, reproducible `notebooks/experiments.ipynb` implementing three SymPy-derived analytic experiments with NumPy/SciPy numerics, parameter sweeps to CSV, PNG/SVG figure export hooks, and pytest-compatible unit-test assertions runnable inside the notebook."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

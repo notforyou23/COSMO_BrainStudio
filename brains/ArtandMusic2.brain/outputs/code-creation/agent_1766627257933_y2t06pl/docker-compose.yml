@@ -1,0 +1,8 @@
+services:
+  smoke:
+    build:
+      context: .
+    command: ["python", "-u", "scripts/smoke_test.py"]
+    volumes:
+      - ./outputs:/out
+    working_dir: /app

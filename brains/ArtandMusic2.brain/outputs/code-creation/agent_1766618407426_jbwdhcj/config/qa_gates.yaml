@@ -1,0 +1,80 @@
+version: 1
+qa:
+  fail_fast: true
+  artifacts:
+    claim_card:
+      template_path: outputs/templates/CLAIM_CARD.yaml
+      workflow_path: outputs/workflows/CLAIM_VERIFICATION_WORKFLOW.md
+      schema_path: config/claim_card.schema.yaml
+      artifact_globs:
+        - outputs/**/CLAIM_CARD.yaml
+        - outputs/**/CLAIM_CARD.yml
+        - outputs/**/CLAIM_CARD.md
+      required_inputs:
+        - verbatim_claim
+        - source_context
+        - provenance_anchor
+      validation_rules:
+        verbatim_claim:
+          type: string
+          min_length: 1
+          must_be_verbatim: true
+        source_context:
+          type: string
+          min_length: 1
+          must_include_source_excerpt_or_pointer: true
+        provenance_anchor:
+          type: string
+          min_length: 1
+          allowed_forms:
+            - https_url
+            - doi
+            - arxiv
+            - urn
+            - sha256
+          pattern: '^(https?://\S+|doi:\S+|arxiv:\S+|urn:\S+|sha256:[a-fA-F0-9]{64})$'
+      status_lifecycle:
+        statuses:
+          - draft
+          - submitted
+          - needs_more_evidence
+          - verified
+          - rejected
+          - superseded
+        initial: draft
+        terminal:
+          - verified
+          - rejected
+          - superseded
+        transitions:
+          draft: [submitted, superseded]
+          submitted: [needs_more_evidence, verified, rejected, superseded]
+          needs_more_evidence: [submitted, rejected, superseded]
+          verified: [superseded]
+          rejected: [superseded]
+          superseded: []
+  gates:
+    - id: claim_card_verification
+      name: Claim Card Verification
+      purpose: Enforce standardized claim capture and verification inputs for all publishable claims.
+      enabled: true
+      severity: error
+      implementation:
+        type: python
+        module: src.qa.claim_card_validator
+        function: run
+      inputs:
+        schema_path: ${qa.artifacts.claim_card.schema_path}
+        workflow_path: ${qa.artifacts.claim_card.workflow_path}
+        template_path: ${qa.artifacts.claim_card.template_path}
+        artifact_globs: ${qa.artifacts.claim_card.artifact_globs}
+        required_inputs: ${qa.artifacts.claim_card.required_inputs}
+        validation_rules: ${qa.artifacts.claim_card.validation_rules}
+        status_lifecycle: ${qa.artifacts.claim_card.status_lifecycle}
+      outputs:
+        report_path: outputs/qa/claim_card_verification_report.json
+  pipelines:
+    default:
+      - gate: claim_card_verification
+        when:
+          any_files_match: ${qa.artifacts.claim_card.artifact_globs}

@@ -1,0 +1,301 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766550130811_3jweutp",
+  "agentType": "code-creation",
+  "goalId": "goal_152",
+  "missionId": "strategic_goal_152_1766550130811",
+  "spawnCycle": 113,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T04:22:16.591Z",
+  "completedAt": "2025-12-24T04:25:18.440Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/run_pipeline.py",
+      "description": "Single CLI entrypoint that runs a deterministic toy experiment end-to-end in <1 minute and writes fixed JSON metrics and a plot into outputs/.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/run_pipeline.py\nDIR_STATE:[\"scripts/__init__.py\", \"scripts/generate_results.py\", \"scripts/generate_roadmap.py\", \"scripts/run.py\", \"scripts/run_pipeline.py\", \"scripts/run_tests_and_capture_log.py\", \"scripts/verify_test_artifacts.py\"]\nSUMMARY: Added a single deterministic CLI entrypoint that generates fixed JSON metrics and a PNG plot into outputs/ in under a minute.\n",
+          "timestamp": "2025-12-24T04:22:32.700Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "_STATE:[\"scripts/__init__.py\", \"scripts/generate_results.py\", \"scripts/generate_roadmap.py\", \"scripts/run.py\", \"scripts/run_experiment.py\", \"scripts/run_pipeline.py\", \"scripts/run_tests_and_capture_log.py\", \"scripts/verify_test_artifacts.py\"]\nSummary: Added a single deterministic CLI pipeline entrypoint that generates fixed JSON metrics and a PNG plot into an outputs/ directory in under a minute.\n",
+          "timestamp": "2025-12-24T04:22:45.355Z"
+        }
+      ],
+      "createdAt": "2025-12-24T04:22:16.591Z",
+      "failedAt": "2025-12-24T04:22:45.355Z"
+    },
+    {
+      "path": "src/toy_pipeline/__init__.py",
+      "description": "Package initializer exposing the public API for the toy pipeline experiment and ensuring importable module structure.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/toy_pipeline/__init__.py\nDIR_STATE:[\"src/toy_pipeline/__init__.py\"]\nSummary: Added toy_pipeline package initializer with a stable public API and lazy import of the experiment entrypoint.\n",
+          "timestamp": "2025-12-24T04:22:53.101Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/toy_pipeline/__init__.py\nDIR_STATE:[\"src/toy_pipeline/__init__.py\"]\nSummary: Added a minimal toy_pipeline package initializer exposing the public API via safe lazy imports.\n",
+          "timestamp": "2025-12-24T04:23:03.841Z"
+        }
+      ],
+      "createdAt": "2025-12-24T04:22:16.591Z",
+      "failedAt": "2025-12-24T04:23:03.841Z"
+    },
+    {
+      "path": "src/toy_pipeline/experiment.py",
+      "description": "Toy experiment implementation that generates deterministic synthetic data, trains a tiny model, computes fixed metrics, and saves JSON + PNG artifacts to outputs/.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/toy_pipeline/experiment.py\nDIR_STATE:[\"src/toy_pipeline/__init__.py\", \"src/toy_pipeline/experiment.py\"]\nSUMMARY: Implemented a deterministic toy experiment that generates synthetic data, fits a tiny linear regression model, and writes stable JSON metrics plus a PNG plot into ./outputs/.\n",
+          "timestamp": "2025-12-24T04:23:17.676Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/toy_pipeline/experiment.py\nDIR_STATE:[\"src/toy_pipeline/__init__.py\", \"src/toy_pipeline/experiment.py\"]\nSummary: Implemented a deterministic toy experiment that fits a tiny linear model and writes stable JSON metrics plus a PNG plot to ./outputs/.\n",
+          "timestamp": "2025-12-24T04:23:32.847Z"
+        }
+      ],
+      "createdAt": "2025-12-24T04:22:16.591Z",
+      "failedAt": "2025-12-24T04:23:32.847Z"
+    },
+    {
+      "path": "src/toy_pipeline/plotting.py",
+      "description": "Plotting utilities that create a reproducible matplotlib figure from experiment results and save it as a PNG.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/toy_pipeline/plotting.py\nDIR_STATE:[\"src/toy_pipeline/__init__.py\", \"src/toy_pipeline/experiment.py\", \"src/toy_pipeline/plotting.py\"]\nSummary: Implemented deterministic matplotlib plotting utilities to render parity and residuals from experiment results and save a reproducible PNG.\n",
+          "timestamp": "2025-12-24T04:23:48.429Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/toy_pipeline/plotting.py\nDIR_STATE:[\"src/toy_pipeline/__init__.py\", \"src/toy_pipeline/experiment.py\", \"src/toy_pipeline/plotting.py\"]\nSUMMARY: Added reproducible matplotlib plotting utilities to generate and save a deterministic PNG summary of toy experiment results.\n",
+          "timestamp": "2025-12-24T04:24:06.933Z"
+        }
+      ],
+      "createdAt": "2025-12-24T04:22:16.591Z",
+      "failedAt": "2025-12-24T04:24:06.933Z"
+    },
+    {
+      "path": "src/toy_pipeline/io.py",
+      "description": "I/O helpers for creating the outputs directory and writing canonical JSON with stable ordering for reproducible artifacts.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/toy_pipeline/io.py\nDIR_STATE:[\"src/toy_pipeline/__init__.py\", \"src/toy_pipeline/experiment.py\", \"src/toy_pipeline/io.py\", \"src/toy_pipeline/plotting.py\"]\nSummary: Added deterministic output directory and canonical JSON writing helpers for reproducible artifacts.\n",
+          "timestamp": "2025-12-24T04:24:12.876Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/toy_pipeline/io.py\nDIR_STATE:[\"src/toy_pipeline/__init__.py\", \"src/toy_pipeline/experiment.py\", \"src/toy_pipeline/io.py\", \"src/toy_pipeline/plotting.py\"]\nSummary: Added deterministic outputs-directory creation and canonical JSON writing helpers with atomic writes for reproducible artifacts.\n",
+          "timestamp": "2025-12-24T04:24:25.680Z"
+        }
+      ],
+      "createdAt": "2025-12-24T04:22:16.591Z",
+      "failedAt": "2025-12-24T04:24:25.680Z"
+    },
+    {
+      "path": "requirements.txt",
+      "description": "Minimal pinned runtime dependencies needed to run the pipeline locally (numpy, matplotlib) on Python 3.11+.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:requirements.txt\nDIR_STATE:[\".DS_Store\", \".gitignore\", \"README.md\", \"exec_1766550269469_ricsji9.py\", \"pyproject.toml\", \"pytest.ini\", \"requirements-dev.txt\", \"requirements.txt\"]\nWrote minimal pinned runtime dependencies for Python 3.11+ (numpy and matplotlib).\n",
+          "timestamp": "2025-12-24T04:24:29.512Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:requirements.txt\nDIR_STATE:[\".DS_Store\", \".gitignore\", \"README.md\", \"exec_1766550272440_q1kfyq8.py\", \"pyproject.toml\", \"pytest.ini\", \"requirements-dev.txt\", \"requirements.txt\"]\nSUMMARY: Added a minimal, pinned requirements.txt for running the local pipeline on Python 3.11+ with numpy and matplotlib.\n",
+          "timestamp": "2025-12-24T04:24:32.479Z"
+        }
+      ],
+      "createdAt": "2025-12-24T04:22:16.591Z",
+      "failedAt": "2025-12-24T04:24:32.479Z"
+    },
+    {
+      "path": "README.md",
+      "description": "Documentation describing how to set up the environment, run scripts/run_pipeline.py, and find the generated artifacts in outputs/.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-24T04:24:40.391Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-24T04:24:47.090Z"
+        }
+      ],
+      "createdAt": "2025-12-24T04:22:16.591Z",
+      "failedAt": "2025-12-24T04:24:47.090Z"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "description": "CI workflow that installs dependencies, runs the pipeline entrypoint, and verifies expected artifacts are produced for deterministic reproducibility.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/tests-and-capture-artifacts.yml\"]\nSUMMARY: Added a GitHub Actions CI workflow that installs dependencies, runs the pipeline, and asserts required artifacts exist and are byte-identical across two runs.\n",
+          "timestamp": "2025-12-24T04:24:55.665Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/tests-and-capture-artifacts.yml\"]\nSummary: Added a CI workflow that installs dependencies, runs the pipeline twice, and asserts the produced artifacts exist and are byte-for-byte deterministic.\n",
+          "timestamp": "2025-12-24T04:25:06.760Z"
+        }
+      ],
+      "createdAt": "2025-12-24T04:22:16.591Z",
+      "failedAt": "2025-12-24T04:25:06.760Z"
+    },
+    {
+      "path": ".gitignore",
+      "description": "Git ignore rules to exclude outputs/, virtual environments, caches, and other generated artifacts from version control.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.gitignore\nDIR_STATE:[\".DS_Store\", \".gitignore\", \"README.md\", \"exec_1766550313363_rfp78a3.py\", \"pyproject.toml\", \"pytest.ini\", \"requirements-dev.txt\", \"requirements.txt\"]\nSUMMARY: Added a .gitignore to exclude outputs, virtualenvs, caches, build artifacts, and common OS/editor files from version control.\n",
+          "timestamp": "2025-12-24T04:25:13.401Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.gitignore\nDIR_STATE:[\".DS_Store\", \".gitignore\", \"README.md\", \"exec_1766550318400_eig1m5b.py\", \"pyproject.toml\", \"pytest.ini\", \"requirements-dev.txt\", \"requirements.txt\"]\nSummary: Added .gitignore rules to exclude outputs, environments, caches, build artifacts, and common OS/editor files from version control.\n",
+          "timestamp": "2025-12-24T04:25:18.440Z"
+        }
+      ],
+      "createdAt": "2025-12-24T04:22:16.591Z",
+      "failedAt": "2025-12-24T04:25:18.440Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Add scripts/run_pipeline.py as the single entrypoint, a minimal requirements.txt (or pyproject.toml), and one toy experiment module that runs in <1 minute and writes fixed outputs (JSON + plot) into ./outputs/; verify by running end-to-end locally.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): A minimal runnable computational skeleton (script/notebook + requirements + toy experiment) is the primary missing deliverable; it converts the project from static markdown into an executable artifact..."
+  ],
+  "projectName": "generated_library_1766550131007",
+  "language": "python",
+  "type": "library",
+  "status": "failed",
+  "requirements": [
+    "include_ci_cd"
+  ],
+  "lastSavedAt": "2025-12-24T04:25:18.440Z",
+  "summary": {
+    "completed": 0,
+    "failed": 9,
+    "total": 9
+  }
+}

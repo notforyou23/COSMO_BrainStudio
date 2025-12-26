@@ -1,0 +1,56 @@
+{
+  "content": "Created `scripts/run_tests_and_capture.py`, a CLI that runs `python -m pytest`, captures combined stdout/stderr into `outputs/pytest_output.txt`, and writes structured run metadata (including timing, environment, git info when available, and artifact paths/sizes) to `outputs/run_metadata.json`.",
+  "reasoning": "",
+  "responseId": "resp_0015906798c1e45b00694b5c5e869481948fffbeec8e947437",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2931,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1518,
+    "output_tokens_details": {
+      "reasoning_tokens": 198
+    },
+    "total_tokens": 4449
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0015906798c1e45b00694b5c5f55888194a442528b3cd20609",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0015906798c1e45b00694b5c6278008194a958337328ea22a8",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, sys, datetime, platform, subprocess, time\n\ntarget_path = Path('/mnt/data').joinpath('scripts/run_tests_and_capture.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"#!/usr/bin/env python3\n\\\"\\\"\\\"Run pytest and capture a canonical set of run artifacts.\n\nArtifacts (written under ./outputs):\n- pytest_output.txt: full combined stdout/stderr from pytest\n- run_metadata.json: structured execution metadata for the run\n\\\"\\\"\\\"\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport os\nimport platform\nimport subprocess\nimport sys\nimport time\nfrom datetime import datetime, timezone\nfrom pathlib import Path\n\"\"\",\n\"\"\"def _utc_now_iso() -> str:\n    return datetime.now(timezone.utc).isoformat().replace(\"+00:00\", \"Z\")\n\n\ndef _safe_run(cmd: list[str], cwd: str | None = None) -> str | None:\n    try:\n        p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, check=False)\n    except Exception:\n        return None\n    out = (p.stdout or \"\").strip()\n    return out if p.returncode == 0 and out else None\n\n\ndef _ensure_parent(path: Path) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n\"\"\",\n\"\"\"def run_pytest(pytest_args: list[str], outputs_dir: Path, show_output: bool) -> dict:\n    _ensure_parent(outputs_dir / \"placeholder\")\n    output_path = outputs_dir / \"pytest_output.txt\"\n    start_ts = _utc_now_iso()\n    t0 = time.time()\n\n    cmd = [sys.executable, \"-m\", \"pytest\"] + pytest_args\n    env = os.environ.copy()\n    env.setdefault(\"PYTHONUNBUFFERED\", \"1\")\n\n    _ensure_parent(output_path)\n    with output_path.open(\"w\", encoding=\"utf-8\", errors=\"replace\") as f:\n        f.write(f\\\"# command: {' '.join(cmd)}\\\\n\\\")\n        f.write(f\\\"# started_utc: {start_ts}\\\\n\\\\n\\\")\n        f.flush()\n\n        proc = subprocess.Popen(\n            cmd,\n            cwd=str(Path.cwd()),\n            env=env,\n            stdout=subprocess.PIPE,\n            stderr=subprocess.STDOUT,\n            text=True,\n            bufsize=1,\n        )\n        assert proc.stdout is not None\n        for line in proc.stdout:\n            f.write(line)\n            if show_output:\n                print(line, end=\"\")\n        proc.wait()\n\n    end_ts = _utc_now_iso()\n    duration_s = round(time.time() - t0, 6)\n\n    return {\n        \"command\": cmd,\n        \"cwd\": str(Path.cwd()),\n        \"returncode\": proc.returncode,\n        \"started_utc\": start_ts,\n        \"ended_utc\": end_ts,\n        \"duration_seconds\": duration_s,\n        \"artifacts\": {\n            \"pytest_output_txt\": str(output_path.as_posix()),\n            \"pytest_output_bytes\": output_path.stat().st_size if output_path.exists() else None,\n        },\n    }\n\"\"\",\n\"\"\"def build_metadata(base: dict, outputs_dir: Path) -> dict:\n    repo_root = _safe_run([\"git\", \"rev-parse\", \"--show-toplevel\"])\n    git_sha = _safe_run([\"git\", \"rev-parse\", \"HEAD\"])\n    git_dirty = None\n    if git_sha is not None:\n        status = _safe_run([\"git\", \"status\", \"--porcelain\"])\n        git_dirty = bool(status)\n\n    pytest_version = _safe_run([sys.executable, \"-m\", \"pytest\", \"--version\"])\n    base[\"environment\"] = {\n        \"python\": sys.version.split()[0],\n        \"executable\": sys.executable,\n        \"platform\": platform.platform(),\n        \"pytest_version\": pytest_version,\n    }\n    base[\"git\"] = {\"root\": repo_root, \"sha\": git_sha, \"dirty\": git_dirty}\n    base[\"artifacts\"][\"run_metadata_json\"] = str((outputs_dir / \"run_metadata.json\").as_posix())\n    return base\n\"\"\",\n\"\"\"def main(argv: list[str] | None = None) -> int:\n    p = argparse.ArgumentParser(description=\"Run pytest and write outputs/pytest_output.txt and outputs/run_metadata.json\")\n    p.add_argument(\"--outputs-dir\", default=\"outputs\", help=\"Directory to write run artifacts (default: outputs)\")\n    p.add_argument(\"--show-output\", action=\"store_true\", help=\"Also stream pytest output to this console\")\n    p.add_argument(\"pytest_args\", nargs=argparse.REMAINDER, help=\"Arguments passed through to pytest (prefix with --)\")\n    args = p.parse_args(argv)\n\n    pytest_args = list(args.pytest_args)\n    if pytest_args and pytest_args[0] == \"--\":\n        pytest_args = pytest_args[1:]\n\n    outputs_dir = Path(args.outputs_dir)\n    outputs_dir.mkdir(parents=True, exist_ok=True)\n\n    meta = run_pytest(pytest_args=pytest_args, outputs_dir=outputs_dir, show_output=args.show_output)\n    meta = build_metadata(meta, outputs_dir=outputs_dir)\n\n    meta_path = outputs_dir / \"run_metadata.json\"\n    _ensure_parent(meta_path)\n    meta_path.write_text(json.dumps(meta, indent=2, sort_keys=True) + \"\\\\n\", encoding=\"utf-8\")\n\n    return int(meta.get(\"returncode\", 1) or 0)\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:scripts/run_tests_and_capture.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_694b5c5752548190993285aacb5a4d730fa7dba8b6f7e14c",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:scripts/run_tests_and_capture.py\nDIR_STATE:[\"scripts/run_tests_and_capture.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0015906798c1e45b00694b5c6f9c048194ad78a96b279db906",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `scripts/run_tests_and_capture.py`, a CLI that runs `python -m pytest`, captures combined stdout/stderr into `outputs/pytest_output.txt`, and writes structured run metadata (including timing, environment, git info when available, and artifact paths/sizes) to `outputs/run_metadata.json`."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/sf_gft_diagnostics/scaling.py` with compact, production-ready utilities for effective exponents (finite-difference and moving-window fits), finite-size scaling rescaling plus collapse scoring and grid search, hyperscaling residual checks, and uncertainty handling via delta-method propagation and bootstrap resampling.",
+  "reasoning": "",
+  "responseId": "resp_0047173f64f766b90069499c84fa2c8195a61b5d0ad8709dc9",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4479,
+    "input_tokens_details": {
+      "cached_tokens": 1408
+    },
+    "output_tokens": 2913,
+    "output_tokens_details": {
+      "reasoning_tokens": 247
+    },
+    "total_tokens": 7392
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0047173f64f766b90069499c85a0388195960494814845da9d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0047173f64f766b90069499c8c300481959466b1d9eca13959",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, numpy as np\ntarget_path = Path('/mnt/data').joinpath('src/sf_gft_diagnostics/scaling.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\n\\\"\\\"\\\"Scaling-analysis utilities for spin-foam/GFT continuum-recovery diagnostics.\n\nCore features:\n- effective (local) scaling exponents from log-derivatives\n- finite-size scaling (FSS) rescaling + collapse scoring\n- hyperscaling consistency checks for exponent sets\n- bootstrap resampling and simple error propagation\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Callable, Dict, Iterable, Mapping, Optional, Sequence, Tuple\n\nimport numpy as np\n\"\"\")\n\nchunks.append(\"\"\"\ndef _as_1d(a) -> np.ndarray:\n    a = np.asarray(a)\n    return a.ravel() if a.ndim else a.reshape(1)\n\n\ndef effective_exponent(x, y, *, loglog: bool = True) -> Tuple[np.ndarray, np.ndarray]:\n    \\\"\\\"\\\"Return (x_mid, alpha_eff) from finite-difference log-derivatives.\n\n    If loglog=True: alpha_eff = d log(y) / d log(x); else d y / d x.\n    Assumes x is strictly monotone.\n    \\\"\\\"\\\"\n    x = _as_1d(x).astype(float)\n    y = _as_1d(y).astype(float)\n    if x.size != y.size or x.size < 3:\n        raise ValueError(\"x and y must have same length >= 3\")\n    if not (np.all(np.diff(x) > 0) or np.all(np.diff(x) < 0)):\n        raise ValueError(\"x must be strictly monotone\")\n    if loglog:\n        if np.any(x <= 0) or np.any(y <= 0):\n            raise ValueError(\"loglog requires x>0 and y>0\")\n        lx, ly = np.log(x), np.log(y)\n        slope = np.diff(ly) / np.diff(lx)\n    else:\n        slope = np.diff(y) / np.diff(x)\n    xmid = 0.5 * (x[1:] + x[:-1])\n    return xmid, slope\n\"\"\")\n\nchunks.append(\"\"\"\ndef moving_window_exponent(x, y, *, k: int = 5) -> Tuple[np.ndarray, np.ndarray]:\n    \\\"\\\"\\\"Least-squares local exponent over a moving window in log-log space.\n\n    Fits log(y)=a*log(x)+b on windows of size k; returns window centers.\n    \\\"\\\"\\\"\n    x = _as_1d(x).astype(float)\n    y = _as_1d(y).astype(float)\n    if k < 3 or k > x.size:\n        raise ValueError(\"k must satisfy 3 <= k <= len(x)\")\n    if np.any(x <= 0) or np.any(y <= 0):\n        raise ValueError(\"requires x>0 and y>0\")\n    lx, ly = np.log(x), np.log(y)\n    alphas, xc = [], []\n    for i in range(x.size - k + 1):\n        X = lx[i : i + k]\n        Y = ly[i : i + k]\n        A = np.vstack([X, np.ones_like(X)]).T\n        a, _b = np.linalg.lstsq(A, Y, rcond=None)[0]\n        alphas.append(a)\n        xc.append(np.exp(np.mean(X)))\n    return np.asarray(xc), np.asarray(alphas)\n\"\"\")\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass FSSRescale:\n    \\\"\\\"\\\"Finite-size scaling rescaling map.\n\n    Typical use: t = (g-gc)/gc and observable O(g,L) ~ L^{-yO} f(t L^{1/nu}).\n    Provide yO = beta/nu (magnetization), -gamma/nu (susceptibility), etc.\n    \\\"\\\"\\\"\n    nu: float\n    yO: float\n    gc: float\n\n    def transform(self, g, O, L) -> Tuple[np.ndarray, np.ndarray]:\n        g = np.asarray(g, float)\n        O = np.asarray(O, float)\n        L = np.asarray(L, float)\n        t = (g - self.gc) / self.gc\n        x = t * (L ** (1.0 / self.nu))\n        y = O * (L ** (self.yO))\n        return x, y\n\"\"\")\n\nchunks.append(\"\"\"\ndef collapse_score(\n    curves: Sequence[Tuple[np.ndarray, np.ndarray]],\n    *,\n    nbins: int = 30,\n    xlim: Optional[Tuple[float, float]] = None,\n) -> float:\n    \\\"\\\"\\\"Quantify curve collapse (lower is better) using binned variance.\n\n    curves: list of (x_rescaled, y_rescaled). Uses common x-range overlap.\n    Returns mean over bins of Var(y)/Mean(y)^2 (scale-invariant).\n    \\\"\\\"\\\"\n    if len(curves) < 2:\n        raise ValueError(\"need at least two curves\")\n    xs = [np.asarray(c[0], float) for c in curves]\n    ys = [np.asarray(c[1], float) for c in curves]\n    xmin = max(np.min(x) for x in xs)\n    xmax = min(np.max(x) for x in xs)\n    if xlim is not None:\n        xmin, xmax = max(xmin, xlim[0]), min(xmax, xlim[1])\n    if not np.isfinite([xmin, xmax]).all() or xmax <= xmin:\n        return np.inf\n    edges = np.linspace(xmin, xmax, nbins + 1)\n    scores = []\n    for lo, hi in zip(edges[:-1], edges[1:]):\n        vals = []\n        for x, y in zip(xs, ys):\n            m = (x >= lo) & (x < hi)\n            if np.any(m):\n                vals.append(np.nanmean(y[m]))\n        if len(vals) >= 2:\n            v = np.nanvar(vals)\n            mu = np.nanmean(vals)\n            if np.isfinite(v) and np.isfinite(mu) and mu != 0:\n                scores.append(v / (mu * mu))\n    return float(np.nanmean(scores)) if scores else np.inf\n\"\"\")\n\nchunks.append(\"\"\"\ndef grid_search_collapse(\n    g_list: Sequence[np.ndarray],\n    O_list: Sequence[np.ndarray],\n    L_list: Sequence[float],\n    *,\n    nus: Sequence[float],\n    yOs: Sequence[float],\n    gcs: Sequence[float],\n    nbins: int = 30,\n) -> Dict[str, float]:\n    \\\"\\\"\\\"Brute-force search for best FSS collapse parameters.\n\n    Inputs are per-size arrays: g_list[i], O_list[i] for system size L_list[i].\n    Returns dict with best nu, yO, gc, score.\n    \\\"\\\"\\\"\n    if not (len(g_list) == len(O_list) == len(L_list) >= 2):\n        raise ValueError(\"g_list, O_list, L_list must have same length >= 2\")\n    best = {\"nu\": np.nan, \"yO\": np.nan, \"gc\": np.nan, \"score\": np.inf}\n    for nu in nus:\n        for yO in yOs:\n            for gc in gcs:\n                tr = FSSRescale(nu=float(nu), yO=float(yO), gc=float(gc))\n                curves = [tr.transform(g, O, L) for g, O, L in zip(g_list, O_list, L_list)]\n                sc = collapse_score(curves, nbins=nbins)\n                if sc < best[\"score\"]:\n                    best = {\"nu\": float(nu), \"yO\": float(yO), \"gc\": float(gc), \"score\": float(sc)}\n    return best\n\"\"\")\n\nchunks.append(\"\"\"\ndef hyperscaling_residuals(exponents: Mapping[str, float], *, d: Optional[float] = None) -> Dict[str, float]:\n    \\\"\\\"\\\"Return residuals of common hyperscaling/scaling relations.\n\n    Supports keys among: alpha,beta,gamma,delta,nu,eta; optional dimension d.\n    Residuals are LHS-RHS for each relation that can be evaluated.\n    \\\"\\\"\\\"\n    e = {k: float(v) for k, v in exponents.items()}\n    r: Dict[str, float] = {}\n    if {\"alpha\", \"beta\", \"gamma\"} <= e.keys():\n        r[\"rushbrooke: alpha+2beta+gamma=2\"] = e[\"alpha\"] + 2 * e[\"beta\"] + e[\"gamma\"] - 2\n    if {\"gamma\", \"beta\", \"delta\"} <= e.keys():\n        r[\"widom: gamma=beta(delta-1)\"] = e[\"gamma\"] - e[\"beta\"] * (e[\"delta\"] - 1)\n    if {\"gamma\", \"nu\", \"eta\"} <= e.keys():\n        r[\"fisher: gamma=(2-eta)nu\"] = e[\"gamma\"] - (2 - e[\"eta\"]) * e[\"nu\"]\n    if d is not None and {\"alpha\", \"nu\"} <= e.keys():\n        r[\"josephson: 2-alpha=d nu\"] = (2 - e[\"alpha\"]) - float(d) * e[\"nu\"]\n    return r\n\"\"\")\n\nchunks.append(\"\"\"\ndef propagate_uncertainty(\n    f: Callable[[np.ndarray], float],\n    x: Sequence[float],\n    cov: np.ndarray,\n    *,\n    eps: float = 1e-6,\n) -> float:\n    \\\"\\\"\\\"Delta-method std for f(x) given covariance of x (numerical Jacobian).\\\"\\\"\\\"\n    x = np.asarray(x, float)\n    cov = np.asarray(cov, float)\n    if cov.shape != (x.size, x.size):\n        raise ValueError(\"cov must be square (n,n) matching x\")\n    fx = float(f(x))\n    J = np.zeros_like(x)\n    for i in range(x.size):\n        dx = np.zeros_like(x)\n        dx[i] = eps * (1.0 + abs(x[i]))\n        J[i] = (float(f(x + dx)) - fx) / dx[i]\n    var = float(J @ cov @ J)\n    return float(np.sqrt(max(var, 0.0)))\n\n\ndef bootstrap(\n    data: np.ndarray,\n    stat: Callable[[np.ndarray], np.ndarray],\n    *,\n    n: int = 500,\n    rng: Optional[np.random.Generator] = None,\n    ci: float = 0.68,\n) -> Dict[str, np.ndarray]:\n    \\\"\\\"\\\"Bootstrap a statistic over first axis; returns mean/std and central CI.\\\"\\\"\\\"\n    rng = np.random.default_rng() if rng is None else rng\n    x = np.asarray(data)\n    if x.ndim == 0:\n        raise ValueError(\"data must be array-like\")\n    m = x.shape[0]\n    reps = []\n    for _ in range(int(n)):\n        idx = rng.integers(0, m, size=m)\n        reps.append(np.asarray(stat(x[idx])))\n    reps = np.stack(reps, axis=0)\n    mean = np.nanmean(reps, axis=0)\n    std = np.nanstd(reps, axis=0, ddof=1)\n    lo = np.nanquantile(reps, (1 - ci) / 2, axis=0)\n    hi = np.nanquantile(reps, 1 - (1 - ci) / 2, axis=0)\n    return {\"mean\": mean, \"std\": std, \"ci_lo\": lo, \"ci_hi\": hi}\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/sf_gft_diagnostics/scaling.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499b97284881909e58fb047f14c1e300fdec2b43878464",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/sf_gft_diagnostics/scaling.py\nDIR_STATE:[\"src/sf_gft_diagnostics/__init__.py\", \"src/sf_gft_diagnostics/observables.py\", \"src/sf_gft_diagnostics/scaling.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0047173f64f766b90069499cb9988c819583cc8f0c18042fd9",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/sf_gft_diagnostics/scaling.py` with compact, production-ready utilities for effective exponents (finite-difference and moving-window fits), finite-size scaling rescaling plus collapse scoring and grid search, hyperscaling residual checks, and uncertainty handling via delta-method propagation and bootstrap resampling."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/goal_33_toy_experiment.py` as a seeded, deterministic CLI that writes `results.json` (summary stats + deterministic checksums/metadata) and a headless-rendered `figure.png` to the specified output directory.",
+  "reasoning": "",
+  "responseId": "resp_0cd480a40a510b2900694b4203a84c8193ac8f2be0a1c746be",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3250,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1741,
+    "output_tokens_details": {
+      "reasoning_tokens": 342
+    },
+    "total_tokens": 4991
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0cd480a40a510b2900694b420464b88193b23dd9e3936d7d33",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0cd480a40a510b2900694b420a10e48193bb922b01fc663357",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, hashlib, sys, math\ntarget_path = Path('/mnt/data').joinpath('src/goal_33_toy_experiment.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\nr\"\"\"#!/usr/bin/env python3\n\\\"\\\"\\\"Seeded toy experiment that writes deterministic artifacts.\n\nProduces:\n- results.json: summary statistics + metadata (deterministic for same inputs)\n- figure.png: simple deterministic plot of the generated data\n\nUsage:\n  python -m src.goal_33_toy_experiment --outdir . --seed 0 --n 1000\n\\\"\\\"\\\"\"\"\",\nr\"\"\"from __future__ import annotations\n\nimport argparse\nimport hashlib\nimport json\nimport platform\nfrom pathlib import Path\nfrom typing import Any, Dict\n\nimport numpy as np\n\n# Use a non-interactive backend for CI/headless environments.\nimport matplotlib\nmatplotlib.use(\"Agg\")  # noqa: E402\nimport matplotlib.pyplot as plt  # noqa: E402\"\"\",\nr\"\"\"def _stable_sha256(obj: Any) -> str:\n    \\\"\\\"\\\"SHA256 of a JSON-serializable object with stable encoding.\\\"\\\"\\\"\n    payload = json.dumps(obj, sort_keys=True, separators=(\",\", \":\"), ensure_ascii=True)\n    return hashlib.sha256(payload.encode(\"utf-8\")).hexdigest()\n\n\ndef run_experiment(seed: int, n: int) -> Dict[str, Any]:\n    rng = np.random.default_rng(seed)\n\n    # Deterministic toy signal: Gaussian noise + a smooth sinusoid trend.\n    x = np.linspace(0.0, 1.0, n, dtype=np.float64)\n    noise = rng.normal(loc=0.0, scale=1.0, size=n).astype(np.float64)\n    y = noise + 0.25 * np.sin(2.0 * np.pi * 3.0 * x)\n\n    stats = {\n        \"n\": int(n),\n        \"seed\": int(seed),\n        \"mean\": float(np.mean(y)),\n        \"std\": float(np.std(y, ddof=1)),\n        \"min\": float(np.min(y)),\n        \"max\": float(np.max(y)),\n        \"q25\": float(np.quantile(y, 0.25)),\n        \"q50\": float(np.quantile(y, 0.50)),\n        \"q75\": float(np.quantile(y, 0.75)),\n    }\n\n    # Stable checksum derived from rounded values serialized as JSON.\n    rounded = np.round(y, 8).tolist()\n    stats[\"data_sha256\"] = _stable_sha256(rounded)\n\n    meta = {\n        \"experiment\": \"goal_33_toy_experiment\",\n        \"schema_version\": 1,\n        \"inputs\": {\"seed\": int(seed), \"n\": int(n)},\n        \"python\": platform.python_version(),\n        \"numpy\": np.__version__,\n        \"matplotlib\": matplotlib.__version__,\n    }\n    meta[\"run_sha256\"] = _stable_sha256({\"meta\": meta, \"stats\": stats})\n    return {\"metadata\": meta, \"stats\": stats, \"rounded_sample_head\": rounded[:10]}\"\"\",\nr\"\"\"def write_artifacts(result: Dict[str, Any], outdir: Path) -> None:\n    outdir.mkdir(parents=True, exist_ok=True)\n    results_path = outdir / \"results.json\"\n    fig_path = outdir / \"figure.png\"\n\n    results_path.write_text(\n        json.dumps(result, sort_keys=True, indent=2, ensure_ascii=True) + \"\\n\",\n        encoding=\"utf-8\",\n    )\n\n    # Deterministic plot: empirical CDF of y using sorted rounded values.\n    y = np.array(result[\"rounded_sample_head\"] + [])  # just to keep type consistent\n    # Rebuild a deterministic view of data via checksum context is not needed for plot;\n    # instead, re-run plotting from summary-friendly data: use quantile markers.\n    # Plot a simple bar of key quantiles and mean to keep it deterministic.\n    stats = result[\"stats\"]\n    labels = [\"min\", \"q25\", \"q50\", \"mean\", \"q75\", \"max\"]\n    values = [stats[\"min\"], stats[\"q25\"], stats[\"q50\"], stats[\"mean\"], stats[\"q75\"], stats[\"max\"]]\n\n    plt.rcParams.update({\"figure.dpi\": 120, \"savefig.dpi\": 120})\n    fig, ax = plt.subplots(figsize=(6, 3))\n    ax.plot(labels, values, marker=\"o\", linewidth=2)\n    ax.set_title(\"Toy experiment summary (deterministic)\")\n    ax.set_ylabel(\"value\")\n    ax.grid(True, alpha=0.3)\n    fig.tight_layout()\n    fig.savefig(fig_path)\n    plt.close(fig)\"\"\",\nr\"\"\"def parse_args(argv: list[str] | None = None) -> argparse.Namespace:\n    p = argparse.ArgumentParser(description=\"Goal 33: deterministic toy experiment\")\n    p.add_argument(\"--outdir\", type=Path, default=Path(\".\"), help=\"Output directory\")\n    p.add_argument(\"--seed\", type=int, default=0, help=\"Random seed\")\n    p.add_argument(\"--n\", type=int, default=1000, help=\"Number of samples\")\n    return p.parse_args(argv)\n\n\ndef main(argv: list[str] | None = None) -> int:\n    args = parse_args(argv)\n    if args.n <= 1:\n        raise SystemExit(\"--n must be > 1\")\n    result = run_experiment(seed=args.seed, n=args.n)\n    write_artifacts(result, args.outdir)\n    print(f\"WROTE:{(args.outdir / 'results.json').as_posix()}\")\n    print(f\"WROTE:{(args.outdir / 'figure.png').as_posix()}\")\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/goal_33_toy_experiment.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b41ff56cc8190b260d1e31434cec50ba283afbb9de0d9",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/goal_33_toy_experiment.py\nDIR_STATE:[\"src/goal_33_toy_experiment.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0cd480a40a510b2900694b42182d0c8193883d12d5209225ba",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/goal_33_toy_experiment.py` as a seeded, deterministic CLI that writes `results.json` (summary stats + deterministic checksums/metadata) and a headless-rendered `figure.png` to the specified output directory."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

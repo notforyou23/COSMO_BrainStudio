@@ -1,0 +1,96 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766625200428_1aw6mzb",
+  "agentType": "code-creation",
+  "goalId": "goal_257",
+  "missionId": "urgent_goal_257_1766625200427",
+  "spawnCycle": 121,
+  "coordinatorReview": null,
+  "spawnedBy": "meta_coordinator_urgent",
+  "triggerSource": "urgent_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-25T01:13:24.407Z",
+  "completedAt": "2025-12-25T01:15:13.898Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/qa/repro_smoke.py",
+      "description": "One-file, runnable smoke/repro script that captures full stdout/stderr and environment metadata, probes crash boundary (startup vs filesystem vs imports), and writes a timestamped log under /outputs/qa/logs/.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "a/defaults.yaml\", \"scripts/qa/detect.py\", \"scripts/qa/docker_runner.py\", \"scripts/qa/failsafe_runner.py\", \"scripts/qa/qa_gate.py\", \"scripts/qa/repro_smoke.py\", \"scripts/qa/run_schema_validation.py\", \"scripts/qa/smoke_repro.py\"]\nSUMMARY: Wrote a one-file smoke/repro script that logs stdout/stderr and environment metadata to outputs/qa/logs and reports a crash boundary (startup/filesystem/imports).\n",
+          "timestamp": "2025-12-25T01:13:53.437Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "s/qa/commands.py\", \"scripts/qa/defaults.yaml\", \"scripts/qa/detect.py\", \"scripts/qa/docker_runner.py\", \"scripts/qa/failsafe_runner.py\", \"scripts/qa/qa_gate.py\", \"scripts/qa/repro_smoke.py\", \"scripts/qa/run_schema_validation.py\", \"scripts/qa/smoke_repro.py\"]\nSummary: Wrote a one-file smoke/repro script that logs environment metadata and probes filesystem/import crash boundaries to outputs/qa/logs/.\n",
+          "timestamp": "2025-12-25T01:14:25.476Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:13:24.407Z",
+      "failedAt": "2025-12-25T01:14:25.476Z"
+    },
+    {
+      "path": "scripts/qa/README.md",
+      "description": "Documentation describing how to run the repro script, what it records, and how to interpret boundary results and log locations under outputs/qa/logs/.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": ", \"scripts/qa/commands.py\", \"scripts/qa/defaults.yaml\", \"scripts/qa/detect.py\", \"scripts/qa/docker_runner.py\", \"scripts/qa/failsafe_runner.py\", \"scripts/qa/qa_gate.py\", \"scripts/qa/repro_smoke.py\", \"scripts/qa/run_schema_validation.py\", \"scripts/qa/smoke_repro.py\"]\nSUMMARY: Added concise run + interpretation documentation for the repro smoke script and its timestamped logs under outputs/qa/logs/.\n",
+          "timestamp": "2025-12-25T01:14:49.617Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "a/commands.py\", \"scripts/qa/defaults.yaml\", \"scripts/qa/detect.py\", \"scripts/qa/docker_runner.py\", \"scripts/qa/failsafe_runner.py\", \"scripts/qa/qa_gate.py\", \"scripts/qa/repro_smoke.py\", \"scripts/qa/run_schema_validation.py\", \"scripts/qa/smoke_repro.py\"]\nSummary: Wrote QA README documenting how to run the repro smoke script, what it records, and how to interpret boundary results and log locations.\n",
+          "timestamp": "2025-12-25T01:15:13.898Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:13:24.407Z",
+      "failedAt": "2025-12-25T01:15:13.898Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Reproduce the failure with the smallest possible script, capture full stderr/stdout + environment metadata, identify the crash boundary (startup vs. filesystem vs. imports), implement a one-file smoke test that writes a timestamped log under /outputs/qa/logs/.",
+  "missionSuccessCriteria": [
+    "Complete the urgent task identified by Meta-Coordinator",
+    "Curated insight (actionability 8-9/10): Unblocks the ability to run the 3-claim pilot by fixing the root cause of execution failures (“container lost”), enabling any execution-backed QA artifacts and time-to-evidence tracking...."
+  ],
+  "projectName": "generated_script_1766625200740",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-25T01:15:13.898Z",
+  "summary": {
+    "completed": 0,
+    "failed": 2,
+    "total": 2
+  }
+}

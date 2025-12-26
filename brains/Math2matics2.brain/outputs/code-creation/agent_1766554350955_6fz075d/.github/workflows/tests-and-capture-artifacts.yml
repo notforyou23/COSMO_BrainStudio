@@ -1,0 +1,56 @@
+name: tests-and-capture-artifacts
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            python -m pip install -r requirements.txt
+          elif [ -f pyproject.toml ]; then
+            python -m pip install -e .
+          elif [ -f setup.py ]; then
+            python -m pip install -e .
+          else
+            echo "No requirements.txt/pyproject.toml/setup.py found; skipping dependency install."
+          fi
+
+      - name: Run tests and capture artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/run_tests_and_capture_log.py
+
+      - name: Verify test artifacts exist (enforcement)
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/verify_test_artifacts.py
+
+      - name: Upload outputs/ artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: outputs
+          path: outputs/
+          if-no-files-found: error

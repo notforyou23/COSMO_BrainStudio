@@ -1,0 +1,56 @@
+{
+  "content": "Created `outputs/bibliography_system.md` specifying required BibTeX fields by entry type, consistent domain/subtopic/type tagging, DOI/ISBN-first deduplication rules, and a 1–5 source-quality scoring rubric.",
+  "reasoning": "",
+  "responseId": "resp_06371eb5a75644fe00694b5cbab0788195b13f8d0dd32e64ca",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3443,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1914,
+    "output_tokens_details": {
+      "reasoning_tokens": 48
+    },
+    "total_tokens": 5357
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_06371eb5a75644fe00694b5cbb58a48195a1b8c2d5a95b52ab",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06371eb5a75644fe00694b5cbc09608195a9861632bef9abc4",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('outputs/bibliography_system.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(r\"\"\"# Bibliography System Specification\n\nThis document defines (1) required BibTeX fields per entry type, (2) tagging conventions for domain/subtopic/type, (3) deduplication rules (DOI/ISBN-first), and (4) a source-quality scoring rubric.\n\n## 1) Canonical fields & normalization (all entries)\n**Required (all types):**\n- `title` (use sentence case; preserve proper nouns)\n- `author` (BibTeX “Last, First and Last2, First2”; include full given names when known)\n- `year` (4 digits)\n- `tags` (see §2; semicolon-separated)\n- `quality` (integer 1–5 per rubric in §4)\n\n**Strongly recommended (when applicable):**\n- `doi` (lowercase; strip `https://doi.org/`)\n- `isbn` (digits and `X` only; store 10 or 13; no hyphens/spaces)\n- `url` (stable landing page; prefer publisher/arXiv)\n- `urldate` (ISO `YYYY-MM-DD`)\n- `abstract` (1–5 sentences; optional)\n- `keywords` (comma-separated; optional)\n- `note` (short provenance notes; optional)\n\n**Normalization rules:**\n- Titles: no trailing period; keep LaTeX for symbols (e.g., `{L}STM`, `$\\alpha$`).\n- Venues: use standard abbreviations consistently (e.g., *JMLR*, *NeurIPS*).\n- `doi`: lowercase; validate pattern `10.\\d{4,9}/...` when feasible.\n- `isbn`: prefer ISBN-13 if known; if both exist, store ISBN-13 in `isbn` and ISBN-10 in `note`.\n\n## 2) Tagging conventions (domain/subtopic/type)\nStore tags in a single BibTeX field: `tags = {domain:<...>; subtopic:<...>; type:<...>; ...}`.\n\n**Required tags (exactly one each):**\n- `domain:<d>` where `<d>` ∈ `{ml, nlp, cv, rl, ir, dm, stats, opt, systems, security, hci, econ, theory}`\n- `subtopic:<s>`: free but consistent, lowercase with hyphens (e.g., `subtopic:transformers`, `subtopic:causal-inference`)\n- `type:<t>` where `<t>` ∈ `{textbook, survey, tutorial, classic, empirical, theoretical, benchmark, methods, position, standard}`\n\n**Optional tags (0+):**\n- `task:<...>` (e.g., `task:classification`, `task:ranking`)\n- `data:<...>` (dataset name)\n- `method:<...>` (e.g., `method:variational-inference`)\n- `level:<...>` ∈ `{intro, intermediate, advanced}`\n- `open:<...>` ∈ `{open-access, closed}`\n- `rep:<...>` ∈ `{has-code, no-code}`\n\n**Example:**\n`tags = {domain:ml; subtopic:deep-learning; type:textbook; level:intro}`\n\n## 3) Required fields by BibTeX entry type\nUse standard BibTeX types; when in doubt choose the closest and comply with required fields below.\n\n### `@article`\nRequired: `author`, `title`, `journal`, `year`, `volume` OR `number`, `pages` OR `eid`, `tags`, `quality`\nRecommended: `doi`, `url`, `urldate`\n\n### `@inproceedings`\nRequired: `author`, `title`, `booktitle`, `year`, `pages` OR `eid`, `tags`, `quality`\nRecommended: `doi`, `url`, `urldate`, `organization`, `publisher`\n\n### `@book`\nRequired: `author` OR `editor`, `title`, `publisher`, `year`, `isbn` (if exists), `tags`, `quality`\nRecommended: `edition`, `address`, `url`, `urldate`\n\n### `@incollection` (chapter in edited book)\nRequired: `author`, `title`, `booktitle`, `publisher`, `year`, `pages`, `editor`, `tags`, `quality`\nRecommended: `doi`, `url`, `urldate`\n\n### `@techreport`\nRequired: `author`, `title`, `institution`, `year`, `tags`, `quality`\nRecommended: `number`, `doi`, `url`, `urldate`\n\n### `@misc` (preprints, web standards, repos)\nRequired: `author` (or responsible org), `title`, `year`, `howpublished` OR `url`, `tags`, `quality`\nRecommended: `doi` (if Zenodo), `eprint`/`archivePrefix` (for arXiv), `urldate`\n\n## 4) Deduplication rules (DOI/ISBN-first)\n**Goal:** one canonical entry per work; alternate versions become `note`/`url` links or separate entries only if substantively different (e.g., journal extension).\n\n1. **DOI match (highest priority):** if two entries share the same normalized `doi`, keep one (prefer publisher version with complete metadata). Merge missing fields from the other; keep one BibTeX key.\n2. **ISBN match:** for books, if `isbn` matches after normalization, treat as duplicates; prefer latest edition only when explicitly needed (otherwise keep first major edition and note later editions).\n3. **Title+author+year fuzzy:** if no DOI/ISBN, consider duplicates when:\n   - titles match after lowercasing and stripping punctuation/stopwords AND\n   - first author last name matches AND\n   - years differ by ≤ 1 (conference vs. arXiv timing).\n4. **Versioning policy:** if a journal article is a substantial extension of a conference paper, keep **both** but link them:\n   - add `note = {Extends/earlier version: <bibkey>}` and reciprocal note.\n5. **Key naming convention:** `AuthorYYYYShortTitle` (ASCII; no spaces), e.g., `Vaswani2017Attention`.\n\n## 5) Source-quality rubric (`quality` = 1–5)\nScore the *source* (venue/credibility) and *utility* (clarity/impact), not personal preference. Use integers only.\n\n- **5 (Gold standard):** definitive textbook/monograph from reputable publisher; or highly influential peer-reviewed work with strong evidence, clear methods, and lasting citations; or authoritative standards.\n- **4 (Strong):** top-tier peer-reviewed venue (journal/conference) or widely used survey/tutorial; solid methodology and reproducibility signals (open data/code).\n- **3 (Good/usable):** peer-reviewed but mid-tier venue; or well-regarded arXiv preprint with substantial community adoption; minor gaps in evaluation or clarity.\n- **2 (Weak):** non-peer-reviewed reports/blogs or preliminary preprints with limited validation; ambiguous claims; hard to reproduce.\n- **1 (Unreliable):** unverifiable claims, low-credibility venues, no methodology, or known issues (retractions/major errors).\n\n**Rubric addenda (apply as adjustments, not separate fields):**\n- +1 (cap at 5) if replicated by multiple independent works or adopted as a de facto standard benchmark.\n- −1 (floor at 1) if results are superseded, contradicted, or the venue is predatory/opaque.\n\n## 6) Compliance checklist (for curators)\n- Entry includes required fields for its BibTeX type (§3) plus `tags` and `quality`.\n- DOI/ISBN normalized and used for dedup (§4).\n- Tags include exactly one `domain:*`, one `subtopic:*`, one `type:*` (§2).\n- Prefer stable URLs; include `urldate` when using `url`.\"\"\")\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:outputs/bibliography_system.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b5cb6e12c8190ba77598d859e6d120c5160806363f1d2",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:outputs/bibliography_system.md\nDIR_STATE:[\"outputs/bibliography_system.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_06371eb5a75644fe00694b5cd3ece08195b6ab5ed6b9577e76",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `outputs/bibliography_system.md` specifying required BibTeX fields by entry type, consistent domain/subtopic/type tagging, DOI/ISBN-first deduplication rules, and a 1–5 source-quality scoring rubric."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,43 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Run runtime/outputs/code-creation/agent_1766613398846_yr1euha/src/init_outputs.py (or the most current equivalent), confirm the canonical root path, and commit/save the generated /outputs structure plus a timestamped console log under /outputs/qa/.
+Project: generated_script_1766620093899 (python script)
+
+Target file details:
+- Path: scripts/run_init_outputs_and_capture.py
+- Purpose: Runnable script that locates and executes the most current init_outputs.py under runtime/outputs/code-creation, confirms and prints the canonical project root path, generates/updates the /outputs structure, and writes a timestamped console log to outputs/qa/ while preserving the full stdout/stderr of the run.
+- Category: source
+
+Other planned files (for context only):
+- scripts/_outputs_qa_utils.py: Support utilities for resolving the canonical repo root, discovering the newest init_outputs.py candidate, executing it with captured output, and safely creating outputs/qa/ log paths with deterministic timestamp formatting.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T23-08-49-021Z_outputs_METADATA_SCHEMA_json_stage1_attempt1_prompt.txt from code-creation agent agent_176661772747
+- [AGENT: agent_1766619476801_dj6dsxw] {"agentId":"agent_1766619476801_dj6dsxw","timestamp":"2025-12-24T23:43:43.594Z","files":[{"filename":"v
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+- [AGENT: agent_1766614627657_h1iraii] {"agentId":"agent_1766614627657_h1iraii","timestamp":"2025-12-24T22:18:53.796Z","files":[{"filename":"v
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Runnable script that locates and executes the most current init_outputs.py under runtime/outputs/code-creation, confirms and prints the canonical project root path, generates/updates the /outputs structure, and writes a timestamped console log to outputs/qa/ while preserving the full stdout/stderr of the run.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/run_init_outputs_and_capture.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/run_init_outputs_and_capture.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/run_init_outputs_and_capture.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

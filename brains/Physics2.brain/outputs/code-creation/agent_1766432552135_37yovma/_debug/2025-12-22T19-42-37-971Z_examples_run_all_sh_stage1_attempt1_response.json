@@ -1,0 +1,190 @@
+{
+  "content": "Created `examples/run_all.sh`, a reproducible, headless-friendly shell script that runs each CLI-exposed experiment once and writes all resulting artifacts into a single output directory (default: `outputs_example`).",
+  "reasoning": "",
+  "responseId": "resp_01556164c914b0a4006949a0de68008190ac9219a438f3eb86",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 5431,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1343,
+    "output_tokens_details": {
+      "reasoning_tokens": 895
+    },
+    "total_tokens": 6774
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_01556164c914b0a4006949a0e049448190b5612becf709671c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01556164c914b0a4006949a0e1619881908ebf6d8e6839cf46",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nroot=Path(\"/mnt/data\")\nlist(root.glob(\"**/*\"))[:20]\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/README.md'),\n PosixPath('/mnt/data/requirements.txt'),\n PosixPath('/mnt/data/src'),\n PosixPath('/mnt/data/src/cli.py'),\n PosixPath('/mnt/data/src/lib'),\n PosixPath('/mnt/data/src/experiments'),\n PosixPath('/mnt/data/src/lib/io.py'),\n PosixPath('/mnt/data/src/lib/plotting.py'),\n PosixPath('/mnt/data/src/lib/graphs.py'),\n PosixPath('/mnt/data/src/lib/quantum.py'),\n PosixPath('/mnt/data/src/experiments/entanglement_diagnostics.py'),\n PosixPath('/mnt/data/src/experiments/rg_flow_toy.py'),\n PosixPath('/mnt/data/src/experiments/emergent_classicality_graph.py')]"
+        }
+      ]
+    },
+    {
+      "id": "rs_01556164c914b0a4006949a0e3a4fc81908bfcf4a8d7cdcf75",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01556164c914b0a4006949a0e3fab081908d2d6f6c6df8752c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import subprocess, textwrap, os, sys, json, re\nimport runpy, importlib.util, importlib\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": []
+    },
+    {
+      "id": "ci_01556164c914b0a4006949a0e6176c8190b8e1c5c8e88c0b1a",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "# Let's open src/cli.py\nfrom pathlib import Path\nprint(Path(\"/mnt/data/src/cli.py\").read_text()[:4000])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Command-line entrypoint for reproducible toy experiments.\n\nThis module is intentionally lightweight: it manages seeding and output\ndirectories and writes plots/tables deterministically for later inspection.\n\"\"\"\nfrom __future__ import annotations\n\nimport argparse\nimport csv\nimport json\nfrom dataclasses import asdict, dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Tuple\n\nimport numpy as np\ndef _ensure_dir(p: Path) -> Path:\n    p.mkdir(parents=True, exist_ok=True)\n    return p\n\n\ndef _write_json(path: Path, obj: Any) -> None:\n    path.write_text(json.dumps(obj, indent=2, sort_keys=True) + \"\\n\", encoding=\"utf-8\")\n\n\ndef _write_csv(path: Path, header: Iterable[str], rows: Iterable[Iterable[Any]]) -> None:\n    with path.open(\"w\", newline=\"\", encoding=\"utf-8\") as f:\n        w = csv.writer(f)\n        w.writerow(list(header))\n        for r in rows:\n            w.writerow(list(r))\n\n\ndef _rng(seed: int) -> np.random.Generator:\n    # Centralized RNG creation so every experiment is deterministic given seed.\n    return np.random.default_rng(int(seed))\ndef _savefig(path: Path) -> None:\n    # Matplotlib import is intentionally delayed to keep import time low.\n    import matplotlib.pyplot as plt  # type: ignore\n\n    path.parent.mkdir(parents=True, exist_ok=True)\n    plt.tight_layout()\n    plt.savefig(path, dpi=160)\n    plt.close()\n\n\ndef _run_dir(root: Path, exp: str, seed: int, name: str | None) -> Path:\n    # Deterministic path: avoids timestamps unless user supplies a name.\n    run = f\"{exp}_seed{seed}\" + (f\"_{name}\" if name else \"\")\n    return _ensure_dir(root / exp / run)\n@dataclass(frozen=True)\nclass CommonArgs:\n    out: Path\n    seed: int\n    name: str | None\n\n\ndef _common_parser(p: argparse.ArgumentParser) -> None:\n    p.add_argument(\"--out\", type=Path, default=Path(\"outputs\"), help=\"Output root directory\")\n    p.add_argument(\"--seed\", type=int, default=0, help=\"RNG seed (deterministic)\")\n    p.add_argument(\"--name\", type=str, default=None, help=\"Optional run name suffix\")\ndef exp_random_walk(args: argparse.Namespace) -> Path:\n    \"\"\"1D random walk ensemble; saves trajectory table and summary plot.\"\"\"\n    common = CommonArgs(out=args.out, seed=args.seed, name=args.name)\n    run = _run_dir(common.out, \"random_walk\", common.seed, common.name)\n    rng = _rng(common.seed)\n\n    steps = int(args.steps)\n    n = int(args.n)\n    # Steps are +/-1; positions include x0=0 so length steps+1.\n    jumps = rng.choice([-1, 1], size=(n, steps))\n    x = np.cumsum(jumps, axis=1)\n    x = np.concatenate([np.zeros((n, 1), dtype=int), x], axis=1)\n\n    _write_csv(run / \"trajectories.csv\", [\"traj\", \"t\", \"x\"], ((i, t, int(x[i, t])) for i in range(n) for t in range(steps + 1)))\n    summary = {\n        \"experiment\": \"random_walk\",\n        \"seed\": common.seed,\n        \"steps\": steps,\n        \"n\": n,\n        \"final_mean\": float(np.mean(x[:, -1])),\n        \"final_var\": float(np.var(x[:, -1])),\n    }\n    _write_json(run / \"summary.json\", summary)\n    _write_json(run / \"args.json\", {**asdict(common), \"steps\": steps, \"n\": n})\n\n    import matplotlib.pyplot as plt  # type: ignore\n\n    t = np.arange(steps + 1)\n    for i in range(min(n, 20)):\n        plt.plot(t, x[i], alpha=0.5, lw=1)\n    plt.xlabel(\"t\")\n    plt.ylabel(\"x(t)\")\n    plt.title(\"1D random walk (first 20 trajectories)\")\n    _savefig(run / \"trajectories.png\")\n\n    plt.hist(x[:, -1], bins=25, density=True)\n    plt.xlabel(\"x(T)\")\n    plt.ylabel(\"density\")\n    plt.title(\"Final position distribution\")\n    _savefig(run / \"final_hist.png\")\n    return run\ndef _ent_entropy_two_qubit_state(psi: np.ndarray) -> float:\n    # psi is shape (4,), pure state on A(2) x B(2).\n    psi = psi / np.linalg.norm(psi)\n    rho = np.outer(psi, np.conjugate(psi))  # 4x4\n    # partial trace over B:\n    rho_a = np.zeros((2, 2), dtype=complex)\n    for b in range(2):\n        idx = [2 * 0 + b, 2 * 1 + b]\n        rho_a += rho[np.ix_(idx, idx)]\n    evals = np.linalg.eigvalsh(rho_a).real\n    evals = np.clip(evals, \n"
+        }
+      ]
+    },
+    {
+      "id": "rs_01556164c914b0a4006949a0e8698c819086ac8adc4cb08a2a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01556164c914b0a4006949a0e8cf3c8190b6907b1fbba1a8d4",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "text=Path(\"/mnt/data/src/cli.py\").read_text()\n# find subparsers\nimport re\nm=re.search(r\"def main\\(\", text)\nprint(text[m.start():m.start()+1500])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "def main(argv: List[str] | None = None) -> int:\n    args = build_parser().parse_args(argv)\n    run = args._fn(args)\n    print(str(run))\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_01556164c914b0a4006949a0eb8f088190b7e6b478def520f7",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01556164c914b0a4006949a0ebc6908190a50984a455131b1c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "idx=text.find(\"def build_parser\")\nprint(text[idx:idx+2000])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "def build_parser() -> argparse.ArgumentParser:\n    p = argparse.ArgumentParser(prog=\"toy-exp\", description=\"Reproducible toy-model experiments (numerical/symbolic).\")\n    sub = p.add_subparsers(dest=\"experiment\", required=True)\n\n    p_rw = sub.add_parser(\"random-walk\", help=\"1D random walk ensemble\")\n    _common_parser(p_rw)\n    p_rw.add_argument(\"--steps\", type=int, default=200)\n    p_rw.add_argument(\"--n\", type=int, default=200)\n    p_rw.set_defaults(_fn=exp_random_walk)\n\n    p_ent = sub.add_parser(\"two-qubit-entanglement\", help=\"Entanglement entropy of random two-qubit states\")\n    _common_parser(p_ent)\n    p_ent.add_argument(\"--n\", type=int, default=5000)\n    p_ent.set_defaults(_fn=exp_two_qubit_entanglement)\n    return p\n\n\ndef main(argv: List[str] | None = None) -> int:\n    args = build_parser().parse_args(argv)\n    run = args._fn(args)\n    print(str(run))\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_01556164c914b0a4006949a0ee03748190bf49c42e2f104ebb",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01556164c914b0a4006949a0f009ac819083a07f27c69ccdce",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "for p in Path(\"/mnt/data/src/experiments\").glob(\"*.py\"):\n    print(p.name, \"lines\", len(p.read_text().splitlines()))\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "entanglement_diagnostics.py lines 194\nrg_flow_toy.py lines 167\nemergent_classicality_graph.py lines 164\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_01556164c914b0a4006949a0f2a1c481909c75ea0c68682ab1",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01556164c914b0a4006949a0f31d0081908f5c884ac3882012",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path(\"/mnt/data/README.md\").read_text()[:2000])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "# generated_script_1766432556417 — Reproducible toy-model experiments\n\nThis repo is a small, reproducible “code interpreter friendly” sandbox for numerical/symbolic toy experiments that probe how classical-looking structure can emerge from quantum rules (and how diagnostics like entanglement respond under simple dynamics).\n\nThe emphasis is on **determinism** (seeded runs), **small-scale** models (lattices/graphs you can run on a laptop), and **artifact saving** (plots + tables you can re-generate byte-for-byte).\n## What you can reproduce\n\nExperiments are intentionally lightweight; each produces one or more plots and a CSV/JSON summary in an output directory:\n\n- **Small lattice Hamiltonians (exact diagonalization)**: ground-state energy gaps and **bipartite entanglement entropy** vs. a control parameter.\n- **Toy decoherence / “classicalization”**: a small system coupled to an environment; track purity/entropy and pointer-basis stability.\n- **Symbolic mini-derivations**: closed-form checks (e.g., simple effective-action terms / beta-function-style flows) to validate numerics.\n\nAll experiments are runnable via `src/cli.py`, and share common utilities in `src/lib/io.py` (seeding + saving) and `src/lib/plotting.py` (styling + deterministic figure output).\n## Installation\n\nRequirements are pinned in `requirements.txt`.\n\n```bash\npython -m venv .venv\n# Linux/macOS:\nsource .venv/bin/activate\n# Windows (PowerShell):\n# .venv\\Scripts\\Activate.ps1\n\npython -m pip install --upgrade pip\npip install -r requirements.txt\n```\n## Quickstart (run one experiment)\n\nAll runs take a seed and an output directory. Re-running with the same args should reproduce the same files.\n\n```bash\n# Show available experiments / flags\npython -m src.cli --help\n\n# Example: exact diagonalization toy model with entanglement diagnostics\npython -m src.cli run ising_ed --L 10 --g_min 0.2 --g_max 2.0 --num 25 --seed 0 --out outputs/ising_ed\n\n# Example: system+environment toy decoherence diagnostic\npython -m src.cli\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_01556164c914b0a4006949a0f538548190bd02e87d7fcc43a2",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01556164c914b0a4006949a0f6d04081909fdb252de91d16b7",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path(\"/mnt/data/README.md\").read_text()[2000:4000])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": " run decoherence --n_sys 1 --n_env 8 --steps 200 --seed 0 --out outputs/decoherence\n```\n## Outputs and reproducibility guarantees\n\nEach run writes into `--out`:\n\n- `metrics.json` (run configuration + scalar diagnostics)\n- `summary.csv` (tabular results for parameter sweeps)\n- `fig_*.png` (plots)\n\nReproducibility conventions used across experiments:\n\n1. A single `--seed` controls `numpy` (and any other RNG used).\n2. Plots are saved with fixed DPI and consistent style.\n3. All parameters are serialized alongside results to make runs self-describing.\n\nTip: keep outputs from different runs separated (e.g., `outputs/<exp_name>/<timestamp_or_tag>`), especially when sweeping parameters.\n## Common CLI patterns\n\n```bash\n# List experiments (if implemented by the CLI)\npython -m src.cli list\n\n# Run with a different seed and overwrite an existing directory (if supported)\npython -m src.cli run ising_ed --seed 123 --out outputs/ising_ed_s123 --overwrite\n```\n## Interpreting the toy results (suggested checks)\n\n- **Entanglement entropy**: peaks/rapid changes often correlate with crossovers/critical regions in small lattices.\n- **Decoherence**: purity typically decays as the environment entangles with the system; “pointer states” are those least disturbed.\n- **Symbolic vs numeric**: use symbolic outputs to sanity-check scalings/signs before trusting larger sweeps.\n\nBecause these are *toy* models, finite-size effects are expected; the goal is qualitative behavior and reproducible diagnostics, not precision estimates.\n## Troubleshooting\n\n- If plotting fails in headless environments, set a non-interactive backend:\n  `export MPLBACKEND=Agg` (Linux/macOS) or `setx MPLBACKEND Agg` (Windows).\n- If runs are slow, reduce lattice size (`--L`) / environment size (`--n_env`) or the number of sweep points (`--num`).\n- If outputs differ between machines, confirm identical Python/package versions and that you are reusing the same `--seed`.\n## License / intended use\n\nThis is a research prototype scaff\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_01556164c914b0a4006949a0f918508190b7570ca61a7fb1f0",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01556164c914b0a4006949a10404008190a47db2689ed19f26",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('examples/run_all.sh')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\nr\"\"\"#!/usr/bin/env bash\nset -euo pipefail\n\n# Run all CLI-exposed toy experiments and collect artifacts in a single folder.\n# Usage:\n#   bash examples/run_all.sh [OUT_DIR]\n#\n# The CLI prints the run directory path for each experiment; this script echoes it.\n\nSCRIPT_DIR=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")\" && pwd)\"\nREPO_ROOT=\"$(cd \"${SCRIPT_DIR}/..\" && pwd)\"\ncd \"${REPO_ROOT}\"\n\nOUT_DIR=\"${1:-outputs_example}\"\nmkdir -p \"${OUT_DIR}\"\n\n# Make plotting deterministic + headless-friendly.\nexport MPLBACKEND=\"${MPLBACKEND:-Agg}\"\n\necho \"Writing outputs under: ${OUT_DIR}\"\necho \"----\"\n\necho \"[1/2] random-walk\"\nRUN_DIR=\"$(python -m src.cli random-walk --out \"${OUT_DIR}\" --seed 0 --steps 200 --n 200)\"\necho \"  -> ${RUN_DIR}\"\necho \"----\"\n\necho \"[2/2] two-qubit-entanglement\"\nRUN_DIR=\"$(python -m src.cli two-qubit-entanglement --out \"${OUT_DIR}\" --seed 0 --n 5000)\"\necho \"  -> ${RUN_DIR}\"\necho \"----\"\n\necho \"Done. Inspect: ${OUT_DIR}\"\"\"    \n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:examples/run_all.sh')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:examples/run_all.sh\nDIR_STATE:[\"examples/run_all.sh\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_01556164c914b0a4006949a10f9fdc8190990fd84e515d23b1",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `examples/run_all.sh`, a reproducible, headless-friendly shell script that runs each CLI-exposed experiment once and writes all resulting artifacts into a single output directory (default: `outputs_example`)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

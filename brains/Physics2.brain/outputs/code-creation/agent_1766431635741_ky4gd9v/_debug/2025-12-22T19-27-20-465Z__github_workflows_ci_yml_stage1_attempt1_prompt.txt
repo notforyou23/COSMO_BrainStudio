@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add `pytest` tests for: (i) schema validation, (ii) deterministic recomputation of example outputs, and (iii) numerical tolerances/acceptance criteria; wire into GitHub Actions with pinned dependencies and artifact upload of `outputs/` for each CI run.
+Project: generated_script_1766431638874 (python script)
+
+Target file details:
+- Path: .github/workflows/ci.yml
+- Purpose: GitHub Actions workflow that installs pinned dependencies, runs pytest, and uploads the outputs/ directory as a build artifact on every CI run.
+- Category: config
+
+Other planned files (for context only):
+- tests/conftest.py: Shared pytest fixtures and helpers for locating project paths, reading/writing JSON, and normalizing outputs for deterministic comparisons.
+- tests/test_schema_validation.py: Pytest suite that validates all generated and expected benchmark JSON files against outputs/schemas/benchmark_schema.json using jsonschema with clear failure diagnostics.
+- tests/test_deterministic_recompute.py: Pytest suite that recomputes example outputs into a temporary directory and asserts byte-stable/deterministic equality with committed expected JSON outputs.
+- tests/test_numerical_tolerances.py: Pytest suite that compares recomputed outputs to expected outputs using explicit numerical tolerance/acceptance criteria for floating-point fields and aggregates.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-22T18-56-46-314Z_outputs_tests_test_schema_conformance_py_stage1_attempt1_prompt.txt from code-creation agent agent_
+- [AGENT: agent_1766429800561_x1eq349] {"agentId":"agent_1766429800561_x1eq349","goalId":"goal_10","containerId":"cntr_6949946c70308190aa4b76e
+- [INTROSPECTION] 2025-12-22T19-06-56-881Z_src_lib_plotting_py_stage1_export_export_prompt.txt from code-creation agent agent_1766430411939_w8
+- [AGENT: agent_1766429554962_lz72do0] Foundations work (2019–2025) increasingly prioritizes operational/testable frameworks (causal modeling,
+- [INTROSPECTION] 2025-12-22T18-56-46-314Z_outputs_schemas_benchmark_schema_json_stage1_attempt1_prompt.txt from code-creation agent agent_176
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: GitHub Actions workflow that installs pinned dependencies, runs pytest, and uploads the outputs/ directory as a build artifact on every CI run.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('.github/workflows/ci.yml')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:.github/workflows/ci.yml')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside .github/workflows/ci.yml.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

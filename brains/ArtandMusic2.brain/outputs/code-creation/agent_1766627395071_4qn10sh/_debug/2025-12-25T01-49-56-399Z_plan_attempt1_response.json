@@ -1,0 +1,37 @@
+{
+  "content": "[\n  {\n    \"path\": \"scripts/ci_qa_harness.py\",\n    \"description\": \"Deterministic CI/QA entrypoint that generates required scaffold, runs the canonical QA command, enforces the /outputs-only write policy, and writes QA_REPORT.json to /outputs.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/validate_outputs.py\",\n    \"description\": \"Utility that scans the repository after QA execution and fails if any new/modified files are written outside the canonical outputs tree with allowlist support.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/scaffold_outputs.py\",\n    \"description\": \"Creates and normalizes the canonical /outputs directory structure and required placeholder files to make the harness deterministic.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \".github/workflows/qa-regression.yml\",\n    \"description\": \"GitHub Actions workflow that runs the harness on every push/PR and on a scheduled cadence, uploads outputs/QA_REPORT.json as an artifact, and fails on QA gate or invalid writes.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"config/qa_harness.json\",\n    \"description\": \"Config declaring the canonical QA command, outputs root, write-policy allowlists, and report/artifact paths for consistent CI and local runs.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"outputs/.gitkeep\",\n    \"description\": \"Keeps the canonical outputs directory tracked so CI and local runs have a stable artifact root.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"README_QA_HARNESS.md\",\n    \"description\": \"Documentation describing how to run the CI/QA harness locally and in CI, interpret QA_REPORT.json, and troubleshoot write-policy failures.\",\n    \"category\": \"documentation\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_08514c124ad6fc0200694c98448b808197b69aeb749da4047b",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 575,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 397,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 972
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "msg_08514c124ad6fc0200694c9844cba8819799cc5ff9c36a0d71",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"scripts/ci_qa_harness.py\",\n    \"description\": \"Deterministic CI/QA entrypoint that generates required scaffold, runs the canonical QA command, enforces the /outputs-only write policy, and writes QA_REPORT.json to /outputs.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/validate_outputs.py\",\n    \"description\": \"Utility that scans the repository after QA execution and fails if any new/modified files are written outside the canonical outputs tree with allowlist support.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/scaffold_outputs.py\",\n    \"description\": \"Creates and normalizes the canonical /outputs directory structure and required placeholder files to make the harness deterministic.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \".github/workflows/qa-regression.yml\",\n    \"description\": \"GitHub Actions workflow that runs the harness on every push/PR and on a scheduled cadence, uploads outputs/QA_REPORT.json as an artifact, and fails on QA gate or invalid writes.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"config/qa_harness.json\",\n    \"description\": \"Config declaring the canonical QA command, outputs root, write-policy allowlists, and report/artifact paths for consistent CI and local runs.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"outputs/.gitkeep\",\n    \"description\": \"Keeps the canonical outputs directory tracked so CI and local runs have a stable artifact root.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"README_QA_HARNESS.md\",\n    \"description\": \"Documentation describing how to run the CI/QA harness locally and in CI, interpret QA_REPORT.json, and troubleshoot write-policy failures.\",\n    \"category\": \"documentation\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

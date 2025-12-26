@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Refactor and modularize reusable code artifacts: 2025-12-24T02-11-29-868Z_pyproject_toml_stage1_attempt1_prompt.txt, 2025-12-24T02-11-29-868Z_src_experiments_io_py_stage1_attempt1_prompt.txt, 2025-12-24T02-11-29-868Z_src_experiments_plotting_py_stage1_attempt1_prompt.txt, 2025-12-24T02-11-29-868Z_src_experiments_sweep_py_stage1_export_export_prompt.txt, 2025-12-24T02-11-29-868Z_tests_test_sweep_io_plotting_py_stage1_attempt1_prompt.txt
+Project: generated_script_1766542734624 (python script)
+
+Target file details:
+- Path: src/experiments/plotting.py
+- Purpose: Plotting utilities for sweep results (summary plots, per-metric plots, saving figures) implemented as reusable functions with minimal side effects.
+- Category: source
+
+Other planned files (for context only):
+- pyproject.toml: Project configuration defining build system, dependencies, formatting/linting tools, and test runner settings for the refactored experiments modules.
+- src/experiments/__init__.py: Package initializer exporting the public API for experiments I/O, sweep execution, and plotting utilities.
+- src/experiments/_common.py: Shared reusable helpers and small utilities (validation, path handling, typing helpers) used by I/O, plotting, and sweep modules to avoid duplication.
+- src/experiments/io.py: Reusable, well-tested functions for reading/writing sweep inputs and outputs (e.g., configs, results tables, metadata) with consistent schemas and error handling.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T01-56-08-639Z_src_refactor_modularize_artifacts_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [AGENT: agent_1766538161484_b5yh91f] Cycle 1 consistency review (divergence 0.97):
+Summary (high-level): The three branches are about differ
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_scripts_run_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766539771836_cun
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Plotting utilities for sweep results (summary plots, per-metric plots, saving figures) implemented as reusable functions with minimal side effects.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/experiments/plotting.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/experiments/plotting.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/experiments/plotting.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

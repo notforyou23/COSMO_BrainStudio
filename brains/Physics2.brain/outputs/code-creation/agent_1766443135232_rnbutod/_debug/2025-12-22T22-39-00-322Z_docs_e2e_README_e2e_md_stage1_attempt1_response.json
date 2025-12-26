@@ -1,0 +1,56 @@
+{
+  "content": "I created `docs/e2e/README_e2e.md` as a modular “glue” entrypoint that links to reusable E2E section documents, defines shared artifact/workflow references, and establishes stable conventions for maintaining E2E documentation.",
+  "reasoning": "",
+  "responseId": "resp_03f8703ee6ec0a88006949c890edf4819598ad1ca54b7ac04d",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2456,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1000,
+    "output_tokens_details": {
+      "reasoning_tokens": 90
+    },
+    "total_tokens": 3456
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_03f8703ee6ec0a88006949c891afc48195acf37b541c1c4f32",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_03f8703ee6ec0a88006949c893f76c8195a66e8b82e58affa3",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('docs/e2e/README_e2e.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"# End-to-End (E2E) Documentation\n\nThis document is the **entry point** for running and validating the project end-to-end. It is intentionally thin and **composes reusable sections** from `docs/e2e/README_e2e_sections/` so the same guidance can be referenced by CI docs, developer docs, and release notes without duplication.\n\n## How this README is structured (modular sections)\n\n- Overview: [`README_e2e_sections/00_overview.md`](README_e2e_sections/00_overview.md)\n- Prerequisites: [`README_e2e_sections/10_prerequisites.md`](README_e2e_sections/10_prerequisites.md)\n- Configuration: [`README_e2e_sections/20_configuration.md`](README_e2e_sections/20_configuration.md)\n- Running locally: [`README_e2e_sections/30_running_locally.md`](README_e2e_sections/30_running_locally.md)\n\n> If you need the “full narrative” start-to-finish, read those sections in order; this file only provides the glue, pointers, and shared conventions.\"\"\",\n\"\"\"## Quick start (links-first)\n\n1. Read the scope and expected outputs: **Overview** → `00_overview.md`  \n2. Ensure your environment matches expectations: **Prerequisites** → `10_prerequisites.md`  \n3. Confirm your config is valid and complete: **Configuration** → `20_configuration.md`  \n4. Execute the E2E run and interpret results: **Running locally** → `30_running_locally.md`\n\n## Shared artifacts and workflows (project-wide references)\n\nThese references are used across E2E docs and are the “single source of truth” locations you should update when behavior changes:\n\n- **E2E orchestrators / entrypoints**\n  - Prefer a single top-level runner script when provided (for example, a `scripts/run_all.sh`-style entrypoint) and keep per-step commands documented in `30_running_locally.md`.\n- **CI requirements / pinned deps**\n  - When a CI requirements file exists (for example, `docs/e2e/requirements-ci.txt`), treat it as the canonical minimal set for deterministic runs; local environments may add extras but should not remove pins required by CI.\n- **Prompts, exports, and introspection logs**\n  - If the project writes “introspection” or “export prompt” artifacts, keep them in their designated docs area and reference them from the relevant section file (overview/prereqs/config/run) rather than duplicating content here.\n\n## Conventions\n\n- **Reusability rule:** actionable guidance lives in the section files; this README only links and summarizes.\n- **Stability rule:** section file names are stable (so external links don’t break); add new sections as `NN_topic.md` where `NN` keeps ordering consistent.\n- **Change rule:** if you change E2E behavior (flags, outputs, required env vars), update the relevant section file and ensure this README still accurately points to it.\n\n## Troubleshooting escalation\n\nIf you cannot complete an E2E run after following the section docs, capture and share:\n- the exact command(s) run,\n- the config file(s) used (with secrets removed),\n- the first error trace and the final summary output,\n- OS/Python version and any container/runtime details.\n\nThen iterate by tightening the relevant reusable section so the next person can follow it without tribal knowledge.\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:docs/e2e/README_e2e.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949c882be7c819088c3caf5ad10e5ac0ab56cad82a1639c",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:docs/e2e/README_e2e.md\nDIR_STATE:[\"docs/e2e/README_e2e.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_03f8703ee6ec0a88006949c8a6cde48195a2a2b5d736ee7fdb",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "I created `docs/e2e/README_e2e.md` as a modular “glue” entrypoint that links to reusable E2E section documents, defines shared artifact/workflow references, and establishes stable conventions for maintaining E2E documentation."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

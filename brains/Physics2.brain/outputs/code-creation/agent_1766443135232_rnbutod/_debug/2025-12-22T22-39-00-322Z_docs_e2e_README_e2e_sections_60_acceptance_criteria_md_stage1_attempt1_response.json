@@ -1,0 +1,61 @@
+{
+  "content": "Created a reusable E2E acceptance-criteria section that defines explicit pass/fail conditions, required checks, exception handling for allowlisted failures, and concrete reporting/artifact expectations.",
+  "reasoning": "",
+  "responseId": "resp_0b4c3a71ec2fbc11006949c97bef508197b75e0609fcc52d5c",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2894,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1286,
+    "output_tokens_details": {
+      "reasoning_tokens": 93
+    },
+    "total_tokens": 4180
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0b4c3a71ec2fbc11006949c97cc694819789f024f3f482cf08",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0b4c3a71ec2fbc11006949c97f124c819795e9251d8a6aeb11",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('docs/e2e/README_e2e_sections/60_acceptance_criteria.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"## Acceptance criteria (pass/fail)\n\nThis section defines the minimum conditions an End-to-End (E2E) run must satisfy to be considered **PASS**, plus what must be produced for review and debugging.\n\n### PASS conditions (all required)\n\nAn E2E run is **PASS** only if **all** of the following are true:\n\n1. **Exit status**\n   - The E2E runner process exits with code **0**.\n\n2. **Test results**\n   - All E2E test cases complete (no skipped-by-error, no “did not run” due to setup failure).\n   - **0 failing tests** (unless an explicit, time-bounded allowlist is approved for the run; see “Allowlisted failures” below).\n\n3. **Required health checks**\n   - Application/services under test are reachable and report healthy at the start of the run.\n   - Any required dependencies (DB, cache, message broker, third-party sandbox) are reachable and initialized.\n   - No fatal startup exceptions in service logs during environment bring-up.\n\n4. **Artifacts and reporting**\n   - A machine-readable test report is generated (recommended: **JUnit XML**).\n   - Human-readable summary is generated (recommended: **HTML** or Markdown summary).\n   - Logs for the E2E runner and the system under test are captured for the full run window.\n\n5. **Data integrity & cleanup**\n   - If the run creates test data, it is either cleaned up or isolated (e.g., per-run namespace / database schema) such that it cannot impact subsequent runs.\n   - The environment is left in a known-good state (or is fully torn down).\n\n### FAIL conditions (any triggers FAIL)\n\nAn E2E run is **FAIL** if **any** of the following occur:\n\n- Non-zero exit code from the E2E runner.\n- Any failing E2E test not covered by an approved allowlist.\n- Environment setup fails (cannot provision, cannot deploy, cannot authenticate, cannot reach required endpoints).\n- Required artifacts are missing (e.g., no JUnit/XML output, no logs) such that failures cannot be triaged.\n- Critical runtime errors in the system under test (panic/segfault, repeated crash loops, unrecoverable migrations).\n\n### Required checks (minimum set)\n\nAt minimum, every E2E execution (local or CI) must perform and record:\n\n- **Config validation**: configuration loads successfully and required keys/values are present.\n- **Connectivity**: base URL(s) and required services are reachable.\n- **Auth** (if applicable): login/token acquisition succeeds using the test identity.\n- **Core workflows**: at least one representative “happy path” scenario per major user journey.\n- **Error budget**: no unexpected 5xx burst or systemic errors during the run.\n- **Performance sanity** (lightweight): no obvious regressions such as timeouts across the suite (track duration).\n\n### Allowlisted failures (exception process)\n\nAllowlisting is only for short-lived transitions (e.g., known flaky test, upstream outage) and must meet **all**:\n\n- The allowlist is **explicit** (test name/ID), **time-bounded**, and includes an owner.\n- The run report clearly marks allowlisted failures separately from unexpected failures.\n- A PASS with allowlisted failures is reported as **PASS_WITH_EXCEPTIONS** (or equivalent) and is not treated as a clean pass for release unless policy states otherwise.\n\n### Reporting expectations\n\nEvery run should publish a concise summary that includes:\n\n- Run identifier (commit SHA / build ID), environment (local/CI, target URL), and timestamps.\n- Totals: tests run, passed, failed, skipped, and duration.\n- Links/paths to artifacts: JUnit XML, HTML/summary, logs, and (if applicable) traces/screenshots/videos.\n- If FAIL: the top failing tests with error messages and the first actionable root-cause indicator (e.g., failing endpoint, migration error).\n\n### Recommended artifact layout\n\nUse a stable, discoverable artifact structure per run, for example:\n\n- `artifacts/e2e/<run-id>/results/junit.xml`\n- `artifacts/e2e/<run-id>/report/summary.html` (or `summary.md`)\n- `artifacts/e2e/<run-id>/logs/runner.log`\n- `artifacts/e2e/<run-id>/logs/services/*.log`\n- `artifacts/e2e/<run-id>/evidence/` (screenshots/videos/traces, if captured)\n\n### Release gate suggestion\n\nIf E2E is used as a release gate, treat as:\n\n- **Required**: PASS (no allowlisted failures) on the release candidate commit.\n- **Optional but tracked**: PASS_WITH_EXCEPTIONS for non-release branches, with a defined burn-down plan.\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:docs/e2e/README_e2e_sections/60_acceptance_criteria.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949c882be7c819088c3caf5ad10e5ac0ab56cad82a1639c",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:docs/e2e/README_e2e_sections/60_acceptance_criteria.md\nDIR_STATE:[\"docs/e2e/README_e2e_sections/00_overview.md\", \"docs/e2e/README_e2e_sections/10_prerequisites.md\", \"docs/e2e/README_e2e_sections/20_configuration.md\", \"docs/e2e/README_e2e_sections/30_running_locally.md\", \"docs/e2e/README_e2e_sections/40_ci_github_actions.md\", \"docs/e2e/README_e2e_sections/50_artifacts_and_logs.md\", \"docs/e2e/README_e2e_sections/60_acceptance_criteria.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0b4c3a71ec2fbc11006949c99c82d0819783068709a7026333",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0b4c3a71ec2fbc11006949c99cb9008197953f3b60282efc8d",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a reusable E2E acceptance-criteria section that defines explicit pass/fail conditions, required checks, exception handling for allowlisted failures, and concrete reporting/artifact expectations."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

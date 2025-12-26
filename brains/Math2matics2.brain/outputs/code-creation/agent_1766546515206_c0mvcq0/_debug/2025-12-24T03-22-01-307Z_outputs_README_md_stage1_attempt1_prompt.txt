@@ -1,0 +1,50 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add a test run step that generates /outputs/pytest_output.txt and /outputs/run_metadata.json; ensure CI/local instructions are documented in /outputs/README.md and linked from /outputs/index.md.
+Project: generated_script_1766546519826 (json script)
+
+Target file details:
+- Path: outputs/README.md
+- Purpose: Documentation describing how to run the test-capture step locally and in CI and explaining the meaning of the generated outputs/pytest_output.txt and outputs/run_metadata.json artifacts.
+- Category: documentation
+
+Other planned files (for context only):
+- scripts/run_tests_and_capture.py: CLI script that runs pytest, captures the full stdout/stderr to outputs/pytest_output.txt, and writes structured execution metadata to outputs/run_metadata.json.
+- outputs/index.md: Index page linking to outputs/README.md and summarizing the canonical run artifacts produced under the outputs/ directory.
+
+Reference insights:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [CONSOLIDATED] Establish a minimal, reproducible pipeline workflow that always generates a canonical set of run artifacts (structured JSON “
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+- [AGENT: agent_1766543291642_15ryvxl] {"agentId":"agent_1766543291642_15ryvxl","goalId":"goal_43","containerId":"cntr_694b4fc317a48190a1321c4
+
+Key requirements:
+- documentation
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Documentation describing how to run the test-capture step locally and in CI and explaining the meaning of the generated outputs/pytest_output.txt and outputs/run_metadata.json artifacts.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/README.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/README.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/README.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

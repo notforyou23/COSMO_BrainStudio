@@ -1,0 +1,51 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f pyproject.toml ]; then pip install -e .; fi
+
+      - name: Run pipeline once (generate canonical outputs)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f src/cli.py ]; then
+            python -m src.cli run
+          elif [ -f src/pipeline.py ]; then
+            python -m src.pipeline
+          else
+            echo "No runnable entrypoint found (expected src/cli.py or src/pipeline.py)" >&2
+            exit 2
+          fi
+
+      - name: Upload outputs artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: outputs
+          path: |
+            outputs/**
+            .outputs/**
+          if-no-files-found: warn

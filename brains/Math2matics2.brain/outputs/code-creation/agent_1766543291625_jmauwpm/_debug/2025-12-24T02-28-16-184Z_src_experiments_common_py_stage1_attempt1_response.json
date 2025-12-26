@@ -1,0 +1,87 @@
+{
+  "content": "Created `src/experiments/common.py` with dependency-light, reusable experiment utilities for UTC timestamps, stable config hashing, global seeding (with optional NumPy/Torch support), recursive dict merging/flattening, environment metadata collection (incl. best-effort git commit), and a minimal `RunInfo` helper for run IDs.",
+  "reasoning": "",
+  "responseId": "resp_086ab0e6ff014ebf00694b4fd9a0688190ab7c55dc59a9f06f",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4529,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2921,
+    "output_tokens_details": {
+      "reasoning_tokens": 2850
+    },
+    "total_tokens": 7450
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_086ab0e6ff014ebf00694b4fda500081908f1f71091f94fe68",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_086ab0e6ff014ebf00694b4fdf3dd881909680a12ae5738c73",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, sys, platform, getpass, socket, datetime, hashlib, subprocess\ntarget_path = Path('/mnt/data').joinpath('src/experiments/common.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"Shared, dependency-light utilities for experiments.\n\nThis module intentionally avoids heavy dependencies; integrations with NumPy/Torch\nare optional and only activated if those libraries are installed.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nimport datetime as _dt\nimport getpass as _getpass\nimport hashlib as _hashlib\nimport json as _json\nimport os as _os\nimport platform as _platform\nimport random as _random\nimport socket as _socket\nimport subprocess as _subprocess\nimport sys as _sys\nfrom typing import Any, Dict, Iterable, Mapping, MutableMapping, Optional, Tuple\n\"\"\")\n\nchunks.append(\"\"\"\n__all__ = [\n    \"RunInfo\",\n    \"now_utc_iso\",\n    \"stable_hash\",\n    \"set_global_seed\",\n    \"deep_update\",\n    \"flatten_dict\",\n    \"collect_env_metadata\",\n]\n\"\"\")\n\nchunks.append(\"\"\"\ndef now_utc_iso(timespec: str = \"seconds\") -> str:\n    \\\"\\\"\\\"Return current UTC time in ISO-8601 format with 'Z'.\\\"\\\"\\\"\n    return _dt.datetime.now(tz=_dt.timezone.utc).isoformat(timespec=timespec).replace(\"+00:00\", \"Z\")\n\n\ndef stable_hash(obj: Any, *, n_hex: int = 10) -> str:\n    \\\"\\\"\\\"Deterministic short hash for JSON-serializable objects.\\\"\\\"\\\"\n    payload = _json.dumps(obj, sort_keys=True, separators=(\",\", \":\"), default=str).encode(\"utf-8\")\n    return _hashlib.sha256(payload).hexdigest()[:n_hex]\n\"\"\")\n\nchunks.append(\"\"\"\ndef set_global_seed(seed: int, *, deterministic: bool = False) -> None:\n    \\\"\\\"\\\"Seed common RNGs (random, NumPy, Torch if available).\n\n    If deterministic=True, also sets common Torch deterministic flags when present.\n    \\\"\\\"\\\"\n    seed = int(seed)\n    _os.environ[\"PYTHONHASHSEED\"] = str(seed)\n    _random.seed(seed)\n\n    try:  # optional numpy\n        import numpy as np  # type: ignore\n\n        np.random.seed(seed)\n    except Exception:\n        pass\n\n    try:  # optional torch\n        import torch  # type: ignore\n\n        torch.manual_seed(seed)\n        if torch.cuda.is_available():\n            torch.cuda.manual_seed_all(seed)\n        if deterministic:\n            try:\n                torch.use_deterministic_algorithms(True)\n            except Exception:\n                pass\n            torch.backends.cudnn.deterministic = True\n            torch.backends.cudnn.benchmark = False\n    except Exception:\n        pass\n\"\"\")\n\nchunks.append(\"\"\"\ndef deep_update(base: Mapping[str, Any], updates: Mapping[str, Any]) -> Dict[str, Any]:\n    \\\"\\\"\\\"Recursively merge updates into base (returns a new dict).\\\"\\\"\\\"\n    out: Dict[str, Any] = dict(base)\n    for k, v in updates.items():\n        if isinstance(v, Mapping) and isinstance(out.get(k), Mapping):\n            out[k] = deep_update(out[k], v)  # type: ignore[arg-type]\n        else:\n            out[k] = v\n    return out\n\n\ndef flatten_dict(d: Mapping[str, Any], *, sep: str = \".\", prefix: str = \"\") -> Dict[str, Any]:\n    \\\"\\\"\\\"Flatten nested dictionaries into a single-level dict with joined keys.\\\"\\\"\\\"\n    items: Dict[str, Any] = {}\n    for k, v in d.items():\n        key = f\"{prefix}{sep}{k}\" if prefix else str(k)\n        if isinstance(v, Mapping):\n            items.update(flatten_dict(v, sep=sep, prefix=key))\n        else:\n            items[key] = v\n    return items\n\"\"\")\n\nchunks.append(\"\"\"\ndef _git_commit(cwd: Optional[str] = None) -> Optional[str]:\n    try:\n        p = _subprocess.run(\n            [\"git\", \"rev-parse\", \"HEAD\"],\n            cwd=cwd,\n            stdout=_subprocess.PIPE,\n            stderr=_subprocess.DEVNULL,\n            check=True,\n            text=True,\n        )\n        return p.stdout.strip() or None\n    except Exception:\n        return None\n\n\ndef collect_env_metadata(*, extra: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:\n    \\\"\\\"\\\"Collect lightweight runtime metadata for provenance.\\\"\\\"\\\"\n    meta = {\n        \"time_utc\": now_utc_iso(),\n        \"python\": _sys.version.split()[0],\n        \"platform\": _platform.platform(),\n        \"hostname\": _socket.gethostname(),\n        \"user\": _getpass.getuser(),\n        \"cwd\": _os.getcwd(),\n        \"git_commit\": _git_commit(_os.getcwd()),\n    }\n    if extra:\n        meta.update(dict(extra))\n    return meta\n\"\"\")\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass RunInfo:\n    \\\"\\\"\\\"Minimal run identifier + metadata helper.\\\"\\\"\\\"\n\n    seed: int\n    created_utc: str\n    config_hash: str\n\n    @classmethod\n    def create(cls, *, seed: int, config: Mapping[str, Any]) -> \"RunInfo\":\n        return cls(seed=int(seed), created_utc=now_utc_iso(), config_hash=stable_hash(config))\n\n    @property\n    def run_id(self) -> str:\n        # compact and stable-ish id suitable for folder names\n        ts = self.created_utc.replace(\":\", \"\").replace(\"-\", \"\")\n        return f\"{ts}_{self.config_hash}\"\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\n# check line count\nline_count = len(final_text.splitlines())\nline_count\n",
+      "container_id": "cntr_694b4fbeb5a8819082ef6cca0e8e962a0289c9c218902ef0",
+      "outputs": []
+    },
+    {
+      "id": "rs_086ab0e6ff014ebf00694b4feb662c8190b5e12e6e4cf688c8",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_086ab0e6ff014ebf00694b4febe59c819084ce964f8f283019",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, os\ntarget_path = Path('/mnt/data').joinpath('src/experiments/common.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"Shared, dependency-light utilities for experiments.\n\nThis module intentionally avoids heavy dependencies; integrations with NumPy/Torch\nare optional and only activated if those libraries are installed.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nimport datetime as _dt\nimport getpass as _getpass\nimport hashlib as _hashlib\nimport json as _json\nimport os as _os\nimport platform as _platform\nimport random as _random\nimport socket as _socket\nimport subprocess as _subprocess\nimport sys as _sys\nfrom typing import Any, Dict, Mapping, Optional\n\"\"\")\n\nchunks.append(\"\"\"\n__all__ = [\n    \"RunInfo\",\n    \"now_utc_iso\",\n    \"stable_hash\",\n    \"set_global_seed\",\n    \"deep_update\",\n    \"flatten_dict\",\n    \"collect_env_metadata\",\n]\n\"\"\")\n\nchunks.append(\"\"\"\ndef now_utc_iso(timespec: str = \"seconds\") -> str:\n    \\\"\\\"\\\"Return current UTC time in ISO-8601 format with 'Z'.\\\"\\\"\\\"\n    return _dt.datetime.now(tz=_dt.timezone.utc).isoformat(timespec=timespec).replace(\"+00:00\", \"Z\")\n\n\ndef stable_hash(obj: Any, *, n_hex: int = 10) -> str:\n    \\\"\\\"\\\"Deterministic short hash for JSON-serializable objects.\\\"\\\"\\\"\n    payload = _json.dumps(obj, sort_keys=True, separators=(\",\", \":\"), default=str).encode(\"utf-8\")\n    return _hashlib.sha256(payload).hexdigest()[:n_hex]\n\"\"\")\n\nchunks.append(\"\"\"\ndef set_global_seed(seed: int, *, deterministic: bool = False) -> None:\n    \\\"\\\"\\\"Seed common RNGs (random, NumPy, Torch if available).\\\"\\\"\\\"\n    seed = int(seed)\n    _os.environ[\"PYTHONHASHSEED\"] = str(seed)\n    _random.seed(seed)\n\n    try:  # optional numpy\n        import numpy as np  # type: ignore\n\n        np.random.seed(seed)\n    except Exception:\n        pass\n\n    try:  # optional torch\n        import torch  # type: ignore\n\n        torch.manual_seed(seed)\n        if torch.cuda.is_available():\n            torch.cuda.manual_seed_all(seed)\n        if deterministic:\n            try:\n                torch.use_deterministic_algorithms(True)\n            except Exception:\n                pass\n            torch.backends.cudnn.deterministic = True\n            torch.backends.cudnn.benchmark = False\n    except Exception:\n        pass\n\"\"\")\n\nchunks.append(\"\"\"\ndef deep_update(base: Mapping[str, Any], updates: Mapping[str, Any]) -> Dict[str, Any]:\n    \\\"\\\"\\\"Recursively merge updates into base (returns a new dict).\\\"\\\"\\\"\n    out: Dict[str, Any] = dict(base)\n    for k, v in updates.items():\n        if isinstance(v, Mapping) and isinstance(out.get(k), Mapping):\n            out[k] = deep_update(out[k], v)  # type: ignore[arg-type]\n        else:\n            out[k] = v\n    return out\n\n\ndef flatten_dict(d: Mapping[str, Any], *, sep: str = \".\", prefix: str = \"\") -> Dict[str, Any]:\n    \\\"\\\"\\\"Flatten nested dictionaries into a single-level dict with joined keys.\\\"\\\"\\\"\n    items: Dict[str, Any] = {}\n    for k, v in d.items():\n        key = f\"{prefix}{sep}{k}\" if prefix else str(k)\n        if isinstance(v, Mapping):\n            items.update(flatten_dict(v, sep=sep, prefix=key))\n        else:\n            items[key] = v\n    return items\n\"\"\")\n\nchunks.append(\"\"\"\ndef _git_commit(cwd: Optional[str] = None) -> Optional[str]:\n    try:\n        p = _subprocess.run(\n            [\"git\", \"rev-parse\", \"HEAD\"],\n            cwd=cwd,\n            stdout=_subprocess.PIPE,\n            stderr=_subprocess.DEVNULL,\n            check=True,\n            text=True,\n        )\n        return p.stdout.strip() or None\n    except Exception:\n        return None\n\n\ndef collect_env_metadata(*, extra: Optional[Mapping[str, Any]] = None) -> Dict[str, Any]:\n    \\\"\\\"\\\"Collect lightweight runtime metadata for provenance.\\\"\\\"\\\"\n    meta: Dict[str, Any] = {\n        \"time_utc\": now_utc_iso(),\n        \"python\": _sys.version.split()[0],\n        \"platform\": _platform.platform(),\n        \"hostname\": _socket.gethostname(),\n        \"user\": _getpass.getuser(),\n        \"cwd\": _os.getcwd(),\n        \"git_commit\": _git_commit(_os.getcwd()),\n    }\n    if extra:\n        meta.update(dict(extra))\n    return meta\n\"\"\")\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass RunInfo:\n    \\\"\\\"\\\"Minimal run identifier + metadata helper.\\\"\\\"\\\"\n\n    seed: int\n    created_utc: str\n    config_hash: str\n\n    @classmethod\n    def create(cls, *, seed: int, config: Mapping[str, Any]) -> \"RunInfo\":\n        return cls(seed=int(seed), created_utc=now_utc_iso(), config_hash=stable_hash(config))\n\n    @property\n    def run_id(self) -> str:\n        ts = self.created_utc.replace(\":\", \"\").replace(\"-\", \"\")\n        return f\"{ts}_{self.config_hash}\"\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\nlen(final_text.splitlines()), target_path\n",
+      "container_id": "cntr_694b4fbeb5a8819082ef6cca0e8e962a0289c9c218902ef0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(132, PosixPath('/mnt/data/src/experiments/common.py'))"
+        }
+      ]
+    },
+    {
+      "id": "rs_086ab0e6ff014ebf00694b4ff33d188190aeeac7b7142a3fdf",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_086ab0e6ff014ebf00694b4ff381d8819088ada361b41b1d62",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "target_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/experiments/common.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4fbeb5a8819082ef6cca0e8e962a0289c9c218902ef0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/common.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/common.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_086ab0e6ff014ebf00694b4ff574d8819086f238eda377e14b",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `src/experiments/common.py` with dependency-light, reusable experiment utilities for UTC timestamps, stable config hashing, global seeding (with optional NumPy/Torch support), recursive dict merging/flattening, environment metadata collection (incl. best-effort git commit), and a minimal `RunInfo` helper for run IDs."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,40 @@
+{
+  "agentId": "agent_1766546515175_tqjuez6",
+  "goalId": "goal_acceptance_qa_1766546448643",
+  "mission": "QA found borderline confidence - research agent should verify claims",
+  "timestamp": "2025-12-24T03:23:09.498Z",
+  "findings": [
+    {
+      "id": 1,
+      "content": "Primary-source verification: To verify a scientific claim, locate and read the original research output (journal article/preprint/registry/dataset), prioritize the Methods section to assess design, outcomes, and analysis plan, then confirm the Results match prespecified outcomes and report effect sizes with uncertainty (e.g., confidence intervals).",
+      "timestamp": "2025-12-24T03:23:09.498Z"
+    },
+    {
+      "id": 2,
+      "content": "Integrity checks are mandatory: Before treating a claim as reliable, check for linked corrections, expressions of concern, or retractions; publication-status signals can materially change whether results should be trusted and are part of standard scholarly record-keeping guidance (e.g., COPE/ICMJE norms).",
+      "timestamp": "2025-12-24T03:23:09.498Z"
+    },
+    {
+      "id": 3,
+      "content": "Triangulation improves confidence: Search for independent replications, re-analyses, and later citing literature (including critiques), and prefer studies with transparent practices such as shared data/code or clearly documented investigative outcomes.",
+      "timestamp": "2025-12-24T03:23:09.498Z"
+    },
+    {
+      "id": 4,
+      "content": "Statistical fact-checking databases: For macro/development indicators, start with World Bank Open Data (WDI), IMF Data/WEO, and OECD Data; corroborate with Our World in Data for quick sanity checks and reproducible charts, while confirming definitions/metadata (rates vs counts; nominal vs real; PPP vs FX).",
+      "timestamp": "2025-12-24T03:23:09.498Z"
+    },
+    {
+      "id": 5,
+      "content": "AI confidence should be calibrated: Token logprobs (and derived measures like entropy or margin) can provide usable uncertainty signals for LLM outputs, but teams should evaluate calibration and groundedness; conformal prediction (e.g., via MAPIE) and calibration tooling (e.g., Uncertainty Toolbox, Venn–Abers) support actionable uncertainty estimates and coverage guarantees.",
+      "timestamp": "2025-12-24T03:23:09.498Z"
+    }
+  ],
+  "summary": "The research converges on a practical verification playbook: trace any scientific or statistical claim back to its primary source, validate what was actually measured and reported (methods/results alignment, effect sizes, uncertainty), and then run integrity checks (corrections/retractions) plus triangulation (replications, critiques, re-analyses). This emphasizes that “what the claim says” is less important than “what the original study/data actually did,” and that reliability improves when evidence is transparent (shared data/code) and independently corroborated.\n\nFor quantitative fact-checking, the most actionable approach is to use the original producer of the statistic (e.g., World Bank/IMF/OECD for global macro; Census/BLS for U.S.) and then corroborate through reputable aggregators that preserve metadata (e.g., Our World in Data; FRED/ALFRED for U.S. time series and vintages). For AI/LLM confidence, the research distinguishes between raw uncertainty signals (e.g., token logprobs/entropy) and whether those signals are calibrated, recommending calibration audits and modern uncertainty quantification methods (notably conformal prediction) to produce decision-grade confidence/coverage guarantees.",
+  "successAssessment": "Criteria 1 (complete handoff): Met—synthesizes the three query areas into a coherent workflow for verifying claims and assessing model confidence. Criteria 2 (build upon parent findings): Met—connects primary-source verification, integrity checks, and triangulation with concrete database/tool recommendations and operational tips (metadata, revisions/vintages). Criteria 3 (actionable results): Met—produces implementable steps (where to look, what to inspect, what checks to run) and names specific platforms/tools (PubMed/Scholar, World Bank/IMF/OECD, Census/BLS, FRED/ALFRED, WHO/CDC WONDER, logprobs, conformal prediction/MAPIE, calibration toolkits) that can be directly used in QA or verification pipelines.",
+  "metadata": {
+    "queriesExecuted": 3,
+    "sourcesFound": 83,
+    "findingsCount": 5
+  }
+}

@@ -1,0 +1,32 @@
+You are planning a python script implementation for the following mission:
+Create /outputs/rights/RIGHTS_AND_LICENSING_CHECKLIST.md and /outputs/rights/RIGHTS_LOG.csv (columns: exemplar_id, title, creator, source_url, license_type, proof_url/screenshot_ref, usage_decision, notes, date_checked).
+
+Relevant context:
+- [AGENT: agent_1766612383475_dwl00ez] {"title":"RIGHTS_AND_LICENSING_CHECKLIST.md plus a RIGHTS_LOG.csv template to track permissions for ima
+- [AGENT: agent_1766612383475_dwl00ez] {"title":"RIGHTS_AND_LICENSING_CHECKLIST.md plus a RIGHTS_LOG.csv template to track permissions for ima
+- [AGENT: agent_1766612383475_dwl00ez] Document Created: RIGHTS_AND_LICENSING_CHECKLIST.md plus a RIGHTS_LOG.csv template to track permissions
+- [AGENT: agent_1766612383475_dwl00ez] Document Created: RIGHTS_AND_LICENSING_CHECKLIST.md plus a RIGHTS_LOG.csv template to track permissions
+- [AGENT: agent_1766616245397_vd4cqbh] {"title":"real /outputs project structure and populate it with core scaffold files (README for outputs,
+- [AGENT: agent_1766616245397_vd4cqbh] {"title":"real /outputs project structure and populate it with core scaffold files (README for outputs,
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] The dominant causal mechanism is a self-reinforcing selection loop: institutions use cheap, hig
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

@@ -1,0 +1,92 @@
+{
+  "content": "Created `tests/test_cli_run.py` with subprocess-based regression tests that run `python -m qg_bench.cli --help` (and `--version`/`-h`) and assert clean startup plus a successful exit code.",
+  "reasoning": "",
+  "responseId": "resp_07831f0a1d0d4df4006949be5189d48194b259f395eecf72fe",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2401,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 890,
+    "output_tokens_details": {
+      "reasoning_tokens": 434
+    },
+    "total_tokens": 3291
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_07831f0a1d0d4df4006949be52606c819481c5f4ba6d8de9f6",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_07831f0a1d0d4df4006949be53884881948b187ac70a824089",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import os, pathlib, json, textwrap, re\nroot=pathlib.Path(\"/mnt/data\")\nsorted([str(p.relative_to(root)) for p in root.glob(\"**/*\") if p.is_file()][:50])[:50]\n",
+      "container_id": "cntr_6949be3256508190889f8f69e6a44abd081e1e0c9ef3588b",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "['tests/test_cli_import.py']"
+        }
+      ]
+    },
+    {
+      "id": "rs_07831f0a1d0d4df4006949be56eab48194bfd31fbc5821b743",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_07831f0a1d0d4df4006949be5754408194bd8ffe68e0696ba1",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "sorted([str(p.relative_to(root)) for p in root.rglob(\"*\") if p.is_file()])[:200]\n",
+      "container_id": "cntr_6949be3256508190889f8f69e6a44abd081e1e0c9ef3588b",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "['tests/test_cli_import.py']"
+        }
+      ]
+    },
+    {
+      "id": "rs_07831f0a1d0d4df4006949be597b208194a1941255938a08a8",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_07831f0a1d0d4df4006949be6027c881948cb5cff304ee9a91",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap\ntarget_path = Path('/mnt/data').joinpath('tests/test_cli_run.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\"\"\"\nimport os\nimport subprocess\nimport sys\n\n\ndef _run(cmd, timeout=30):\n    env = os.environ.copy()\n    env.setdefault(\"PYTHONUNBUFFERED\", \"1\")\n    return subprocess.run(\n        cmd,\n        capture_output=True,\n        text=True,\n        env=env,\n        timeout=timeout,\n    )\n\n\ndef test_cli_help_via_module():\n    # Regression test: importing/running the CLI used to fail with a SyntaxError.\n    proc = _run([sys.executable, \"-m\", \"qg_bench.cli\", \"--help\"])\n    assert proc.returncode == 0, (proc.stdout, proc.stderr)\n    out = (proc.stdout + proc.stderr).lower()\n    assert \"usage\" in out or \"help\" in out or \"options\" in out\n\n\ndef test_cli_version_or_help_exits_successfully():\n    # Some CLIs implement --version; if not, it should fail gracefully.\n    proc = _run([sys.executable, \"-m\", \"qg_bench.cli\", \"--version\"])\n    if proc.returncode != 0:\n        proc = _run([sys.executable, \"-m\", \"qg_bench.cli\", \"-h\"])\n    assert proc.returncode == 0, (proc.stdout, proc.stderr)\n\"\"\"]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tests/test_cli_run.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949be3256508190889f8f69e6a44abd081e1e0c9ef3588b",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_cli_run.py\nDIR_STATE:[\"tests/test_cli_import.py\", \"tests/test_cli_run.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_07831f0a1d0d4df4006949be670bcc8194a709b5f71fec74cc",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/test_cli_run.py` with subprocess-based regression tests that run `python -m qg_bench.cli --help` (and `--version`/`-h`) and assert clean startup plus a successful exit code."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

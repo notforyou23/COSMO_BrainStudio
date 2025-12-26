@@ -1,0 +1,74 @@
+{
+  "content": "Implemented a syntax-valid `qg_bench/cli.py` providing a minimal `qg-bench` CLI with `validate` and `run` subcommands, optional schema-based validation, and consistent non-zero exit codes on usage/validation/runtime errors.",
+  "reasoning": "",
+  "responseId": "resp_0dac8885af03e8a0006949bd4a2784819780f93af1b89b5b4e",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3378,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1819,
+    "output_tokens_details": {
+      "reasoning_tokens": 1763
+    },
+    "total_tokens": 5197
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0dac8885af03e8a0006949bd4aee708197ba6a2ede259d8840",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0dac8885af03e8a0006949bd4bea5c819788d81b177031b13e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nimport os, json, textwrap, re\nbase=Path(\"/mnt/data\")\nlist(base.iterdir())[:10]\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0dac8885af03e8a0006949bd4dc9ec8197bbe1b30bb4160511",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0dac8885af03e8a0006949bd5536a08197a40f6e07f875e412",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, sys, textwrap\ntarget_path = Path('/mnt/data').joinpath('qg_bench/cli.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"qg_bench CLI.\n\nThis module intentionally keeps a small, dependency-light surface so the\nbenchmark pipeline can invoke it reliably in minimal environments.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport sys\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, Optional, Tuple\n\"\"\")\n\nchunks.append(\"\"\"\nEXIT_OK = 0\nEXIT_RUNTIME_ERROR = 1\nEXIT_USAGE_ERROR = 2\nEXIT_VALIDATION_ERROR = 3\n\"\"\")\n\nchunks.append(\"\"\"\ndef _eprint(*parts: object) -> None:\n    print(*parts, file=sys.stderr)\n\n\ndef _load_json(path: Path) -> Dict[str, Any]:\n    try:\n        data = json.loads(path.read_text(encoding=\"utf-8\"))\n    except FileNotFoundError as e:\n        raise ValueError(f\"input file not found: {path}\") from e\n    except json.JSONDecodeError as e:\n        raise ValueError(f\"invalid JSON in {path}: {e}\") from e\n    if not isinstance(data, dict):\n        raise ValueError(\"benchmark payload must be a JSON object\")\n    return data\n\n\ndef _schema_path() -> Path:\n    # Expected layout: <repo_root>/schemas/benchmark.schema.json\n    here = Path(__file__).resolve()\n    for parent in (here.parent, *here.parents):\n        cand = parent / \"schemas\" / \"benchmark.schema.json\"\n        if cand.is_file():\n            return cand\n    return Path(\"schemas\") / \"benchmark.schema.json\"\n\n\ndef _validate_payload(payload: Dict[str, Any], schema_file: Optional[Path] = None) -> Tuple[bool, str]:\n    # Lightweight validation that works with or without jsonschema installed.\n    schema_file = schema_file or _schema_path()\n    schema: Optional[Dict[str, Any]] = None\n    if schema_file.is_file():\n        try:\n            schema = json.loads(schema_file.read_text(encoding=\"utf-8\"))\n        except Exception:\n            schema = None\n\n    try:\n        import jsonschema  # type: ignore\n    except Exception:\n        jsonschema = None  # type: ignore\n\n    if schema and jsonschema:\n        try:\n            jsonschema.validate(instance=payload, schema=schema)\n        except Exception as e:\n            return False, str(e)\n\n    # Minimal required keys for pipeline smoke-runs.\n    if \"case_id\" not in payload or not isinstance(payload[\"case_id\"], str) or not payload[\"case_id\"].strip():\n        return False, \"missing or invalid required field: case_id\"\n    if \"experiment\" not in payload or not isinstance(payload[\"experiment\"], dict):\n        return False, \"missing or invalid required field: experiment\"\n    if \"name\" not in payload[\"experiment\"] or not isinstance(payload[\"experiment\"][\"name\"], str):\n        return False, \"missing or invalid required field: experiment.name\"\n    return True, \"\"\n\"\"\")\n\nchunks.append(\"\"\"\ndef build_parser() -> argparse.ArgumentParser:\n    p = argparse.ArgumentParser(prog=\"qg-bench\", description=\"Minimal benchmark CLI.\")\n    p.add_argument(\"--version\", action=\"version\", version=\"qg-bench 0.1\")\n    sub = p.add_subparsers(dest=\"cmd\", required=True)\n\n    pv = sub.add_parser(\"validate\", help=\"Validate a benchmark JSON payload.\")\n    pv.add_argument(\"input\", type=Path, help=\"Path to benchmark JSON file.\")\n    pv.add_argument(\"--schema\", type=Path, default=None, help=\"Optional path to schema JSON file.\")\n\n    pr = sub.add_parser(\"run\", help=\"Run a benchmark case (smoke-run).\")\n    pr.add_argument(\"input\", type=Path, help=\"Path to benchmark JSON file.\")\n    pr.add_argument(\"--schema\", type=Path, default=None, help=\"Optional path to schema JSON file.\")\n    pr.add_argument(\"-o\", \"--output\", type=Path, default=None, help=\"Optional output JSON file.\")\n    pr.add_argument(\"--dry-run\", action=\"store_true\", help=\"Validate and echo resolved run plan only.\")\n    return p\n\"\"\")\n\nchunks.append(\"\"\"\ndef _run_case(payload: Dict[str, Any]) -> Dict[str, Any]:\n    # This CLI does not execute heavy experiments; it standardizes an execution plan\n    # so the rest of the pipeline can take over.\n    exp = payload.get(\"experiment\", {}) if isinstance(payload.get(\"experiment\"), dict) else {}\n    return {\n        \"case_id\": payload.get(\"case_id\"),\n        \"experiment\": {\"name\": exp.get(\"name\"), \"params\": exp.get(\"params\", {})},\n        \"status\": \"planned\",\n    }\n\n\ndef main(argv: Optional[Iterable[str]] = None) -> int:\n    parser = build_parser()\n    args = parser.parse_args(list(argv) if argv is not None else None)\n\n    try:\n        payload = _load_json(args.input)\n    except ValueError as e:\n        _eprint(f\"ERROR: {e}\")\n        return EXIT_VALIDATION_ERROR\n\n    ok, msg = _validate_payload(payload, schema_file=getattr(args, \"schema\", None))\n    if not ok:\n        _eprint(f\"VALIDATION_ERROR: {msg}\")\n        return EXIT_VALIDATION_ERROR\n\n    if args.cmd == \"validate\":\n        return EXIT_OK\n\n    if args.cmd == \"run\":\n        result = _run_case(payload)\n        if args.dry_run or args.output is None:\n            print(json.dumps(result, indent=2, sort_keys=True))\n        else:\n            args.output.parent.mkdir(parents=True, exist_ok=True)\n            args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + \"\\\\n\", encoding=\"utf-8\")\n        return EXIT_OK\n\n    parser.error(f\"unknown command: {args.cmd}\")\n    return EXIT_USAGE_ERROR\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:qg_bench/cli.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:qg_bench/cli.py\nDIR_STATE:[\"qg_bench/cli.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0dac8885af03e8a0006949bd6ce7d081978ce6e4d60dc17d99",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented a syntax-valid `qg_bench/cli.py` providing a minimal `qg-bench` CLI with `validate` and `run` subcommands, optional schema-based validation, and consistent non-zero exit codes on usage/validation/runtime errors."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

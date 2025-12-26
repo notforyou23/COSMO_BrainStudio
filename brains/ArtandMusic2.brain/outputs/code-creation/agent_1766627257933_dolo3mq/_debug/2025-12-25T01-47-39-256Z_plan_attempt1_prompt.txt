@@ -1,0 +1,37 @@
+You are planning a python configuration implementation for the following mission:
+Codify these as required fields in the intake checklist + validator rules (hard-fail if claim text or dataset anchor is missing) and add an example template showing compliant vs non-compliant inputs for primary-source verification.
+
+Relevant context:
+- [INTROSPECTION] intake_checklist.md from code-creation agent agent_1766619349563_g2iypl9: # Intake Checklist (Claim Cards)
+
+Purpose: ensure 
+- [INTROSPECTION] 2025-12-24T23-20-08-705Z_config_qa_gates_yaml_stage1_attempt1_prompt.txt from code-creation agent agent_1766618407426_jbwdhc
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] test_path_canonicalize.py from code-creation agent agent_1766620699965_cdhh9no: from pathlib import Pathimport json
+import o
+- [INTROSPECTION] 2025-12-24T23-20-08-705Z_src_qa_qa_gate_runner_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766618407426_jb
+- [INTROSPECTION] 2025-12-24T23-20-08-705Z_src_qa_qa_gate_runner_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766618407426_jb
+- [INTROSPECTION] CLAIM_CARD_TEMPLATE.md from code-creation agent agent_1766619349564_mr0xc71: # Claim Card (Template)
+
+## Intake Checklist (m
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

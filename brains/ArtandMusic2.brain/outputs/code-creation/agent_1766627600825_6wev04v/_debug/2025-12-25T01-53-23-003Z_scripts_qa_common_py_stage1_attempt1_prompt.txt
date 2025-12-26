@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add a diagnostic run mode that reproduces the failure with maximal telemetry (resource limits, exit codes, container lifecycle events) and then remediate (e.g., adjust timeouts/memory, ensure working directory mounts, reduce initial test discovery load) until a minimal test completes and writes logs under `/outputs/qa/logs/`.
+Project: generated_script_1766627601753 (python script)
+
+Target file details:
+- Path: scripts/qa/common.py
+- Purpose: Shared constants, path canonicalization helpers, and safe file/log writing utilities used by all QA diagnostic components.
+- Category: source
+
+Other planned files (for context only):
+- scripts/qa/diagnostic_run.py: Implements a Docker-based diagnostic QA run mode that captures maximal telemetry (resource limits, exit codes, container lifecycle events), iteratively remediates common failures (timeouts/memory, mounts, reduced discovery), and ensures a minimal test completes and logs are written under outputs/qa/logs/.
+- scripts/qa/docker_runner.py: Provides a robust Docker wrapper used by diagnostic_run to create/start/monitor containers, stream logs, capture inspect/state/events, enforce timeouts, and write structured telemetry artifacts to outputs/qa/logs/.
+- scripts/qa/telemetry.py: Collects and normalizes environment and runtime telemetry (CPU/memory/ulimits, disk, cgroups, process tree snapshots) and serializes it as JSON plus human-readable summaries into outputs/qa/logs/.
+- scripts/qa/remediation.py: Encapsulates remediation strategies and heuristics to adjust Docker resource flags, bind mounts, working directory, and test execution parameters until a minimal passing test run is achieved.
+
+Reference insights:
+- [CONSOLIDATED] Robust QA automation should be designed to *fail safe*—detect unstable/unsupported execution environments early, gracefully d
+- [INTROSPECTION] 2025-12-25T00-21-55-842Z_scripts_qa_run_sh_stage1_attempt1_prompt.txt from code-creation agent agent_1766622114110_412seks: 
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+
+Key requirements:
+- docker
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Shared constants, path canonicalization helpers, and safe file/log writing utilities used by all QA diagnostic components.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/qa/common.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/qa/common.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/qa/common.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

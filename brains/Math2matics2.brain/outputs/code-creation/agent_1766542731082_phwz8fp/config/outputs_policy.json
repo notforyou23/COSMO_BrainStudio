@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Define outputs directory selection order, minimum required v1 output documents, and enforcement rules for per-cycle updates.",
+  "outputs_directory": {
+    "preference_order": [
+      "outputs",
+      "output",
+      "artifacts/outputs",
+      "artifacts",
+      "run_outputs"
+    ],
+    "portable_fallback_root": ".portable_outputs",
+    "fallback_naming": {
+      "mode": "timestamped_subdir",
+      "prefix": "outputs_",
+      "timestamp_format": "%Y%m%d_%H%M%S"
+    },
+    "writability_check": {
+      "create_if_missing": true,
+      "test_file_name": ".write_test",
+      "cleanup_test_file": true
+    }
+  },
+  "minimum_v1": {
+    "required_files": [
+      {
+        "path": "README.md",
+        "category": "index",
+        "description": "Outputs index explaining policy and linking to core documents."
+      },
+      {
+        "path": "core_findings.md",
+        "category": "core_doc",
+        "description": "Consolidated findings/decisions; intended to be updated as part of research cycles."
+      }
+    ],
+    "ensure_files_exist": true,
+    "default_encoding": "utf-8",
+    "line_endings": "lf"
+  },
+  "per_cycle_enforcement": {
+    "enabled": true,
+    "must_add_or_update_at_least_one_outputs_file": true,
+    "detect_changes_by": [
+      "exists",
+      "size_bytes",
+      "mtime_ns",
+      "sha256"
+    ],
+    "ignore_patterns": [
+      ".DS_Store",
+      "Thumbs.db",
+      ".write_test",
+      "*.tmp",
+      "*.swp",
+      "*~"
+    ],
+    "allow_creating_required_files_to_satisfy_rule": true,
+    "suggested_update_targets_in_order": [
+      "core_findings.md",
+      "README.md"
+    ],
+    "failure_behavior": {
+      "on_no_change": "error",
+      "error_message": "Outputs policy violation: each research cycle must add or update at least one file in the selected outputs directory."
+    }
+  }
+}

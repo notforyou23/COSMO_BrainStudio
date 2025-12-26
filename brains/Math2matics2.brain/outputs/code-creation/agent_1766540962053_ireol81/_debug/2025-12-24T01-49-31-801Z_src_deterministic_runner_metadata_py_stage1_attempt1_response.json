@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/deterministic_runner/metadata.py` to deterministically collect a small reproducibility metadata block containing the git commit hash (if discoverable), Python version/platform details, and selected installed package versions.",
+  "reasoning": "",
+  "responseId": "resp_00d2b736b157e28900694b46f77c34819599c89451e1eff47d",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2608,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1095,
+    "output_tokens_details": {
+      "reasoning_tokens": 1049
+    },
+    "total_tokens": 3703
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_00d2b736b157e28900694b46f834c481959141f87ce3c4cf05",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_00d2b736b157e28900694b46fbb7408195a8c890461bc64393",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, sys, subprocess, platform\ntarget_path = Path('/mnt/data').joinpath('src/deterministic_runner/metadata.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Reproducibility metadata helpers.\n\nThis module intentionally keeps metadata small and deterministic:\n- Git commit hash (if available)\n- Python version info\n- Selected installed package versions\n\\\"\\\"\\\"\"\"\",\n\"\"\"from __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom importlib import metadata as importlib_metadata\nfrom pathlib import Path\nimport platform\nimport subprocess\nfrom typing import Iterable, Optional, Dict, Any\"\"\",\n\"\"\"def _find_git_root(start: Path) -> Optional[Path]:\n    \\\"\\\"\\\"Walk parents looking for a .git directory.\\\"\\\"\\\"\n    cur = start\n    for parent in [cur, *cur.parents]:\n        if (parent / \".git\").exists():\n            return parent\n    return None\"\"\",\n\"\"\"def _git_commit_hash(repo_root: Optional[Path] = None) -> Optional[str]:\n    \\\"\\\"\\\"Return the current Git commit hash if available; otherwise None.\\\"\\\"\\\"\n    try:\n        root = repo_root or _find_git_root(Path(__file__).resolve())\n        if root is None:\n            return None\n        out = subprocess.check_output(\n            [\"git\", \"rev-parse\", \"HEAD\"],\n            cwd=str(root),\n            stderr=subprocess.DEVNULL,\n            timeout=2,\n        )\n        return out.decode(\"utf-8\", \"replace\").strip() or None\n    except Exception:\n        return None\"\"\",\n\"\"\"def _python_info() -> Dict[str, str]:\n    \\\"\\\"\\\"Return a small, stable python information mapping.\\\"\\\"\\\"\n    return {\n        \"version\": platform.python_version(),\n        \"implementation\": platform.python_implementation(),\n        \"platform\": platform.platform(),\n    }\"\"\",\n\"\"\"def _package_versions(names: Iterable[str]) -> Dict[str, str]:\n    \\\"\\\"\\\"Return installed versions for the provided distributions.\\\"\\\"\\\"\n    versions: Dict[str, str] = {}\n    for name in names:\n        try:\n            versions[name] = importlib_metadata.version(name)\n        except Exception:\n            # Keep output deterministic: missing packages are simply omitted.\n            continue\n    return versions\"\"\",\n\"\"\"def collect_metadata(\n    package_names: Optional[Iterable[str]] = None,\n    *,\n    repo_root: Optional[Path] = None,\n) -> Dict[str, Any]:\n    \\\"\\\"\\\"Collect reproducibility metadata.\n\n    Parameters\n    ----------\n    package_names:\n        Iterable of distribution names to report versions for. If None, a small\n        default set is used.\n    repo_root:\n        Optional path to a git repository root. If not provided, this module\n        tries to discover a .git directory by walking parents.\n\n    Returns\n    -------\n    dict\n        Mapping with fixed top-level keys: git_commit, python, packages.\n    \\\"\\\"\\\"\n    default_pkgs = (\"deterministic-runner\", \"numpy\", \"matplotlib\")\n    pkgs = tuple(package_names) if package_names is not None else default_pkgs\n    return {\n        \"git_commit\": _git_commit_hash(repo_root=repo_root),\n        \"python\": _python_info(),\n        \"packages\": _package_versions(pkgs),\n    }\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/deterministic_runner/metadata.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b46a9b06081908ddabe8eda0d3a7007b40091a73fffb7",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/deterministic_runner/metadata.py\nDIR_STATE:[\"src/deterministic_runner/__init__.py\", \"src/deterministic_runner/cli.py\", \"src/deterministic_runner/determinism.py\", \"src/deterministic_runner/metadata.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_00d2b736b157e28900694b4704334c819584b11582a259e9bf",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/deterministic_runner/metadata.py` to deterministically collect a small reproducibility metadata block containing the git commit hash (if discoverable), Python version/platform details, and selected installed package versions."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

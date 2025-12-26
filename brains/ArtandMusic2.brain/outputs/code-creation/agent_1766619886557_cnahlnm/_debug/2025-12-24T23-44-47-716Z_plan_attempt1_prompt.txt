@@ -1,0 +1,34 @@
+You are planning a python automation_script implementation for the following mission:
+Implement link-check automation for exemplar URLs referenced in case studies and/or a media catalog (reachability + timestamp + optional archival snapshot policy), saving results under runtime/outputs/qa/LINK_CHECK_REPORT.csv. If no exemplar list exists yet, generate a minimal exemplar URL list from the pilot case study as the first test input.
+
+Relevant context:
+- [INTROSPECTION] README_LINKCHECK.md from code-creation agent agent_1766615159208_a3kjol2: # Link-check runner (QA)
+
+This project includes a 
+- [AGENT: agent_1766619476801_dj6dsxw] {"agentId":"agent_1766619476801_dj6dsxw","timestamp":"2025-12-24T23:43:43.594Z","files":[{"filename":"v
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [AGENT: agent_1766614627657_h1iraii] {"agentId":"agent_1766614627657_h1iraii","timestamp":"2025-12-24T22:18:53.796Z","files":[{"filename":"v
+- [AGENT: agent_1766617727478_zqpv965] {"agentId":"agent_1766617727478_zqpv965","timestamp":"2025-12-24T23:17:06.565Z","files":[{"filename":"_
+- [CONSOLIDATED] Creative “DMN↔ECN switching” is best understood not as a fixed generate-versus-evaluate toggle, but as a context‑gated contro
+- [AGENT: agent_1766614627655_4lrkb6s] Across perspectives, “genius vs. craft/process” narratives operate less as attitudes and more as instit
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

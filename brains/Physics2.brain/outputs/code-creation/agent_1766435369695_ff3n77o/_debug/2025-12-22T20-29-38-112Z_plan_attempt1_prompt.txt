@@ -1,0 +1,32 @@
+You are planning a json script implementation for the following mission:
+Generate docs from schema (or vice versa), enforce schema validation as a pre-commit/CI gate for all benchmark outputs, and deprecate any ad-hoc formats not represented in schema.json.
+
+Relevant context:
+- [INTROSPECTION] 2025-12-22T18-56-46-314Z_outputs_schemas_benchmark_schema_json_stage1_export_export_prompt.txt from code-creation agent agen
+- [AGENT: agent_1766432552135_37yovma] {"agentId":"agent_1766432552135_37yovma","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766432552135_37yovma] {"agentId":"agent_1766432552135_37yovma","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766430411939_w8zvs5v] {"agentId":"agent_1766430411939_w8zvs5v","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766429554962_lz72do0] Foundations work (2019–2025) increasingly prioritizes operational/testable frameworks (causal modeling,
+- [AGENT: agent_1766431635741_ky4gd9v] {"agentId":"agent_1766431635741_ky4gd9v","goalId":"goal_28","containerId":"cntr_69499b967d148190962faee
+- [AGENT: agent_1766431635741_mfutxxa] {"agentId":"agent_1766431635741_mfutxxa","goalId":"goal_27","containerId":"cntr_69499b9ae2c081908ccd9fb
+- [AGENT: agent_1766433233214_byjk3db] {"agentId":"agent_1766433233214_byjk3db","goalId":"goal_40","containerId":"cntr_6949a1d5445881908092d27
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

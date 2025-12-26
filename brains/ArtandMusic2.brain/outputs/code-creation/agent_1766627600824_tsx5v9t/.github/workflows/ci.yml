@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies (if any)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install -U pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run single QA runner (produces manifest + artifacts)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/qa_run.py
+
+      - name: Validate run manifest + artifact checklist (post-run gate)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/validate_outputs.py
+
+      - name: Upload QA outputs (best-effort)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-outputs
+          if-no-files-found: ignore
+          path: |
+            qa_outputs/**
+            **/*run_manifest*.json
+            **/*manifest*.json

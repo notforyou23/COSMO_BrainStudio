@@ -1,0 +1,42 @@
+{
+  "content": "[\n  {\n    \"path\": \"scripts/run_pipeline.py\",\n    \"description\": \"Pipeline entrypoint updated to accept a single seed, propagate it through all RNGs, enforce writing to a canonical outputs/ layout, and validate outputs/results.json and outputs/figure.png against the fixed schema before exiting.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/pipeline/output_schema.py\",\n    \"description\": \"Defines the canonical results schema (fixed keys/types), provides validation utilities, and implements a single function to write outputs/results.json in a stable, deterministic form.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/pipeline/seed_control.py\",\n    \"description\": \"Implements unified seed control that sets and propagates one RNG seed across Python random, NumPy, and common ML/plotting libraries when available, returning a context object for downstream use.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/pipeline/output_paths.py\",\n    \"description\": \"Centralizes canonical output paths (outputs/results.json, outputs/figure.png, and optional metadata) and ensures directories exist with consistent behavior in local runs and CI.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"docs/OUTPUTS_SCHEMA.md\",\n    \"description\": \"Documents the enforced canonical outputs layout, the exact results.json keys and meanings, and how to run the pipeline with deterministic seeding.\",\n    \"category\": \"documentation\"\n  },\n  {\n    \"path\": \"tests/test_pipeline_outputs_schema.py\",\n    \"description\": \"Automated tests that run the pipeline in a temp workspace to assert deterministic behavior under a fixed seed and validate that outputs/results.json and outputs/figure.png are produced and schema-compliant.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \".github/workflows/ci.yml\",\n    \"description\": \"CI workflow that installs dependencies, runs unit tests, and executes the pipeline to enforce canonical outputs and deterministic seed behavior on every push and pull request.\",\n    \"category\": \"config\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_0cc7ffa0e018df0e00694b6152c9d4819788a7655eb17894ad",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 683,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 626,
+    "output_tokens_details": {
+      "reasoning_tokens": 187
+    },
+    "total_tokens": 1309
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0cc7ffa0e018df0e00694b615316a08197b14ff10e6ca76c71",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0cc7ffa0e018df0e00694b6156dae08197993ab92a21b3ae7d",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"scripts/run_pipeline.py\",\n    \"description\": \"Pipeline entrypoint updated to accept a single seed, propagate it through all RNGs, enforce writing to a canonical outputs/ layout, and validate outputs/results.json and outputs/figure.png against the fixed schema before exiting.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/pipeline/output_schema.py\",\n    \"description\": \"Defines the canonical results schema (fixed keys/types), provides validation utilities, and implements a single function to write outputs/results.json in a stable, deterministic form.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/pipeline/seed_control.py\",\n    \"description\": \"Implements unified seed control that sets and propagates one RNG seed across Python random, NumPy, and common ML/plotting libraries when available, returning a context object for downstream use.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/pipeline/output_paths.py\",\n    \"description\": \"Centralizes canonical output paths (outputs/results.json, outputs/figure.png, and optional metadata) and ensures directories exist with consistent behavior in local runs and CI.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"docs/OUTPUTS_SCHEMA.md\",\n    \"description\": \"Documents the enforced canonical outputs layout, the exact results.json keys and meanings, and how to run the pipeline with deterministic seeding.\",\n    \"category\": \"documentation\"\n  },\n  {\n    \"path\": \"tests/test_pipeline_outputs_schema.py\",\n    \"description\": \"Automated tests that run the pipeline in a temp workspace to assert deterministic behavior under a fixed seed and validate that outputs/results.json and outputs/figure.png are produced and schema-compliant.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \".github/workflows/ci.yml\",\n    \"description\": \"CI workflow that installs dependencies, runs unit tests, and executes the pipeline to enforce canonical outputs and deterministic seed behavior on every push and pull request.\",\n    \"category\": \"config\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

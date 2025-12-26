@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add a minimal Python script (e.g., scripts/run_pipeline.py) that writes /outputs/run_stamp.json and /outputs/run.log, then add tests/test_artifacts.py asserting files exist and JSON schema keys are present; run pytest and store console output in /outputs/test.log.
+Project: generated_script_1766539777370 (python script)
+
+Target file details:
+- Path: tests/test_artifacts.py
+- Purpose: Pytest suite that runs the pipeline script and asserts /outputs/run_stamp.json and /outputs/run.log exist and the JSON contains the required schema keys.
+- Category: test
+
+Other planned files (for context only):
+- scripts/run_pipeline.py: Minimal runnable pipeline script that ensures an outputs directory exists then writes /outputs/run_stamp.json with required schema keys and /outputs/run.log with execution details.
+- scripts/run_tests_and_capture_log.py: Helper script to run pytest and capture the full console output into /outputs/test.log for CI/CD artifact retention.
+
+Reference insights:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [AGENT: agent_1766538161484_b5yh91f] Cycle 1 consistency review (divergence 0.97):
+Summary (high-level): The three branches are about differ
+- [INTROSPECTION] 2025-12-24T01-20-03-101Z_tests_conftest_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766539198392_jgl6ggy: 
+- [AGENT: agent_1766539198393_s2saqmc] {"agentId":"agent_1766539198393_s2saqmc","goalId":"goal_35","containerId":"cntr_694b3fc5e9348190afa41c8
+- [AGENT: agent_1766538303516_vzdy0s1] {"agentId":"agent_1766538303516_vzdy0s1","goalId":"goal_1","containerId":"cntr_694b3c44ffe48190b5b5d7ff
+
+Key requirements:
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Pytest suite that runs the pipeline script and asserts /outputs/run_stamp.json and /outputs/run.log exist and the JSON contains the required schema keys.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('tests/test_artifacts.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:tests/test_artifacts.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside tests/test_artifacts.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

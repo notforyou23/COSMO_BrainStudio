@@ -1,0 +1,214 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766627257933_y2t06pl",
+  "agentType": "code-creation",
+  "goalId": "goal_236",
+  "missionId": "strategic_goal_236_1766627257932",
+  "spawnCycle": 137,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-25T01:47:44.258Z",
+  "completedAt": "2025-12-25T01:50:26.013Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/smoke_test.py",
+      "description": "Runs the minimal in-container command, captures stdout/stderr/exit code, and writes a timestamped log bundle under /out or /outputs (with robust fallbacks) for CI gating.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "check_report.py\", \"scripts/validate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_rights_and_licensing.py\", \"scripts/validate_scaffold.py\", \"scripts/verifier_benchmark.py\"]\nSummary: Added a minimal smoke-test script that runs a tiny shell command, captures stdout/stderr/exit code, and writes a timestamped log bundle to /out or /outputs with robust fallbacks for CI gating.\n",
+          "timestamp": "2025-12-25T01:47:58.824Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "eport.py\", \"scripts/validate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_rights_and_licensing.py\", \"scripts/validate_scaffold.py\", \"scripts/verifier_benchmark.py\"]\nSUMMARY: Added a minimal smoke test script that runs a tiny in-container command, captures stdout/stderr/exit code, and writes a timestamped log bundle to /out or /outputs with robust fallbacks for CI gating.\n",
+          "timestamp": "2025-12-25T01:48:15.265Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:47:44.258Z",
+      "failedAt": "2025-12-25T01:48:15.265Z"
+    },
+    {
+      "path": "scripts/write_log_bundle.py",
+      "description": "Provides shared utilities for canonical output directory resolution, timestamped bundle creation, and structured log/metadata writing used by the smoke test script.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "ort.py\", \"scripts/validate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_rights_and_licensing.py\", \"scripts/validate_scaffold.py\", \"scripts/verifier_benchmark.py\", \"scripts/write_log_bundle.py\"]\nSUMMARY:Created shared utilities to resolve a canonical output directory, create timestamped log bundles, and write structured stdout/stderr/metadata artifacts for CI smoke tests.\n",
+          "timestamp": "2025-12-25T01:48:32.309Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "test.py\", \"scripts/update_project_tracker.py\", \"scripts/update_tracker.py\", \"scripts/validate_case_studies_schema.py\", \"scripts/validate_intake.py\", \"scripts/validate_linkcheck_report.py\", \"scripts/validate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_rights_and_licensing.py\", \"scripts/validate_scaffold.py\", \"scripts/verifier_benchmark.py\", \"scripts/write_log_bundle.py\"]\n",
+          "timestamp": "2025-12-25T01:48:50.857Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:47:44.258Z",
+      "failedAt": "2025-12-25T01:48:50.857Z"
+    },
+    {
+      "path": "docker-compose.yml",
+      "description": "Defines a minimal service that runs the smoke test inside the container and mounts a host output directory to the canonical /out path for log bundle persistence.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "RITTEN:docker-compose.yml\nDIR_STATE:[\"Makefile\", \"README.md\", \"README_LINKCHECK.md\", \"README_QA.md\", \"README_add_case_study.md\", \"TRACKING_RECONCILIATION.md\", \"docker-compose.yml\", \"exec_1766627339249_6125lf4.py\", \"pyproject.toml\", \"requirements.txt\"]\nSUMMARY: Added a minimal docker-compose service that builds the image, runs the smoke test, and mounts ./outputs to /out for persisted log bundles.\n",
+          "timestamp": "2025-12-25T01:48:59.309Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "docker-compose.yml\nDIR_STATE:[\"Makefile\", \"README.md\", \"README_LINKCHECK.md\", \"README_QA.md\", \"README_add_case_study.md\", \"TRACKING_RECONCILIATION.md\", \"docker-compose.yml\", \"exec_1766627346446_hejip6o.py\", \"pyproject.toml\", \"requirements.txt\"]\nSummary: Added a minimal docker-compose smoke service that runs the in-container smoke test and persists logs via a host-mounted ./outputs -> /out volume.\n",
+          "timestamp": "2025-12-25T01:49:06.505Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:47:44.258Z",
+      "failedAt": "2025-12-25T01:49:06.505Z"
+    },
+    {
+      "path": "Dockerfile",
+      "description": "Builds the minimal Docker image needed to execute the smoke test script and its smallest possible container command while keeping runtime dependencies lean.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "ITTEN:Dockerfile\nDIR_STATE:[\"Dockerfile\", \"Makefile\", \"README.md\", \"README_LINKCHECK.md\", \"README_QA.md\", \"README_add_case_study.md\", \"TRACKING_RECONCILIATION.md\", \"docker-compose.yml\", \"exec_1766627363237_r30iid4.py\", \"pyproject.toml\", \"requirements.txt\"]\nSUMMARY: Wrote a minimal, lean Dockerfile that runs non-root and provides canonical /out and /outputs directories with a tiny default command.\n",
+          "timestamp": "2025-12-25T01:49:23.288Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "Dockerfile\", \"Makefile\", \"README.md\", \"README_LINKCHECK.md\", \"README_QA.md\", \"README_add_case_study.md\", \"TRACKING_RECONCILIATION.md\", \"docker-compose.yml\", \"exec_1766627370870_usysicm.py\", \"pyproject.toml\", \"requirements.txt\"]\nSUMMARY:Wrote a minimal Alpine-based Python Dockerfile that runs the smoke test script by default and prepares canonical /out and /outputs directories for CI log bundling.\n",
+          "timestamp": "2025-12-25T01:49:30.919Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:47:44.258Z",
+      "failedAt": "2025-12-25T01:49:30.919Z"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "description": "Adds a first-gate CI job that builds the Docker image, runs the smoke test via docker compose, and uploads the timestamped log bundle as an artifact before any longer jobs.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/qa-gate.yml\"]\nAdded a first-gate CI smoke job that builds with docker compose, runs the smoke service, and uploads the outputs log bundle artifact even on failure.\n",
+          "timestamp": "2025-12-25T01:49:45.372Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/qa-gate.yml\"]\nSUMMARY: Added a first-gate smoke-test CI job that builds and runs the docker-compose smoke service and always uploads the persisted out/ log bundle before longer jobs run.\n",
+          "timestamp": "2025-12-25T01:49:57.425Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:47:44.258Z",
+      "failedAt": "2025-12-25T01:49:57.425Z"
+    },
+    {
+      "path": "README.md",
+      "description": "Documents how to run the smoke test locally with Docker, where outputs are written, and how the CI gate enforces the minimal container health check.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "IR_STATE:[\"Dockerfile\", \"Makefile\", \"README.md\", \"README_LINKCHECK.md\", \"README_QA.md\", \"README_add_case_study.md\", \"TRACKING_RECONCILIATION.md\", \"docker-compose.yml\", \"exec_1766627410332_f937y9v.py\", \"pyproject.toml\", \"requirements.txt\"]\nSummary: Added README instructions for running the minimal Docker smoke test, locating timestamped output bundles, and enforcing the check as the first CI gate.\n",
+          "timestamp": "2025-12-25T01:50:10.388Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "README.md\nDIR_STATE:[\"Dockerfile\", \"Makefile\", \"README.md\", \"README_LINKCHECK.md\", \"README_QA.md\", \"README_add_case_study.md\", \"TRACKING_RECONCILIATION.md\", \"docker-compose.yml\", \"exec_1766627425953_02c6pwa.py\", \"pyproject.toml\", \"requirements.txt\"]\nSummary: README documents running the Docker smoke-test, where timestamped log bundles are written, and how CI uses it as an early health-check gate.\n",
+          "timestamp": "2025-12-25T01:50:26.012Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:47:44.258Z",
+      "failedAt": "2025-12-25T01:50:26.012Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Implement and run a minimal smoke-test job that (a) executes the smallest possible command in the container, (b) captures full stdout/stderr + exit code, and (c) writes a timestamped log bundle to a canonical /out or /outputs path; then wire it into CI as the first gate before any longer runs.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Unblocks execution-dependent work (pilot claims, verifier benchmarking, calibration experiments) by turning the recurring 'container lost after testing 0/50 files' into a diagnosable incident with rep..."
+  ],
+  "projectName": "generated_script_1766627258170",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [
+    "include_docker"
+  ],
+  "lastSavedAt": "2025-12-25T01:50:26.013Z",
+  "summary": {
+    "completed": 0,
+    "failed": 6,
+    "total": 6
+  }
+}

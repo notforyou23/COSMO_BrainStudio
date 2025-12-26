@@ -1,0 +1,241 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766617727483_ge3slv6",
+  "agentType": "code-creation",
+  "goalId": "goal_117",
+  "missionId": "urgent_goal_117_1766617727482",
+  "spawnCycle": 56,
+  "coordinatorReview": null,
+  "spawnedBy": "meta_coordinator_urgent",
+  "triggerSource": "urgent_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T23:08:54.156Z",
+  "completedAt": "2025-12-24T23:13:51.173Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "src/intake/validation_checklist.py",
+      "description": "Implements a blocking validation checklist for intake that rejects tasks missing verbatim claim, source context, or provenance anchor and applies DOI-missing defaults for date range (2019–2025) plus required query keywords/author fields.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/intake/validation_checklist.py\nDIR_STATE:[\"src/intake/validation_checklist.py\"]\nSummary: Wrote a blocking intake validation checklist that enforces verbatim claim/source/provenance and applies DOI-missing defaults with required query fields and a 2019–2025 date range.\n",
+          "timestamp": "2025-12-24T23:09:27.130Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/intake/validation_checklist.py\nDIR_STATE:[\"src/intake/validation_checklist.py\"]\nSUMMARY: Added a blocking intake checklist with DOI-missing defaults (2019–2025) and required query keywords/author fields, rejecting tasks lacking verbatim claim, source context, or provenance anchor.\n",
+          "timestamp": "2025-12-24T23:09:54.199Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:08:54.156Z",
+      "failedAt": "2025-12-24T23:09:54.199Z"
+    },
+    {
+      "path": "src/intake/schema/task_intake.schema.json",
+      "description": "Defines a JSON Schema for intake tasks enforcing required claim/source/provenance fields and conditional defaults/requirements when DOI is absent.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/intake/schema/task_intake.schema.json\nDIR_STATE:[\"src/intake/schema/task_intake.schema.json\"]\nSUMMARY:Wrote an intake JSON Schema that blocks tasks missing verbatim claim, source context, or provenance anchor, and enforces query defaults/requirements when DOI is absent.\n",
+          "timestamp": "2025-12-24T23:10:10.135Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/intake/schema/task_intake.schema.json\nDIR_STATE:[\"src/intake/schema/task_intake.schema.json\"]\nSUMMARY: Added a blocking intake JSON Schema requiring verbatim claim, source context, and provenance anchor, with DOI-missing conditional requirements and 2019–2025 default date range.\n",
+          "timestamp": "2025-12-24T23:10:23.738Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:08:54.156Z",
+      "failedAt": "2025-12-24T23:10:23.738Z"
+    },
+    {
+      "path": "src/intake/normalize_task.py",
+      "description": "Normalizes incoming intake JSON by filling defaults (including 2019–2025 date range) and deriving required query fields when DOI is missing before validation.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/intake/normalize_task.py\nDIR_STATE:[\"src/intake/normalize_task.py\", \"src/intake/validation_checklist.py\"]\nSUMMARY: Implemented intake task normalization to apply a 2019–2025 default date range and derive query keywords/author when DOI is missing.\n",
+          "timestamp": "2025-12-24T23:10:49.513Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/intake/normalize_task.py\nDIR_STATE:[\"src/intake/normalize_task.py\", \"src/intake/validation_checklist.py\"]\nSUMMARY:Implemented intake task normalization to standardize claim/source/provenance shapes, default date range to 2019–2025, and derive required query keywords/authors when DOI is missing.\n",
+          "timestamp": "2025-12-24T23:11:18.700Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:08:54.156Z",
+      "failedAt": "2025-12-24T23:11:18.700Z"
+    },
+    {
+      "path": "src/intake/validate_task.py",
+      "description": "Provides a single entrypoint function and CLI to normalize then validate intake tasks against the checklist and JSON Schema with clear blocking error outputs.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/intake/validate_task.py\nDIR_STATE:[\"src/intake/normalize_task.py\", \"src/intake/validate_task.py\", \"src/intake/validation_checklist.py\"]\nSUMMARY: Added a standalone validate_task entrypoint and CLI that normalizes intake JSON (including DOI-missing defaults) and emits clear blocking validation errors.\n",
+          "timestamp": "2025-12-24T23:11:44.256Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/intake/validate_task.py\nDIR_STATE:[\"src/intake/normalize_task.py\", \"src/intake/validate_task.py\", \"src/intake/validation_checklist.py\"]\nSummary: Wrote validate_task.py with a single entrypoint function and CLI that normalizes intake tasks (including DOI-missing defaults) and emits clear blocking validation errors.\n",
+          "timestamp": "2025-12-24T23:12:07.016Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:08:54.156Z",
+      "failedAt": "2025-12-24T23:12:07.016Z"
+    },
+    {
+      "path": "src/intake/errors.py",
+      "description": "Defines structured error types and helpers to format blocking validation failures for intake consumers and logs.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/intake/errors.py\nDIR_STATE:[\"src/intake/errors.py\", \"src/intake/normalize_task.py\", \"src/intake/validate_task.py\", \"src/intake/validation_checklist.py\"]\n",
+          "timestamp": "2025-12-24T23:12:21.246Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/intake/errors.py\nDIR_STATE:[\"src/intake/errors.py\", \"src/intake/normalize_task.py\", \"src/intake/validate_task.py\", \"src/intake/validation_checklist.py\"]\nSUMMARY: Implemented structured intake validation error types and formatting helpers for blocking failures.\n",
+          "timestamp": "2025-12-24T23:12:40.264Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:08:54.156Z",
+      "failedAt": "2025-12-24T23:12:40.264Z"
+    },
+    {
+      "path": "tests/test_intake_validation.py",
+      "description": "End-to-end tests covering rejection of missing verbatim claim/source context/provenance anchor and DOI-missing defaulting behavior for date range and query keyword/author requirements.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/test_intake_validation.py\nDIR_STATE:[\"tests/test_intake_validation.py\"]\nSummary: Added end-to-end pytest coverage for blocking intake validation and DOI-missing default/requirements behavior.\n",
+          "timestamp": "2025-12-24T23:13:08.811Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/test_intake_validation.py\nDIR_STATE:[\"tests/test_intake_validation.py\"]\nSUMMARY: Added end-to-end pytest coverage for blocking intake validation and DOI-missing default/requirement behavior.\n",
+          "timestamp": "2025-12-24T23:13:31.330Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:08:54.156Z",
+      "failedAt": "2025-12-24T23:13:31.330Z"
+    },
+    {
+      "path": "pyproject.toml",
+      "description": "Configures project metadata and dependencies (including a JSON Schema validator) plus test runner settings for the intake validation implementation.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:pyproject.toml\nDIR_STATE:[\"Makefile\", \"README.md\", \"README_LINKCHECK.md\", \"README_add_case_study.md\", \"exec_1766618021977_che1e4r.py\", \"pyproject.toml\", \"requirements.txt\"]\nSummary: Added project metadata, runtime/dev dependencies (including jsonschema), a CLI entrypoint, and pytest settings for intake validation.\n",
+          "timestamp": "2025-12-24T23:13:42.043Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:pyproject.toml\nDIR_STATE:[\"Makefile\", \"README.md\", \"README_LINKCHECK.md\", \"README_add_case_study.md\", \"exec_1766618031115_x2a6isz.py\", \"pyproject.toml\", \"requirements.txt\"]\nSummary: Added project metadata, core dependencies (jsonschema/typer/rich), and pytest/ruff settings for intake validation implementation.\n",
+          "timestamp": "2025-12-24T23:13:51.172Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:08:54.156Z",
+      "failedAt": "2025-12-24T23:13:51.172Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Translate the minimum inputs into a blocking validation checklist (and/or JSON Schema) used by intake: reject tasks missing verbatim claim, source context, and provenance anchor; add defaults for date range (2019–2025) and required query keywords/author fields when DOI is missing.",
+  "missionSuccessCriteria": [
+    "Complete the urgent task identified by Meta-Coordinator",
+    "Curated insight (actionability 8-9/10): Defines minimum viable inputs for primary-source verification (claim text + dataset/DOI/link or at least research area), which can be converted into enforceable validation rules for intake and evidenc..."
+  ],
+  "projectName": "generated_script_1766617727708",
+  "language": "json",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-24T23:13:51.173Z",
+  "summary": {
+    "completed": 0,
+    "failed": 7,
+    "total": 7
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "content": "Implemented `src/refactor_modularize/artifacts.py` with a compact, dependency-free `Artifact` data model plus deterministic loaders and filename-based metadata/kind inference to normalize artifact files and their metadata.",
+  "reasoning": "",
+  "responseId": "resp_0268dd8cd02d95db00694b4860f3488196b8e99efb8487159d",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4379,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2745,
+    "output_tokens_details": {
+      "reasoning_tokens": 460
+    },
+    "total_tokens": 7124
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0268dd8cd02d95db00694b486195648196af693251a5e0b330",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0268dd8cd02d95db00694b4865636c8196969c29bd26997104",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, re, hashlib\ntarget_path = Path('/mnt/data').joinpath('src/refactor_modularize/artifacts.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(r\"\"\"\\\n\"\"\"Core data models and loaders for representing, reading, and normalizing artifact files.\n\nThis module is intentionally small and dependency-free: it provides a stable schema for\nartifact inputs and a couple of helpers to infer metadata from common export filenames.\n\"\"\"\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence\nimport hashlib\nimport re\n\"\"\")\n\nchunks.append(r\"\"\"\\\n_KIND_BY_SUFFIX = {\n    \".py\": \"python\",\n    \".md\": \"markdown\",\n    \".toml\": \"toml\",\n    \".json\": \"json\",\n    \".txt\": \"text\",\n}\n\n\n_EXPORT_NAME_RE = re.compile(\n    r\"^(?P<ts>\\d{4}-\\d{2}-\\d{2}T[^_]+)_(?P<label>.+?)_stage(?P<stage>\\d+)\"\n    r\"(?:_attempt(?P<attempt>\\d+))?_(?P<role>prompt|export)(?:_.+)?\\.(?P<ext>[^.]+)$\"\n)\n\"\"\")\n\nchunks.append(r\"\"\"\\\n@dataclass(frozen=True)\nclass Artifact:\n    \"\"\"Normalized representation of a single artifact file.\"\"\"\n    path: Path\n    relpath: str\n    kind: str\n    text: str\n    sha256: str\n    size: int\n    mtime: float\n    meta: Mapping[str, Any] = field(default_factory=dict)\n\n    @property\n    def name(self) -> str:\n        return self.path.name\n\"\"\")\n\nchunks.append(r\"\"\"\\\ndef infer_kind(path: Path) -> str:\n    \"\"\"Infer an artifact kind from filename/suffix.\"\"\"\n    name = path.name.lower()\n    if name == \"readme.md\":\n        return \"readme\"\n    if name == \"pyproject.toml\":\n        return \"pyproject\"\n    return _KIND_BY_SUFFIX.get(path.suffix.lower(), \"unknown\")\n\"\"\")\n\nchunks.append(r\"\"\"\\\ndef parse_export_filename(name: str) -> Dict[str, Any]:\n    \"\"\"Parse common export filenames into metadata.\n\n    Expected examples:\n      2025-12-24T01-49-28-186Z_README_md_stage1_attempt1_prompt.txt\n      2025-12-24T01-49-28-186Z_pyproject_toml_stage1_export_export_prompt.txt\n    \"\"\"\n    m = _EXPORT_NAME_RE.match(name)\n    if not m:\n        return {}\n    d: Dict[str, Any] = m.groupdict()\n    for k in (\"stage\", \"attempt\"):\n        if d.get(k) is not None:\n            d[k] = int(d[k])\n        else:\n            d.pop(k, None)\n    # Normalize label like README_md -> README.md for easier grouping.\n    label = d.get(\"label\", \"\")\n    if label and \"_\" in label:\n        parts = label.split(\"_\")\n        if len(parts) >= 2 and parts[-1].isalpha() and len(parts[-1]) <= 5:\n            d[\"label_normalized\"] = \".\".join(parts)\n    return d\n\"\"\")\n\nchunks.append(r\"\"\"\\\ndef load_artifact(\n    path: Path,\n    *,\n    root: Optional[Path] = None,\n    encoding: str = \"utf-8\",\n    errors: str = \"replace\",\n    max_bytes: Optional[int] = None,\n) -> Artifact:\n    \"\"\"Read and normalize an artifact file.\"\"\"\n    p = Path(path)\n    b = p.read_bytes()\n    if max_bytes is not None:\n        b = b[:max_bytes]\n    text = b.decode(encoding, errors=errors)\n    stat = p.stat()\n    sha = hashlib.sha256(b).hexdigest()\n    rel = str(p.relative_to(root)) if root else str(p)\n    meta: Dict[str, Any] = {}\n    meta.update(parse_export_filename(p.name))\n    return Artifact(\n        path=p,\n        relpath=rel,\n        kind=infer_kind(p),\n        text=text,\n        sha256=sha,\n        size=stat.st_size,\n        mtime=stat.st_mtime,\n        meta=meta,\n    )\n\"\"\")\n\nchunks.append(r\"\"\"\\\ndef load_artifacts(\n    paths: Sequence[Path],\n    *,\n    root: Optional[Path] = None,\n    **kwargs: Any,\n) -> List[Artifact]:\n    \"\"\"Load multiple artifacts deterministically (sorted by relpath).\"\"\"\n    arts = [load_artifact(p, root=root, **kwargs) for p in paths]\n    return sorted(arts, key=lambda a: a.relpath)\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/refactor_modularize/artifacts.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b48372d7081909f70f3661941a95b001f3dc92161f15d",
+      "outputs": []
+    },
+    {
+      "id": "rs_0268dd8cd02d95db00694b486fcff08196a93baba2af2f593a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0268dd8cd02d95db00694b48730f488196b64cd90b4b2acef0",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\ntarget_path = Path('/mnt/data').joinpath('src/refactor_modularize/artifacts.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append('''\"\"\"Core data models and loaders for representing, reading, and normalizing artifact files.\n\nThis module is dependency-free: it provides a stable schema for artifact inputs and\nhelpers to infer metadata from common export filename conventions.\n\"\"\"\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom pathlib import Path\nfrom typing import Any, Dict, List, Mapping, Optional, Sequence\nimport hashlib\nimport re\n''')\n\nchunks.append('''_KIND_BY_SUFFIX = {\n    \".py\": \"python\",\n    \".md\": \"markdown\",\n    \".toml\": \"toml\",\n    \".json\": \"json\",\n    \".txt\": \"text\",\n}\n\n_EXPORT_NAME_RE = re.compile(\n    r\"^(?P<ts>\\\\d{4}-\\\\d{2}-\\\\d{2}T[^_]+)_(?P<label>.+?)_stage(?P<stage>\\\\d+)\"\n    r\"(?:_attempt(?P<attempt>\\\\d+))?_(?P<role>prompt|export)(?:_.+)?\\\\.(?P<ext>[^.]+)$\"\n)\n''')\n\nchunks.append('''@dataclass(frozen=True)\nclass Artifact:\n    \"\"\"Normalized representation of a single artifact file.\"\"\"\n    path: Path\n    relpath: str\n    kind: str\n    text: str\n    sha256: str\n    size: int\n    mtime: float\n    meta: Mapping[str, Any] = field(default_factory=dict)\n\n    @property\n    def name(self) -> str:\n        return self.path.name\n''')\n\nchunks.append('''def infer_kind(path: Path) -> str:\n    \"\"\"Infer an artifact kind from filename/suffix.\"\"\"\n    name = path.name.lower()\n    if name == \"readme.md\":\n        return \"readme\"\n    if name == \"pyproject.toml\":\n        return \"pyproject\"\n    return _KIND_BY_SUFFIX.get(path.suffix.lower(), \"unknown\")\n''')\n\nchunks.append('''def parse_export_filename(name: str) -> Dict[str, Any]:\n    \"\"\"Parse common export filenames into metadata.\n\n    Examples:\n      - 2025-12-24T01-49-28-186Z_README_md_stage1_attempt1_prompt.txt\n      - 2025-12-24T01-49-28-186Z_pyproject_toml_stage1_export_export_prompt.txt\n    \"\"\"\n    m = _EXPORT_NAME_RE.match(name)\n    if not m:\n        return {}\n    d: Dict[str, Any] = m.groupdict()\n    for k in (\"stage\", \"attempt\"):\n        if d.get(k) is not None:\n            d[k] = int(d[k])\n        else:\n            d.pop(k, None)\n    label = d.get(\"label\") or \"\"\n    if label and \"_\" in label:\n        parts = label.split(\"_\")\n        # Heuristic: convert FOO_bar -> FOO.bar when last part looks like an extension.\n        if len(parts) >= 2 and parts[-1].isalpha() and 1 <= len(parts[-1]) <= 5:\n            d[\"label_normalized\"] = \".\".join(parts)\n    return d\n''')\n\nchunks.append('''def load_artifact(\n    path: Path,\n    *,\n    root: Optional[Path] = None,\n    encoding: str = \"utf-8\",\n    errors: str = \"replace\",\n    max_bytes: Optional[int] = None,\n) -> Artifact:\n    \"\"\"Read and normalize an artifact file.\"\"\"\n    p = Path(path)\n    b = p.read_bytes()\n    if max_bytes is not None:\n        b = b[:max_bytes]\n    text = b.decode(encoding, errors=errors)\n    stat = p.stat()\n    sha = hashlib.sha256(b).hexdigest()\n    rel = str(p.relative_to(root)) if root else str(p)\n    meta: Dict[str, Any] = {}\n    meta.update(parse_export_filename(p.name))\n    return Artifact(\n        path=p,\n        relpath=rel,\n        kind=infer_kind(p),\n        text=text,\n        sha256=sha,\n        size=stat.st_size,\n        mtime=stat.st_mtime,\n        meta=meta,\n    )\n''')\n\nchunks.append('''def load_artifacts(\n    paths: Sequence[Path],\n    *,\n    root: Optional[Path] = None,\n    **kwargs: Any,\n) -> List[Artifact]:\n    \"\"\"Load multiple artifacts deterministically (sorted by relpath).\"\"\"\n    arts = [load_artifact(p, root=root, **kwargs) for p in paths]\n    return sorted(arts, key=lambda a: a.relpath)\n''')\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/refactor_modularize/artifacts.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b48372d7081909f70f3661941a95b001f3dc92161f15d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/refactor_modularize/artifacts.py\nDIR_STATE:[\"src/refactor_modularize/__init__.py\", \"src/refactor_modularize/artifacts.py\", \"src/refactor_modularize/cli.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0268dd8cd02d95db00694b487aea0881969c89998726627fbe",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0268dd8cd02d95db00694b487b542c819699508e9b8234d2c4",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/refactor_modularize/artifacts.py` with a compact, dependency-free `Artifact` data model plus deterministic loaders and filename-based metadata/kind inference to normalize artifact files and their metadata."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

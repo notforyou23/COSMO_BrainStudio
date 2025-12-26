@@ -1,0 +1,110 @@
+{
+  "content": "Wrote `src/benchmark/json_compare.py`, implementing a dependency-free tolerant JSON comparator (`diff_json`) and assertion helper (`assert_json_close`) with clear, path-aware mismatch reporting and numeric `rtol/atol` handling.",
+  "reasoning": "",
+  "responseId": "resp_065ef89f34b1567c006949b64936ac819486bb4a1fbbadda13",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 5334,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2197,
+    "output_tokens_details": {
+      "reasoning_tokens": 2146
+    },
+    "total_tokens": 7531
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_065ef89f34b1567c006949b649f18c819494a34e58336f2614",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_065ef89f34b1567c006949b64b9d0881949b625fdc8cc99444",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path('/mnt/data')\nsorted([str(p.relative_to(base)) for p in base.rglob('*') if p.is_file()][:50])[:50]\n",
+      "container_id": "cntr_6949b60f8e1081909c7f4a8b8e6ed6e207e0eb243d8f5f64",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "['src/benchmark/reproduce.py']"
+        }
+      ]
+    },
+    {
+      "id": "rs_065ef89f34b1567c006949b64e08188194bdec5909ed073650",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_065ef89f34b1567c006949b64e5c488194bdaf21cdb4661a6c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nprint(Path('/mnt/data/src/benchmark/reproduce.py').read_text()[:4000])\n",
+      "container_id": "cntr_6949b60f8e1081909c7f4a8b8e6ed6e207e0eb243d8f5f64",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Deterministic benchmark reproduction helpers.\n\nThis module is intentionally dependency-light so it can be used by both a CLI\nwrapper and pytest to reproduce a known benchmark case and emit JSON output.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, asdict\nfrom hashlib import sha256\nfrom math import fsum, sqrt\nfrom pathlib import Path\nfrom typing import Any, Dict, Optional\nimport json\nimport os\nimport random\ndef _seed_everything(seed: int) -> None:\n    \"\"\"Seed common RNGs for deterministic runs.\"\"\"\n    random.seed(seed)\n    # Numpy is optional; if present, seed it as well.\n    try:\n        import numpy as np  # type: ignore\n    except Exception:\n        np = None\n    if np is not None:\n        np.random.seed(seed)\n    # Best-effort: keep other libs deterministic if they are imported later.\n    os.environ.setdefault(\"PYTHONHASHSEED\", str(seed))\n@dataclass(frozen=True)\nclass Case001Config:\n    n: int = 1024\n    d: int = 8\n    noise_std: float = 0.05\n\n    def to_dict(self) -> Dict[str, Any]:\n        return asdict(self)\ndef _dot(a: list[float], b: list[float]) -> float:\n    return fsum(x * y for x, y in zip(a, b))\n\n\ndef _l2(a: list[float]) -> float:\n    return sqrt(fsum(x * x for x in a))\ndef run_benchmark_case_001(seed: int = 0, config: Optional[Case001Config] = None) -> Dict[str, Any]:\n    \"\"\"Run benchmark_case_001 deterministically and return a JSON-serializable dict.\"\"\"\n    cfg = config or Case001Config()\n    _seed_everything(seed)\n    rng = random.Random(seed)\n\n    # Ground-truth weights and bias.\n    w_true = [rng.uniform(-1.0, 1.0) for _ in range(cfg.d)]\n    b_true = rng.uniform(-0.5, 0.5)\n\n    # A simple fixed estimator: ridge-like shrinkage of true weights.\n    shrink = 0.85\n    w_hat = [shrink * w for w in w_true]\n    b_hat = b_true * shrink\n\n    # Generate data and evaluate predictions.\n    sq_errs: list[float] = []\n    abs_errs: list[float] = []\n    y_samples: list[float] = []\n\n    for _ in range(cfg.n):\n        x = [rng.gauss(0.0, 1.0) for _ in range(cfg.d)]\n        noise = rng.gauss(0.0, cfg.noise_std)\n        y = _dot(w_true, x) + b_true + noise\n        y_hat = _dot(w_hat, x) + b_hat\n        err = y_hat - y\n        sq_errs.append(err * err)\n        abs_errs.append(abs(err))\n        if len(y_samples) < 16:\n            y_samples.append(y)\n\n    mse = fsum(sq_errs) / cfg.n\n    rmse = sqrt(mse)\n    mae = fsum(abs_errs) / cfg.n\n\n    digest = sha256(\n        json.dumps(\n            {\n                \"w_true\": w_true,\n                \"b_true\": b_true,\n                \"w_hat\": w_hat,\n                \"b_hat\": b_hat,\n                \"y_samples\": y_samples,\n            },\n            sort_keys=True,\n            separators=(\",\", \":\"),\n        ).encode(\"utf-8\")\n    ).hexdigest()\n\n    return {\n        \"case_id\": \"benchmark_case_001\",\n        \"seed\": seed,\n        \"config\": cfg.to_dict(),\n        \"metrics\": {\"mse\": mse, \"rmse\": rmse, \"mae\": mae},\n        \"artifacts\": {\n            \"w_true_l2\": _l2(w_true),\n            \"w_hat_l2\": _l2(w_hat),\n            \"sample_digest_sha256\": digest,\n            \"y_samples\": y_samples,\n        },\n    }\ndef reproduce(case_id: str, *, seed: int = 0) -> Dict[str, Any]:\n    \"\"\"Reproduce a supported benchmark case.\"\"\"\n    if case_id != \"benchmark_case_001\":\n        raise ValueError(f\"Unsupported case_id: {case_id!r}\")\n    return run_benchmark_case_001(seed=seed)\ndef write_json(data: Dict[str, Any], path: Path) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    path.write_text(json.dumps(data, indent=2, sort_keys=True) + \"\\n\", encoding=\"utf-8\")\ndef verify_against_expected(\n    produced: Dict[str, Any],\n    expected_path: Path,\n    *,\n    rtol: float = 1e-7,\n    atol: float = 1e-9,\n) -> None:\n    \"\"\"Verify produced output against expected JSON using tolerant comparison.\n\n    Uses src.benchmark.json_compare if available; otherwise falls back to strict\n    equality for non-floats and tight float tolerance.\n    \"\"\"\n    expected = json.loads(expected_path.read_text\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_065ef89f34b1567c006949b6507400819481ee08b17bbaa0a7",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_065ef89f34b1567c006949b65082bc8194a634b47ce6c61c64",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\ntext=Path('/mnt/data/src/benchmark/reproduce.py').read_text()\nprint(text[4000:8000])\n",
+      "container_id": "cntr_6949b60f8e1081909c7f4a8b8e6ed6e207e0eb243d8f5f64",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(encoding=\"utf-8\"))\n\n    try:\n        from .json_compare import assert_json_close  # type: ignore\n    except Exception:\n        assert_json_close = None  # type: ignore\n\n    if assert_json_close is not None:\n        assert_json_close(produced, expected, rtol=rtol, atol=atol)\n        return\n\n    def _close(a: Any, b: Any) -> bool:\n        if isinstance(a, (int, str, bool)) or a is None:\n            return a == b\n        if isinstance(a, float) and isinstance(b, float):\n            return abs(a - b) <= (atol + rtol * abs(b))\n        if isinstance(a, list) and isinstance(b, list) and len(a) == len(b):\n            return all(_close(x, y) for x, y in zip(a, b))\n        if isinstance(a, dict) and isinstance(b, dict) and a.keys() == b.keys():\n            return all(_close(a[k], b[k]) for k in a.keys())\n        return a == b\n\n    if not _close(produced, expected):\n        raise AssertionError(\"Produced JSON did not match expected within tolerances.\")\ndef main(argv: Optional[list[str]] = None) -> int:\n    import argparse\n\n    p = argparse.ArgumentParser(description=\"Reproduce deterministic benchmark outputs.\")\n    p.add_argument(\"case_id\", choices=[\"benchmark_case_001\"])\n    p.add_argument(\"--seed\", type=int, default=0)\n    p.add_argument(\"--out\", type=Path, required=True, help=\"Output JSON path.\")\n    p.add_argument(\"--expected\", type=Path, default=None, help=\"Optional expected JSON to verify against.\")\n    p.add_argument(\"--rtol\", type=float, default=1e-7)\n    p.add_argument(\"--atol\", type=float, default=1e-9)\n    ns = p.parse_args(argv)\n\n    produced = reproduce(ns.case_id, seed=ns.seed)\n    write_json(produced, ns.out)\n    if ns.expected is not None:\n        verify_against_expected(produced, ns.expected, rtol=ns.rtol, atol=ns.atol)\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_065ef89f34b1567c006949b652c92c81949e1b82cd99afc369",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_065ef89f34b1567c006949b65767108194aa6867c309785745",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re, math\ntarget_path = Path('/mnt/data').joinpath('src/benchmark/json_compare.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\\\"\\\"\\\"Tolerant JSON comparison utilities.\n\nThis module provides a small, dependency-free recursive comparator that treats\nnumbers as \"close\" under (atol + rtol*|expected|) while comparing other JSON\ntypes strictly.\n\nIt is used by both the benchmark reproduction code and pytest to validate that\nproduced JSON matches an expected artifact within numeric tolerances.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Any, Iterable, List, Sequence, Tuple\nimport math\"\"\")\n\nchunks.append(\"\"\"@dataclass(frozen=True)\nclass JsonDiff:\n    \\\"\\\"\\\"A single mismatch between two JSON-like structures.\\\"\\\"\\\"\n\n    path: str\n    expected: Any\n    actual: Any\n    message: str\n\n    def __str__(self) -> str:  # pragma: no cover\n        return f\\\"{self.path}: {self.message} (expected={self.expected!r}, actual={self.actual!r})\\\"\"\"\")\n\nchunks.append(\"\"\"def _is_number(x: Any) -> bool:\n    # bool is a subclass of int; treat it separately to keep JSON semantics.\n    return isinstance(x, (int, float)) and not isinstance(x, bool)\n\n\ndef _format_path(parent: str, token: str) -> str:\n    if not parent:\n        return token\n    if token.startswith(\"[\"):\n        return parent + token\n    return parent + \".\" + token\"\"\")\n\nchunks.append(\"\"\"def _numbers_close(actual: float, expected: float, *, rtol: float, atol: float) -> bool:\n    # Mirrors numpy.isclose semantics for finite values.\n    if math.isnan(expected) and math.isnan(actual):\n        return True\n    if math.isinf(expected) or math.isinf(actual):\n        return expected == actual\n    return abs(actual - expected) <= (atol + rtol * abs(expected))\"\"\")\n\nchunks.append(\"\"\"def diff_json(\n    actual: Any,\n    expected: Any,\n    *,\n    rtol: float = 1e-7,\n    atol: float = 1e-9,\n    _path: str = \"\",\n    _diffs: List[JsonDiff] | None = None,\n    _max_diffs: int = 50,\n) -> List[JsonDiff]:\n    \\\"\\\"\\\"Return a list of differences between two JSON-like structures.\n\n    Args:\n        actual: Produced value (JSON-compatible Python types).\n        expected: Expected value (JSON-compatible Python types).\n        rtol, atol: Numeric tolerances applied when both values are numbers.\n        _max_diffs: Internal guard to keep error messages bounded.\n    \\\"\\\"\\\"\n    diffs: List[JsonDiff] = [] if _diffs is None else _diffs\n    if len(diffs) >= _max_diffs:\n        return diffs\n\n    # Numbers: compare with tolerance (int/float interchangeably).\n    if _is_number(actual) and _is_number(expected):\n        a = float(actual)\n        e = float(expected)\n        if not _numbers_close(a, e, rtol=rtol, atol=atol):\n            diffs.append(\n                JsonDiff(\n                    path=_path or \"$\",\n                    expected=expected,\n                    actual=actual,\n                    message=f\\\"numbers differ (rtol={rtol}, atol={atol})\\\",\n                )\n            )\n        return diffs\n\n    # Primitive JSON types: strict equality.\n    if isinstance(expected, (str, bool)) or expected is None:\n        if actual != expected:\n            diffs.append(JsonDiff(path=_path or \"$\", expected=expected, actual=actual, message=\\\"values differ\\\"))\n        return diffs\n\n    # Sequences.\n    if isinstance(expected, (list, tuple)):\n        if not isinstance(actual, (list, tuple)):\n            diffs.append(JsonDiff(path=_path or \"$\", expected=expected, actual=actual, message=\\\"type differs\\\"))\n            return diffs\n        if len(actual) != len(expected):\n            diffs.append(\n                JsonDiff(\n                    path=_path or \"$\",\n                    expected=len(expected),\n                    actual=len(actual),\n                    message=\\\"sequence length differs\\\",\n                )\n            )\n            # Still compare overlapping prefix for better diagnostics.\n        for i, (a_item, e_item) in enumerate(zip(actual, expected)):\n            diff_json(\n                a_item,\n                e_item,\n                rtol=rtol,\n                atol=atol,\n                _path=_format_path(_path or \"$\", f\\\"[{i}]\\\"),\n                _diffs=diffs,\n                _max_diffs=_max_diffs,\n            )\n            if len(diffs) >= _max_diffs:\n                break\n        return diffs\n\n    # Mappings.\n    if isinstance(expected, dict):\n        if not isinstance(actual, dict):\n            diffs.append(JsonDiff(path=_path or \"$\", expected=expected, actual=actual, message=\\\"type differs\\\"))\n            return diffs\n        exp_keys = set(expected.keys())\n        act_keys = set(actual.keys())\n        missing = sorted(exp_keys - act_keys)\n        extra = sorted(act_keys - exp_keys)\n        for k in missing:\n            diffs.append(\n                JsonDiff(\n                    path=_format_path(_path or \"$\", str(k)),\n                    expected=expected.get(k),\n                    actual=None,\n                    message=\\\"missing key\\\",\n                )\n            )\n            if len(diffs) >= _max_diffs:\n                return diffs\n        for k in extra:\n            diffs.append(\n                JsonDiff(\n                    path=_format_path(_path or \"$\", str(k)),\n                    expected=None,\n                    actual=actual.get(k),\n                    message=\\\"unexpected key\\\",\n                )\n            )\n            if len(diffs) >= _max_diffs:\n                return diffs\n        for k in sorted(exp_keys & act_keys, key=lambda x: str(x)):\n            diff_json(\n                actual[k],\n                expected[k],\n                rtol=rtol,\n                atol=atol,\n                _path=_format_path(_path or \"$\", str(k)),\n                _diffs=diffs,\n                _max_diffs=_max_diffs,\n            )\n            if len(diffs) >= _max_diffs:\n                break\n        return diffs\n\n    # Fallback: unknown types -> strict equality (still useful for pytest).\n    if actual != expected:\n        diffs.append(JsonDiff(path=_path or \"$\", expected=expected, actual=actual, message=\\\"values differ\\\"))\n    return diffs\"\"\")\n\nchunks.append(\"\"\"def assert_json_close(\n    actual: Any,\n    expected: Any,\n    *,\n    rtol: float = 1e-7,\n    atol: float = 1e-9,\n    max_diffs: int = 20,\n) -> None:\n    \\\"\\\"\\\"Assert that two JSON-like objects match within tolerances.\n\n    Raises AssertionError with a readable diff summary on mismatch.\n    \\\"\\\"\\\"\n    diffs = diff_json(actual, expected, rtol=rtol, atol=atol, _max_diffs=max_diffs)\n    if not diffs:\n        return\n    lines = [f\\\"JSON mismatch: {len(diffs)} difference(s) (showing up to {max_diffs})\\\"]\n    for d in diffs:\n        lines.append(str(d))\n    raise AssertionError(\\\"\\\\n\\\".join(lines))\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/benchmark/json_compare.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949b60f8e1081909c7f4a8b8e6ed6e207e0eb243d8f5f64",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/benchmark/json_compare.py\nDIR_STATE:[\"src/benchmark/json_compare.py\", \"src/benchmark/reproduce.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_065ef89f34b1567c006949b66e071481949b788322574009d3",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Wrote `src/benchmark/json_compare.py`, implementing a dependency-free tolerant JSON comparator (`diff_json`) and assertion helper (`assert_json_close`) with clear, path-aware mismatch reporting and numeric `rtol/atol` handling."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

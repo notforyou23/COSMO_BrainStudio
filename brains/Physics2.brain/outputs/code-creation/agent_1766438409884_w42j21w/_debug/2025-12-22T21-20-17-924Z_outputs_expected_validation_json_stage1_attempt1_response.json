@@ -1,0 +1,56 @@
+{
+  "content": "Created `outputs/expected_validation.json` containing the expected “valid=true” validation summary and basic metadata for the worked example.",
+  "reasoning": "",
+  "responseId": "resp_03f897f0ab2630f4006949b73a0b0c8196b7c422decec2f90d",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 1769,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 313,
+    "output_tokens_details": {
+      "reasoning_tokens": 81
+    },
+    "total_tokens": 2082
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_03f897f0ab2630f4006949b73ab9a88196a82d373c257a5f82",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_03f897f0ab2630f4006949b73cd16c8196b5d60dafd8fd76c0",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('outputs/expected_validation.json')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"{\n  \"valid\": true,\n  \"errors\": [],\n  \"summary\": {\n    \"checked_files\": [\n      \"examples/sample_run.json\"\n    ],\n    \"schema_id\": \"benchmark.schema.json\",\n    \"validator\": \"benchmarks.validate\",\n    \"version\": \"0.1.0\"\n  }\n}\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:outputs/expected_validation.json')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:outputs/expected_validation.json\nDIR_STATE:[\"outputs/expected_validation.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_03f897f0ab2630f4006949b740f31c81968bf79aa9f80ce0a4",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `outputs/expected_validation.json` containing the expected “valid=true” validation summary and basic metadata for the worked example."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

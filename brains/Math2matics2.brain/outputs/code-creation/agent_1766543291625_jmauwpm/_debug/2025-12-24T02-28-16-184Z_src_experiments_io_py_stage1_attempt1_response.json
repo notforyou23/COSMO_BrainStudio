@@ -1,0 +1,56 @@
+{
+  "content": "Implemented a dependency-light unified experiment IO layer in `src/experiments/io.py`, providing safe path joins, atomic writes, JSON/text/table helpers, and an `ExperimentIO` class with consistent `configs/`, `results/`, `artifacts/`, and `tables/` layout.",
+  "reasoning": "",
+  "responseId": "resp_01b67c02e7b1d0a700694b4ff82d84819696f6bd653accfe1b",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3493,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1907,
+    "output_tokens_details": {
+      "reasoning_tokens": 147
+    },
+    "total_tokens": 5400
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_01b67c02e7b1d0a700694b4ff8c65c81968fdd8ebbe60e4586",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01b67c02e7b1d0a700694b4ffb03fc8196a8b12eab870875c4",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/io.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Unified experiment IO utilities.\n\nProvides a small, dependency-light layer for consistent paths and safe\nread/write of configs, results, artifacts, and tabular data.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nimport csv\nimport io\nimport json\nimport os\nimport tempfile\nfrom typing import Any, Dict, Iterable, Iterator, List, Mapping, Optional, Sequence, Union\n\n\nJson = Union[Dict[str, Any], List[Any], str, int, float, bool, None]\n\"\"\",\n\"\"\"def _norm_rel(*parts: Union[str, os.PathLike]) -> Path:\n    p = Path(*parts)\n    if p.is_absolute():\n        raise ValueError(f\\\"absolute paths not allowed: {p}\\\")\n    # Prevent traversal: any '..' segment is rejected.\n    if any(seg == \\\"..\\\" for seg in p.parts):\n        raise ValueError(f\\\"path traversal not allowed: {p}\\\")\n    return p\n\n\ndef safe_join(root: Union[str, os.PathLike], *parts: Union[str, os.PathLike]) -> Path:\n    \\\"\\\"\\\"Join *parts under root, rejecting absolute/traversing paths.\\\"\\\"\\\"\n    root_p = Path(root)\n    rel = _norm_rel(*parts)\n    out = (root_p / rel).resolve()\n    root_r = root_p.resolve()\n    try:\n        out.relative_to(root_r)\n    except Exception as e:  # pragma: no cover\n        raise ValueError(f\\\"path escapes root: {out}\\\") from e\n    return out\n\n\ndef ensure_dir(path: Union[str, os.PathLike]) -> Path:\n    p = Path(path)\n    p.mkdir(parents=True, exist_ok=True)\n    return p\n\n\ndef atomic_write(path: Union[str, os.PathLike], data: bytes) -> Path:\n    \\\"\\\"\\\"Atomic write to path (best-effort on the current filesystem).\\\"\\\"\\\"\n    p = Path(path)\n    ensure_dir(p.parent)\n    fd, tmp = tempfile.mkstemp(prefix=p.name + \\\".\\\", dir=str(p.parent))\n    try:\n        with os.fdopen(fd, \\\"wb\\\") as f:\n            f.write(data)\n            f.flush()\n            os.fsync(f.fileno())\n        os.replace(tmp, p)\n    finally:\n        try:\n            os.unlink(tmp)\n        except FileNotFoundError:\n            pass\n    return p\n\"\"\",\n\"\"\"def read_text(path: Union[str, os.PathLike], encoding: str = \\\"utf-8\\\") -> str:\n    return Path(path).read_text(encoding=encoding)\n\n\ndef write_text(path: Union[str, os.PathLike], text: str, encoding: str = \\\"utf-8\\\") -> Path:\n    return atomic_write(path, text.encode(encoding))\n\n\ndef read_json(path: Union[str, os.PathLike]) -> Json:\n    return json.loads(read_text(path))\n\n\ndef write_json(\n    path: Union[str, os.PathLike],\n    obj: Json,\n    *,\n    indent: int = 2,\n    sort_keys: bool = True,\n) -> Path:\n    text = json.dumps(obj, indent=indent, sort_keys=sort_keys, ensure_ascii=False) + \\\"\\\\n\\\"\n    return write_text(path, text)\n\"\"\",\n\"\"\"def write_table(\n    path: Union[str, os.PathLike],\n    rows: Iterable[Mapping[str, Any]],\n    *,\n    fieldnames: Optional[Sequence[str]] = None,\n    dialect: str = \\\"excel\\\",\n) -> Path:\n    \\\"\\\"\\\"Write list/iterable of dict rows to CSV.\n\n    If fieldnames is omitted, it is inferred from the first row.\n    \\\"\\\"\\\"\n    it = iter(rows)\n    first = next(it, None)\n    if first is None:\n        raise ValueError(\\\"cannot write empty table (no rows)\\\")\n    if fieldnames is None:\n        fieldnames = list(first.keys())\n    buf = io.StringIO()\n    w = csv.DictWriter(buf, fieldnames=fieldnames, dialect=dialect)\n    w.writeheader()\n    w.writerow(dict(first))\n    for r in it:\n        w.writerow(dict(r))\n    return write_text(path, buf.getvalue())\n\n\ndef read_table(path: Union[str, os.PathLike], *, dialect: str = \\\"excel\\\") -> List[Dict[str, str]]:\n    with Path(path).open(\\\"r\\\", encoding=\\\"utf-8\\\", newline=\\\"\\\") as f:\n        return list(csv.DictReader(f, dialect=dialect))\n\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass ExperimentIO:\n    \\\"\\\"\\\"Consistent filesystem layout for experiments.\n\n    Layout under root:\n      - configs/   : configuration files (json)\n      - results/   : results/metrics (json, csv)\n      - artifacts/ : arbitrary files (binary/text)\n      - tables/    : tabular exports (csv)\n    \\\"\\\"\\\"\n\n    root: Path\n\n    def __post_init__(self) -> None:\n        object.__setattr__(self, \\\"root\\\", Path(self.root))\n\n    def _dir(self, name: str) -> Path:\n        return ensure_dir(safe_join(self.root, name))\n\n    @property\n    def configs_dir(self) -> Path: return self._dir(\\\"configs\\\")\n    @property\n    def results_dir(self) -> Path: return self._dir(\\\"results\\\")\n    @property\n    def artifacts_dir(self) -> Path: return self._dir(\\\"artifacts\\\")\n    @property\n    def tables_dir(self) -> Path: return self._dir(\\\"tables\\\")\n\n    def path(self, *parts: Union[str, os.PathLike]) -> Path:\n        return safe_join(self.root, *parts)\n\n    # Configs\n    def write_config(self, name: str, cfg: Json) -> Path:\n        return write_json(safe_join(self.configs_dir, f\\\"{name}.json\\\"), cfg)\n\n    def read_config(self, name: str) -> Json:\n        return read_json(safe_join(self.configs_dir, f\\\"{name}.json\\\"))\n\n    # Results\n    def write_result(self, name: str, obj: Json) -> Path:\n        return write_json(safe_join(self.results_dir, f\\\"{name}.json\\\"), obj)\n\n    def read_result(self, name: str) -> Json:\n        return read_json(safe_join(self.results_dir, f\\\"{name}.json\\\"))\n\n    # Artifacts\n    def write_artifact_bytes(self, relpath: str, data: bytes) -> Path:\n        return atomic_write(safe_join(self.artifacts_dir, relpath), data)\n\n    def write_artifact_text(self, relpath: str, text: str, encoding: str = \\\"utf-8\\\") -> Path:\n        return write_text(safe_join(self.artifacts_dir, relpath), text, encoding=encoding)\n\n    def read_artifact_bytes(self, relpath: str) -> bytes:\n        return safe_join(self.artifacts_dir, relpath).read_bytes()\n\n    # Tables\n    def write_table(self, name: str, rows: Iterable[Mapping[str, Any]], *, fieldnames=None) -> Path:\n        return write_table(safe_join(self.tables_dir, f\\\"{name}.csv\\\"), rows, fieldnames=fieldnames)\n\n    def read_table(self, name: str) -> List[Dict[str, str]]:\n        return read_table(safe_join(self.tables_dir, f\\\"{name}.csv\\\"))\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/experiments/io.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4fbeb5a8819082ef6cca0e8e962a0289c9c218902ef0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/io.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/common.py\", \"src/experiments/io.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_01b67c02e7b1d0a700694b500aa79481968f058c5fed755615",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented a dependency-light unified experiment IO layer in `src/experiments/io.py`, providing safe path joins, atomic writes, JSON/text/table helpers, and an `ExperimentIO` class with consistent `configs/`, `results/`, `artifacts/`, and `tables/` layout."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

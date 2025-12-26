@@ -1,0 +1,212 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766547586805_j8aytnq",
+  "agentType": "code-creation",
+  "goalId": "goal_66",
+  "missionId": "strategic_goal_66_1766547586805",
+  "spawnCycle": 94,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T03:39:54.330Z",
+  "completedAt": "2025-12-24T03:44:00.419Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/run_pipeline.py",
+      "description": "Runnable end-to-end script that deterministically generates /outputs/results.json and /outputs/figure.png from a small synthetic experiment with fixed seed and saved metadata for reproducibility.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/run_pipeline.py\nDIR_STATE:[\"scripts/run.py\", \"scripts/run_pipeline.py\"]\nSummary: Wrote a deterministic end-to-end pipeline script that generates outputs/results.json and outputs/figure.png and records stable JSON/image hashes for drift detection.\n",
+          "timestamp": "2025-12-24T03:40:25.588Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/run_pipeline.py\nDIR_STATE:[\"scripts/run.py\", \"scripts/run_pipeline.py\"]\nSummary: Wrote a deterministic end-to-end pipeline script that generates outputs and performs a lightweight stability check via JSON checksum and PNG dHash.\n",
+          "timestamp": "2025-12-24T03:40:56.179Z"
+        }
+      ],
+      "createdAt": "2025-12-24T03:39:54.330Z",
+      "failedAt": "2025-12-24T03:40:56.179Z"
+    },
+    {
+      "path": "src/metrics.py",
+      "description": "Utility module providing stable checksum functions for JSON (canonicalized) and a tolerant perceptual/pixel hash for PNG images used to verify output stability across runs.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/metrics.py\nDIR_STATE:[\"src/metrics.py\", \"src/results_schema.py\", \"src/run_artifacts.py\"]\nSUMMARY: Added stable canonical JSON checksums and tolerant PNG perceptual hashing utilities for output stability verification.\n",
+          "timestamp": "2025-12-24T03:41:16.122Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/metrics.py\nDIR_STATE:[\"src/determinism.py\", \"src/metrics.py\", \"src/results_schema.py\", \"src/run_artifacts.py\"]\nSUMMARY: Implemented canonical JSON checksum and tolerant PNG average-hash utilities for stability verification.\n",
+          "timestamp": "2025-12-24T03:41:35.958Z"
+        }
+      ],
+      "createdAt": "2025-12-24T03:39:54.330Z",
+      "failedAt": "2025-12-24T03:41:35.958Z"
+    },
+    {
+      "path": "tests/test_stability.py",
+      "description": "Pytest that runs the pipeline, computes JSON checksum and PNG perceptual hash, and asserts they match stored baselines within tolerance to detect unintended drift across runs.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/test_stability.py\nDIR_STATE:[\"tests/test_artifacts.py\", \"tests/test_stability.py\"]\nSummary: Added a pytest stability test that runs the pipeline and checks JSON checksum and PNG perceptual hash against baselines with tolerance.\n",
+          "timestamp": "2025-12-24T03:41:56.536Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/test_stability.py\nDIR_STATE:[\"tests/test_artifacts.py\", \"tests/test_stability.py\"]\nAdded a pytest stability test that runs the pipeline and checks JSON checksum plus PNG perceptual hash against stored baselines with tolerance.\n",
+          "timestamp": "2025-12-24T03:42:24.913Z"
+        }
+      ],
+      "createdAt": "2025-12-24T03:39:54.330Z",
+      "failedAt": "2025-12-24T03:42:24.913Z"
+    },
+    {
+      "path": "tests/baselines/results_checksum.txt",
+      "description": "Baseline canonical JSON checksum value expected from scripts/run_pipeline.py for stability verification.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/baselines/results_checksum.txt\nDIR_STATE:[\"tests/baselines/results_checksum.txt\"]\nBaseline results checksum has been written for deterministic stability testing.\n",
+          "timestamp": "2025-12-24T03:42:43.226Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-24T03:43:01.544Z"
+        }
+      ],
+      "createdAt": "2025-12-24T03:39:54.330Z",
+      "failedAt": "2025-12-24T03:43:01.544Z"
+    },
+    {
+      "path": "tests/baselines/figure_phash.txt",
+      "description": "Baseline PNG perceptual hash value expected from scripts/run_pipeline.py for stability verification with small rendering tolerance.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-24T03:43:20.562Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "OK {\"figure_dhash\": \"16c0c3c6ccb0604c\", \"results_checksum\": \"f0a0de02b4d1228eeebc008fa4e6784339897dfc826b39fe69b152473b7fa145\"}\nFILE_WRITTEN:tests/baselines/figure_phash.txt\nDIR_STATE:[\"tests/baselines/figure_phash.txt\", \"tests/baselines/results_checksum.txt\"]\nSummary: Computed the current pipeline figure PNG perceptual hash and saved it as the baseline for stability testing.\n",
+          "timestamp": "2025-12-24T03:43:50.119Z"
+        }
+      ],
+      "createdAt": "2025-12-24T03:39:54.330Z",
+      "failedAt": "2025-12-24T03:43:50.119Z"
+    },
+    {
+      "path": "requirements.txt",
+      "description": "Pinned minimal Python dependencies needed to run the pipeline and tests (numpy, matplotlib, pillow, pytest).",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:requirements.txt\nDIR_STATE:[\".DS_Store\", \"exec_1766547835429_tkesnyi.py\", \"pyproject.toml\", \"requirements.txt\"]\nSummary: Wrote a pinned minimal requirements.txt with numpy, matplotlib, pillow, and pytest for deterministic pipeline and stability tests.\n",
+          "timestamp": "2025-12-24T03:43:55.477Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:requirements.txt\nDIR_STATE:[\".DS_Store\", \"exec_1766547840372_u4ctkva.py\", \"pyproject.toml\", \"requirements.txt\"]\nSummary: Wrote pinned minimal runtime and test dependencies to requirements.txt for deterministic pipeline execution.\n",
+          "timestamp": "2025-12-24T03:44:00.419Z"
+        }
+      ],
+      "createdAt": "2025-12-24T03:39:54.330Z",
+      "failedAt": "2025-12-24T03:44:00.419Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Implement the runnable script to produce /outputs/results.json + /outputs/figure.png, then add a lightweight checksum or pixel-hash test (tolerant if needed) to verify stability across runs.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Specifies a concrete deterministic deliverable pair (/outputs/results.json and /outputs/figure.png) that can serve as the recurring 'cycle artifact' baseline for evaluation and regression, making each..."
+  ],
+  "projectName": "generated_script_1766547587328",
+  "language": "json",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-24T03:44:00.419Z",
+  "summary": {
+    "completed": 0,
+    "failed": 6,
+    "total": 6
+  }
+}

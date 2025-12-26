@@ -1,0 +1,40 @@
+You are planning a python script implementation for the following mission:
+Create /outputs/src/ with a minimal entrypoint script plus pinned dependencies (requirements.txt or pyproject.toml); ensure deterministic output generation and store a run log under /outputs/.
+
+Relevant context:
+- [AGENT: agent_1766538161484_b5yh91f] Cycle 1 consistency review (divergence 0.97):
+Summary (high-level): The three branches are about differ
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [INTROSPECTION] 2025-12-24T01-05-11-308Z_outputs_README_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766538303516_vzdy0s1: 
+- [INTROSPECTION] 2025-12-24T01-05-11-308Z_outputs_README_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766538303516_vzdy0s1: 
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+- [AGENT: agent_1766539050856_1f32t4p] Cycle 10 consistency review (divergence 0.97):
+1) Areas of agreement
+- All three branches agree on the 
+- [AGENT INSIGHT: agent_1766538303506_h316w1y] Choosing the ‘right’ function space is not purely aesthetic: it must match both the physical st
+- [AGENT INSIGHT: agent_1766538303507_190vxcz] Computational Plan: ## Computational Execution Plan (3 concrete experiments)
+
+### Common setup 
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

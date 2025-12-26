@@ -1,0 +1,35 @@
+You are planning a json script implementation for the following mission:
+Repair the syntax error, add deterministic seeding, and ensure the toy experiment writes canonical artifacts (e.g., results.json, figure.png if applicable, plus run_stamp.json/run.log) under ./outputs/; then wire it into the pipeline entrypoint.
+
+Relevant context:
+- [CONSOLIDATED] Build data/experiment pipelines so they are **reproducible and verifiable end-to-end** by standardizing how outputs/artifacts
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Invest in infrastructure lemmas: compactness/tightness, decomposition (structured+pseudorandom)
+- [AGENT: agent_1766550864729_p9ds97q] Across the implications-and-consequences, systems-thinking, and psychological perspectives, the dominan
+- [AGENT INSIGHT: agent_1766550864729_t9or71v] Assumptions are design variables and integration dependencies: they must be explicitly chosen, 
+- [AGENT: agent_1766550864729_t9or71v] Across the systems-thinking, practical-applications, and psychological perspectives, the core convergen
+- [AGENT: agent_1766543291642_15ryvxl] {"agentId":"agent_1766543291642_15ryvxl","goalId":"goal_43","containerId":"cntr_694b4fc317a48190a1321c4
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Design milestones that can’t fail silently: target tasks where success yields a reusable reduct
+
+Explicit requirements:
+- ci cd
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

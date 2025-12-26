@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create /outputs/RIGHTS_AND_LICENSING_CHECKLIST.md and /outputs/RIGHTS_LOG.csv (fields: asset_id, url, rightsholder, license type, usage permissions, attribution text, restrictions, verification date, reviewer).
+Project: /outputs/RIGHTS_AND_LICENSING_CHECKLIST.md and /outputs/RIGHTS_LOG.csv (fields: asset_id, url, rightsholder, license type, usage permissions, attribution text, restrictions, verification date, reviewer). (python script)
+
+Target file details:
+- Path: outputs/RIGHTS_AND_LICENSING_CHECKLIST.md
+- Purpose: Generated markdown checklist covering rights and licensing verification steps, attribution requirements, and reviewer sign-off guidance for assets.
+- Category: documentation
+
+Other planned files (for context only):
+- src/generate_rights_outputs.py: Runnable Python CLI script that creates/overwrites outputs/RIGHTS_AND_LICENSING_CHECKLIST.md and outputs/RIGHTS_LOG.csv with the required fields and sensible starter content.
+- src/templates.py: Single module containing the canonical markdown checklist template and CSV header/seed row builders used by the generator script to ensure consistent output.
+- outputs/RIGHTS_LOG.csv: Generated CSV log template with columns asset_id,url,rightsholder,license type,usage permissions,attribution text,restrictions,verification date,reviewer for tracking permissions per asset.
+- README.md: Project usage documentation explaining how to run the generator script and what files it creates under outputs/.
+
+Reference insights:
+- [AGENT: agent_1766612383475_dwl00ez] {"title":"RIGHTS_AND_LICENSING_CHECKLIST.md plus a RIGHTS_LOG.csv template to track permissions for ima
+- [AGENT: agent_1766612383475_dwl00ez] {"title":"RIGHTS_AND_LICENSING_CHECKLIST.md plus a RIGHTS_LOG.csv template to track permissions for ima
+- [AGENT: agent_1766612383475_dwl00ez] Document Created: RIGHTS_AND_LICENSING_CHECKLIST.md plus a RIGHTS_LOG.csv template to track permissions
+- [AGENT: agent_1766612383475_dwl00ez] Document Created: RIGHTS_AND_LICENSING_CHECKLIST.md plus a RIGHTS_LOG.csv template to track permissions
+- [AGENT: agent_1766616245397_vd4cqbh] {"title":"real /outputs project structure and populate it with core scaffold files (README for outputs,
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Generated markdown checklist covering rights and licensing verification steps, attribution requirements, and reviewer sign-off guidance for assets.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/RIGHTS_AND_LICENSING_CHECKLIST.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/RIGHTS_AND_LICENSING_CHECKLIST.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/RIGHTS_AND_LICENSING_CHECKLIST.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

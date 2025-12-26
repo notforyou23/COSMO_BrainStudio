@@ -1,0 +1,47 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Define v1 schema (fields + required/optional + enums for workstream type), then implement a minimal CLI (e.g., `python -m case_studies.add`) that creates a new case folder with a prefilled metadata file and runs schema validation before allowing commit.
+Project: generated_cli_tool_1766624721472 (python cli_tool)
+
+Target file details:
+- Path: support/githooks/pre-commit
+- Purpose: Git pre-commit hook that runs python -m case_studies.validate and blocks commits when schema validation fails.
+- Category: support
+
+Other planned files (for context only):
+- src/case_studies/__init__.py: Defines the case_studies package and exposes versioned schema utilities for external callers.
+- src/case_studies/schema_v1.py: Implements the v1 metadata schema definition (fields, required/optional, enums) and a dependency-free validator.
+- src/case_studies/paths.py: Provides canonical path rules and helpers for locating the case-studies root and per-case folder layout.
+- src/case_studies/add.py: Implements the minimal CLI entrypoint (python -m case_studies.add) to scaffold a new case folder with prefilled metadata and validate it.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T22-17-08-971Z_plan_attempt1_prompt.txt from code-creation agent agent_1766614627659_92j3x3t: You are planning a j
+- [INTROSPECTION] 2025-12-25T00-21-55-842Z_qa_checks_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766622114110_412seks: You a
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] test_path_canonicalize.py from code-creation agent agent_1766620699965_cdhh9no: from pathlib import Pathimport json
+import o
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Git pre-commit hook that runs python -m case_studies.validate and blocks commits when schema validation fails.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('support/githooks/pre-commit')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:support/githooks/pre-commit')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside support/githooks/pre-commit.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

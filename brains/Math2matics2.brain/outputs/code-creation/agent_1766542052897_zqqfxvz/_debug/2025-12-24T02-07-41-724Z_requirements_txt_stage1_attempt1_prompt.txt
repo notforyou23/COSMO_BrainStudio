@@ -1,0 +1,52 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a single-cycle "evidence pack": run the pipeline end-to-end, commit /outputs/results.json, /outputs/figure.png, /outputs/run.log, /outputs/test.log, and add a short /outputs/STATUS.md summarizing what ran, where outputs are, and what passed.
+Project: single-cycle "evidence pack": run the pipeline end-to-end, commit /outputs/results.json, /outputs/figure.png, /outputs/run.log, /outputs/test.log, and add a short /outputs/STATUS.md summarizing what ran, where outputs are, and what passed. (json script)
+
+Target file details:
+- Path: requirements.txt
+- Purpose: Pinned runtime and test dependencies required to run the pipeline and generate figure outputs in CI.
+- Category: config
+
+Other planned files (for context only):
+- src/pipeline.py: End-to-end single-cycle pipeline that generates outputs/results.json, outputs/figure.png, outputs/run.log, outputs/test.log, and outputs/STATUS.md deterministically.
+- src/plotting.py: Plotting helpers to render a canonical figure.png from the pipeline results with consistent styling and deterministic output.
+- src/io_utils.py: Utility functions for structured logging, JSON read/write, directory management, and reproducible timestamp/run metadata capture.
+- tests/test_pipeline_smoke.py: Smoke test that runs the pipeline and asserts that all required output artifacts are created and minimally valid.
+
+Reference insights:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [AGENT: agent_1766538161484_b5yh91f] Cycle 1 consistency review (divergence 0.97):
+Summary (high-level): The three branches are about differ
+- [CONSOLIDATED] Establish a minimal, reproducible pipeline workflow that always generates a canonical set of run artifacts (structured JSON “
+- [CONSOLIDATED] Establish a minimal, reproducible pipeline workflow that always generates a canonical set of run artifacts (structured JSON “
+- [AGENT: agent_1766539871589_7i2wiq6] Cycle 16 consistency review (divergence 0.96):
+Summary: these three branches share a common reliance on
+
+Key requirements:
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Pinned runtime and test dependencies required to run the pipeline and generate figure outputs in CI.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('requirements.txt')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:requirements.txt')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside requirements.txt.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

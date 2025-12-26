@@ -1,0 +1,76 @@
+# Default configuration for QA gate execution (container-first with local failsafe).
+version: 1
+
+artifacts:
+  root_dir: /outputs/qa
+  run_dirname: run_{timestamp_utc}
+  files:
+    metadata_json: metadata.json
+    docker_stdout_log: docker.stdout.log
+    docker_stderr_log: docker.stderr.log
+    failsafe_stdout_log: failsafe.stdout.log
+    failsafe_stderr_log: failsafe.stderr.log
+    combined_log: qa.combined.log
+    junit_xml: junit.xml
+    results_json: results.json
+    error_report_json: error_report.json
+
+docker:
+  enabled: true
+  image: python:3.11-slim
+  workdir: /repo
+  network: none
+  shm_size: 1g
+  # Arguments appended to `docker run` (in order); runner may add mounts/envs/timeouts.
+  run_args:
+    - --rm
+    - --init
+    - --ipc=private
+  # Signals for "container lost" detection; runner treats these as hard infra failures.
+  container_lost_markers:
+    - "Container killed"
+    - "No such container"
+    - "OCI runtime exec failed"
+    - "cannot start a container"
+    - "context deadline exceeded"
+    - "signal: killed"
+    - "exit code 137"
+    - "exit code 143"
+  hard_fail_exit_codes: [125, 126, 127]
+
+commands:
+  # Full command intended for the QA gate (container execution).
+  full: "python -m pytest -q --disable-warnings --maxfail=1 --junitxml=/outputs/qa/junit.xml"
+  # Optional preflight check(s) executed before full (best-effort).
+  preflight:
+    - "python -V"
+    - "python -c "import sys; print('PYTHONPATH', sys.path[:3])""
+
+failsafe:
+  enabled: true
+  # Local, deterministic reduced test selection (no container). Keep fast and reliable.
+  reduced_command: "python -m pytest -q --disable-warnings --maxfail=1 -k 'not slow and not integration' --durations=10"
+  # If repository lacks tests, still produce artifacts via a lightweight smoke check.
+  smoke_command: "python -c "print('failsafe_smoke_ok')""
+  # On infra/container failure, still attempt to generate minimal structured results.
+  emit_minimal_results_on_failure: true
+  max_test_files: 50
+  allow_no_tests_exit_code: 5
+
+timeouts:
+  # Hard ceiling for container run (seconds); runner should enforce wall-clock timeout.
+  docker_total_seconds: 3600
+  # Hard ceiling for local failsafe run (seconds).
+  failsafe_total_seconds: 900
+  # Per-test timeout if supported by plugins (seconds); runner may export as env var.
+  per_test_seconds: 60
+  # Graceful termination before hard kill (seconds).
+  terminate_grace_seconds: 20
+
+logging:
+  tee_to_console: true
+  max_log_bytes: 10485760
+  redact_patterns:
+    - "(?i)authorization:.*"
+    - "(?i)password=.*"
+    - "(?i)token=.*"

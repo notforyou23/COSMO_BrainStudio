@@ -1,0 +1,56 @@
+{
+  "content": "Created a concise project-level `README.md` documenting dgpipe’s goals, installation, CLI usage, examples, key concepts, and extension points within the 150-line budget.",
+  "reasoning": "",
+  "responseId": "resp_09f962649a102f11006949b59abc588193be0283f2b8ac792e",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2603,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1059,
+    "output_tokens_details": {
+      "reasoning_tokens": 60
+    },
+    "total_tokens": 3662
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_09f962649a102f11006949b59b6a3481938b64e26d15d82ca2",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_09f962649a102f11006949b59c984c8193992ab2fe3f87c10c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('README.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"# dgpipe\n\n`dgpipe` is a small, typed Python toolkit for building and running **data-generation / data-processing pipelines** as composable stages.\nIt provides:\n- a minimal domain model (pipeline specs, stage results),\n- protocols (interfaces) to implement custom stages and runners,\n- an ergonomic CLI to run pipelines from Python modules.\n\nThe project aims to stay lightweight, easy to extend, and safe to refactor (good typing, narrow public API).\n\n## Install\n\nFrom a local checkout:\n\n```bash\npython -m pip install -e .\n```\n\nOr run directly in a repo (for development):\n\n```bash\npython -m dgpipe --help\n```\n\n## Quick start (Python)\n\nA pipeline is just a list of stages. A stage receives an input context and returns a result (or updated context).\n\n```python\nfrom dgpipe import Pipeline, Stage, run\n\nclass Hello(Stage):\n    name = \"hello\"\n    def __call__(self, ctx):\n        ctx[\"greeting\"] = f\"hello {ctx.get('who','world')}\"\n        return ctx\n\npipe = Pipeline(stages=[Hello()])\nfinal_ctx = run(pipe, {\"who\": \"dgpipe\"})\nprint(final_ctx[\"greeting\"])\n```\n\n## CLI usage\n\nThe CLI is intended for running a pipeline defined in a Python module.\n\n### 1) Create a pipeline module\n\nCreate `my_pipeline.py`:\n\n```python\nfrom dgpipe import Pipeline, Stage\n\nclass MakeNumber(Stage):\n    name = \"make_number\"\n    def __call__(self, ctx):\n        ctx[\"n\"] = 40 + 2\n        return ctx\n\nPIPELINE = Pipeline(stages=[MakeNumber()])\n```\n\n### 2) Run it\n\n```bash\npython -m dgpipe run my_pipeline:PIPELINE\n```\n\nCommon options (exact flags may vary by version):\n- `--input` to pass initial context (JSON),\n- `--output` to write final context / results,\n- `--verbose` for stage-by-stage logging.\n\nExample:\n\n```bash\npython -m dgpipe run my_pipeline:PIPELINE --input '{\"seed\": 123}' --verbose\n```\n\n## Concepts\n\n### Pipeline\nA `Pipeline` is an ordered list of stages plus optional metadata (name, description, default config).\n\n### Stage\nA stage is a small, testable unit of work. Stages should:\n- be deterministic where possible,\n- validate inputs and produce well-scoped outputs,\n- keep side effects explicit (e.g., writing files).\n\n### Runner / execution\nExecution is intentionally simple: stages run in order and pass a mutable context (dict-like) forward.\nRunners can add behaviors like:\n- structured logging,\n- timing/metrics,\n- retries,\n- parallel execution (where safe).\n\n## Extension points\n\n`dgpipe` is designed to be extended without changing core code:\n\n- **Custom stages**: implement the `Stage` protocol (callable) and optionally expose `name`.\n- **Custom runners**: implement the runner protocol to control how stages are invoked and how results are collected.\n- **Custom IO**: provide adapters for reading/writing contexts and artifacts (JSON, files, etc).\n\nIn general:\n- depend on `dgpipe.protocols` for interfaces,\n- depend on `dgpipe.models` for shared dataclasses,\n- import from `dgpipe` (package root) for the stable public surface.\n\n## Public API\n\nThe recommended imports are from the package root:\n\n```python\nfrom dgpipe import Pipeline, Stage, run\n```\n\nLower-level modules are available for advanced use:\n- `dgpipe.models` – core dataclasses / domain models\n- `dgpipe.protocols` – typing protocols (interfaces)\n- `dgpipe.cli` – CLI entrypoints\n\n## Development\n\nRun tests (if present):\n\n```bash\npython -m pytest\n```\n\nType-check (if configured):\n\n```bash\npython -m mypy src\n```\n\n## License\n\nSee `LICENSE` in the repository root (if provided).\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:README.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949b590d1548190ae21728e2f723cbf0045b034ab97adc3",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:README.md\nDIR_STATE:[\"README.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_09f962649a102f11006949b5b1d10c81939979ace532036901",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a concise project-level `README.md` documenting dgpipe’s goals, installation, CLI usage, examples, key concepts, and extension points within the 150-line budget."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,54 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a minimal package layout + entrypoint (python -m <package>.run) that writes outputs/, then add tests/test_pipeline.py asserting files exist and (optionally) JSON schema keys match.
+Project: minimal package layout + entrypoint (python -m <package>.run) that writes outputs/, then add tests/test_pipeline.py asserting files exist and (optionally) JSON schema keys match. (python library)
+
+Target file details:
+- Path: src/minipipe/__init__.py
+- Purpose: Package initializer exposing the public API version and ensuring the package is importable.
+- Category: source
+
+Other planned files (for context only):
+- pyproject.toml: Project configuration defining build system, package metadata, dependencies, and pytest settings for CI/CD-friendly execution.
+- README.md: Documentation explaining how to run the entrypoint via python -m <package>.run and what artifacts are produced in outputs/.
+- src/minipipe/pipeline.py: Core pipeline implementation that deterministically creates outputs/ and writes required artifact files including a JSON report.
+- src/minipipe/run.py: Module entrypoint supporting python -m minipipe.run to execute the pipeline and exit with appropriate status for CI.
+
+Reference insights:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_plan_attempt1_prompt.txt from code-creation agent agent_1766539771836_cunrzw4: You are planning a p
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_plan_attempt1_prompt.txt from code-creation agent agent_1766539771836_cunrzw4: You are planning a p
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+- [AGENT: agent_1766539516432_lwvqffa] Cycle 13 consistency review (divergence 0.97):
+Summary of agreement
+- All branches aim to improve predi
+
+Key requirements:
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Package initializer exposing the public API version and ensuring the package is importable.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/minipipe/__init__.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/minipipe/__init__.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/minipipe/__init__.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

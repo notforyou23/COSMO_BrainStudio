@@ -1,0 +1,56 @@
+{
+  "content": "FILE_WRITTEN:benchmarks/contracts/v0_1.json  \nDIR_STATE:[\"benchmarks/contracts/v0_1.json\"]\n\nCreated the canonical v0.1 benchmark contract JSON defining required metadata, standardized I/O roots and artifact filenames, reference algorithm entrypoint, and default numeric/structured diff tolerances plus acceptance criteria.",
+  "reasoning": "",
+  "responseId": "resp_0a2f968af9e86b3d006949bed2502881939ee3df5868d84824",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2512,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 989,
+    "output_tokens_details": {
+      "reasoning_tokens": 920
+    },
+    "total_tokens": 3501
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0a2f968af9e86b3d006949bed2f6408193bdfd7ea663b6e40d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a2f968af9e86b3d006949bed7771481939959e289f24c8e65",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, datetime\n\ntarget_path = Path('/mnt/data').joinpath('benchmarks/contracts/v0_1.json')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\ncontract = {\n  \"contract_version\": \"0.1\",\n  \"name\": \"v0.1 benchmark contract\",\n  \"purpose\": \"Canonical contract describing required metadata, I/O paths, reference algorithm selection, and tolerance thresholds for v0.1 benchmark tasks.\",\n  \"paths\": {\n    \"project_root\": \".\",\n    \"contracts_dir\": \"benchmarks/contracts\",\n    \"data_root\": \"benchmarks/data/v0_1\",\n    \"golden_root\": \"benchmarks/golden/v0_1\",\n    \"runs_root\": \"benchmarks/runs/v0_1\"\n  },\n  \"invocation\": {\n    \"pytest\": \"pytest -q\",\n    \"benchmark\": \"python -m src.run_benchmark --contract benchmarks/contracts/v0_1.json\"\n  },\n  \"reference_algorithm\": {\n    \"id\": \"reference\",\n    \"module\": \"src.reference\",\n    \"callable\": \"run\",\n    \"description\": \"Deterministic reference implementation used to generate benchmark outputs for v0.1 tasks.\"\n  },\n  \"diff\": {\n    \"numeric\": {\n      \"absolute_tolerance\": 1e-8,\n      \"relative_tolerance\": 1e-6,\n      \"nan_equal\": True,\n      \"inf_equal\": True\n    },\n    \"structured\": {\n      \"ignore_paths\": [],\n      \"unordered_collections\": True,\n      \"float_format\": \"full_precision\"\n    }\n  },\n  \"artifacts\": {\n    \"input_manifest\": \"manifest.json\",\n    \"output_filename\": \"output.json\",\n    \"diff_report_filename\": \"diff_report.json\",\n    \"summary_filename\": \"summary.json\"\n  },\n  \"tasks\": [\n    {\n      \"task_id\": \"default\",\n      \"description\": \"Default v0.1 task; concrete inputs are discovered from the input_manifest under data_root.\",\n      \"io\": {\n        \"inputs_dir\": \"{data_root}\",\n        \"golden_dir\": \"{golden_root}/default\",\n        \"run_dir\": \"{runs_root}/default\"\n      },\n      \"outputs\": [\n        \"{run_dir}/{output_filename}\"\n      ],\n      \"golden_outputs\": [\n        \"{golden_dir}/{output_filename}\"\n      ],\n      \"tolerance_overrides\": {}\n    }\n  ],\n  \"acceptance_criteria\": {\n    \"pytest_must_pass\": True,\n    \"benchmark_diff_within_tolerance\": True,\n    \"diff_failure_policy\": \"fail_if_any_task_exceeds_tolerance\"\n  }\n}\n\n# pretty JSON with stable key ordering\nfinal_text = json.dumps(contract, indent=2, sort_keys=True) + \"\\n\"\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:benchmarks/contracts/v0_1.json')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949be2e3cc88190ba383d17f1aa1c440ba8e9f08a4be3b1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:benchmarks/contracts/v0_1.json\nDIR_STATE:[\"benchmarks/contracts/v0_1.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0a2f968af9e86b3d006949bee0e9308193a30b076be028cd11",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_WRITTEN:benchmarks/contracts/v0_1.json  \nDIR_STATE:[\"benchmarks/contracts/v0_1.json\"]\n\nCreated the canonical v0.1 benchmark contract JSON defining required metadata, standardized I/O roots and artifact filenames, reference algorithm entrypoint, and default numeric/structured diff tolerances plus acceptance criteria."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

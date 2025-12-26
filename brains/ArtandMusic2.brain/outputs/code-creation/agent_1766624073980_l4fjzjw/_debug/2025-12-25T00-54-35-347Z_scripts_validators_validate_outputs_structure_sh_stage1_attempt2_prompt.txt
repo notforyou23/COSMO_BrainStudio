@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a single entrypoint script/command (e.g., scripts/run_validation_harness.sh) that: (1) runs the scaffold generator, (2) checks for required files under /outputs (e.g., REPORT_OUTLINE.md, templates, pilot case), and (3) runs validators; fail with clear error messages when artifacts are missing.
+Project: single entrypoint (bash configuration)
+
+Target file details:
+- Path: scripts/validators/validate_outputs_structure.sh
+- Purpose: Bash validator that enforces a machine-checkable outputs directory structure (required files, templates directory, and pilot case presence) and exits nonzero with actionable messages.
+- Category: source
+
+Other planned files (for context only):
+- scripts/run_validation_harness.sh: Single entrypoint Bash script that runs the scaffold generator, verifies required /outputs artifacts exist, then runs validators and fails fast with clear error messages when anything is missing or invalid.
+- scripts/lib/harness_common.sh: Shared Bash helper library for consistent logging, error handling, path resolution, and required-artifact checks used by the validation harness.
+- scripts/validators/validate_markdown_outline.sh: Bash validator that checks REPORT_OUTLINE.md exists and meets minimal structural expectations (non-empty, required headings/sections) for downstream tooling.
+- scripts/validators/validate_templates.sh: Bash validator that checks required template files exist under /outputs/templates and are non-empty, reporting missing or empty templates clearly.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T22-59-19-146Z_scripts_run_scaffold_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766617157732_r6g
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [CONSOLIDATED] Establish explicit, machine-checkable specifications (schemas, expected artifacts, checklists) and enforce them with automate
+- [INTROSPECTION] 2025-12-24T22-59-19-146Z_Makefile_stage1_attempt1_prompt.txt from code-creation agent agent_1766617157732_r6gg9mj: You are i
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Bash validator that enforces a machine-checkable outputs directory structure (required files, templates directory, and pilot case presence) and exits nonzero with actionable messages.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/validators/validate_outputs_structure.sh')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/validators/validate_outputs_structure.sh')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/validators/validate_outputs_structure.sh.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

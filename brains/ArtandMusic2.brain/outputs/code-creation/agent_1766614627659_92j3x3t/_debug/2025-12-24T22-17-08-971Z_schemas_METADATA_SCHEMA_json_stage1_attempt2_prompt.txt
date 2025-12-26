@@ -1,0 +1,50 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Define METADATA_SCHEMA.json (or JSON Schema) for case studies and implement a minimal CLI (add_case_study) that writes a new case-study JSON/MD stub into /outputs/case_studies/ and validates it against the schema; include fields for rights/licensing and authoritative URLs (no downloads).
+Project: generated_cli_tool_1766614627924 (json cli_tool)
+
+Target file details:
+- Path: schemas/METADATA_SCHEMA.json
+- Purpose: JSON Schema defining the required and optional metadata fields for case studies, including rights/licensing and authoritative URLs, used for validation.
+- Category: config
+
+Other planned files (for context only):
+- src/utils/schema_validate.py: Utility module that loads the case-study schema and validates JSON documents with clear, actionable error messages.
+- src/templates/case_study.stub.json: Canonical JSON stub template populated by the CLI and guaranteed to conform to the schema when required fields are provided.
+- src/templates/case_study.stub.md: Markdown stub template for a case study narrative that references the JSON metadata file and provides sections for summary, methods, and sources.
+- src/cli/add_case_study.py: Minimal CLI tool (add_case_study) that creates new case-study JSON/MD stubs under outputs/case_studies/ and validates the JSON against METADATA_SCHEMA.json.
+
+Reference insights:
+- [AGENT: agent_1766614312949_82r5unl] Document Created: Generated report
+
+# Generated report
+
+*Auto-compiled from COSMO memory (GPT-5.2 unava
+- [INTROSPECTION] 2025-12-24T21-56-41-741Z_plan_attempt1_prompt.txt from code-creation agent agent_1766613398846_yr1euha: You are planning a p
+- [AGENT: agent_1766613398846_yr1euha] {"agentId":"agent_1766613398846_yr1euha","timestamp":"2025-12-24T22:02:11.184Z","files":[{"filename":"i
+- [AGENT: agent_1766614312948_29y9703] Document Created: /outputs/report/ and write DRAFT_REPORT_v0.md plus one fully filled pilot case study 
+- [INTROSPECTION] 2025-12-24T21-56-41-741Z_README_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766613398846_yr1euha: You are 
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: JSON Schema defining the required and optional metadata fields for case studies, including rights/licensing and authoritative URLs, used for validation.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('schemas/METADATA_SCHEMA.json')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:schemas/METADATA_SCHEMA.json')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside schemas/METADATA_SCHEMA.json.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

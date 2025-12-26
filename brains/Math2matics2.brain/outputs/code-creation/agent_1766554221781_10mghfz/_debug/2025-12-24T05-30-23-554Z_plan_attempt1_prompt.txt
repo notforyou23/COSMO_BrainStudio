@@ -1,0 +1,32 @@
+You are planning a python script implementation for the following mission:
+Run scripts/run_tests_and_capture_log.py; save stdout/stderr + exit code to ./outputs/test_run_log_2025-12-24.txt and capture environment (python version, pip freeze) to ./outputs/env_2025-12-24.txt; link these in the roadmap DoD.
+
+Relevant context:
+- [INTROSPECTION] 2025-12-24T04-50-00-098Z_roadmap_v1_md_stage1_attempt2_prompt.txt from code-creation agent agent_1766551798569_1jkxc0c: You 
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Invest in infrastructure lemmas: compactness/tightness, decomposition (structured+pseudorandom)
+- [AGENT: agent_1766550864729_p9ds97q] Across the implications-and-consequences, systems-thinking, and psychological perspectives, the dominan
+- [AGENT INSIGHT: agent_1766550864729_t9or71v] Assumptions are design variables and integration dependencies: they must be explicitly chosen, 
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_scripts_run_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766539771836_cun
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Design milestones that can’t fail silently: target tasks where success yields a reusable reduct
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Regime/phase-diagram first: identify the correct parameters and scalings, then prove regime-sep
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

@@ -1,0 +1,69 @@
+{
+  "content": "Implemented deterministic artifact helpers in `src/minipipeline/artifacts.py`, including outputs directory resolution/creation, canonical JSON writing, and canonical JSONL log appending suitable for stable pipeline runs and tests.",
+  "reasoning": "",
+  "responseId": "resp_09e3bd5dcbc318d000694b4ad1ed048196b68b86e1903d645e",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3467,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1935,
+    "output_tokens_details": {
+      "reasoning_tokens": 1891
+    },
+    "total_tokens": 5402
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_09e3bd5dcbc318d000694b4ad2bcbc8196b2c55513f9c316e2",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_09e3bd5dcbc318d000694b4ad634b481968af150acbbc38049",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/minipipeline/artifacts.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Artifact helpers for the minimal pipeline.\n\nThis module focuses on deterministic, test-friendly artifact creation:\n- ensure an outputs directory exists\n- write canonical JSON (stable formatting + sorted keys)\n- append structured log lines (JSONL) deterministically\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Mapping, MutableMapping\nimport json\nimport os\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass ArtifactPaths:\n    \\\"\\\"\\\"Convenience container for common artifact file locations.\\\"\\\"\\\"\n\n    outputs_dir: Path\n\n    @property\n    def run_stamp_json(self) -> Path:\n        return self.outputs_dir / \"run_stamp.json\"\n\n    @property\n    def run_log(self) -> Path:\n        return self.outputs_dir / \"run.log\\\"\"\" ,\n\"\"\"def ensure_outputs_dir(\n    root: Path | None = None,\n    dirname: str = \"outputs\",\n    env_var: str = \"MINIPIPELINE_OUTPUTS_DIR\",\n) -> Path:\n    \\\"\\\"\\\"Return an outputs directory path and create it if necessary.\n\n    Resolution order:\n      1) explicit env var (defaults to MINIPIPELINE_OUTPUTS_DIR)\n      2) provided *root* / *dirname*\n      3) current working directory / *dirname*\n    \\\"\\\"\\\"\n    env_val = os.environ.get(env_var)\n    if env_val:\n        out = Path(env_val)\n    else:\n        base = root if root is not None else Path.cwd()\n        out = base / dirname\n    out.mkdir(parents=True, exist_ok=True)\n    return out\"\"\",\n\"\"\"def _canonical_json_bytes(obj: Any) -> bytes:\n    \\\"\\\"\\\"Serialize *obj* to canonical JSON bytes (stable across runs).\\\"\\\"\\\"\n    text = json.dumps(\n        obj,\n        sort_keys=True,\n        ensure_ascii=False,\n        separators=(\",\", \":\"),\n    )\n    return (text + \"\\\\n\").encode(\"utf-8\")\"\"\",\n\"\"\"def write_json(path: Path, data: Any) -> Path:\n    \\\"\\\"\\\"Write canonical JSON to *path*, creating parent dirs as needed.\\\"\\\"\\\"\n    path.parent.mkdir(parents=True, exist_ok=True)\n    path.write_bytes(_canonical_json_bytes(data))\n    return path\"\"\",\n\"\"\"def append_log_line(path: Path, record: Mapping[str, Any]) -> Path:\n    \\\"\\\"\\\"Append a canonical JSON log line (JSONL) to *path*.\n\n    The caller should supply any timestamps/sequence numbers to keep the\n    content deterministic. Keys are sorted and formatting is stable.\n    \\\"\\\"\\\"\n    path.parent.mkdir(parents=True, exist_ok=True)\n    with path.open(\"ab\") as f:\n        f.write(_canonical_json_bytes(dict(record)))\n    return path\"\"\",\n\"\"\"def merge_defaults(\n    payload: MutableMapping[str, Any], defaults: Mapping[str, Any]\n) -> MutableMapping[str, Any]:\n    \\\"\\\"\\\"Update *payload* with values from *defaults* only when missing.\\\"\\\"\\\"\n    for k, v in defaults.items():\n        payload.setdefault(k, v)\n    return payload\"\"\",\n\"\"\"def artifact_paths(root: Path | None = None) -> ArtifactPaths:\n    \\\"\\\"\\\"Return common artifact paths rooted at the resolved outputs dir.\\\"\\\"\\\"\n    return ArtifactPaths(outputs_dir=ensure_outputs_dir(root=root))\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/minipipeline/artifacts.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4aadc8ac8190b085d2f4f9ea2ac000e5916d7745774a",
+      "outputs": []
+    },
+    {
+      "id": "rs_09e3bd5dcbc318d000694b4ae235c88196bc849eb92c51a060",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_09e3bd5dcbc318d000694b4ae2f0e48196af7d7a5555ec533c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/minipipeline/artifacts.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Artifact helpers for the minimal pipeline.\n\nThis module focuses on deterministic, test-friendly artifact creation:\n- ensure an outputs directory exists\n- write canonical JSON (stable formatting + sorted keys)\n- append structured log lines (JSONL) deterministically\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Mapping, MutableMapping\nimport json\nimport os\n\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass ArtifactPaths:\n    \\\"\\\"\\\"Convenience container for common artifact file locations.\\\"\\\"\\\"\n\n    outputs_dir: Path\n\n    @property\n    def run_stamp_json(self) -> Path:\n        return self.outputs_dir / \"run_stamp.json\"\n\n    @property\n    def run_log(self) -> Path:\n        return self.outputs_dir / \"run.log\"\n\"\"\",\n\"\"\"def ensure_outputs_dir(\n    root: Path | None = None,\n    dirname: str = \"outputs\",\n    env_var: str = \"MINIPIPELINE_OUTPUTS_DIR\",\n) -> Path:\n    \\\"\\\"\\\"Return an outputs directory path and create it if necessary.\n\n    Resolution order:\n      1) explicit env var (defaults to MINIPIPELINE_OUTPUTS_DIR)\n      2) provided *root* / *dirname*\n      3) current working directory / *dirname*\n    \\\"\\\"\\\"\n    env_val = os.environ.get(env_var)\n    if env_val:\n        out = Path(env_val)\n    else:\n        base = root if root is not None else Path.cwd()\n        out = base / dirname\n    out.mkdir(parents=True, exist_ok=True)\n    return out\n\"\"\",\n\"\"\"def _canonical_json_bytes(obj: Any) -> bytes:\n    \\\"\\\"\\\"Serialize *obj* to canonical JSON bytes (stable across runs).\\\"\\\"\\\"\n    text = json.dumps(\n        obj,\n        sort_keys=True,\n        ensure_ascii=False,\n        separators=(\",\", \":\"),\n    )\n    return (text + \"\\\\n\").encode(\"utf-8\")\n\"\"\",\n\"\"\"def write_json(path: Path, data: Any) -> Path:\n    \\\"\\\"\\\"Write canonical JSON to *path*, creating parent dirs as needed.\\\"\\\"\\\"\n    path.parent.mkdir(parents=True, exist_ok=True)\n    path.write_bytes(_canonical_json_bytes(data))\n    return path\n\"\"\",\n\"\"\"def append_log_line(path: Path, record: Mapping[str, Any]) -> Path:\n    \\\"\\\"\\\"Append a canonical JSON log line (JSONL) to *path*.\n\n    The caller should supply any timestamps/sequence numbers to keep the\n    content deterministic. Keys are sorted and formatting is stable.\n    \\\"\\\"\\\"\n    path.parent.mkdir(parents=True, exist_ok=True)\n    with path.open(\"ab\") as f:\n        f.write(_canonical_json_bytes(dict(record)))\n    return path\n\"\"\",\n\"\"\"def merge_defaults(\n    payload: MutableMapping[str, Any], defaults: Mapping[str, Any]\n) -> MutableMapping[str, Any]:\n    \\\"\\\"\\\"Update *payload* with values from *defaults* only when missing.\\\"\\\"\\\"\n    for k, v in defaults.items():\n        payload.setdefault(k, v)\n    return payload\n\"\"\",\n\"\"\"def artifact_paths(root: Path | None = None) -> ArtifactPaths:\n    \\\"\\\"\\\"Return common artifact paths rooted at the resolved outputs dir.\\\"\\\"\\\"\n    return ArtifactPaths(outputs_dir=ensure_outputs_dir(root=root))\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/minipipeline/artifacts.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4aadc8ac8190b085d2f4f9ea2ac000e5916d7745774a",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/minipipeline/artifacts.py\nDIR_STATE:[\"src/minipipeline/__init__.py\", \"src/minipipeline/artifacts.py\", \"src/minipipeline/run.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_09e3bd5dcbc318d000694b4ae9a51c8196a922c6c5bdfb3d97",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented deterministic artifact helpers in `src/minipipeline/artifacts.py`, including outputs directory resolution/creation, canonical JSON writing, and canonical JSONL log appending suitable for stable pipeline runs and tests."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

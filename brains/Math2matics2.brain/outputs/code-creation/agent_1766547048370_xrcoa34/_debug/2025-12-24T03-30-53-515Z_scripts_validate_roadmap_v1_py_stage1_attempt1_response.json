@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `scripts/validate_roadmap_v1.py` as a CLI validator that fails with actionable messages when `outputs/roadmap_v1.md` is missing required section headings (scope/timebox/targets/definition) or lacks a bottom-of-file checkbox-style checklist covering those elements.",
+  "reasoning": "",
+  "responseId": "resp_0dfc911826894bc900694b5e8a221c8194916b900a583e218c",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2678,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1185,
+    "output_tokens_details": {
+      "reasoning_tokens": 107
+    },
+    "total_tokens": 3863
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0dfc911826894bc900694b5e8ac2088194b33fc42c6fa22293",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0dfc911826894bc900694b5e8cb150819480867623925c9aad",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('scripts/validate_roadmap_v1.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(r\"\"\"#!/usr/bin/env python3\n\\\"\\\"\\\"Validate outputs/roadmap_v1.md against acceptance criteria.\n\nChecks for required sections (scope, timebox, targets, definition) and ensures a\nbottom-of-file self-verification checklist is present.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport re\nimport sys\nfrom pathlib import Path\n\n\nREQUIRED_SECTIONS = [\"scope\", \"timebox\", \"targets\", \"definition\"]\nCHECKLIST_TOKENS = [\"checklist\", \"scope\", \"timebox\", \"targets\", \"definition\"]\n\n\ndef _read_text(path: Path) -> str:\n    try:\n        return path.read_text(encoding=\"utf-8\")\n    except FileNotFoundError:\n        raise\n    except Exception as e:  # pragma: no cover\n        raise RuntimeError(f\"Failed to read {path}: {e}\") from e\n\n\ndef _find_missing_sections(md: str) -> list[str]:\n    # Accept headings like \"# Scope\", \"## Timebox\", etc. (case-insensitive).\n    missing: list[str] = []\n    for name in REQUIRED_SECTIONS:\n        pat = re.compile(rf\"(?im)^\\\\s*#+\\\\s*{re.escape(name)}\\\\b\")\n        if not pat.search(md):\n            missing.append(name)\n    return missing\n\n\ndef _has_bottom_checklist(md: str, tail_lines: int = 120) -> tuple[bool, list[str]]:\n    lines = md.splitlines()\n    tail = \"\\\\n\".join(lines[-tail_lines:]).strip().lower()\n\n    if \"checklist\" not in tail:\n        return False, [\"No 'Checklist' found near the bottom of the file.\"]\n\n    missing_tokens = [t for t in CHECKLIST_TOKENS if t not in tail]\n    if missing_tokens:\n        return False, [\n            \"Checklist is present near the bottom, but it does not mention: \"\n            + \", \".join(missing_tokens)\n            + \". Ensure the checklist explicitly covers scope/timebox/targets/definition.\"\n        ]\n\n    # Encourage checkbox syntax, but don't strictly require markdown task list.\n    if \"- [ ]\" not in tail and \"- [x]\" not in tail and \"* [ ]\" not in tail and \"* [x]\" not in tail:\n        return False, [\n            \"Checklist found near the bottom but no markdown checkboxes were detected \"\n            \"(e.g., '- [ ] item'). Add a task-list style checklist for self-verification.\"\n        ]\n\n    return True, []\n\n\ndef validate(path: Path) -> int:\n    try:\n        md = _read_text(path)\n    except FileNotFoundError:\n        print(\n            f\"ERROR: Missing roadmap file at '{path}'.\\\\n\"\n            \"Action: run the generator to create outputs/roadmap_v1.md, then re-run validation.\",\n            file=sys.stderr,\n        )\n        return 2\n\n    errors: list[str] = []\n\n    missing = _find_missing_sections(md)\n    if missing:\n        errors.append(\n            \"Missing required section headings: \"\n            + \", \".join(missing)\n            + \".\\\\nAction: add markdown headings like '## Scope', '## Timebox', '## Targets', '## Definition'.\"\n        )\n\n    ok, checklist_errors = _has_bottom_checklist(md)\n    if not ok:\n        errors.extend(checklist_errors)\n\n    if errors:\n        print(\"VALIDATION_FAILED:\", file=sys.stderr)\n        for i, err in enumerate(errors, 1):\n            print(f\"{i}. {err}\", file=sys.stderr)\n        return 1\n\n    print(\"VALIDATION_OK\")\n    return 0\n\n\ndef main(argv: list[str] | None = None) -> int:\n    p = argparse.ArgumentParser(description=\"Validate outputs/roadmap_v1.md acceptance criteria.\")\n    p.add_argument(\n        \"--path\",\n        type=Path,\n        default=Path(\"outputs/roadmap_v1.md\"),\n        help=\"Path to the roadmap markdown file (default: outputs/roadmap_v1.md).\",\n    )\n    args = p.parse_args(argv)\n    return validate(args.path)\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:scripts/validate_roadmap_v1.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b5e6b732481908899bb698f26a8f80d0fd5a75ad24f76",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:scripts/validate_roadmap_v1.py\nDIR_STATE:[\"scripts/generate_roadmap_v1.py\", \"scripts/validate_roadmap_v1.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0dfc911826894bc900694b5e9840a48194b1575e5a4590c98f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `scripts/validate_roadmap_v1.py` as a CLI validator that fails with actionable messages when `outputs/roadmap_v1.md` is missing required section headings (scope/timebox/targets/definition) or lacks a bottom-of-file checkbox-style checklist covering those elements."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

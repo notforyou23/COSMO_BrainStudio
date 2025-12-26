@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/qg_bench/validate.py` to load the bundled JSON Schema via `importlib.resources`, validate dataset objects/files using `jsonschema` Draft 2020-12, and raise clear, deterministic multi-error messages with JSON-pointer-like paths.",
+  "reasoning": "",
+  "responseId": "resp_066ee2f57e8c5e06006949be7644d08194a9863a708cc05eae",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2726,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1231,
+    "output_tokens_details": {
+      "reasoning_tokens": 1174
+    },
+    "total_tokens": 3957
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_066ee2f57e8c5e06006949be76f99c8194b1e915a6dfe514f8",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_066ee2f57e8c5e06006949be7933288194860ef5038f266e74",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re\ntarget_path = Path('/mnt/data').joinpath('src/qg_bench/validate.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"Schema validation for qg_bench datasets.\n\nThis module loads the bundled JSON Schema and validates benchmark datasets\nusing ``jsonschema`` with human-friendly error messages.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nimport json\nfrom pathlib import Path\nfrom typing import Any, Iterable, Mapping, Sequence\n\nfrom importlib import resources\n\nfrom jsonschema import Draft202012Validator\nfrom jsonschema.exceptions import ValidationError\n\"\"\".strip(\"\\n\"))\nchunks.append(\"\"\"\nSCHEMA_RESOURCE_PACKAGE = \"qg_bench.schemas\"\nSCHEMA_RESOURCE_NAME = \"benchmark.schema.json\"\n\"\"\".strip(\"\\n\"))\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass ValidationIssue:\n    \\\"\\\"\\\"A single schema validation issue.\\\"\\\"\\\"\n\n    path: str\n    message: str\n    validator: str | None = None\n\n    def format(self) -> str:\n        v = f\" ({self.validator})\" if self.validator else \"\"\n        return f\"- {self.path}: {self.message}{v}\"\n\"\"\".strip(\"\\n\"))\nchunks.append(\"\"\"\ndef _json_pointer(parts: Sequence[Any]) -> str:\n    # jsonschema uses deque/tuple of keys/indices; format as JSON Pointer.\n    if not parts:\n        return \"$\"\n    out = \"$\"\n    for p in parts:\n        if isinstance(p, int):\n            out += f\"[{p}]\"\n        else:\n            s = str(p).replace(\"~\", \"~0\").replace(\"/\", \"~1\")\n            out += f\"/{s}\"\n    return out\n\"\"\".strip(\"\\n\"))\nchunks.append(\"\"\"\ndef load_schema() -> dict[str, Any]:\n    \\\"\\\"\\\"Load the bundled benchmark schema as a dict.\\\"\\\"\\\"\n    with resources.files(SCHEMA_RESOURCE_PACKAGE).joinpath(SCHEMA_RESOURCE_NAME).open(\n        \"r\", encoding=\"utf-8\"\n    ) as f:\n        return json.load(f)\n\"\"\".strip(\"\\n\"))\nchunks.append(\"\"\"\ndef iter_validation_issues(data: Any, schema: Mapping[str, Any] | None = None) -> Iterable[ValidationIssue]:\n    \\\"\\\"\\\"Yield all validation issues (sorted, deterministic).\\\"\\\"\\\"\n    sch = dict(schema) if schema is not None else load_schema()\n    validator = Draft202012Validator(sch)\n    errors = sorted(validator.iter_errors(data), key=lambda e: (list(e.path), e.message))\n    for err in errors:\n        yield ValidationIssue(\n            path=_json_pointer(list(err.path)),\n            message=err.message,\n            validator=getattr(err, \"validator\", None),\n        )\n\"\"\".strip(\"\\n\"))\nchunks.append(\"\"\"\ndef validate_dataset(data: Any, *, schema: Mapping[str, Any] | None = None) -> None:\n    \\\"\\\"\\\"Validate a dataset object.\n\n    Raises:\n        ValueError: if validation fails, with a multi-line readable message.\n    \\\"\\\"\\\"\n    issues = list(iter_validation_issues(data, schema=schema))\n    if not issues:\n        return\n    header = f\"Dataset failed schema validation with {len(issues)} error(s):\"\n    body = \"\\\\n\".join(i.format() for i in issues[:50])\n    extra = \"\" if len(issues) <= 50 else f\"\\\\n... and {len(issues) - 50} more\"\n    raise ValueError(f\"{header}\\\\n{body}{extra}\")\n\"\"\".strip(\"\\n\"))\nchunks.append(\"\"\"\ndef load_dataset(path: str | Path) -> Any:\n    \\\"\\\"\\\"Load a JSON dataset from disk.\\\"\\\"\\\"\n    p = Path(path)\n    try:\n        text = p.read_text(encoding=\"utf-8\")\n    except FileNotFoundError as e:\n        raise FileNotFoundError(f\"Dataset file not found: {p}\") from e\n    try:\n        return json.loads(text)\n    except json.JSONDecodeError as e:\n        loc = f\"line {e.lineno} column {e.colno}\"\n        raise ValueError(f\"Invalid JSON in {p} ({loc}): {e.msg}\") from e\n\"\"\".strip(\"\\n\"))\nchunks.append(\"\"\"\ndef validate_file(path: str | Path, *, schema: Mapping[str, Any] | None = None) -> Any:\n    \\\"\\\"\\\"Load and validate a dataset file; returns the parsed object.\\\"\\\"\\\"\n    data = load_dataset(path)\n    validate_dataset(data, schema=schema)\n    return data\n\"\"\".strip(\"\\n\"))\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/qg_bench/validate.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949be2fa9948190b7fd0f89484479600a95eb5fa105098f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/qg_bench/validate.py\nDIR_STATE:[\"src/qg_bench/__init__.py\", \"src/qg_bench/validate.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_066ee2f57e8c5e06006949be8ab4b48194819b4f819dc1e132",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/qg_bench/validate.py` to load the bundled JSON Schema via `importlib.resources`, validate dataset objects/files using `jsonschema` Draft 2020-12, and raise clear, deterministic multi-error messages with JSON-pointer-like paths."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

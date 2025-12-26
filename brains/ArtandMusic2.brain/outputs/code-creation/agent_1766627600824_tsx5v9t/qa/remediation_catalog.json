@@ -1,0 +1,111 @@
+{
+  "catalog_version": "1.0",
+  "purpose": "Central mapping from QA check IDs to remediation pointers used in QA_REPORT.json and QA_REPORT.md.",
+  "remediation_base": {
+    "primary_doc": "qa/README.md",
+    "report_schema": "qa/schema_qa_report.json",
+    "qa_runner": "scripts/qa_run.sh",
+    "qa_implementation": "qa/qa_checks.py"
+  },
+  "checks": {
+    "INPUT_DRAFT_REPORT_EXISTS": {
+      "severity": "error",
+      "remediation_pointer": "qa/README.md#inputs",
+      "what_it_means": "The required draft report markdown file is missing or not readable at the expected path.",
+      "how_to_fix": [
+        "Ensure DRAFT_REPORT_v0.md exists in the repository root (or the path configured by the runner).",
+        "Confirm the file is not empty and is readable by the QA command."
+      ]
+    },
+    "INPUT_PILOT_ARTIFACTS_PRESENT": {
+      "severity": "error",
+      "remediation_pointer": "qa/README.md#pilot-artifacts",
+      "what_it_means": "One or more required pilot artifacts are missing or the artifacts directory is not found.",
+      "how_to_fix": [
+        "Create or copy the pilot artifacts into the expected artifacts location documented in qa/README.md.",
+        "Re-run the QA gate after verifying filenames and paths match expectations."
+      ]
+    },
+    "MARKDOWN_HAS_TOP_LEVEL_TITLE": {
+      "severity": "error",
+      "remediation_pointer": "qa/README.md#report-structure",
+      "what_it_means": "The draft report does not begin with a top-level H1 title (# ...).",
+      "how_to_fix": [
+        "Add a single H1 title at the top of DRAFT_REPORT_v0.md (first non-empty line).",
+        "Avoid multiple H1 titles; use H2/H3 for subsections."
+      ]
+    },
+    "MARKDOWN_HAS_REQUIRED_SECTIONS": {
+      "severity": "error",
+      "remediation_pointer": "qa/README.md#required-sections",
+      "what_it_means": "The draft report is missing one or more required sections (headings).",
+      "how_to_fix": [
+        "Add the missing section headings exactly (case/spacing) as documented in qa/README.md.",
+        "Populate each section with at least a short paragraph; avoid empty headings."
+      ]
+    },
+    "MARKDOWN_LINKS_NO_BROKEN_LOCAL_REFS": {
+      "severity": "warning",
+      "remediation_pointer": "qa/README.md#links-and-paths",
+      "what_it_means": "The draft report contains local links to files that do not exist.",
+      "how_to_fix": [
+        "Fix the link target path(s) or add the referenced file(s).",
+        "Prefer relative paths and keep paths stable under version control."
+      ]
+    },
+    "ARTIFACT_JSON_PARSEABLE": {
+      "severity": "error",
+      "remediation_pointer": "qa/README.md#artifact-validation",
+      "what_it_means": "A required JSON artifact could not be parsed (invalid JSON syntax).",
+      "how_to_fix": [
+        "Validate the artifact with a JSON linter and fix syntax errors (commas, quotes, brackets).",
+        "Ensure the file is UTF-8 encoded and not truncated."
+      ]
+    },
+    "ARTIFACT_JSON_SCHEMA_VALID": {
+      "severity": "error",
+      "remediation_pointer": "qa/README.md#artifact-validation",
+      "what_it_means": "A JSON artifact does not conform to its expected schema/shape.",
+      "how_to_fix": [
+        "Compare the artifact fields/types to the documented expectations in qa/README.md.",
+        "Regenerate the artifact from the pipeline step that produced it, if applicable."
+      ]
+    },
+    "REPORT_JSON_SCHEMA_VALID": {
+      "severity": "error",
+      "remediation_pointer": "qa/schema_qa_report.json",
+      "what_it_means": "The emitted QA_REPORT.json does not validate against the QA report schema.",
+      "how_to_fix": [
+        "Update qa/qa_checks.py to emit fields required by qa/schema_qa_report.json.",
+        "Ensure per-check objects include id, status, message, and remediation_pointer."
+      ]
+    },
+    "RUN_METADATA_PRESENT": {
+      "severity": "warning",
+      "remediation_pointer": "qa/README.md#outputs",
+      "what_it_means": "QA run metadata is missing (timestamp, command, inputs, or environment fields).",
+      "how_to_fix": [
+        "Ensure the runner passes run context into the report generator.",
+        "Populate run metadata consistently for reproducibility."
+      ]
+    },
+    "OUTPUT_FILES_EMITTED": {
+      "severity": "error",
+      "remediation_pointer": "qa/README.md#outputs",
+      "what_it_means": "QA_REPORT.json and/or QA_REPORT.md were not written to disk.",
+      "how_to_fix": [
+        "Check write permissions in the working directory.",
+        "Ensure the QA runner calls the report writer and exits non-zero on failure."
+      ]
+    },
+    "PATHS_CANONICALIZED": {
+      "severity": "warning",
+      "remediation_pointer": "qa/README.md#links-and-paths",
+      "what_it_means": "Paths in reports are not normalized/canonical, reducing portability and comparability across runs.",
+      "how_to_fix": [
+        "Emit relative paths anchored to repo root where possible.",
+        "Avoid machine-specific absolute paths in report payloads."
+      ]
+    }
+  }
+}

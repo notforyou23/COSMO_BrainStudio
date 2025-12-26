@@ -1,0 +1,43 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create /outputs/PROJECT_TRACKER.json (or .csv) with fields like date, goalId, taskId, status, artifactsChanged, and evidenceLinks; add a tiny update script that appends entries and references the validation log/artifact paths.
+Project: /outputs/PROJECT_TRACKER.json (or .csv) with fields like date, goalId, taskId, status, artifactsChanged, and evidenceLinks; add a tiny update (json script)
+
+Target file details:
+- Path: scripts/update_project_tracker.py
+- Purpose: CLI script that appends a validated entry to outputs/PROJECT_TRACKER.json and optionally references validation logs and artifact paths as evidence links.
+- Category: source
+
+Other planned files (for context only):
+- outputs/PROJECT_TRACKER.json: Append-only project progress ledger storing entries with date, goalId, taskId, status, artifactsChanged, and evidenceLinks as a JSON array.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T22-11-55-228Z_outputs_PROJECT_TRACKER_json_stage1_attempt1_prompt.txt from code-creation agent agent_176661431294
+- [INTROSPECTION] PROJECT_TRACKER.md from code-creation agent agent_1766616245398_0s5lm4w: # PROJECT_TRACKER: single source-of-truth progress 
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766619349563
+- [AGENT: agent_1766619349563_evph48k] Document Created: /outputs/PROJECT_TRACKER.json (or .csv) + a small script/Makefile target to update it
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: CLI script that appends a validated entry to outputs/PROJECT_TRACKER.json and optionally references validation logs and artifact paths as evidence links.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/update_project_tracker.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/update_project_tracker.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/update_project_tracker.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

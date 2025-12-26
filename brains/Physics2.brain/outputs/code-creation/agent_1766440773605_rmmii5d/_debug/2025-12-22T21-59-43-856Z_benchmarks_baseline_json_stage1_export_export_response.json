@@ -1,0 +1,56 @@
+{
+  "content": "FILE_EXPORT:{\"path\":\"benchmarks/baseline.json\",\"size\":134,\"encoding\":\"base64\",\"sha256\":\"f7ba7c1336a549d7222871a8ebaa18f330921a5e9a4ddec57f658a7b3f03967f\",\"content\":\"ewogICJiZW5jaG1hcmtfaW1wb3J0X21vZHVsZV9zZWMiOiAwLjAwMjUsCiAgImJlbmNobWFya19qc29uX3JvdW5kdHJpcF9zZWMiOiAwLjAwMTIsCiAgImJlbmNobWFya19zbWFsbF9mdW5jdGlvbl9jYWxsX3NlYyI6IDAuMDAwMzUKfQo=\"}\nDIR_STATE:[\"benchmarks/baseline.json\"]",
+  "reasoning": "",
+  "responseId": "resp_0bdf0b3bef81a25b006949c0b96e6c81908fd8586cd07240fb",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 1482,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 465,
+    "output_tokens_details": {
+      "reasoning_tokens": 35
+    },
+    "total_tokens": 1947
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0bdf0b3bef81a25b006949c0ba34d081908da8d106067ea0f0",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0bdf0b3bef81a25b006949c0baf6ac8190954300836a64aca7",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport base64, json, hashlib, gzip\n\ntarget_path = Path('/mnt/data').joinpath('benchmarks/baseline.json')\nassert target_path.is_file(), 'Expected benchmarks/baseline.json to exist before export'\ndata = target_path.read_bytes()\npayload = {\n    'path': 'benchmarks/baseline.json',\n    'size': len(data),\n    'encoding': 'base64',\n    'sha256': hashlib.sha256(data).hexdigest(),\n    'content': None\n}\nif len(data) > 20000:\n    compressed = gzip.compress(data)\n    payload['encoding'] = 'gzip+base64'\n    payload['content'] = base64.b64encode(compressed).decode('ascii')\nelse:\n    payload['content'] = base64.b64encode(data).decode('ascii')\n\nprint('FILE_EXPORT:' + json.dumps(payload, separators=(',', ':')))\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949bf4d82d48190914ab1de1631f7580f09298ef9bbb62e",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_EXPORT:{\"path\":\"benchmarks/baseline.json\",\"size\":134,\"encoding\":\"base64\",\"sha256\":\"f7ba7c1336a549d7222871a8ebaa18f330921a5e9a4ddec57f658a7b3f03967f\",\"content\":\"ewogICJiZW5jaG1hcmtfaW1wb3J0X21vZHVsZV9zZWMiOiAwLjAwMjUsCiAgImJlbmNobWFya19qc29uX3JvdW5kdHJpcF9zZWMiOiAwLjAwMTIsCiAgImJlbmNobWFya19zbWFsbF9mdW5jdGlvbl9jYWxsX3NlYyI6IDAuMDAwMzUKfQo=\"}\nDIR_STATE:[\"benchmarks/baseline.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0bdf0b3bef81a25b006949c0bf65348190a22fa35378757442",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_EXPORT:{\"path\":\"benchmarks/baseline.json\",\"size\":134,\"encoding\":\"base64\",\"sha256\":\"f7ba7c1336a549d7222871a8ebaa18f330921a5e9a4ddec57f658a7b3f03967f\",\"content\":\"ewogICJiZW5jaG1hcmtfaW1wb3J0X21vZHVsZV9zZWMiOiAwLjAwMjUsCiAgImJlbmNobWFya19qc29uX3JvdW5kdHJpcF9zZWMiOiAwLjAwMTIsCiAgImJlbmNobWFya19zbWFsbF9mdW5jdGlvbl9jYWxsX3NlYyI6IDAuMDAwMzUKfQo=\"}\nDIR_STATE:[\"benchmarks/baseline.json\"]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

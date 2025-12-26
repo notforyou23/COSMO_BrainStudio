@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Execute `scripts/run_tests_and_capture_log.py`, store logs + exit code + environment snapshot (Python version, pip freeze) under `./outputs/` with a stable naming convention; add a CI/local check to ensure these artifacts are produced.
+Project: generated_script_1766547893945 (python script)
+
+Target file details:
+- Path: outputs/.gitkeep
+- Purpose: Keeps the outputs directory tracked in git so logs and snapshots have a consistent destination.
+- Category: support
+
+Other planned files (for context only):
+- scripts/run_tests_and_capture_log.py: Runs the project test command, captures stdout/stderr plus exit code and environment snapshot (Python version and pip freeze), and writes all artifacts to outputs/ using a stable timestamped naming convention.
+- scripts/verify_test_artifacts.py: Validates that the expected outputs/ artifacts from the most recent run exist and are non-empty, intended for use as a CI/local enforcement check.
+- .github/workflows/tests-and-capture-artifacts.yml: GitHub Actions workflow that executes scripts/run_tests_and_capture_log.py and then enforces artifact creation via scripts/verify_test_artifacts.py while uploading outputs/ as build artifacts.
+
+Reference insights:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_scripts_run_tests_and_capture_log_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_scripts_run_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766539771836_cun
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Keeps the outputs directory tracked in git so logs and snapshots have a consistent destination.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/.gitkeep')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/.gitkeep')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/.gitkeep.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

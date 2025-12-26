@@ -1,0 +1,110 @@
+{
+  "content": "Implemented `outputs/src/benchmarks/cli.py` as a compact CLI with `example`, `run`, and `validate` subcommands to generate deterministic benchmark input/output artifacts under `outputs/` and validate them against the repository JSON schema for CI-ready end-to-end verification.",
+  "reasoning": "",
+  "responseId": "resp_0a9d958b23d47ff100694995451a048196a6188652475701de",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 6075,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2033,
+    "output_tokens_details": {
+      "reasoning_tokens": 690
+    },
+    "total_tokens": 8108
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0a9d958b23d47ff10069499545f374819697ccecb3ff432829",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a9d958b23d47ff100694995472f188196905c05c0eb409614",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nimport os, json, textwrap, re\nbase=Path('/mnt/data')\nlist(base.glob('outputs/src/benchmarks/*'))\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/outputs/src/benchmarks/__init__.py'),\n PosixPath('/mnt/data/outputs/src/benchmarks/compute.py'),\n PosixPath('/mnt/data/outputs/src/benchmarks/schema.py')]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0a9d958b23d47ff10069499549e84c81969e649d09131d15c3",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a9d958b23d47ff1006949954a48348196a8150285607ec6b8",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "for p in base.glob('outputs/src/benchmarks/*.py'):\n    print(\"==\",p)\n    print(p.read_text()[:4000])\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "== /mnt/data/outputs/src/benchmarks/__init__.py\n\"\"\"Benchmarks package.\n\nThis package is intentionally lightweight: it provides stable import paths for\nbenchmark computation and schema validation utilities that live under\n``outputs/src/benchmarks``.\n\nThe test/CI scaffolding added elsewhere in the repository can rely on these\nimports without forcing heavy dependencies to import at package import time.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom importlib import import_module\nfrom types import ModuleType\nfrom typing import Any, Optional\n\n__all__ = [\n    \"optional_import\",\n    \"load_module\",\n    \"schema\",\n    \"compute\",\n    \"validate\",\n]\n\ndef optional_import(module: str) -> Optional[ModuleType]:\n    \"\"\"Import *module* relative to this package and return it or ``None``.\n\n    This keeps ``benchmarks`` importable even when only a subset of modules is\n    present (e.g., during incremental generation stages).\n    \"\"\"\n    try:\n        return import_module(f\"{__name__}.{module}\")\n    except ModuleNotFoundError:\n        return None\n\ndef load_module(module: str) -> ModuleType:\n    \"\"\"Import *module* relative to this package, raising on failure.\"\"\"\n    return import_module(f\"{__name__}.{module}\")\n\n# Common submodules (if/when they exist).\nschema = optional_import(\"schema\")\ncompute = optional_import(\"compute\")\nvalidate = optional_import(\"validate\")\n\ndef __getattr__(name: str) -> Any:  # pragma: no cover\n    \"\"\"Lazy attribute access for submodules and their public members.\n\n    Examples:\n        - ``from benchmarks import compute`` (module)\n        - ``from benchmarks import run`` (member of ``benchmarks.compute``)\n    \"\"\"\n    if name in {\"schema\", \"compute\", \"validate\"}:\n        return globals()[name]\n    for mod in (compute, validate, schema):\n        if mod is not None and hasattr(mod, name):\n            return getattr(mod, name)\n    raise AttributeError(f\"module {__name__!r} has no attribute {name!r}\")\n\n== /mnt/data/outputs/src/benchmarks/compute.py\n\"\"\"Deterministic benchmark computation.\n\nThis module reads a benchmark input JSON, validates it (optionally via JSON\nSchema), computes deterministic summary statistics, and writes a normalized\noutput JSON.\n\nThe intention is to provide a stable end-to-end artifact for CI.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport hashlib\nimport json\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple\n\ntry:  # Optional dependency; tests/CI are expected to install it.\n    import jsonschema  # type: ignore\nexcept Exception:  # pragma: no cover\n    jsonschema = None  # type: ignore\nNumber = float\n\n\ndef _read_json(path: Path) -> Any:\n    return json.loads(path.read_text(encoding=\"utf-8\"))\n\n\ndef _write_json(path: Path, obj: Any) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    path.write_text(json.dumps(obj, indent=2, sort_keys=True) + \"\\n\", encoding=\"utf-8\")\n\n\ndef _default_schema_path() -> Path:\n    # outputs/src/benchmarks/compute.py -> outputs/schemas/benchmark.schema.json\n    return Path(__file__).resolve().parents[2] / \"schemas\" / \"benchmark.schema.json\"\n\n\ndef _validate_with_schema(instance: Any, schema_path: Path) -> None:\n    if jsonschema is None:\n        raise RuntimeError(\"jsonschema is required for validation but is not installed.\")\n    schema = _read_json(schema_path)\n    jsonschema.validate(instance=instance, schema=schema)\ndef _as_number_list(values: Any, case_id: str) -> List[Number]:\n    if not isinstance(values, list) or not values:\n        raise ValueError(f\"case {case_id!r} must have non-empty list 'values'\")\n    out: List[Number] = []\n    for v in values:\n        if isinstance(v, bool) or not isinstance(v, (int, float)):\n            raise ValueError(f\"case {case_id!r} contains non-numeric value: {v!r}\")\n        out.append(float(v))\n    return out\n\n\ndef _stats(values: Sequence[Number]) -> Dict[str, Any]:\n    n = len(values)\n    s = float(sum(values))\n    mn = float(min(values))\n    mx = float(max(values))\n    mean = s / n\n    # Deterministic \"signature\" so tests can detect any ordering changes.\n    h = hashlib.sha256((\",\".join(f\"{x:.12g}\" for x in values)).encode(\"utf-8\")).hexdigest()\n    return {\n        \"count\": n,\n        \"sum\": s,\n        \"mean\": mean,\n        \"min\": mn,\n        \"max\": mx,\n        \"sha256\": h,\n    }\ndef compute(input_obj: Mapping[str, Any]) -> Dict[str, Any]:\n    \"\"\"Compute a normalized output artifact from an input artifact.\"\"\"\n    if not isinstance(input_obj, Mapping):\n        raise TypeError(\"benchmark input must be a JSON object\")\n\n    benchmark = input_obj.get(\"benchmark\")\n    if not isinstance(benchmark, Mapping):\n        raise ValueError(\"input must contain object field 'benchmark'\")\n    name = benchmark.get(\"name\")\n    if not isinstance(name, str) or not name:\n        raise ValueError(\"benchmark.name must be a non-empty string\")\n    cases = benchmark.get(\"cases\")\n    if not isinstance(cases, list) or not cases:\n        raise ValueError(\"benchmark.cases must be a non-empty list\")\n\n    out_cases: List[Dict[str, Any]] = []\n    for i, c in enumerate(cases):\n        if not isinstance(c, Mapping):\n            raise ValueError(f\"case at index {i} must be an object\")\n        cid = c.get(\"id\", str(i))\n        if not isinstance(cid, str) or not cid:\n            raise ValueError(f\"case at index {i} has invalid 'id'\")\n        values = _as_number_list(c.get(\"values\"), cid)\n        out_cases.append({\"id\": cid, \"values\": values, \"stats\": _stats(values)})\n\n    # Normalize: stable ordering and canonical floats (via json dumps later).\n    out_cases.sort(key=lambda x: x[\"id\"])\n\n    total_values = [v for c in out_cases for v in c[\"values\"]]\n    output: Dict[str, Any] = {\n        \"schema_version\": input_obj.get(\"schema_version\", 1),\n        \"artifact\": \"benchmark_output\",\n        \"benchmark\": {\n            \"name\": name,\n            \"case_count\": len(out_cases),\n            \"cases\": out_cases,\n            \"overall\": _stats(total_values\n== /mnt/data/outputs/src/benchmarks/schema.py\n\"\"\"Schema loading and JSON Schema validation helpers.\n\nThese utilities are shared by the CLI and the automated test suite.\nThey intentionally keep I/O and error messages deterministic to make CI reliable.\n\"\"\"\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Optional, Union\n\nimport json\n\nfrom jsonschema import FormatChecker, ValidationError, validators\nJSONMapping = Dict[str, Any]\n\n\n@dataclass(frozen=True)\nclass SchemaValidationResult:\n    \"\"\"Result of a schema validation run.\"\"\"\n\n    valid: bool\n    errors: List[str]\ndef default_schema_path(filename: str = \"benchmark.schema.json\") -> Path:\n    \"\"\"Return the default schema location within the repository layout.\n\n    Assumes this file lives at: outputs/src/benchmarks/schema.py and the schema at\n    outputs/schemas/<filename>.\n    \"\"\"\n    outputs_dir = Path(__file__).resolve().parents[2]\n    return outputs_dir / \"schemas\" / filename\ndef load_schema(path: Optional[Union[str, Path]] = None) -> JSONMapping:\n    \"\"\"Load and parse a JSON Schema file.\n\n    Args:\n        path: Optional path to a schema JSON file. If omitted, uses the default\n            schema location.\n\n    Raises:\n        FileNotFoundError: if the schema path does not exist.\n        json.JSONDecodeError: if the schema file is not valid JSON.\n    \"\"\"\n    schema_path = Path(path) if path is not None else default_schema_path()\n    text = schema_path.read_text(encoding=\"utf-8\")\n    return json.loads(text)\ndef _validator_for_schema(schema: JSONMapping):\n    \"\"\"Construct an appropriate jsonschema validator for the given schema.\"\"\"\n    cls = validators.validator_for(schema)\n    cls.check_schema(schema)\n    return cls(schema, format_checker=FormatChecker())\ndef iter_validation_errors(\n    instance: Any,\n    *,\n    schema: Optional[JSONMapping] = None,\n    schema_path: Optional[Union[str, Path]] = None,\n) -> Iterable[ValidationError]:\n    \"\"\"Yield JSON Schema validation errors for an instance.\n\n    Provide either a pre-loaded schema or a schema_path. If both are omitted,\n    the default schema is used.\n    \"\"\"\n    if schema is None:\n        schema = load_schema(schema_path)\n    validator = _validator_for_schema(schema)\n    yield from validator.iter_errors(instance)\ndef validate_or_raise(\n    instance: Any,\n    *,\n    schema: Optional[JSONMapping] = None,\n    schema_path: Optional[Union[str, Path]] = None,\n) -> None:\n    \"\"\"Validate an instance and raise the first error with a readable message.\"\"\"\n    errors = sorted(\n        iter_validation_errors(instance, schema=schema, schema_path=schema_path),\n        key=lambda e: list(e.path),\n    )\n    if not errors:\n        return\n    err = errors[0]\n    loc = \".\".join(str(p) for p in err.path) or \"<root>\"\n    raise ValidationError(f\"{err.message} (at {loc})\")\ndef validate(\n    instance: Any,\n    *,\n    schema: Optional[JSONMapping] = None,\n    schema_path: Optional[Union[str, Path]] = None,\n) -> SchemaValidationResult:\n    \"\"\"Validate an instance and return a structured result (no exception).\"\"\"\n    msgs: List[str] = []\n    for err in sorted(\n        iter_validation_errors(instance, schema=schema, schema_path=schema_path),\n        key=lambda e: (list(e.path), e.message),\n    ):\n        loc = \".\".join(str(p) for p in err.path) or \"<root>\"\n        msgs.append(f\"{err.message} (at {loc})\")\n    return SchemaValidationResult(valid=not msgs, errors=msgs)\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0a9d958b23d47ff1006949954d1e8c819695c3244fa7eedeaa",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a9d958b23d47ff1006949954d94848196b4765ace7521b3d4",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "p=base/'outputs/src/benchmarks/compute.py'\ntext=p.read_text()\nprint(text[4000:8000])\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "),\n        },\n    }\n    return output\ndef run(\n    input_path: Path,\n    output_path: Path,\n    schema_path: Optional[Path] = None,\n    validate_output: bool = True,\n) -> Dict[str, Any]:\n    input_obj = _read_json(input_path)\n    schema_path = schema_path or _default_schema_path()\n    if schema_path.exists():\n        _validate_with_schema(input_obj, schema_path)\n    output_obj = compute(input_obj)\n    if validate_output and schema_path.exists():\n        _validate_with_schema(output_obj, schema_path)\n    _write_json(output_path, output_obj)\n    return output_obj\n\n\ndef main(argv: Optional[Sequence[str]] = None) -> int:\n    p = argparse.ArgumentParser(description=__doc__)\n    p.add_argument(\"input\", type=Path, help=\"Path to benchmark input JSON\")\n    p.add_argument(\"output\", type=Path, help=\"Path to write benchmark output JSON\")\n    p.add_argument(\"--schema\", type=Path, default=None, help=\"Optional JSON Schema path\")\n    p.add_argument(\"--no-validate-output\", action=\"store_true\", help=\"Skip output validation\")\n    args = p.parse_args(argv)\n    run(args.input, args.output, schema_path=args.schema, validate_output=not args.no_validate_output)\n    return 0\n\n\nif __name__ == \"__main__\":  # pragma: no cover\n    raise SystemExit(main())\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0a9d958b23d47ff100694995501a488196803552722ed54b71",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a9d958b23d47ff1006949955cb51c819682b31fd966ab3960",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('outputs/src/benchmarks/cli.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Benchmarks CLI.\n\nThis CLI is used by developers and CI to generate deterministic benchmark\nartifacts under the repository's ``outputs/`` directory.\n\nTypical use:\n  python -m benchmarks.cli example\n\\\"\\\"\\\"\\n\nfrom __future__ import annotations\n\nimport argparse\nimport json\nfrom pathlib import Path\nfrom typing import Any, Dict, Optional, Sequence\n\nfrom . import compute as compute_mod\nfrom . import schema as schema_mod\n\"\"\",\n\"\"\"def _outputs_dir() -> Path:\n    # outputs/src/benchmarks/cli.py -> outputs/\n    return Path(__file__).resolve().parents[2]\n\n\ndef _read_json(path: Path) -> Any:\n    return json.loads(path.read_text(encoding=\"utf-8\"))\n\n\ndef _write_json(path: Path, obj: Any) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    path.write_text(json.dumps(obj, indent=2, sort_keys=True) + \"\\\\n\", encoding=\"utf-8\")\n\"\"\",\n\"\"\"def make_example_input() -> Dict[str, Any]:\n    \\\"\\\"\\\"Return a deterministic example benchmark input artifact.\\\"\\\"\\\"\n    return {\n        \"schema_version\": 1,\n        \"artifact\": \"benchmark_input\",\n        \"benchmark\": {\n            \"name\": \"example\",\n            \"cases\": [\n                {\"id\": \"case_a\", \"values\": [1, 2, 3, 4]},\n                {\"id\": \"case_b\", \"values\": [-2.5, 0, 2.5, 5]},\n            ],\n        },\n    }\n\n\ndef run_end_to_end(\n    *,\n    outdir: Path,\n    schema_path: Optional[Path] = None,\n    overwrite: bool = False,\n) -> Dict[str, Path]:\n    \\\"\\\"\\\"Generate example input+output JSON and validate them against schema.\\\"\\\"\\\"\n    outdir = outdir.resolve()\n    outdir.mkdir(parents=True, exist_ok=True)\n    schema_path = schema_path or schema_mod.default_schema_path()\n\n    input_path = outdir / \"example.input.json\"\n    output_path = outdir / \"example.output.json\"\n\n    if not overwrite and (input_path.exists() or output_path.exists()):\n        raise FileExistsError(f\\\"refusing to overwrite existing artifacts in {outdir}\\\")\n\n    input_obj = make_example_input()\n    schema_mod.validate_or_raise(input_obj, schema_path=schema_path)\n    _write_json(input_path, input_obj)\n\n    # Compute module also validates if schema exists; we validate explicitly for clear errors.\n    output_obj = compute_mod.compute(input_obj)\n    schema_mod.validate_or_raise(output_obj, schema_path=schema_path)\n    _write_json(output_path, output_obj)\n\n    return {\"input\": input_path, \"output\": output_path, \"schema\": schema_path}\n\"\"\",\n\"\"\"def _cmd_example(args: argparse.Namespace) -> int:\n    outdir = Path(args.outdir) if args.outdir else (_outputs_dir() / \"benchmarks\")\n    paths = run_end_to_end(outdir=outdir, schema_path=Path(args.schema) if args.schema else None, overwrite=args.overwrite)\n    print(str(paths[\"input\"]))\n    print(str(paths[\"output\"]))\n    return 0\n\n\ndef _cmd_run(args: argparse.Namespace) -> int:\n    schema_path = Path(args.schema) if args.schema else None\n    compute_mod.run(Path(args.input), Path(args.output), schema_path=schema_path, validate_output=not args.no_validate_output)\n    print(str(Path(args.output)))\n    return 0\n\n\ndef _cmd_validate(args: argparse.Namespace) -> int:\n    schema_path = Path(args.schema) if args.schema else schema_mod.default_schema_path()\n    obj = _read_json(Path(args.path))\n    schema_mod.validate_or_raise(obj, schema_path=schema_path)\n    print(\"OK\")\n    return 0\n\"\"\",\n\"\"\"def main(argv: Optional[Sequence[str]] = None) -> int:\n    p = argparse.ArgumentParser(prog=\"benchmarks\", description=__doc__)\n    sub = p.add_subparsers(dest=\"cmd\", required=True)\n\n    ex = sub.add_parser(\"example\", help=\"Generate deterministic example artifacts under outputs/\")\n    ex.add_argument(\"--outdir\", default=None, help=\"Output directory (default: outputs/benchmarks)\")\n    ex.add_argument(\"--schema\", default=None, help=\"Optional schema path (default: outputs/schemas/benchmark.schema.json)\")\n    ex.add_argument(\"--overwrite\", action=\"store_true\", help=\"Overwrite existing artifacts\")\n    ex.set_defaults(func=_cmd_example)\n\n    run = sub.add_parser(\"run\", help=\"Run benchmark from an input JSON to an output JSON\")\n    run.add_argument(\"input\", help=\"Path to benchmark input JSON\")\n    run.add_argument(\"output\", help=\"Path to write benchmark output JSON\")\n    run.add_argument(\"--schema\", default=None, help=\"Optional schema path\")\n    run.add_argument(\"--no-validate-output\", action=\"store_true\", help=\"Skip output validation\")\n    run.set_defaults(func=_cmd_run)\n\n    val = sub.add_parser(\"validate\", help=\"Validate a JSON artifact against the benchmark schema\")\n    val.add_argument(\"path\", help=\"Path to JSON file to validate\")\n    val.add_argument(\"--schema\", default=None, help=\"Optional schema path\")\n    val.set_defaults(func=_cmd_validate)\n\n    args = p.parse_args(argv)\n    return int(args.func(args))\n\n\nif __name__ == \"__main__\":  # pragma: no cover\n    raise SystemExit(main())\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:outputs/src/benchmarks/cli.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:outputs/src/benchmarks/cli.py\nDIR_STATE:[\"outputs/src/benchmarks/__init__.py\", \"outputs/src/benchmarks/cli.py\", \"outputs/src/benchmarks/compute.py\", \"outputs/src/benchmarks/schema.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0a9d958b23d47ff1006949956e7c548196b6a060b12310c20b",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `outputs/src/benchmarks/cli.py` as a compact CLI with `example`, `run`, and `validate` subcommands to generate deterministic benchmark input/output artifacts under `outputs/` and validate them against the repository JSON schema for CI-ready end-to-end verification."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

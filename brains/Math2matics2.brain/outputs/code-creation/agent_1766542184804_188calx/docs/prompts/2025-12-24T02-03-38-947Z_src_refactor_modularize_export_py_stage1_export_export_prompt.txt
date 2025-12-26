@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Export the Stage 1 prompt used for the “export” branch of the refactor/modularize work as a reproducibility/auditing artifact.
+
+Project: generated_script_1766542191957 (python script)
+
+Target artifact:
+- Path: docs/prompts/2025-12-24T02-03-38-947Z_src_refactor_modularize_export_py_stage1_export_export_prompt.txt
+- Purpose: Store the exact prompt text that drove the “export” branch for Stage 1 so future reviewers can reproduce the agent’s instructions and compare outputs.
+- Category: documentation
+
+Context (do not implement here; documentation only):
+- src/refactor_modularize/utils.py: reusable utilities extracted for multiple scripts
+- scripts/generate_artifacts.py: CLI for generating/exporting artifacts deterministically
+- README.md: setup + usage
+- docs/prompts/*refactor*_prompt.txt: sibling prompt export for the refactor branch
+
+Branch: export
+Stage: Stage 1
+Mode: export
+Goal: Persist the Stage 1 export-branch prompt as plain text in the repository under docs/prompts/.
+
+Operational constraints that were in effect:
+- Write only to the target file under /mnt/data.
+- Keep console output short and deterministic.
+- No placeholders, no TODO markers in the produced artifact.
+- Preserve exact wording and instruction ordering as much as possible to support auditing.
+
+Export-branch Stage 1 instructions (verbatim intent):
+1) Create a documentation artifact that captures the prompt used to generate/export Stage 1 deliverables for the export branch.
+2) The artifact must live at:
+   docs/prompts/2025-12-24T02-03-38-947Z_src_refactor_modularize_export_py_stage1_export_export_prompt.txt
+3) The content must be self-contained and sufficiently specific that another engineer can:
+   - understand what was being asked of the agent,
+   - identify the project and target file,
+   - see constraints and expected output behavior,
+   - reproduce the same steps in a clean environment.
+4) Do not include any secret material. Only include the prompt and relevant constraints.
+
+Execution template used by the automation (for reference):
+- Build the deliverable as a list named `chunks`, where each item is a multi-line string block.
+- Join blocks with newlines to form `final_text`, ensuring a trailing newline.
+- Write `final_text` to the target_path with UTF-8 encoding.
+- Print:
+  FILE_WRITTEN:<relative-path>
+  DIR_STATE:<json-array-of-files-in-target-directory>
+
+End of exported prompt.

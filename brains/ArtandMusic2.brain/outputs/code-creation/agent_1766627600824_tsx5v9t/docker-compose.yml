@@ -1,0 +1,22 @@
+version: "3.9"
+services:
+  qa:
+    container_name: qa_pipeline
+    build:
+      context: .
+    working_dir: /app
+    command: ["python", "-u", "scripts/qa_run.py"]
+    environment:
+      OUTPUTS_DIR: /outputs
+      QA_LOG_DIR: /outputs/qa/exec_logs
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./outputs:/outputs
+      - ./:/app:ro
+    tmpfs:
+      - /tmp
+    init: true
+    stdin_open: false
+    tty: false
+    stop_grace_period: 30s
+    restart: "no"

@@ -1,0 +1,37 @@
+{
+  "content": "[\n  {\n    \"path\": \"scripts/qa_run.py\",\n    \"description\": \"End-to-end QA runner that executes a minimal smoke test first, captures full stdout/stderr into canonical artifacts under outputs/qa/exec_logs/, detects failure signatures, performs automatic retry, and writes an environment dump (container image hash, resources, dependency versions) on retry-triggered failures.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa_smoke_test.py\",\n    \"description\": \"Minimal smoke test entrypoint designed to run first and quickly validate basic runtime assumptions (Python, filesystem, Docker availability) while emitting deterministic output for log capture.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/env_dump.py\",\n    \"description\": \"Environment introspection utility that collects container identity (image hash when available), host/container resources, OS details, and dependency versions and writes a structured dump to outputs/qa/exec_logs/ for failure triage.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/failure_signatures.py\",\n    \"description\": \"Centralized catalog and matching logic for known unstable/unsupported-environment failure signatures used to trigger automatic retry and env dump behavior.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/exec_utils.py\",\n    \"description\": \"Shared subprocess execution helpers that stream and tee stdout/stderr to canonical log files with timestamps, exit codes, and per-attempt metadata.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/paths.py\",\n    \"description\": \"Path canonicalization helpers that standardize output locations (including outputs/qa/exec_logs/) and ensure directory creation across local/CI/Docker runs.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"docker/Dockerfile\",\n    \"description\": \"Dockerfile that installs project dependencies and provides a consistent container environment for running the QA smoke test and full QA pipeline.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"docker/entrypoint.sh\",\n    \"description\": \"Container entrypoint that invokes the QA runner with sensible defaults and ensures logs and environment dumps are written under outputs/qa/exec_logs/.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"docker-compose.yml\",\n    \"description\": \"Docker Compose configuration to build and run the QA pipeline in a container with mounted outputs directory for canonical artifact capture.\",\n    \"category\": \"config\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_022ae5147ae3489a00694c974298848196b99a1a2b29031b1a",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 633,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 533,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 1166
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "msg_022ae5147ae3489a00694c9742edcc8196bc8133765926451e",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"scripts/qa_run.py\",\n    \"description\": \"End-to-end QA runner that executes a minimal smoke test first, captures full stdout/stderr into canonical artifacts under outputs/qa/exec_logs/, detects failure signatures, performs automatic retry, and writes an environment dump (container image hash, resources, dependency versions) on retry-triggered failures.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa_smoke_test.py\",\n    \"description\": \"Minimal smoke test entrypoint designed to run first and quickly validate basic runtime assumptions (Python, filesystem, Docker availability) while emitting deterministic output for log capture.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/env_dump.py\",\n    \"description\": \"Environment introspection utility that collects container identity (image hash when available), host/container resources, OS details, and dependency versions and writes a structured dump to outputs/qa/exec_logs/ for failure triage.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/failure_signatures.py\",\n    \"description\": \"Centralized catalog and matching logic for known unstable/unsupported-environment failure signatures used to trigger automatic retry and env dump behavior.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/exec_utils.py\",\n    \"description\": \"Shared subprocess execution helpers that stream and tee stdout/stderr to canonical log files with timestamps, exit codes, and per-attempt metadata.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/paths.py\",\n    \"description\": \"Path canonicalization helpers that standardize output locations (including outputs/qa/exec_logs/) and ensure directory creation across local/CI/Docker runs.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"docker/Dockerfile\",\n    \"description\": \"Dockerfile that installs project dependencies and provides a consistent container environment for running the QA smoke test and full QA pipeline.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"docker/entrypoint.sh\",\n    \"description\": \"Container entrypoint that invokes the QA runner with sensible defaults and ensures logs and environment dumps are written under outputs/qa/exec_logs/.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"docker-compose.yml\",\n    \"description\": \"Docker Compose configuration to build and run the QA pipeline in a container with mounted outputs directory for canonical artifact capture.\",\n    \"category\": \"config\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

@@ -1,0 +1,146 @@
+{
+  "content": "Created `tests/fixtures/expected_output.json` containing the deterministic, sorted-key JSON output expected from running the current minimal benchmark runner on `examples/example_dataset.json`.",
+  "reasoning": "",
+  "responseId": "resp_001a7a0a260dc79a006949bf56956c8197b4da0a7f3db000d2",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4730,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 683,
+    "output_tokens_details": {
+      "reasoning_tokens": 646
+    },
+    "total_tokens": 5413
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_001a7a0a260dc79a006949bf5746148197820970de8f05176c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_001a7a0a260dc79a006949bf587724819796624a8e0a2a9e41",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nsorted([str(p.relative_to(base)) for p in base.rglob(\"*\")])[:50], len(list(base.rglob(\"*\")))\n",
+      "container_id": "cntr_6949be2fa9948190b7fd0f89484479600a95eb5fa105098f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(['examples',\n  'examples/example_dataset.json',\n  'pyproject.toml',\n  'src',\n  'src/qg_bench',\n  'src/qg_bench/__init__.py',\n  'src/qg_bench/cli.py',\n  'src/qg_bench/runner.py',\n  'src/qg_bench/schemas',\n  'src/qg_bench/schemas/benchmark.schema.json',\n  'src/qg_bench/validate.py',\n  'tests',\n  'tests/test_example_fixture.py'],\n 13)"
+        }
+      ]
+    },
+    {
+      "id": "rs_001a7a0a260dc79a006949bf5b834081978dbdc1dd4d16beee",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_001a7a0a260dc79a006949bf5bdb98819783c7131924ec3113",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import json, textwrap\nfrom pathlib import Path\ndef read(p):\n    return Path(\"/mnt/data\").joinpath(p).read_text(encoding=\"utf-8\")\nprint(read(\"src/qg_bench/runner.py\"))\n",
+      "container_id": "cntr_6949be2fa9948190b7fd0f89484479600a95eb5fa105098f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Benchmark runner for qg_bench.\n\nThis module provides a tiny, deterministic runner that:\n- loads a JSON dataset,\n- validates it against the bundled JSON Schema,\n- computes a minimal exact-match score, and\n- emits JSON results (stdout or a file).\n\"\"\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport sys\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Optional, Tuple\n\nimport jsonschema\ntry:\n    from importlib.resources import files as _files  # py3.9+\nexcept Exception:  # pragma: no cover\n    from importlib_resources import files as _files  # type: ignore\n\n\ndef _schema() -> Dict[str, Any]:\n    schema_path = _files(\"qg_bench\").joinpath(\"schemas/benchmark.schema.json\")\n    return json.loads(schema_path.read_text(encoding=\"utf-8\"))\n\n\ndef validate_dataset(data: Dict[str, Any]) -> None:\n    \"\"\"Validate a benchmark dataset dict against the bundled schema.\"\"\"\n    schema = _schema()\n    validator = jsonschema.Draft202012Validator(schema)\n    errors = sorted(validator.iter_errors(data), key=lambda e: list(e.absolute_path))\n    if not errors:\n        return\n    e = errors[0]\n    loc = \"$\" + \"\".join(f\"[{p!r}]\" if isinstance(p, str) else f\"[{p}]\" for p in e.absolute_path)\n    msg = f\"Dataset validation failed at {loc}: {e.message}\"\n    raise ValueError(msg)\ndef _normalize(text: str) -> str:\n    return \" \".join(text.strip().lower().split())\n\n\n@dataclass(frozen=True)\nclass RunResult:\n    dataset_path: str\n    n_items: int\n    accuracy: float\n    scores: List[Dict[str, Any]]\n\n    def as_dict(self) -> Dict[str, Any]:\n        return {\n            \"dataset_path\": self.dataset_path,\n            \"n_items\": self.n_items,\n            \"accuracy\": self.accuracy,\n            \"scores\": self.scores,\n        }\ndef load_dataset(path: Path) -> Dict[str, Any]:\n    data = json.loads(path.read_text(encoding=\"utf-8\"))\n    if not isinstance(data, dict):\n        raise ValueError(\"Dataset JSON must be an object at the top level.\")\n    return data\n\n\ndef run_benchmark(dataset_path: Path) -> RunResult:\n    \"\"\"Run the minimal benchmark (exact match on prediction vs reference).\"\"\"\n    dataset = load_dataset(dataset_path)\n    validate_dataset(dataset)\n\n    items = dataset.get(\"items\") or []\n    scores: List[Dict[str, Any]] = []\n    total = 0.0\n    for it in items:\n        # Schema ensures these exist and are strings.\n        iid = it.get(\"id\")\n        pred = it.get(\"prediction\", \"\")\n        ref = it.get(\"reference\", \"\")\n        score = 1.0 if _normalize(pred) == _normalize(ref) else 0.0\n        scores.append({\"id\": iid, \"score\": score})\n        total += score\n\n    n = len(items)\n    acc = (total / n) if n else 0.0\n    return RunResult(dataset_path=str(dataset_path), n_items=n, accuracy=acc, scores=scores)\ndef _dump_json(obj: Any, fp) -> None:\n    json.dump(obj, fp, ensure_ascii=False, sort_keys=True, indent=2)\n    fp.write(\"\\n\")\n\n\ndef main(argv: Optional[List[str]] = None) -> int:\n    p = argparse.ArgumentParser(prog=\"qg-bench\", description=\"Run qg_bench benchmark on a dataset JSON.\")\n    p.add_argument(\"dataset\", type=Path, help=\"Path to benchmark dataset JSON.\")\n    p.add_argument(\"-o\", \"--output\", type=Path, default=None, help=\"Write results JSON to this file.\")\n    args = p.parse_args(argv)\n\n    result = run_benchmark(args.dataset).as_dict()\n\n    if args.output:\n        args.output.parent.mkdir(parents=True, exist_ok=True)\n        with args.output.open(\"w\", encoding=\"utf-8\") as f:\n            _dump_json(result, f)\n    else:\n        _dump_json(result, sys.stdout)\n    return 0\n\n\nif __name__ == \"__main__\":  # pragma: no cover\n    raise SystemExit(main())\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_001a7a0a260dc79a006949bf5e7c948197879dbbbc56f3b289",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_001a7a0a260dc79a006949bf5f3ee081979869cf7668f25753",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(read(\"examples/example_dataset.json\"))\n",
+      "container_id": "cntr_6949be2fa9948190b7fd0f89484479600a95eb5fa105098f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "{\n  \"benchmark_id\": \"qg_bench_example\",\n  \"dataset_version\": \"1.0.0\",\n  \"license\": \"CC0-1.0\",\n  \"source\": \"Synthetic worked example bundled with qg_bench\",\n  \"description\": \"A tiny, self-contained dataset demonstrating the qg_bench benchmark format.\",\n  \"metadata\": {\n    \"language\": \"en\",\n    \"task\": \"question_answering\",\n    \"notes\": \"Reference answers are short strings suitable for exact-match scoring.\"\n  },\n  \"examples\": [\n    {\n      \"id\": \"ex_001\",\n      \"context\": \"The Pacific Ocean is the largest and deepest of Earth's oceanic divisions. It extends from the Arctic Ocean in the north to the Southern Ocean in the south.\",\n      \"question\": \"Which ocean is the largest on Earth?\",\n      \"reference_answers\": [\"Pacific Ocean\", \"the Pacific Ocean\"],\n      \"tags\": [\"geography\", \"oceans\"],\n      \"difficulty\": \"easy\",\n      \"metadata\": {\n        \"answer_type\": \"entity\"\n      }\n    },\n    {\n      \"id\": \"ex_002\",\n      \"context\": \"Ada Lovelace was an English mathematician and writer. She is often regarded as the first computer programmer due to her work on Charles Babbage's Analytical Engine.\",\n      \"question\": \"Who is often regarded as the first computer programmer?\",\n      \"reference_answers\": [\"Ada Lovelace\", \"Lovelace\"],\n      \"tags\": [\"history\", \"computing\"],\n      \"difficulty\": \"easy\",\n      \"metadata\": {\n        \"answer_type\": \"person\"\n      }\n    },\n    {\n      \"id\": \"ex_003\",\n      \"context\": \"Water boils at 100 degrees Celsius at standard atmospheric pressure (1 atm). At higher altitudes, where atmospheric pressure is lower, water boils at a lower temperature.\",\n      \"question\": \"At standard atmospheric pressure, at what temperature does water boil in degrees Celsius?\",\n      \"reference_answers\": [\"100\", \"100 °C\", \"100°C\", \"100 degrees Celsius\"],\n      \"tags\": [\"science\", \"physics\"],\n      \"difficulty\": \"medium\",\n      \"metadata\": {\n        \"answer_type\": \"number\"\n      }\n    }\n  ]\n}\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_001a7a0a260dc79a006949bf6195c48197beefce2c37bf7c10",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_001a7a0a260dc79a006949bf62e29c819795dd8647c5e57051",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(read(\"src/qg_bench/schemas/benchmark.schema.json\"))\n",
+      "container_id": "cntr_6949be2fa9948190b7fd0f89484479600a95eb5fa105098f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"$id\": \"https://example.com/qg-bench/benchmark.schema.json\",\n  \"title\": \"qg_bench benchmark dataset\",\n  \"description\": \"Schema for a simple question-generation benchmark dataset consumed by qg_bench.validate and qg_bench.runner.\",\n  \"type\": \"object\",\n  \"additionalProperties\": false,\n  \"required\": [\"benchmark_id\", \"dataset_version\", \"examples\"],\n  \"properties\": {\n    \"benchmark_id\": {\n      \"type\": \"string\",\n      \"description\": \"Stable identifier for the benchmark dataset.\",\n      \"minLength\": 1\n    },\n    \"dataset_version\": {\n      \"type\": \"string\",\n      \"description\": \"Dataset format or content version (free-form semantic version recommended).\",\n      \"minLength\": 1\n    },\n    \"license\": {\n      \"type\": \"string\",\n      \"description\": \"Optional license identifier or URL.\",\n      \"minLength\": 1\n    },\n    \"source\": {\n      \"type\": \"string\",\n      \"description\": \"Optional provenance string or URL for the dataset.\",\n      \"minLength\": 1\n    },\n    \"description\": {\n      \"type\": \"string\",\n      \"description\": \"Optional human-readable dataset description.\"\n    },\n    \"metadata\": {\n      \"type\": \"object\",\n      \"description\": \"Optional arbitrary metadata for the dataset header.\",\n      \"additionalProperties\": true\n    },\n    \"examples\": {\n      \"type\": \"array\",\n      \"description\": \"List of benchmark examples.\",\n      \"minItems\": 1,\n      \"items\": { \"$ref\": \"#/$defs/example\" }\n    }\n  },\n  \"$defs\": {\n    \"nonEmptyString\": {\n      \"type\": \"string\",\n      \"minLength\": 1\n    },\n    \"example\": {\n      \"type\": \"object\",\n      \"additionalProperties\": false,\n      \"required\": [\"id\", \"context\", \"question\", \"reference_answers\"],\n      \"properties\": {\n        \"id\": {\n          \"$ref\": \"#/$defs/nonEmptyString\",\n          \"description\": \"Unique example identifier (unique within the dataset).\"\n        },\n        \"context\": {\n          \"type\": \"string\",\n          \"description\": \"Context passage from which the question is generated/answered.\",\n          \"minLength\": 1\n        },\n        \"question\": {\n          \"type\": \"string\",\n          \"description\": \"The question to be evaluated.\",\n          \"minLength\": 1\n        },\n        \"reference_answers\": {\n          \"type\": \"array\",\n          \"description\": \"One or more acceptable reference answers for scoring.\",\n          \"minItems\": 1,\n          \"items\": { \"$ref\": \"#/$defs/nonEmptyString\" }\n        },\n        \"tags\": {\n          \"type\": \"array\",\n          \"description\": \"Optional tags or categories for filtering/analysis.\",\n          \"items\": { \"$ref\": \"#/$defs/nonEmptyString\" },\n          \"uniqueItems\": true\n        },\n        \"difficulty\": {\n          \"type\": \"string\",\n          \"description\": \"Optional difficulty label.\",\n          \"enum\": [\"easy\", \"medium\", \"hard\"]\n        },\n        \"metadata\": {\n          \"type\": \"object\",\n          \"description\": \"Optional per-example metadata.\",\n          \"additionalProperties\": true\n        }\n      }\n    }\n  }\n}\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_001a7a0a260dc79a006949bf66006c8197a9294c03c418136e",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_001a7a0a260dc79a006949bf67c9f88197982f09e7e9c8b79e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(read(\"tests/test_example_fixture.py\"))\n",
+      "container_id": "cntr_6949be2fa9948190b7fd0f89484479600a95eb5fa105098f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "from __future__ import annotations\n\nimport json\nfrom pathlib import Path\n\nimport pytest\n\nfrom qg_bench.runner import run_benchmark\nfrom qg_bench.validate import iter_validation_issues, validate_file\n\n\nEXAMPLE_DATASET_PATH = Path(\"examples/example_dataset.json\")\n\n# This is the checked-in expected output for the worked example dataset.\n# It intentionally matches the current minimal runner behavior.\nEXPECTED_RUNNER_OUTPUT = {\n    \"dataset_path\": \"examples/example_dataset.json\",\n    \"n_items\": 0,\n    \"accuracy\": 0.0,\n    \"scores\": [],\n}\n\n\ndef test_example_dataset_schema_validates() -> None:\n    data = validate_file(EXAMPLE_DATASET_PATH)\n    issues = list(iter_validation_issues(data))\n    assert issues == []\n\n\ndef test_runner_output_matches_expected_fixture(tmp_path: Path) -> None:\n    # Run from a relative dataset path so dataset_path in the result is stable.\n    result = run_benchmark(EXAMPLE_DATASET_PATH).as_dict()\n    assert result == EXPECTED_RUNNER_OUTPUT\n\n    # Optional sanity check: result is JSON-serializable and deterministic.\n    out = tmp_path / \"out.json\"\n    out.write_text(json.dumps(result, sort_keys=True, indent=2) + \"\\n\", encoding=\"utf-8\")\n    assert json.loads(out.read_text(encoding=\"utf-8\")) == EXPECTED_RUNNER_OUTPUT\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_001a7a0a260dc79a006949bf69fd808197958d4948b87a93b5",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_001a7a0a260dc79a006949bf6bc02c819787f9d5667082a765",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\ntarget_path = Path('/mnt/data').joinpath('tests/fixtures/expected_output.json')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nexpected = {\n    \"dataset_path\": \"examples/example_dataset.json\",\n    \"n_items\": 0,\n    \"accuracy\": 0.0,\n    \"scores\": [],\n}\n\nchunks = [json.dumps(expected, ensure_ascii=False, sort_keys=True, indent=2)]\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tests/fixtures/expected_output.json')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949be2fa9948190b7fd0f89484479600a95eb5fa105098f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/fixtures/expected_output.json\nDIR_STATE:[\"tests/fixtures/expected_output.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_001a7a0a260dc79a006949bf6f79108197839012b52bfd2aee",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/fixtures/expected_output.json` containing the deterministic, sorted-key JSON output expected from running the current minimal benchmark runner on `examples/example_dataset.json`."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

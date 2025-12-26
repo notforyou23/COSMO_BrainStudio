@@ -1,0 +1,56 @@
+{
+  "content": "Created `docs/output_promotion.md` documenting why audits can report 0 documents when artifacts remain in agent directories, and how the promotion tool consolidates them into `outputs/` while generating/maintaining `outputs/index.md`.",
+  "reasoning": "",
+  "responseId": "resp_0803b1c0cc1a489b00694b4b3208788194942672df91dff26d",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2985,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1471,
+    "output_tokens_details": {
+      "reasoning_tokens": 159
+    },
+    "total_tokens": 4456
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0803b1c0cc1a489b00694b4b32aefc8194be9f898b7e07c07b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0803b1c0cc1a489b00694b4b3535008194a2f0b31ae0c16524",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('docs/output_promotion.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"# Output promotion and canonical indexing\n\nThis repository can contain artifacts produced by multiple autonomous agents. Those agents often write files inside their own working directories (for example `agent_*/`, `runs/`, or other job-specific folders). The **audit step** that reports the number of documents typically **only scans `outputs/`** (and sometimes a small allowlist of other canonical locations). If useful artifacts remain under agent directories, the audit will legitimately report **0 documents** even though the repository contains many files.\n\nThis document explains (1) why audits report 0 documents, (2) how the promotion tooling consolidates agent artifacts into `outputs/`, and (3) how `outputs/index.md` is generated and maintained.\"\"\",\n\"\"\"## Why the audit reports 0 documents\n\nAudits are designed to be deterministic and avoid noise. To achieve that, they generally:\n\n- Look for deliverables in **one canonical directory**: `outputs/`\n- Ignore agent scratch space to avoid:\n  - transient logs and prompts (e.g., `*prompt*.txt`, `*introspection*`)\n  - duplicated intermediate drafts across runs\n  - non-deliverable caches, checkpoints, and binaries\n\nIf agents write deliverables to locations like `agent_*/README.md` or `agent_*/first_artifact.md`, the audit won't count them unless they are **promoted** into `outputs/`.\"\"\",\n\"\"\"## What “promotion” means\n\n**Promotion** is a controlled copy operation:\n\n1. **Discover** candidate artifacts in agent-specific directories using configurable patterns.\n2. **Filter** candidates using an allowlist/denylist (e.g., allow `*.md`, deny logs and hidden files).\n3. **Copy** them into the canonical `outputs/` directory.\n4. **Rename safely** on collisions so nothing is overwritten unintentionally.\n5. **Regenerate** `outputs/index.md` so reviewers and audits can find everything in one place.\n\nThe source files are left intact; `outputs/` becomes the canonical “publication” surface.\"\"\",\n\"\"\"## Promotion CLI (high-level behavior)\n\nThe promotion script (`tools/promote_artifacts.py`) is intended to be run locally or in CI. At a high level it:\n\n- Scans for agent directories (configurable default patterns such as `agent_*`).\n- Collects eligible files (for example: `README.md`, `*_artifact*.md`, `research_template.md`, and other Markdown deliverables).\n- Copies them to `outputs/` with a stable, collision-safe naming policy.\n\n### Collision-safe naming\n\nIf multiple agents produced a file with the same name (e.g., many `README.md` files), the promoter avoids overwriting by using a deterministic suffix, typically derived from the source path. Example strategies:\n\n- `README.md` → `agent_1234__README.md`\n- `first_artifact.md` → `agent_5678__first_artifact.md`\n\nThe exact policy is configured in `tools/output_promotion_config.py` and should be deterministic so repeated runs produce the same filenames.\"\"\",\n\"\"\"## How `outputs/index.md` is generated and maintained\n\n`outputs/index.md` is a **generated** Markdown index of everything currently present in `outputs/` (excluding the index itself). The promotion tool:\n\n- Enumerates files in `outputs/`\n- Sorts them (typically by filename for stable diffs)\n- Writes a list of Markdown links such as:\n\n  - [`agent_1234__README.md`](agent_1234__README.md)\n  - [`agent_5678__first_artifact.md`](agent_5678__first_artifact.md)\n\nBecause this index is generated, it should be treated as **derived** from the contents of `outputs/`:\n\n- If you add/remove/rename promoted files, re-run the promoter to refresh the index.\n- Manual edits are discouraged because they will be overwritten on the next generation run.\"\"\",\n\"\"\"## Configuration: what gets promoted (and what does not)\n\nDefault discovery and filtering rules live in `tools/output_promotion_config.py`. Typical knobs include:\n\n- **Agent directory patterns**: which folders to search (e.g., `agent_*`)\n- **Allowlist**: what file types/names count as deliverables (e.g., `*.md`)\n- **Denylist**: what to exclude even if it matches the allowlist\n  - prompt transcripts, introspection logs, build artifacts\n  - hidden files and temporary files\n- **Destination naming**: how to construct unique output filenames\n- **Index formatting**: heading text, sorting, and link style\n\nIf the audit still reports 0 documents after running promotion, it usually means one of:\n- No files matched the allowlist (e.g., artifacts are `*.txt` but only `*.md` is allowed)\n- Files were all denied by denylist rules (e.g., named like prompt logs)\n- The promoter was not run, or `outputs/` was not committed/preserved\"\"\",\n\"\"\"## Recommended workflow\n\n1. Let agents produce artifacts wherever they normally do (agent directories are fine).\n2. Run the promotion CLI to publish deliverables into `outputs/`.\n3. Ensure `outputs/index.md` is generated/updated by the same run.\n4. The audit step should now find documents under `outputs/` and report a non-zero count.\n\nThe key idea: **agents can write anywhere; audits only count what is canonically published to `outputs/`.**\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:docs/output_promotion.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4ae830a88190930f3c8c1867ff850697a1e233f89eab",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:docs/output_promotion.md\nDIR_STATE:[\"docs/output_promotion.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0803b1c0cc1a489b00694b4b4639c88194a30d296283675755",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `docs/output_promotion.md` documenting why audits can report 0 documents when artifacts remain in agent directories, and how the promotion tool consolidates them into `outputs/` while generating/maintaining `outputs/index.md`."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

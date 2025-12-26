@@ -1,0 +1,69 @@
+{
+  "content": "FILE_WRITTEN:scripts/repro_steps.py  \nDIR_STATE:[\"scripts/artifacts.py\",\"scripts/e2e.py\",\"scripts/issue_on_failure.py\",\"scripts/repro_steps.py\"]\n\nImplemented `scripts/repro_steps.py` as a CLI that converts pipeline context + failing stage metadata into a concise, secret-redacted Markdown reproduction report (env details + minimal commands) for issue creation.",
+  "reasoning": "",
+  "responseId": "resp_0c0c526ea029d99b006949bf1029208193832b2ac090d4488a",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4124,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2619,
+    "output_tokens_details": {
+      "reasoning_tokens": 2537
+    },
+    "total_tokens": 6743
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0c0c526ea029d99b006949bf10dee48193a914d967993255f3",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c0c526ea029d99b006949bf14da308193a27c43b2a24f77c2",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, sys, platform, subprocess, re, shlex, datetime\ntarget_path = Path('/mnt/data').joinpath('scripts/repro_steps.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(r\"\"\"#!/usr/bin/env python3\n\\\"\\\"\\\"Generate minimal reproduction steps and environment details.\n\nInput is a JSON pipeline context and a JSON failure (stage) metadata object.\nOutputs a concise Markdown report suitable for pasting into an issue.\n\\\"\\\"\\\"\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport os\nimport platform\nimport shlex\nimport subprocess\nimport sys\nfrom datetime import datetime\nfrom typing import Any, Dict, Iterable, List, Optional, Tuple\"\"\")\n\nchunks.append(r\"\"\"SENSITIVE_KEY_RE = re.compile(r\"(token|secret|password|passwd|key|private|auth|cookie)\", re.I)\n\ndef _safe_json_load(path: Optional[str]) -> Any:\n    if not path or path == \"-\":\n        return json.load(sys.stdin)\n    with open(path, \"r\", encoding=\"utf-8\") as f:\n        return json.load(f)\n\ndef _run(cmd: List[str]) -> Tuple[int, str]:\n    try:\n        p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, check=False)\n        return p.returncode, (p.stdout or \"\").strip()\n    except Exception as e:\n        return 1, f\"<error running {cmd!r}: {e}>\"\n\ndef _redact_env(env: Dict[str, str]) -> Dict[str, str]:\n    out: Dict[str, str] = {}\n    for k, v in sorted(env.items()):\n        if SENSITIVE_KEY_RE.search(k) or (isinstance(v, str) and len(v) > 200):\n            out[k] = \"<redacted>\"\n        else:\n            out[k] = v\n    return out\n\ndef _fmt_kv(d: Dict[str, Any], prefix: str = \"\") -> str:\n    lines = []\n    for k, v in d.items():\n        lines.append(f\"{prefix}{k}={v}\")\n    return \"\\n\".join(lines)\"\"\")\n\n",
+      "container_id": "cntr_6949be2f5f848190a4b8106bfdfa0c4704094e1617bbf644",
+      "outputs": []
+    },
+    {
+      "id": "rs_0c0c526ea029d99b006949bf1d52148193a7bff5451501ed1f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c0c526ea029d99b006949bf1eaf2c8193b4884bf0135364a5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, os, sys\ntarget_path = Path('/mnt/data/scripts/repro_steps.py')\nchunks=[]\nchunks.append(\"\"\"#!/usr/bin/env python3\n\\\"\\\"\\\"Generate minimal reproduction steps and environment details.\n\nReads:\n- pipeline context JSON (optional): general run metadata\n- failure/stage JSON: stage metadata for the failing step\n\nWrites a compact Markdown report suitable for GitHub issues.\n\\\"\\\"\\\"\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport os\nimport platform\nimport re\nimport shlex\nimport subprocess\nimport sys\nfrom datetime import datetime\nfrom typing import Any, Dict, List, Optional, Tuple\n\"\"\".strip(\"\\n\"))\nchunks.append(\"\"\"SENSITIVE_KEY_RE = re.compile(r\"(token|secret|password|passwd|key|private|auth|cookie)\", re.I)\n\ndef safe_json_load(path: Optional[str]) -> Any:\n    if not path or path == \"-\":\n        return json.load(sys.stdin)\n    with open(path, \"r\", encoding=\"utf-8\") as f:\n        return json.load(f)\n\ndef run(cmd: List[str]) -> Tuple[int, str]:\n    try:\n        p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, check=False)\n        return p.returncode, (p.stdout or \"\").strip()\n    except Exception as e:\n        return 1, f\"<error running {cmd!r}: {e}>\"\n\ndef redact_env(env: Dict[str, str]) -> Dict[str, str]:\n    out: Dict[str, str] = {}\n    for k in sorted(env):\n        v = env[k]\n        if SENSITIVE_KEY_RE.search(k) or (isinstance(v, str) and len(v) > 200):\n            out[k] = \"<redacted>\"\n        else:\n            out[k] = v\n    return out\n\ndef shell_join(argv: List[str]) -> str:\n    return \" \".join(shlex.quote(a) for a in argv)\n\"\"\".strip(\"\\n\"))\nchunks.append(\"\"\"def collect_environment(context: Dict[str, Any]) -> Dict[str, Any]:\n    py = {\n        \"python\": sys.executable,\n        \"python_version\": platform.python_version(),\n        \"platform\": platform.platform(),\n        \"cwd\": os.getcwd(),\n    }\n    # Best-effort git info (helpful for local repro); avoid failing if not a git repo.\n    git: Dict[str, str] = {}\n    rc, out = run([\"git\", \"rev-parse\", \"--show-toplevel\"])\n    if rc == 0 and out:\n        git[\"repo_root\"] = out.splitlines()[-1].strip()\n        rc2, sha = run([\"git\", \"rev-parse\", \"HEAD\"])\n        if rc2 == 0:\n            git[\"commit\"] = sha.splitlines()[-1].strip()\n        rc3, br = run([\"git\", \"rev-parse\", \"--abbrev-ref\", \"HEAD\"])\n        if rc3 == 0:\n            git[\"branch\"] = br.splitlines()[-1].strip()\n\n    ci = {k: os.environ.get(k, \"\") for k in (\n        \"GITHUB_ACTIONS\", \"GITHUB_WORKFLOW\", \"GITHUB_RUN_ID\", \"GITHUB_RUN_NUMBER\",\n        \"GITHUB_REPOSITORY\", \"GITHUB_REF\", \"GITHUB_SHA\",\n        \"CI\",\n    ) if os.environ.get(k) is not None}\n\n    # Allow context to override detected values if provided by orchestrator.\n    env = {\"python\": py, \"git\": git, \"ci\": ci}\n    if isinstance(context.get(\"environment\"), dict):\n        env[\"context_environment\"] = context[\"environment\"]\n    return env\n\ndef stage_to_repro(stage: Dict[str, Any]) -> Dict[str, Any]:\n    name = stage.get(\"name\") or stage.get(\"stage\") or stage.get(\"id\") or \"<unknown-stage>\"\n    workdir = stage.get(\"workdir\") or stage.get(\"cwd\") or stage.get(\"working_dir\") or \".\"\n    argv = stage.get(\"argv\") or stage.get(\"cmd\") or stage.get(\"command\")\n    if isinstance(argv, str):\n        argv = [\"/bin/sh\", \"-lc\", argv]\n    elif not isinstance(argv, list):\n        argv = []\n\n    env = stage.get(\"env\") if isinstance(stage.get(\"env\"), dict) else {}\n    env = {str(k): str(v) for k, v in env.items()}\n    env = redact_env(env)\n\n    pre = stage.get(\"pre\") or stage.get(\"setup\") or []\n    if isinstance(pre, str):\n        pre = [pre]\n    pre = [str(x) for x in pre] if isinstance(pre, list) else []\n\n    return {\"name\": name, \"workdir\": workdir, \"argv\": argv, \"env\": env, \"pre\": pre}\n\"\"\".strip(\"\\n\"))\nchunks.append(\"\"\"def render_report(context: Dict[str, Any], failure: Dict[str, Any]) -> str:\n    stage = stage_to_repro(failure.get(\"stage\", failure) if isinstance(failure, dict) else {})\n    env_info = collect_environment(context if isinstance(context, dict) else {})\n\n    now = datetime.utcnow().strftime(\"%Y-%m-%dT%H:%M:%SZ\")\n    lines: List[str] = []\n    lines.append(f\"# Reproduction steps ({stage['name']})\")\n    lines.append(\"\")\n    lines.append(f\"_Generated: {now}_\")\n    lines.append(\"\")\n    if isinstance(failure, dict) and failure.get(\"error\"):\n        lines.append(\"## Failure summary\")\n        lines.append(\"\")\n        lines.append(\"```\")\n        lines.append(str(failure[\"error\"]).strip())\n        lines.append(\"```\")\n        lines.append(\"\")\n\n    lines.append(\"## Environment\")\n    lines.append(\"\")\n    lines.append(\"```json\")\n    lines.append(json.dumps(env_info, indent=2, sort_keys=True))\n    lines.append(\"```\")\n    lines.append(\"\")\n\n    lines.append(\"## Minimal reproduction\")\n    lines.append(\"\")\n    lines.append(\"Run from repository root:\")\n    lines.append(\"\")\n    cmd_lines: List[str] = []\n    cmd_lines.append(f\"cd {shlex.quote(stage['workdir'])}\")\n    for k, v in stage[\"env\"].items():\n        if v == \"\":\n            continue\n        cmd_lines.append(f\"export {k}={shlex.quote(v)}\")\n    for p in stage[\"pre\"]:\n        cmd_lines.append(p)\n    if stage[\"argv\"]:\n        cmd_lines.append(shell_join(stage[\"argv\"]))\n    else:\n        cmd_lines.append(\"# <no command recorded in failure metadata>\")\n\n    lines.append(\"```bash\")\n    lines.extend(cmd_lines)\n    lines.append(\"```\")\n    lines.append(\"\")\n\n    # Extra breadcrumbs for CI debugging.\n    if isinstance(failure, dict):\n        artifacts = failure.get(\"artifacts\") or failure.get(\"logs\") or {}\n        if artifacts:\n            lines.append(\"## Related logs/artifacts\")\n            lines.append(\"\")\n            lines.append(\"```json\")\n            lines.append(json.dumps(artifacts, indent=2, sort_keys=True))\n            lines.append(\"```\")\n            lines.append(\"\")\n    return \"\\n\".join(lines)\n\"\"\".strip(\"\\n\"))\nchunks.append(\"\"\"def main(argv: Optional[List[str]] = None) -> int:\n    ap = argparse.ArgumentParser(description=__doc__)\n    ap.add_argument(\"--context\", help=\"Path to pipeline context JSON (or '-' for stdin).\", default=None)\n    ap.add_argument(\"--failure\", help=\"Path to failure/stage JSON.\", required=True)\n    ap.add_argument(\"--out\", help=\"Write report to this path (default: stdout).\", default=None)\n    args = ap.parse_args(argv)\n\n    context = safe_json_load(args.context) if args.context else {}\n    failure = safe_json_load(args.failure)\n\n    report = render_report(context if isinstance(context, dict) else {}, failure if isinstance(failure, dict) else {})\n    if args.out:\n        with open(args.out, \"w\", encoding=\"utf-8\") as f:\n            f.write(report.rstrip() + \"\\n\")\n    else:\n        sys.stdout.write(report.rstrip() + \"\\n\")\n    return 0\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\"\"\".strip(\"\\n\"))\n\nfinal_text = \"\\n\".join(block.strip(\"\\n\") for block in chunks).strip() + \"\\n\"\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\ntarget_path.write_text(final_text, encoding=\"utf-8\")\nprint(\"FILE_WRITTEN:scripts/repro_steps.py\")\nprint(\"DIR_STATE:\" + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob(\"*\") if p.is_file())))\n",
+      "container_id": "cntr_6949be2f5f848190a4b8106bfdfa0c4704094e1617bbf644",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:scripts/repro_steps.py\nDIR_STATE:[\"scripts/artifacts.py\", \"scripts/e2e.py\", \"scripts/issue_on_failure.py\", \"scripts/repro_steps.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0c0c526ea029d99b006949bf42b8ac819391aa2db6d3250ab8",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_WRITTEN:scripts/repro_steps.py  \nDIR_STATE:[\"scripts/artifacts.py\",\"scripts/e2e.py\",\"scripts/issue_on_failure.py\",\"scripts/repro_steps.py\"]\n\nImplemented `scripts/repro_steps.py` as a CLI that converts pipeline context + failing stage metadata into a concise, secret-redacted Markdown reproduction report (env details + minimal commands) for issue creation."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

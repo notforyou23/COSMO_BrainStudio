@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Repair the syntax error, add deterministic seeding, and ensure the toy experiment writes canonical artifacts (e.g., results.json, figure.png if applicable, plus run_stamp.json/run.log) under ./outputs/; then wire it into the pipeline entrypoint.
+Project: generated_script_1766551798758 (json script)
+
+Target file details:
+- Path: .github/workflows/ci.yml
+- Purpose: Runs CI on push/pull_request to execute the pipeline, verify canonical artifacts are created, and fail fast on reproducibility regressions.
+- Category: config
+
+Other planned files (for context only):
+- src/pipeline/__init__.py: Defines the pipeline package and exposes the main entrypoint used by the project to run experiments end-to-end.
+- src/pipeline/entrypoint.py: Implements the pipeline entrypoint that runs the toy experiment with deterministic seeding and writes canonical artifacts under outputs/.
+- src/pipeline/artifacts.py: Provides reusable helpers for canonical artifact creation (outputs dir, results.json, figure.png, run_stamp.json, run.log) and atomic writes.
+- src/pipeline/seeding.py: Implements deterministic seeding across Python, NumPy, and (optionally) torch while recording the chosen seed for reproducibility.
+
+Reference insights:
+- [CONSOLIDATED] Build data/experiment pipelines so they are **reproducible and verifiable end-to-end** by standardizing how outputs/artifacts
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Invest in infrastructure lemmas: compactness/tightness, decomposition (structured+pseudorandom)
+- [AGENT: agent_1766550864729_p9ds97q] Across the implications-and-consequences, systems-thinking, and psychological perspectives, the dominan
+- [AGENT INSIGHT: agent_1766550864729_t9or71v] Assumptions are design variables and integration dependencies: they must be explicitly chosen, 
+
+Key requirements:
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Runs CI on push/pull_request to execute the pipeline, verify canonical artifacts are created, and fail fast on reproducibility regressions.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('.github/workflows/ci.yml')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:.github/workflows/ci.yml')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside .github/workflows/ci.yml.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Refactor and modularize reusable code artifacts: 2025-12-22T22-13-32-823Z__github_actions_e2e-on-failure_action_yml_stage1_export_export_prompt.txt, action.yml, e2e_failure.yml, 2025-12-22T22-13-32-823Z__github_workflows_e2e_failure_yml_stage1_export_export_prompt.txt, 2025-12-22T22-13-32-823Z_docs_e2e_README_e2e_md_stage1_export_export_prompt.txt
+Project: generated_script_1766442182225 (yaml script)
+
+Target file details:
+- Path: docs/e2e/README_e2e.md
+- Purpose: Documentation describing how the E2E failure workflow and action work, required inputs, artifact layout, and local/CI usage examples.
+- Category: documentation
+
+Other planned files (for context only):
+- .github/actions/e2e-on-failure/action.yml: Composite GitHub Action definition refactored into modular steps to collect and upload E2E diagnostics only when a prior step/job fails.
+- .github/workflows/e2e_failure.yml: Reusable workflow that invokes the e2e-on-failure composite action and standardizes failure-handling diagnostics across E2E jobs.
+- scripts/e2e/collect_diagnostics.sh: Reusable bash script that gathers logs, screenshots, videos, test reports, and environment metadata into a single diagnostics directory for upload.
+- scripts/e2e/validate_config.py: Python validator that checks required inputs and environment assumptions for E2E failure collection, emitting actionable errors for CI.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-22T22-13-32-823Z__github_workflows_e2e_failure_yml_stage1_export_export_prompt.txt from code-creation agent agent_17
+- [INTROSPECTION] 2025-12-22T22-13-32-823Z_docs_e2e_requirements-ci_txt_stage1_attempt1_prompt.txt from code-creation agent agent_176644160695
+- [INTROSPECTION] 2025-12-22T22-13-32-823Z_plan_attempt1_prompt.txt from code-creation agent agent_1766441606958_qncx1i2: You are planning a y
+- [CONSOLIDATED] Across these projects, the recurring insight is that **reproducible and scalable research/engineering work emerges from treat
+- [AGENT INSIGHT: agent_1766438409885_1kgnb7c] **Scaffold meets required structure + governance docs are in place.**
+
+Key requirements:
+- documentation
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Documentation describing how the E2E failure workflow and action work, required inputs, artifact layout, and local/CI usage examples.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('docs/e2e/README_e2e.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:docs/e2e/README_e2e.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside docs/e2e/README_e2e.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

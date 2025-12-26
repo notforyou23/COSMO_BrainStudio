@@ -1,0 +1,56 @@
+{
+  "content": "FILE_EXPORT:{\"path\":\"benchmarks/golden/v0_1_output.json\",\"size\":315,\"encoding\":\"base64\",\"sha256\":\"4e1991d6190a2b31790c54ee478024c43d1d95f03fa0eff453171fb6ad13b4c5\",\"content\":\"ewogICJjb250cmFjdF92ZXJzaW9uIjogInYwLjEiLAogICJ0YXNrX2lkIjogImRlZmF1bHQiLAogICJtZXRhZGF0YSI6IHsKICAgICJnZW5lcmF0ZWRfYnkiOiAiZ29sZGVuX3JlZmVyZW5jZSIsCiAgICAic2NoZW1hIjogInYwLjFfb3V0cHV0IiwKICAgICJzZWVkIjogMAogIH0sCiAgIm1ldHJpY3MiOiB7CiAgICAic2NvcmUiOiAxLjAsCiAgICAibG9zcyI6IDAuMAogIH0sCiAgIm91dHB1dHMiOiB7CiAgICAibGFiZWxzIjogWzAsIDEsIDIsIDMsIDRdLAogICAgInByb2JhYmlsaXRpZXMiOiBbMC4xLCAwLjIsIDAuMywgMC4yNSwgMC4xNV0KICB9Cn0K\"}\nDIR_STATE:[\"benchmarks/golden/v0_1_output.json\"]",
+  "reasoning": "",
+  "responseId": "resp_0d87f9068e13d295006949c06c9364819684cc2a05e3a73ca8",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 1652,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 616,
+    "output_tokens_details": {
+      "reasoning_tokens": 27
+    },
+    "total_tokens": 2268
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0d87f9068e13d295006949c06da060819692a85a1da688041e",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d87f9068e13d295006949c06e568881968665c50fee4ccd5a",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport base64, json, hashlib, gzip\n\ntarget_path = Path('/mnt/data').joinpath('benchmarks/golden/v0_1_output.json')\nassert target_path.is_file(), 'Expected benchmarks/golden/v0_1_output.json to exist before export'\ndata = target_path.read_bytes()\npayload = {\n    'path': 'benchmarks/golden/v0_1_output.json',\n    'size': len(data),\n    'encoding': 'base64',\n    'sha256': hashlib.sha256(data).hexdigest(),\n    'content': None\n}\nif len(data) > 20000:\n    compressed = gzip.compress(data)\n    payload['encoding'] = 'gzip+base64'\n    payload['content'] = base64.b64encode(compressed).decode('ascii')\nelse:\n    payload['content'] = base64.b64encode(data).decode('ascii')\n\nprint('FILE_EXPORT:' + json.dumps(payload, separators=(',', ':')))\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949be2e3cc88190ba383d17f1aa1c440ba8e9f08a4be3b1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_EXPORT:{\"path\":\"benchmarks/golden/v0_1_output.json\",\"size\":315,\"encoding\":\"base64\",\"sha256\":\"4e1991d6190a2b31790c54ee478024c43d1d95f03fa0eff453171fb6ad13b4c5\",\"content\":\"ewogICJjb250cmFjdF92ZXJzaW9uIjogInYwLjEiLAogICJ0YXNrX2lkIjogImRlZmF1bHQiLAogICJtZXRhZGF0YSI6IHsKICAgICJnZW5lcmF0ZWRfYnkiOiAiZ29sZGVuX3JlZmVyZW5jZSIsCiAgICAic2NoZW1hIjogInYwLjFfb3V0cHV0IiwKICAgICJzZWVkIjogMAogIH0sCiAgIm1ldHJpY3MiOiB7CiAgICAic2NvcmUiOiAxLjAsCiAgICAibG9zcyI6IDAuMAogIH0sCiAgIm91dHB1dHMiOiB7CiAgICAibGFiZWxzIjogWzAsIDEsIDIsIDMsIDRdLAogICAgInByb2JhYmlsaXRpZXMiOiBbMC4xLCAwLjIsIDAuMywgMC4yNSwgMC4xNV0KICB9Cn0K\"}\nDIR_STATE:[\"benchmarks/golden/v0_1_output.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0d87f9068e13d295006949c071fbf08196bcd1fc987afaea8f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_EXPORT:{\"path\":\"benchmarks/golden/v0_1_output.json\",\"size\":315,\"encoding\":\"base64\",\"sha256\":\"4e1991d6190a2b31790c54ee478024c43d1d95f03fa0eff453171fb6ad13b4c5\",\"content\":\"ewogICJjb250cmFjdF92ZXJzaW9uIjogInYwLjEiLAogICJ0YXNrX2lkIjogImRlZmF1bHQiLAogICJtZXRhZGF0YSI6IHsKICAgICJnZW5lcmF0ZWRfYnkiOiAiZ29sZGVuX3JlZmVyZW5jZSIsCiAgICAic2NoZW1hIjogInYwLjFfb3V0cHV0IiwKICAgICJzZWVkIjogMAogIH0sCiAgIm1ldHJpY3MiOiB7CiAgICAic2NvcmUiOiAxLjAsCiAgICAibG9zcyI6IDAuMAogIH0sCiAgIm91dHB1dHMiOiB7CiAgICAibGFiZWxzIjogWzAsIDEsIDIsIDMsIDRdLAogICAgInByb2JhYmlsaXRpZXMiOiBbMC4xLCAwLjIsIDAuMywgMC4yNSwgMC4xNV0KICB9Cn0K\"}\nDIR_STATE:[\"benchmarks/golden/v0_1_output.json\"]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

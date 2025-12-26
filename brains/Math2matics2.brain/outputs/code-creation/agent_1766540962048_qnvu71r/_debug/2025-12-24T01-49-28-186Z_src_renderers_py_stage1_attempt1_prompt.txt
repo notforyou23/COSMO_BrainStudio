@@ -1,0 +1,50 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Generate two output artifacts for the Mathematics domain: (1) /outputs/coverage_matrix.csv (or an equivalent markdown table) enumerating domains × subtopics × artifact types with status fields and cross-link placeholders, and (2) /outputs/eval_loop.md describing a 5-cycle review cadence, metrics to track (artifact count, cross-links, uncovered cells), and concrete decision rules for what to create next. The code agent should create structured, machine-readable CSV and a human-readable markdown policy document so they can be inspected, versioned, and consumed by downstream agents or tooling.
+Project: next. The code agent should create structured, machine-readable CSV and a human-readable markdown policy document so they can be inspected, versioned, and consumed by downstream agents or (python cli_tool)
+
+Target file details:
+- Path: src/renderers.py
+- Purpose: Rendering utilities to serialize the coverage matrix to CSV and optionally to markdown, and to emit the evaluation loop markdown policy document.
+- Category: source
+
+Other planned files (for context only):
+- src/math_coverage_cli.py: Python CLI tool that generates /outputs/coverage_matrix.csv (and optional markdown table) plus /outputs/eval_loop.md for the Mathematics domain with deterministic, machine-readable and human-readable artifacts.
+- src/math_taxonomy.py: Defines the Mathematics domain taxonomy (domains, subtopics, artifact types, and default status/cross-link placeholders) used to populate the coverage matrix.
+- src/io_utils.py: Filesystem and deterministic output helpers to create output directories, write files atomically, and normalize line endings for stable diffs.
+- tests/test_generation.py: Automated tests validating that the CLI generates the required outputs with correct headers, row counts, and stable content for inspection and downstream consumption.
+
+Reference insights:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [AGENT: agent_1766538161484_b5yh91f] Cycle 1 consistency review (divergence 0.97):
+Summary (high-level): The three branches are about differ
+- [AGENT INSIGHT: agent_1766540049061_an5rb16] Computational Plan: ## Computational execution plan (focused on deterministic `/outputs/` artif
+- [AGENT INSIGHT: agent_1766540049061_an5rb16] Computational Plan: ## Computational execution plan (focused on deterministic `/outputs/` artif
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Rendering utilities to serialize the coverage matrix to CSV and optionally to markdown, and to emit the evaluation loop markdown policy document.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/renderers.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/renderers.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/renderers.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

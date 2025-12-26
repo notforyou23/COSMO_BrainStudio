@@ -1,0 +1,56 @@
+{
+  "content": "FILE_WRITTEN:src/refactor_modularize/cli.py  \nDIR_STATE:[\"src/refactor_modularize/__init__.py\", \"src/refactor_modularize/cli.py\"]  \n\nImplemented a compact, self-contained CLI with `analyze`, `refactor`, and `export` subcommands that can hash/detect duplicates, deduplicate into a deterministic output directory, and emit a stable JSON manifest to stdout or a file.",
+  "reasoning": "",
+  "responseId": "resp_011c260b6e7c9d4700694b484b17ec81938ea450e9d1b7edbf",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3299,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1752,
+    "output_tokens_details": {
+      "reasoning_tokens": 1658
+    },
+    "total_tokens": 5051
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_011c260b6e7c9d4700694b484bdec48193b79026fd90e5a80b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_011c260b6e7c9d4700694b4850bb788193a2067b7d6edb9bd0",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, hashlib, argparse, sys, textwrap\n\ntarget_path = Path('/mnt/data').joinpath('src/refactor_modularize/cli.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\\\n\\\"\\\"\\\"Command-line interface for the refactor_modularize package.\n\nThe CLI provides three subcommands:\n\n- analyze: summarize input artifacts and detect duplicates by content hash\n- refactor: produce a deterministic, deduplicated set of artifacts in an output dir\n- export: emit a JSON manifest describing the (optionally refactored) artifacts\n\nThis module is intentionally lightweight and self-contained so it can be used\neven before the rest of the package is imported.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport hashlib\nimport json\nimport sys\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Iterable, Sequence\n\"\"\")\n\nchunks.append(\"\"\"\\\n@dataclass(frozen=True)\nclass ArtifactInfo:\n    path: str\n    size: int\n    sha256: str\n\n    @property\n    def suffix(self) -> str:\n        return Path(self.path).suffix.lower()\n\n\ndef _sha256_bytes(data: bytes) -> str:\n    return hashlib.sha256(data).hexdigest()\n\n\ndef _iter_input_files(inputs: Sequence[str]) -> Iterable[Path]:\n    for raw in inputs:\n        p = Path(raw)\n        if p.is_dir():\n            yield from (q for q in sorted(p.rglob(\"*\")) if q.is_file())\n        elif p.is_file():\n            yield p\n        else:\n            raise SystemExit(f\\\"Input not found: {raw}\\\")\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef analyze_paths(inputs: Sequence[str]) -> dict:\n    infos: list[ArtifactInfo] = []\n    by_hash: dict[str, list[str]] = {}\n    for p in _iter_input_files(inputs):\n        data = p.read_bytes()\n        h = _sha256_bytes(data)\n        infos.append(ArtifactInfo(path=str(p), size=len(data), sha256=h))\n        by_hash.setdefault(h, []).append(str(p))\n    dups = {h: ps for h, ps in by_hash.items() if len(ps) > 1}\n    return {\n        \"count\": len(infos),\n        \"total_bytes\": sum(i.size for i in infos),\n        \"duplicates\": dups,\n        \"artifacts\": [i.__dict__ for i in infos],\n    }\n\n\ndef refactor_to_dir(inputs: Sequence[str], out_dir: str) -> dict:\n    out = Path(out_dir)\n    out.mkdir(parents=True, exist_ok=True)\n    analysis = analyze_paths(inputs)\n    written: dict[str, str] = {}\n    for a in analysis[\"artifacts\"]:\n        p = Path(a[\"path\"])\n        h = a[\"sha256\"]\n        ext = p.suffix.lower() or \".bin\"\n        name = f\\\"{h[:12]}{ext}\\\"\n        dest = out / name\n        if not dest.exists():\n            dest.write_bytes(Path(a[\"path\"]).read_bytes())\n        written[a[\"path\"]] = str(dest)\n    analysis[\"refactored_dir\"] = str(out)\n    analysis[\"refactored_map\"] = written\n    return analysis\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef export_manifest(payload: dict, out_path: str | None) -> str:\n    text = json.dumps(payload, indent=2, sort_keys=True) + \\\"\\\\n\\\"\n    if out_path:\n        Path(out_path).parent.mkdir(parents=True, exist_ok=True)\n        Path(out_path).write_text(text, encoding=\"utf-8\")\n        return out_path\n    sys.stdout.write(text)\n    return \"-\"  # stdout\n\n\ndef _build_parser() -> argparse.ArgumentParser:\n    p = argparse.ArgumentParser(prog=\"refactor-modularize\")\n    sub = p.add_subparsers(dest=\"cmd\", required=True)\n\n    pa = sub.add_parser(\"analyze\", help=\"Analyze inputs; detect duplicates by hash.\")\n    pa.add_argument(\"inputs\", nargs=\"+\", help=\"Files and/or directories to analyze.\")\n    pa.add_argument(\"-o\", \"--out\", help=\"Write JSON result to this path (default: stdout).\")\n\n    pr = sub.add_parser(\"refactor\", help=\"Deduplicate inputs into an output directory.\")\n    pr.add_argument(\"inputs\", nargs=\"+\", help=\"Files and/or directories to refactor.\")\n    pr.add_argument(\"--out-dir\", required=True, help=\"Directory to write refactored artifacts.\")\n    pr.add_argument(\"-o\", \"--out\", help=\"Write JSON result/manifest to this path (default: stdout).\")\n\n    pe = sub.add_parser(\"export\", help=\"Export a manifest (optionally after refactor).\")\n    pe.add_argument(\"inputs\", nargs=\"+\", help=\"Files and/or directories to include.\")\n    pe.add_argument(\"--refactor-out-dir\", help=\"If set, refactor first into this directory.\")\n    pe.add_argument(\"-o\", \"--out\", help=\"Write JSON manifest to this path (default: stdout).\")\n    return p\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef main(argv: Sequence[str] | None = None) -> int:\n    ns = _build_parser().parse_args(list(argv) if argv is not None else None)\n\n    if ns.cmd == \"analyze\":\n        payload = analyze_paths(ns.inputs)\n        export_manifest(payload, ns.out)\n        return 0\n\n    if ns.cmd == \"refactor\":\n        payload = refactor_to_dir(ns.inputs, ns.out_dir)\n        export_manifest(payload, ns.out)\n        return 0\n\n    if ns.cmd == \"export\":\n        if ns.refactor_out_dir:\n            payload = refactor_to_dir(ns.inputs, ns.refactor_out_dir)\n        else:\n            payload = analyze_paths(ns.inputs)\n        export_manifest(payload, ns.out)\n        return 0\n\n    raise SystemExit(f\"Unknown command: {ns.cmd}\")\n\n\nif __name__ == \"__main__\":  # pragma: no cover\n    raise SystemExit(main())\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/refactor_modularize/cli.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b48372d7081909f70f3661941a95b001f3dc92161f15d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/refactor_modularize/cli.py\nDIR_STATE:[\"src/refactor_modularize/__init__.py\", \"src/refactor_modularize/cli.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_011c260b6e7c9d4700694b485df4c08193bd705ffe62378920",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_WRITTEN:src/refactor_modularize/cli.py  \nDIR_STATE:[\"src/refactor_modularize/__init__.py\", \"src/refactor_modularize/cli.py\"]  \n\nImplemented a compact, self-contained CLI with `analyze`, `refactor`, and `export` subcommands that can hash/detect duplicates, deduplicate into a deterministic output directory, and emit a stable JSON manifest to stdout or a file."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Translate the minimum inputs into a blocking validation checklist (and/or JSON Schema) used by intake: reject tasks missing verbatim claim, source context, and provenance anchor; add defaults for date range (2019–2025) and required query keywords/author fields when DOI is missing.
+Project: generated_script_1766617727708 (json script)
+
+Target file details:
+- Path: src/intake/validation_checklist.py
+- Purpose: Implements a blocking validation checklist for intake that rejects tasks missing verbatim claim, source context, or provenance anchor and applies DOI-missing defaults for date range (2019–2025) plus required query keywords/author fields.
+- Category: source
+
+Other planned files (for context only):
+- src/intake/schema/task_intake.schema.json: Defines a JSON Schema for intake tasks enforcing required claim/source/provenance fields and conditional defaults/requirements when DOI is absent.
+- src/intake/normalize_task.py: Normalizes incoming intake JSON by filling defaults (including 2019–2025 date range) and deriving required query fields when DOI is missing before validation.
+- src/intake/validate_task.py: Provides a single entrypoint function and CLI to normalize then validate intake tasks against the checklist and JSON Schema with clear blocking error outputs.
+- src/intake/errors.py: Defines structured error types and helpers to format blocking validation failures for intake consumers and logs.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T22-59-19-146Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766617157732
+- [AGENT: agent_1766612249730_02kggt6] Finding 2: For primary-source verification (2019–2025), the agent identified the minimum viable inputs 
+- [AGENT: agent_1766612249730_02kggt6] Finding 4: For fact-checking, the agent highlighted that context/source (who said it, when, link/screen
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] The dominant causal mechanism is a self-reinforcing selection loop: institutions use cheap, hig
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Implements a blocking validation checklist for intake that rejects tasks missing verbatim claim, source context, or provenance anchor and applies DOI-missing defaults for date range (2019–2025) plus required query keywords/author fields.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/intake/validation_checklist.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/intake/validation_checklist.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/intake/validation_checklist.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

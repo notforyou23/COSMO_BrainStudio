@@ -1,0 +1,50 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a one-command harness (e.g., scripts/run_pipeline.sh or python -m tools.pipeline) that runs init_outputs + validate_outputs and exits nonzero on failure; ensure it checks for the presence and minimal completeness of TRACKING_RECONCILIATION.md, Claim Cards, and QA gate artifacts.
+Project: generated_cli_tool_1766623930114 (python cli_tool)
+
+Target file details:
+- Path: scripts/run_pipeline.sh
+- Purpose: Shell wrapper that invokes the canonical python QA gate command for local and CI usage with strict failure propagation.
+- Category: support
+
+Other planned files (for context only):
+- tools/__init__.py: Defines the tools package so the QA gate harness can be executed via python -m tools.pipeline.
+- tools/pipeline.py: Implements the one-command harness that runs init_outputs then validate_outputs, performs required artifact presence/minimal-completeness checks, and exits nonzero on any failure.
+- tools/qa_gate.py: Provides reusable orchestration helpers for running pipeline stages deterministically, capturing failures, and producing a concise QA gate report/exit code.
+- tools/qa_artifacts.py: Implements concrete checks for TRACKING_RECONCILIATION.md, Claim Cards, and QA gate artifacts including minimal completeness heuristics and canonical path handling.
+
+Reference insights:
+- [CONSOLIDATED] A robust delivery pipeline should include a single, canonical “QA gate” command that deterministically verifies required outp
+- [INTROSPECTION] 2025-12-25T00-21-55-842Z_qa_checks_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766622114110_412seks: You a
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] test_path_canonicalize.py from code-creation agent agent_1766620699965_cdhh9no: from pathlib import Pathimport json
+import o
+
+Key requirements:
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Shell wrapper that invokes the canonical python QA gate command for local and CI usage with strict failure propagation.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/run_pipeline.sh')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/run_pipeline.sh')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/run_pipeline.sh.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

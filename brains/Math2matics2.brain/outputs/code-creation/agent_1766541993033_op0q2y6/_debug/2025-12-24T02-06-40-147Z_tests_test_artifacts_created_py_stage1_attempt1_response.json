@@ -1,0 +1,56 @@
+{
+  "content": "Created `tests/test_artifacts_created.py`, a pytest that runs the pipeline (importing from `src/`), then asserts `/outputs/run_stamp.json` and `/outputs/run.log` exist and contain a minimal expected schema/content.",
+  "reasoning": "",
+  "responseId": "resp_069eecef0780c6f500694b4b0842288196bd16611f4a9375e0",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2665,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1178,
+    "output_tokens_details": {
+      "reasoning_tokens": 480
+    },
+    "total_tokens": 3843
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_069eecef0780c6f500694b4b08f3bc819699a092cfa527571c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_069eecef0780c6f500694b4b0fb00c8196b5ea4329434fb709",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_artifacts_created.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"from __future__ import annotations\n\nimport json\nimport os\nimport sys\nfrom pathlib import Path\n\nimport pytest\n\n\ndef _add_src_to_syspath() -> None:\n    repo_root = Path(__file__).resolve().parents[1]\n    src = repo_root / \"src\"\n    if src.exists():\n        sys.path.insert(0, str(src))\n\n\ndef _run_pipeline() -> None:\n    _add_src_to_syspath()\n    try:\n        import minipipeline  # type: ignore\n    except Exception as e:  # pragma: no cover\n        raise AssertionError(f\"Failed to import minipipeline package: {e}\") from e\n\n    # Preferred: public entrypoint in package root.\n    if hasattr(minipipeline, \"run\") and callable(getattr(minipipeline, \"run\")):\n        minipipeline.run()\n        return\n\n    # Fallback: run module function.\n    try:\n        from minipipeline.run import run as run_func  # type: ignore\n    except Exception as e:  # pragma: no cover\n        raise AssertionError(f\"Failed to locate a runnable entrypoint: {e}\") from e\n    run_func()\n\n\n@pytest.mark.order(1)\ndef test_artifacts_created_and_have_expected_content() -> None:\n    outputs_dir = Path(os.environ.get(\"MINIPIPELINE_OUTPUTS_DIR\", \"/outputs\"))\n    stamp_path = outputs_dir / \"run_stamp.json\"\n    log_path = outputs_dir / \"run.log\"\n\n    outputs_dir.mkdir(parents=True, exist_ok=True)\n    for p in (stamp_path, log_path):\n        if p.exists():\n            p.unlink()\n\n    _run_pipeline()\n\n    assert stamp_path.is_file(), f\"Missing artifact: {stamp_path}\"\n    assert log_path.is_file(), f\"Missing artifact: {log_path}\"\n\n    stamp = json.loads(stamp_path.read_text(encoding=\"utf-8\"))\n    assert isinstance(stamp, dict)\n    assert stamp.get(\"schema_version\") == 1\n    assert stamp.get(\"run_id\") == \"deterministic-run\"\n    assert stamp.get(\"outputs_dir\") == str(outputs_dir)\n    assert \"payload\" in stamp and isinstance(stamp[\"payload\"], dict)\n    assert \"environment\" in stamp and isinstance(stamp[\"environment\"], dict)\n\n    log_text = log_path.read_text(encoding=\"utf-8\")\n    assert \"RUN_START\" in log_text\n    assert \"RUN_END\" in log_text\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:tests/test_artifacts_created.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4aadc8ac8190b085d2f4f9ea2ac000e5916d7745774a",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_artifacts_created.py\nDIR_STATE:[\"tests/test_artifacts_created.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_069eecef0780c6f500694b4b16ea308196a850799c4982eabb",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/test_artifacts_created.py`, a pytest that runs the pipeline (importing from `src/`), then asserts `/outputs/run_stamp.json` and `/outputs/run.log` exist and contain a minimal expected schema/content."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

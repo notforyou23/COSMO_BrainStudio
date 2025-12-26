@@ -1,0 +1,35 @@
+You are planning a python script implementation for the following mission:
+Add a minimal smoke test target that runs first, capture full stdout/stderr into canonical artifacts under `/outputs/qa/exec_logs/`, and implement an automatic retry + environment dump (container image hash, resources, dependency versions) when the failure signature is detected.
+
+Relevant context:
+- [CONSOLIDATED] Robust QA automation should be designed to *fail safe*—detect unstable/unsupported execution environments early, gracefully d
+- [INTROSPECTION] 2025-12-25T00-21-55-842Z_scripts_qa_run_sh_stage1_attempt2_prompt.txt from code-creation agent agent_1766622114110_412seks: 
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+- [INTROSPECTION] 2025-12-24T22-59-19-146Z_scripts_validate_outputs_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766617157732
+- [CONSOLIDATED] Robust QA automation is best achieved by standardizing checks into a configurable, reproducible pipeline (local/CI, optionall
+- [INTROSPECTION] 2025-12-25T00-50-00-140Z_scripts_qa_README_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766623798549_61a97n
+
+Explicit requirements:
+- docker
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

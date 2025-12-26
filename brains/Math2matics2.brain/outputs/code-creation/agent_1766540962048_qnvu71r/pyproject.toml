@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=69.0", "wheel"]
+build-backend = "setuptools.build_meta
+[project]
+name = "math-coverage-cli"
+version = "0.1.0"
+description = "Deterministic CLI that generates Mathematics coverage matrix and evaluation loop artifacts."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "OpenAI Code Interpreter"}]
+dependencies = []
+
+[project.scripts]
+math-coverage = "math_coverage_cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = ["math_coverage_cli", "math_taxonomy", "renderers", "io_utils"]
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-q"
+testpaths = ["tests"]
+pythonpath = ["src"]

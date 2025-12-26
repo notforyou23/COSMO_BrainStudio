@@ -1,0 +1,69 @@
+{
+  "content": "Implemented `src/stats/pipeline.py` as a compact, backend-agnostic statistical pipeline module providing composable likelihoods, common priors, posterior evaluation with Metropolis–Hastings sampling, quick model-comparison metrics (AIC/BIC + Laplace evidence), and a Fisher-matrix forecasting hook.",
+  "reasoning": "",
+  "responseId": "resp_02db14b5311f8d21006949a3c43e188196b6e9d7710bb2b215",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4179,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2609,
+    "output_tokens_details": {
+      "reasoning_tokens": 151
+    },
+    "total_tokens": 6788
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_02db14b5311f8d21006949a3c5106481968032de8b8ce463de",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_02db14b5311f8d21006949a3c962e48196bec9079ee6920a20",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, numpy as np\ntarget_path = Path('/mnt/data').joinpath('src/stats/pipeline.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(r\"\"\"\n\"\"\"\n)\n",
+      "container_id": "cntr_6949a1d497e081909a00da1af070d618029e616ce667a0de",
+      "outputs": []
+    },
+    {
+      "id": "rs_02db14b5311f8d21006949a3cc13088196bc78e284958b9a15",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_02db14b5311f8d21006949a3ccdd788196bbffb2c64ca28b11",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\ntarget_path = Path('/mnt/data').joinpath('src/stats/pipeline.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\"\"\"\n\\\"\\\"\\\"Statistical pipeline utilities.\n\nThis module provides lightweight, dependency-minimal building blocks for\nconfronting swampland-constrained cosmology models with data:\n- Likelihood composition (Gaussian & multivariate Gaussian)\n- Priors and transforms (uniform/log-uniform/normal)\n- Posterior evaluation + a small MCMC sampler (random-walk Metropolis)\n- Simple evidence/model comparison surrogates (AIC/BIC + Laplace evidence)\n- Forecast hooks (Fisher matrix via numerical derivatives)\n\nThe intent is to be backend-agnostic: a \\\"model\\\" is any callable mapping\na parameter dict -> observable dict or vector.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Callable, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Union\nimport math\nimport numpy as np\n\nArray = np.ndarray\nParams = Dict[str, float]\n\n\n# ---------------------------- Likelihoods --------------------------------- #\n\n@dataclass(frozen=True)\nclass Likelihood:\n    \\\"\\\"\\\"Base class: implement __call__(theta)->logL.\\\"\\\"\\\"\n    def __call__(self, theta: Params) -> float:  # pragma: no cover\n        raise NotImplementedError\n\n\n@dataclass(frozen=True)\nclass GaussianLikelihood(Likelihood):\n    \\\"\\\"\\\"Independent Gaussian likelihood for a set of named observables.\\\"\\\"\\\"\n    data: Mapping[str, float]\n    sigma: Mapping[str, float]\n    predict: Callable[[Params], Mapping[str, float]]\n\n    def __call__(self, theta: Params) -> float:\n        pred = self.predict(theta)\n        ll = 0.0\n        for k, y in self.data.items():\n            s = float(self.sigma[k])\n            r = (float(pred[k]) - float(y)) / s\n            ll += -0.5 * (r * r + math.log(2 * math.pi * s * s))\n        return float(ll)\n\n\n@dataclass(frozen=True)\nclass MVGaussianLikelihood(Likelihood):\n    \\\"\\\"\\\"Multivariate Gaussian likelihood for a vector-valued observable.\\\"\\\"\\\"\n    y: Array\n    cov: Array\n    predict: Callable[[Params], Array]\n\n    def __post_init__(self):\n        ic = np.linalg.inv(self.cov)\n        object.__setattr__(self, \\\"_icov\\\", ic)\n        sign, logdet = np.linalg.slogdet(self.cov)\n        if sign <= 0:\n            raise ValueError(\\\"Covariance must be positive definite.\\\")\n        object.__setattr__(self, \\\"_lognorm\\\", 0.5 * (len(self.y) * math.log(2 * math.pi) + logdet))\n\n    def __call__(self, theta: Params) -> float:\n        r = np.asarray(self.predict(theta), dtype=float) - np.asarray(self.y, dtype=float)\n        q = float(r.T @ self._icov @ r)\n        return float(-0.5 * q - self._lognorm)\n\n\n@dataclass(frozen=True)\nclass SumLikelihood(Likelihood):\n    parts: Sequence[Likelihood]\n    def __call__(self, theta: Params) -> float:\n        return float(sum(p(theta) for p in self.parts))\n\n\n# ------------------------------ Priors ------------------------------------ #\n\n@dataclass(frozen=True)\nclass Prior:\n    name: str\n    def logpdf(self, x: float) -> float:  # pragma: no cover\n        raise NotImplementedError\n    def sample(self, rng: np.random.Generator) -> float:  # pragma: no cover\n        raise NotImplementedError\n\n\n@dataclass(frozen=True)\nclass UniformPrior(Prior):\n    lo: float\n    hi: float\n    def logpdf(self, x: float) -> float:\n        if self.lo <= x <= self.hi:\n            return -math.log(self.hi - self.lo)\n        return -math.inf\n    def sample(self, rng: np.random.Generator) -> float:\n        return float(rng.uniform(self.lo, self.hi))\n\n\n@dataclass(frozen=True)\nclass LogUniformPrior(Prior):\n    lo: float\n    hi: float\n    def __post_init__(self):\n        if self.lo <= 0 or self.hi <= 0:\n            raise ValueError(\\\"LogUniform bounds must be positive.\\\")\n    def logpdf(self, x: float) -> float:\n        if self.lo <= x <= self.hi:\n            return -math.log(x) - math.log(math.log(self.hi / self.lo))\n        return -math.inf\n    def sample(self, rng: np.random.Generator) -> float:\n        u = rng.uniform(0.0, 1.0)\n        return float(self.lo * (self.hi / self.lo) ** u)\n\n\n@dataclass(frozen=True)\nclass NormalPrior(Prior):\n    mu: float\n    sigma: float\n    def logpdf(self, x: float) -> float:\n        z = (x - self.mu) / self.sigma\n        return float(-0.5 * (z * z + math.log(2 * math.pi * self.sigma * self.sigma)))\n    def sample(self, rng: np.random.Generator) -> float:\n        return float(rng.normal(self.mu, self.sigma))\n\n\ndef log_prior(theta: Params, priors: Sequence[Prior]) -> float:\n    lp = 0.0\n    for p in priors:\n        lp += p.logpdf(float(theta[p.name]))\n        if not np.isfinite(lp):\n            return -math.inf\n    return float(lp)\n\n\ndef sample_from_priors(priors: Sequence[Prior], rng: Optional[np.random.Generator] = None) -> Params:\n    rng = np.random.default_rng() if rng is None else rng\n    return {p.name: p.sample(rng) for p in priors}\n\n\n# ------------------------- Posterior + inference -------------------------- #\n\ndef log_posterior(theta: Params, like: Likelihood, priors: Sequence[Prior]) -> float:\n    lp = log_prior(theta, priors)\n    if not np.isfinite(lp):\n        return -math.inf\n    ll = like(theta)\n    return float(lp + ll)\n\n\ndef metropolis_hastings(\n    init: Params,\n    like: Likelihood,\n    priors: Sequence[Prior],\n    step: Mapping[str, float],\n    n: int,\n    burn: int = 0,\n    thin: int = 1,\n    rng: Optional[np.random.Generator] = None,\n) -> Tuple[List[Params], Array, float]:\n    \\\"\\\"\\\"Random-walk MH. Returns (samples, logpost, acceptance_rate).\\\"\\\"\\\"\n    rng = np.random.default_rng() if rng is None else rng\n    keys = list(init.keys())\n    cur = dict(init)\n    cur_lp = log_posterior(cur, like, priors)\n    acc = 0\n    out: List[Params] = []\n    lps: List[float] = []\n    for i in range(n):\n        prop = dict(cur)\n        for k in keys:\n            prop[k] = float(prop[k] + rng.normal(0.0, float(step.get(k, 0.0))))\n        prop_lp = log_posterior(prop, like, priors)\n        if math.log(rng.uniform()) < (prop_lp - cur_lp):\n            cur, cur_lp = prop, prop_lp\n            acc += 1\n        if i >= burn and ((i - burn) % thin == 0):\n            out.append(dict(cur))\n            lps.append(cur_lp)\n    return out, np.asarray(lps, dtype=float), acc / max(1, n)\n\n\n# ------------------------- Model comparison -------------------------------- #\n\ndef aic_bic(max_loglike: float, k: int, n_data: int) -> Tuple[float, float]:\n    \\\"\\\"\\\"AIC/BIC for quick ranking when evidence is unavailable.\\\"\\\"\\\"\n    aic = 2 * k - 2 * max_loglike\n    bic = k * math.log(max(1, n_data)) - 2 * max_loglike\n    return float(aic), float(bic)\n\n\ndef laplace_log_evidence(mle: Array, logpost: Callable[[Array], float], hess: Array) -> float:\n    \\\"\\\"\\\"Laplace approx to log evidence around MLE/MAP with Hessian of -logpost.\\\"\\\"\\\"\n    k = len(mle)\n    sign, logdet = np.linalg.slogdet(hess)\n    if sign <= 0:\n        raise ValueError(\\\"Hessian must be positive definite for Laplace evidence.\\\")\n    return float(logpost(mle) + 0.5 * k * math.log(2 * math.pi) - 0.5 * logdet)\n\n\n# ------------------------------ Forecasting -------------------------------- #\n\ndef fisher_matrix(\n    theta0: Params,\n    like_builder: Callable[[Params], Likelihood],\n    params: Sequence[str],\n    eps: Union[float, Mapping[str, float]] = 1e-3,\n) -> Array:\n    \\\"\\\"\\\"Numerical Fisher matrix using second derivatives of -logL at theta0.\\\"\\\"\\\"\n    eps_map = {p: float(eps[p]) for p in params} if isinstance(eps, Mapping) else {p: float(eps) for p in params}\n    base_like = like_builder(theta0)\n    def nll(th: Params) -> float:\n        return float(-base_like(th))\n    k = len(params)\n    F = np.zeros((k, k), dtype=float)\n    for i, pi in enumerate(params):\n        for j, pj in enumerate(params[i:], start=i):\n            hi, hj = eps_map[pi], eps_map[pj]\n            tpp = dict(theta0); tpp[pi] += hi; tpp[pj] += hj\n            tpm = dict(theta0); tpm[pi] += hi; tpm[pj] -= hj\n            tmp = dict(theta0); tmp[pi] -= hi; tmp[pj] += hj\n            tmm = dict(theta0); tmm[pi] -= hi; tmm[pj] -= hj\n            val = (nll(tpp) - nll(tpm) - nll(tmp) + nll(tmm)) / (4 * hi * hj)\n            F[i, j] = F[j, i] = float(val)\n    return F\n\"\"\".strip(\"\\n\")]\n\nfinal_text = \"\\n\".join(block.strip(\"\\n\") for block in chunks).strip() + \"\\n\"\ntarget_path.write_text(final_text, encoding=\"utf-8\")\nprint(\"FILE_WRITTEN:src/stats/pipeline.py\")\nprint(\"DIR_STATE:\" + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob(\"*\") if p.is_file())))\n",
+      "container_id": "cntr_6949a1d497e081909a00da1af070d618029e616ce667a0de",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/stats/pipeline.py\nDIR_STATE:[\"src/stats/pipeline.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_02db14b5311f8d21006949a3eb3d1081969e1462d943a31074",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/stats/pipeline.py` as a compact, backend-agnostic statistical pipeline module providing composable likelihoods, common priors, posterior evaluation with Metropolis–Hastings sampling, quick model-comparison metrics (AIC/BIC + Laplace evidence), and a Fisher-matrix forecasting hook."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

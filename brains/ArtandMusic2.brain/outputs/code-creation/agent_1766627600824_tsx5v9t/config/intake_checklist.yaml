@@ -1,0 +1,96 @@
+version: 1
+name: intake_checklist
+description: Intake checklist defining required inputs and validation gates for downstream automation.
+sections:
+  - id: project_metadata
+    title: Project metadata
+    required: true
+    fields:
+      - id: project_name
+        type: string
+        required: true
+        constraints: {min_length: 3}
+      - id: requester
+        type: string
+        required: false
+      - id: created_utc
+        type: string
+        required: false
+        constraints: {format: iso8601_datetime}
+  - id: primary_source_verification
+    title: Primary-source verification
+    required: true
+    description: >
+      Provide a canonical dataset identifier (preferred) OR, if unknown, provide enough
+      research context to execute a deterministic 2019–2025 primary-source search plan.
+    validation:
+      any_of:
+        - name: known_dataset_identifier
+          requires_any: [dataset_name, dataset_doi, dataset_link]
+        - name: unknown_dataset_identifier
+          requires_all: [research_area]
+          requires_any: [candidate_authors, keywords]
+      notes:
+        - dataset_doi must match DOI syntax if provided.
+        - dataset_link must be an http(s) URL if provided.
+        - candidate_authors and keywords accept comma-separated strings or YAML lists.
+    fields:
+      - id: dataset_name
+        type: string
+        required: false
+        constraints: {min_length: 2}
+      - id: dataset_doi
+        type: string
+        required: false
+        constraints:
+          pattern: '^10\.[0-9]{4,9}/[-._;()/:A-Z0-9]+$'
+          flags: [IGNORECASE]
+      - id: dataset_link
+        type: string
+        required: false
+        constraints: {pattern: '^https?://.+'}
+      - id: research_area
+        type: string
+        required: false
+        constraints: {min_length: 3}
+      - id: candidate_authors
+        type: array
+        required: false
+        items: {type: string, constraints: {min_length: 2}}
+        coercions: [{from: string, split: ','}]
+      - id: keywords
+        type: array
+        required: false
+        items: {type: string, constraints: {min_length: 2}}
+        coercions: [{from: string, split: ','}]
+    mapping:
+      template_ref: config/search_plan_template_2019_2025.yaml
+      template_id: primary_source_search_plan_2019_2025
+      field_map:
+        dataset_name: target.dataset.name
+        dataset_doi: target.dataset.doi
+        dataset_link: target.dataset.url
+        research_area: target.context.research_area
+        candidate_authors: target.context.candidate_authors
+        keywords: target.context.keywords
+      derived_rules:
+        - when_any_present: [dataset_name, dataset_doi, dataset_link]
+          set:
+            target.identification_mode: direct_identifier
+        - otherwise_set:
+            target.identification_mode: discovery_via_context
+      required_outputs:
+        - template.search_window.start_year: 2019
+        - template.search_window.end_year: 2025
+        - template.query_bundle.minimum_queries: 3
+        - template.evidence.minimum_primary_sources: 2
+  - id: approvals
+    title: Approvals
+    required: true
+    fields:
+      - id: confirmed_rights_to_use_sources
+        type: boolean
+        required: true
+      - id: confirmed_no_sensitive_data
+        type: boolean
+        required: true

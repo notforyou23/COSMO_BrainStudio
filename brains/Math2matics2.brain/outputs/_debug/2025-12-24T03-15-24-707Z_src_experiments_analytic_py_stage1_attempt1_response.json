@@ -1,0 +1,92 @@
+{
+  "content": "Implemented `src/experiments/analytic.py` with deterministic SymPy-based, LaTeX-friendly step-by-step derivations for the three experiments (geometric series, logistic ODE solution, and least-squares line fit), plus a small public dispatcher and LaTeX conversion helper.",
+  "reasoning": "",
+  "responseId": "resp_02ec8d167ad7a16300694b5b0e7eb88193b451c057e413fd47",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4944,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2615,
+    "output_tokens_details": {
+      "reasoning_tokens": 2553
+    },
+    "total_tokens": 7559
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_02ec8d167ad7a16300694b5b0f3da48193a6f93cbd948c90f1",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_02ec8d167ad7a16300694b5b106110819381961e04bcc52a6f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path('/mnt/data')\nlist(base.glob('src/experiments/*'))\n",
+      "container_id": "cntr_694b5aca46a08190837471b6a8b1f41e0a4013e4cc7137e1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/src/experiments/__init__.py')]"
+        }
+      ]
+    },
+    {
+      "id": "rs_02ec8d167ad7a16300694b5b12b9988193a6655faaa52e186b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_02ec8d167ad7a16300694b5b12f53c81938949ef3a6f1f2967",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path('/mnt/data/src/experiments/__init__.py').read_text())\n",
+      "container_id": "cntr_694b5aca46a08190837471b6a8b1f41e0a4013e4cc7137e1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Experiments package public API.\n\nThis package is designed to be used from the companion notebook and unit tests.\nIt exposes a stable, lightweight import surface while keeping heavy dependencies\n(e.g., NumPy/SciPy/Matplotlib/SymPy) lazily imported.\n\nSubmodules (planned):\n- analytic: SymPy symbolic derivations and LaTeX-friendly helpers\n- numeric: NumPy/SciPy numerical implementations and reference checks\n- sweep: parameter sweep harness producing pandas DataFrames\n- plotting: Matplotlib helpers for consistent figures\n- io: save/load hooks for CSV and figure exports\n\nThe initializer supports `from experiments import <name>` without eagerly\nimporting all submodules.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom importlib import import_module\nfrom typing import Any, Dict, Iterable, Mapping, Tuple\n\n__all__ = [\n    # Submodules\n    \"analytic\",\n    \"numeric\",\n    \"sweep\",\n    \"plotting\",\n    \"io\",\n    # Helpers\n    \"load_csv\",\n    \"save_csv\",\n    \"save_figure\",\n    \"set_mpl_style\",\n    \"run_sweep\",\n    \"symbolic_steps\",\n    \"numeric_eval\",\n    \"public_api\",\n]\n\n__version__ = \"0.1.0\"\n# Map attribute name -> (module, attribute)\n# Keep this minimal; callers can always import submodules directly.\n_EXPORTS: Dict[str, Tuple[str, str]] = {\n    # io\n    \"load_csv\": (\".io\", \"load_csv\"),\n    \"save_csv\": (\".io\", \"save_csv\"),\n    \"save_figure\": (\".io\", \"save_figure\"),\n    # plotting\n    \"set_mpl_style\": (\".plotting\", \"set_mpl_style\"),\n    # sweep\n    \"run_sweep\": (\".sweep\", \"run_sweep\"),\n    # analytic / numeric convenience\n    \"symbolic_steps\": (\".analytic\", \"symbolic_steps\"),\n    \"numeric_eval\": (\".numeric\", \"numeric_eval\"),\n}\n\n_SUBMODULES = {\"analytic\", \"numeric\", \"sweep\", \"plotting\", \"io\"}\ndef __getattr__(name: str) -> Any:\n    \"\"\"Lazy attribute resolver for re-exported helpers and submodules.\"\"\"\n    if name in _SUBMODULES:\n        return import_module(f\"{__name__}.{name}\")\n    if name in _EXPORTS:\n        mod_name, attr = _EXPORTS[name]\n        mod = import_module(f\"{__name__}{mod_name}\")\n        try:\n            return getattr(mod, attr)\n        except AttributeError as exc:\n            raise AttributeError(f\"module '{mod.__name__}' has no attribute '{attr}'\") from exc\n    raise AttributeError(f\"module '{__name__}' has no attribute '{name}'\")\n\n\ndef __dir__() -> Iterable[str]:\n    return sorted(set(globals().keys()) | _SUBMODULES | set(_EXPORTS.keys()))\n\n\ndef public_api() -> Mapping[str, str]:\n    \"\"\"Return a mapping of exported attribute -> fully qualified source.\"\"\"\n    api: Dict[str, str] = {k: f\"{__name__}.{k}\" for k in _SUBMODULES}\n    for k, (m, a) in _EXPORTS.items():\n        api[k] = f\"{__name__}{m}.{a}\"\n    return dict(sorted(api.items()))\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_02ec8d167ad7a16300694b5b152f1c8193abde1237d30fb9b4",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_02ec8d167ad7a16300694b5b21c284819393e5c46ff25bff95",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re\ntarget_path = Path('/mnt/data').joinpath('src/experiments/analytic.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"SymPy analytic derivations for the three experiments.\n\nThis module is intentionally lightweight and deterministic: simplification uses a\nfixed pipeline and all public helpers return LaTeX-friendly objects.\n\nExperiments implemented:\n1) Geometric series: S_n(r) = sum_{k=0}^{n-1} r^k\n2) Logistic growth ODE: x'(t)=r x (1-x/K)\n3) Linear least-squares line fit: y≈a x + b via aggregated sums\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Dict, Iterable, List, Mapping, Sequence, Tuple\n\nimport sympy as sp\n\"\"\")\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass Step:\n    \\\"\\\"\\\"One symbolic transformation step suitable for display in notebooks.\\\"\\\"\\\"\n    label: str\n    expr: sp.Expr\n\n    def latex(self) -> str:  # LaTeX-friendly output\n        return sp.latex(self.expr, fold_frac_powers=True, fold_short_frac=True)\n\n\ndef _dsimplify(expr: sp.Expr) -> sp.Expr:\n    \\\"\\\"\\\"Deterministic-ish simplification pipeline (stable across runs).\\\"\\\"\\\"\n    expr = sp.together(expr)\n    expr = sp.cancel(expr)\n    expr = sp.factor(expr)\n    expr = sp.simplify(expr)\n    return expr\n\"\"\")\n\nchunks.append(\"\"\"\ndef geometric_series_steps() -> List[Step]:\n    \\\"\\\"\\\"Derive the finite geometric series closed form.\\\"\\\"\\\"\n    r, n, k = sp.symbols(\"r n k\")\n    S = sp.summation(r**k, (k, 0, n - 1))\n    steps = [Step(\"definition\", S)]\n    closed = sp.Function(\"S\")(n)\n    # Construct the classic derivation: (1-r)S = 1-r^n\n    Ssym = sp.Symbol(\"S\")\n    eq1 = sp.Eq(Ssym, sp.summation(r**k, (k, 0, n - 1)))\n    steps.append(Step(\"multiply_by_r\", sp.Eq(r * Ssym, sp.summation(r**(k + 1), (k, 0, n - 1)))))\n    steps.append(Step(\"shift_index\", sp.Eq(r * Ssym, sp.summation(r**k, (k, 1, n)))))\n    steps.append(Step(\"subtract\", sp.Eq(Ssym - r * Ssym, 1 - r**n)))\n    final = _dsimplify((1 - r**n) / (1 - r))\n    steps.append(Step(\"closed_form\", final))\n    return steps\n\n\ndef geometric_series_expr() -> sp.Expr:\n    r, n = sp.symbols(\"r n\")\n    return geometric_series_steps()[-1].expr.subs({sp.Symbol(\"r\"): r, sp.Symbol(\"n\"): n})\n\"\"\")\n\nchunks.append(\"\"\"\ndef logistic_solution_steps() -> List[Step]:\n    \\\"\\\"\\\"Solve logistic ODE x'(t)=r x (1-x/K) with initial condition x(0)=x0.\\\"\\\"\\\"\n    t = sp.Symbol(\"t\", real=True)\n    r, K, x0 = sp.symbols(\"r K x0\", positive=True)\n    x = sp.Function(\"x\")\n    ode = sp.Eq(sp.diff(x(t), t), r * x(t) * (1 - x(t) / K))\n    steps: List[Step] = [Step(\"ode\", ode)]\n    # Separation of variables and partial fractions\n    sep = sp.Eq(sp.diff(x(t), t) / (x(t) * (1 - x(t) / K)), r)\n    steps.append(Step(\"separate\", sep))\n    integrand = sp.apart(1 / (sp.Symbol(\"u\") * (1 - sp.Symbol(\"u\") / K)), sp.Symbol(\"u\"))\n    steps.append(Step(\"partial_fractions_u\", integrand))\n    u = sp.Symbol(\"u\")\n    integral = sp.integrate(1 / (u * (1 - u / K)), u)\n    steps.append(Step(\"integrate_u\", _dsimplify(integral)))\n    # Known closed form solution\n    sol = _dsimplify(K / (1 + (K / x0 - 1) * sp.exp(-r * t)))\n    steps.append(Step(\"closed_form_x(t)\", sol))\n    return steps\n\n\ndef logistic_solution_expr() -> sp.Expr:\n    return logistic_solution_steps()[-1].expr\n\"\"\")\n\nchunks.append(\"\"\"\ndef least_squares_line_steps() -> List[Step]:\n    \\\"\\\"\\\"Closed form for a,b minimizing sum_i (a x_i + b - y_i)^2 using sums.\n\n    Uses aggregated symbols: n, Sx=Σx, Sy=Σy, Sxx=Σx^2, Sxy=Σx y.\n    \\\"\\\"\\\"\n    a, b = sp.symbols(\"a b\", real=True)\n    n, Sx, Sy, Sxx, Sxy = sp.symbols(\"n Sx Sy Sxx Sxy\", real=True)\n    J = sp.Symbol(\"J\")\n    # Normal equations from gradients of J = Σ(ax+b-y)^2 / 2 (scale irrelevant)\n    eq_a = sp.Eq(a * Sxx + b * Sx - Sxy, 0)\n    eq_b = sp.Eq(a * Sx + b * n - Sy, 0)\n    steps: List[Step] = [Step(\"normal_eq_a\", eq_a), Step(\"normal_eq_b\", eq_b)]\n    sol = sp.solve((eq_a, eq_b), (a, b), dict=True)[0]\n    a_hat = _dsimplify(sol[a])\n    b_hat = _dsimplify(sol[b])\n    steps.append(Step(\"a_star\", a_hat))\n    steps.append(Step(\"b_star\", b_hat))\n    return steps\n\n\ndef least_squares_line_exprs() -> Tuple[sp.Expr, sp.Expr]:\n    steps = least_squares_line_steps()\n    return steps[-2].expr, steps[-1].expr\n\"\"\")\n\nchunks.append(\"\"\"\n_EXPERIMENTS: Mapping[str, callable] = {\n    \"geometric_series\": geometric_series_steps,\n    \"logistic_solution\": logistic_solution_steps,\n    \"least_squares_line\": least_squares_line_steps,\n}\n\n\ndef symbolic_steps(experiment: str) -> List[Step]:\n    \\\"\\\"\\\"Return the derivation steps for a named experiment.\\\"\\\"\\\"\n    try:\n        return list(_EXPERIMENTS[experiment]())\n    except KeyError as exc:\n        raise KeyError(f\"Unknown experiment '{experiment}'. Options: {sorted(_EXPERIMENTS)}\") from exc\n\n\ndef steps_to_latex(steps: Sequence[Step]) -> List[Tuple[str, str]]:\n    \\\"\\\"\\\"Convert steps to (label, latex) pairs for notebook display.\\\"\\\"\\\"\n    return [(s.label, s.latex()) for s in steps]\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/experiments/analytic.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b5aca46a08190837471b6a8b1f41e0a4013e4cc7137e1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/analytic.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/analytic.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_02ec8d167ad7a16300694b5b335c988193ab18bc34a6563da3",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/experiments/analytic.py` with deterministic SymPy-based, LaTeX-friendly step-by-step derivations for the three experiments (geometric series, logistic ODE solution, and least-squares line fit), plus a small public dispatcher and LaTeX conversion helper."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

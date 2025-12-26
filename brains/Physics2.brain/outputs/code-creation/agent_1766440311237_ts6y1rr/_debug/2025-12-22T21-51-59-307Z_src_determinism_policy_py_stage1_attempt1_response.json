@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/determinism_policy.py` providing a single determinism policy with best-effort environment normalization plus seed setting/restoration for Python `random` and optional NumPy, exposed via a simple `DeterminismPolicy` context manager API for the benchmark runner.",
+  "reasoning": "",
+  "responseId": "resp_0dd09e4682d2dcba006949bd8d4cb481908893bc379ea0d6b4",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3125,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1608,
+    "output_tokens_details": {
+      "reasoning_tokens": 1550
+    },
+    "total_tokens": 4733
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0dd09e4682d2dcba006949bd8e01ac81909a2fb88d9938884b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0dd09e4682d2dcba006949bd95322c81908bbdea9d0b0bcb58",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, random\ntarget_path = Path('/mnt/data').joinpath('src/determinism_policy.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\\\n\\\"\\\"\\\"Determinism policy utilities.\n\nThis module centralizes repeatability controls for benchmarks:\n- Sets seeds for Python's `random` and NumPy (if installed).\n- Normalizes common environment variables that influence determinism.\n\nIt is intentionally lightweight and dependency-free (NumPy optional).\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, field\nimport os\nimport random\nfrom typing import Any, Dict, Optional, Tuple\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef _import_numpy():\n    try:\n        import numpy as np  # type: ignore\n    except Exception:\n        return None\n    return np\n\n\ndef set_global_seed(seed: int) -> None:\n    \\\"\\\"\\\"Seed Python's RNGs (and NumPy if available).\\\"\\\"\\\"\n    if not isinstance(seed, int):\n        raise TypeError(f\\\"seed must be int, got {type(seed)!r}\\\")\n    random.seed(seed)\n    np = _import_numpy()\n    if np is not None:\n        np.random.seed(seed)\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef normalized_env_defaults() -> Dict[str, str]:\n    \\\"\\\"\\\"Environment variables commonly set for deterministic execution.\\\"\\\"\\\"\n    return {\n        # Hash randomization affects iteration order of sets/dicts in some cases.\n        \\\"PYTHONHASHSEED\\\": \\\"0\\\",\n        # Prefer stable UTF-8 behavior across systems.\n        \\\"PYTHONUTF8\\\": \\\"1\\\",\n        # Keep locale/timezone stable for any incidental formatting.\n        \\\"TZ\\\": \\\"UTC\\\",\n        \\\"LC_ALL\\\": \\\"C\\\",\n        \\\"LANG\\\": \\\"C\\\",\n        # Reduce non-determinism from threaded BLAS backends (best effort).\n        \\\"OMP_NUM_THREADS\\\": \\\"1\\\",\n        \\\"MKL_NUM_THREADS\\\": \\\"1\\\",\n        \\\"OPENBLAS_NUM_THREADS\\\": \\\"1\\\",\n        \\\"VECLIB_MAXIMUM_THREADS\\\": \\\"1\\\",\n        \\\"NUMEXPR_NUM_THREADS\\\": \\\"1\\\",\n        # GPU libraries (if present) can require additional controls.\n        \\\"CUBLAS_WORKSPACE_CONFIG\\\": \\\":4096:8\\\",\n    }\n\n\ndef apply_environment(env: Optional[Dict[str, str]] = None) -> Dict[str, Optional[str]]:\n    \\\"\\\"\\\"Apply environment overrides and return previous values for restoration.\\\"\\\"\\\"\n    overrides = normalized_env_defaults()\n    if env:\n        overrides.update({k: str(v) for k, v in env.items()})\n    previous: Dict[str, Optional[str]] = {}\n    for k, v in overrides.items():\n        previous[k] = os.environ.get(k)\n        os.environ[k] = v\n    # Ensure tz changes take effect where supported.\n    if \\\"TZ\\\" in overrides:\n        try:\n            import time\n\n            time.tzset()  # type: ignore[attr-defined]\n        except Exception:\n            pass\n    return previous\n\n\ndef restore_environment(previous: Dict[str, Optional[str]]) -> None:\n    \\\"\\\"\\\"Restore environment variables captured from `apply_environment`.\\\"\\\"\\\"\n    for k, old in previous.items():\n        if old is None:\n            os.environ.pop(k, None)\n        else:\n            os.environ[k] = old\n    if \\\"TZ\\\" in previous:\n        try:\n            import time\n\n            time.tzset()  # type: ignore[attr-defined]\n        except Exception:\n            pass\n\"\"\")\n\nchunks.append(\"\"\"\\\n@dataclass\nclass DeterminismPolicy:\n    \\\"\\\"\\\"A small policy object for reproducible benchmark runs.\n\n    Typical use from a runner:\n\n        with DeterminismPolicy(seed=123).activate():\n            ... run benchmark ...\n\n    It captures/restores RNG and environment state so callers can nest policies.\n    \\\"\\\"\\\"\n\n    seed: Optional[int] = 0\n    env: Dict[str, str] = field(default_factory=dict)\n    _prev_env: Dict[str, Optional[str]] = field(init=False, default_factory=dict)\n    _py_random_state: Any = field(init=False, default=None)\n    _np_random_state: Any = field(init=False, default=None)\n    _active: bool = field(init=False, default=False)\n\n    def activate(self) -> \\\"DeterminismPolicy\\\":\n        if self._active:\n            return self\n        self._py_random_state = random.getstate()\n        np = _import_numpy()\n        if np is not None:\n            self._np_random_state = np.random.get_state()\n        self._prev_env = apply_environment(self.env)\n        if self.seed is not None:\n            set_global_seed(int(self.seed))\n        self._active = True\n        return self\n\n    def close(self) -> None:\n        if not self._active:\n            return\n        restore_environment(self._prev_env)\n        if self._py_random_state is not None:\n            random.setstate(self._py_random_state)\n        np = _import_numpy()\n        if np is not None and self._np_random_state is not None:\n            np.random.set_state(self._np_random_state)\n        self._active = False\n\n    def __enter__(self) -> \\\"DeterminismPolicy\\\":\n        return self.activate()\n\n    def __exit__(self, exc_type, exc, tb) -> None:\n        self.close()\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/determinism_policy.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd7c27f481909eaafa795397fda805ca11b7959e0da0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/determinism_policy.py\nDIR_STATE:[\"src/determinism_policy.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0dd09e4682d2dcba006949bda808ac8190b7c027494e6af4d3",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/determinism_policy.py` providing a single determinism policy with best-effort environment normalization plus seed setting/restoration for Python `random` and optional NumPy, exposed via a simple `DeterminismPolicy` context manager API for the benchmark runner."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

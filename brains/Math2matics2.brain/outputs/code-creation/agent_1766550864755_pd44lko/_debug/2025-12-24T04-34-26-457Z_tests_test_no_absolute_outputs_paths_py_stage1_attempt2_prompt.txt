@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a single output-path helper (e.g., OUTPUT_DIR defaulting to ./outputs with optional env override) and refactor all writers to use it; add a pytest asserting no absolute /outputs paths are produced in logs or artifacts.
+Project: single output-path helper (e.g., OUTPUT_DIR defaulting to ./outputs with optional env override) and refactor all writers to use it; add a pytest asserting no absolute /outputs paths are produced in logs or artifacts. (python script)
+
+Target file details:
+- Path: tests/test_no_absolute_outputs_paths.py
+- Purpose: Pytest that runs key writer/pipeline code paths and asserts no absolute '/outputs' paths appear in generated artifacts or captured logs.
+- Category: test
+
+Other planned files (for context only):
+- src/utils/output_path.py: Defines a single OUTPUT_DIR helper (defaulting to ./outputs with optional environment-variable override) plus small path utilities used by all artifact/log writers.
+- src/io/writers.py: Centralizes all artifact/log writing functions and refactors them to build destinations via the shared OUTPUT_DIR helper instead of hardcoded /outputs paths.
+- scripts/run_pipeline.py: Updates the pipeline entrypoint to route all produced logs/artifacts through the shared OUTPUT_DIR helper and avoid emitting absolute /outputs references.
+
+Reference insights:
+- [AGENT INSIGHT: agent_1766540049061_an5rb16] **Ensure portability of the `/outputs` requirement**: because `/outputs` can be unwritable (obs
+- [CONSOLIDATED] In this environment, the default root-level output directory (`/outputs`) may be non-writable (permission denied), so workflo
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_scripts_run_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766539771836_cun
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+- [AGENT: agent_1766550481146_0a96u82] Cycle 118 consistency review (divergence 0.95):
+Summary answer
+All three branches are largely compatibl
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Pytest that runs key writer/pipeline code paths and asserts no absolute '/outputs' paths appear in generated artifacts or captured logs.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('tests/test_no_absolute_outputs_paths.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:tests/test_no_absolute_outputs_paths.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside tests/test_no_absolute_outputs_paths.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

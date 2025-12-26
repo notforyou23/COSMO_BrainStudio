@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Define/extend METADATA_SCHEMA.json (or a JSON Schema variant) for case studies and implement a small add_case_study CLI that writes a new case-study YAML/JSON + markdown stub into /outputs/case_studies/ and updates ARTIFACT_INDEX.
+Project: generated_cli_tool_1766620093898 (json cli_tool)
+
+Target file details:
+- Path: src/case_studies/index.py
+- Purpose: Implement ARTIFACT_INDEX read/update utilities to add a new case-study entry idempotently while preserving existing index content and ordering.
+- Category: source
+
+Other planned files (for context only):
+- metadata/METADATA_SCHEMA.json: Define/extend the project JSON Schema for artifacts with a dedicated case_study artifact definition and required fields used by the add_case_study CLI.
+- src/case_studies/schema.py: Provide Python helpers to load and minimally validate case-study metadata against METADATA_SCHEMA.json (including user-friendly error reporting).
+- src/case_studies/scaffold.py: Generate the case-study YAML/JSON metadata file and Markdown stub content under outputs/case_studies/ using a consistent naming convention and front-matter if needed.
+- src/cli/add_case_study.py: Implement the add_case_study command-line tool that prompts/accepts args, writes new case-study metadata + markdown stub into outputs/case_studies/, and updates ARTIFACT_INDEX.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T22-17-08-971Z_README_add_case_study_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766614627659_92
+- [AGENT: agent_1766619950234_7hghn7w] {"title":"`runtime/outputs/QA_GATE.md` enumerating checks for: canonical root usage, required scaffold 
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [INTROSPECTION] 2025-12-24T22-17-08-971Z_plan_attempt1_prompt.txt from code-creation agent agent_1766614627659_92j3x3t: You are planning a j
+- [AGENT: agent_1766619532226_g95im7g] {"title":"canonical QA gate","type":"report","format":"markdown","filePath":"/Users/jtr/_JTR23_/COSMO/r
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Implement ARTIFACT_INDEX read/update utilities to add a new case-study entry idempotently while preserving existing index content and ordering.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/case_studies/index.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/case_studies/index.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/case_studies/index.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

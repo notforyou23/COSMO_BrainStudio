@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/dgpipe/models.py` as a compact, dependency-light set of core dataclasses/enums for pipeline and stage specifications, runtime configuration, and execution results with robust dict/ISO timestamp serialization helpers.",
+  "reasoning": "",
+  "responseId": "resp_0335a8b2c57dad1e006949b60da1a481979c01052b0ed38863",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3712,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2132,
+    "output_tokens_details": {
+      "reasoning_tokens": 82
+    },
+    "total_tokens": 5844
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0335a8b2c57dad1e006949b60e503c8197a95c8588f44fbbed",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0335a8b2c57dad1e006949b610535081979ddfd28a447e9dd5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/dgpipe/models.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"dgpipe domain models.\n\nThis module defines small, reusable dataclasses shared across dgpipe modules.\nThey are intentionally dependency-light to keep the public API stable.\n\\\"\\\"\\\"\"\"\",\n\"\"\"from __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom datetime import datetime, timezone\nfrom enum import Enum\nfrom typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence\"\"\",\n\"\"\"def utc_now() -> datetime:\n    \\\"\\\"\\\"Return an aware UTC timestamp.\\\"\\\"\\\"\n    return datetime.now(timezone.utc)\n\n\ndef _omit_none(d: Mapping[str, Any]) -> Dict[str, Any]:\n    return {k: v for k, v in d.items() if v is not None}\"\"\",\n\"\"\"class StageStatus(str, Enum):\n    \\\"\\\"\\\"Execution status for an individual stage.\\\"\\\"\\\"\n\n    PENDING = \"pending\"\n    RUNNING = \"running\"\n    SKIPPED = \"skipped\"\n    SUCCESS = \"success\"\n    FAILED = \"failed\\\"\\\"\\\"\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass StageSpec:\n    \\\"\\\"\\\"Declarative stage configuration.\n\n    Attributes:\n        name: Stable identifier used in logs and result lookups.\n        kind: Implementation discriminator (e.g., \"python\", \"shell\").\n        config: Arbitrary stage configuration (JSON-serializable).\n        requires: Names of stages that must complete successfully first.\n    \\\"\\\"\\\"\n\n    name: str\n    kind: str = \"python\"\n    config: Dict[str, Any] = field(default_factory=dict)\n    requires: List[str] = field(default_factory=list)\n\n    def to_dict(self) -> Dict[str, Any]:\n        return {\n            \"name\": self.name,\n            \"kind\": self.kind,\n            \"config\": self.config,\n            \"requires\": list(self.requires),\n        }\n\n    @classmethod\n    def from_dict(cls, d: Mapping[str, Any]) -> \"StageSpec\":\n        return cls(\n            name=str(d[\"name\"]),\n            kind=str(d.get(\"kind\", \"python\")),\n            config=dict(d.get(\"config\") or {}),\n            requires=list(d.get(\"requires\") or []),\n        )\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass PipelineSpec:\n    \\\"\\\"\\\"Declarative pipeline configuration (ordered stages).\\\"\\\"\\\"\n\n    name: str = \"pipeline\"\n    stages: List[StageSpec] = field(default_factory=list)\n    metadata: Dict[str, Any] = field(default_factory=dict)\n\n    def stage_by_name(self) -> Dict[str, StageSpec]:\n        return {s.name: s for s in self.stages}\n\n    def validate(self) -> None:\n        seen: set[str] = set()\n        for s in self.stages:\n            if s.name in seen:\n                raise ValueError(f\"Duplicate stage name: {s.name}\")\n            seen.add(s.name)\n        unknown = sorted({r for s in self.stages for r in s.requires if r not in seen})\n        if unknown:\n            raise ValueError(f\"Unknown stage dependencies: {unknown}\")\n\n    def to_dict(self) -> Dict[str, Any]:\n        return {\n            \"name\": self.name,\n            \"stages\": [s.to_dict() for s in self.stages],\n            \"metadata\": self.metadata,\n        }\n\n    @classmethod\n    def from_dict(cls, d: Mapping[str, Any]) -> \"PipelineSpec\":\n        return cls(\n            name=str(d.get(\"name\", \"pipeline\")),\n            stages=[StageSpec.from_dict(x) for x in (d.get(\"stages\") or [])],\n            metadata=dict(d.get(\"metadata\") or {}),\n        )\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass RunConfig:\n    \\\"\\\"\\\"Runtime configuration for running a pipeline.\\\"\\\"\\\"\n\n    workdir: Optional[str] = None\n    env: Dict[str, str] = field(default_factory=dict)\n    max_workers: int = 1\n    dry_run: bool = False\n    continue_on_error: bool = False\n\n    def to_dict(self) -> Dict[str, Any]:\n        return _omit_none(\n            {\n                \"workdir\": self.workdir,\n                \"env\": dict(self.env),\n                \"max_workers\": int(self.max_workers),\n                \"dry_run\": bool(self.dry_run),\n                \"continue_on_error\": bool(self.continue_on_error),\n            }\n        )\n\n    @classmethod\n    def from_dict(cls, d: Mapping[str, Any]) -> \"RunConfig\":\n        return cls(\n            workdir=d.get(\"workdir\"),\n            env={str(k): str(v) for k, v in (d.get(\"env\") or {}).items()},\n            max_workers=int(d.get(\"max_workers\", 1)),\n            dry_run=bool(d.get(\"dry_run\", False)),\n            continue_on_error=bool(d.get(\"continue_on_error\", False)),\n        )\"\"\",\n\"\"\"@dataclass\nclass StageResult:\n    \\\"\\\"\\\"Result of running a single stage.\\\"\\\"\\\"\n\n    name: str\n    status: StageStatus = StageStatus.PENDING\n    started_at: Optional[datetime] = None\n    finished_at: Optional[datetime] = None\n    outputs: Dict[str, Any] = field(default_factory=dict)\n    error: Optional[str] = None\n    logs: List[str] = field(default_factory=list)\n\n    def mark_running(self) -> None:\n        self.status = StageStatus.RUNNING\n        self.started_at = self.started_at or utc_now()\n\n    def mark_finished(self, status: StageStatus, *, error: Optional[str] = None) -> None:\n        self.status = status\n        self.finished_at = self.finished_at or utc_now()\n        self.error = error\n\n    @property\n    def ok(self) -> bool:\n        return self.status in (StageStatus.SUCCESS, StageStatus.SKIPPED)\n\n    def to_dict(self) -> Dict[str, Any]:\n        def dt(x: Optional[datetime]) -> Optional[str]:\n            return x.isoformat() if x else None\n\n        return _omit_none(\n            {\n                \"name\": self.name,\n                \"status\": self.status.value,\n                \"started_at\": dt(self.started_at),\n                \"finished_at\": dt(self.finished_at),\n                \"outputs\": self.outputs,\n                \"error\": self.error,\n                \"logs\": list(self.logs),\n            }\n        )\n\n    @classmethod\n    def from_dict(cls, d: Mapping[str, Any]) -> \"StageResult\":\n        def parse_dt(s: Optional[str]) -> Optional[datetime]:\n            return datetime.fromisoformat(s) if s else None\n\n        return cls(\n            name=str(d[\"name\"]),\n            status=StageStatus(str(d.get(\"status\", StageStatus.PENDING.value))),\n            started_at=parse_dt(d.get(\"started_at\")),\n            finished_at=parse_dt(d.get(\"finished_at\")),\n            outputs=dict(d.get(\"outputs\") or {}),\n            error=d.get(\"error\"),\n            logs=list(d.get(\"logs\") or []),\n        )\"\"\",\n\"\"\"@dataclass\nclass PipelineResult:\n    \\\"\\\"\\\"Result of running an entire pipeline.\\\"\\\"\\\"\n\n    spec_name: str\n    run_id: str\n    started_at: datetime = field(default_factory=utc_now)\n    finished_at: Optional[datetime] = None\n    stages: List[StageResult] = field(default_factory=list)\n    metadata: Dict[str, Any] = field(default_factory=dict)\n\n    def stage_map(self) -> Dict[str, StageResult]:\n        return {r.name: r for r in self.stages}\n\n    @property\n    def ok(self) -> bool:\n        return all(r.ok for r in self.stages)\n\n    def to_dict(self) -> Dict[str, Any]:\n        return _omit_none(\n            {\n                \"spec_name\": self.spec_name,\n                \"run_id\": self.run_id,\n                \"started_at\": self.started_at.isoformat(),\n                \"finished_at\": self.finished_at.isoformat() if self.finished_at else None,\n                \"stages\": [s.to_dict() for s in self.stages],\n                \"metadata\": self.metadata,\n                \"ok\": self.ok,\n            }\n        )\n\n    @classmethod\n    def from_dict(cls, d: Mapping[str, Any]) -> \"PipelineResult\":\n        started = datetime.fromisoformat(str(d[\"started_at\"]))\n        finished = d.get(\"finished_at\")\n        return cls(\n            spec_name=str(d[\"spec_name\"]),\n            run_id=str(d[\"run_id\"]),\n            started_at=started,\n            finished_at=datetime.fromisoformat(finished) if finished else None,\n            stages=[StageResult.from_dict(x) for x in (d.get(\"stages\") or [])],\n            metadata=dict(d.get(\"metadata\") or {}),\n        )\n\n\ndef stages_in_order(spec: PipelineSpec, names: Sequence[str]) -> List[StageSpec]:\n    \\\"\\\"\\\"Return StageSpec objects in pipeline order filtered by stage names.\\\"\\\"\\\"\n    wanted = set(names)\n    return [s for s in spec.stages if s.name in wanted]\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/dgpipe/models.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949b590d1548190ae21728e2f723cbf0045b034ab97adc3",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/dgpipe/models.py\nDIR_STATE:[\"src/dgpipe/__init__.py\", \"src/dgpipe/models.py\", \"src/dgpipe/protocols.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0335a8b2c57dad1e006949b628b1b48197b748bc947ea281ab",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/dgpipe/models.py` as a compact, dependency-light set of core dataclasses/enums for pipeline and stage specifications, runtime configuration, and execution results with robust dict/ISO timestamp serialization helpers."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

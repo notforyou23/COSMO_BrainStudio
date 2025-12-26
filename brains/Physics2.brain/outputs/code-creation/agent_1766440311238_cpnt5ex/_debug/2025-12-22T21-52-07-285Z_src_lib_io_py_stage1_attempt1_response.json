@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/lib/io.py` with deterministic JSON/CSV save/load utilities, atomic writes, and lightweight reproducibility metadata capture including a stable SHA-256 fingerprint.",
+  "reasoning": "",
+  "responseId": "resp_0e7ea4264682d67f006949be7a7f708197ae1fa1f7e3ba019f",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3333,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1862,
+    "output_tokens_details": {
+      "reasoning_tokens": 185
+    },
+    "total_tokens": 5195
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0e7ea4264682d67f006949be7b6e3c8197963a86577957748f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0e7ea4264682d67f006949be7f8728819789b50f4b48c80d2a",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, sys, platform, hashlib, csv, datetime, importlib\n\ntarget_path = Path('/mnt/data').joinpath('src/lib/io.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\\\n\\\"\\\"\\\"src.lib.io\n\nSmall I/O helpers for reproducible prototype experiments.\n\nDesign goals:\n- Deterministic JSON serialization (stable key order, stable float formatting).\n- Atomic writes (write to temp file then replace).\n- Lightweight metadata capture for run reproducibility.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import asdict, is_dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Union\nimport csv\nimport datetime as _dt\nimport hashlib\nimport json\nimport os\nimport platform\nimport sys\n\"\"\")\n\nchunks.append(\"\"\"\\\nJsonable = Union[None, bool, int, float, str, List[\"Jsonable\"], Dict[str, \"Jsonable\"]]\n\n\ndef _to_jsonable(obj: Any) -> Jsonable:\n    \\\"\\\"\\\"Convert common Python objects to JSON-compatible structures.\\\"\\\"\\\"\n    if is_dataclass(obj):\n        return _to_jsonable(asdict(obj))\n    if isinstance(obj, Path):\n        return str(obj)\n    if isinstance(obj, (tuple, set)):\n        return [_to_jsonable(x) for x in obj]\n    if isinstance(obj, dict):\n        return {str(k): _to_jsonable(v) for k, v in obj.items()}\n    if isinstance(obj, list):\n        return [_to_jsonable(x) for x in obj]\n    return obj  # assume already JSON-serializable\n\"\"\")\n\nchunks.append(\"\"\"\\\nclass _DeterministicFloatEncoder(json.JSONEncoder):\n    \\\"\\\"\\\"JSON encoder with stable float formatting.\\\"\\\"\\\"\n\n    def iterencode(self, o: Any, _one_shot: bool = False):  # type: ignore[override]\n        # Adapted from CPython encoder: force float repr via format.\n        def floatstr(\n            obj: float,\n            allow_nan=self.allow_nan,\n            _inf=float(\"inf\"),\n            _neginf=-float(\"inf\"),\n        ):\n            if obj != obj:\n                text = \"NaN\"\n            elif obj == _inf:\n                text = \"Infinity\"\n            elif obj == _neginf:\n                text = \"-Infinity\"\n            else:\n                # 17 significant digits round-trips IEEE754 and is deterministic.\n                text = format(obj, \".17g\")\n            if not allow_nan and text in {\"NaN\", \"Infinity\", \"-Infinity\"}:\n                raise ValueError(\"Out of range float values are not JSON compliant\")\n            return text\n\n        encoder = json.encoder._make_iterencode(  # type: ignore[attr-defined]\n            None,\n            self.default,\n            json.encoder.encode_basestring,  # type: ignore[attr-defined]\n            self.indent,\n            floatstr,\n            self.key_separator,\n            self.item_separator,\n            self.sort_keys,\n            self.skipkeys,\n            _one_shot,\n        )\n        return encoder(o, 0)\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef stable_json_dumps(data: Any, *, indent: int = 2) -> str:\n    \\\"\\\"\\\"Deterministically serialize to JSON (sorted keys + stable floats).\\\"\\\"\\\"\n    payload = _to_jsonable(data)\n    return json.dumps(\n        payload,\n        cls=_DeterministicFloatEncoder,\n        sort_keys=True,\n        ensure_ascii=False,\n        indent=indent,\n        separators=(\",\", \": \"),\n    ) + \"\\\\n\"\n\n\ndef _atomic_write_text(path: Path, text: str, *, encoding: str = \"utf-8\") -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    tmp = path.with_suffix(path.suffix + \".tmp\")\n    tmp.write_text(text, encoding=encoding)\n    os.replace(tmp, path)\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef save_json(path: Union[str, Path], data: Any, *, indent: int = 2) -> Path:\n    \\\"\\\"\\\"Save JSON deterministically and atomically.\\\"\\\"\\\"\n    p = Path(path)\n    _atomic_write_text(p, stable_json_dumps(data, indent=indent))\n    return p\n\n\ndef load_json(path: Union[str, Path]) -> Any:\n    \\\"\\\"\\\"Load JSON from disk.\\\"\\\"\\\"\n    return json.loads(Path(path).read_text(encoding=\"utf-8\"))\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef save_csv(\n    path: Union[str, Path],\n    rows: Sequence[Mapping[str, Any]],\n    *,\n    fieldnames: Optional[Sequence[str]] = None,\n) -> Path:\n    \\\"\\\"\\\"Save rows (dicts) to CSV with stable column order.\n\n    If fieldnames is not provided, it is the sorted union of keys across rows.\n    \\\"\\\"\\\"\n    p = Path(path)\n    p.parent.mkdir(parents=True, exist_ok=True)\n    if fieldnames is None:\n        keys = set()\n        for r in rows:\n            keys.update(r.keys())\n        fieldnames = sorted(str(k) for k in keys)\n    tmp = p.with_suffix(p.suffix + \".tmp\")\n    with tmp.open(\"w\", encoding=\"utf-8\", newline=\"\") as f:\n        w = csv.DictWriter(f, fieldnames=list(fieldnames))\n        w.writeheader()\n        for r in rows:\n            w.writerow({k: r.get(k, \"\") for k in fieldnames})\n    os.replace(tmp, p)\n    return p\n\n\ndef load_csv(path: Union[str, Path]) -> List[Dict[str, str]]:\n    \\\"\\\"\\\"Load CSV into list of dicts (all values as strings).\\\"\\\"\\\"\n    p = Path(path)\n    with p.open(\"r\", encoding=\"utf-8\", newline=\"\") as f:\n        return list(csv.DictReader(f))\n\"\"\")\n\nchunks.append(\"\"\"\\\ndef capture_metadata(\n    *,\n    params: Optional[Mapping[str, Any]] = None,\n    extra: Optional[Mapping[str, Any]] = None,\n    packages: Sequence[str] = (\"numpy\", \"sympy\", \"pandas\", \"matplotlib\"),\n) -> Dict[str, Any]:\n    \\\"\\\"\\\"Capture lightweight metadata for reproducible runs.\\\"\\\"\\\"\n    meta: Dict[str, Any] = {\n        \"timestamp_utc\": _dt.datetime.now(tz=_dt.timezone.utc).isoformat(),\n        \"python\": sys.version.split()[0],\n        \"platform\": platform.platform(),\n        \"cwd\": os.getcwd(),\n        \"argv\": sys.argv[:],\n    }\n    # Optional package versions (best-effort).\n    vers: Dict[str, str] = {}\n    for name in packages:\n        try:\n            mod = __import__(name)\n            v = getattr(mod, \"__version__\", None)\n            if v:\n                vers[name] = str(v)\n        except Exception:\n            continue\n    if vers:\n        meta[\"packages\"] = dict(sorted(vers.items()))\n    if params is not None:\n        meta[\"params\"] = _to_jsonable(dict(params))\n    if extra is not None:\n        meta[\"extra\"] = _to_jsonable(dict(extra))\n    meta[\"fingerprint_sha256\"] = hashlib.sha256(\n        stable_json_dumps(meta, indent=0).encode(\"utf-8\")\n    ).hexdigest()\n    return meta\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/lib/io.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd84af8481908e931e87d628d2450d02f5accc7ac937",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/lib/io.py\nDIR_STATE:[\"src/lib/io.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0e7ea4264682d67f006949be973c2c8197976ac3a5ce39e977",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/lib/io.py` with deterministic JSON/CSV save/load utilities, atomic writes, and lightweight reproducibility metadata capture including a stable SHA-256 fingerprint."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

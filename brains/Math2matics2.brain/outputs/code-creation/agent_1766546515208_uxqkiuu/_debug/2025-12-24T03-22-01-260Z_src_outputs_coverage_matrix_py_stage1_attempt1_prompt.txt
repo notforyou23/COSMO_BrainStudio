@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create /outputs/coverage_matrix.csv with stable ontology columns (domain, subtopic, artifact_type, status, link) and seed rows; create /outputs/eval_loop.md with 5-cycle cadence, metrics, thresholds, and 'what to do next' decision rules.
+Project: /outputs/coverage_matrix.csv with stable ontology columns (domain, subtopic, artifact_type, status, link) and seed rows; create /outputs/eval_loop.md with 5-cycle cadence, metrics, thresholds, and 'what to do next' decision rules. (python script)
+
+Target file details:
+- Path: src/outputs/coverage_matrix.py
+- Purpose: Module defining the stable ontology schema and seed row templates and providing functions to render the coverage matrix to CSV.
+- Category: source
+
+Other planned files (for context only):
+- scripts/generate_outputs.py: CLI script that deterministically generates outputs/coverage_matrix.csv with stable ontology columns and seed rows and outputs/eval_loop.md with a 5-cycle cadence, metrics, thresholds, and decision rules.
+- src/outputs/eval_loop.py: Module that renders the evaluation loop markdown including cycle cadence, required metrics, thresholds, and next-action decision rules.
+- src/utils/fs.py: Filesystem utilities for creating output directories and writing files atomically to ensure reproducible artifact generation.
+- src/utils/csv_utils.py: CSV helper utilities for stable column ordering, canonical newline handling, and deterministic writing.
+
+Reference insights:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [INTROSPECTION] 2025-12-24T01-42-52-338Z_plan_attempt1_prompt.txt from code-creation agent agent_1766540568432_0u1x4ih: You are planning a p
+- [INTROSPECTION] 2025-12-24T01-42-52-338Z_plan_attempt1_prompt.txt from code-creation agent agent_1766540568432_0u1x4ih: You are planning a p
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_scripts_run_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766539771836_cun
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Module defining the stable ontology schema and seed row templates and providing functions to render the coverage matrix to CSV.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/outputs/coverage_matrix.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/outputs/coverage_matrix.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/outputs/coverage_matrix.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

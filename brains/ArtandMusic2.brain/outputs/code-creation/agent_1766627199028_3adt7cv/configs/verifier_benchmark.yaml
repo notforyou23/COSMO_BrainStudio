@@ -1,0 +1,102 @@
+# Verifier benchmark default configuration
+version: 1
+run:
+  name: verifier_benchmark_default
+  seed: 42
+  output_dir: /Users/jtr/_JTR23_/COSMO/runtime/outputs/execution/runs/verifier_benchmark
+dataset:
+  # Grounded QA dataset with cited evidence (JSONL recommended)
+  path: /Users/jtr/_JTR23_/COSMO/runtime/outputs/execution/data/grounded_qa.jsonl
+  format: jsonl
+  schema:
+    id_field: id
+    question_field: question
+    answer_field: answer
+    evidence_field: evidence
+    evidence_required_fields: [doc_id, snippet, citation]
+  limits:
+    max_examples: 200
+    shuffle: true
+    start_offset: 0
+verifier_patterns:
+  enabled:
+    - best_of_n_rerank
+    - evidence_entailment_check
+    - self_consistency_critique_gate
+  best_of_n_rerank:
+    n: 5
+    rerank_strategy: verifier_score  # verifier_score | pairwise
+  evidence_entailment_check:
+    max_evidence: 6
+    require_citations: true
+    entailment_threshold: 0.5
+  self_consistency_critique_gate:
+    n: 7
+    gate_threshold: 0.6
+models:
+  generation:
+    backend: openai_compat_http
+    model: gpt-4o-mini
+    endpoint: https://api.openai.com/v1
+    api_key_env: OPENAI_API_KEY
+    request:
+      temperature: 0.7
+      max_tokens: 512
+      top_p: 1.0
+      timeout_s: 60
+      max_retries: 3
+  verification:
+    backend: openai_compat_http
+    model: gpt-4o-mini
+    endpoint: https://api.openai.com/v1
+    api_key_env: OPENAI_API_KEY
+    request:
+      temperature: 0.0
+      max_tokens: 256
+      top_p: 1.0
+      timeout_s: 60
+      max_retries: 3
+pipeline:
+  mode: generate_verify_revise  # generate_only | generate_verify | generate_verify_revise
+  revision:
+    enabled: true
+    max_rounds: 1
+    keep_all_candidates: true
+scoring:
+  # Dataset provides ground-truth correctness; verifier predicts "error"/"ok" with confidence.
+  positive_label: error
+  thresholds:
+    default: 0.5
+    sweep:
+      enabled: true
+      num_points: 21
+metrics:
+  error_detection:
+    enabled: true
+    report: [precision, recall, f1, accuracy, roc_auc, pr_auc]
+  calibration:
+    enabled: true
+    bins: 10
+    curves: [reliability, confidence_hist]
+    report: [ece, brier]
+  failure_modes:
+    enabled: true
+    top_k: 30
+artifacts:
+  write_jsonl: true
+  write_summary_json: true
+  write_plots: true
+plots:
+  calibration_curve:
+    enabled: true
+    dpi: 150
+  pr_curve:
+    enabled: true
+    dpi: 150
+  roc_curve:
+    enabled: true
+    dpi: 150
+logging:
+  level: INFO
+  log_prompts: false
+  log_responses: false

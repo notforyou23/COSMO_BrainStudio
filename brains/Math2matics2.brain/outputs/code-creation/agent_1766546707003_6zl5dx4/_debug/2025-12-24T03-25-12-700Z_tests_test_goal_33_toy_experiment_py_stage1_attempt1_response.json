@@ -1,0 +1,118 @@
+{
+  "content": "Created a pytest (`tests/test_goal_33_toy_experiment.py`) that runs `src/goal_33_toy_experiment.py` twice with the same seed and asserts `results.json` and `figure.png` are produced and byte-for-byte deterministic across runs.",
+  "reasoning": "",
+  "responseId": "resp_0762bd628d79ad2300694b5d4594048197a2108f49a1eab372",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4297,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1410,
+    "output_tokens_details": {
+      "reasoning_tokens": 595
+    },
+    "total_tokens": 5707
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0762bd628d79ad2300694b5d465ec881978d8b20ccbff67bb9",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0762bd628d79ad2300694b5d47c4d0819781dfb7270e584cd6",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path('/mnt/data')\nlist(base.iterdir())[:20]\n",
+      "container_id": "cntr_694b5d16df288190a9669fba1e3086060e3da45af80e27f2",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/src')]"
+        }
+      ]
+    },
+    {
+      "id": "ci_0762bd628d79ad2300694b5d4a0e288197b6b977980ddce01b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "src=base/'src'\nlist(src.iterdir())\n",
+      "container_id": "cntr_694b5d16df288190a9669fba1e3086060e3da45af80e27f2",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/src/goal_33_toy_experiment.py'),\n PosixPath('/mnt/data/src/experiment_utils.py')]"
+        }
+      ]
+    },
+    {
+      "id": "ci_0762bd628d79ad2300694b5d4c17108197b9705a6e36a31fad",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((src/'goal_33_toy_experiment.py').read_text()[:4000])\n",
+      "container_id": "cntr_694b5d16df288190a9669fba1e3086060e3da45af80e27f2",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "#!/usr/bin/env python3\n\\\"\\\"\\\"Deterministic, seed-controlled toy experiment.\n\nThis script generates synthetic linear data, fits a least-squares model, and\nwrites two artifacts for test validation:\n\n- <output_dir>/results.json\n- <output_dir>/figure.png\n\\\"\\\"\\\"\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport os\nfrom pathlib import Path\nfrom typing import Any, Dict, Tuple\n\nimport numpy as np\ndef _seed_everything(seed: int) -> np.random.Generator:\n    # Ensure deterministic hash-based operations when this process spawns libs.\n    os.environ.setdefault(\"PYTHONHASHSEED\", str(seed))\n    return np.random.default_rng(seed)\ndef _ensure_dir(path: Path) -> Path:\n    path.mkdir(parents=True, exist_ok=True)\n    return path\ndef _stable_json_dump(data: Dict[str, Any], path: Path) -> None:\n    def _coerce(obj: Any) -> Any:\n        if isinstance(obj, (np.floating,)):\n            return float(np.round(obj, 12))\n        if isinstance(obj, (np.integer,)):\n            return int(obj)\n        if isinstance(obj, np.ndarray):\n            return [_coerce(x) for x in obj.tolist()]\n        if isinstance(obj, dict):\n            return {str(k): _coerce(v) for k, v in obj.items()}\n        if isinstance(obj, (list, tuple)):\n            return [_coerce(x) for x in obj]\n        return obj\n\n    coerced = _coerce(data)\n    text = json.dumps(coerced, indent=2, sort_keys=True, ensure_ascii=False) + \"\\n\"\n    path.write_text(text, encoding=\"utf-8\")\ndef _make_dataset(\n    rng: np.random.Generator, n: int, noise: float\n) -> Tuple[np.ndarray, np.ndarray, Dict[str, float]]:\n    x = rng.uniform(-2.0, 2.0, size=n)\n    true_w = 1.75\n    true_b = -0.4\n    y = true_w * x + true_b + rng.normal(0.0, noise, size=n)\n    return x, y, {\"w\": true_w, \"b\": true_b}\ndef _fit_least_squares(x: np.ndarray, y: np.ndarray) -> Dict[str, float]:\n    # Solve for [w, b] in y ≈ w*x + b using normal equations.\n    X = np.column_stack([x, np.ones_like(x)])\n    beta, *_ = np.linalg.lstsq(X, y, rcond=None)\n    w_hat, b_hat = beta\n    return {\"w\": float(w_hat), \"b\": float(b_hat)}\ndef _metrics(x: np.ndarray, y: np.ndarray, params: Dict[str, float]) -> Dict[str, float]:\n    y_hat = params[\"w\"] * x + params[\"b\"]\n    resid = y - y_hat\n    mse = float(np.mean(resid**2))\n    ss_tot = float(np.sum((y - float(np.mean(y))) ** 2))\n    ss_res = float(np.sum(resid**2))\n    r2 = 1.0 - (ss_res / ss_tot if ss_tot > 0 else 0.0)\n    return {\"mse\": mse, \"r2\": float(r2)}\ndef _save_figure(x: np.ndarray, y: np.ndarray, params: Dict[str, float], out_path: Path) -> None:\n    import matplotlib\n\n    matplotlib.use(\"Agg\", force=True)\n    import matplotlib.pyplot as plt\n\n    fig, ax = plt.subplots(figsize=(6, 4), dpi=150)\n    ax.scatter(x, y, s=10, alpha=0.85, edgecolor=\"none\")\n    xs = np.linspace(float(np.min(x)), float(np.max(x)), 200)\n    ax.plot(xs, params[\"w\"] * xs + params[\"b\"], linewidth=2)\n    ax.set_title(\"Toy linear regression (deterministic)\")\n    ax.set_xlabel(\"x\")\n    ax.set_ylabel(\"y\")\n    ax.grid(True, alpha=0.25)\n    fig.tight_layout()\n    fig.savefig(out_path, format=\"png\")\n    plt.close(fig)\ndef run(seed: int, n: int, noise: float, output_dir: Path) -> Dict[str, Any]:\n    rng = _seed_everything(seed)\n    x, y, true_params = _make_dataset(rng, n=n, noise=noise)\n    est_params = _fit_least_squares(x, y)\n    mets = _metrics(x, y, est_params)\n\n    out_dir = _ensure_dir(output_dir)\n    results_path = out_dir / \"results.json\"\n    fig_path = out_dir / \"figure.png\"\n\n    results: Dict[str, Any] = {\n        \"seed\": int(seed),\n        \"n\": int(n),\n        \"noise\": float(noise),\n        \"true_params\": true_params,\n        \"estimated_params\": est_params,\n        \"metrics\": mets,\n        # A tiny checksum-like summary for tests.\n        \"y_mean\": float(np.mean(y)),\n        \"y_std\": float(np.std(y)),\n    }\n    _stable_json_dump(results, results_path)\n    _save_figure(x, y, est_params, fig_path)\n    return results\ndef _parse_args(argv: list[str] | None = None) -> argparse.Namespace:\n    p = argparse.Arg\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0762bd628d79ad2300694b5d4e4b5c8197813a03b7feeedd33",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0762bd628d79ad2300694b5d4e8f848197866f11311a4baea7",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((src/'goal_33_toy_experiment.py').read_text()[4000:8000])\n",
+      "container_id": "cntr_694b5d16df288190a9669fba1e3086060e3da45af80e27f2",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "umentParser(description=\"Run a deterministic toy experiment.\")\n    p.add_argument(\"--seed\", type=int, default=0, help=\"RNG seed (default: 0)\")\n    p.add_argument(\"--n\", type=int, default=200, help=\"Number of samples (default: 200)\")\n    p.add_argument(\"--noise\", type=float, default=0.25, help=\"Gaussian noise std (default: 0.25)\")\n    p.add_argument(\n        \"--output-dir\",\n        type=Path,\n        default=Path(\"outputs\"),\n        help=\"Output directory (default: ./outputs)\",\n    )\n    return p.parse_args(argv)\ndef main(argv: list[str] | None = None) -> int:\n    args = _parse_args(argv)\n    run(seed=args.seed, n=args.n, noise=args.noise, output_dir=args.output_dir)\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0762bd628d79ad2300694b5d509c348197bc83ce4a3c9f3141",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0762bd628d79ad2300694b5d571c6881978ae0dfe538b83016",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, hashlib, subprocess, sys\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_goal_33_toy_experiment.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\nr\"\"\"\nimport hashlib\nimport json\nimport os\nimport subprocess\nimport sys\nfrom pathlib import Path\n\n\ndef _run(seed: int, out_dir: Path) -> subprocess.CompletedProcess:\n    script = Path(__file__).resolve().parents[1] / \"src\" / \"goal_33_toy_experiment.py\"\n    assert script.is_file(), f\"Missing script at {script}\"\n    env = os.environ.copy()\n    # Keep hashing stable for anything that might indirectly rely on it.\n    env[\"PYTHONHASHSEED\"] = str(seed)\n    cmd = [\n        sys.executable,\n        str(script),\n        \"--seed\",\n        str(seed),\n        \"--n\",\n        \"200\",\n        \"--noise\",\n        \"0.25\",\n        \"--output-dir\",\n        str(out_dir),\n    ]\n    return subprocess.run(cmd, check=True, capture_output=True, text=True, env=env)\n\n\ndef _sha256(path: Path) -> str:\n    h = hashlib.sha256()\n    with path.open(\"rb\") as f:\n        for chunk in iter(lambda: f.read(1024 * 1024), b\"\"):\n            h.update(chunk)\n    return h.hexdigest()\n\"\"\",\nr\"\"\"\ndef test_toy_experiment_writes_artifacts_and_is_deterministic(tmp_path: Path) -> None:\n    out1 = tmp_path / \"run1\" / \"outputs\"\n    out2 = tmp_path / \"run2\" / \"outputs\"\n\n    _run(seed=123, out_dir=out1)\n    _run(seed=123, out_dir=out2)\n\n    res1 = out1 / \"results.json\"\n    fig1 = out1 / \"figure.png\"\n    res2 = out2 / \"results.json\"\n    fig2 = out2 / \"figure.png\"\n\n    for p in (res1, fig1, res2, fig2):\n        assert p.exists(), f\"Expected artifact missing: {p}\"\n        assert p.stat().st_size > 0, f\"Expected non-empty artifact: {p}\"\n\n    # JSON content must be stable across repeated runs.\n    j1 = json.loads(res1.read_text(encoding=\"utf-8\"))\n    j2 = json.loads(res2.read_text(encoding=\"utf-8\"))\n    assert j1 == j2\n\n    # Also validate raw bytes for both artifacts.\n    assert _sha256(res1) == _sha256(res2)\n    assert _sha256(fig1) == _sha256(fig2)\n\n    # Light schema checks to ensure results are meaningful.\n    assert j1[\"seed\"] == 123\n    assert j1[\"n\"] == 200\n    assert \"metrics\" in j1 and set(j1[\"metrics\"]) >= {\"mse\", \"r2\"}\n    assert \"estimated_params\" in j1 and set(j1[\"estimated_params\"]) >= {\"w\", \"b\"}\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tests/test_goal_33_toy_experiment.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b5d16df288190a9669fba1e3086060e3da45af80e27f2",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_goal_33_toy_experiment.py\nDIR_STATE:[\"tests/test_goal_33_toy_experiment.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0762bd628d79ad2300694b5d613bc88197805f0d4b9a910880",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a pytest (`tests/test_goal_33_toy_experiment.py`) that runs `src/goal_33_toy_experiment.py` twice with the same seed and asserts `results.json` and `figure.png` are produced and byte-for-byte deterministic across runs."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

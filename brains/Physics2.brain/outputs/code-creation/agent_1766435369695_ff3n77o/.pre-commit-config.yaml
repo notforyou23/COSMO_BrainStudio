@@ -1,0 +1,20 @@
+# Pre-commit configuration for benchmark output validation.
+# This hook blocks commits that introduce benchmark outputs that:
+# - do not conform to outputs/schemas/benchmark_schema.json
+# - match deprecated legacy/ad-hoc formats disallowed by policy
+#
+# Run manually:
+#   pre-commit run validate-benchmark-outputs --all-files
+default_language_version:
+  python: python3
+repos:
+  - repo: local
+    hooks:
+      - id: validate-benchmark-outputs
+        name: Validate benchmark outputs against schema/policy
+        language: python
+        entry: python tools/validate_benchmark_outputs.py
+        pass_filenames: false
+        require_serial: true
+        files: >-
+          ^(outputs/(?!schemas/).+\.(json|jsonl)|benchmarks/.+\.(json|jsonl))$

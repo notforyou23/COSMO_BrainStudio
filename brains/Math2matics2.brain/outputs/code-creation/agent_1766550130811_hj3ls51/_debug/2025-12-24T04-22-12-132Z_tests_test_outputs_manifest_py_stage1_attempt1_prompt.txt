@@ -1,0 +1,53 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create ./outputs/index.md that lists every expected artifact (roadmap, bib, coverage matrix, results.json, figure.png, test logs) and update scripts/run_pipeline.py to regenerate them deterministically; add tests that assert the manifest-listed files exist.
+Project: ./outputs/index.md that lists every expected artifact (roadmap, bib, coverage matrix, results.json, figure.png, test logs) and update (python script)
+
+Target file details:
+- Path: tests/test_outputs_manifest.py
+- Purpose: End-to-end test that runs the pipeline and asserts every file listed in outputs/index.md exists (and is reproducibly generated) for CI/CD gating.
+- Category: test
+
+Other planned files (for context only):
+- scripts/run_pipeline.py: Deterministic, CLI-driven pipeline entrypoint that regenerates all expected artifacts (including outputs/index.md) with stable schemas/formats and optional CI-friendly flags.
+- src/artifacts.py: Artifact generation utilities that write roadmap, bibliography, coverage matrix, results.json, figure.png, and test logs deterministically to a target output directory.
+- src/manifest.py: Manifest management module that defines the canonical artifact list, renders outputs/index.md, and parses it for test assertions.
+- outputs/index.md: Artifact manifest markdown that lists every expected pipeline output file and serves as the canonical checklist for CI tests.
+
+Reference insights:
+- [CONSOLIDATED] Prioritize **reproducible and portable artifact generation** by standardizing output schemas and file formats, writing determ
+- [INTROSPECTION] 2025-12-24T01-42-52-338Z_plan_attempt1_prompt.txt from code-creation agent agent_1766540568432_0u1x4ih: You are planning a p
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_scripts_run_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766539771836_cun
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+- [AGENT: agent_1766539516432_lwvqffa] Cycle 13 consistency review (divergence 0.97):
+Summary of agreement
+- All branches aim to improve predi
+
+Key requirements:
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: End-to-end test that runs the pipeline and asserts every file listed in outputs/index.md exists (and is reproducibly generated) for CI/CD gating.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('tests/test_outputs_manifest.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:tests/test_outputs_manifest.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside tests/test_outputs_manifest.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

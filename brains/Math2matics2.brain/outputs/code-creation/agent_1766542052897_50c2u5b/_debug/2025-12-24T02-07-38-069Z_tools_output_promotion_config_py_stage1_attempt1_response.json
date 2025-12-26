@@ -1,0 +1,69 @@
+{
+  "content": "Wrote `tools/output_promotion_config.py`, defining the default discovery globs, allow/deny rules, destination naming policy, and `outputs/index.md` rendering helpers used by the promotion CLI.",
+  "reasoning": "",
+  "responseId": "resp_060d61630323e51d00694b4b05fca88193bebf934679e92ece",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3258,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1714,
+    "output_tokens_details": {
+      "reasoning_tokens": 1670
+    },
+    "total_tokens": 4972
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_060d61630323e51d00694b4b06c9348193960840626126fdd6",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_060d61630323e51d00694b4b094adc8193a6ec4b9ed52d3e87",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re, hashlib, datetime\n",
+      "container_id": "cntr_694b4ae830a88190930f3c8c1867ff850697a1e233f89eab",
+      "outputs": []
+    },
+    {
+      "id": "rs_060d61630323e51d00694b4b0b33588193b85166599af77022",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_060d61630323e51d00694b4b0ba21c819399c97557ebb23d43",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('tools/output_promotion_config.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Default configuration for the artifact promotion tool.\n\nThe audit expects generated documents under the canonical ``outputs/`` directory.\nAgents often write artifacts into agent-specific directories (e.g. ``agent_*``),\nso the promotion CLI discovers those artifacts, copies them into ``outputs/``,\nand regenerates ``outputs/index.md`` linking to everything promoted.\n\\\"\\\"\\\"\"\"\",\n\"\"\"from __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nimport re\nfrom typing import Iterable, Sequence\"\"\",\nr\"\"\"@dataclass(frozen=True)\nclass PromotionConfig:\n    # Discovery: where to look for agent outputs relative to project root.\n    agent_dir_globs: Sequence[str]\n    # Discovery: which files inside those dirs are considered artifacts.\n    allow_filenames: Sequence[str]\n    allow_extensions: Sequence[str]\n    deny_globs: Sequence[str]\n\n    # Canonical destination.\n    outputs_dirname: str\n    index_filename: str\n\n    # Destination naming policy.\n    # If True: prefix promoted filenames with the agent directory name to avoid collisions.\n    prefix_with_agent_dir: bool\n    # If True: preserve relative subdirectories under agent dir (sanitized) in outputs/.\n    preserve_subdirs: bool\n\n    # Index formatting.\n    index_title: str\n    index_preamble: str\n\n    def outputs_dir(self, project_root: Path) -> Path:\n        return project_root / self.outputs_dirname\n\n    def index_path(self, project_root: Path) -> Path:\n        return self.outputs_dir(project_root) / self.index_filename\"\"\",\nr\"\"\"DEFAULT_CONFIG = PromotionConfig(\n    agent_dir_globs=(\n        \"agent_*\",\n        \"**/agent_*\",\n        \"**/agents/agent_*\",\n        \"**/.agents/agent_*\",\n    ),\n    # Common artifact names used by agent scaffolds.\n    allow_filenames=(\n        \"README.md\",\n        \"readme.md\",\n        \"first_artifact.md\",\n        \"research_template.md\",\n        \"final.md\",\n        \"report.md\",\n        \"summary.md\",\n        \"index.md\",\n    ),\n    allow_extensions=(\n        \".md\",\n        \".txt\",\n        \".json\",\n        \".yaml\",\n        \".yml\",\n        \".csv\",\n    ),\n    # Avoid copying bulky/irrelevant content into outputs/ by default.\n    deny_globs=(\n        \"**/__pycache__/**\",\n        \"**/.git/**\",\n        \"**/.venv/**\",\n        \"**/venv/**\",\n        \"**/node_modules/**\",\n        \"**/.pytest_cache/**\",\n        \"**/.mypy_cache/**\",\n        \"**/.ruff_cache/**\",\n        \"**/.DS_Store\",\n        \"**/*.pyc\",\n        \"**/*.pyo\",\n        \"**/*.pyd\",\n        \"**/*.so\",\n        \"**/*.dylib\",\n        \"**/*.exe\",\n    ),\n    outputs_dirname=\"outputs\",\n    index_filename=\"index.md\",\n    prefix_with_agent_dir=True,\n    preserve_subdirs=False,\n    index_title=\"Outputs\",\n    index_preamble=(\n        \"This folder contains promoted artifacts consolidated from agent-specific \"\n        \"directories. The promotion tool regenerates this index.\\n\"\n    ),\n)\"\"\",\nr\"\"\"_SAFE_CHARS_RE = re.compile(r\"[^A-Za-z0-9._-]+\")\n\n\ndef sanitize_segment(text: str) -> str:\n    \\\"\\\"\\\"Sanitize a path segment for use in a filename.\\\"\\\"\\\"\n    cleaned = _SAFE_CHARS_RE.sub(\"-\", text.strip())\n    cleaned = cleaned.strip(\"-.\")\n    return cleaned or \"artifact\"\n\n\ndef choose_destination_name(\n    *,\n    src_path: Path,\n    agent_dir: Path,\n    config: PromotionConfig = DEFAULT_CONFIG,\n) -> str:\n    \\\"\\\"\\\"Return the destination filename for a discovered artifact.\n\n    The CLI may still apply collision resolution (e.g., appending -2, -3).\n    \\\"\\\"\\\"\n    name = src_path.name\n    if config.prefix_with_agent_dir:\n        prefix = sanitize_segment(agent_dir.name)\n        name = f\\\"{prefix}__{name}\\\"\n\n    if config.preserve_subdirs:\n        try:\n            rel = src_path.relative_to(agent_dir).parent\n        except ValueError:\n            rel = Path()\n        if rel != Path():\n            safe_parts = [sanitize_segment(p) for p in rel.parts]\n            name = \\\"__\\\".join(safe_parts + [name])\n    return name\"\"\",\nr\"\"\"def should_consider_file(\n    *,\n    src_path: Path,\n    config: PromotionConfig = DEFAULT_CONFIG,\n) -> bool:\n    \\\"\\\"\\\"Fast allow/deny check used during discovery.\\\"\\\"\\\"\n    if not src_path.is_file():\n        return False\n\n    s = src_path.as_posix()\n    for pat in config.deny_globs:\n        # Path.match anchors to start; emulate glob-anywhere via '**/' patterns in config.\n        if src_path.match(pat) or (pat.startswith(\"**/\") and Path(s).match(pat)):\n            return False\n\n    if src_path.name in config.allow_filenames:\n        return True\n    return src_path.suffix.lower() in {e.lower() for e in config.allow_extensions}\"\"\",\nr\"\"\"def render_index_markdown(\n    *,\n    entries: Iterable[tuple[str, str]],\n    config: PromotionConfig = DEFAULT_CONFIG,\n) -> str:\n    \\\"\\\"\\\"Render outputs/index.md content.\n\n    entries: iterable of (display_name, relative_link) pairs.\n    \\\"\\\"\\\"\n    lines: list[str] = [f\\\"# {config.index_title}\\\", \\\"\\\", config.index_preamble.strip(), \\\"\\\"]\n    items = sorted(entries, key=lambda x: (x[0].lower(), x[1]))\n    if not items:\n        lines.append(\\\"(No promoted outputs yet.)\\\")\n        lines.append(\\\"\\\")\n        return \\\"\\\\n\\\".join(lines).rstrip() + \\\"\\\\n\\\"\n\n    for display, link in items:\n        lines.append(f\\\"- [{display}]({link})\\\")\n    lines.append(\\\"\\\")\n    return \\\"\\\\n\\\".join(lines)\"\"\",\nr\"\"\"__all__ = [\n    \"PromotionConfig\",\n    \"DEFAULT_CONFIG\",\n    \"sanitize_segment\",\n    \"choose_destination_name\",\n    \"should_consider_file\",\n    \"render_index_markdown\",\n]\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:tools/output_promotion_config.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4ae830a88190930f3c8c1867ff850697a1e233f89eab",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tools/output_promotion_config.py\nDIR_STATE:[\"tools/output_promotion_config.py\", \"tools/promote_artifacts.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_060d61630323e51d00694b4b1c51248193b0aa889d487607ac",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Wrote `tools/output_promotion_config.py`, defining the default discovery globs, allow/deny rules, destination naming policy, and `outputs/index.md` rendering helpers used by the promotion CLI."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,105 @@
+{
+  "content": "Implemented `src/benchmarks/cli.py` providing an argparse-based `benchmarks-validate` CLI that validates a run JSON file against the local schema (optionally overridden via `--schema`) and, when requested, compares an outputs directory to expected outputs using SHA-256 with strict/non-strict modes.",
+  "reasoning": "",
+  "responseId": "resp_0323035219cbe708006949b6bffc788190baa9c46c07cc20f1",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 5023,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1714,
+    "output_tokens_details": {
+      "reasoning_tokens": 538
+    },
+    "total_tokens": 6737
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0323035219cbe708006949b6c097a481909dddcc570b61dcc0",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0323035219cbe708006949b6c5e7088190ad79888fc397bda8",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path('/mnt/data')\nlist(base.glob('src/benchmarks/*.py'))[:10]\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/src/benchmarks/__init__.py'),\n PosixPath('/mnt/data/src/benchmarks/schema.py'),\n PosixPath('/mnt/data/src/benchmarks/validate.py')]"
+        }
+      ]
+    },
+    {
+      "id": "ci_0323035219cbe708006949b6c82e4c8190bd34f4a80af3cb40",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path('/mnt/data/src/benchmarks/schema.py').read_text()[:4000])\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Schema loader for the benchmark JSON Schema.\n\nThis module is responsible for locating the repository's schema files (under the\ntop-level ``schema/`` directory), loading the root schema as a Python ``dict``,\nand configuring local reference resolution so that ``$ref`` works across files.\n\nThe primary entry point is :func:`load_schema`.\n\"\"\"\nfrom __future__ import annotations\n\nfrom functools import lru_cache\nimport json\nfrom pathlib import Path\nfrom typing import Any, Dict, Mapping, Optional, Tuple, Union\nfrom urllib.parse import urlparse\n\ntry:\n    # jsonschema < 4.18: present and commonly used\n    from jsonschema import RefResolver  # type: ignore\nexcept Exception:  # pragma: no cover\n    RefResolver = None  # type: ignore\ndef _repo_root() -> Path:\n    \"\"\"Return the repository root (parent of ``src/``).\n\n    Assumes this file lives at ``<root>/src/benchmarks/schema.py``.\n    \"\"\"\n    return Path(__file__).resolve().parents[2]\n\n\ndef _schema_dir() -> Path:\n    return _repo_root() / \"schema\"\n\n\ndef _pick_root_schema(schema_dir: Path) -> Path:\n    \"\"\"Heuristically pick a root schema JSON file.\n\n    Preference order is a small list of common names; otherwise we fall back to\n    the first ``*.schema.json`` / ``*.json`` file in the directory.\n    \"\"\"\n    candidates = [\n        schema_dir / \"benchmark.schema.json\",\n        schema_dir / \"benchmark-run.schema.json\",\n        schema_dir / \"run.schema.json\",\n        schema_dir / \"schema.json\",\n    ]\n    for p in candidates:\n        if p.is_file():\n            return p\n    for pat in (\"*.schema.json\", \"*.json\"):\n        hits = sorted(schema_dir.glob(pat))\n        if hits:\n            return hits[0]\n    raise FileNotFoundError(\n        f\"No schema JSON files found in {schema_dir}. Expected e.g. benchmark.schema.json\"\n    )\ndef _load_json(path: Path) -> Dict[str, Any]:\n    with path.open(\"r\", encoding=\"utf-8\") as f:\n        return json.load(f)\n\n\ndef _file_handler(uri: str) -> Any:\n    \"\"\"Load a referenced schema from disk for the ``file://`` scheme.\"\"\"\n    parsed = urlparse(uri)\n    # urlparse(\"file:///...\").path is percent-decoded on most platforms.\n    path = Path(parsed.path)\n    return _load_json(path)\n\n\ndef _make_resolver(schema: Mapping[str, Any], *, base_uri: str):\n    \"\"\"Create a local-only resolver compatible with ``jsonschema``.\n\n    Returns ``None`` if the installed jsonschema no longer exposes RefResolver.\n    \"\"\"\n    if RefResolver is None:  # pragma: no cover\n        return None\n    return RefResolver(base_uri=base_uri, referrer=schema, handlers={\"file\": _file_handler})\n@lru_cache(maxsize=1)\ndef load_schema(\n    *,\n    schema_path: Optional[Union[str, Path]] = None,\n    return_resolver: bool = False,\n) -> Union[Dict[str, Any], Tuple[Dict[str, Any], Any]]:\n    \"\"\"Load the benchmark JSON Schema.\n\n    Parameters\n    ----------\n    schema_path:\n        Optional explicit path to the root schema JSON. If omitted, the loader\n        looks under ``<repo-root>/schema``.\n    return_resolver:\n        If True, return ``(schema, resolver)`` where ``resolver`` can be passed\n        to ``jsonschema`` validators to resolve local ``$ref``.\n\n    Notes\n    -----\n    The schema dictionary is returned unchanged; callers are expected to pass\n    the returned resolver when constructing a validator.\n    \"\"\"\n    if schema_path is None:\n        schema_dir = _schema_dir()\n        schema_file = _pick_root_schema(schema_dir)\n    else:\n        schema_file = Path(schema_path).expanduser().resolve()\n        if schema_file.is_dir():\n            schema_file = _pick_root_schema(schema_file)\n\n    schema = _load_json(schema_file)\n    base_uri = schema_file.resolve().as_uri()\n    resolver = _make_resolver(schema, base_uri=base_uri)\n\n    return (schema, resolver) if return_resolver else schema\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0323035219cbe708006949b6ca23a481908e46a8eda1ab00d2",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0323035219cbe708006949b6ca615c81909d5992aa9e4580bd",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path('/mnt/data/src/benchmarks/validate.py').read_text()[:4000])\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Benchmark run validation helpers.\n\nThis module validates a benchmark run JSON document (loaded into a Python dict)\nagainst the repository's JSON Schema and produces a compact, human-readable\nerror report suitable for CLI use.\n\"\"\"\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nimport json\nfrom pathlib import Path\nfrom typing import Any, Iterable, List, Mapping, Optional, Sequence, Tuple, Union\n\nfrom jsonschema import ValidationError\nfrom jsonschema.validators import validator_for\n\nfrom .schema import load_schema\n@dataclass(frozen=True)\nclass ValidationErrorDetail:\n    \"\"\"A lightweight, serialisable view of a ``jsonschema`` ValidationError.\"\"\"\n\n    message: str\n    instance_path: str\n    schema_path: str\n    validator: str\n    validator_value: Any = None\ndef _json_pointer(path: Iterable[Union[str, int]]) -> str:\n    parts: List[str] = []\n    for p in path:\n        s = str(p).replace(\"~\", \"~0\").replace(\"/\", \"~1\")\n        parts.append(s)\n    return \"/\" + \"/\".join(parts) if parts else \"/\"\ndef _flatten_error(err: ValidationError) -> List[ValidationError]:\n    \"\"\"Flatten compound errors (e.g. oneOf/anyOf) into leaf errors.\"\"\"\n    if err.context:\n        out: List[ValidationError] = []\n        for c in err.context:\n            out.extend(_flatten_error(c))\n        return out\n    return [err]\ndef _to_detail(err: ValidationError) -> ValidationErrorDetail:\n    return ValidationErrorDetail(\n        message=err.message,\n        instance_path=_json_pointer(err.path),\n        schema_path=_json_pointer(err.schema_path),\n        validator=str(err.validator) if err.validator is not None else \"\",\n        validator_value=err.validator_value,\n    )\ndef validate_run(\n    run: Mapping[str, Any],\n    *,\n    schema: Optional[Mapping[str, Any]] = None,\n) -> Tuple[bool, Sequence[ValidationErrorDetail]]:\n    \"\"\"Validate a benchmark run dict against the benchmark schema.\n\n    Returns ``(ok, errors)`` where ``errors`` is a (possibly empty) list of\n    :class:`ValidationErrorDetail`.\n    \"\"\"\n    resolver = None\n    if schema is None:\n        schema, resolver = load_schema(return_resolver=True)  # type: ignore[misc]\n\n    Validator = validator_for(schema)  # picks Draft based on $schema, defaults safely\n    validator = Validator(schema, resolver=resolver)\n    raw_errors: List[ValidationError] = []\n    for e in validator.iter_errors(run):\n        raw_errors.extend(_flatten_error(e))\n\n    raw_errors.sort(key=lambda e: (list(e.path), e.message))\n    details = [_to_detail(e) for e in raw_errors]\n    return (len(details) == 0), details\ndef validate_run_file(\n    path: Union[str, Path],\n    *,\n    schema: Optional[Mapping[str, Any]] = None,\n) -> Tuple[bool, Sequence[ValidationErrorDetail], Mapping[str, Any]]:\n    \"\"\"Load a JSON file and validate it as a benchmark run.\n\n    Returns ``(ok, errors, run_dict)``.\n    \"\"\"\n    p = Path(path)\n    with p.open(\"r\", encoding=\"utf-8\") as f:\n        run = json.load(f)\n    ok, errors = validate_run(run, schema=schema)\n    return ok, errors, run\ndef format_errors(\n    errors: Sequence[ValidationErrorDetail],\n    *,\n    max_errors: Optional[int] = 50,\n) -> str:\n    \"\"\"Format validation errors as a readable multi-line string.\"\"\"\n    if not errors:\n        return \"OK\"\n\n    shown = errors if max_errors is None else errors[:max_errors]\n    lines: List[str] = []\n    lines.append(f\"{len(errors)} validation error(s):\")\n    for i, e in enumerate(shown, 1):\n        loc = e.instance_path or \"/\"\n        lines.append(f\"{i:>2}. {loc}: {e.message} (schema {e.schema_path})\")\n    if max_errors is not None and len(errors) > max_errors:\n        lines.append(f\"... {len(errors) - max_errors} more not shown\")\n    return \"\\n\".join(lines)\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0323035219cbe708006949b6cc30d08190a2c82574453717aa",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0323035219cbe708006949b6d0a7e08190bb5899701ba065bd",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/benchmarks/cli.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Command-line interface for the benchmarks reference implementation.\n\nValidates a benchmark run JSON file against the local JSON Schema and can\noptionally compare an outputs directory to an expected-outputs directory.\n\\\"\\\"\\\"\nfrom __future__ import annotations\n\nimport argparse\nimport hashlib\nimport sys\nfrom pathlib import Path\nfrom typing import Iterable, List, Tuple\n\nfrom .validate import format_errors, validate_run_file\"\"\",\n\"\"\"def _sha256(path: Path) -> str:\n    h = hashlib.sha256()\n    with path.open(\"rb\") as f:\n        for chunk in iter(lambda: f.read(1024 * 1024), b\"\"):\n            h.update(chunk)\n    return h.hexdigest()\n\n\ndef _iter_files(root: Path) -> Iterable[Path]:\n    for p in sorted(root.rglob(\"*\")):\n        if p.is_file():\n            yield p\n\n\ndef _compare_dirs(expected: Path, actual: Path, *, strict: bool = True) -> Tuple[bool, List[str]]:\n    \\\"\\\"\\\"Compare directory trees by file presence and SHA-256.\n\n    If strict is True, extra files in `actual` that are not in `expected` fail.\n    \\\"\\\"\\\"\n    exp_files = {p.relative_to(expected): p for p in _iter_files(expected)}\n    act_files = {p.relative_to(actual): p for p in _iter_files(actual)}\n\n    problems: List[str] = []\n    for rel, pexp in exp_files.items():\n        pact = act_files.get(rel)\n        if pact is None:\n            problems.append(f\\\"MISSING: {rel.as_posix()}\\\")\n            continue\n        if _sha256(pexp) != _sha256(pact):\n            problems.append(f\\\"DIFFERS: {rel.as_posix()}\\\")\n    if strict:\n        for rel in sorted(set(act_files) - set(exp_files)):\n            problems.append(f\\\"EXTRA: {rel.as_posix()}\\\")\n    return (len(problems) == 0), problems\"\"\",\n\"\"\"def build_parser() -> argparse.ArgumentParser:\n    p = argparse.ArgumentParser(prog=\"benchmarks-validate\", description=\"Validate benchmark runs.\")\n    p.add_argument(\"run\", type=Path, help=\"Path to a benchmark run JSON file.\")\n    p.add_argument(\n        \"--schema\",\n        type=Path,\n        default=None,\n        help=\"Optional path to the root schema JSON file (or a directory containing it).\",\n    )\n    p.add_argument(\n        \"--outputs\",\n        type=Path,\n        default=None,\n        help=\"Directory containing produced outputs to compare (optional).\",\n    )\n    p.add_argument(\n        \"--expected\",\n        type=Path,\n        default=None,\n        help=\"Directory containing expected outputs to compare against (optional).\",\n    )\n    p.add_argument(\n        \"--non-strict\",\n        action=\"store_true\",\n        help=\"Allow extra files in --outputs that are not present in --expected.\",\n    )\n    p.add_argument(\"--max-errors\", type=int, default=50, help=\"Max schema errors to print.\")\n    return p\n\n\ndef main(argv: List[str] | None = None) -> int:\n    args = build_parser().parse_args(argv)\n\n    schema = None\n    if args.schema is not None:\n        # Defer import to keep the CLI small and to reuse schema loader behavior.\n        from .schema import load_schema\n\n        schema = load_schema(schema_path=args.schema)\n\n    ok, errors, _run = validate_run_file(args.run, schema=schema)\n    if not ok:\n        print(format_errors(errors, max_errors=args.max_errors), file=sys.stderr)\n        return 2\n\n    if (args.outputs is None) ^ (args.expected is None):\n        print(\"Both --outputs and --expected must be provided to compare outputs.\", file=sys.stderr)\n        return 2\n\n    if args.outputs is not None and args.expected is not None:\n        exp = args.expected.expanduser().resolve()\n        out = args.outputs.expanduser().resolve()\n        if not exp.is_dir():\n            print(f\\\"--expected is not a directory: {exp}\\\", file=sys.stderr)\n            return 2\n        if not out.is_dir():\n            print(f\\\"--outputs is not a directory: {out}\\\", file=sys.stderr)\n            return 2\n\n        same, problems = _compare_dirs(exp, out, strict=not args.non_strict)\n        if not same:\n            for line in problems:\n                print(line, file=sys.stderr)\n            return 3\n\n    print(\"OK\")\n    return 0\n\n\nif __name__ == \"__main__\":  # pragma: no cover\n    raise SystemExit(main())\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/benchmarks/cli.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/benchmarks/cli.py\nDIR_STATE:[\"src/benchmarks/__init__.py\", \"src/benchmarks/cli.py\", \"src/benchmarks/schema.py\", \"src/benchmarks/validate.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0323035219cbe708006949b6df1c58819089b94c8cebd748dd",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/benchmarks/cli.py` providing an argparse-based `benchmarks-validate` CLI that validates a run JSON file against the local schema (optionally overridden via `--schema`) and, when requested, compares an outputs directory to expected outputs using SHA-256 with strict/non-strict modes."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/METADATA_SCHEMA.json",
+  "title": "Case Study Metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "title",
+    "summary",
+    "rights",
+    "authoritative_urls"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Schema version for this metadata document.",
+      "enum": ["1.0.0"]
+    },
+    "id": {
+      "type": "string",
+      "description": "Stable, filesystem-safe identifier for the case study.",
+      "pattern": "^[a-z0-9][a-z0-9_-]{2,64}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 200
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 2000
+    },
+    "status": {
+      "type": "string",
+      "description": "Lifecycle status of the case study writeup/metadata.",
+      "enum": ["draft", "review", "published", "archived"],
+      "default": "draft"
+    },
+    "keywords": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "maxLength": 60 },
+      "uniqueItems": true,
+      "default": []
+    },
+    "domain": {
+      "type": "string",
+      "description": "High-level domain (e.g., healthcare, finance, robotics, education).",
+      "minLength": 1,
+      "maxLength": 80
+    },
+    "methods": {
+      "type": "array",
+      "description": "Methods/approaches used (e.g., RAG, classification, forecasting).",
+      "items": { "type": "string", "minLength": 1, "maxLength": 80 },
+      "uniqueItems": true,
+      "default": []
+    },
+    "dates": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "created": { "type": "string", "format": "date-time" },
+        "updated": { "type": "string", "format": "date-time" },
+        "event_start": { "type": "string", "format": "date" },
+        "event_end": { "type": "string", "format": "date" }
+      }
+    },
+    "people": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "authors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/person" },
+          "default": []
+        },
+        "reviewers": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/person" },
+          "default": []
+        },
+        "contacts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/person" },
+          "default": []
+        }
+      }
+    },
+    "organizations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/organization" },
+      "default": []
+    },
+    "rights": {
+      "type": "object",
+      "description": "Rights and licensing for the case study content/metadata; include authoritative license identifier/URL and any usage constraints.",
+      "additionalProperties": false,
+      "required": ["license", "attribution", "source_materials_policy"],
+      "properties": {
+        "license": {
+          "type": "string",
+          "description": "License identifier (prefer SPDX) or a license URL applicable to the case study content.",
+          "minLength": 1,
+          "maxLength": 200,
+          "anyOf": [
+            { "pattern": "^[A-Za-z0-9\.-]+$" },
+            { "format": "uri" }
+          ]
+        },
+        "attribution": {
+          "type": "string",
+          "description": "Attribution/citation statement required when reusing the case study.",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "copyright_notice": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "source_materials_policy": {
+          "type": "string",
+          "description": "Describe how underlying sources may be used; must not instruct to download materials; use URLs and citations only.",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "privacy": {
+          "type": "string",
+          "description": "Optional privacy considerations (PII/PHI, anonymization, consent).",
+          "maxLength": 1000
+        },
+        "limitations": {
+          "type": "string",
+          "description": "Optional limitations on reuse/interpretation.",
+          "maxLength": 1000
+        }
+      }
+    },
+    "authoritative_urls": {
+      "type": "array",
+      "description": "Authoritative URLs only (no downloads). Include primary sources such as official project pages, publications, docs, or repositories.",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/authoritative_url" }
+    },
+    "sources": {
+      "type": "array",
+      "description": "Cited sources (papers, docs, standards). Prefer persistent identifiers and URLs.",
+      "items": { "$ref": "#/$defs/source" },
+      "default": []
+    },
+    "related_case_studies": {
+      "type": "array",
+      "description": "IDs of related case studies.",
+      "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_-]{2,64}$" },
+      "uniqueItems": true,
+      "default": []
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional internal notes (non-public).",
+      "maxLength": 2000
+    }
+  },
+  "$defs": {
+    "person": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "affiliation": { "type": "string", "maxLength": 200 },
+        "email": { "type": "string", "format": "email" },
+        "orcid": { "type": "string", "pattern": "^https://orcid\.org/[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$" },
+        "url": { "type": "string", "format": "uri" }
+      }
+    },
+    "organization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "url": { "type": "string", "format": "uri" }
+      }
+    },
+    "authoritative_url": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "type"],
+      "properties": {
+        "url": { "type": "string", "format": "uri", "maxLength": 2048 },
+        "type": {
+          "type": "string",
+          "enum": ["project", "publication", "dataset", "code", "documentation", "standard", "other"]
+        },
+        "title": { "type": "string", "maxLength": 200 },
+        "description": { "type": "string", "maxLength": 500 },
+        "is_authoritative": { "type": "boolean", "default": true }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 300 },
+        "authors": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "default": []
+        },
+        "year": { "type": "integer", "minimum": 1500, "maximum": 2500 },
+        "doi": { "type": "string", "pattern": "^10\.[0-9]{4,9}/[-._;()/:A-Z0-9]+$", "description": "DOI without URL prefix.", "default": "" },
+        "url": { "type": "string", "format": "uri" },
+        "publisher": { "type": "string", "maxLength": 200 },
+        "notes": { "type": "string", "maxLength": 500 }
+      }
+    }
+  }
+}

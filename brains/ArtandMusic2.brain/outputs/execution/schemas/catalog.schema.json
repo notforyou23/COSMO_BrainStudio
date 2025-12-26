@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/catalog.schema.json",
+  "title": "Case Study Catalog Index",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "catalog", "entries"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Version of this catalog index document schema.",
+      "pattern": "^[0-9]+\.[0-9]+(\.[0-9]+)?$"
+    },
+    "catalog": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "base_path", "updated_at"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "description": {"type": "string"},
+        "base_path": {
+          "type": "string",
+          "const": "outputs/catalog/",
+          "description": "Base directory (project-relative) containing case study entry JSON files."
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp for this catalog index."
+        },
+        "generator": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {"type": "string", "minLength": 1},
+            "version": {"type": "string"}
+          }
+        }
+      }
+    },
+    "entries": {
+      "type": "array",
+      "description": "List of case study entry references and summary metadata.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "slug", "title", "path", "tags", "status", "created_at"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable identifier for the case study (often a UUID or slug-based id).",
+            "minLength": 1
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL- and filename-safe short name for the case study.",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "title": {"type": "string", "minLength": 1},
+          "summary": {"type": "string"},
+          "path": {
+            "type": "string",
+            "description": "Project-relative path to the case study JSON entry file.",
+            "pattern": "^outputs/catalog/[A-Za-z0-9][A-Za-z0-9._/-]*\.json$"
+          },
+          "tags": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1},
+            "uniqueItems": true,
+            "default": []
+          },
+          "status": {
+            "type": "string",
+            "enum": ["draft", "published", "archived"],
+            "description": "Lifecycle status of the case study entry."
+          },
+          "created_at": {"type": "string", "format": "date-time"},
+          "updated_at": {"type": "string", "format": "date-time"},
+          "published_at": {"type": "string", "format": "date-time"},
+          "source_urls": {
+            "type": "array",
+            "items": {"type": "string", "format": "uri"},
+            "uniqueItems": true
+          },
+          "citations": {
+            "type": "array",
+            "description": "Optional short citation records for quick lookup; canonical citations live in the case study entry.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["type", "reference"],
+              "properties": {
+                "type": {"type": "string", "enum": ["doi", "url", "isbn", "other"]},
+                "reference": {"type": "string", "minLength": 1}
+              }
+            }
+          },
+          "rights": {
+            "type": "object",
+            "description": "Optional rights summary; canonical rights live in the case study entry.",
+            "additionalProperties": false,
+            "properties": {
+              "license": {"type": "string", "minLength": 1},
+              "copyright_holder": {"type": "string", "minLength": 1},
+              "usage_notes": {"type": "string"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "content": "Implemented a dependency-light `src/experiments/sweep.py` providing deterministic grid generation, sequential sweep execution with structured error capture, best-result selection, and JSON manifest save/load utilities for persisting sweep runs.",
+  "reasoning": "",
+  "responseId": "resp_047a06d5e017f76c00694b502accd481979bdafe132246c287",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3382,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1763,
+    "output_tokens_details": {
+      "reasoning_tokens": 155
+    },
+    "total_tokens": 5145
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_047a06d5e017f76c00694b502b994c8197ae1ad614488f2c4e",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_047a06d5e017f76c00694b502ded5c8197a89f525757ca5014",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/sweep.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Parameter sweep utilities.\n\nThis module is dependency-light and focuses on:\n- building cartesian grids from parameter spaces,\n- running a user-provided experiment function over the grid,\n- collecting structured results (including errors),\n- persisting/reloading sweep manifests as JSON.\n\nAll functions are deterministic given deterministic inputs.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, asdict\nfrom hashlib import sha1\nfrom itertools import product\nfrom pathlib import Path\nfrom time import time\nfrom typing import Any, Callable, Dict, Iterable, Iterator, List, Mapping, MutableMapping, Optional, Sequence, Tuple, Union\nimport json\n\"\"\",\n\"\"\"Jsonable = Union[None, bool, int, float, str, List[\"Jsonable\"], Dict[str, \"Jsonable\"]]\n\n\ndef _json_default(obj: Any) -> Jsonable:\n    \\\"\\\"\\\"Best-effort JSON fallback for common python objects.\\\"\\\"\\\"\n    if hasattr(obj, \"__dict__\"):\n        return {k: _json_default(v) for k, v in vars(obj).items()}\n    return str(obj)\n\n\ndef _stable_hash(data: Any) -> str:\n    b = json.dumps(data, sort_keys=True, default=_json_default, separators=(\",\", \":\")).encode(\"utf-8\")\n    return sha1(b).hexdigest()[:12]\n\"\"\",\n\"\"\"def normalize_space(space: Mapping[str, Union[Sequence[Any], Any]]) -> Dict[str, List[Any]]:\n    \\\"\\\"\\\"Normalize a parameter space to dict[str, list]. Scalars become 1-length lists.\\\"\\\"\\\"\n    out: Dict[str, List[Any]] = {}\n    for k, v in space.items():\n        if isinstance(v, (str, bytes)) or not isinstance(v, Sequence):\n            out[k] = [v]\n        else:\n            out[k] = list(v)\n    return out\n\n\ndef iter_grid(space: Mapping[str, Union[Sequence[Any], Any]]) -> Iterator[Dict[str, Any]]:\n    \\\"\\\"\\\"Yield parameter dicts for the cartesian product of a parameter space.\\\"\\\"\\\"\n    sp = normalize_space(space)\n    keys = sorted(sp.keys())\n    for values in product(*(sp[k] for k in keys)):\n        yield dict(zip(keys, values))\n\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass SweepItem:\n    \\\"\\\"\\\"A single sweep evaluation input.\\\"\\\"\\\"\n\n    params: Dict[str, Any]\n    run_id: str\n\n    @staticmethod\n    def from_params(params: Mapping[str, Any], run_id: Optional[str] = None) -> \"SweepItem\":\n        p = dict(params)\n        rid = run_id or _stable_hash(p)\n        return SweepItem(params=p, run_id=rid)\n\n\n@dataclass\nclass SweepResult:\n    \\\"\\\"\\\"A single sweep evaluation output.\\\"\\\"\\\"\n\n    run_id: str\n    params: Dict[str, Any]\n    ok: bool\n    result: Any = None\n    error: Optional[str] = None\n    started_s: float = 0.0\n    duration_s: float = 0.0\n\n    def to_dict(self) -> Dict[str, Any]:\n        d = asdict(self)\n        # ensure result is jsonable-ish\n        d[\"result\"] = json.loads(json.dumps(d[\"result\"], default=_json_default))\n        return d\n\"\"\",\n\"\"\"def build_sweep(space: Mapping[str, Union[Sequence[Any], Any]]) -> List[SweepItem]:\n    \\\"\\\"\\\"Create a concrete sweep list from a space.\\\"\\\"\\\"\n    return [SweepItem.from_params(p) for p in iter_grid(space)]\n\n\ndef run_sweep(\n    items: Iterable[SweepItem],\n    run_fn: Callable[[Mapping[str, Any]], Any],\n) -> List[SweepResult]:\n    \\\"\\\"\\\"Run a sweep sequentially and return a list of SweepResult.\n\n    run_fn(params) should return any json-serializable result (or convertible).\n    Exceptions are caught and stored in the result.\n    \\\"\\\"\\\"\n    out: List[SweepResult] = []\n    for it in items:\n        t0 = time()\n        try:\n            res = run_fn(it.params)\n            out.append(SweepResult(run_id=it.run_id, params=it.params, ok=True, result=res, started_s=t0, duration_s=time() - t0))\n        except Exception as e:  # pragma: no cover\n            out.append(SweepResult(run_id=it.run_id, params=it.params, ok=False, error=f\"{type(e).__name__}: {e}\", started_s=t0, duration_s=time() - t0))\n    return out\n\"\"\",\n\"\"\"def manifest_dict(\n    results: Sequence[SweepResult],\n    space: Optional[Mapping[str, Union[Sequence[Any], Any]]] = None,\n    meta: Optional[Mapping[str, Any]] = None,\n) -> Dict[str, Any]:\n    \\\"\\\"\\\"Create a JSON-ready sweep manifest.\\\"\\\"\\\"\n    m: Dict[str, Any] = {\n        \"format\": \"experiments.sweep.v1\",\n        \"created_s\": time(),\n        \"n\": len(results),\n        \"results\": [r.to_dict() for r in results],\n    }\n    if space is not None:\n        m[\"space\"] = normalize_space(space)\n    if meta:\n        m[\"meta\"] = json.loads(json.dumps(dict(meta), default=_json_default))\n    # convenience: overall hash to detect changes\n    m[\"sweep_id\"] = _stable_hash({\"space\": m.get(\"space\"), \"meta\": m.get(\"meta\"), \"results\": [(r.run_id, r.ok) for r in results]})\n    return m\n\n\ndef save_manifest(path: Union[str, Path], manifest: Mapping[str, Any]) -> Path:\n    \\\"\\\"\\\"Write a manifest as UTF-8 JSON (pretty, deterministic keys).\\\"\\\"\\\"\n    p = Path(path)\n    p.parent.mkdir(parents=True, exist_ok=True)\n    p.write_text(json.dumps(manifest, indent=2, sort_keys=True, default=_json_default) + \"\\\\n\", encoding=\"utf-8\")\n    return p\n\n\ndef load_manifest(path: Union[str, Path]) -> Dict[str, Any]:\n    \\\"\\\"\\\"Load a manifest written by save_manifest.\\\"\\\"\\\"\n    return json.loads(Path(path).read_text(encoding=\"utf-8\"))\n\"\"\",\n\"\"\"def best_by(\n    results: Sequence[SweepResult],\n    key: Callable[[Any], float],\n    maximize: bool = True,\n) -> Optional[SweepResult]:\n    \\\"\\\"\\\"Pick the best successful result by key(result).\\\"\\\"\\\"\n    ok = [r for r in results if r.ok]\n    if not ok:\n        return None\n    return max(ok, key=lambda r: key(r.result)) if maximize else min(ok, key=lambda r: key(r.result))\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/experiments/sweep.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4fbeb5a8819082ef6cca0e8e962a0289c9c218902ef0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/sweep.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/common.py\", \"src/experiments/io.py\", \"src/experiments/plotting.py\", \"src/experiments/sweep.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_047a06d5e017f76c00694b503cac448197ae16870dbe7ae2d3",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented a dependency-light `src/experiments/sweep.py` providing deterministic grid generation, sequential sweep execution with structured error capture, best-result selection, and JSON manifest save/load utilities for persisting sweep runs."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

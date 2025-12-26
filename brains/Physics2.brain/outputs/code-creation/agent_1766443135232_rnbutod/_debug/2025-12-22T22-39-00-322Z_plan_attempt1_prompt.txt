@@ -1,0 +1,35 @@
+You are planning a python script implementation for the following mission:
+Refactor and modularize reusable code artifacts: README_e2e.md
+
+Relevant context:
+- [INTROSPECTION] 2025-12-22T22-13-32-823Z_docs_e2e_README_e2e_md_stage1_export_export_prompt.txt from code-creation agent agent_1766441606958
+- [INTROSPECTION] 2025-12-22T22-13-32-823Z_docs_e2e_requirements-ci_txt_stage1_attempt1_prompt.txt from code-creation agent agent_176644160695
+- [CONSOLIDATED] Develop a prioritized, project-mapped collaboration plan that names specific experimental/analogue and theory/compute partner
+- [INTROSPECTION] 2025-12-22T21-52-07-285Z_scripts_run_all_sh_stage1_export_export_prompt.txt from code-creation agent agent_1766440311238_cpn
+- [CONSOLIDATED] Complex, multi-stakeholder research roadmaps are best executed by first locking a clear document/acceptance architecture, the
+- [INTROSPECTION] 2025-12-22T22-13-32-823Z_docs_e2e_README_e2e_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766441606958_qncx
+- [INTROSPECTION] 2025-12-22T22-13-32-823Z_scripts_e2e_validate_config_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766441606
+- [INTROSPECTION] 2025-12-22T22-13-32-823Z__github_actions_e2e-common_action_yml_stage1_attempt1_prompt.txt from code-creation agent agent_176
+
+Explicit requirements:
+- documentation
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

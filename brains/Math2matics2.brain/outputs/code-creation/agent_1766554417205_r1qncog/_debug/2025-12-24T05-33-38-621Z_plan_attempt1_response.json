@@ -1,0 +1,37 @@
+{
+  "content": "[\n  {\n    \"path\": \"scripts/reproducibility_check.js\",\n    \"description\": \"Node.js script that runs the pipeline twice, computes SHA256 hashes for all artifacts under outputs/, compares runs and/or validates against outputs/hashes.json, and exits nonzero on any mismatch for CI/CD or local use.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/hash_outputs.js\",\n    \"description\": \"Node.js helper script that deterministically enumerates files in outputs/ and writes a stable outputs/hashes.json mapping of relative paths to SHA256 hashes to support regression checks.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"outputs/hashes.json\",\n    \"description\": \"In-repo canonical JSON file storing expected SHA256 hashes for artifacts in outputs/ to enable deterministic regression verification in CI/CD and local runs.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \".github/workflows/reproducibility.yml\",\n    \"description\": \"GitHub Actions workflow that runs the project pipeline and then executes the reproducibility check to fail CI on non-reproducible outputs or hash regressions.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"Makefile\",\n    \"description\": \"Make targets for running the pipeline, updating outputs/hashes.json, and performing reproducibility checks locally in a CI-aligned way.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"README_reproducibility.md\",\n    \"description\": \"Documentation describing how to run the reproducibility check locally/CI, how hashes are generated/updated, and how to diagnose mismatches.\",\n    \"category\": \"documentation\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_02d2846ca015007500694b7b32b75c8193a788dadcf80af8d9",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 700,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 359,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 1059
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "msg_02d2846ca015007500694b7b32f93c819385e3dbfe8a334bb9",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"scripts/reproducibility_check.js\",\n    \"description\": \"Node.js script that runs the pipeline twice, computes SHA256 hashes for all artifacts under outputs/, compares runs and/or validates against outputs/hashes.json, and exits nonzero on any mismatch for CI/CD or local use.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/hash_outputs.js\",\n    \"description\": \"Node.js helper script that deterministically enumerates files in outputs/ and writes a stable outputs/hashes.json mapping of relative paths to SHA256 hashes to support regression checks.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"outputs/hashes.json\",\n    \"description\": \"In-repo canonical JSON file storing expected SHA256 hashes for artifacts in outputs/ to enable deterministic regression verification in CI/CD and local runs.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \".github/workflows/reproducibility.yml\",\n    \"description\": \"GitHub Actions workflow that runs the project pipeline and then executes the reproducibility check to fail CI on non-reproducible outputs or hash regressions.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"Makefile\",\n    \"description\": \"Make targets for running the pipeline, updating outputs/hashes.json, and performing reproducibility checks locally in a CI-aligned way.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"README_reproducibility.md\",\n    \"description\": \"Documentation describing how to run the reproducibility check locally/CI, how hashes are generated/updated, and how to diagnose mismatches.\",\n    \"category\": \"documentation\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

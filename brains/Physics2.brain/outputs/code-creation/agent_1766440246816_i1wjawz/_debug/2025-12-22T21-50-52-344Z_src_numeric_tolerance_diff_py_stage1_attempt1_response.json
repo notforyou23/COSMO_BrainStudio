@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/numeric_tolerance_diff.py` with a deterministic, structured JSON diff engine supporting absolute/relative numeric tolerances, per-path (fnmatch) tolerance overrides, NaN/inf handling, and a CI-friendly report (plus an `assert_json_close` helper).",
+  "reasoning": "",
+  "responseId": "resp_010cc82dd9a0624e006949bd919ca08197bee8393d929fa277",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3576,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1987,
+    "output_tokens_details": {
+      "reasoning_tokens": 337
+    },
+    "total_tokens": 5563
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_010cc82dd9a0624e006949bd9243988197ac1d3cb4e389573a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_010cc82dd9a0624e006949bd99dd788197b031b326640616c0",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap\n\ntarget_path = Path('/mnt/data').joinpath('src/numeric_tolerance_diff.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Numeric-tolerance diff for expected-vs-actual JSON-like structures.\n\nSupports absolute/relative tolerances, per-path overrides (fnmatch), NaN/inf\nhandling, and produces a deterministic structured diff report.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom fnmatch import fnmatch\nfrom typing import Any, Dict, Iterable, List, Optional, Tuple\nimport math\n\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass Tolerance:\n    abs: float = 0.0\n    rel: float = 0.0\n\n    def threshold(self, expected_mag: float) -> float:\n        return max(float(self.abs), float(self.rel) * float(expected_mag))\n\"\"\",\n\"\"\"def _is_number(x: Any) -> bool:\n    return isinstance(x, (int, float)) and not isinstance(x, bool)\n\ndef _is_nan(x: Any) -> bool:\n    return isinstance(x, float) and math.isnan(x)\n\ndef _is_inf(x: Any) -> bool:\n    return isinstance(x, float) and math.isinf(x)\n\ndef _path_join(base: str, key: Any) -> str:\n    if isinstance(key, int):\n        return f\\\"{base}[{key}]\\\"\n    if base == \\\"$\\\":\n        return f\\\"$.{key}\\\"\n    return f\\\"{base}.{key}\\\"\n\ndef _resolve_tol(path: str, default: Tolerance, overrides: Optional[Dict[str, Tolerance]]) -> Tolerance:\n    if not overrides:\n        return default\n    best_pat, best = None, None\n    for pat, tol in overrides.items():\n        if fnmatch(path, pat) and (best_pat is None or len(pat) > len(best_pat)):\n            best_pat, best = pat, tol\n    return best if best is not None else default\n\"\"\",\n\"\"\"def diff_json(\n    expected: Any,\n    actual: Any,\n    *,\n    abs_tol: float = 0.0,\n    rel_tol: float = 0.0,\n    path_tolerances: Optional[Dict[str, Tolerance]] = None,\n    allow_nan_equal: bool = True,\n    allow_inf_equal: bool = True,\n) -> Dict[str, Any]:\n    \\\"\\\"\\\"Return a structured diff report for JSON-like objects.\\\"\\\"\\\"\n    default_tol = Tolerance(abs=abs_tol, rel=rel_tol)\n    diffs: List[Dict[str, Any]] = []\n\n    def add(kind: str, path: str, e: Any, a: Any, msg: str, **extra: Any) -> None:\n        d = {\\\"kind\\\": kind, \\\"path\\\": path, \\\"expected\\\": e, \\\"actual\\\": a, \\\"message\\\": msg}\n        d.update(extra)\n        diffs.append(d)\n\n    def cmp(e: Any, a: Any, path: str) -> None:\n        # Numbers (incl. NaN/inf)\n        if _is_number(e) and _is_number(a):\n            if _is_nan(e) or _is_nan(a):\n                if allow_nan_equal and _is_nan(e) and _is_nan(a):\n                    return\n                add(\\\"nan_mismatch\\\", path, e, a, \\\"NaN mismatch\\\")\n                return\n            if _is_inf(e) or _is_inf(a):\n                if allow_inf_equal and _is_inf(e) and _is_inf(a) and (math.copysign(1.0, e) == math.copysign(1.0, a)):\n                    return\n                add(\\\"inf_mismatch\\\", path, e, a, \\\"Infinity mismatch\\\")\n                return\n            tol = _resolve_tol(path, default_tol, path_tolerances)\n            err_abs = abs(float(e) - float(a))\n            denom = max(abs(float(e)), 1e-300)\n            err_rel = err_abs / denom\n            thr = tol.threshold(abs(float(e)))\n            ok = err_abs <= thr or err_rel <= float(tol.rel)\n            if not ok:\n                add(\n                    \\\"number_mismatch\\\",\n                    path,\n                    e,\n                    a,\n                    \\\"Numeric difference exceeds tolerance\\\",\n                    abs_err=err_abs,\n                    rel_err=err_rel,\n                    tol_abs=tol.abs,\n                    tol_rel=tol.rel,\n                    threshold=thr,\n                )\n            return\n\n        # Dicts\n        if isinstance(e, dict) and isinstance(a, dict):\n            e_keys, a_keys = set(e.keys()), set(a.keys())\n            missing, extra = sorted(e_keys - a_keys), sorted(a_keys - e_keys)\n            for k in missing:\n                add(\\\"missing_key\\\", _path_join(path, k), e.get(k), None, \\\"Key missing in actual\\\")\n            for k in extra:\n                add(\\\"extra_key\\\", _path_join(path, k), None, a.get(k), \\\"Unexpected key in actual\\\")\n            for k in sorted(e_keys & a_keys):\n                cmp(e[k], a[k], _path_join(path, k))\n            return\n\n        # Lists\n        if isinstance(e, list) and isinstance(a, list):\n            if len(e) != len(a):\n                add(\\\"length_mismatch\\\", path, len(e), len(a), \\\"List length differs\\\")\n            for i, (ee, aa) in enumerate(zip(e, a)):\n                cmp(ee, aa, _path_join(path, i))\n            return\n\n        # Fallback: strict equality\n        if e != a:\n            add(\\\"value_mismatch\\\", path, e, a, \\\"Values differ\\\")\n\n    cmp(expected, actual, \\\"$\\\")\n\n    kinds: Dict[str, int] = {}\n    for d in diffs:\n        kinds[d[\\\"kind\\\"]] = kinds.get(d[\\\"kind\\\"], 0) + 1\n    return {\n        \\\"ok\\\": len(diffs) == 0,\n        \\\"diff_count\\\": len(diffs),\n        \\\"diffs\\\": diffs,\n        \\\"summary\\\": {\\\"by_kind\\\": kinds},\n        \\\"settings\\\": {\n            \\\"abs_tol\\\": abs_tol,\n            \\\"rel_tol\\\": rel_tol,\n            \\\"path_tolerances\\\": {k: {\\\"abs\\\": v.abs, \\\"rel\\\": v.rel} for k, v in (path_tolerances or {}).items()},\n            \\\"allow_nan_equal\\\": allow_nan_equal,\n            \\\"allow_inf_equal\\\": allow_inf_equal,\n        },\n    }\n\"\"\",\n\"\"\"def assert_json_close(*args: Any, **kwargs: Any) -> Dict[str, Any]:\n    \\\"\\\"\\\"Convenience wrapper: raises AssertionError if diff_json is not ok.\\\"\\\"\\\"\n    report = diff_json(*args, **kwargs)\n    if not report[\\\"ok\\\"]:\n        first = report[\\\"diffs\\\"][0]\n        raise AssertionError(f\\\"JSON mismatch at {first['path']}: {first['message']}\\\")\n    return report\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/numeric_tolerance_diff.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd39c7008190b2d314f911169a74060596b8e6d512ff",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/numeric_tolerance_diff.py\nDIR_STATE:[\"src/determinism.py\", \"src/numeric_tolerance_diff.py\", \"src/stable_json.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_010cc82dd9a0624e006949bdaf9acc8197a8eb1b04749c25de",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/numeric_tolerance_diff.py` with a deterministic, structured JSON diff engine supporting absolute/relative numeric tolerances, per-path (fnmatch) tolerance overrides, NaN/inf handling, and a CI-friendly report (plus an `assert_json_close` helper)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

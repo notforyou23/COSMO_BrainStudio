@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/results.schema.v1.json",
+  "title": "results.json schema (v1)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "run", "artifacts", "metrics"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Results schema version."
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "created_at", "determinism"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "created_at": { "type": "string", "format": "date-time" },
+        "duration_seconds": { "type": "number", "minimum": 0 },
+        "host": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["python_version", "platform"],
+          "properties": {
+            "python_version": { "type": "string", "minLength": 1 },
+            "platform": { "type": "string", "minLength": 1 }
+          }
+        },
+        "code": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "git_commit": { "type": "string", "minLength": 7 },
+            "dirty": { "type": "boolean" }
+          }
+        },
+        "determinism": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["seed"],
+          "properties": {
+            "seed": { "type": "integer" },
+            "python_hash_seed": { "type": "string" },
+            "numpy_seed": { "type": "integer" },
+            "torch_deterministic": { "type": "boolean" },
+            "matplotlib_rcparams_hash": { "$ref": "#/$defs/sha256" }
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "description": "Files emitted by the run (including figures), with content hashes for regression testing.",
+      "items": { "$ref": "#/$defs/artifact" }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scalars"],
+      "properties": {
+        "scalars": {
+          "type": "object",
+          "description": "Flat map of scalar metrics.",
+          "additionalProperties": { "type": "number" }
+        },
+        "series": {
+          "type": "object",
+          "description": "Optional time-series or step-series metrics.",
+          "additionalProperties": {
+            "type": "array",
+            "items": { "type": "number" }
+          }
+        },
+        "tables": {
+          "type": "object",
+          "description": "Optional named tables; each row is a JSON object.",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      }
+    },
+    "params": {
+      "type": "object",
+      "description": "Optional hyperparameters/config captured for traceability.",
+      "additionalProperties": true
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "errors": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "notes": { "type": "string" }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[A-Fa-f0-9]{64}$",
+      "description": "Hex-encoded SHA-256 digest."
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "bytes"],
+      "properties": {
+        "name": { "type": "string" },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Relative path under the outputs directory."
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["figure", "results_json", "data", "log", "other"]
+        },
+        "format": {
+          "type": "string",
+          "description": "Optional file format hint (e.g., png, pdf, json, csv)."
+        },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "bytes": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

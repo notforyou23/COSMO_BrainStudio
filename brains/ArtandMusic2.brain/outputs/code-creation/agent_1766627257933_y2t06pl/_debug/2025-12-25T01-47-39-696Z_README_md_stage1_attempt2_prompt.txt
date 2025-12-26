@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement and run a minimal smoke-test job that (a) executes the smallest possible command in the container, (b) captures full stdout/stderr + exit code, and (c) writes a timestamped log bundle to a canonical /out or /outputs path; then wire it into CI as the first gate before any longer runs.
+Project: generated_script_1766627258170 (python script)
+
+Target file details:
+- Path: README.md
+- Purpose: Documents how to run the smoke test locally with Docker, where outputs are written, and how the CI gate enforces the minimal container health check.
+- Category: documentation
+
+Other planned files (for context only):
+- scripts/smoke_test.py: Runs the minimal in-container command, captures stdout/stderr/exit code, and writes a timestamped log bundle under /out or /outputs (with robust fallbacks) for CI gating.
+- scripts/write_log_bundle.py: Provides shared utilities for canonical output directory resolution, timestamped bundle creation, and structured log/metadata writing used by the smoke test script.
+- docker-compose.yml: Defines a minimal service that runs the smoke test inside the container and mounts a host output directory to the canonical /out path for log bundle persistence.
+- Dockerfile: Builds the minimal Docker image needed to execute the smoke test script and its smallest possible container command while keeping runtime dependencies lean.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-25T01-21-50-895Z_docker_docker-compose_yml_stage1_attempt1_prompt.txt from code-creation agent agent_1766625709591_p
+- [AGENT: agent_1766619476801_dj6dsxw] {"agentId":"agent_1766619476801_dj6dsxw","timestamp":"2025-12-24T23:43:43.594Z","files":[{"filename":"v
+- [AGENT: agent_1766614627657_h1iraii] {"agentId":"agent_1766614627657_h1iraii","timestamp":"2025-12-24T22:18:53.796Z","files":[{"filename":"v
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+
+Key requirements:
+- docker
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Documents how to run the smoke test locally with Docker, where outputs are written, and how the CI gate enforces the minimal container health check.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('README.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:README.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside README.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

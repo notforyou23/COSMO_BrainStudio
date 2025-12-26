@@ -1,0 +1,97 @@
+{
+  "content": "Implemented `cosmo_contracts.markdown` as a dependency-free, syntactically valid Markdown utility module with a stable public API (builder + rendering helpers) suitable for reliable imports in CI smoke tests.",
+  "reasoning": "",
+  "responseId": "resp_0476e73951e3d199006949bf5465dc81909e61561f2e8a2213",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3560,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2042,
+    "output_tokens_details": {
+      "reasoning_tokens": 1995
+    },
+    "total_tokens": 5602
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0476e73951e3d199006949bf5520e881909f3c81007c0d2a15",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0476e73951e3d199006949bf568c04819094a4a56eca4ffbb8",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nlist(base.joinpath(\"src\").glob(\"**/*.py\"))[:20]\n",
+      "container_id": "cntr_6949bf4868f48190afb7ac7aab80c24301c1c0df42eb0f40",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0476e73951e3d199006949bf58b3208190add885814b2d656d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0476e73951e3d199006949bf59cd7c8190870b281305f0e7ac",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nbase=Path(\"/mnt/data\")\nsorted([str(p.relative_to(base)) for p in base.rglob(\"*\")][:50])\n",
+      "container_id": "cntr_6949bf4868f48190afb7ac7aab80c24301c1c0df42eb0f40",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0476e73951e3d199006949bf5b9c548190a62aa40780c101de",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0476e73951e3d199006949bf638e7c8190aa472628bff0e2af",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, re\ntarget_path = Path('/mnt/data').joinpath('src/cosmo_contracts/markdown.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\\\"\\\"\\\"cosmo_contracts.markdown\n\nSmall, dependency-free helpers for producing GitHub-flavoured Markdown.\n\nThe project historically exposed this module as a public entrypoint; the goal\nhere is to keep a stable import surface and provide a minimal but useful API.\n\\\"\\\"\\\"\"\"\")\n\nchunks.append(\"\"\"from __future__ import annotations\n\nfrom dataclasses import dataclass, field\nfrom typing import Any, Iterable, Mapping, Sequence\"\"\")\n\nchunks.append(\"\"\"__all__ = [\n    \"Markdown\",\n    \"MarkdownBuilder\",\n    \"escape_markdown\",\n    \"heading\",\n    \"paragraph\",\n    \"bullet_list\",\n    \"code_block\",\n    \"table\",\n    \"render\",\n]\"\"\")\n\nchunks.append(\"\"\"class Markdown(str):\n    \\\"\\\"\\\"A thin marker type for strings that contain Markdown.\\\"\\\"\\\"\"\"\")\n\nchunks.append(\"\"\"def escape_markdown(text: str) -> str:\n    \\\"\\\"\\\"Escape characters that frequently break Markdown rendering.\n\n    This is intentionally conservative and targets common inline contexts.\n    \\\"\\\"\\\"\n    if not text:\n        return \"\"\n    # Escape backslash first to avoid double escaping.\n    text = text.replace(\"\\\\\\\\\", \"\\\\\\\\\\\\\\\\\")\n    for ch in (\"*\", \"_\", \"`\", \"[\", \"]\", \"<\", \">\", \"|\"):\n        text = text.replace(ch, f\"\\\\\\\\{ch}\")\n    return text\"\"\")\n\nchunks.append(\"\"\"def heading(text: str, level: int = 1) -> Markdown:\n    \\\"\\\"\\\"Return a Markdown heading.\\\"\\\"\\\"\n    lvl = max(1, min(int(level), 6))\n    return Markdown(f\\\"{'#' * lvl} {text.strip()}\\\\n\\\")\"\"\")\n\nchunks.append(\"\"\"def paragraph(text: str) -> Markdown:\n    \\\"\\\"\\\"Return a Markdown paragraph (terminated with a blank line).\\\"\\\"\\\"\n    t = text.strip()\n    return Markdown(f\\\"{t}\\\\n\\\\n\\\" if t else \\\"\\\\n\\\")\"\"\")\n\nchunks.append(\"\"\"def bullet_list(items: Iterable[Any], *, indent: int = 0) -> Markdown:\n    \\\"\\\"\\\"Render an iterable as a Markdown bullet list.\\\"\\\"\\\"\n    pad = \" \" * max(0, int(indent))\n    lines = []\n    for item in items:\n        s = str(item).strip()\n        if not s:\n            continue\n        lines.append(f\\\"{pad}- {s}\\\")\n    return Markdown(\\\"\\\\n\\\".join(lines) + (\\\"\\\\n\\\" if lines else \\\"\\\"))\"\"\")\n\nchunks.append(\"\"\"def code_block(code: str, language: str = \"\") -> Markdown:\n    \\\"\\\"\\\"Return a fenced code block.\\\"\\\"\\\"\n    lang = language.strip()\n    body = (code or \"\").rstrip(\"\\\\n\")\n    return Markdown(f\\\"```{lang}\\\\n{body}\\\\n```\\\\n\\\")\"\"\")\n\nchunks.append(\"\"\"def _stringify_cell(value: Any) -> str:\n    if value is None:\n        return \"\"\n    if isinstance(value, Markdown):\n        return str(value).strip()\n    return escape_markdown(str(value)).strip()\"\"\")\n\nchunks.append(\"\"\"def table(headers: Sequence[Any], rows: Sequence[Sequence[Any]]) -> Markdown:\n    \\\"\\\"\\\"Render a simple GFM table.\n\n    Cells are escaped for safe inline rendering.\n    \\\"\\\"\\\"\n    if not headers:\n        raise ValueError(\"headers must be non-empty\")\n    h = [_stringify_cell(x) for x in headers]\n    header_line = \"| \" + \" | \".join(h) + \" |\"\n    sep_line = \"| \" + \" | \".join([\"---\"] * len(h)) + \" |\"\n    row_lines = []\n    for r in rows:\n        cells = list(r) + [\"\"] * (len(h) - len(r))\n        cells = cells[: len(h)]\n        row_lines.append(\"| \" + \" | \".join(_stringify_cell(c) for c in cells) + \" |\")\n    return Markdown(\"\\\\n\".join([header_line, sep_line, *row_lines]) + \"\\\\n\")\"\"\")\n\nchunks.append(\"\"\"@dataclass\nclass MarkdownBuilder:\n    \\\"\\\"\\\"Incrementally build Markdown with convenience helpers.\\\"\\\"\\\"\n\n    lines: list[str] = field(default_factory=list)\n\n    def add(self, md: Any) -> \"MarkdownBuilder\":\n        if md is None:\n            return self\n        text = str(md)\n        self.lines.extend(text.splitlines())\n        return self\n\n    def add_heading(self, text: str, level: int = 1) -> \"MarkdownBuilder\":\n        return self.add(heading(text, level))\n\n    def add_paragraph(self, text: str) -> \"MarkdownBuilder\":\n        return self.add(paragraph(text))\n\n    def add_bullets(self, items: Iterable[Any], *, indent: int = 0) -> \"MarkdownBuilder\":\n        return self.add(bullet_list(items, indent=indent))\n\n    def add_code(self, code: str, language: str = \"\") -> \"MarkdownBuilder\":\n        return self.add(code_block(code, language))\n\n    def add_table(self, headers: Sequence[Any], rows: Sequence[Sequence[Any]]) -> \"MarkdownBuilder\":\n        return self.add(table(headers, rows))\n\n    def build(self) -> Markdown:\n        # Preserve explicit blank lines; always end with a newline for POSIX friendliness.\n        return Markdown(\"\\\\n\".join(self.lines).rstrip(\"\\\\n\") + \"\\\\n\")\"\"\")\n\nchunks.append(\"\"\"def render(obj: Any) -> Markdown:\n    \\\"\\\"\\\"Best-effort conversion of common Python objects to Markdown.\n\n    - str / Markdown: returned as-is\n    - Mapping: renders as a 2-column table of key/value\n    - Sequence: renders as a bullet list\n    - Other: coerced to a paragraph\n    \\\"\\\"\\\"\n    if obj is None:\n        return Markdown(\"\")\n    if isinstance(obj, Markdown):\n        return obj\n    if isinstance(obj, str):\n        return Markdown(obj if obj.endswith(\"\\\\n\") else obj + \"\\\\n\")\n    if isinstance(obj, Mapping):\n        headers = [\"key\", \"value\"]\n        rows = [(k, v) for k, v in obj.items()]\n        return table(headers, rows)\n    if isinstance(obj, (list, tuple, set, frozenset)):\n        return bullet_list(obj)\n    return paragraph(str(obj))\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/cosmo_contracts/markdown.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bf4868f48190afb7ac7aab80c24301c1c0df42eb0f40",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/cosmo_contracts/markdown.py\nDIR_STATE:[\"src/cosmo_contracts/markdown.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0476e73951e3d199006949bf7a38ec819087a903ff54b025d3",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0476e73951e3d199006949bf7a79d48190aad4a2498e931076",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `cosmo_contracts.markdown` as a dependency-free, syntactically valid Markdown utility module with a stable public API (builder + rendering helpers) suitable for reliable imports in CI smoke tests."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,182 @@
+{
+  "content": "Created `tests/test_cli_smoke.py` with three minimal pytest smoke tests that (1) import `qg_bench.cli` and build the argparse parser, (2) validate the provided example JSON case, and (3) run a dry-run execution plan and assert the emitted JSON structure and exit code.",
+  "reasoning": "",
+  "responseId": "resp_001e8383c4cc40d6006949be32733881968854536003e11992",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4993,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1420,
+    "output_tokens_details": {
+      "reasoning_tokens": 821
+    },
+    "total_tokens": 6413
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_001e8383c4cc40d6006949be331dbc8196b3e66b89a0c79355",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_001e8383c4cc40d6006949be33f59481968bfc3779b4ca6359",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nroot=Path(\"/mnt/data\")\nsorted([str(p.relative_to(root)) for p in root.glob(\"**/*\") if p.is_file()])[:50], len(list(root.glob(\"**/*\")))",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(['outputs/examples/benchmark_case_001.json',\n  'outputs/examples/benchmark_case_002.json',\n  'qg_bench/cli.py',\n  'src/experiments/symbolic_rg.py',\n  'src/experiments/symbolic_rg_utils.py',\n  'src/experiments/toy_ising_emergent_classicality.py'],\n 11)"
+        }
+      ]
+    },
+    {
+      "id": "rs_001e8383c4cc40d6006949be36aca881968dab1187a03edc9e",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_001e8383c4cc40d6006949be37990481969f38662a16fc92a5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nprint(Path(\"/mnt/data/qg_bench/cli.py\").read_text()[:4000])\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"qg_bench CLI.\n\nThis module intentionally keeps a small, dependency-light surface so the\nbenchmark pipeline can invoke it reliably in minimal environments.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport sys\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, Optional, Tuple\nEXIT_OK = 0\nEXIT_RUNTIME_ERROR = 1\nEXIT_USAGE_ERROR = 2\nEXIT_VALIDATION_ERROR = 3\ndef _eprint(*parts: object) -> None:\n    print(*parts, file=sys.stderr)\n\n\ndef _load_json(path: Path) -> Dict[str, Any]:\n    try:\n        data = json.loads(path.read_text(encoding=\"utf-8\"))\n    except FileNotFoundError as e:\n        raise ValueError(f\"input file not found: {path}\") from e\n    except json.JSONDecodeError as e:\n        raise ValueError(f\"invalid JSON in {path}: {e}\") from e\n    if not isinstance(data, dict):\n        raise ValueError(\"benchmark payload must be a JSON object\")\n    return data\n\n\ndef _schema_path() -> Path:\n    # Expected layout: <repo_root>/schemas/benchmark.schema.json\n    here = Path(__file__).resolve()\n    for parent in (here.parent, *here.parents):\n        cand = parent / \"schemas\" / \"benchmark.schema.json\"\n        if cand.is_file():\n            return cand\n    return Path(\"schemas\") / \"benchmark.schema.json\"\n\n\ndef _validate_payload(payload: Dict[str, Any], schema_file: Optional[Path] = None) -> Tuple[bool, str]:\n    # Lightweight validation that works with or without jsonschema installed.\n    schema_file = schema_file or _schema_path()\n    schema: Optional[Dict[str, Any]] = None\n    if schema_file.is_file():\n        try:\n            schema = json.loads(schema_file.read_text(encoding=\"utf-8\"))\n        except Exception:\n            schema = None\n\n    try:\n        import jsonschema  # type: ignore\n    except Exception:\n        jsonschema = None  # type: ignore\n\n    if schema and jsonschema:\n        try:\n            jsonschema.validate(instance=payload, schema=schema)\n        except Exception as e:\n            return False, str(e)\n\n    # Minimal required keys for pipeline smoke-runs.\n    if \"case_id\" not in payload or not isinstance(payload[\"case_id\"], str) or not payload[\"case_id\"].strip():\n        return False, \"missing or invalid required field: case_id\"\n    if \"experiment\" not in payload or not isinstance(payload[\"experiment\"], dict):\n        return False, \"missing or invalid required field: experiment\"\n    if \"name\" not in payload[\"experiment\"] or not isinstance(payload[\"experiment\"][\"name\"], str):\n        return False, \"missing or invalid required field: experiment.name\"\n    return True, \"\"\ndef build_parser() -> argparse.ArgumentParser:\n    p = argparse.ArgumentParser(prog=\"qg-bench\", description=\"Minimal benchmark CLI.\")\n    p.add_argument(\"--version\", action=\"version\", version=\"qg-bench 0.1\")\n    sub = p.add_subparsers(dest=\"cmd\", required=True)\n\n    pv = sub.add_parser(\"validate\", help=\"Validate a benchmark JSON payload.\")\n    pv.add_argument(\"input\", type=Path, help=\"Path to benchmark JSON file.\")\n    pv.add_argument(\"--schema\", type=Path, default=None, help=\"Optional path to schema JSON file.\")\n\n    pr = sub.add_parser(\"run\", help=\"Run a benchmark case (smoke-run).\")\n    pr.add_argument(\"input\", type=Path, help=\"Path to benchmark JSON file.\")\n    pr.add_argument(\"--schema\", type=Path, default=None, help=\"Optional path to schema JSON file.\")\n    pr.add_argument(\"-o\", \"--output\", type=Path, default=None, help=\"Optional output JSON file.\")\n    pr.add_argument(\"--dry-run\", action=\"store_true\", help=\"Validate and echo resolved run plan only.\")\n    return p\ndef _run_case(payload: Dict[str, Any]) -> Dict[str, Any]:\n    # This CLI does not execute heavy experiments; it standardizes an execution plan\n    # so the rest of the pipeline can take over.\n    exp = payload.get(\"experiment\", {}) if isinstance(payload.get(\"experiment\"), dict) else {}\n    return {\n        \"case_id\": payload.get(\"case_id\"),\n        \"experiment\": {\"name\": exp.get(\"name\"), \"params\": exp.get(\"params\", {})},\n        \"status\": \"planned\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_001e8383c4cc40d6006949be39edb08196b1abf9f0126a478b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_001e8383c4cc40d6006949be3a61bc8196b9ee6da33f77e7cf",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path(\"/mnt/data/qg_bench/cli.py\").read_text()[4000:8000])\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\",\n    }\n\n\ndef main(argv: Optional[Iterable[str]] = None) -> int:\n    parser = build_parser()\n    args = parser.parse_args(list(argv) if argv is not None else None)\n\n    try:\n        payload = _load_json(args.input)\n    except ValueError as e:\n        _eprint(f\"ERROR: {e}\")\n        return EXIT_VALIDATION_ERROR\n\n    ok, msg = _validate_payload(payload, schema_file=getattr(args, \"schema\", None))\n    if not ok:\n        _eprint(f\"VALIDATION_ERROR: {msg}\")\n        return EXIT_VALIDATION_ERROR\n\n    if args.cmd == \"validate\":\n        return EXIT_OK\n\n    if args.cmd == \"run\":\n        result = _run_case(payload)\n        if args.dry_run or args.output is None:\n            print(json.dumps(result, indent=2, sort_keys=True))\n        else:\n            args.output.parent.mkdir(parents=True, exist_ok=True)\n            args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + \"\\n\", encoding=\"utf-8\")\n        return EXIT_OK\n\n    parser.error(f\"unknown command: {args.cmd}\")\n    return EXIT_USAGE_ERROR\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_001e8383c4cc40d6006949be3c52a88196a064eacff90b2264",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_001e8383c4cc40d6006949be3d41ac8196b242be9db6993223",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "text=Path(\"/mnt/data/qg_bench/cli.py\").read_text().splitlines()\nfor i in range(70,95):\n    print(i+1, text[i])\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "71         return False, \"missing or invalid required field: experiment.name\"\n72     return True, \"\"\n73 def build_parser() -> argparse.ArgumentParser:\n74     p = argparse.ArgumentParser(prog=\"qg-bench\", description=\"Minimal benchmark CLI.\")\n75     p.add_argument(\"--version\", action=\"version\", version=\"qg-bench 0.1\")\n76     sub = p.add_subparsers(dest=\"cmd\", required=True)\n77 \n78     pv = sub.add_parser(\"validate\", help=\"Validate a benchmark JSON payload.\")\n79     pv.add_argument(\"input\", type=Path, help=\"Path to benchmark JSON file.\")\n80     pv.add_argument(\"--schema\", type=Path, default=None, help=\"Optional path to schema JSON file.\")\n81 \n82     pr = sub.add_parser(\"run\", help=\"Run a benchmark case (smoke-run).\")\n83     pr.add_argument(\"input\", type=Path, help=\"Path to benchmark JSON file.\")\n84     pr.add_argument(\"--schema\", type=Path, default=None, help=\"Optional path to schema JSON file.\")\n85     pr.add_argument(\"-o\", \"--output\", type=Path, default=None, help=\"Optional output JSON file.\")\n86     pr.add_argument(\"--dry-run\", action=\"store_true\", help=\"Validate and echo resolved run plan only.\")\n87     return p\n88 def _run_case(payload: Dict[str, Any]) -> Dict[str, Any]:\n89     # This CLI does not execute heavy experiments; it standardizes an execution plan\n90     # so the rest of the pipeline can take over.\n91     exp = payload.get(\"experiment\", {}) if isinstance(payload.get(\"experiment\"), dict) else {}\n92     return {\n93         \"case_id\": payload.get(\"case_id\"),\n94         \"experiment\": {\"name\": exp.get(\"name\"), \"params\": exp.get(\"params\", {})},\n95         \"status\": \"planned\",\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_001e8383c4cc40d6006949be3fcbbc81969621f7de17fb011c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_001e8383c4cc40d6006949be4153588196a6c818e5a7aab909",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nschema_path = Path(\"/mnt/data/schemas/benchmark.schema.json\")\nprint(schema_path.exists())\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "False\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_001e8383c4cc40d6006949be43272481968b2cdcb4a4c29eb2",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_001e8383c4cc40d6006949be449988819685f5347dd96bea8c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import json, pathlib\np=Path(\"/mnt/data/outputs/examples/benchmark_case_001.json\")\nprint(p.read_text())\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "{\n  \"case_id\": \"benchmark_case_001\",\n  \"experiment\": {\n    \"name\": \"toy_ising_emergent_classicality\",\n    \"params\": {\n      \"burn_in\": 10,\n      \"coupling\": 1.0,\n      \"field\": 0.0,\n      \"n_spins\": 32,\n      \"seed\": 0,\n      \"sweeps\": 50,\n      \"temperature\": 2.0\n    }\n  }\n}\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_001e8383c4cc40d6006949be46e24c8196b79f9fa499c94c7b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_001e8383c4cc40d6006949be4ce3988196b6593b022fdcea54",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_cli_smoke.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"import json\nfrom pathlib import Path\n\nimport pytest\n\n\ndef _repo_root() -> Path:\n    # tests/ is expected to live at <repo_root>/tests\n    return Path(__file__).resolve().parents[1]\n\"\"\",\n\"\"\"def test_cli_import_and_parser_builds():\n    # Import should not raise (guards against syntax errors).\n    import qg_bench.cli as cli\n\n    parser = cli.build_parser()\n    # Basic sanity: expected subcommands exist.\n    sub_actions = [a for a in parser._actions if a.dest == \"cmd\"]\n    assert sub_actions, \"CLI parser is missing required subcommand configuration\"\n\"\"\",\n\"\"\"def test_cli_validate_example_payload_exits_zero(capsys):\n    import qg_bench.cli as cli\n\n    example = _repo_root() / \"outputs\" / \"examples\" / \"benchmark_case_001.json\"\n    assert example.is_file()\n\n    code = cli.main([\"validate\", str(example)])\n    out = capsys.readouterr()\n    assert code == 0\n    # validate should be quiet on success\n    assert out.err == \"\"\n\"\"\",\n\"\"\"def test_cli_run_dry_run_prints_plan_and_exits_zero(tmp_path, capsys):\n    import qg_bench.cli as cli\n\n    payload = {\n        \"case_id\": \"smoke_case\",\n        \"experiment\": {\"name\": \"toy_ising_emergent_classicality\", \"params\": {\"seed\": 0}},\n    }\n    inp = tmp_path / \"case.json\"\n    inp.write_text(json.dumps(payload), encoding=\"utf-8\")\n\n    code = cli.main([\"run\", str(inp), \"--dry-run\"])\n    captured = capsys.readouterr()\n\n    assert code == 0\n    data = json.loads(captured.out)\n    assert data[\"case_id\"] == \"smoke_case\"\n    assert data[\"status\"] == \"planned\"\n\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tests/test_cli_smoke.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_cli_smoke.py\nDIR_STATE:[\"tests/test_cli_smoke.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_001e8383c4cc40d6006949be555ed0819683efe1f9e5d248b0",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_001e8383c4cc40d6006949be56289c8196b3655113167cd0d8",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import subprocess, textwrap, os, sys, json, pathlib, shlex, re\nres=subprocess.run([sys.executable,\"-m\",\"pytest\",\"-q\"],cwd=\"/mnt/data\",capture_output=True,text=True)\nres.returncode, res.stdout, res.stderr[:4000]\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(0,\n '\\x1b[32m.\\x1b[0m\\x1b[32m.\\x1b[0m\\x1b[32m.\\x1b[0m\\x1b[32m                                                                      [100%]\\x1b[0m\\n\\x1b[32m\\x1b[32m\\x1b[1m3 passed\\x1b[0m\\x1b[32m in 1.63s\\x1b[0m\\x1b[0m\\n',\n \"/home/sandbox/.local/lib/python3.11/site-packages/ddtrace/vendor/psutil/_pslinux.py:527: RuntimeWarning: 'sin' and 'sout' swap memory stats couldn't be determined and were set to 0 ([Errno 2] No such file or directory: '/proc/vmstat')\\n  warnings.warn(msg, RuntimeWarning)\\n\")"
+        }
+      ]
+    },
+    {
+      "id": "msg_001e8383c4cc40d6006949be5dbf60819690de650b657a1e4d",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/test_cli_smoke.py` with three minimal pytest smoke tests that (1) import `qg_bench.cli` and build the argparse parser, (2) validate the provided example JSON case, and (3) run a dry-run execution plan and assert the emitted JSON structure and exit code."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,146 @@
+{
+  "content": "Created `src/experiments/plotting.py` with small, reusable matplotlib-based helpers to summarize sweep metrics, generate per-metric and grid plots versus a parameter, plot summary bars, and save figures with minimal side effects.",
+  "reasoning": "",
+  "responseId": "resp_0d6fb03b6284147f00694b4deb1d648190bbebf0bc2b59eadc",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 6854,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2392,
+    "output_tokens_details": {
+      "reasoning_tokens": 615
+    },
+    "total_tokens": 9246
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0d6fb03b6284147f00694b4dec0f30819084ca5a6680cb4029",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d6fb03b6284147f00694b4dec593c8190a193aa026bee3918",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nlist(base.glob(\"src/experiments/*.py\"))[:20], [p.name for p in (base/\"src/experiments\").glob(\"*\")]",
+      "container_id": "cntr_694b4d8e36dc8190b33c31668379700e0f2b66b245dabab1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "([PosixPath('/mnt/data/src/experiments/__init__.py'),\n  PosixPath('/mnt/data/src/experiments/_common.py'),\n  PosixPath('/mnt/data/src/experiments/io.py')],\n ['__init__.py', '_common.py', 'io.py'])"
+        }
+      ]
+    },
+    {
+      "id": "rs_0d6fb03b6284147f00694b4dee4b008190859fa795c952504f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d6fb03b6284147f00694b4deeb49c81909f9c4d4c8a9a3dc0",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nprint((Path(\"/mnt/data/src/experiments/_common.py\")).read_text()[:4000])\n",
+      "container_id": "cntr_694b4d8e36dc8190b33c31668379700e0f2b66b245dabab1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Shared helpers for the :mod:`experiments` package.\n\nThe project keeps these utilities small and dependency-free so they can be\nimported by I/O, sweep, and plotting modules without introducing heavy imports.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import is_dataclass, asdict\nfrom pathlib import Path\nfrom typing import Any, Iterable, Mapping, MutableMapping, Sequence, TypeVar, Union, overload\n\nPathLike = Union[str, Path]\nT = TypeVar(\"T\")\n\n__all__ = [\n    \"PathLike\",\n    \"as_path\",\n    \"ensure_dir\",\n    \"ensure_parent_dir\",\n    \"ensure_suffix\",\n    \"require\",\n    \"check_one_of\",\n    \"jsonable\",\n]\n@overload\ndef as_path(path: None) -> None: ...\n@overload\ndef as_path(path: PathLike) -> Path: ...\n\n\ndef as_path(path: PathLike | None) -> Path | None:\n    \"\"\"Coerce a path-like value to :class:`~pathlib.Path`.\n\n    Returns ``None`` if ``path`` is ``None``.\n    \"\"\"\n    if path is None:\n        return None\n    return path if isinstance(path, Path) else Path(path)\ndef ensure_dir(path: PathLike) -> Path:\n    \"\"\"Ensure a directory exists and return it as a :class:`~pathlib.Path`.\"\"\"\n    p = as_path(path)\n    assert p is not None\n    p.mkdir(parents=True, exist_ok=True)\n    return p\n\n\ndef ensure_parent_dir(file_path: PathLike) -> Path:\n    \"\"\"Ensure the parent directory of a file exists; return the file path.\"\"\"\n    p = as_path(file_path)\n    assert p is not None\n    if p.parent != p:\n        p.parent.mkdir(parents=True, exist_ok=True)\n    return p\n\n\ndef ensure_suffix(path: PathLike, suffix: str) -> Path:\n    \"\"\"Return *path* as a :class:`~pathlib.Path` with the given suffix.\n\n    ``suffix`` may be provided with or without a leading dot.\n    \"\"\"\n    p = as_path(path)\n    assert p is not None\n    suf = suffix if suffix.startswith(\".\") else f\".{suffix}\"\n    return p if p.suffix == suf else p.with_suffix(suf)\ndef require(condition: bool, message: str, exc: type[Exception] = ValueError) -> None:\n    \"\"\"Raise *exc* with *message* if *condition* is falsy.\"\"\"\n    if not condition:\n        raise exc(message)\n\n\ndef check_one_of(name: str, value: Any, options: Iterable[Any]) -> Any:\n    \"\"\"Validate that ``value`` is in ``options`` and return it.\"\"\"\n    opts = tuple(options)\n    if value not in opts:\n        raise ValueError(f\"{name} must be one of {opts!r}; got {value!r}\")\n    return value\ndef jsonable(obj: Any) -> Any:\n    \"\"\"Convert common Python objects into JSON-serializable structures.\n\n    This is intended for metadata/config persistence and errs on the side of\n    preserving information (e.g., converting :class:`~pathlib.Path` to ``str``).\n    \"\"\"\n    if obj is None or isinstance(obj, (str, int, float, bool)):\n        return obj\n    if isinstance(obj, Path):\n        return str(obj)\n    if is_dataclass(obj):\n        return {k: jsonable(v) for k, v in asdict(obj).items()}\n    if isinstance(obj, Mapping):\n        return {str(k): jsonable(v) for k, v in obj.items()}\n    if isinstance(obj, (list, tuple)):\n        return [jsonable(v) for v in obj]\n    if isinstance(obj, set):\n        return sorted(jsonable(v) for v in obj)\n    # Numpy scalars / pandas types often define ``item``.\n    item = getattr(obj, \"item\", None)\n    if callable(item):\n        try:\n            return jsonable(item())\n        except Exception:\n            pass\n    # Fall back to string representation (safe for logs/metadata).\n    return str(obj)\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0d6fb03b6284147f00694b4df05fdc819095e6680037918018",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d6fb03b6284147f00694b4df08558819082f59b7dbd0c0fe8",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path(\"/mnt/data/src/experiments/io.py\").read_text()[:4000])\n",
+      "container_id": "cntr_694b4d8e36dc8190b33c31668379700e0f2b66b245dabab1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"I/O helpers for experiment sweeps.\n\nThis module provides small, reusable functions to read/write sweep artifacts with\nconsistent schemas and friendly errors. It is intentionally dependency-light\n(only stdlib) to keep it usable in scripts and tests.\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Mapping, MutableMapping, Optional, Sequence, Tuple\nimport csv\nimport json\nimport os\nimport tempfile\nclass SweepIOError(RuntimeError):\n    \"\"\"Raised when a sweep artifact cannot be read/written or validated.\"\"\"\n\n@dataclass(frozen=True)\nclass SweepPaths:\n    \"\"\"Conventional file layout for a single sweep run directory.\"\"\"\n\n    run_dir: Path\n    config_name: str = \"config.json\"\n    results_name: str = \"results.csv\"\n    metadata_name: str = \"metadata.json\"\n\n    @property\n    def config_path(self) -> Path:\n        return self.run_dir / self.config_name\n\n    @property\n    def results_path(self) -> Path:\n        return self.run_dir / self.results_name\n\n    @property\n    def metadata_path(self) -> Path:\n        return self.run_dir / self.metadata_name\ndef _ensure_parent(path: Path) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n\ndef _atomic_write_text(path: Path, text: str, encoding: str = \"utf-8\") -> None:\n    \"\"\"Write text atomically (best-effort) to avoid partially-written files.\"\"\"\n    _ensure_parent(path)\n    fd, tmp = tempfile.mkstemp(prefix=path.name + \".\", dir=str(path.parent))\n    try:\n        with os.fdopen(fd, \"w\", encoding=encoding, newline=\"\") as f:\n            f.write(text)\n        os.replace(tmp, path)\n    except Exception as e:  # pragma: no cover (cleanup path)\n        try:\n            os.unlink(tmp)\n        except OSError:\n            pass\n        raise SweepIOError(f\"Failed writing {path}: {e}\") from e\n\ndef _require_mapping(obj: Any, *, context: str) -> Mapping[str, Any]:\n    if not isinstance(obj, Mapping):\n        raise SweepIOError(f\"{context} must be a JSON object (mapping), got {type(obj).__name__}\")\n    return obj\n\ndef _require_keys(d: Mapping[str, Any], keys: Sequence[str], *, context: str) -> None:\n    missing = [k for k in keys if k not in d]\n    if missing:\n        raise SweepIOError(f\"{context} missing required keys: {missing}\")\ndef read_json(path: Path) -> Any:\n    \"\"\"Read JSON from *path* with consistent error messages.\"\"\"\n    try:\n        text = Path(path).read_text(encoding=\"utf-8\")\n        return json.loads(text)\n    except FileNotFoundError as e:\n        raise SweepIOError(f\"JSON file not found: {path}\") from e\n    except json.JSONDecodeError as e:\n        raise SweepIOError(f\"Invalid JSON in {path}: {e}\") from e\n    except OSError as e:\n        raise SweepIOError(f\"Failed reading {path}: {e}\") from e\n\ndef write_json(path: Path, obj: Any, *, indent: int = 2, sort_keys: bool = True) -> None:\n    \"\"\"Write JSON to *path* atomically.\"\"\"\n    try:\n        text = json.dumps(obj, indent=indent, sort_keys=sort_keys, ensure_ascii=False) + \"\\n\"\n    except TypeError as e:\n        raise SweepIOError(f\"Object not JSON-serializable for {path}: {e}\") from e\n    _atomic_write_text(Path(path), text)\ndef read_config(path: Path) -> Dict[str, Any]:\n    \"\"\"Read an experiment/sweep config JSON object.\"\"\"\n    obj = read_json(path)\n    cfg = dict(_require_mapping(obj, context=f\"Config {path}\"))\n    # Convention: allow 'params' for sweep parameters; optional.\n    if \"params\" in cfg:\n        _require_mapping(cfg[\"params\"], context=f\"Config {path}['params']\")\n        cfg[\"params\"] = dict(cfg[\"params\"])\n    return cfg\n\ndef write_config(path: Path, config: Mapping[str, Any]) -> None:\n    _require_mapping(config, context=\"config\")\n    write_json(path, dict(config))\ndef _coerce_scalar(s: str) -> Any:\n    \"\"\"Best-effort parse for CSV cells written from python scalars.\"\"\"\n    if s == \"\":\n        return \"\"\n    sl = s.lower()\n    if sl == \"null\" or sl == \"none\":\n        return None\n    if sl == \"true\":\n        return True\n    if sl\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0d6fb03b6284147f00694b4df27d70819096419902fad1a90b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d6fb03b6284147f00694b4df2d7e481908fbaf14ead4c85ef",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "text=Path(\"/mnt/data/src/experiments/io.py\").read_text()\nprint(text[4000:8000])\n",
+      "container_id": "cntr_694b4d8e36dc8190b33c31668379700e0f2b66b245dabab1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": " == \"false\":\n        return False\n    try:\n        if \".\" in s or \"e\" in sl:\n            return float(s)\n        return int(s)\n    except ValueError:\n        return s\n\ndef read_results_csv(path: Path) -> List[Dict[str, Any]]:\n    \"\"\"Read a results table from CSV as a list of dict rows.\"\"\"\n    try:\n        with Path(path).open(\"r\", encoding=\"utf-8\", newline=\"\") as f:\n            reader = csv.DictReader(f)\n            if reader.fieldnames is None:\n                return []\n            rows: List[Dict[str, Any]] = []\n            for r in reader:\n                rows.append({k: _coerce_scalar(v) for k, v in r.items()})\n            return rows\n    except FileNotFoundError as e:\n        raise SweepIOError(f\"Results CSV not found: {path}\") from e\n    except csv.Error as e:\n        raise SweepIOError(f\"Invalid CSV in {path}: {e}\") from e\n    except OSError as e:\n        raise SweepIOError(f\"Failed reading {path}: {e}\") from e\n\ndef write_results_csv(path: Path, rows: Iterable[Mapping[str, Any]]) -> None:\n    \"\"\"Write a results table to CSV atomically.\n\n    Fieldnames are the union of keys across rows (stable order by first occurrence).\n    \"\"\"\n    rows_l = [dict(r) for r in rows]\n    fieldnames: List[str] = []\n    seen = set()\n    for r in rows_l:\n        for k in r.keys():\n            if k not in seen:\n                seen.add(k)\n                fieldnames.append(k)\n    text_io: List[str] = []\n    try:\n        import io\n        buf = io.StringIO()\n        w = csv.DictWriter(buf, fieldnames=fieldnames, extrasaction=\"ignore\")\n        w.writeheader()\n        for r in rows_l:\n            w.writerow({k: json.dumps(v, ensure_ascii=False) if isinstance(v, (dict, list)) else v for k, v in r.items()})\n        text = buf.getvalue()\n    except Exception as e:\n        raise SweepIOError(f\"Failed serializing results for {path}: {e}\") from e\n    _atomic_write_text(Path(path), text)\ndef read_metadata(path: Path) -> Dict[str, Any]:\n    \"\"\"Read metadata JSON object (e.g., timing, git sha, host info).\"\"\"\n    meta = dict(_require_mapping(read_json(path), context=f\"Metadata {path}\"))\n    return meta\n\ndef write_metadata(path: Path, metadata: Mapping[str, Any]) -> None:\n    _require_mapping(metadata, context=\"metadata\")\n    write_json(path, dict(metadata))\ndef load_run(run_dir: Path, *, required: Tuple[str, ...] = (\"config\", \"results\", \"metadata\")) -> Dict[str, Any]:\n    \"\"\"Load a conventional run directory into a dict with keys: config/results/metadata.\"\"\"\n    sp = SweepPaths(Path(run_dir))\n    out: Dict[str, Any] = {}\n    if \"config\" in required or sp.config_path.exists():\n        out[\"config\"] = read_config(sp.config_path)\n    if \"results\" in required or sp.results_path.exists():\n        out[\"results\"] = read_results_csv(sp.results_path)\n    if \"metadata\" in required or sp.metadata_path.exists():\n        out[\"metadata\"] = read_metadata(sp.metadata_path)\n    for k in required:\n        if k not in out:\n            raise SweepIOError(f\"Run {run_dir} missing required artifact: {k}\")\n    return out\n\ndef save_run(run_dir: Path, *, config: Mapping[str, Any], results: Iterable[Mapping[str, Any]], metadata: Mapping[str, Any]) -> SweepPaths:\n    \"\"\"Save config/results/metadata to the conventional files within *run_dir*.\"\"\"\n    sp = SweepPaths(Path(run_dir))\n    sp.run_dir.mkdir(parents=True, exist_ok=True)\n    write_config(sp.config_path, config)\n    write_results_csv(sp.results_path, results)\n    write_metadata(sp.metadata_path, metadata)\n    return sp\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0d6fb03b6284147f00694b4df5e5f08190b4a6b87175b485c1",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d6fb03b6284147f00694b4df721808190942f5afa9f83100d",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "tests=list(Path(\"/mnt/data/tests\").glob(\"*.py\"))\ntests\n",
+      "container_id": "cntr_694b4d8e36dc8190b33c31668379700e0f2b66b245dabab1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0d6fb03b6284147f00694b4df8dd348190a60ee3f232b6840e",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d6fb03b6284147f00694b4dfd24008190830836edc6efa33c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, sys, math, statistics\ntarget_path = Path('/mnt/data').joinpath('src/experiments/plotting.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\\\"\\\"\\\"Plotting utilities for sweep results.\n\nThe functions in this module are intentionally small and side-effect minimal:\nthey *return* matplotlib Figure/Axes objects and never call ``plt.show()``.\nInputs are standard-library friendly (list-of-dicts rows as produced by\n:func:`experiments.io.read_results_csv`).\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom pathlib import Path\nfrom typing import Any, Iterable, Mapping, Sequence, Tuple, List, Optional, Dict\n\nfrom ._common import as_path, ensure_parent_dir, ensure_suffix, require, check_one_of\n\n__all__ = [\n    \"summarize_metrics\",\n    \"plot_metric_vs_param\",\n    \"plot_metrics_grid\",\n    \"plot_summary_bars\",\n    \"save_figure\",\n]\"\"\")\n\nchunks.append(\"\"\"def _mpl():\n    \\\"\\\"\\\"Import matplotlib lazily with a clear error if unavailable.\\\"\\\"\\\"\n    try:\n        import matplotlib.pyplot as plt  # type: ignore\n    except Exception as e:  # pragma: no cover\n        raise RuntimeError(\n            \"matplotlib is required for plotting utilities; install it to use experiments.plotting\"\n        ) from e\n    return plt\n\n\ndef _to_float(x: Any) -> Optional[float]:\n    if x is None:\n        return None\n    if isinstance(x, bool):\n        return None\n    if isinstance(x, (int, float)):\n        return float(x)\n    try:\n        return float(x)\n    except Exception:\n        return None\"\"\")\n\nchunks.append(\"\"\"def summarize_metrics(\n    rows: Sequence[Mapping[str, Any]],\n    metrics: Sequence[str],\n    *,\n    group_by: str | None = None,\n) -> Dict[str, Dict[str, float]]:\n    \\\"\\\"\\\"Summarize numeric metrics across *rows*.\n\n    Returns a nested dict: ``{metric: {count, mean, min, max}}``.\n    If ``group_by`` is provided, that key must exist in each row; its value is\n    ignored here (use it for consistency checks before plotting).\n    \\\"\\\"\\\"\n    out: Dict[str, Dict[str, float]] = {}\n    if group_by is not None:\n        for r in rows:\n            require(group_by in r, f\"Missing group_by key {group_by!r} in a results row\")\n    for m in metrics:\n        vals = [_to_float(r.get(m)) for r in rows]\n        nums = [v for v in vals if v is not None]\n        if not nums:\n            out[m] = {\"count\": 0.0, \"mean\": float(\"nan\"), \"min\": float(\"nan\"), \"max\": float(\"nan\")}\n            continue\n        out[m] = {\n            \"count\": float(len(nums)),\n            \"mean\": float(sum(nums) / len(nums)),\n            \"min\": float(min(nums)),\n            \"max\": float(max(nums)),\n        }\n    return out\"\"\")\n\nchunks.append(\"\"\"def plot_metric_vs_param(\n    rows: Sequence[Mapping[str, Any]],\n    *,\n    param: str,\n    metric: str,\n    agg: str = \"mean\",\n    ax=None,\n    sort_x: bool = True,\n    label: str | None = None,\n):\n    \\\"\\\"\\\"Plot *metric* as a function of *param*.\n\n    Aggregates repeated param values using ``agg`` in {mean,min,max,median}.\n    Returns ``(fig, ax)``.\n    \\\"\\\"\\\"\n    agg = check_one_of(\"agg\", agg, (\"mean\", \"min\", \"max\", \"median\"))\n    xs: Dict[float, List[float]] = {}\n    for r in rows:\n        x = _to_float(r.get(param))\n        y = _to_float(r.get(metric))\n        if x is None or y is None:\n            continue\n        xs.setdefault(x, []).append(y)\n    require(xs, f\"No numeric data found for param={param!r} metric={metric!r}\")\n    def _reduce(vs: List[float]) -> float:\n        if agg == \"mean\":\n            return sum(vs) / len(vs)\n        if agg == \"min\":\n            return min(vs)\n        if agg == \"max\":\n            return max(vs)\n        return float(sorted(vs)[len(vs)//2])\n    xvals = list(xs.keys())\n    if sort_x:\n        xvals.sort()\n    yvals = [_reduce(xs[x]) for x in xvals]\n    plt = _mpl()\n    if ax is None:\n        fig, ax = plt.subplots()\n    else:\n        fig = ax.figure\n    ax.plot(xvals, yvals, marker=\"o\", label=label or metric)\n    ax.set_xlabel(param)\n    ax.set_ylabel(metric)\n    if label is not None:\n        ax.legend()\n    ax.grid(True, alpha=0.3)\n    return fig, ax\"\"\")\n\nchunks.append(\"\"\"def plot_metrics_grid(\n    rows: Sequence[Mapping[str, Any]],\n    *,\n    param: str,\n    metrics: Sequence[str],\n    agg: str = \"mean\",\n    ncols: int = 2,\n    figsize: Tuple[float, float] | None = None,\n):\n    \\\"\\\"\\\"Create a grid of ``plot_metric_vs_param`` for multiple *metrics*.\\\"\\\"\\\"\n    require(ncols >= 1, \"ncols must be >= 1\")\n    plt = _mpl()\n    n = len(metrics)\n    require(n >= 1, \"metrics must be non-empty\")\n    nrows = (n + ncols - 1) // ncols\n    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, squeeze=False)\n    for i, m in enumerate(metrics):\n        r, c = divmod(i, ncols)\n        plot_metric_vs_param(rows, param=param, metric=m, agg=agg, ax=axes[r][c], label=None)\n        axes[r][c].set_title(m)\n    for j in range(n, nrows * ncols):\n        r, c = divmod(j, ncols)\n        axes[r][c].axis(\"off\")\n    fig.tight_layout()\n    return fig, axes\"\"\")\n\nchunks.append(\"\"\"def plot_summary_bars(\n    summary: Mapping[str, Mapping[str, float]],\n    *,\n    value_key: str = \"mean\",\n    ax=None,\n):\n    \\\"\\\"\\\"Bar plot from the output of :func:`summarize_metrics`.\\\"\\\"\\\"\n    plt = _mpl()\n    if ax is None:\n        fig, ax = plt.subplots()\n    else:\n        fig = ax.figure\n    metrics = list(summary.keys())\n    vals = [float(summary[m].get(value_key, float(\"nan\"))) for m in metrics]\n    ax.bar(metrics, vals)\n    ax.set_ylabel(value_key)\n    ax.set_xticks(range(len(metrics)), metrics, rotation=30, ha=\"right\")\n    ax.grid(True, axis=\"y\", alpha=0.3)\n    fig.tight_layout()\n    return fig, ax\"\"\")\n\nchunks.append(\"\"\"def save_figure(fig, path: str | Path, *, dpi: int = 150, close: bool = False) -> Path:\n    \\\"\\\"\\\"Save a matplotlib figure to *path* (default suffix: .png).\\\"\\\"\\\"\n    p = ensure_suffix(as_path(path) or Path(path), \".png\")\n    ensure_parent_dir(p)\n    fig.savefig(p, dpi=dpi, bbox_inches=\"tight\")\n    if close:\n        _mpl().close(fig)\n    return p\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/experiments/plotting.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4d8e36dc8190b33c31668379700e0f2b66b245dabab1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/plotting.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/_common.py\", \"src/experiments/io.py\", \"src/experiments/plotting.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0d6fb03b6284147f00694b4e0da3a4819090d42672b4dff284",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `src/experiments/plotting.py` with small, reusable matplotlib-based helpers to summarize sweep metrics, generate per-metric and grid plots versus a parameter, plot summary bars, and save figures with minimal side effects."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

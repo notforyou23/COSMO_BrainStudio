@@ -1,0 +1,82 @@
+{
+  "content": "Created `pyproject.toml` configuring a Python 3.11+ `src/`-layout package with required scientific dependencies (SymPy/NumPy/SciPy/Matplotlib/Pandas) plus `pytest`, and added pytest defaults for reproducible test execution.",
+  "reasoning": "",
+  "responseId": "resp_08a96ffe7d41076100694b4d078dd081979a2a415b59f5c901",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2815,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1205,
+    "output_tokens_details": {
+      "reasoning_tokens": 1146
+    },
+    "total_tokens": 4020
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_08a96ffe7d41076100694b4d082d5881979a8215d690db5d57",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_08a96ffe7d41076100694b4d09fc1c8197b14fd9e017afdccf",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, sys, re\ntarget_path = Path('/mnt/data').joinpath('pyproject.toml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"[build-system]\nrequires = [\"setuptools>=68\", \"wheel\"]\nbuild-backend = \"setuptools.build_meta\\\"\"\",\n\"\"\"[project]\nname = \"generated_library_1766542288533\"\nversion = \"0.1.0\"\ndescription = \"Reproducible SymPy/NumPy/SciPy experiments with parameter sweeps, plotting, and tests.\"\nreadme = \"README.md\"\nrequires-python = \">=3.11\"\nlicense = {text = \"MIT\"}\nauthors = [{name = \"OpenAI\", email = \"noreply@openai.com\"}]\ndependencies = [\n  \"sympy>=1.12\",\n  \"numpy>=1.26\",\n  \"scipy>=1.11\",\n  \"matplotlib>=3.8\",\n  \"pandas>=2.1\",\n  \"pytest>=7.4\",\n]\n\n[project.urls]\nHomepage = \"https://example.invalid/generated_library_1766542288533\\\"\"\",\n\"\"\"[tool.setuptools]\npackage-dir = {\"\" = \"src\"}\ninclude-package-data = false\n\n[tool.setuptools.packages.find]\nwhere = [\"src\"]\"\"\",\n\"\"\"[tool.pytest.ini_options]\nminversion = \"7.4\"\ntestpaths = [\"tests\"]\naddopts = [\"-q\", \"--disable-warnings\", \"--maxfail=1\"]\nfilterwarnings = [\n  \"error::DeprecationWarning\",\n  \"ignore:the matrix subclass is not the recommended way.*:PendingDeprecationWarning\",\n]\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:pyproject.toml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4bd0381081909cae03b5047a4b910a942f49460a0d3d",
+      "outputs": []
+    },
+    {
+      "id": "rs_08a96ffe7d41076100694b4d0f5fa08197b051bdba11d05695",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_08a96ffe7d41076100694b4d0fbf3c819788482ddbe91e49f6",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\ntarget_path = Path('/mnt/data').joinpath('pyproject.toml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"[build-system]\nrequires = [\"setuptools>=68\", \"wheel\"]\nbuild-backend = \"setuptools.build_meta\\\"\"\" ,\n]\n",
+      "container_id": "cntr_694b4bd0381081909cae03b5047a4b910a942f49460a0d3d",
+      "outputs": []
+    },
+    {
+      "id": "rs_08a96ffe7d41076100694b4d11eab48197934df6fe1ee40490",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_08a96ffe7d41076100694b4d1271a88197ade4fdaa980463f5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\ntarget_path = Path('/mnt/data/pyproject.toml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\"\"\"[build-system]\nrequires = [\"setuptools>=68\", \"wheel\"]\nbuild-backend = \"setuptools.build_meta\"\n\n[project]\nname = \"generated_library_1766542288533\"\nversion = \"0.1.0\"\ndescription = \"Reproducible SymPy/NumPy/SciPy experiments with parameter sweeps, plotting, and tests.\"\nreadme = \"README.md\"\nrequires-python = \">=3.11\"\nlicense = {text = \"MIT\"}\nauthors = [{name = \"OpenAI\", email = \"noreply@openai.com\"}]\ndependencies = [\n  \"sympy>=1.12\",\n  \"numpy>=1.26\",\n  \"scipy>=1.11\",\n  \"matplotlib>=3.8\",\n  \"pandas>=2.1\",\n  \"pytest>=7.4\",\n]\n\n[project.urls]\nHomepage = \"https://example.invalid/generated_library_1766542288533\"\n\n[tool.setuptools]\npackage-dir = {\"\" = \"src\"}\ninclude-package-data = false\n\n[tool.setuptools.packages.find]\nwhere = [\"src\"]\n\n[tool.pytest.ini_options]\nminversion = \"7.4\"\ntestpaths = [\"tests\"]\naddopts = [\"-q\", \"--disable-warnings\", \"--maxfail=1\"]\nfilterwarnings = [\n  \"error::DeprecationWarning\",\n  \"ignore:the matrix subclass is not the recommended way.*:PendingDeprecationWarning\",\n]\n\"\"\"]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:pyproject.toml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4bd0381081909cae03b5047a4b910a942f49460a0d3d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:pyproject.toml\nDIR_STATE:[\"pyproject.toml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_08a96ffe7d41076100694b4d16e8f48197b304fdce7e6d17c5",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `pyproject.toml` configuring a Python 3.11+ `src/`-layout package with required scientific dependencies (SymPy/NumPy/SciPy/Matplotlib/Pandas) plus `pytest`, and added pytest defaults for reproducible test execution."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/dgpipe/io.py` with deterministic JSON/CSV/NPZ read/write (including atomic writes), lightweight schema validation for configs, stable config hashing, global seeding utilities, provenance capture, and a `write_bundle()` helper to persist config/provenance/results/arrays reproducibly.",
+  "reasoning": "",
+  "responseId": "resp_049c54260a8aaea5006949b2694e908196820e55aab59dfb05",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3664,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2071,
+    "output_tokens_details": {
+      "reasoning_tokens": 207
+    },
+    "total_tokens": 5735
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_049c54260a8aaea5006949b26a1cb88196b61cad885b4158c1",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_049c54260a8aaea5006949b272c6e08196ba5f8c8f55bfea8c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/dgpipe/io.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"dgpipe.io\n\nRobust, reproducible I/O helpers for configs, datasets, results, and provenance.\nSupports JSON / CSV / NPZ with lightweight schema validation and deterministic seeding.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Mapping, MutableMapping, Sequence\nimport csv\nimport hashlib\nimport json\nimport os\nimport platform\nimport random\nimport sys\nimport time\n\nimport numpy as np\"\"\",\n\"\"\"def _atomic_write_text(path: Path, text: str, encoding: str = \"utf-8\") -> None:\n    path = Path(path)\n    path.parent.mkdir(parents=True, exist_ok=True)\n    tmp = path.with_suffix(path.suffix + \".tmp\")\n    tmp.write_text(text, encoding=encoding)\n    os.replace(tmp, path)\n\n\ndef _json_dumps_deterministic(obj: Any) -> str:\n    return json.dumps(obj, sort_keys=True, indent=2, ensure_ascii=False) + \"\\\\n\"\n\n\ndef load_json(path: str | Path) -> Any:\n    with Path(path).open(\"r\", encoding=\"utf-8\") as f:\n        return json.load(f)\n\n\ndef save_json(path: str | Path, obj: Any) -> None:\n    _atomic_write_text(Path(path), _json_dumps_deterministic(obj))\n\n\ndef load_csv_dicts(path: str | Path) -> list[dict[str, str]]:\n    with Path(path).open(\"r\", encoding=\"utf-8\", newline=\"\") as f:\n        return list(csv.DictReader(f))\n\n\ndef save_csv_dicts(path: str | Path, rows: Sequence[Mapping[str, Any]]) -> None:\n    path = Path(path)\n    path.parent.mkdir(parents=True, exist_ok=True)\n    rows = list(rows)\n    fieldnames = sorted({k for r in rows for k in r.keys()})\n    tmp = path.with_suffix(path.suffix + \".tmp\")\n    with tmp.open(\"w\", encoding=\"utf-8\", newline=\"\") as f:\n        w = csv.DictWriter(f, fieldnames=fieldnames)\n        w.writeheader()\n        for r in rows:\n            w.writerow({k: r.get(k, \"\") for k in fieldnames})\n    os.replace(tmp, path)\n\n\ndef save_npz(path: str | Path, **arrays: Any) -> None:\n    path = Path(path)\n    path.parent.mkdir(parents=True, exist_ok=True)\n    tmp = path.with_suffix(path.suffix + \".tmp\")\n    np.savez_compressed(tmp, **arrays)\n    os.replace(tmp, path)\n\n\ndef load_npz(path: str | Path) -> dict[str, np.ndarray]:\n    with np.load(Path(path), allow_pickle=False) as z:\n        return {k: z[k] for k in z.files}\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass Schema:\n    \\\"\\\"\\\"Very small schema: mapping key -> type / nested Schema / (type, ...) / list[Schema].\\\"\\\"\\\"\n\n    spec: Mapping[str, Any]\n\n    def validate(self, obj: Any, *, where: str = \"root\") -> None:\n        if not isinstance(obj, Mapping):\n            raise TypeError(f\"{where}: expected mapping, got {type(obj).__name__}\")\n        for key, rule in self.spec.items():\n            if key not in obj:\n                raise KeyError(f\"{where}: missing required key '{key}'\")\n            _validate_rule(obj[key], rule, where=f\"{where}.{key}\")\n\n\ndef _validate_rule(val: Any, rule: Any, *, where: str) -> None:\n    if isinstance(rule, Schema):\n        rule.validate(val, where=where)\n        return\n    if isinstance(rule, list):\n        if len(rule) != 1 or not isinstance(rule[0], (type, Schema, tuple)):\n            raise TypeError(f\"{where}: invalid list rule\")\n        if not isinstance(val, Sequence) or isinstance(val, (str, bytes, bytearray)):\n            raise TypeError(f\"{where}: expected sequence, got {type(val).__name__}\")\n        for i, v in enumerate(val):\n            _validate_rule(v, rule[0], where=f\"{where}[{i}]\")\n        return\n    if isinstance(rule, tuple):\n        if not isinstance(val, rule):\n            exp = \",\".join(t.__name__ for t in rule)\n            raise TypeError(f\"{where}: expected one of ({exp}), got {type(val).__name__}\")\n        return\n    if isinstance(rule, type):\n        if not isinstance(val, rule):\n            raise TypeError(f\"{where}: expected {rule.__name__}, got {type(val).__name__}\")\n        return\n    raise TypeError(f\"{where}: invalid schema rule {rule!r}\")\n\n\ndef load_config(path: str | Path, schema: Schema | None = None) -> dict[str, Any]:\n    cfg = load_json(path)\n    if schema is not None:\n        schema.validate(cfg)\n    if not isinstance(cfg, dict):\n        raise TypeError(\"config: expected JSON object at top-level\")\n    return cfg\"\"\",\n\"\"\"def stable_int_hash(obj: Any, *, salt: str = \"\") -> int:\n    payload = _json_dumps_deterministic({\"salt\": salt, \"obj\": obj}).encode(\"utf-8\")\n    h = hashlib.sha256(payload).digest()\n    return int.from_bytes(h[:8], \"big\", signed=False)\n\n\ndef set_global_seed(seed: int) -> None:\n    \\\"\\\"\\\"Seed Python + NumPy deterministically (call early in the pipeline).\\\"\\\"\\\"\n    random.seed(int(seed) & 0xFFFFFFFF)\n    np.random.seed(int(seed) & 0xFFFFFFFF)\n\n\ndef seed_from_config(cfg: Mapping[str, Any], *, salt: str = \"dgpipe\") -> int:\n    \\\"\\\"\\\"Derive a deterministic 64-bit seed from a config mapping.\\\"\\\"\\\"\n    return stable_int_hash(cfg, salt=salt)\n\n\ndef provenance(cfg: Mapping[str, Any], *, seed: int | None = None, extra: Mapping[str, Any] | None = None) -> dict[str, Any]:\n    prov: MutableMapping[str, Any] = {\n        \"time_unix\": time.time(),\n        \"python\": sys.version.split()[0],\n        \"platform\": platform.platform(),\n        \"cwd\": os.getcwd(),\n    }\n    if seed is not None:\n        prov[\"seed\"] = int(seed)\n    prov[\"config_hash64\"] = stable_int_hash(cfg, salt=\"config\")\n    if extra:\n        prov[\"extra\"] = dict(extra)\n    return dict(prov)\n\n\ndef write_bundle(outdir: str | Path, *, cfg: Mapping[str, Any], results: Mapping[str, Any] | None = None,\n                 arrays: Mapping[str, Any] | None = None, seed: int | None = None,\n                 cfg_schema: Schema | None = None, prov_extra: Mapping[str, Any] | None = None) -> dict[str, str]:\n    \\\"\\\"\\\"Write a minimal, reproducible result bundle: config.json, provenance.json, results.json, arrays.npz.\\\"\\\"\\\"\n    if cfg_schema is not None:\n        cfg_schema.validate(cfg)\n    out = Path(outdir)\n    out.mkdir(parents=True, exist_ok=True)\n    save_json(out / \"config.json\", dict(cfg))\n    save_json(out / \"provenance.json\", provenance(cfg, seed=seed, extra=prov_extra))\n    if results is not None:\n        save_json(out / \"results.json\", results)\n    if arrays:\n        save_npz(out / \"arrays.npz\", **dict(arrays))\n    return {\n        \"config\": str(out / \"config.json\"),\n        \"provenance\": str(out / \"provenance.json\"),\n        \"results\": str(out / \"results.json\") if results is not None else \"\",\n        \"arrays\": str(out / \"arrays.npz\") if arrays else \"\",\n    }\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/dgpipe/io.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949aff88f24819097f165c497ce475e074f2320f5d510c4",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/dgpipe/io.py\nDIR_STATE:[\"src/dgpipe/__init__.py\", \"src/dgpipe/cli.py\", \"src/dgpipe/inference.py\", \"src/dgpipe/io.py\", \"src/dgpipe/models.py\", \"src/dgpipe/protocols.py\", \"src/dgpipe/simulations.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_049c54260a8aaea5006949b294d7a08196b8fac2a7cb5528ac",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/dgpipe/io.py` with deterministic JSON/CSV/NPZ read/write (including atomic writes), lightweight schema validation for configs, stable config hashing, global seeding utilities, provenance capture, and a `write_bundle()` helper to persist config/provenance/results/arrays reproducibly."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

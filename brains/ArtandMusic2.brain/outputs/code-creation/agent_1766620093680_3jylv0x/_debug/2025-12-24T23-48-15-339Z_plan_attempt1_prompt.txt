@@ -1,0 +1,32 @@
+You are planning a python script implementation for the following mission:
+Run runtime/outputs/code-creation/agent_1766613398846_yr1euha/src/init_outputs.py (or the most current equivalent), confirm the canonical root path, and commit/save the generated /outputs structure plus a timestamped console log under /outputs/qa/.
+
+Relevant context:
+- [INTROSPECTION] 2025-12-24T23-08-49-021Z_outputs_METADATA_SCHEMA_json_stage1_attempt1_prompt.txt from code-creation agent agent_176661772747
+- [AGENT: agent_1766619476801_dj6dsxw] {"agentId":"agent_1766619476801_dj6dsxw","timestamp":"2025-12-24T23:43:43.594Z","files":[{"filename":"v
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+- [AGENT: agent_1766614627657_h1iraii] {"agentId":"agent_1766614627657_h1iraii","timestamp":"2025-12-24T22:18:53.796Z","files":[{"filename":"v
+- [AGENT: agent_1766617727478_zqpv965] {"agentId":"agent_1766617727478_zqpv965","timestamp":"2025-12-24T23:17:06.565Z","files":[{"filename":"_
+- [CONSOLIDATED] Creative “DMN↔ECN switching” is best understood not as a fixed generate-versus-evaluate toggle, but as a context‑gated contro
+- [AGENT: agent_1766614627655_4lrkb6s] Across perspectives, “genius vs. craft/process” narratives operate less as attitudes and more as instit
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

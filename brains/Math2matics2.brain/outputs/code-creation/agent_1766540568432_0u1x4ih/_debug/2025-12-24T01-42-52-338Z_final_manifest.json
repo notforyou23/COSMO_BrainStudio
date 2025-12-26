@@ -1,0 +1,60 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766540568432_0u1x4ih",
+  "agentType": "code-creation",
+  "goalId": "goal_4",
+  "missionId": "mission_1766540568431_o9wy8q6ya",
+  "spawnCycle": 21,
+  "coordinatorReview": null,
+  "spawnedBy": "meta_coordinator",
+  "triggerSource": "orchestrator",
+  "spawningReason": "goal_execution",
+  "createdAt": "2025-12-24T01:42:54.648Z",
+  "completedAt": "2025-12-24T01:43:28.002Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/generate_outputs.py",
+      "description": "Python script that generates outputs/coverage_matrix.csv (and a Markdown table variant) plus outputs/eval_loop.md with a 5-cycle review cadence, measurable metrics, decision rules, and inline examples/instructions for future updates.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "complete",
+      "attempts": 1,
+      "errors": [],
+      "createdAt": "2025-12-24T01:42:54.648Z",
+      "containerFileId": null,
+      "containerPath": "scripts/generate_outputs.py",
+      "containerFilename": "scripts/generate_outputs.py",
+      "completedAt": "2025-12-24T01:43:28.000Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Generate two output artifacts in the repository: (1) /outputs/coverage_matrix.csv (or .md table) that enumerates the Mathematics domain, its subtopics, and artifact types with an initial population of cells (coverage status, counts, and cross-link pointers); and (2) /outputs/eval_loop.md defining a 5-cycle review cadence, measurable metrics (artifact count, cross-links, coverage gaps), and explicit decision rules that determine what to produce next. Implement the CSV/MD file in a script-friendly, machine- and human-readable layout and include minimal inline examples and instructions for how future agents should update the matrix and use the eval loop.",
+  "missionSuccessCriteria": [
+    "A file exists at /outputs/coverage_matrix.csv (or /outputs/coverage_matrix.md) with rows for the domain 'Mathematics' broken down into subtopics (algebra, calculus, geometry, probability, statistics, discrete math, modeling) and columns for artifact types (e.g., tutorial, example, problem_set, solution, reference, visualization), with each cell populated by at least a coverage status tag (e.g., none/partial/complete) and a count field.",
+    "A file exists at /outputs/eval_loop.md that specifies a 5-cycle review cadence (cycle length and checkpoints), defines the metrics to track (artifact count per cell, number of cross-links per artifact, explicit coverage gaps per subtopic × artifact type), and provides clear decision rules (thresholds and actions) for prioritizing next artifacts.",
+    "Both files include concrete examples and instructions: how to add new artifacts, how to update counts and cross-links, and a short validation checklist; files are syntactically correct (CSV parseable or Markdown table renders) and saved in /outputs."
+  ],
+  "projectName": "generated_script_1766540571298",
+  "language": "python",
+  "type": "script",
+  "status": "complete",
+  "requirements": [
+    "include_examples"
+  ],
+  "lastSavedAt": "2025-12-24T01:43:28.002Z",
+  "summary": {
+    "completed": 1,
+    "failed": 0,
+    "total": 1
+  }
+}

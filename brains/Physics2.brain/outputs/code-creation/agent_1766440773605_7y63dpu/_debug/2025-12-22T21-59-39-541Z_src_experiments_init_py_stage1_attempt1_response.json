@@ -1,0 +1,74 @@
+{
+  "content": "Created a parse-clean `src/experiments/__init__.py` that exposes the experiments registry interface via lazy imports (`__getattr__`/`get_registry`) to avoid import-time side effects.",
+  "reasoning": "",
+  "responseId": "resp_03b90b50785d29c5006949bfb6c33c8196a6a5768f70213f19",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2722,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1170,
+    "output_tokens_details": {
+      "reasoning_tokens": 524
+    },
+    "total_tokens": 3892
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_03b90b50785d29c5006949bfb7806c8196a43699d4001942fb",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_03b90b50785d29c5006949bfb878b88196a3362ab6cc8534bf",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\npaths=list(base.rglob(\"src/experiments/__init__.py\"))\npaths\n",
+      "container_id": "cntr_6949bf49646c819096b016c3e92a33230ce550ef4271a753",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_03b90b50785d29c5006949bfbbbc9481968d28fed23516f0b5",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_03b90b50785d29c5006949bfc5f3f481969c7d256ab6dfac05",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/__init__.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Experiments package.\n\nThis package is intentionally lightweight at import time. The registry implementation\nlives in :mod:`experiments.registry` and is loaded lazily to avoid import-time side\neffects and to keep CLI/module import smoke-tests fast and reliable.\n\nPublic API is exposed via attribute access (PEP 562) and a small set of helper\nfunctions that import the registry module only when needed.\n\\\"\\\"\\\"\"\"\",\n\"\"\"from __future__ import annotations\n\nfrom importlib import import_module\nfrom typing import TYPE_CHECKING, Any, List\"\"\",\n\"\"\"if TYPE_CHECKING:  # pragma: no cover\n    # Imported only for static type checking; runtime import is lazy.\n    from . import registry as registry  # noqa: F401\"\"\",\n\"\"\"__all__ = [\n    \"get_registry\",\n    # Common registry symbols (resolved lazily via __getattr__):\n    \"registry\",\n    \"ExperimentRegistry\",\n    \"Registry\",\n    \"register\",\n    \"get\",\n    \"list_experiments\",\n]\"\"\",\n\"\"\"_LAZY_EXPORTS = {\n    \"registry\",\n    \"ExperimentRegistry\",\n    \"Registry\",\n    \"register\",\n    \"get\",\n    \"list_experiments\",\n}\"\"\",\n\"\"\"def _load_registry_module():\n    \\\"\\\"\\\"Import and return :mod:`experiments.registry`.\\\"\\\"\\\"\n    return import_module(__name__ + \".registry\")\"\"\",\n\"\"\"def get_registry():\n    \\\"\\\"\\\"Return the registry module (:mod:`experiments.registry`) lazily.\\\"\\\"\\\"\n    return _load_registry_module()\"\"\",\n\"\"\"def __getattr__(name: str) -> Any:  # pragma: no cover\n    \\\"\\\"\\\"Lazily resolve registry symbols from :mod:`experiments.registry`.\\\"\\\"\\\"\n    if name in _LAZY_EXPORTS:\n        mod = _load_registry_module()\n        return mod if name == \"registry\" else getattr(mod, name)\n    raise AttributeError(f\"module {__name__!r} has no attribute {name!r}\")\"\"\",\n\"\"\"def __dir__() -> List[str]:  # pragma: no cover\n    return sorted(set(globals().keys()) | _LAZY_EXPORTS)\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/experiments/__init__.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bf49646c819096b016c3e92a33230ce550ef4271a753",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/__init__.py\nDIR_STATE:[\"src/experiments/__init__.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_03b90b50785d29c5006949bfd02cfc8196883afe3124ed642d",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a parse-clean `src/experiments/__init__.py` that exposes the experiments registry interface via lazy imports (`__getattr__`/`get_registry`) to avoid import-time side effects."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,69 @@
+{
+  "content": "Implemented deterministic CSV utilities in `src/utils/csv_utils.py`, providing stable fieldname validation, row coercion, canonical LF newline rendering, and deterministic writing to disk.",
+  "reasoning": "",
+  "responseId": "resp_0a8483aea22d1cee00694b5cab6c648195a1860cdede16a9a6",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2904,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1349,
+    "output_tokens_details": {
+      "reasoning_tokens": 251
+    },
+    "total_tokens": 4253
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0a8483aea22d1cee00694b5cac2c3c8195b2189dac4346f3af",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a8483aea22d1cee00694b5caf91788195af6567672e131fa2",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/utils/csv_utils.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(r\"\"\"\n\"\"\"\n)\n\n",
+      "container_id": "cntr_694b5c56939c81908985d275ca637a8300916f77a7bfb0c9",
+      "outputs": []
+    },
+    {
+      "id": "rs_0a8483aea22d1cee00694b5cb15fcc8195ba91b5ed58e9a1f4",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a8483aea22d1cee00694b5cb1ba3c819597821295eb71ca2e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap\n\ntarget_path = Path('/mnt/data').joinpath('src/utils/csv_utils.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\n\\\"\\\"\\\"CSV helper utilities.\n\nThis module focuses on deterministic CSV generation:\n- stable column ordering (explicit fieldnames preferred)\n- canonical newlines (LF) regardless of platform\n- deterministic writer settings (explicit lineterminator, no implicit extras)\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport csv\nimport io\nfrom pathlib import Path\nfrom typing import Iterable, Mapping, Sequence, Any, Optional, List, Dict, Union\n\"\"\")\n\nchunks.append(\"\"\"\ndef stable_fieldnames(\n    fieldnames: Sequence[str],\n    *,\n    require_unique: bool = True,\n) -> List[str]:\n    \\\"\\\"\\\"Return a validated, stable list of CSV columns.\n\n    Args:\n        fieldnames: Desired column order.\n        require_unique: If True, raise on duplicates.\n\n    Raises:\n        ValueError: If fieldnames is empty or contains duplicates.\n    \\\"\\\"\\\"\n    cols = list(fieldnames)\n    if not cols:\n        raise ValueError(\"fieldnames must be a non-empty sequence\")\n    if require_unique:\n        seen = set()\n        dups = [c for c in cols if (c in seen) or seen.add(c)]\n        if dups:\n            raise ValueError(f\"duplicate fieldnames not allowed: {sorted(set(dups))}\")\n    return cols\n\"\"\")\n\nchunks.append(\"\"\"\ndef coerce_row(\n    row: Mapping[str, Any],\n    fieldnames: Sequence[str],\n    *,\n    missing: str = \"\",\n    strict: bool = False,\n) -> Dict[str, Any]:\n    \\\"\\\"\\\"Coerce a row mapping into a dict aligned to fieldnames.\n\n    - Missing keys are filled with `missing`.\n    - Extra keys are ignored by default; if strict=True they raise.\n\n    Values are passed through as-is; the csv module will stringify them.\n    \\\"\\\"\\\"\n    cols = stable_fieldnames(fieldnames)\n    if strict:\n        extra = set(row.keys()) - set(cols)\n        if extra:\n            raise ValueError(f\"row has unexpected keys: {sorted(extra)}\")\n    out: Dict[str, Any] = {c: row.get(c, missing) for c in cols}\n    return out\n\"\"\")\n\nchunks.append(\"\"\"\ndef render_csv_text(\n    rows: Iterable[Mapping[str, Any]],\n    fieldnames: Sequence[str],\n    *,\n    include_header: bool = True,\n    missing: str = \"\",\n    strict: bool = False,\n) -> str:\n    \\\"\\\"\\\"Render rows to CSV text with canonical LF newlines.\n\n    Determinism notes:\n    - Column order is exactly `fieldnames`.\n    - Line terminator is always '\\\\n'.\n    - DictWriter ignores extras unless strict=True via coerce_row.\n\n    Returns:\n        CSV content as a UTF-8 friendly Python string.\n    \\\"\\\"\\\"\n    cols = stable_fieldnames(fieldnames)\n    buf = io.StringIO(newline=\"\")  # prevent universal-newline translation\n    writer = csv.DictWriter(\n        buf,\n        fieldnames=cols,\n        extrasaction=\"ignore\",\n        lineterminator=\"\\\\n\",\n    )\n    if include_header:\n        writer.writeheader()\n    for r in rows:\n        writer.writerow(coerce_row(r, cols, missing=missing, strict=strict))\n    return buf.getvalue()\n\"\"\")\n\nchunks.append(\"\"\"\ndef write_csv(\n    path: Union[str, Path],\n    rows: Iterable[Mapping[str, Any]],\n    fieldnames: Sequence[str],\n    *,\n    include_header: bool = True,\n    encoding: str = \"utf-8\",\n    missing: str = \"\",\n    strict: bool = False,\n) -> None:\n    \\\"\\\"\\\"Write CSV deterministically to disk.\n\n    This uses canonical LF newlines by opening with newline='\\\\n' and\n    writing CSV with lineterminator='\\\\n'.\n\n    Note: atomic writes are handled elsewhere (see fs utilities).\n    \\\"\\\"\\\"\n    p = Path(path)\n    text = render_csv_text(\n        rows,\n        fieldnames,\n        include_header=include_header,\n        missing=missing,\n        strict=strict,\n    )\n    p.write_text(text, encoding=encoding, newline=\"\\\\n\")\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/utils/csv_utils.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b5c56939c81908985d275ca637a8300916f77a7bfb0c9",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/utils/csv_utils.py\nDIR_STATE:[\"src/utils/csv_utils.py\", \"src/utils/fs.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0a8483aea22d1cee00694b5cbc04948195947f37f31ab9c5f7",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented deterministic CSV utilities in `src/utils/csv_utils.py`, providing stable fieldname validation, row coercion, canonical LF newline rendering, and deterministic writing to disk."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

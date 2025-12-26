@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Perform a canonicalization pass by scanning agent-specific and runtime/outputs locations and migrating the best-known deliverables into the chosen canonical /outputs structure; produce a canonicalization report (moved files, collisions, chosen winners) under /outputs/tracking/ or /outputs/qa/.
+Project: generated_script_1766623736477 (python script)
+
+Target file details:
+- Path: scripts/canonicalize_outputs.py
+- Purpose: Python CLI tool that scans agent-specific and runtime output locations, selects best-known deliverables, migrates them into canonical /outputs structure, and writes a detailed canonicalization report under outputs/tracking/ or outputs/qa/ including moves, collisions, and chosen winners.
+- Category: source
+
+Other planned files (for context only):
+- scripts/_canonicalize_lib.py: Reusable library implementing discovery, scoring, collision resolution, safe move/copy, and report generation logic used by the canonicalization script.
+- scripts/qa_run_canonicalization.sh: Shell script that executes the canonicalization CLI with sensible defaults and exits nonzero on failure for QA/runtime automation.
+- outputs/tracking/.gitkeep: Placeholder file to ensure outputs/tracking directory exists for canonicalization reports in clean checkouts.
+- outputs/qa/.gitkeep: Placeholder file to ensure outputs/qa directory exists for canonicalization reports when QA mode is used.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T23-41-08-888Z_runtime_outputs_CANONICALIZATION_REPORT_md_stage1_attempt1_prompt.txt from code-creation agent agen
+- [INTROSPECTION] 2025-12-25T00-21-55-842Z_scripts_qa_run_sh_stage1_attempt1_prompt.txt from code-creation agent agent_1766622114110_412seks: 
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Python CLI tool that scans agent-specific and runtime output locations, selects best-known deliverables, migrates them into canonical /outputs structure, and writes a detailed canonicalization report under outputs/tracking/ or outputs/qa/ including moves, collisions, and chosen winners.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/canonicalize_outputs.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/canonicalize_outputs.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/canonicalize_outputs.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

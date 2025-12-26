@@ -1,0 +1,51 @@
+{
+  "content": "FILE_EXPORT:{\"path\":\"src/dgpipe/__init__.py\",\"size\":976,\"encoding\":\"base64\",\"sha256\":\"c03c69ed46e5236af05325d1a5905e6a7d31e79865939241bc09b82b28c242e4\",\"content\":\"IiIiZGdwaXBlOiBEaXNjcmV0ZS1ncmF2aXR5IHBpcGVsaW5lLgoKVGhpcyBwYWNrYWdlIHByb3ZpZGVzIGEgdGhlb3JldGljYWwtdG8tZXhwZXJpbWVudGFsIHBpcGVsaW5lIGNvbm5lY3RpbmcKZGlzY3JldGUtZ3Jhdml0eSBtaWNyb3N0cnVjdHVyZSBtb2RlbHMgKGUuZy4sIGNhdXNhbCBzZXRzIC8gZGlzY3JldGUgc3BlY3RyYSkKdG8gbWVhc3VyYWJsZSBjb3JyZWxhdG9ycywgZW50YW5nbGVtZW50IGRpYWdub3N0aWNzLCBzaW11bGF0aW9ucywgYW5kIGluZmVyZW5jZS4KClRoZSBwdWJsaWMgQVBJIGlzIGludGVudGlvbmFsbHkgc21hbGw7IGludGVybmFsIG1vZHVsZXMgbWF5IGV2b2x2ZSB3aGlsZSB0aGlzCnN1cmZhY2UgcmVtYWlucyBzdGFibGUuCiIiIgpmcm9tIF9fZnV0dXJlX18gaW1wb3J0IGFubm90YXRpb25zCgpmcm9tIGltcG9ydGxpYiBpbXBvcnQgbWV0YWRhdGEgYXMgX21ldGFkYXRhCgpfX2FsbF9fID0gWwogICAgIl9fdmVyc2lvbl9fIiwKICAgICJnZXRfdmVyc2lvbiIsCl0KZGVmIGdldF92ZXJzaW9uKGRpc3RfbmFtZTogc3RyID0gImRncGlwZSIpIC0+IHN0cjoKICAgICIiIlJldHVybiB0aGUgaW5zdGFsbGVkIHBhY2thZ2UgdmVyc2lvbi4KCiAgICBVc2VzIGltcG9ydGxpYi5tZXRhZGF0YSBhbmQgZmFsbHMgYmFjayB0byBhIGxvY2FsIGRldmVsb3BtZW50IGlkZW50aWZpZXIKICAgIHdoZW4gdGhlIHBhY2thZ2UgaXMgbm90IGluc3RhbGxlZCAoZS5nLiwgcnVubmluZyBmcm9tIGEgc291cmNlIGNoZWNrb3V0KS4KICAgICIiIgogICAgdHJ5OgogICAgICAgIHJldHVybiBfbWV0YWRhdGEudmVyc2lvbihkaXN0X25hbWUpCiAgICBleGNlcHQgX21ldGFkYXRhLlBhY2thZ2VOb3RGb3VuZEVycm9yOgogICAgICAgIHJldHVybiAiMCt1bmtub3duIgojIENlbnRyYWxpemVkIHZlcnNpb24gc3RyaW5nIGZvciBkb3duc3RyZWFtIGNvbnN1bWVycy4KX192ZXJzaW9uX18gPSBnZXRfdmVyc2lvbigpCg==\"}\nDIR_STATE:[\"src/dgpipe/__init__.py\",\"src/dgpipe/cli.py\",\"src/dgpipe/inference.py\",\"src/dgpipe/io.py\",\"src/dgpipe/models.py\",\"src/dgpipe/protocols.py\",\"src/dgpipe/simulations.py\"]",
+  "reasoning": "",
+  "responseId": "resp_079b43c27e1daaa9006949b42c411c8197896140e7fe0dda88",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2236,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1202,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 3438
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "ci_079b43c27e1daaa9006949b42d33f08197a284d370f59a8ed2",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport base64, json, hashlib, gzip\n\ntarget_path = Path('/mnt/data').joinpath('src/dgpipe/__init__.py')\nassert target_path.is_file(), 'Expected src/dgpipe/__init__.py to exist before export'\ndata = target_path.read_bytes()\npayload = {\n  'path': 'src/dgpipe/__init__.py',\n  'size': len(data),\n  'encoding': 'base64',\n  'sha256': hashlib.sha256(data).hexdigest(),\n  'content': None\n}\nif len(data) > 20000:\n    compressed = gzip.compress(data)\n    payload['encoding'] = 'gzip+base64'\n    payload['content'] = base64.b64encode(compressed).decode('ascii')\nelse:\n    payload['content'] = base64.b64encode(data).decode('ascii')\nprint('FILE_EXPORT:' + json.dumps(payload, separators=(',', ':')))\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949aff88f24819097f165c497ce475e074f2320f5d510c4",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_EXPORT:{\"path\":\"src/dgpipe/__init__.py\",\"size\":976,\"encoding\":\"base64\",\"sha256\":\"c03c69ed46e5236af05325d1a5905e6a7d31e79865939241bc09b82b28c242e4\",\"content\":\"IiIiZGdwaXBlOiBEaXNjcmV0ZS1ncmF2aXR5IHBpcGVsaW5lLgoKVGhpcyBwYWNrYWdlIHByb3ZpZGVzIGEgdGhlb3JldGljYWwtdG8tZXhwZXJpbWVudGFsIHBpcGVsaW5lIGNvbm5lY3RpbmcKZGlzY3JldGUtZ3Jhdml0eSBtaWNyb3N0cnVjdHVyZSBtb2RlbHMgKGUuZy4sIGNhdXNhbCBzZXRzIC8gZGlzY3JldGUgc3BlY3RyYSkKdG8gbWVhc3VyYWJsZSBjb3JyZWxhdG9ycywgZW50YW5nbGVtZW50IGRpYWdub3N0aWNzLCBzaW11bGF0aW9ucywgYW5kIGluZmVyZW5jZS4KClRoZSBwdWJsaWMgQVBJIGlzIGludGVudGlvbmFsbHkgc21hbGw7IGludGVybmFsIG1vZHVsZXMgbWF5IGV2b2x2ZSB3aGlsZSB0aGlzCnN1cmZhY2UgcmVtYWlucyBzdGFibGUuCiIiIgpmcm9tIF9fZnV0dXJlX18gaW1wb3J0IGFubm90YXRpb25zCgpmcm9tIGltcG9ydGxpYiBpbXBvcnQgbWV0YWRhdGEgYXMgX21ldGFkYXRhCgpfX2FsbF9fID0gWwogICAgIl9fdmVyc2lvbl9fIiwKICAgICJnZXRfdmVyc2lvbiIsCl0KZGVmIGdldF92ZXJzaW9uKGRpc3RfbmFtZTogc3RyID0gImRncGlwZSIpIC0+IHN0cjoKICAgICIiIlJldHVybiB0aGUgaW5zdGFsbGVkIHBhY2thZ2UgdmVyc2lvbi4KCiAgICBVc2VzIGltcG9ydGxpYi5tZXRhZGF0YSBhbmQgZmFsbHMgYmFjayB0byBhIGxvY2FsIGRldmVsb3BtZW50IGlkZW50aWZpZXIKICAgIHdoZW4gdGhlIHBhY2thZ2UgaXMgbm90IGluc3RhbGxlZCAoZS5nLiwgcnVubmluZyBmcm9tIGEgc291cmNlIGNoZWNrb3V0KS4KICAgICIiIgogICAgdHJ5OgogICAgICAgIHJldHVybiBfbWV0YWRhdGEudmVyc2lvbihkaXN0X25hbWUpCiAgICBleGNlcHQgX21ldGFkYXRhLlBhY2thZ2VOb3RGb3VuZEVycm9yOgogICAgICAgIHJldHVybiAiMCt1bmtub3duIgojIENlbnRyYWxpemVkIHZlcnNpb24gc3RyaW5nIGZvciBkb3duc3RyZWFtIGNvbnN1bWVycy4KX192ZXJzaW9uX18gPSBnZXRfdmVyc2lvbigpCg==\"}\nDIR_STATE:[\"src/dgpipe/__init__.py\", \"src/dgpipe/cli.py\", \"src/dgpipe/inference.py\", \"src/dgpipe/io.py\", \"src/dgpipe/models.py\", \"src/dgpipe/protocols.py\", \"src/dgpipe/simulations.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_079b43c27e1daaa9006949b43202cc819794423fb5ec532612",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_EXPORT:{\"path\":\"src/dgpipe/__init__.py\",\"size\":976,\"encoding\":\"base64\",\"sha256\":\"c03c69ed46e5236af05325d1a5905e6a7d31e79865939241bc09b82b28c242e4\",\"content\":\"IiIiZGdwaXBlOiBEaXNjcmV0ZS1ncmF2aXR5IHBpcGVsaW5lLgoKVGhpcyBwYWNrYWdlIHByb3ZpZGVzIGEgdGhlb3JldGljYWwtdG8tZXhwZXJpbWVudGFsIHBpcGVsaW5lIGNvbm5lY3RpbmcKZGlzY3JldGUtZ3Jhdml0eSBtaWNyb3N0cnVjdHVyZSBtb2RlbHMgKGUuZy4sIGNhdXNhbCBzZXRzIC8gZGlzY3JldGUgc3BlY3RyYSkKdG8gbWVhc3VyYWJsZSBjb3JyZWxhdG9ycywgZW50YW5nbGVtZW50IGRpYWdub3N0aWNzLCBzaW11bGF0aW9ucywgYW5kIGluZmVyZW5jZS4KClRoZSBwdWJsaWMgQVBJIGlzIGludGVudGlvbmFsbHkgc21hbGw7IGludGVybmFsIG1vZHVsZXMgbWF5IGV2b2x2ZSB3aGlsZSB0aGlzCnN1cmZhY2UgcmVtYWlucyBzdGFibGUuCiIiIgpmcm9tIF9fZnV0dXJlX18gaW1wb3J0IGFubm90YXRpb25zCgpmcm9tIGltcG9ydGxpYiBpbXBvcnQgbWV0YWRhdGEgYXMgX21ldGFkYXRhCgpfX2FsbF9fID0gWwogICAgIl9fdmVyc2lvbl9fIiwKICAgICJnZXRfdmVyc2lvbiIsCl0KZGVmIGdldF92ZXJzaW9uKGRpc3RfbmFtZTogc3RyID0gImRncGlwZSIpIC0+IHN0cjoKICAgICIiIlJldHVybiB0aGUgaW5zdGFsbGVkIHBhY2thZ2UgdmVyc2lvbi4KCiAgICBVc2VzIGltcG9ydGxpYi5tZXRhZGF0YSBhbmQgZmFsbHMgYmFjayB0byBhIGxvY2FsIGRldmVsb3BtZW50IGlkZW50aWZpZXIKICAgIHdoZW4gdGhlIHBhY2thZ2UgaXMgbm90IGluc3RhbGxlZCAoZS5nLiwgcnVubmluZyBmcm9tIGEgc291cmNlIGNoZWNrb3V0KS4KICAgICIiIgogICAgdHJ5OgogICAgICAgIHJldHVybiBfbWV0YWRhdGEudmVyc2lvbihkaXN0X25hbWUpCiAgICBleGNlcHQgX21ldGFkYXRhLlBhY2thZ2VOb3RGb3VuZEVycm9yOgogICAgICAgIHJldHVybiAiMCt1bmtub3duIgojIENlbnRyYWxpemVkIHZlcnNpb24gc3RyaW5nIGZvciBkb3duc3RyZWFtIGNvbnN1bWVycy4KX192ZXJzaW9uX18gPSBnZXRfdmVyc2lvbigpCg==\"}\nDIR_STATE:[\"src/dgpipe/__init__.py\",\"src/dgpipe/cli.py\",\"src/dgpipe/inference.py\",\"src/dgpipe/io.py\",\"src/dgpipe/models.py\",\"src/dgpipe/protocols.py\",\"src/dgpipe/simulations.py\"]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

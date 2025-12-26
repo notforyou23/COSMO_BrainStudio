@@ -1,0 +1,56 @@
+{
+  "content": "Created `support/outputs_snapshot_schema.md`, documenting the JSON snapshot structure and the precise added/updated-file comparison logic used to enforce the “each cycle updates at least one outputs file” rule (including the unwritable-`/outputs` fallback behavior).",
+  "reasoning": "",
+  "responseId": "resp_09526d98af1448a500694b4e0886cc8195ab42487569343868",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2681,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1181,
+    "output_tokens_details": {
+      "reasoning_tokens": 117
+    },
+    "total_tokens": 3862
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_09526d98af1448a500694b4e0949908195b3a2b49b37544af8",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_09526d98af1448a500694b4e0b440c8195ada9a918416e0a81",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap\n\ntarget_path = Path('/mnt/data').joinpath('support/outputs_snapshot_schema.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"# Outputs snapshot schema (on-disk change detection)\n\nThis document defines the snapshot format used to compare `/outputs` (or its writable fallback) across research cycles, and how the enforcement logic decides whether a cycle “added/updated at least one output file”.\n\n## Scope and assumptions\n\n- Snapshots cover **regular files only** in the chosen outputs directory (no directories, symlinks, or special files).\n- Paths are stored as **POSIX-style relative paths** from the outputs root.\n- A “research cycle” captures a **before** snapshot at cycle start and an **after** snapshot at cycle end, then compares them.\n\n## Snapshot file format\n\nA snapshot is a UTF-8 JSON document (typically written to a temporary path during a run) with this structure:\n\n```json\n{\n  \"schema_version\": 1,\n  \"root\": \"outputs\",\n  \"created_at_utc\": \"2025-12-24T01:29:38Z\",\n  \"files\": {\n    \"README.md\": {\n      \"size_bytes\": 1234,\n      \"mtime_ns\": 1735000000000000000,\n      \"sha256\": \"…optional hex…\"\n    },\n    \"core_findings.md\": {\n      \"size_bytes\": 4321,\n      \"mtime_ns\": 1735000001000000000,\n      \"sha256\": \"…optional hex…\"\n    }\n  }\n}\n```\n\n### Field definitions\n\n- `schema_version` (int): Must be `1` for this schema.\n- `root` (str): Label for the outputs root used for the snapshot (e.g., `\"outputs\"` or `\"outputs_fallback\"`). This is informational; comparisons are based on relative paths.\n- `created_at_utc` (str): ISO-8601 timestamp in UTC (seconds precision is sufficient).\n- `files` (object): Mapping of `relative_path -> file_record`.\n\nEach `file_record` contains:\n\n- `size_bytes` (int): Size from `stat().st_size`.\n- `mtime_ns` (int): Modification time in nanoseconds from `stat().st_mtime_ns`.\n- `sha256` (str, optional): Hex digest of file contents. When present, it is the strongest change signal.\n\n## Change classification\n\nGiven `before.files` and `after.files`:\n\n- **Added**: path exists in `after` but not in `before`.\n- **Deleted**: path exists in `before` but not in `after` (tracked for reporting, not sufficient to satisfy the policy).\n- **Updated**: path exists in both and the file is considered different.\n\nA file is considered **different** using the following precedence (strongest-first):\n\n1. If both records have `sha256`: `sha256` differs ⇒ updated.\n2. Else: `(size_bytes, mtime_ns)` differs ⇒ updated.\n\nThis allows a fast default (stat-based) and an integrity option (hash-based) when needed.\n\n## Enforcement rule (“at least one added/updated output per cycle”)\n\nA cycle **passes** the outputs policy if:\n\n- `len(added_paths) + len(updated_paths) >= 1`\n\nNotes:\n- Deletions do **not** count toward compliance.\n- Renames appear as a deletion + addition and therefore **do** count (via the addition).\n\n## Writable outputs selection (portability)\n\nBecause `/outputs` may be unwritable in some environments, the pipeline selects an outputs root in this order:\n\n1. Prefer the configured `outputs/` directory if it exists or can be created and a small write test succeeds.\n2. Otherwise, use a **portable fallback** (e.g., a project-local directory under the working tree or a temp directory) and record that choice (e.g., `root: \"outputs_fallback\"`).\n\nSnapshots always use the **actual** chosen root, ensuring the policy can be enforced even when the default outputs directory cannot be written.\n\n## Determinism and stability\n\n- Snapshot comparisons are path-based and do not depend on directory traversal order.\n- Using `sha256` yields stable detection even on filesystems with coarse timestamp resolution; using `mtime_ns` is usually sufficient in CI-like environments.\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:support/outputs_snapshot_schema.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4d901fcc8190a9704e726b0fa4ce0ae8110eda47e406",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:support/outputs_snapshot_schema.md\nDIR_STATE:[\"support/outputs_snapshot_schema.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_09526d98af1448a500694b4e19cf588195b452b6d61066f3e2",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `support/outputs_snapshot_schema.md`, documenting the JSON snapshot structure and the precise added/updated-file comparison logic used to enforce the “each cycle updates at least one outputs file” rule (including the unwritable-`/outputs` fallback behavior)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

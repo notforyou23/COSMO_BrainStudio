@@ -1,0 +1,52 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create /outputs/README.md specifying artifact rules/conventions and immediately add the first required pipeline artifacts (roadmap, bibliography docs, coverage matrix) so subsequent cycles build on a stable structure.
+Project: /outputs/README.md specifying artifact rules/conventions and immediately add the first required pipeline artifacts (roadmap, bibliography docs, coverage matrix) so subsequent cycles build on a stable structure. (python script)
+
+Target file details:
+- Path: .github/workflows/outputs-artifacts.yml
+- Purpose: GitHub Actions workflow that runs the generator script on pushes/PRs, validates determinism, and uploads /outputs/ artifacts.
+- Category: config
+
+Other planned files (for context only):
+- scripts/generate_outputs.py: Python script that deterministically creates /outputs/README.md and the initial required pipeline artifacts (roadmap, bibliography, coverage matrix) following defined conventions.
+- outputs/README.md: Defines artifact rules, naming conventions, determinism guarantees, and update cadence for all files produced under /outputs/.
+- outputs/roadmap.md: Project roadmap artifact capturing milestones, cycles, deliverables, and evolution plan for subsequent pipeline runs.
+- outputs/bibliography.md: Curated bibliography artifact listing sources, links, and citation notes used by the project and its agents.
+
+Reference insights:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [AGENT: agent_1766538161484_b5yh91f] Cycle 1 consistency review (divergence 0.97):
+Summary (high-level): The three branches are about differ
+- [AGENT INSIGHT: agent_1766540049061_an5rb16] Computational Plan: ## Computational execution plan (focused on deterministic `/outputs/` artif
+- [CONSOLIDATED] Establish a reproducible workflow where key project artifacts (a structured coverage matrix, an evaluation cadence document, 
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_scripts_run_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766539771836_cun
+
+Key requirements:
+- documentation
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: GitHub Actions workflow that runs the generator script on pushes/PRs, validates determinism, and uploads /outputs/ artifacts.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('.github/workflows/outputs-artifacts.yml')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:.github/workflows/outputs-artifacts.yml')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside .github/workflows/outputs-artifacts.yml.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

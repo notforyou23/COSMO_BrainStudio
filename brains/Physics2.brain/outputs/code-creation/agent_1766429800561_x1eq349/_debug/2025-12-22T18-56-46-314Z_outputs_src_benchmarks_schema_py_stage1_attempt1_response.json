@@ -1,0 +1,60 @@
+{
+  "content": "Implemented compact schema utilities in `outputs/src/benchmarks/schema.py`, including default schema path resolution, schema loading, and JSON Schema validation helpers usable by both the CLI and pytest/CI.",
+  "reasoning": "",
+  "responseId": "resp_0a75d416ff5ce691006949952c891c8195b45f232f316d4ccf",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2742,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1296,
+    "output_tokens_details": {
+      "reasoning_tokens": 1254
+    },
+    "total_tokens": 4038
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0a75d416ff5ce691006949952d7418819599a7711ca5e60390",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0a75d416ff5ce69100694995323ae48195b00008e7034f4394",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re, sys\ntarget_path = Path('/mnt/data').joinpath('outputs/src/benchmarks/schema.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\\\"\\\"\\\"Schema loading and JSON Schema validation helpers.\n\nThese utilities are shared by the CLI and the automated test suite.\nThey intentionally keep I/O and error messages deterministic to make CI reliable.\n\\\"\\\"\\\"\"\"\")\n\nchunks.append(\"\"\"from __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Optional, Union\n\nimport json\n\nfrom jsonschema import FormatChecker, ValidationError, validators\n\"\"\")\n\nchunks.append(\"\"\"JSONMapping = Dict[str, Any]\n\n\n@dataclass(frozen=True)\nclass SchemaValidationResult:\n    \\\"\\\"\\\"Result of a schema validation run.\\\"\\\"\\\"\n\n    valid: bool\n    errors: List[str]\n\"\"\")\n\nchunks.append(\"\"\"def default_schema_path(filename: str = \"benchmark.schema.json\") -> Path:\n    \\\"\\\"\\\"Return the default schema location within the repository layout.\n\n    Assumes this file lives at: outputs/src/benchmarks/schema.py and the schema at\n    outputs/schemas/<filename>.\n    \\\"\\\"\\\"\n    outputs_dir = Path(__file__).resolve().parents[2]\n    return outputs_dir / \"schemas\" / filename\n\"\"\")\n\nchunks.append(\"\"\"def load_schema(path: Optional[Union[str, Path]] = None) -> JSONMapping:\n    \\\"\\\"\\\"Load and parse a JSON Schema file.\n\n    Args:\n        path: Optional path to a schema JSON file. If omitted, uses the default\n            schema location.\n\n    Raises:\n        FileNotFoundError: if the schema path does not exist.\n        json.JSONDecodeError: if the schema file is not valid JSON.\n    \\\"\\\"\\\"\n    schema_path = Path(path) if path is not None else default_schema_path()\n    text = schema_path.read_text(encoding=\"utf-8\")\n    return json.loads(text)\n\"\"\")\n\nchunks.append(\"\"\"def _validator_for_schema(schema: JSONMapping):\n    \\\"\\\"\\\"Construct an appropriate jsonschema validator for the given schema.\\\"\\\"\\\"\n    cls = validators.validator_for(schema)\n    cls.check_schema(schema)\n    return cls(schema, format_checker=FormatChecker())\n\"\"\")\n\nchunks.append(\"\"\"def iter_validation_errors(\n    instance: Any,\n    *,\n    schema: Optional[JSONMapping] = None,\n    schema_path: Optional[Union[str, Path]] = None,\n) -> Iterable[ValidationError]:\n    \\\"\\\"\\\"Yield JSON Schema validation errors for an instance.\n\n    Provide either a pre-loaded schema or a schema_path. If both are omitted,\n    the default schema is used.\n    \\\"\\\"\\\"\n    if schema is None:\n        schema = load_schema(schema_path)\n    validator = _validator_for_schema(schema)\n    yield from validator.iter_errors(instance)\n\"\"\")\n\nchunks.append(\"\"\"def validate_or_raise(\n    instance: Any,\n    *,\n    schema: Optional[JSONMapping] = None,\n    schema_path: Optional[Union[str, Path]] = None,\n) -> None:\n    \\\"\\\"\\\"Validate an instance and raise the first error with a readable message.\\\"\\\"\\\"\n    errors = sorted(\n        iter_validation_errors(instance, schema=schema, schema_path=schema_path),\n        key=lambda e: list(e.path),\n    )\n    if not errors:\n        return\n    err = errors[0]\n    loc = \".\".join(str(p) for p in err.path) or \"<root>\"\n    raise ValidationError(f\"{err.message} (at {loc})\")\n\"\"\")\n\nchunks.append(\"\"\"def validate(\n    instance: Any,\n    *,\n    schema: Optional[JSONMapping] = None,\n    schema_path: Optional[Union[str, Path]] = None,\n) -> SchemaValidationResult:\n    \\\"\\\"\\\"Validate an instance and return a structured result (no exception).\\\"\\\"\\\"\n    msgs: List[str] = []\n    for err in sorted(\n        iter_validation_errors(instance, schema=schema, schema_path=schema_path),\n        key=lambda e: (list(e.path), e.message),\n    ):\n        loc = \".\".join(str(p) for p in err.path) or \"<root>\"\n        msgs.append(f\"{err.message} (at {loc})\")\n    return SchemaValidationResult(valid=not msgs, errors=msgs)\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:outputs/src/benchmarks/schema.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\nlen(final_text.splitlines())\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:outputs/src/benchmarks/schema.py\nDIR_STATE:[\"outputs/src/benchmarks/__init__.py\", \"outputs/src/benchmarks/compute.py\", \"outputs/src/benchmarks/schema.py\"]\n"
+        },
+        {
+          "type": "logs",
+          "logs": "96"
+        }
+      ]
+    },
+    {
+      "id": "msg_0a75d416ff5ce69100694995426cfc81958eea1443d8567045",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented compact schema utilities in `outputs/src/benchmarks/schema.py`, including default schema path resolution, schema loading, and JSON Schema validation helpers usable by both the CLI and pytest/CI."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

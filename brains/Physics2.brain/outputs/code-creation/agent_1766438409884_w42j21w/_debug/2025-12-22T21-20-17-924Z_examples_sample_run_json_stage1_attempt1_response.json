@@ -1,0 +1,272 @@
+{
+  "content": "Created `examples/sample_run.json`, a fully valid worked-example benchmark run document (including pass/fail/error cases plus an aggregated summary) suitable for demonstrating successful schema validation.",
+  "reasoning": "",
+  "responseId": "resp_0646c1c6c2733151006949b6fb73f88196bd1b21cb190e055f",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4705,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2243,
+    "output_tokens_details": {
+      "reasoning_tokens": 2203
+    },
+    "total_tokens": 6948
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0646c1c6c2733151006949b6fc47dc8196bcd5784c8466d112",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0646c1c6c2733151006949b6fd2d10819686c0ead0e583fe2d",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nlist(base.iterdir())[:20]\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/pyproject.toml'),\n PosixPath('/mnt/data/README.md'),\n PosixPath('/mnt/data/src'),\n PosixPath('/mnt/data/schemas')]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0646c1c6c2733151006949b7003fc08196999f30a79142f520",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0646c1c6c2733151006949b70071708196b2a35917c19ce1e4",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "schemas=Path(\"/mnt/data/schemas\")\nlist(schemas.rglob(\"*\"))[:30]\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/schemas/benchmark.schema.json')]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0646c1c6c2733151006949b702e56c819695b1900c5d4531f2",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0646c1c6c2733151006949b70348288196afa9350b309db2d5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import json, textwrap\nschema_path=Path(\"/mnt/data/schemas/benchmark.schema.json\")\nschema=json.loads(schema_path.read_text())\nschema.keys(), schema.get(\"$id\")\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(dict_keys(['$schema', '$id', 'title', 'type', 'additionalProperties', 'required', 'properties', '$defs']),\n 'https://example.org/schemas/benchmark.schema.json')"
+        }
+      ]
+    },
+    {
+      "id": "rs_0646c1c6c2733151006949b705e70c81969061728a9f9ea081",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0646c1c6c2733151006949b706826c819697357c470b415891",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "schema[\"required\"], schema[\"properties\"].keys()\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(['schema_version', 'run_id', 'timestamp', 'benchmark', 'system', 'results'],\n dict_keys(['schema_version', 'run_id', 'timestamp', 'benchmark', 'system', 'config', 'results', 'summary', 'notes']))"
+        }
+      ]
+    },
+    {
+      "id": "rs_0646c1c6c2733151006949b7088ad88196b6c407bf10fcbf28",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0646c1c6c2733151006949b70903e48196affbcfb7df945688",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import pprint, itertools\npprint.pp(schema[\"properties\"][\"benchmark\"])\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "{'type': 'object',\n 'additionalProperties': False,\n 'required': ['name', 'version'],\n 'properties': {'name': {'type': 'string', 'minLength': 1},\n                'version': {'type': 'string', 'minLength': 1},\n                'description': {'type': 'string'}}}\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0646c1c6c2733151006949b70b4040819682fa57401c9b2cea",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0646c1c6c2733151006949b70b7ad08196a7614b29301f6ee5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "pprint.pp(schema[\"properties\"][\"system\"])\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "{'type': 'object',\n 'additionalProperties': False,\n 'required': ['model', 'runner'],\n 'properties': {'model': {'type': 'object',\n                          'additionalProperties': False,\n                          'required': ['name'],\n                          'properties': {'name': {'type': 'string',\n                                                  'minLength': 1},\n                                         'provider': {'type': 'string'},\n                                         'version': {'type': 'string'},\n                                         'parameters': {'type': 'object',\n                                                        'additionalProperties': True}}},\n                'runner': {'type': 'object',\n                           'additionalProperties': False,\n                           'required': ['name', 'version'],\n                           'properties': {'name': {'type': 'string',\n                                                   'minLength': 1},\n                                          'version': {'type': 'string',\n                                                      'minLength': 1},\n                                          'commit': {'type': 'string'}}},\n                'hardware': {'type': 'object',\n                             'additionalProperties': True,\n                             'properties': {'cpu': {'type': 'string'},\n                                            'gpu': {'type': 'string'},\n                                            'ram_gb': {'type': 'number',\n                                                       'minimum': 0}}},\n                'os': {'type': 'string'}}}\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0646c1c6c2733151006949b70d7e9c81969beab48f8cb6ccee",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0646c1c6c2733151006949b70dc59c8196931d0e8e57a758b5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "pprint.pp(schema[\"properties\"][\"results\"])\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "{'type': 'array', 'minItems': 1, 'items': {'$ref': '#/$defs/result'}}\n"
+        }
+      ]
+    },
+    {
+      "id": "ci_0646c1c6c2733151006949b70fc1a48196b8b2a5f689bff963",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "pprint.pp(schema[\"$defs\"][\"result\"])\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "{'type': 'object',\n 'additionalProperties': False,\n 'required': ['case_id', 'status', 'metrics'],\n 'properties': {'case_id': {'type': 'string', 'minLength': 1},\n                'status': {'type': 'string',\n                           'description': 'Outcome for this case.',\n                           'enum': ['pass', 'fail', 'error', 'skip']},\n                'metrics': {'type': 'object',\n                            'description': 'Case-level metrics (scores, '\n                                           'latencies, etc.).',\n                            'additionalProperties': {'anyOf': [{'type': 'number'},\n                                                               {'type': 'integer'},\n                                                               {'type': 'string'},\n                                                               {'type': 'boolean'},\n                                                               {'type': 'null'}]}},\n                'output': {'type': ['object', 'string', 'null'],\n                           'description': 'Optional raw model output for the '\n                                          'case.',\n                           'additionalProperties': True},\n                'error': {'type': 'object',\n                          'description': 'Present when status=error.',\n                          'additionalProperties': False,\n                          'required': ['message'],\n                          'properties': {'message': {'type': 'string'},\n                                         'type': {'type': 'string'},\n                                         'traceback': {'type': 'string'}}},\n                'started_at': {'type': 'string', 'format': 'date-time'},\n                'ended_at': {'type': 'string', 'format': 'date-time'}},\n 'allOf': [{'if': {'properties': {'status': {'const': 'error'}}},\n            'then': {'required': ['error']}}]}\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0646c1c6c2733151006949b711a3e48196bc5e3e4941d29b87",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0646c1c6c2733151006949b711fe7c819697e32fc435ca0fdc",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "pprint.pp(schema[\"properties\"][\"schema_version\"])\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "{'type': 'string',\n 'description': 'Version of this benchmark schema.',\n 'pattern': '^\\\\d+\\\\.\\\\d+\\\\.\\\\d+$',\n 'examples': ['1.0.0']}\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0646c1c6c2733151006949b713dbc881968c9b28ffc512810a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0646c1c6c2733151006949b71497d48196b126421a48f62f03",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "pprint.pp(schema[\"properties\"][\"summary\"])\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "{'type': 'object',\n 'description': 'Optional aggregated metrics for the whole run.',\n 'additionalProperties': True}\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0646c1c6c2733151006949b716b7d88196a95b04e075a89db6",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0646c1c6c2733151006949b7170de481969d5e6af5c3b4938f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "pprint.pp(schema[\"properties\"][\"config\"])\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "{'type': 'object',\n 'description': 'Benchmark configuration used for the run; intentionally '\n                'open-ended.',\n 'additionalProperties': True}\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0646c1c6c2733151006949b718f0408196a0f31aebaf23b33f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0646c1c6c2733151006949b71bd4a481968c45db27c34c674b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, uuid, datetime\ntarget_path = Path('/mnt/data').joinpath('examples/sample_run.json')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nrun = {\n  \"schema_version\": \"1.0.0\",\n  \"run_id\": \"sample-run-0001\",\n  \"timestamp\": \"2025-01-15T12:00:00Z\",\n  \"benchmark\": {\n    \"name\": \"minimal-example-benchmark\",\n    \"version\": \"0.1.0\",\n    \"description\": \"A tiny worked example demonstrating a valid benchmark run document.\"\n  },\n  \"system\": {\n    \"model\": {\n      \"name\": \"example-model\",\n      \"provider\": \"example\",\n      \"version\": \"2025.01\",\n      \"parameters\": {\"temperature\": 0.0, \"max_tokens\": 32}\n    },\n    \"runner\": {\"name\": \"benchmarks-validator\", \"version\": \"0.1.0\"},\n    \"hardware\": {\"cpu\": \"Example CPU\", \"ram_gb\": 16},\n    \"os\": \"linux\"\n  },\n  \"config\": {\n    \"dataset\": \"examples/minimal_dataset.jsonl\",\n    \"scoring\": {\"metric\": \"exact_match\"}\n  },\n  \"results\": [\n    {\n      \"case_id\": \"case-001\",\n      \"status\": \"pass\",\n      \"metrics\": {\"score\": 1.0, \"latency_ms\": 12},\n      \"output\": {\"prediction\": \"hello\", \"reference\": \"hello\"},\n      \"started_at\": \"2025-01-15T12:00:00Z\",\n      \"ended_at\": \"2025-01-15T12:00:00.012Z\"\n    },\n    {\n      \"case_id\": \"case-002\",\n      \"status\": \"fail\",\n      \"metrics\": {\"score\": 0.0, \"latency_ms\": 15},\n      \"output\": {\"prediction\": \"goodbye\", \"reference\": \"hello\"},\n      \"started_at\": \"2025-01-15T12:00:01Z\",\n      \"ended_at\": \"2025-01-15T12:00:01.015Z\"\n    },\n    {\n      \"case_id\": \"case-003\",\n      \"status\": \"error\",\n      \"metrics\": {\"score\": None},\n      \"error\": {\"message\": \"Model request timed out\", \"type\": \"TimeoutError\"},\n      \"started_at\": \"2025-01-15T12:00:02Z\",\n      \"ended_at\": \"2025-01-15T12:00:32Z\"\n    }\n  ],\n  \"summary\": {\n    \"num_cases\": 3,\n    \"num_pass\": 1,\n    \"num_fail\": 1,\n    \"num_error\": 1,\n    \"pass_rate\": 0.3333333333,\n    \"mean_latency_ms\": 13.5\n  },\n  \"notes\": \"This file is intentionally small but exercises pass/fail/error statuses.\"\n}\n\n# build chunks as required (list of multiline strings)\nfinal_text = json.dumps(run, indent=2, ensure_ascii=False) + \"\\n\"\ntarget_path.write_text(final_text, encoding=\"utf-8\")\nprint('FILE_WRITTEN:examples/sample_run.json')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:examples/sample_run.json\nDIR_STATE:[\"examples/sample_run.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0646c1c6c2733151006949b72a5a488196974a723625c2faa2",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0646c1c6c2733151006949b72bdbc481969a4cb42350240287",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\ntarget_path = Path('/mnt/data').joinpath('examples/sample_run.json')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\"\"\"{\n  \"schema_version\": \"1.0.0\",\n  \"run_id\": \"sample-run-0001\",\n  \"timestamp\": \"2025-01-15T12:00:00Z\",\n  \"benchmark\": {\n    \"name\": \"minimal-example-benchmark\",\n    \"version\": \"0.1.0\",\n    \"description\": \"A tiny worked example demonstrating a valid benchmark run document.\"\n  },\n  \"system\": {\n    \"model\": {\n      \"name\": \"example-model\",\n      \"provider\": \"example\",\n      \"version\": \"2025.01\",\n      \"parameters\": {\n        \"temperature\": 0.0,\n        \"max_tokens\": 32\n      }\n    },\n    \"runner\": {\n      \"name\": \"benchmarks-validator\",\n      \"version\": \"0.1.0\"\n    },\n    \"hardware\": {\n      \"cpu\": \"Example CPU\",\n      \"ram_gb\": 16\n    },\n    \"os\": \"linux\"\n  },\n  \"config\": {\n    \"dataset\": \"examples/minimal_dataset.jsonl\",\n    \"scoring\": {\n      \"metric\": \"exact_match\"\n    }\n  },\n  \"results\": [\n    {\n      \"case_id\": \"case-001\",\n      \"status\": \"pass\",\n      \"metrics\": {\n        \"score\": 1.0,\n        \"latency_ms\": 12\n      },\n      \"output\": {\n        \"prediction\": \"hello\",\n        \"reference\": \"hello\"\n      },\n      \"started_at\": \"2025-01-15T12:00:00Z\",\n      \"ended_at\": \"2025-01-15T12:00:00.012Z\"\n    },\n    {\n      \"case_id\": \"case-002\",\n      \"status\": \"fail\",\n      \"metrics\": {\n        \"score\": 0.0,\n        \"latency_ms\": 15\n      },\n      \"output\": {\n        \"prediction\": \"goodbye\",\n        \"reference\": \"hello\"\n      },\n      \"started_at\": \"2025-01-15T12:00:01Z\",\n      \"ended_at\": \"2025-01-15T12:00:01.015Z\"\n    },\n    {\n      \"case_id\": \"case-003\",\n      \"status\": \"error\",\n      \"metrics\": {\n        \"score\": null\n      },\n      \"error\": {\n        \"message\": \"Model request timed out\",\n        \"type\": \"TimeoutError\"\n      },\n      \"started_at\": \"2025-01-15T12:00:02Z\",\n      \"ended_at\": \"2025-01-15T12:00:32Z\"\n    }\n  ],\n  \"summary\": {\n    \"num_cases\": 3,\n    \"num_pass\": 1,\n    \"num_fail\": 1,\n    \"num_error\": 1,\n    \"pass_rate\": 0.3333333333,\n    \"mean_latency_ms\": 13.5\n  },\n  \"notes\": \"This file is intentionally small but exercises pass/fail/error statuses.\"\n}\"\"\"]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\n# sanity check JSON parses\njson.loads(target_path.read_text(encoding=\"utf-8\"))\n\nprint('FILE_WRITTEN:examples/sample_run.json')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:examples/sample_run.json\nDIR_STATE:[\"examples/sample_run.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0646c1c6c2733151006949b7366cc481968d5b1f31516fb118",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0646c1c6c2733151006949b73759608196a255f95bb9ad71ad",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `examples/sample_run.json`, a fully valid worked-example benchmark run document (including pass/fail/error cases plus an aggregated summary) suitable for demonstrating successful schema validation."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,92 @@
+{
+  "content": "Created `pyproject.toml` configuring `ruff`/`black`/`pytest` and defining CI-focused optional dependencies (linting, schema validation, and test tooling) suitable for the planned GitHub Actions workflow.",
+  "reasoning": "",
+  "responseId": "resp_06836e7c9a7dd6da006949bfebcb388195a9f61bb695ece3d1",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 5813,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1093,
+    "output_tokens_details": {
+      "reasoning_tokens": 524
+    },
+    "total_tokens": 6906
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_06836e7c9a7dd6da006949bfec6f808195a94e66ff61e5d9a5",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06836e7c9a7dd6da006949bff0aaa88195ab4244a86475dc28",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nsorted([str(p.relative_to(base)) for p in base.rglob(\"*\") if p.is_file()][:50]), len(list(base.rglob(\"*\")))\n",
+      "container_id": "cntr_6949bf4d82d48190914ab1de1631f7580f09298ef9bbb62e",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(['.github/workflows/ci.yml',\n  'benchmarks/baseline.json',\n  'scripts/bench_repro_check.py',\n  'scripts/ci_lint_compile.py',\n  'scripts/validate_examples_schema.py'],\n 9)"
+        }
+      ]
+    },
+    {
+      "id": "rs_06836e7c9a7dd6da006949bff359708195a0836003c953f03d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06836e7c9a7dd6da006949bff3f7fc8195af96b78631e44f5b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nfor p in [\"scripts/ci_lint_compile.py\",\"scripts/validate_examples_schema.py\",\"scripts/bench_repro_check.py\"]:\n    print(\"----\",p)\n    print(Path(\"/mnt/data\",p).read_text()[:4000])\n",
+      "container_id": "cntr_6949bf4d82d48190914ab1de1631f7580f09298ef9bbb62e",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "---- scripts/ci_lint_compile.py\n#!/usr/bin/env python3\n\"\"\"CI helper: lint/format checks + compilation/import sanity.\n\nDesigned for GitHub Actions: always writes logs under artifacts/ci_lint_compile\nso the workflow can upload them on failure.\n\"\"\"\nfrom __future__ import annotations\n\nimport ast\nimport os\nimport subprocess\nimport sys\nfrom pathlib import Path\nfrom typing import Iterable, Sequence, Tuple\n\n\nEXCLUDE_DIRS = {\".git\", \".venv\", \"venv\", \"__pycache__\", \"build\", \"dist\", \".mypy_cache\", \".pytest_cache\"}\nARTIFACT_DIR = Path(\"artifacts\") / \"ci_lint_compile\"\n\n\ndef repo_root() -> Path:\n    here = Path(__file__).resolve()\n    return here.parent.parent\n\n\ndef iter_py_files(root: Path) -> Iterable[Path]:\n    for p in root.rglob(\"*.py\"):\n        parts = set(p.parts)\n        if any(d in parts for d in EXCLUDE_DIRS):\n            continue\n        yield p\n\n\ndef run_cmd(cmd: Sequence[str], cwd: Path, log_path: Path, env: dict | None = None) -> int:\n    log_path.parent.mkdir(parents=True, exist_ok=True)\n    with log_path.open(\"w\", encoding=\"utf-8\") as f:\n        f.write(\"$ \" + \" \".join(cmd) + \"\\n\\n\")\n        proc = subprocess.run(cmd, cwd=str(cwd), env=env, text=True, capture_output=True)\n        if proc.stdout:\n            f.write(proc.stdout)\n        if proc.stderr:\n            f.write(\"\\n[stderr]\\n\" + proc.stderr)\n        f.write(f\"\\n\\n[exit_code] {proc.returncode}\\n\")\n    return proc.returncode\n\n\ndef tool_exists(argv0: str) -> bool:\n    from shutil import which\n    return which(argv0) is not None\n\n\ndef ast_parse_check(files: Sequence[Path], log_path: Path) -> int:\n    \"\"\"Fast syntax check that yields readable file/line errors.\"\"\"\n    log_path.parent.mkdir(parents=True, exist_ok=True)\n    failures: list[str] = []\n    for p in files:\n        try:\n            ast.parse(p.read_text(encoding=\"utf-8\"), filename=str(p))\n        except Exception as e:  # SyntaxError, UnicodeDecodeError, etc.\n            failures.append(f\"{p}: {e.__class__.__name__}: {e}\")\n    with log_path.open(\"w\", encoding=\"utf-8\") as f:\n        f.write(\"AST parse check\\n\\n\")\n        if failures:\n            f.write(\"\\n\".join(failures) + \"\\n\")\n        else:\n            f.write(\"OK\\n\")\n    return 1 if failures else 0\n\n\ndef compileall_check(root: Path, log_path: Path) -> int:\n    # compileall is a good proxy for bytecode compilation across the repo.\n    cmd = [sys.executable, \"-m\", \"compileall\", \"-q\", str(root)]\n    return run_cmd(cmd, cwd=root, log_path=log_path)\n\n\ndef lint_and_format(root: Path, log_dir: Path) -> Tuple[int, list[Path]]:\n    \"\"\"Runs ruff/black if available; otherwise emits a note and succeeds.\"\"\"\n    codes: list[int] = []\n    logs: list[Path] = []\n\n    # Prefer ruff for lint + formatting check.\n    if tool_exists(\"ruff\"):\n        p1 = log_dir / \"ruff_check.log\"\n        codes.append(run_cmd([\"ruff\", \"check\", \".\"], cwd=root, log_path=p1))\n        logs.append(p1)\n        p2 = log_dir / \"ruff_format_check.log\"\n        codes.append(run_cmd([\"ruff\", \"format\", \"--check\", \".\"], cwd=root, log_path=p2))\n        logs.append(p2)\n    else:\n        p = log_dir / \"lint_missing_tools.log\"\n        p.write_text(\"ruff not found on PATH; skipping lint/format checks.\\n\", encoding=\"utf-8\")\n        logs.append(p)\n\n    # Optional black check (some repos still use it); doesn't fail if missing.\n    if tool_exists(\"black\"):\n        p = log_dir / \"black_check.log\"\n        codes.append(run_cmd([\"black\", \"--check\", \".\"], cwd=root, log_path=p))\n        logs.append(p)\n\n    return (0 if all(c == 0 for c in codes) else 1), logs\n\n\ndef main(argv: Sequence[str]) -> int:\n    root = repo_root()\n    os.chdir(root)\n    ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)\n\n    files = sorted(iter_py_files(root))\n    if not files:\n        (ARTIFACT_DIR / \"note.log\").write_text(\"No Python files found.\\n\", encoding=\"utf-8\")\n        return 0\n\n    exit_code = 0\n\n    lint_rc, _ = lint_and_format(root, ARTIFACT_DIR)\n    exit_code |= lint_rc\n\n    exit_code |= ast_parse_check(files, ARTIFACT_DIR / \"ast_parse.log\")\n    exit_code |= compileall_check\n---- scripts/validate_examples_schema.py\n#!/usr/bin/env python3\n\"\"\"Validate repository example files against a JSON Schema.\n\n- Discovers example files (default: examples/**.json|yml|yaml).\n- Validates each file against a JSON Schema (default: auto-discover schema*.json).\n- Emits a diff-like, pointer-addressed report for any violations and exits non-zero.\n\nIntended for CI usage; output is stable and human-readable.\n\"\"\"\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport sys\nfrom pathlib import Path\nfrom typing import Any, Iterable, Tuple\ndef _load_text(path: Path) -> str:\n    return path.read_text(encoding=\"utf-8\")\n\ndef _load_data(path: Path) -> Any:\n    if path.suffix.lower() == \".json\":\n        return json.loads(_load_text(path))\n    if path.suffix.lower() in {\".yml\", \".yaml\"}:\n        try:\n            import yaml  # type: ignore\n        except Exception as e:  # pragma: no cover\n            raise RuntimeError(f\"PyYAML is required to read {path.name}: {e}\") from e\n        return yaml.safe_load(_load_text(path))\n    raise ValueError(f\"Unsupported example file type: {path}\")\n\ndef _json_pointer(parts: Iterable[Any]) -> str:\n    segs = []\n    for p in parts:\n        s = str(p).replace(\"~\", \"~0\").replace(\"/\", \"~1\")\n        segs.append(s)\n    return \"/\" + \"/\".join(segs) if segs else \"/\"\n\ndef _fmt_value(v: Any, limit: int = 240) -> str:\n    try:\n        s = json.dumps(v, ensure_ascii=False, sort_keys=True)\n    except Exception:\n        s = repr(v)\n    if len(s) > limit:\n        s = s[: limit - 3] + \"...\"\n    return s\ndef _discover_schema(repo_root: Path) -> Path:\n    candidates = []\n    for rel in (\"schema.json\", \"schemas/schema.json\", \"json_schema.json\"):\n        p = repo_root / rel\n        if p.is_file():\n            candidates.append(p)\n    candidates += sorted(repo_root.glob(\"**/schema*.json\"))\n    for p in candidates:\n        if p.is_file():\n            return p\n    raise FileNotFoundError(\n        \"No schema found; pass --schema PATH (looked for schema.json and **/schema*.json).\"\n    )\n\ndef _discover_examples(repo_root: Path, root: str, patterns: Tuple[str, ...]) -> list[Path]:\n    ex_root = repo_root / root\n    if not ex_root.exists():\n        return []\n    files: list[Path] = []\n    for pat in patterns:\n        files.extend(sorted(ex_root.rglob(pat)))\n    return [p for p in files if p.is_file()]\ndef _build_validator(schema: dict) -> Any:\n    try:\n        import jsonschema  # type: ignore\n        from jsonschema.validators import validator_for  # type: ignore\n    except Exception as e:  # pragma: no cover\n        raise RuntimeError(\n            \"jsonschema is required for validation; add it to your CI dependencies.\"\n        ) from e\n    cls = validator_for(schema)\n    cls.check_schema(schema)\n    return cls(schema)\n\ndef _format_error(err: Any, instance: Any) -> str:\n    ptr = _json_pointer(err.absolute_path)\n    # Best-effort lookup of offending value.\n    cur = instance\n    try:\n        for part in err.absolute_path:\n            cur = cur[part]\n        val = _fmt_value(cur)\n    except Exception:\n        val = \"<unavailable>\"\n    schema_ptr = _json_pointer(err.absolute_schema_path)\n    msg = (err.message or str(err)).strip()\n    return \"\\n\".join(\n        [\n            f\"@@ {ptr}\",\n            f\"- value: {val}\",\n            f\"+ error: {msg}\",\n            f\"+ schema: {schema_ptr}\",\n        ]\n    )\ndef validate_examples(schema_path: Path, example_paths: list[Path]) -> int:\n    schema = json.loads(_load_text(schema_path))\n    validator = _build_validator(schema)\n\n    any_fail = False\n    for ex in example_paths:\n        try:\n            data = _load_data(ex)\n        except Exception as e:\n            any_fail = True\n            sys.stdout.write(f\"--- {ex.as_posix()}\\n+++ parse_error\\n+ {e}\\n\")\n            continue\n\n        errors = sorted(validator.iter_errors(data), key=lambda e: list(e.absolute_path))\n        if not errors:\n            continue\n\n        any_fail = True\n        sys.stdout.write(f\"--- {ex.as_posix()}\\n+++ schema_validation\\n\")\n       \n---- scripts/bench_repro_check.py\n#!/usr/bin/env python3\n\\\"\\\"\\\"Benchmark reproduction check.\n\nRuns a benchmark command expected to emit JSON results (dict of name->number) on stdout,\ncompares against a committed baseline within tolerances, and writes:\n- bench_repro_diff.txt (human-readable)\n- bench_repro_report.json (machine-readable)\nExit code 0 if within tolerances, else 1.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport argparse, json, os, re, subprocess, sys\nfrom pathlib import Path\nfrom typing import Dict, Any, Tuple\n\n\ndef _stable_env() -> dict:\n    env = dict(os.environ)\n    env.setdefault(\"PYTHONHASHSEED\", \"0\")\n    for k in (\"OMP_NUM_THREADS\",\"MKL_NUM_THREADS\",\"OPENBLAS_NUM_THREADS\",\"NUMEXPR_NUM_THREADS\"):\n        env.setdefault(k, \"1\")\n    env.setdefault(\"TOKENIZERS_PARALLELISM\", \"false\")\n    return env\n\n\ndef _parse_json_from_stdout(stdout: str) -> Dict[str, float]:\n    s = stdout.strip()\n    if not s:\n        raise ValueError(\"benchmark command produced empty stdout; expected JSON\")\n    # Try whole stdout first; fallback to last {...} or [...] block.\n    try:\n        obj = json.loads(s)\n    except Exception:\n        m = re.findall(r\"(\\{.*\\}|\\[.*\\])\", s, flags=re.S)\n        if not m:\n            raise\n        obj = json.loads(m[-1])\n    if isinstance(obj, dict):\n        out = {}\n        for k, v in obj.items():\n            if isinstance(v, (int, float)):\n                out[str(k)] = float(v)\n        if not out:\n            raise ValueError(\"parsed JSON dict but found no numeric values\")\n        return out\n    raise ValueError(\"expected JSON object mapping benchmark->number\")\n\n\ndef _load_baseline(path: Path) -> Dict[str, float]:\n    obj = json.loads(path.read_text(encoding=\"utf-8\"))\n    if not isinstance(obj, dict):\n        raise ValueError(\"baseline must be a JSON object mapping benchmark->number\")\n    return {str(k): float(v) for k, v in obj.items() if isinstance(v, (int, float))}\n\n\ndef _compare(baseline: Dict[str, float], current: Dict[str, float], rel: float, abs_: float):\n    all_keys = sorted(set(baseline) | set(current))\n    rows = []\n    ok = True\n    for k in all_keys:\n        b = baseline.get(k)\n        c = current.get(k)\n        if b is None or c is None:\n            ok = False\n            rows.append((k, b, c, None, None, False, \"missing\"))\n            continue\n        delta = c - b\n        tol = abs_ + rel * (abs(b) if b != 0 else 1.0)\n        passed = abs(delta) <= tol\n        ok &= passed\n        pct = None if b == 0 else (delta / b) * 100.0\n        rows.append((k, b, c, delta, pct, passed, f\"tol={tol:g}\"))\n    return ok, rows\n\n\ndef main(argv=None) -> int:\n    ap = argparse.ArgumentParser()\n    ap.add_argument(\"--cmd\", default=\"python -m benchmarks.run\", help=\"benchmark command (shell-like)\")\n    ap.add_argument(\"--baseline\", default=\"benchmarks/baseline.json\")\n    ap.add_argument(\"--out-dir\", default=\"artifacts/bench_repro\")\n    ap.add_argument(\"--rel-tol\", type=float, default=0.05, help=\"relative tolerance (fraction)\")\n    ap.add_argument(\"--abs-tol\", type=float, default=0.0, help=\"absolute tolerance\")\n    args = ap.parse_args(argv)\n\n    baseline_path = Path(args.baseline)\n    out_dir = Path(args.out_dir)\n    out_dir.mkdir(parents=True, exist_ok=True)\n\n    report = {\"cmd\": args.cmd, \"baseline\": str(baseline_path), \"rel_tol\": args.rel_tol, \"abs_tol\": args.abs_tol}\n\n    try:\n        baseline = _load_baseline(baseline_path)\n        report[\"baseline_count\"] = len(baseline)\n    except Exception as e:\n        (out_dir / \"bench_repro_diff.txt\").write_text(f\"ERROR loading baseline: {e}\\n\", encoding=\"utf-8\")\n        report.update({\"status\": \"error\", \"error\": f\"baseline: {e}\"})\n        (out_dir / \"bench_repro_report.json\").write_text(json.dumps(report, indent=2, sort_keys=True), encoding=\"utf-8\")\n        return 2\n\n    try:\n        p = subprocess.run(args.cmd, shell=True, check=False, text=True, capture_output=True, env=_stable_env())\n        (out_dir / \"bench_stdout.txt\").write_text(p.stdout, encoding=\"utf-8\")\n        (out_dir / \"bench_stderr\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_06836e7c9a7dd6da006949bff62af08195950508d6dd686e31",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06836e7c9a7dd6da006949bffa6a0c8195bf22fc2f6eca4062",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('pyproject.toml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"[build-system]\nrequires = [\"setuptools>=68\", \"wheel\"]\nbuild-backend = \"setuptools.build_meta\"\n\n[project]\nname = \"generated_script_1766440781994\"\nversion = \"0.0.0\"\ndescription = \"CI-tooled Python script repository.\"\nreadme = \"README.md\"\nrequires-python = \">=3.10\"\nlicense = {text = \"MIT\"}\nauthors = [{name = \"Unknown\"}]\ndependencies = []\n\n[project.optional-dependencies]\nci = [\n  \"ruff>=0.6.0\",\n  \"black>=24.0.0\",\n  \"pytest>=7.4.0\",\n  \"pytest-cov>=4.1.0\",\n  \"jsonschema>=4.20.0\",\n  \"PyYAML>=6.0.1\",\n]\nbench = []\"\"\",\n\"\"\"[tool.ruff]\ntarget-version = \"py310\"\nline-length = 100\nextend-exclude = [\"artifacts\", \"build\", \"dist\", \".venv\", \"venv\"]\n\n[tool.ruff.lint]\nselect = [\"E\", \"F\", \"I\", \"B\", \"UP\", \"SIM\"]\nignore = [\"E501\"]\n\n[tool.ruff.format]\nquote-style = \"double\"\nindent-style = \"space\"\nline-ending = \"lf\"\n\n[tool.black]\nline-length = 100\ntarget-version = [\"py310\"]\nextend-exclude = '''\n/(\n  artifacts\n  | build\n  | dist\n  | \\\\.venv\n  | venv\n)/\n'''\"\"\",\n\"\"\"[tool.pytest.ini_options]\nminversion = \"7.0\"\naddopts = \"-q\"\ntestpaths = [\"tests\"]\nxfail_strict = true\nfilterwarnings = [\n  \"error::DeprecationWarning\",\n  \"error::PendingDeprecationWarning\",\n]\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:pyproject.toml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bf4d82d48190914ab1de1631f7580f09298ef9bbb62e",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:pyproject.toml\nDIR_STATE:[\"pyproject.toml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_06836e7c9a7dd6da006949c00723ec8195b9918d047213edbb",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `pyproject.toml` configuring `ruff`/`black`/`pytest` and defining CI-focused optional dependencies (linting, schema validation, and test tooling) suitable for the planned GitHub Actions workflow."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

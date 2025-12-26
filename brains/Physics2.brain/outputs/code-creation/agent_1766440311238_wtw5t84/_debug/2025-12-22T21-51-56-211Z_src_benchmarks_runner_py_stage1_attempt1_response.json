@@ -1,0 +1,64 @@
+{
+  "content": "Implemented `src/benchmarks/runner.py` as an end-to-end benchmark runner that loads validated task contracts, executes reference vs. candidate callables, and enforces standardized comparisons via centralized utilities with concise CI-friendly failure reporting and a small CLI.",
+  "reasoning": "",
+  "responseId": "resp_0ec8545a162de5f0006949bdec5bac819593559f2ed1f6a86d",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3614,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2042,
+    "output_tokens_details": {
+      "reasoning_tokens": 663
+    },
+    "total_tokens": 5656
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0ec8545a162de5f0006949bded12e88195aae3ea35738a7df4",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ec8545a162de5f0006949bdf91ee08195b748ad2865c85513",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\r\nimport json, textwrap, os, sys, re",
+      "container_id": "cntr_6949bd7a484c8190a2c35d8222ddd72e01ed19761adadc33",
+      "outputs": []
+    },
+    {
+      "id": "ci_0ec8545a162de5f0006949bdfb30308195b107e5da84775704",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\r\nimport json\r\n\r\ntarget_path = Path('/mnt/data').joinpath('src/benchmarks/runner.py')\r\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\r\n\r\nchunks = []\r\n\r\nchunks.append(\"\"\"\\\r\n\\\"\\\"\\\"Benchmark runner.\r\n\r\nLoads each task contract, runs reference and candidate implementations, and\r\ncompares outputs using centralized utilities with CI-friendly failure output.\r\n\\\"\\\"\\\"\r\nfrom __future__ import annotations\r\n\r\nfrom dataclasses import dataclass\r\nfrom importlib import import_module\r\nfrom pathlib import Path\r\nfrom typing import Any, Callable, Iterable, Sequence\r\nimport argparse\r\nimport json\r\nimport sys\r\n\r\nfrom .compare import compare_outputs\r\nfrom .contract import load_contract\r\n\"\"\")\r\n\r\nchunks.append(\"\"\"\\\r\ndef _load_callable(spec: str) -> Callable[..., Any]:\r\n    \\\"\\\"\\\"Load a callable from 'pkg.mod:attr' or 'pkg.mod.attr'.\\\"\\\"\\\"\r\n    if \\\":\\\" in spec:\r\n        mod, attr = spec.split(\\\":\\\", 1)\r\n    else:\r\n        mod, attr = spec.rsplit(\\\".\\\", 1)\r\n    obj = getattr(import_module(mod), attr)\r\n    if not callable(obj):\r\n        raise TypeError(f\\\"Loaded object is not callable: {spec}\\\")\r\n    return obj\r\n\r\n\r\ndef _iter_contract_paths(path: Path) -> list[Path]:\r\n    if path.is_file():\r\n        return [path]\r\n    if not path.is_dir():\r\n        raise FileNotFoundError(str(path))\r\n    exts = (\\\"*.json\\\", \\\"*.yaml\\\", \\\"*.yml\\\")\r\n    out: list[Path] = []\r\n    for pat in exts:\r\n        out.extend(sorted(path.glob(pat)))\r\n    return out\r\n\"\"\")\r\n\r\nchunks.append(\"\"\"\\\r\n@dataclass\r\nclass RunResult:\r\n    task_id: str\r\n    passed: bool\r\n    failures: list[str]  # already formatted for CI\r\n\r\n\r\ndef run_task(contract_path: Path, candidate: Callable[..., Any]) -> RunResult:\r\n    contract = load_contract(contract_path)\r\n    # contract is responsible for validating required metadata/tolerances\r\n    task_id = getattr(contract, \\\"task_id\\\", None) or getattr(contract, \\\"id\\\", None) or contract_path.stem\r\n\r\n    cases: Iterable[Any] = getattr(contract, \\\"cases\\\", None)\r\n    if cases is None and hasattr(contract, \\\"make_cases\\\"):\r\n        cases = contract.make_cases()\r\n    if cases is None:\r\n        raise ValueError(f\\\"Contract {contract_path} provides no cases/make_cases\\\")\r\n\r\n    reference = getattr(contract, \\\"reference\\\", None)\r\n    if reference is None and hasattr(contract, \\\"get_reference_callable\\\"):\r\n        reference = contract.get_reference_callable()\r\n    if not callable(reference):\r\n        raise ValueError(f\\\"Contract {contract_path} provides no callable reference implementation\\\")\r\n\r\n    # Tolerances and policies are contract-defined; compare_outputs owns semantics.\r\n    tolerances = getattr(contract, \\\"tolerances\\\", None)\r\n    nan_policy = getattr(contract, \\\"nan_policy\\\", None)\r\n    inf_policy = getattr(contract, \\\"inf_policy\\\", None)\r\n\r\n    failures: list[str] = []\r\n    for i, case in enumerate(cases):\r\n        # Support either raw input or dict-like {\\\"input\\\": ...}\r\n        inp = case.get(\\\"input\\\") if hasattr(case, \\\"get\\\") else case\r\n        meta = case.get(\\\"meta\\\", {}) if hasattr(case, \\\"get\\\") else {}\r\n        try:\r\n            ref_out = reference(inp)\r\n            cand_out = candidate(inp)\r\n        except Exception as e:  # noqa: BLE001\r\n            failures.append(f\\\"{task_id} case={i} EXEC_ERROR: {e.__class__.__name__}: {e}\\\")\r\n            continue\r\n\r\n        cmp_res = compare_outputs(\r\n            expected=ref_out,\r\n            actual=cand_out,\r\n            tolerances=tolerances,\r\n            nan_policy=nan_policy,\r\n            inf_policy=inf_policy,\r\n            context={\\\"task\\\": task_id, \\\"case\\\": i, **(meta or {})},\r\n        )\r\n        if not cmp_res.ok:\r\n            # Keep output terse but actionable for CI logs.\r\n            failures.append(cmp_res.format(max_mismatches=10))\r\n    return RunResult(task_id=task_id, passed=not failures, failures=failures)\r\n\"\"\")\r\n\r\nchunks.append(\"\"\"\\\r\ndef run(contracts: Sequence[Path], candidate_spec: str) -> int:\r\n    candidate = _load_callable(candidate_spec)\r\n    all_failures: list[str] = []\r\n    any_ran = False\r\n\r\n    for root in contracts:\r\n        for cpath in _iter_contract_paths(root):\r\n            any_ran = True\r\n            res = run_task(cpath, candidate)\r\n            if not res.passed:\r\n                all_failures.extend(res.failures)\r\n\r\n    if not any_ran:\r\n        print(\\\"No contracts found.\\\", file=sys.stderr)\r\n        return 2\r\n\r\n    if all_failures:\r\n        for line in all_failures:\r\n            print(line, file=sys.stderr)\r\n        print(f\\\"FAILURES: {len(all_failures)}\\\", file=sys.stderr)\r\n        return 1\r\n\r\n    print(\\\"OK\\\")  # keep success output minimal for CI\r\n    return 0\r\n\r\n\r\ndef main(argv: Sequence[str] | None = None) -> int:\r\n    p = argparse.ArgumentParser(description=\\\"Run benchmark contracts and compare candidate vs reference.\\\")\r\n    p.add_argument(\\\"contracts\\\", nargs=\\\"+\\\", help=\\\"Contract file(s) or directory(ies)\\\")\r\n    p.add_argument(\\\"--candidate\\\", required=True, help=\\\"Callable spec: pkg.mod:func (or pkg.mod.func)\\\")\r\n    args = p.parse_args(list(argv) if argv is not None else None)\r\n    paths = [Path(s) for s in args.contracts]\r\n    return run(paths, args.candidate)\r\n\r\n\r\nif __name__ == \\\"__main__\\\":\r\n    raise SystemExit(main())\r\n\"\"\")\r\n\r\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\r\ntarget_path.write_text(final_text, encoding='utf-8')\r\nprint('FILE_WRITTEN:src/benchmarks/runner.py')\r\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949bd7a484c8190a2c35d8222ddd72e01ed19761adadc33",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/benchmarks/runner.py\nDIR_STATE:[\"src/benchmarks/compare.py\", \"src/benchmarks/contract.py\", \"src/benchmarks/runner.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0ec8545a162de5f0006949be0a2a0881958d580a7c2176c259",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/benchmarks/runner.py` as an end-to-end benchmark runner that loads validated task contracts, executes reference vs. candidate callables, and enforces standardized comparisons via centralized utilities with concise CI-friendly failure reporting and a small CLI."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

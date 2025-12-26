@@ -1,0 +1,43 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement and run a minimal smoke-test command that writes /outputs/qa/logs/<timestamp>_smoke_test.log (python --version, basic imports) and commit/record the produced artifact as the new baseline for all future runs.
+Project: generated_script_1766626522599 (python script)
+
+Target file details:
+- Path: outputs/qa/logs/baseline_smoke_test.log
+- Purpose: Committed baseline artifact containing a previously generated smoke-test log used for future comparisons/CI verification.
+- Category: support
+
+Other planned files (for context only):
+- scripts/qa/smoke_test.py: Runnable smoke-test script that captures python --version and validates basic imports, writing results to outputs/qa/logs/<timestamp>_smoke_test.log (and optionally updating a committed baseline log).
+
+Reference insights:
+- [INTROSPECTION] 2025-12-25T01-21-50-895Z_plan_attempt1_prompt.txt from code-creation agent agent_1766625709591_pl2w6bw: You are planning a p
+- [INTROSPECTION] 2025-12-25T00-21-55-842Z_scripts_qa_run_sh_stage1_attempt2_prompt.txt from code-creation agent agent_1766622114110_412seks: 
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Committed baseline artifact containing a previously generated smoke-test log used for future comparisons/CI verification.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/qa/logs/baseline_smoke_test.log')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/qa/logs/baseline_smoke_test.log')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/qa/logs/baseline_smoke_test.log.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

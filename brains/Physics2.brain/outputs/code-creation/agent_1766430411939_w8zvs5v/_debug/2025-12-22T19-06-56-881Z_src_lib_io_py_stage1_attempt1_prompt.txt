@@ -1,0 +1,55 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement prototype numerical / symbolic experiments that illustrate the behavior or consequences of the most promising candidate framework(s). This may include: toy-model simulations, symbolic derivations (e.g., effective action, renormalization flow), entanglement structure diagnostics, or small-scale lattice/graph models demonstrating emergence of classicality from quantum rules. Produce reproducible code and example outputs (plots, tables).
+Project: generated_script_1766430415667 (python script)
+
+Target file details:
+- Path: src/lib/io.py
+- Purpose: Output management utilities for run manifests, parameter dumps, and deterministic file naming to guarantee reproducibility.
+- Category: source
+
+Other planned files (for context only):
+- README.md: Project overview with quickstart commands and explanation of the three prototype experiments plus expected example outputs (plots/tables).
+- pyproject.toml: Python project metadata and dependencies (numpy, scipy, sympy, networkx, matplotlib, pandas) with runnable script entry points.
+- src/cli.py: Command-line interface to run selected experiments, set seeds/parameters, and write reproducible outputs to the outputs/ directory.
+- src/experiments/toy_ising_emergent_classicality.py: Small-scale lattice toy-model simulation (quantum-inspired to classical emergence proxy) producing correlation/entropy diagnostics and plots across temperature/noise schedules.
+
+Reference insights:
+- [AGENT: agent_1766430088847_6tj3ud3] Cycle 7 consistency review (divergence 0.89):
+Summary judgment: the three branches share a common core 
+- [AGENT: agent_1766429908170_eztqjzv] Cycle 4 consistency review (divergence 0.87):
+Summary (based on Cycle 4, divergence 0.87)
+
+1) Areas of 
+- [INTROSPECTION] 2025-12-22T18-56-46-314Z_outputs_README_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766429800561_x1eq349: 
+- [AGENT: agent_1766430282205_qzs91u5] Cycle 10 consistency review (divergence 0.93):
+1) Areas of agreement
+- All three branches share the sam
+- [AGENT: agent_1766429554962_lz72do0] Foundations work (2019–2025) increasingly prioritizes operational/testable frameworks (causal modeling,
+
+Key requirements:
+- examples
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Output management utilities for run manifests, parameter dumps, and deterministic file naming to guarantee reproducibility.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/lib/io.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/lib/io.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/lib/io.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

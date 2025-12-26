@@ -1,0 +1,133 @@
+{
+  "content": "Implemented `src/experiments/numeric.py` with stable, vectorized NumPy/SciPy numerical evaluators for the geometric series, logistic ODE solution, and least-squares line fit, plus cached SymPy-lambdified reference checks against the analytic closed forms.",
+  "reasoning": "",
+  "responseId": "resp_0cf4d09c253483ce00694b5b362bd481908bf5afe4ab8c4c7e",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 5725,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2879,
+    "output_tokens_details": {
+      "reasoning_tokens": 2817
+    },
+    "total_tokens": 8604
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0cf4d09c253483ce00694b5b36d6c081908406aa54673305ab",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0cf4d09c253483ce00694b5b373c8481908640968358432dbd",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nlist(base.glob(\"src/experiments/*.py\"))[:10], [p.name for p in base.glob(\"src/experiments/*\")]",
+      "container_id": "cntr_694b5aca46a08190837471b6a8b1f41e0a4013e4cc7137e1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "([PosixPath('/mnt/data/src/experiments/__init__.py'),\n  PosixPath('/mnt/data/src/experiments/analytic.py')],\n ['__init__.py', 'analytic.py'])"
+        }
+      ]
+    },
+    {
+      "id": "rs_0cf4d09c253483ce00694b5b3a1bbc819094ded58538f0a580",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0cf4d09c253483ce00694b5b3a68408190b2e27ead112ee0ba",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nprint(Path(\"/mnt/data/src/experiments/analytic.py\").read_text()[:4000])\n",
+      "container_id": "cntr_694b5aca46a08190837471b6a8b1f41e0a4013e4cc7137e1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"SymPy analytic derivations for the three experiments.\n\nThis module is intentionally lightweight and deterministic: simplification uses a\nfixed pipeline and all public helpers return LaTeX-friendly objects.\n\nExperiments implemented:\n1) Geometric series: S_n(r) = sum_{k=0}^{n-1} r^k\n2) Logistic growth ODE: x'(t)=r x (1-x/K)\n3) Linear least-squares line fit: y≈a x + b via aggregated sums\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Dict, Iterable, List, Mapping, Sequence, Tuple\n\nimport sympy as sp\n@dataclass(frozen=True)\nclass Step:\n    \"\"\"One symbolic transformation step suitable for display in notebooks.\"\"\"\n    label: str\n    expr: sp.Expr\n\n    def latex(self) -> str:  # LaTeX-friendly output\n        return sp.latex(self.expr, fold_frac_powers=True, fold_short_frac=True)\n\n\ndef _dsimplify(expr: sp.Expr) -> sp.Expr:\n    \"\"\"Deterministic-ish simplification pipeline (stable across runs).\"\"\"\n    expr = sp.together(expr)\n    expr = sp.cancel(expr)\n    expr = sp.factor(expr)\n    expr = sp.simplify(expr)\n    return expr\ndef geometric_series_steps() -> List[Step]:\n    \"\"\"Derive the finite geometric series closed form.\"\"\"\n    r, n, k = sp.symbols(\"r n k\")\n    S = sp.summation(r**k, (k, 0, n - 1))\n    steps = [Step(\"definition\", S)]\n    closed = sp.Function(\"S\")(n)\n    # Construct the classic derivation: (1-r)S = 1-r^n\n    Ssym = sp.Symbol(\"S\")\n    eq1 = sp.Eq(Ssym, sp.summation(r**k, (k, 0, n - 1)))\n    steps.append(Step(\"multiply_by_r\", sp.Eq(r * Ssym, sp.summation(r**(k + 1), (k, 0, n - 1)))))\n    steps.append(Step(\"shift_index\", sp.Eq(r * Ssym, sp.summation(r**k, (k, 1, n)))))\n    steps.append(Step(\"subtract\", sp.Eq(Ssym - r * Ssym, 1 - r**n)))\n    final = _dsimplify((1 - r**n) / (1 - r))\n    steps.append(Step(\"closed_form\", final))\n    return steps\n\n\ndef geometric_series_expr() -> sp.Expr:\n    r, n = sp.symbols(\"r n\")\n    return geometric_series_steps()[-1].expr.subs({sp.Symbol(\"r\"): r, sp.Symbol(\"n\"): n})\ndef logistic_solution_steps() -> List[Step]:\n    \"\"\"Solve logistic ODE x'(t)=r x (1-x/K) with initial condition x(0)=x0.\"\"\"\n    t = sp.Symbol(\"t\", real=True)\n    r, K, x0 = sp.symbols(\"r K x0\", positive=True)\n    x = sp.Function(\"x\")\n    ode = sp.Eq(sp.diff(x(t), t), r * x(t) * (1 - x(t) / K))\n    steps: List[Step] = [Step(\"ode\", ode)]\n    # Separation of variables and partial fractions\n    sep = sp.Eq(sp.diff(x(t), t) / (x(t) * (1 - x(t) / K)), r)\n    steps.append(Step(\"separate\", sep))\n    integrand = sp.apart(1 / (sp.Symbol(\"u\") * (1 - sp.Symbol(\"u\") / K)), sp.Symbol(\"u\"))\n    steps.append(Step(\"partial_fractions_u\", integrand))\n    u = sp.Symbol(\"u\")\n    integral = sp.integrate(1 / (u * (1 - u / K)), u)\n    steps.append(Step(\"integrate_u\", _dsimplify(integral)))\n    # Known closed form solution\n    sol = _dsimplify(K / (1 + (K / x0 - 1) * sp.exp(-r * t)))\n    steps.append(Step(\"closed_form_x(t)\", sol))\n    return steps\n\n\ndef logistic_solution_expr() -> sp.Expr:\n    return logistic_solution_steps()[-1].expr\ndef least_squares_line_steps() -> List[Step]:\n    \"\"\"Closed form for a,b minimizing sum_i (a x_i + b - y_i)^2 using sums.\n\n    Uses aggregated symbols: n, Sx=Σx, Sy=Σy, Sxx=Σx^2, Sxy=Σx y.\n    \"\"\"\n    a, b = sp.symbols(\"a b\", real=True)\n    n, Sx, Sy, Sxx, Sxy = sp.symbols(\"n Sx Sy Sxx Sxy\", real=True)\n    J = sp.Symbol(\"J\")\n    # Normal equations from gradients of J = Σ(ax+b-y)^2 / 2 (scale irrelevant)\n    eq_a = sp.Eq(a * Sxx + b * Sx - Sxy, 0)\n    eq_b = sp.Eq(a * Sx + b * n - Sy, 0)\n    steps: List[Step] = [Step(\"normal_eq_a\", eq_a), Step(\"normal_eq_b\", eq_b)]\n    sol = sp.solve((eq_a, eq_b), (a, b), dict=True)[0]\n    a_hat = _dsimplify(sol[a])\n    b_hat = _dsimplify(sol[b])\n    steps.append(Step(\"a_star\", a_hat))\n    steps.append(Step(\"b_star\", b_hat))\n    return steps\n\n\ndef least_squares_line_exprs() -> Tuple[sp.Expr, sp.Expr]:\n    steps = least_squares_line_steps()\n    return steps[-2].expr, steps[-1].expr\n_EXPERIMENTS: Mapping[str, callable] = {\n    \"geometric_series\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0cf4d09c253483ce00694b5b3cd198819083d02f642c67eec0",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0cf4d09c253483ce00694b5b3d20bc8190808bf44f928935bd",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "text=Path(\"/mnt/data/src/experiments/analytic.py\").read_text()\nprint(text[4000:8000])\n",
+      "container_id": "cntr_694b5aca46a08190837471b6a8b1f41e0a4013e4cc7137e1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\": geometric_series_steps,\n    \"logistic_solution\": logistic_solution_steps,\n    \"least_squares_line\": least_squares_line_steps,\n}\n\n\ndef symbolic_steps(experiment: str) -> List[Step]:\n    \"\"\"Return the derivation steps for a named experiment.\"\"\"\n    try:\n        return list(_EXPERIMENTS[experiment]())\n    except KeyError as exc:\n        raise KeyError(f\"Unknown experiment '{experiment}'. Options: {sorted(_EXPERIMENTS)}\") from exc\n\n\ndef steps_to_latex(steps: Sequence[Step]) -> List[Tuple[str, str]]:\n    \"\"\"Convert steps to (label, latex) pairs for notebook display.\"\"\"\n    return [(s.label, s.latex()) for s in steps]\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0cf4d09c253483ce00694b5b3f603481908fed460347187ee7",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0cf4d09c253483ce00694b5b48b6888190a82ee3a277c24d42",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, numpy as np\ntarget_path = Path('/mnt/data').joinpath('src/experiments/numeric.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\\\"\\\"\\\"NumPy/SciPy numerical implementations for the three experiments.\n\nImplements stable, vectorized evaluators and lightweight reference checks against\nthe symbolic closed forms from :mod:`experiments.analytic`.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom functools import lru_cache\nfrom typing import Callable, Dict, Tuple\n\nimport numpy as np\n\ntry:  # SciPy is preferred for a stable expit\n    from scipy.special import expit as _expit\nexcept Exception:  # pragma: no cover\n    def _expit(z):\n        z = np.asarray(z)\n        out = np.empty_like(z, dtype=float)\n        pos = z >= 0\n        out[pos] = 1.0 / (1.0 + np.exp(-z[pos]))\n        ez = np.exp(z[~pos])\n        out[~pos] = ez / (1.0 + ez)\n        return out\n\"\"\")\n\nchunks.append(\"\"\"def geometric_series(r, n):\n    \\\"\\\"\\\"Finite geometric series S_n(r)=sum_{k=0}^{n-1} r^k.\n\n    Uses the closed form with a special-case around r≈1 for stability.\n    \\\"\\\"\\\"\n    r = np.asarray(r, dtype=np.complex128 if np.iscomplexobj(r) else float)\n    n = np.asarray(n)\n    if np.any(n < 0):\n        raise ValueError(\\\"n must be >= 0\\\")\n    # Stable around r=1: limit is n\n    denom = 1.0 - r\n    closed = (1.0 - np.power(r, n)) / denom\n    return np.where(np.abs(denom) < 1e-10, n.astype(closed.dtype), closed)\n\"\"\")\n\nchunks.append(\"\"\"def logistic_solution(t, r, K, x0):\n    \\\"\\\"\\\"Logistic ODE solution x(t)=K/(1+(K/x0-1)*exp(-r t)).\n\n    Computed via a logit/expit transform to avoid overflow for large |r t|.\n    \\\"\\\"\\\"\n    t = np.asarray(t, dtype=float)\n    r = np.asarray(r, dtype=float)\n    K = np.asarray(K, dtype=float)\n    x0 = np.asarray(x0, dtype=float)\n    if np.any(K <= 0) or np.any(x0 <= 0) or np.any(x0 >= K):\n        raise ValueError(\\\"Require K>0 and 0<x0<K for the expit-based form\\\")\n    z0 = np.log(x0) - np.log(K - x0)  # logit(x0/K)\n    z = r * t + z0\n    return K * _expit(z)\n\"\"\")\n\nchunks.append(\"\"\"def least_squares_line_from_sums(n, Sx, Sy, Sxx, Sxy):\n    \\\"\\\"\\\"Return (a,b) for y≈a x + b from aggregated sums.\\\"\\\"\\\"\n    n = float(n)\n    Sx, Sy, Sxx, Sxy = map(float, (Sx, Sy, Sxx, Sxy))\n    denom = n * Sxx - Sx * Sx\n    if abs(denom) < 1e-15:\n        raise ValueError(\\\"Degenerate design: need variance in x\\\")\n    a = (n * Sxy - Sx * Sy) / denom\n    b = (Sxx * Sy - Sx * Sxy) / denom\n    return a, b\n\n\ndef least_squares_line(x, y):\n    \\\"\\\"\\\"Return (a,b) minimizing Σ (a x + b - y)^2 for 1D arrays.\\\"\\\"\\\"\n    x = np.asarray(x, dtype=float).ravel()\n    y = np.asarray(y, dtype=float).ravel()\n    if x.size != y.size or x.size == 0:\n        raise ValueError(\\\"x and y must be same nonzero length\\\")\n    n = x.size\n    return least_squares_line_from_sums(n, x.sum(), y.sum(), np.dot(x, x), np.dot(x, y))\n\"\"\")\n\nchunks.append(\"\"\"@lru_cache(None)\ndef _symbolic_refs() -> Dict[str, Callable]:\n    import sympy as sp\n    from . import analytic\n\n    r, n = sp.symbols(\\\"r n\\\")\n    t, rr, K, x0 = sp.symbols(\\\"t rr K x0\\\")\n    Sn = analytic.geometric_series_steps()[-1].expr\n    xexpr = analytic.logistic_solution_expr()\n    aexpr, bexpr = analytic.least_squares_line_exprs()\n    # Note: least-squares expressions use (n,Sx,Sy,Sxx,Sxy) symbols\n    nn, Sx, Sy, Sxx, Sxy = sp.symbols(\\\"n Sx Sy Sxx Sxy\\\")\n\n    return {\n        \\\"geometric_series\\\": sp.lambdify((r, n), Sn, \\\"numpy\\\"),\n        \\\"logistic_solution\\\": sp.lambdify((t, rr, K, x0), xexpr.subs({sp.Symbol('r'): rr}), \\\"numpy\\\"),\n        \\\"ls_a\\\": sp.lambdify((nn, Sx, Sy, Sxx, Sxy), aexpr, \\\"numpy\\\"),\n        \\\"ls_b\\\": sp.lambdify((nn, Sx, Sy, Sxx, Sxy), bexpr, \\\"numpy\\\"),\n    }\n\"\"\")\n\nchunks.append(\"\"\"def reference_check_geometric(r, n) -> float:\n    \\\"\\\"\\\"Max absolute difference vs symbolic closed form.\\\"\\\"\\\"\n    f = _symbolic_refs()[\\\"geometric_series\\\"]\n    num = geometric_series(r, n)\n    ref = f(np.asarray(r), np.asarray(n))\n    return float(np.max(np.abs(num - ref)))\n\n\ndef reference_check_logistic(t, r, K, x0) -> float:\n    f = _symbolic_refs()[\\\"logistic_solution\\\"]\n    num = logistic_solution(t, r, K, x0)\n    ref = f(np.asarray(t), np.asarray(r), np.asarray(K), np.asarray(x0))\n    return float(np.max(np.abs(num - ref)))\n\n\ndef reference_check_least_squares(x, y) -> float:\n    refs = _symbolic_refs()\n    x = np.asarray(x, float).ravel()\n    y = np.asarray(y, float).ravel()\n    n = x.size\n    Sx, Sy, Sxx, Sxy = x.sum(), y.sum(), np.dot(x, x), np.dot(x, y)\n    a, b = least_squares_line_from_sums(n, Sx, Sy, Sxx, Sxy)\n    a_ref = float(refs[\\\"ls_a\\\"](n, Sx, Sy, Sxx, Sxy))\n    b_ref = float(refs[\\\"ls_b\\\"](n, Sx, Sy, Sxx, Sxy))\n    return float(max(abs(a - a_ref), abs(b - b_ref)))\n\n\n__all__ = [\n    \\\"geometric_series\\\",\n    \\\"logistic_solution\\\",\n    \\\"least_squares_line\\\",\n    \\\"least_squares_line_from_sums\\\",\n    \\\"reference_check_geometric\\\",\n    \\\"reference_check_logistic\\\",\n    \\\"reference_check_least_squares\\\",\n]\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint(\"FILE_WRITTEN:src/experiments/numeric.py\")\nprint(\"DIR_STATE:\" + json.dumps(sorted(str(p.relative_to(Path('/mnt/data'))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b5aca46a08190837471b6a8b1f41e0a4013e4cc7137e1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/numeric.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/analytic.py\", \"src/experiments/numeric.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0cf4d09c253483ce00694b5b5a56288190a3d537d2b7e4e419",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0cf4d09c253483ce00694b5b5a839881909685a90f47230f54",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import pathlib, re\ntext=pathlib.Path(\"/mnt/data/src/experiments/numeric.py\").read_text()\nlen(text.splitlines())\n",
+      "container_id": "cntr_694b5aca46a08190837471b6a8b1f41e0a4013e4cc7137e1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "126"
+        }
+      ]
+    },
+    {
+      "id": "rs_0cf4d09c253483ce00694b5b5d1968819083dcedf532d8709a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0cf4d09c253483ce00694b5b62947081909a5593c10c39430f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/experiments/numeric.py` with stable, vectorized NumPy/SciPy numerical evaluators for the geometric series, logistic ODE solution, and least-squares line fit, plus cached SymPy-lambdified reference checks against the analytic closed forms."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

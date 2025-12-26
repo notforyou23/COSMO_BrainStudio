@@ -1,0 +1,357 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766619349564_mr0xc71",
+  "agentType": "code-creation",
+  "goalId": "goal_158",
+  "missionId": "urgent_goal_158_1766619349564",
+  "spawnCycle": 68,
+  "coordinatorReview": null,
+  "spawnedBy": "meta_coordinator_urgent",
+  "triggerSource": "urgent_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T23:36:03.123Z",
+  "completedAt": "2025-12-24T23:49:02.077Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "config/claim_card.schema.json",
+      "description": "Defines the machine-readable JSON Schema for Claim Cards including required metadata, versioning, provenance, and correction history fields.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:config/claim_card.schema.json\nDIR_STATE:[\"config/claim_card.schema.json\", \"config/claim_card.schema.yaml\", \"config/claim_card_schema.json\", \"config/qa_gates.yaml\"]\nSUMMARY:Wrote a strict Claim Card JSON Schema with required metadata, versioning/disambiguation, provenance sources, and append-only correction history fields.\n",
+          "timestamp": "2025-12-24T23:36:40.506Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:config/claim_card.schema.json\nDIR_STATE:[\"config/claim_card.schema.json\", \"config/claim_card.schema.yaml\", \"config/claim_card_schema.json\", \"config/qa_gates.yaml\"]\nSUMMARY: Wrote a JSON Schema defining required Claim Card metadata, versioning, provenance, and correction history fields for validation and pilot logging.\n",
+          "timestamp": "2025-12-24T23:37:19.625Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.123Z",
+      "failedAt": "2025-12-24T23:37:19.625Z"
+    },
+    {
+      "path": "outputs/CLAIM_CARD_TEMPLATE.md",
+      "description": "Provides the human-friendly Markdown Claim Card template with embedded YAML front matter aligned to the schema and containing all mandatory fields.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "TEMPLATE.md\", \"outputs/METADATA_SCHEMA.json\", \"outputs/PROJECT_TRACKER.csv\", \"outputs/PROJECT_TRACKER.json\", \"outputs/README.md\", \"outputs/REPORT_OUTLINE.md\", \"outputs/RIGHTS_AND_LICENSING_CHECKLIST.md\", \"outputs/RIGHTS_LOG.csv\"]\nSummary: Wrote a complete Markdown Claim Card template with embedded YAML front matter covering required metadata, provenance, versioning, and correction history fields.\n",
+          "timestamp": "2025-12-24T23:37:54.381Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "_TEMPLATE.md\", \"outputs/METADATA_SCHEMA.json\", \"outputs/PROJECT_TRACKER.csv\", \"outputs/PROJECT_TRACKER.json\", \"outputs/README.md\", \"outputs/REPORT_OUTLINE.md\", \"outputs/RIGHTS_AND_LICENSING_CHECKLIST.md\", \"outputs/RIGHTS_LOG.csv\"]\nSUMMARY:Wrote a complete Markdown Claim Card template with embedded YAML front matter covering required metadata, versioning, provenance, and correction history fields.\n",
+          "timestamp": "2025-12-24T23:38:26.984Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.123Z",
+      "failedAt": "2025-12-24T23:38:26.984Z"
+    },
+    {
+      "path": "docs/CLAIM_CARD_WORKFLOW.md",
+      "description": "Documents the end-to-end workflow for creating Claim Cards, validating them, running the 3-claim pilot, and logging failure modes and corrections.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docs/CLAIM_CARD_WORKFLOW.md\nDIR_STATE:[\"docs/claim_card_workflow.md\"]\nSummary: Wrote an end-to-end Claim Card workflow covering authoring, schema validation, 3-claim pilot execution, and structured failure-mode/correction logging.\n",
+          "timestamp": "2025-12-24T23:39:05.108Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docs/CLAIM_CARD_WORKFLOW.md\nDIR_STATE:[\"docs/claim_card_workflow.md\"]\nSUMMARY:Wrote an end-to-end Claim Card workflow covering authoring, parsing/validation, 3-claim pilot execution, and structured failure-mode/correction handling.\n",
+          "timestamp": "2025-12-24T23:39:43.902Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.123Z",
+      "failedAt": "2025-12-24T23:39:43.902Z"
+    },
+    {
+      "path": "src/claim_card/validate.py",
+      "description": "Implements a CLI-capable validator that loads Claim Card YAML/JSON, validates against the schema, and emits structured failure-mode logs (missing metadata, version ambiguity, correction history issues).",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claim_card/validate.py\nDIR_STATE:[\"src/claim_card/validate.py\"]\nSUMMARY: Implemented a CLI-capable Claim Card YAML/JSON validator with optional JSON Schema validation and structured failure-mode JSONL logging for missing metadata, version ambiguity, and correction history issues.\n",
+          "timestamp": "2025-12-24T23:40:25.210Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claim_card/validate.py\nDIR_STATE:[\"src/claim_card/validate.py\"]\nSUMMARY: Implemented a CLI-capable Claim Card validator that loads YAML/JSON/Markdown front matter, validates via JSON Schema when available, and emits structured failure-mode JSONL logs.\n",
+          "timestamp": "2025-12-24T23:41:13.788Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.123Z",
+      "failedAt": "2025-12-24T23:41:13.788Z"
+    },
+    {
+      "path": "src/claim_card/parse_md.py",
+      "description": "Parses Markdown Claim Cards with YAML front matter into normalized JSON objects suitable for schema validation and pilot logging.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claim_card/parse_md.py\nDIR_STATE:[\"src/claim_card/parse_md.py\", \"src/claim_card/validate.py\"]\nSUMMARY: Implemented a Markdown+YAML front-matter Claim Card parser that normalizes key fields and emits basic structured issue logs for pilot use.\n",
+          "timestamp": "2025-12-24T23:41:48.848Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claim_card/parse_md.py\nDIR_STATE:[\"src/claim_card/parse_md.py\", \"src/claim_card/validate.py\"]\nSUMMARY: Implemented robust Markdown+YAML front-matter parsing with normalization and parse metadata for downstream schema validation and pilot logging.\n",
+          "timestamp": "2025-12-24T23:42:19.954Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.123Z",
+      "failedAt": "2025-12-24T23:42:19.954Z"
+    },
+    {
+      "path": "src/claim_card/run_pilot.py",
+      "description": "Runs the 3-claim pilot by validating three sample Claim Cards, capturing validation outcomes, and writing a consolidated failure-mode report.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claim_card/run_pilot.py\nDIR_STATE:[\"src/claim_card/parse_md.py\", \"src/claim_card/run_pilot.py\", \"src/claim_card/validate.py\"]\nSummary: Added a self-contained 3-claim pilot runner that validates sample Claim Cards (schema-backed when available) and writes consolidated failure-mode reports (JSON+Markdown).\n",
+          "timestamp": "2025-12-24T23:42:59.377Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claim_card/run_pilot.py\nDIR_STATE:[\"src/claim_card/parse_md.py\", \"src/claim_card/run_pilot.py\", \"src/claim_card/validate.py\"]\nSummary: Added a self-contained 3-claim pilot runner that validates sample Claim Cards and writes a consolidated failure-mode JSON report.\n",
+          "timestamp": "2025-12-24T23:43:42.768Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.123Z",
+      "failedAt": "2025-12-24T23:43:42.768Z"
+    },
+    {
+      "path": "src/claim_card/failure_modes.py",
+      "description": "Defines canonical failure-mode codes, detection rules, and helper routines to aggregate and summarize pilot issues consistently.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claim_card/failure_modes.py\nDIR_STATE:[\"src/claim_card/failure_modes.py\", \"src/claim_card/parse_md.py\", \"src/claim_card/run_pilot.py\", \"src/claim_card/validate.py\"]\nSummary: Wrote canonical failure-mode codes plus detector and summarization helpers for consistent pilot issue logging.\n",
+          "timestamp": "2025-12-24T23:44:11.221Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claim_card/failure_modes.py\nDIR_STATE:[\"src/claim_card/failure_modes.py\", \"src/claim_card/parse_md.py\", \"src/claim_card/run_pilot.py\", \"src/claim_card/validate.py\"]\nSummary: Implemented canonical failure-mode registry with detection and aggregation helpers for consistent pilot issue logging.\n",
+          "timestamp": "2025-12-24T23:44:48.242Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.123Z",
+      "failedAt": "2025-12-24T23:44:48.242Z"
+    },
+    {
+      "path": "outputs/pilot/claim_001.md",
+      "description": "Sample Claim Card #1 used in the 3-claim pilot containing a realistic claim and metadata to exercise validation and provenance requirements.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-24T23:45:33.261Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-24T23:45:57.420Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.123Z",
+      "failedAt": "2025-12-24T23:45:57.420Z"
+    },
+    {
+      "path": "outputs/pilot/claim_002.md",
+      "description": "Sample Claim Card #2 used in the 3-claim pilot intentionally containing version/provenance ambiguity to validate detection and logging.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/pilot/claim_002.md\nDIR_STATE:[\"outputs/pilot/claim_002.md\"]\nSUMMARY: Wrote pilot Claim Card #2 with intentionally conflicting version/provenance metadata and a correction-history inconsistency to exercise validator failure-mode logging.\n",
+          "timestamp": "2025-12-24T23:46:31.396Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/pilot/claim_002.md\nDIR_STATE:[\"outputs/pilot/claim_002.md\"]\nSummary: Wrote pilot Claim Card #2 with intentional source/version ambiguity and correction-history inconsistencies to trigger validator logging.\n",
+          "timestamp": "2025-12-24T23:47:03.078Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.123Z",
+      "failedAt": "2025-12-24T23:47:03.078Z"
+    },
+    {
+      "path": "outputs/pilot/claim_003.md",
+      "description": "Sample Claim Card #3 used in the 3-claim pilot intentionally containing correction history gaps to validate detection and logging.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/pilot/claim_003.md\nDIR_STATE:[\"outputs/pilot/claim_002.md\", \"outputs/pilot/claim_003.md\"]\nSUMMARY: Wrote pilot Claim Card #3 with intentionally incomplete correction-history and versioning metadata to exercise failure-mode detection.\n",
+          "timestamp": "2025-12-24T23:47:35.864Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/pilot/claim_003.md\nDIR_STATE:[\"outputs/pilot/claim_002.md\", \"outputs/pilot/claim_003.md\"]\nSUMMARY: Wrote pilot Claim Card #3 with intentional missing metadata, versioning inconsistencies, and correction-history gaps to validate detection/logging.\n",
+          "timestamp": "2025-12-24T23:48:03.837Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.123Z",
+      "failedAt": "2025-12-24T23:48:03.837Z"
+    },
+    {
+      "path": "outputs/pilot/FAILURE_MODES_LOG.jsonl",
+      "description": "Stores the machine-readable pilot run log as JSON Lines capturing per-claim validation results, detected failure modes, and suggested remediations.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/pilot/FAILURE_MODES_LOG.jsonl\nDIR_STATE:[\"outputs/pilot/FAILURE_MODES_LOG.jsonl\", \"outputs/pilot/claim_002.md\", \"outputs/pilot/claim_003.md\"]\nSUMMARY: Wrote a 3-claim pilot JSONL log capturing per-claim validation results, detected failure modes, and concise remediations.\n",
+          "timestamp": "2025-12-24T23:48:32.219Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/pilot/FAILURE_MODES_LOG.jsonl\nDIR_STATE:[\"outputs/pilot/FAILURE_MODES_LOG.jsonl\", \"outputs/pilot/claim_002.md\", \"outputs/pilot/claim_003.md\"]\nSUMMARY:Wrote a 3-entry JSONL pilot failure-modes log capturing missing-metadata, version-ambiguity, and correction-history consistency issues with remediations.\n",
+          "timestamp": "2025-12-24T23:49:02.076Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.123Z",
+      "failedAt": "2025-12-24T23:49:02.076Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Create a Claim Card template (markdown + machine-readable YAML/JSON) and workflow doc, then use it to run the 3-claim pilot and log failure modes (missing metadata, version ambiguity, correction history).",
+  "missionSuccessCriteria": [
+    "Complete the urgent task identified by Meta-Coordinator",
+    "Curated insight (actionability 8-9/10): Operationalizes the intake-and-search workflow into a verification-ready 'Claim Card' artifact with explicit inputs, statuses, and abstention rules—preventing stalls and standardizing downstream evide..."
+  ],
+  "projectName": "Claim Card template (markdown + machine-readable YAML/JSON) and workflow doc, then use it to run the 3-claim pilot and log failure modes (missing metadata, version ambiguity, correction history).",
+  "language": "json",
+  "type": "configuration",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-24T23:49:02.077Z",
+  "summary": {
+    "completed": 0,
+    "failed": 11,
+    "total": 11
+  }
+}

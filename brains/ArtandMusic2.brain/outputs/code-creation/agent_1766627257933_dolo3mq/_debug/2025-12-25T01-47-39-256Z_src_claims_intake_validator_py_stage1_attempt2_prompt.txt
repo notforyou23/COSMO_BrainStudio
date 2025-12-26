@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Codify these as required fields in the intake checklist + validator rules (hard-fail if claim text or dataset anchor is missing) and add an example template showing compliant vs non-compliant inputs for primary-source verification.
+Project: generated_configuration_1766627258175 (python configuration)
+
+Target file details:
+- Path: src/claims/intake_validator.py
+- Purpose: Provides hard-fail validation functions that reject claim cards missing required claim text or dataset anchor and emits clear error messages.
+- Category: source
+
+Other planned files (for context only):
+- src/claims/intake_fields.py: Defines the required intake fields and their semantics (including claim text and dataset anchor) in a single, importable Python configuration module.
+- src/claims/intake_schema.py: Implements a machine-validated schema (e.g., JSON Schema as a Python dict) for claim card intake, encoding required fields and structural constraints.
+- src/claims/templates.py: Contains example compliant vs non-compliant primary-source verification templates as structured strings/data for reuse in docs and tests.
+- docs/intake_checklist.md: Updates the intake checklist to codify claim text and dataset anchor as explicitly required fields and mirrors the validator hard-fail rules.
+
+Reference insights:
+- [INTROSPECTION] intake_checklist.md from code-creation agent agent_1766619349563_g2iypl9: # Intake Checklist (Claim Cards)
+
+Purpose: ensure 
+- [INTROSPECTION] 2025-12-24T23-20-08-705Z_config_qa_gates_yaml_stage1_attempt1_prompt.txt from code-creation agent agent_1766618407426_jbwdhc
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] test_path_canonicalize.py from code-creation agent agent_1766620699965_cdhh9no: from pathlib import Pathimport json
+import o
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Provides hard-fail validation functions that reject claim cards missing required claim text or dataset anchor and emits clear error messages.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/claims/intake_validator.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/claims/intake_validator.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/claims/intake_validator.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

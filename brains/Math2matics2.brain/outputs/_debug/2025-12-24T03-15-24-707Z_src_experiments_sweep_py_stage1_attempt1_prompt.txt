@@ -1,0 +1,52 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement the three experiments as a single reproducible Jupyter notebook (and companion Python modules) using Python 3.11+ and SymPy: include (A) analytic derivations (SymPy symbolic steps), (B) numeric implementations (NumPy/SciPy), (C) parameter sweep harness, (D) automated unit tests (pytest-compatible), and (E) plotting code. Add save/load hooks to export figures (PNG/SVG) and CSV results.
+Project: generated_library_1766546122986 (python library)
+
+Target file details:
+- Path: src/experiments/sweep.py
+- Purpose: Parameter sweep harness that runs grids/lists of parameter configurations reproducibly, aggregates results into pandas DataFrames, and supports deterministic seeding and caching hooks.
+- Category: source
+
+Other planned files (for context only):
+- notebooks/experiments.ipynb: Single reproducible Jupyter notebook implementing the three experiments with SymPy analytic derivations, NumPy/SciPy numerics, parameter sweeps, plotting, and save/load hooks for CSV and PNG/SVG outputs.
+- src/experiments/__init__.py: Package initializer exposing the public API for analytic, numeric, sweep, plotting, and I/O helpers used by the notebook and tests.
+- src/experiments/analytic.py: SymPy-based symbolic derivations and step-by-step analytic helpers for all three experiments with deterministic simplification and LaTeX-friendly outputs.
+- src/experiments/numeric.py: NumPy/SciPy implementations for all three experiments including stable numerical evaluation functions, vectorized computation, and reference checks against symbolic forms.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T02-11-29-868Z_src_experiments_plotting_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766542280435
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+- [AGENT: agent_1766543291642_15ryvxl] {"agentId":"agent_1766543291642_15ryvxl","goalId":"goal_43","containerId":"cntr_694b4fc317a48190a1321c4
+
+Key requirements:
+- tests
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Parameter sweep harness that runs grids/lists of parameter configurations reproducibly, aggregates results into pandas DataFrames, and supports deterministic seeding and caching hooks.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/experiments/sweep.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/experiments/sweep.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/experiments/sweep.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

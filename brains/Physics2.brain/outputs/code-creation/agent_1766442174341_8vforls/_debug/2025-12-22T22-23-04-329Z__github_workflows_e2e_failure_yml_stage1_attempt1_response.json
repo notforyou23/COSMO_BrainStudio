@@ -1,0 +1,56 @@
+{
+  "content": "Created a reusable `workflow_call` workflow at `.github/workflows/e2e_failure.yml` that standardizes E2E failure diagnostics collection by checking out the repo and invoking the local `e2e-on-failure` composite action with configurable artifact/retention inputs.",
+  "reasoning": "",
+  "responseId": "resp_022ab0d1b942a8c9006949c4dfc58c8195b08b0030eb19be3c",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2739,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1176,
+    "output_tokens_details": {
+      "reasoning_tokens": 1117
+    },
+    "total_tokens": 3915
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_022ab0d1b942a8c9006949c4e087e0819597253cae5dfae763",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_022ab0d1b942a8c9006949c4ec16e88195ab493ea94d5382a2",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('.github/workflows/e2e_failure.yml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [r\"\"\"name: e2e-failure-diagnostics\n\non:\n  workflow_call:\n    inputs:\n      artifact_name:\n        description: Name of the uploaded diagnostics artifact.\n        required: false\n        type: string\n        default: e2e-diagnostics\n      diagnostics_dir:\n        description: Directory to write collected diagnostics into (relative to repository root).\n        required: false\n        type: string\n        default: e2e-diagnostics\n      retention_days:\n        description: Artifact retention period in days.\n        required: false\n        type: number\n        default: 7\n      runner:\n        description: Runner label to execute diagnostics collection on.\n        required: false\n        type: string\n        default: ubuntu-latest\n      checkout_ref:\n        description: Optional ref to checkout (defaults to the workflow SHA).\n        required: false\n        type: string\n    secrets:\n      GITHUB_TOKEN:\n        required: false\n\njobs:\n  collect:\n    name: Collect E2E failure diagnostics\n    runs-on: ${{ inputs.runner }}\n    permissions:\n      contents: read\n      actions: read\n    steps:\n      - name: Checkout\n        uses: actions/checkout@v4\n        with:\n          ref: ${{ inputs.checkout_ref || github.sha }}\n\n      - name: Collect + upload diagnostics (only when prior job failed)\n        uses: ./.github/actions/e2e-on-failure\n        with:\n          diagnostics_dir: ${{ inputs.diagnostics_dir }}\n          artifact_name: ${{ inputs.artifact_name }}\n          retention_days: ${{ inputs.retention_days }}\"\"\"]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:.github/workflows/e2e_failure.yml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949c4c596008190acfa409a64608da20b039f16c5820fcb",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:.github/workflows/e2e_failure.yml\nDIR_STATE:[\".github/workflows/e2e_failure.yml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_022ab0d1b942a8c9006949c4f1aab48195ace8decc196ed91f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a reusable `workflow_call` workflow at `.github/workflows/e2e_failure.yml` that standardizes E2E failure diagnostics collection by checking out the repo and invoking the local `e2e-on-failure` composite action with configurable artifact/retention inputs."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

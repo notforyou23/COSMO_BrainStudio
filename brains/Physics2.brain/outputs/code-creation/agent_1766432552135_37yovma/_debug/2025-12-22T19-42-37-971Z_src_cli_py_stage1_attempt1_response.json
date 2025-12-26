@@ -1,0 +1,74 @@
+{
+  "content": "Implemented `src/cli.py` as a lightweight, deterministic command-line entrypoint with subcommands for two reproducible toy experiments (random walk and two-qubit entanglement), including seed-controlled RNG, structured output directories, and saved CSV/JSON/PNG artifacts.",
+  "reasoning": "",
+  "responseId": "resp_06167ce96576f9c70069499f6577d8819389da38a8cc848dd7",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4100,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2622,
+    "output_tokens_details": {
+      "reasoning_tokens": 656
+    },
+    "total_tokens": 6722
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_06167ce96576f9c70069499f666b888193a8c6d6a60fa3c14f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06167ce96576f9c70069499f6b034c8193ac64bbbd4b05dd47",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import os, pathlib, json, textwrap, sys\nbase=pathlib.Path('/mnt/data')\nlist(base.rglob('*'))[:20], len(list(base.rglob('*')))\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "([PosixPath('/mnt/data/README.md'), PosixPath('/mnt/data/requirements.txt')],\n 2)"
+        }
+      ]
+    },
+    {
+      "id": "rs_06167ce96576f9c70069499f6d43d08193b0f3cada7f61e2cd",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_06167ce96576f9c70069499f74f48881939dcb06169e38e37e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, csv, math\ntarget_path = Path('/mnt/data').joinpath('src/cli.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\n\\\"\\\"\\\"Command-line entrypoint for reproducible toy experiments.\n\nThis module is intentionally lightweight: it manages seeding and output\ndirectories and writes plots/tables deterministically for later inspection.\n\\\"\\\"\\\"\nfrom __future__ import annotations\n\nimport argparse\nimport csv\nimport json\nfrom dataclasses import asdict, dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Tuple\n\nimport numpy as np\n\"\"\")\n\nchunks.append(\"\"\"\ndef _ensure_dir(p: Path) -> Path:\n    p.mkdir(parents=True, exist_ok=True)\n    return p\n\n\ndef _write_json(path: Path, obj: Any) -> None:\n    path.write_text(json.dumps(obj, indent=2, sort_keys=True) + \"\\\\n\", encoding=\"utf-8\")\n\n\ndef _write_csv(path: Path, header: Iterable[str], rows: Iterable[Iterable[Any]]) -> None:\n    with path.open(\"w\", newline=\"\", encoding=\"utf-8\") as f:\n        w = csv.writer(f)\n        w.writerow(list(header))\n        for r in rows:\n            w.writerow(list(r))\n\n\ndef _rng(seed: int) -> np.random.Generator:\n    # Centralized RNG creation so every experiment is deterministic given seed.\n    return np.random.default_rng(int(seed))\n\"\"\")\n\nchunks.append(\"\"\"\ndef _savefig(path: Path) -> None:\n    # Matplotlib import is intentionally delayed to keep import time low.\n    import matplotlib.pyplot as plt  # type: ignore\n\n    path.parent.mkdir(parents=True, exist_ok=True)\n    plt.tight_layout()\n    plt.savefig(path, dpi=160)\n    plt.close()\n\n\ndef _run_dir(root: Path, exp: str, seed: int, name: str | None) -> Path:\n    # Deterministic path: avoids timestamps unless user supplies a name.\n    run = f\"{exp}_seed{seed}\" + (f\"_{name}\" if name else \"\")\n    return _ensure_dir(root / exp / run)\n\"\"\")\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass CommonArgs:\n    out: Path\n    seed: int\n    name: str | None\n\n\ndef _common_parser(p: argparse.ArgumentParser) -> None:\n    p.add_argument(\"--out\", type=Path, default=Path(\"outputs\"), help=\"Output root directory\")\n    p.add_argument(\"--seed\", type=int, default=0, help=\"RNG seed (deterministic)\")\n    p.add_argument(\"--name\", type=str, default=None, help=\"Optional run name suffix\")\n\"\"\")\n\nchunks.append(\"\"\"\ndef exp_random_walk(args: argparse.Namespace) -> Path:\n    \\\"\\\"\\\"1D random walk ensemble; saves trajectory table and summary plot.\\\"\\\"\\\"\n    common = CommonArgs(out=args.out, seed=args.seed, name=args.name)\n    run = _run_dir(common.out, \"random_walk\", common.seed, common.name)\n    rng = _rng(common.seed)\n\n    steps = int(args.steps)\n    n = int(args.n)\n    # Steps are +/-1; positions include x0=0 so length steps+1.\n    jumps = rng.choice([-1, 1], size=(n, steps))\n    x = np.cumsum(jumps, axis=1)\n    x = np.concatenate([np.zeros((n, 1), dtype=int), x], axis=1)\n\n    _write_csv(run / \"trajectories.csv\", [\"traj\", \"t\", \"x\"], ((i, t, int(x[i, t])) for i in range(n) for t in range(steps + 1)))\n    summary = {\n        \"experiment\": \"random_walk\",\n        \"seed\": common.seed,\n        \"steps\": steps,\n        \"n\": n,\n        \"final_mean\": float(np.mean(x[:, -1])),\n        \"final_var\": float(np.var(x[:, -1])),\n    }\n    _write_json(run / \"summary.json\", summary)\n    _write_json(run / \"args.json\", {**asdict(common), \"steps\": steps, \"n\": n})\n\n    import matplotlib.pyplot as plt  # type: ignore\n\n    t = np.arange(steps + 1)\n    for i in range(min(n, 20)):\n        plt.plot(t, x[i], alpha=0.5, lw=1)\n    plt.xlabel(\"t\")\n    plt.ylabel(\"x(t)\")\n    plt.title(\"1D random walk (first 20 trajectories)\")\n    _savefig(run / \"trajectories.png\")\n\n    plt.hist(x[:, -1], bins=25, density=True)\n    plt.xlabel(\"x(T)\")\n    plt.ylabel(\"density\")\n    plt.title(\"Final position distribution\")\n    _savefig(run / \"final_hist.png\")\n    return run\n\"\"\")\n\nchunks.append(\"\"\"\ndef _ent_entropy_two_qubit_state(psi: np.ndarray) -> float:\n    # psi is shape (4,), pure state on A(2) x B(2).\n    psi = psi / np.linalg.norm(psi)\n    rho = np.outer(psi, np.conjugate(psi))  # 4x4\n    # partial trace over B:\n    rho_a = np.zeros((2, 2), dtype=complex)\n    for b in range(2):\n        idx = [2 * 0 + b, 2 * 1 + b]\n        rho_a += rho[np.ix_(idx, idx)]\n    evals = np.linalg.eigvalsh(rho_a).real\n    evals = np.clip(evals, 0.0, 1.0)\n    nz = evals[evals > 0]\n    return float(-np.sum(nz * np.log2(nz)))\n\n\ndef exp_two_qubit_entanglement(args: argparse.Namespace) -> Path:\n    \\\"\\\"\\\"Samples random two-qubit pure states and plots entanglement entropy.\\\"\\\"\\\"\n    common = CommonArgs(out=args.out, seed=args.seed, name=args.name)\n    run = _run_dir(common.out, \"two_qubit_entanglement\", common.seed, common.name)\n    rng = _rng(common.seed)\n\n    n = int(args.n)\n    # Complex Gaussian -> Haar-random direction after normalization.\n    psi = rng.normal(size=(n, 4)) + 1j * rng.normal(size=(n, 4))\n    ent = np.array([_ent_entropy_two_qubit_state(psi[i]) for i in range(n)], dtype=float)\n\n    _write_csv(run / \"entropies.csv\", [\"i\", \"S_bits\"], ((i, float(ent[i])) for i in range(n)))\n    _write_json(run / \"summary.json\", {\"experiment\": \"two_qubit_entanglement\", \"seed\": common.seed, \"n\": n, \"mean_S\": float(ent.mean())})\n    _write_json(run / \"args.json\", {**asdict(common), \"n\": n})\n\n    import matplotlib.pyplot as plt  # type: ignore\n\n    plt.hist(ent, bins=30, range=(0, 1), density=True)\n    plt.xlabel(\"S(ρ_A) [bits]\")\n    plt.ylabel(\"density\")\n    plt.title(\"Entanglement entropy of random two-qubit pure states\")\n    _savefig(run / \"entropy_hist.png\")\n    return run\n\"\"\")\n\nchunks.append(\"\"\"\ndef build_parser() -> argparse.ArgumentParser:\n    p = argparse.ArgumentParser(prog=\"toy-exp\", description=\"Reproducible toy-model experiments (numerical/symbolic).\")\n    sub = p.add_subparsers(dest=\"experiment\", required=True)\n\n    p_rw = sub.add_parser(\"random-walk\", help=\"1D random walk ensemble\")\n    _common_parser(p_rw)\n    p_rw.add_argument(\"--steps\", type=int, default=200)\n    p_rw.add_argument(\"--n\", type=int, default=200)\n    p_rw.set_defaults(_fn=exp_random_walk)\n\n    p_ent = sub.add_parser(\"two-qubit-entanglement\", help=\"Entanglement entropy of random two-qubit states\")\n    _common_parser(p_ent)\n    p_ent.add_argument(\"--n\", type=int, default=5000)\n    p_ent.set_defaults(_fn=exp_two_qubit_entanglement)\n    return p\n\n\ndef main(argv: List[str] | None = None) -> int:\n    args = build_parser().parse_args(argv)\n    run = args._fn(args)\n    print(str(run))\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/cli.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/cli.py\nDIR_STATE:[\"src/cli.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_06167ce96576f9c70069499f8eba5481938af0901f5f02cdfd",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/cli.py` as a lightweight, deterministic command-line entrypoint with subcommands for two reproducible toy experiments (random walk and two-qubit entanglement), including seed-controlled RNG, structured output directories, and saved CSV/JSON/PNG artifacts."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

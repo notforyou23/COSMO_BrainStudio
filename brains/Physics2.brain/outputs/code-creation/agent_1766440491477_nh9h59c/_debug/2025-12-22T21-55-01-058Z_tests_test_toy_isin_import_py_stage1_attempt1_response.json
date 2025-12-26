@@ -1,0 +1,128 @@
+{
+  "content": "Added `tests/test_toy_isin_import.py` to discover and import any `src/experiments/toy_isin*` modules (file- or package-based), skipping cleanly when none are present to avoid false failures in minimal checkouts.",
+  "reasoning": "",
+  "responseId": "resp_03fc04b662faacdf006949be6966c08194a71ca8b3a9e22e16",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2986,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1424,
+    "output_tokens_details": {
+      "reasoning_tokens": 829
+    },
+    "total_tokens": 4410
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_03fc04b662faacdf006949be6a1014819499d30022f14eda6f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_03fc04b662faacdf006949be6b06608194894b0f8c5a080f4c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nroot=Path(\"/mnt/data\")\nlist(root.glob(\"src/experiments/toy_isin*\"))[:20], [p.name for p in root.glob(\"src/experiments/toy_isin*\")]\n",
+      "container_id": "cntr_6949be3256508190889f8f69e6a44abd081e1e0c9ef3588b",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "([], [])"
+        }
+      ]
+    },
+    {
+      "id": "rs_03fc04b662faacdf006949be6e40288194a1bd55e03f3681bb",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_03fc04b662faacdf006949be6e9df481949057364e8cb60a25",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nroot=Path(\"/mnt/data\")\nsorted([str(p.relative_to(root)) for p in root.glob(\"**/toy_isin*\")])[:50]\n",
+      "container_id": "cntr_6949be3256508190889f8f69e6a44abd081e1e0c9ef3588b",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_03fc04b662faacdf006949be715c3481949d7736baae855d0b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_03fc04b662faacdf006949be72c8a481948f4b5a91a0ba16d7",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nroot=Path(\"/mnt/data\")\n# list src\nfor p in [root/\"src\", root/\"qg_bench\", root/\"tests\"]:\n    print(p, p.exists())\n",
+      "container_id": "cntr_6949be3256508190889f8f69e6a44abd081e1e0c9ef3588b",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "/mnt/data/src False\n/mnt/data/qg_bench False\n/mnt/data/tests True\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_03fc04b662faacdf006949be75628481949b11e63d8543e0ae",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_03fc04b662faacdf006949be75f5b481949d3f89aa2380d010",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nroot=Path(\"/mnt/data\")\nsorted([p.name for p in root.iterdir()])\n",
+      "container_id": "cntr_6949be3256508190889f8f69e6a44abd081e1e0c9ef3588b",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "['tests']"
+        }
+      ]
+    },
+    {
+      "id": "rs_03fc04b662faacdf006949be784fa88194833bc793296b4c6f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_03fc04b662faacdf006949be856b2481949176c1bc875be0ae",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_toy_isin_import.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"import importlib\nfrom pathlib import Path\n\nimport pytest\n\n\ndef _repo_root() -> Path:\n    # tests/ is expected to live at repo_root/tests/\n    return Path(__file__).resolve().parents[1]\n\n\ndef _discover_toy_isin_modules() -> list[str]:\n    root = _repo_root()\n\n    modules: list[str] = []\n\n    # Common layout: repo_root/src/experiments/toy_isin*.py\n    for py in sorted(root.glob(\"src/experiments/toy_isin*.py\")):\n        if py.name == \"__init__.py\":\n            continue\n        modules.append(f\"src.experiments.{py.stem}\")\n\n    # Also allow package-style modules: repo_root/src/experiments/toy_isin*/\n    for pkg_init in sorted(root.glob(\"src/experiments/toy_isin*/__init__.py\")):\n        pkg = pkg_init.parent.name\n        modules.append(f\"src.experiments.{pkg}\")\n\n    # De-duplicate while preserving order\n    seen: set[str] = set()\n    uniq: list[str] = []\n    for m in modules:\n        if m not in seen:\n            uniq.append(m)\n            seen.add(m)\n    return uniq\n\n\nTOY_ISIN_MODULES = _discover_toy_isin_modules()\n\n\n@pytest.mark.parametrize(\"module_name\", TOY_ISIN_MODULES)\ndef test_toy_isin_modules_import(module_name: str) -> None:\n    \\\"\\\"\\\"Regression: ensure toy_isin* modules are syntactically valid and importable.\\\"\\\"\\\"\n    importlib.import_module(module_name)\n\n\ndef test_toy_isin_modules_present_or_skipped() -> None:\n    \\\"\\\"\\\"If the modules don't exist in this checkout, skip rather than erroring.\\\"\\\"\\\"\n    if not TOY_ISIN_MODULES:\n        pytest.skip(\"No src/experiments/toy_isin* modules found in this checkout.\")\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:tests/test_toy_isin_import.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949be3256508190889f8f69e6a44abd081e1e0c9ef3588b",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_toy_isin_import.py\nDIR_STATE:[\"tests/test_cli_import.py\", \"tests/test_cli_run.py\", \"tests/test_toy_isin_import.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_03fc04b662faacdf006949be9114948194a7d08beb49d669ae",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Added `tests/test_toy_isin_import.py` to discover and import any `src/experiments/toy_isin*` modules (file- or package-based), skipping cleanly when none are present to avoid false failures in minimal checkouts."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

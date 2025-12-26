@@ -1,0 +1,56 @@
+{
+  "content": "FILE_EXPORT:{\"path\":\".github/workflows/ci.yml\",\"size\":655,\"encoding\":\"base64\",\"sha256\":\"c85c23b5f720fd75103fef72b25710a19fc35e6241c1ac76cb63478e24ea2df1\",\"content\":\"bmFtZTogQ0kKCm9uOgogIHB1c2g6CiAgICBicmFuY2hlczogWyIqKiJdCiAgcHVsbF9yZXF1ZXN0OgoKcGVybWlzc2lvbnM6CiAgY29udGVudHM6IHJlYWQKCmpvYnM6CiAgdGVzdDoKICAgIHJ1bnMtb246IHVidW50dS1sYXRlc3QKICAgIHN0cmF0ZWd5OgogICAgICBmYWlsLWZhc3Q6IGZhbHNlCiAgICAgIG1hdHJpeDoKICAgICAgICBweXRob24tdmVyc2lvbjogWyIzLjEwIiwgIjMuMTEiLCAiMy4xMiJdCgogICAgc3RlcHM6CiAgICAgIC0gdXNlczogYWN0aW9ucy9jaGVja291dEB2NAoKICAgICAgLSBuYW1lOiBTZXQgdXAgUHl0aG9uCiAgICAgICAgdXNlczogYWN0aW9ucy9zZXR1cC1weXRob25AdjUKICAgICAgICB3aXRoOgogICAgICAgICAgcHl0aG9uLXZlcnNpb246ICR7eyBtYXRyaXgucHl0aG9uLXZlcnNpb24gfX0KICAgICAgICAgIGNhY2hlOiBwaXAKCiAgICAgIC0gbmFtZTogSW5zdGFsbAogICAgICAgIHJ1bjogfAogICAgICAgICAgcHl0aG9uIC1tIHBpcCBpbnN0YWxsIC0tdXBncmFkZSBwaXAKICAgICAgICAgIHB5dGhvbiAtbSBwaXAgaW5zdGFsbCAtZSAuCiAgICAgICAgICBweXRob24gLW0gcGlwIGluc3RhbGwgcHl0ZXN0CgogICAgICAtIG5hbWU6IFJ1biB0ZXN0cwogICAgICAgIHJ1bjogfAogICAgICAgICAgcHl0ZXN0IC1xCg==\"}\nDIR_STATE:[\".github/workflows/ci.yml\"]",
+  "reasoning": "",
+  "responseId": "resp_041392f289e5bb22006949bed83ab88195a9cb56d111d7d3a1",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 1889,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 862,
+    "output_tokens_details": {
+      "reasoning_tokens": 36
+    },
+    "total_tokens": 2751
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_041392f289e5bb22006949bed8f31481959636b8eb22ba1e9d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_041392f289e5bb22006949bed9c1248195b957951c6c891daa",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport base64, json, hashlib, gzip\n\ntarget_path = Path('/mnt/data').joinpath('.github/workflows/ci.yml')\nassert target_path.is_file(), 'Expected .github/workflows/ci.yml to exist before export'\ndata = target_path.read_bytes()\n\npayload = {\n    'path': '.github/workflows/ci.yml',\n    'size': len(data),\n    'encoding': 'base64',\n    'sha256': hashlib.sha256(data).hexdigest(),\n    'content': None\n}\n\nif len(data) > 20000:\n    compressed = gzip.compress(data)\n    payload['encoding'] = 'gzip+base64'\n    payload['content'] = base64.b64encode(compressed).decode('ascii')\nelse:\n    payload['content'] = base64.b64encode(data).decode('ascii')\n\nprint('FILE_EXPORT:' + json.dumps(payload, separators=(',', ':')))\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949be3256508190889f8f69e6a44abd081e1e0c9ef3588b",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_EXPORT:{\"path\":\".github/workflows/ci.yml\",\"size\":655,\"encoding\":\"base64\",\"sha256\":\"c85c23b5f720fd75103fef72b25710a19fc35e6241c1ac76cb63478e24ea2df1\",\"content\":\"bmFtZTogQ0kKCm9uOgogIHB1c2g6CiAgICBicmFuY2hlczogWyIqKiJdCiAgcHVsbF9yZXF1ZXN0OgoKcGVybWlzc2lvbnM6CiAgY29udGVudHM6IHJlYWQKCmpvYnM6CiAgdGVzdDoKICAgIHJ1bnMtb246IHVidW50dS1sYXRlc3QKICAgIHN0cmF0ZWd5OgogICAgICBmYWlsLWZhc3Q6IGZhbHNlCiAgICAgIG1hdHJpeDoKICAgICAgICBweXRob24tdmVyc2lvbjogWyIzLjEwIiwgIjMuMTEiLCAiMy4xMiJdCgogICAgc3RlcHM6CiAgICAgIC0gdXNlczogYWN0aW9ucy9jaGVja291dEB2NAoKICAgICAgLSBuYW1lOiBTZXQgdXAgUHl0aG9uCiAgICAgICAgdXNlczogYWN0aW9ucy9zZXR1cC1weXRob25AdjUKICAgICAgICB3aXRoOgogICAgICAgICAgcHl0aG9uLXZlcnNpb246ICR7eyBtYXRyaXgucHl0aG9uLXZlcnNpb24gfX0KICAgICAgICAgIGNhY2hlOiBwaXAKCiAgICAgIC0gbmFtZTogSW5zdGFsbAogICAgICAgIHJ1bjogfAogICAgICAgICAgcHl0aG9uIC1tIHBpcCBpbnN0YWxsIC0tdXBncmFkZSBwaXAKICAgICAgICAgIHB5dGhvbiAtbSBwaXAgaW5zdGFsbCAtZSAuCiAgICAgICAgICBweXRob24gLW0gcGlwIGluc3RhbGwgcHl0ZXN0CgogICAgICAtIG5hbWU6IFJ1biB0ZXN0cwogICAgICAgIHJ1bjogfAogICAgICAgICAgcHl0ZXN0IC1xCg==\"}\nDIR_STATE:[\".github/workflows/ci.yml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_041392f289e5bb22006949bedea9d8819592f3dd4ed59ab6f6",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_EXPORT:{\"path\":\".github/workflows/ci.yml\",\"size\":655,\"encoding\":\"base64\",\"sha256\":\"c85c23b5f720fd75103fef72b25710a19fc35e6241c1ac76cb63478e24ea2df1\",\"content\":\"bmFtZTogQ0kKCm9uOgogIHB1c2g6CiAgICBicmFuY2hlczogWyIqKiJdCiAgcHVsbF9yZXF1ZXN0OgoKcGVybWlzc2lvbnM6CiAgY29udGVudHM6IHJlYWQKCmpvYnM6CiAgdGVzdDoKICAgIHJ1bnMtb246IHVidW50dS1sYXRlc3QKICAgIHN0cmF0ZWd5OgogICAgICBmYWlsLWZhc3Q6IGZhbHNlCiAgICAgIG1hdHJpeDoKICAgICAgICBweXRob24tdmVyc2lvbjogWyIzLjEwIiwgIjMuMTEiLCAiMy4xMiJdCgogICAgc3RlcHM6CiAgICAgIC0gdXNlczogYWN0aW9ucy9jaGVja291dEB2NAoKICAgICAgLSBuYW1lOiBTZXQgdXAgUHl0aG9uCiAgICAgICAgdXNlczogYWN0aW9ucy9zZXR1cC1weXRob25AdjUKICAgICAgICB3aXRoOgogICAgICAgICAgcHl0aG9uLXZlcnNpb246ICR7eyBtYXRyaXgucHl0aG9uLXZlcnNpb24gfX0KICAgICAgICAgIGNhY2hlOiBwaXAKCiAgICAgIC0gbmFtZTogSW5zdGFsbAogICAgICAgIHJ1bjogfAogICAgICAgICAgcHl0aG9uIC1tIHBpcCBpbnN0YWxsIC0tdXBncmFkZSBwaXAKICAgICAgICAgIHB5dGhvbiAtbSBwaXAgaW5zdGFsbCAtZSAuCiAgICAgICAgICBweXRob24gLW0gcGlwIGluc3RhbGwgcHl0ZXN0CgogICAgICAtIG5hbWU6IFJ1biB0ZXN0cwogICAgICAgIHJ1bjogfAogICAgICAgICAgcHl0ZXN0IC1xCg==\"}\nDIR_STATE:[\".github/workflows/ci.yml\"]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/experiments/numerical.py` with concrete NumPy-based prototype experiments: fixed-step RK4 ODE integration (with a van der Pol demo), logistic-map bifurcation sweeps, and linear-system eigenvalue stability checks, plus a `run_smoke()` summary for quick validation.",
+  "reasoning": "",
+  "responseId": "resp_0ab2c0bed643efc5006949be59a5c881969054d8b841b9c6ea",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3491,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1988,
+    "output_tokens_details": {
+      "reasoning_tokens": 253
+    },
+    "total_tokens": 5479
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0ab2c0bed643efc5006949be5a8c888196b5f46504684e28b5",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ab2c0bed643efc5006949be600cbc81968dec565f8d8b3df7",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/numerical.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Prototype numerical experiments (NumPy-based).\n\nThe goal is to provide small, dependency-light simulations/sweeps that can be\ncalled from notebooks or CLI wrappers to illustrate qualitative behaviors:\n- bifurcation/chaos via the logistic map\n- stability checks of linear dynamical systems via eigenvalues\n- simple ODE simulation via fixed-step RK4\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Callable, Dict, Iterable, Optional, Tuple\n\nimport numpy as np\"\"\",\n\"\"\"Array = np.ndarray\n\n\n@dataclass(frozen=True)\nclass RK4Result:\n    t: Array\n    y: Array  # shape (len(t), dim)\n\n\ndef rk4_integrate(\n    f: Callable[[float, Array], Array],\n    y0: Array,\n    t: Array,\n) -> RK4Result:\n    \\\"\\\"\\\"Fixed-step RK4 integrator with user-provided time grid.\\\"\\\"\\\"\n    t = np.asarray(t, dtype=float)\n    y0 = np.asarray(y0, dtype=float)\n    y = np.empty((t.size, y0.size), dtype=float)\n    y[0] = y0\n    for i in range(t.size - 1):\n        h = t[i + 1] - t[i]\n        ti, yi = t[i], y[i]\n        k1 = f(ti, yi)\n        k2 = f(ti + 0.5 * h, yi + 0.5 * h * k1)\n        k3 = f(ti + 0.5 * h, yi + 0.5 * h * k2)\n        k4 = f(ti + h, yi + h * k3)\n        y[i + 1] = yi + (h / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)\n    return RK4Result(t=t, y=y)\"\"\",\n\"\"\"def logistic_map(r: float, x0: float, n: int) -> Array:\n    \\\"\\\"\\\"Iterate x_{k+1} = r x_k (1 - x_k) for n steps (returns length n+1).\\\"\\\"\\\"\n    x = np.empty(n + 1, dtype=float)\n    x[0] = float(x0)\n    for k in range(n):\n        x[k + 1] = r * x[k] * (1.0 - x[k])\n    return x\n\n\ndef logistic_bifurcation_sweep(\n    r: Array,\n    x0: float = 0.2,\n    n_transient: int = 500,\n    n_samples: int = 200,\n) -> Dict[str, Array]:\n    \\\"\\\"\\\"Return samples after transients for each r (for bifurcation diagrams).\n\n    Output:\n      r: (m,) values\n      x: (m, n_samples) samples from the tail trajectory\n    \\\"\\\"\\\"\n    r = np.asarray(r, dtype=float)\n    m = r.size\n    x_tail = np.empty((m, n_samples), dtype=float)\n    for i, ri in enumerate(r):\n        traj = logistic_map(float(ri), x0, n_transient + n_samples)\n        x_tail[i] = traj[-n_samples:]\n    return {\\\"r\\\": r, \\\"x\\\": x_tail}\"\"\",\n\"\"\"def linear_stability(A: Array, discrete: bool = False) -> Dict[str, object]:\n    \\\"\\\"\\\"Stability check via eigenvalues.\n\n    continuous-time: x' = A x is asymptotically stable iff Re(lambda)<0 for all.\n    discrete-time:   x_{k+1} = A x_k stable iff |lambda|<1 for all.\n    \\\"\\\"\\\"\n    A = np.asarray(A, dtype=float)\n    eig = np.linalg.eigvals(A)\n    if discrete:\n        metric = np.abs(eig)\n        stable = bool(np.all(metric < 1.0))\n        margin = float(1.0 - metric.max())\n    else:\n        metric = np.real(eig)\n        stable = bool(np.all(metric < 0.0))\n        margin = float(-metric.max())\n    return {\\\"eigs\\\": eig, \\\"stable\\\": stable, \\\"margin\\\": margin, \\\"discrete\\\": discrete}\"\"\",\n\"\"\"def van_der_pol(mu: float) -> Callable[[float, Array], Array]:\n    \\\"\\\"\\\"Van der Pol oscillator as a closure suitable for rk4_integrate.\\\"\\\"\\\"\n    mu = float(mu)\n\n    def f(_t: float, y: Array) -> Array:\n        x, v = y\n        return np.array([v, mu * (1.0 - x * x) * v - x], dtype=float)\n\n    return f\n\n\ndef vdp_limit_cycle_experiment(\n    mu: float = 3.0,\n    t_span: Tuple[float, float] = (0.0, 40.0),\n    dt: float = 0.01,\n    y0: Tuple[float, float] = (2.0, 0.0),\n) -> Dict[str, Array]:\n    \\\"\\\"\\\"Integrate van der Pol and return a downsampled trajectory.\\\"\\\"\\\"\n    t0, t1 = map(float, t_span)\n    n = int(np.floor((t1 - t0) / dt)) + 1\n    t = t0 + dt * np.arange(n, dtype=float)\n    res = rk4_integrate(van_der_pol(mu), np.array(y0, dtype=float), t)\n    return {\\\"t\\\": res.t, \\\"y\\\": res.y, \\\"mu\\\": np.array([mu], dtype=float)}\"\"\",\n\"\"\"def run_smoke() -> Dict[str, object]:\n    \\\"\\\"\\\"Small, fast run returning summary scalars for Definition-of-Done checks.\\\"\\\"\\\"\n    sweep = logistic_bifurcation_sweep(np.linspace(2.5, 4.0, 25), n_transient=200, n_samples=50)\n    stab = linear_stability(np.array([[-1.0, 2.0], [-3.0, -4.0]]))\n    vdp = vdp_limit_cycle_experiment(mu=2.0, t_span=(0.0, 10.0), dt=0.02)\n    return {\n        \\\"logistic\\\": {\\\"r_min\\\": float(sweep[\\\"r\\\"].min()), \\\"r_max\\\": float(sweep[\\\"r\\\"].max()), \\\"x_std\\\": float(sweep[\\\"x\\\"].std())},\n        \\\"linear\\\": {\\\"stable\\\": bool(stab[\\\"stable\\\"]), \\\"margin\\\": float(stab[\\\"margin\\\"])},\n        \\\"vdp\\\": {\\\"t_final\\\": float(vdp[\\\"t\\\"][-1]), \\\"y_norm_final\\\": float(np.linalg.norm(vdp[\\\"y\\\"][-1]))},\n    }\n\n\n__all__ = [\n    \\\"RK4Result\\\",\n    \\\"rk4_integrate\\\",\n    \\\"logistic_map\\\",\n    \\\"logistic_bifurcation_sweep\\\",\n    \\\"linear_stability\\\",\n    \\\"van_der_pol\\\",\n    \\\"vdp_limit_cycle_experiment\\\",\n    \\\"run_smoke\\\",\n]\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/experiments/numerical.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd84af8481908e931e87d628d2450d02f5accc7ac937",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/numerical.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/numerical.py\", \"src/experiments/registry.py\", \"src/experiments/symbolic.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0ab2c0bed643efc5006949be770f84819687b71482f19f07aa",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/experiments/numerical.py` with concrete NumPy-based prototype experiments: fixed-step RK4 ODE integration (with a van der Pol demo), logistic-map bifurcation sweeps, and linear-system eigenvalue stability checks, plus a `run_smoke()` summary for quick validation."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

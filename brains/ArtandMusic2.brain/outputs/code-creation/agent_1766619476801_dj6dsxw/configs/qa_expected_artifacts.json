@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "outputs_dir_name": "outputs",
+  "required_artifacts": [
+    {
+      "id": "report_outline",
+      "type": "file",
+      "match": {"kind": "exact", "path": "REPORT_OUTLINE.md"}
+    },
+    {
+      "id": "case_study_template",
+      "type": "file",
+      "match": {"kind": "exact", "path": "CASE_STUDY_TEMPLATE.md"}
+    },
+    {
+      "id": "metadata_schema",
+      "type": "file",
+      "match": {"kind": "exact", "path": "METADATA_SCHEMA.md"}
+    },
+    {
+      "id": "case_studies_index",
+      "type": "file",
+      "match": {"kind": "exact", "path": "CASE_STUDIES_INDEX.csv"}
+    }
+  ],
+  "required_groups": [
+    {
+      "id": "rights_artifacts",
+      "description": "At least one rights/compliance artifact must exist in outputs/ (common license/notice/copyright/readme files).",
+      "require": {"kind": "at_least", "count": 1},
+      "matches": [
+        {"kind": "glob", "pattern": "LICENSE*"},
+        {"kind": "glob", "pattern": "LICENCE*"},
+        {"kind": "glob", "pattern": "COPYRIGHT*"},
+        {"kind": "glob", "pattern": "NOTICE*"},
+        {"kind": "glob", "pattern": "RIGHTS*"},
+        {"kind": "glob", "pattern": "ATTRIBUTION*"},
+        {"kind": "glob", "pattern": "THIRD_PARTY_NOTICES*"},
+        {"kind": "glob", "pattern": "THIRD-PARTY-NOTICES*"},
+        {"kind": "glob", "pattern": "OPEN_SOURCE_NOTICES*"},
+        {"kind": "glob", "pattern": "OPEN-SOURCE-NOTICES*"}
+      ]
+    }
+  ],
+  "matching_options": {
+    "case_insensitive": true,
+    "treat_paths_as_posix": true
+  }
+}

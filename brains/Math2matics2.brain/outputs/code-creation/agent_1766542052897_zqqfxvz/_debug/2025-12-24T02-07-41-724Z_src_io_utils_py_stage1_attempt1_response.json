@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/io_utils.py` with deterministic JSON read/write, directory creation, reproducible run timestamp + run metadata (supports `EVIDENCE_PACK_TIMESTAMP`/`SOURCE_DATE_EPOCH`), and a structured JSONL logger for evidence-pack logging.",
+  "reasoning": "",
+  "responseId": "resp_0f602cab6fd78a4500694b4b21232881978ff005830624e635",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2923,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1440,
+    "output_tokens_details": {
+      "reasoning_tokens": 233
+    },
+    "total_tokens": 4363
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0f602cab6fd78a4500694b4b21c030819787671012a06f85f6",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0f602cab6fd78a4500694b4b252ee48197933d620547818513",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, sys, platform, hashlib\ntarget_path = Path('/mnt/data').joinpath('src/io_utils.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\n\\\"\\\"\\\"I/O utilities for the evidence-pack pipeline.\n\nProvides:\n- Directory management helpers\n- Deterministic JSON read/write\n- Structured JSONL logging\n- Reproducible run timestamp + metadata capture (supports SOURCE_DATE_EPOCH)\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom datetime import datetime, timezone\nfrom pathlib import Path\nfrom typing import Any, Callable, Dict, Optional\nimport json\nimport os\nimport platform\nimport sys\nimport hashlib\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\ndef ensure_dir(path: Path) -> Path:\n    \\\"\\\"\\\"Create *path* as a directory (parents=True) and return it.\\\"\\\"\\\"\n    path.mkdir(parents=True, exist_ok=True)\n    return path\n\n\ndef read_json(path: Path) -> Any:\n    \\\"\\\"\\\"Read JSON from *path* using UTF-8.\\\"\\\"\\\"\n    return json.loads(path.read_text(encoding=\"utf-8\"))\n\n\ndef write_json(path: Path, obj: Any, *, indent: int = 2, sort_keys: bool = True) -> None:\n    \\\"\\\"\\\"Write JSON to *path* deterministically (sorted keys, LF newlines).\\\"\\\"\\\"\n    text = json.dumps(obj, indent=indent, sort_keys=sort_keys, ensure_ascii=False)\n    path.write_text(text + \"\\\\n\", encoding=\"utf-8\")\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\ndef _env_int(name: str) -> Optional[int]:\n    v = os.environ.get(name)\n    if v is None or v == \"\":\n        return None\n    try:\n        return int(v)\n    except ValueError:\n        return None\n\n\ndef run_timestamp() -> str:\n    \\\"\\\"\\\"Return a reproducible UTC timestamp string.\n\n    Uses (in order): EVIDENCE_PACK_TIMESTAMP, SOURCE_DATE_EPOCH, else current time.\n    Format: YYYY-MM-DDTHH:MM:SSZ\n    \\\"\\\"\\\"\n    fixed = os.environ.get(\"EVIDENCE_PACK_TIMESTAMP\")\n    if fixed:\n        return fixed\n    sde = _env_int(\"SOURCE_DATE_EPOCH\")\n    if sde is not None:\n        dt = datetime.fromtimestamp(sde, tz=timezone.utc)\n    else:\n        dt = datetime.now(tz=timezone.utc)\n    return dt.replace(microsecond=0).isoformat().replace(\"+00:00\", \"Z\")\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass RunMeta:\n    \\\"\\\"\\\"Minimal run metadata captured for evidence packs.\\\"\\\"\\\"\n\n    run_id: str\n    started_at: str\n    seed: int\n    python: str\n    platform: str\n    cwd: str\n\n    def as_dict(self) -> Dict[str, Any]:\n        return {\n            \"run_id\": self.run_id,\n            \"started_at\": self.started_at,\n            \"seed\": self.seed,\n            \"python\": self.python,\n            \"platform\": self.platform,\n            \"cwd\": self.cwd,\n        }\n\n\ndef make_run_meta(*, seed: int = 0, started_at: Optional[str] = None) -> RunMeta:\n    \\\"\\\"\\\"Create reproducible run metadata.\n\n    run_id is a stable short hash of (started_at, seed, cwd).\n    \\\"\\\"\\\"\n    ts = started_at or run_timestamp()\n    cwd = str(Path.cwd())\n    h = hashlib.sha256(f\"{ts}|{seed}|{cwd}\".encode(\"utf-8\")).hexdigest()[:12]\n    return RunMeta(\n        run_id=h,\n        started_at=ts,\n        seed=int(seed),\n        python=f\"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}\",\n        platform=platform.platform(),\n        cwd=cwd,\n    )\n\"\"\".strip(\"\\n\"))\n\nchunks.append(\"\"\"\ndef make_jsonl_logger(log_path: Path, *, meta: Optional[RunMeta] = None) -> Callable[..., None]:\n    \\\"\\\"\\\"Return a structured logger writing one JSON object per line.\n\n    Each event includes: ts, level, event, and optional meta.run_id.\n    The returned callable signature is: log(event, level=\"INFO\", **fields).\n    \\\"\\\"\\\"\n    ensure_dir(log_path.parent)\n    fh = log_path.open(\"a\", encoding=\"utf-8\", newline=\"\\\\n\")\n\n    def log(event: str, *, level: str = \"INFO\", **fields: Any) -> None:\n        rec: Dict[str, Any] = {\"ts\": run_timestamp(), \"level\": level, \"event\": event}\n        if meta is not None:\n            rec[\"run_id\"] = meta.run_id\n        if fields:\n            rec.update(fields)\n        fh.write(json.dumps(rec, sort_keys=True, ensure_ascii=False) + \"\\\\n\")\n        fh.flush()\n\n    return log\n\"\"\".strip(\"\\n\"))\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/io_utils.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_694b4aec1e8081909daf775a3b668d2c0adc623df7df482c",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/io_utils.py\nDIR_STATE:[\"src/io_utils.py\", \"src/pipeline.py\", \"src/plotting.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0f602cab6fd78a4500694b4b3034b48197ae18ca5e3afb1ec9",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/io_utils.py` with deterministic JSON read/write, directory creation, reproducible run timestamp + run metadata (supports `EVIDENCE_PACK_TIMESTAMP`/`SOURCE_DATE_EPOCH`), and a structured JSONL logger for evidence-pack logging."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

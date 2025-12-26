@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add a reproducibility step to CI/local make target: run the pipeline twice, compare SHA256 hashes of artifacts in ./outputs/, and fail if mismatched; store the expected hashes in-repo (or in ./outputs/hashes.json) to support regression checks.
+Project: generated_script_1766554417471 (json script)
+
+Target file details:
+- Path: scripts/reproducibility_check.js
+- Purpose: Node.js script that runs the pipeline twice, computes SHA256 hashes for all artifacts under outputs/, compares runs and/or validates against outputs/hashes.json, and exits nonzero on any mismatch for CI/CD or local use.
+- Category: source
+
+Other planned files (for context only):
+- scripts/hash_outputs.js: Node.js helper script that deterministically enumerates files in outputs/ and writes a stable outputs/hashes.json mapping of relative paths to SHA256 hashes to support regression checks.
+- outputs/hashes.json: In-repo canonical JSON file storing expected SHA256 hashes for artifacts in outputs/ to enable deterministic regression verification in CI/CD and local runs.
+- .github/workflows/reproducibility.yml: GitHub Actions workflow that runs the project pipeline and then executes the reproducibility check to fail CI on non-reproducible outputs or hash regressions.
+- Makefile: Make targets for running the pipeline, updating outputs/hashes.json, and performing reproducibility checks locally in a CI-aligned way.
+
+Reference insights:
+- [CONSOLIDATED] Build data/experiment pipelines so they are **reproducible and verifiable end-to-end** by standardizing how outputs/artifacts
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Invest in infrastructure lemmas: compactness/tightness, decomposition (structured+pseudorandom)
+- [AGENT: agent_1766540049057_egk6x7y] {"agentId":"agent_1766540049057_egk6x7y","goalId":"goal_4","containerId":"cntr_694b4314fdec8190b56501a8
+- [AGENT: agent_1766550864729_p9ds97q] Across the implications-and-consequences, systems-thinking, and psychological perspectives, the dominan
+
+Key requirements:
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Node.js script that runs the pipeline twice, computes SHA256 hashes for all artifacts under outputs/, compares runs and/or validates against outputs/hashes.json, and exits nonzero on any mismatch for CI/CD or local use.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/reproducibility_check.js')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/reproducibility_check.js')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/reproducibility_check.js.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

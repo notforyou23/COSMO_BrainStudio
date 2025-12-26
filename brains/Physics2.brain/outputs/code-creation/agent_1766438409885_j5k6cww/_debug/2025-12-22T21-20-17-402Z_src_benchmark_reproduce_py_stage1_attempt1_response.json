@@ -1,0 +1,74 @@
+{
+  "content": "Implemented `src/benchmark/reproduce.py` to deterministically run `benchmark_case_001` with best-effort global seeding, emit stable JSON output, and optionally verify against an expected JSON using a tolerant comparator (preferring `json_compare` if available, with a tight fallback).",
+  "reasoning": "",
+  "responseId": "resp_07e69c8b9003ca5b006949b61b1ba08195948adacbb563925c",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4060,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2526,
+    "output_tokens_details": {
+      "reasoning_tokens": 718
+    },
+    "total_tokens": 6586
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_07e69c8b9003ca5b006949b61bc73881959d7430e24a3ad71c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_07e69c8b9003ca5b006949b61c99c081958544d4c4b0c0c011",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path('/mnt/data')\npaths=list(base.rglob('*'))\nlen(paths), [str(p.relative_to(base)) for p in paths if p.is_file()][:20]\n",
+      "container_id": "cntr_6949b60f8e1081909c7f4a8b8e6ed6e207e0eb243d8f5f64",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(0, [])"
+        }
+      ]
+    },
+    {
+      "id": "rs_07e69c8b9003ca5b006949b61ecb6c8195a1895b7aab5c53d3",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_07e69c8b9003ca5b006949b62c13d881958e8e5c928a09aed5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/benchmark/reproduce.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Deterministic benchmark reproduction helpers.\n\nThis module is intentionally dependency-light so it can be used by both a CLI\nwrapper and pytest to reproduce a known benchmark case and emit JSON output.\n\\\"\\\"\\\"\\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, asdict\nfrom hashlib import sha256\nfrom math import fsum, sqrt\nfrom pathlib import Path\nfrom typing import Any, Dict, Optional\nimport json\nimport os\nimport random\"\"\",\n\"\"\"def _seed_everything(seed: int) -> None:\n    \\\"\\\"\\\"Seed common RNGs for deterministic runs.\\\"\\\"\\\"\n    random.seed(seed)\n    # Numpy is optional; if present, seed it as well.\n    try:\n        import numpy as np  # type: ignore\n    except Exception:\n        np = None\n    if np is not None:\n        np.random.seed(seed)\n    # Best-effort: keep other libs deterministic if they are imported later.\n    os.environ.setdefault(\"PYTHONHASHSEED\", str(seed))\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass Case001Config:\n    n: int = 1024\n    d: int = 8\n    noise_std: float = 0.05\n\n    def to_dict(self) -> Dict[str, Any]:\n        return asdict(self)\"\"\",\n\"\"\"def _dot(a: list[float], b: list[float]) -> float:\n    return fsum(x * y for x, y in zip(a, b))\n\n\ndef _l2(a: list[float]) -> float:\n    return sqrt(fsum(x * x for x in a))\"\"\",\n\"\"\"def run_benchmark_case_001(seed: int = 0, config: Optional[Case001Config] = None) -> Dict[str, Any]:\n    \\\"\\\"\\\"Run benchmark_case_001 deterministically and return a JSON-serializable dict.\\\"\\\"\\\"\n    cfg = config or Case001Config()\n    _seed_everything(seed)\n    rng = random.Random(seed)\n\n    # Ground-truth weights and bias.\n    w_true = [rng.uniform(-1.0, 1.0) for _ in range(cfg.d)]\n    b_true = rng.uniform(-0.5, 0.5)\n\n    # A simple fixed estimator: ridge-like shrinkage of true weights.\n    shrink = 0.85\n    w_hat = [shrink * w for w in w_true]\n    b_hat = b_true * shrink\n\n    # Generate data and evaluate predictions.\n    sq_errs: list[float] = []\n    abs_errs: list[float] = []\n    y_samples: list[float] = []\n\n    for _ in range(cfg.n):\n        x = [rng.gauss(0.0, 1.0) for _ in range(cfg.d)]\n        noise = rng.gauss(0.0, cfg.noise_std)\n        y = _dot(w_true, x) + b_true + noise\n        y_hat = _dot(w_hat, x) + b_hat\n        err = y_hat - y\n        sq_errs.append(err * err)\n        abs_errs.append(abs(err))\n        if len(y_samples) < 16:\n            y_samples.append(y)\n\n    mse = fsum(sq_errs) / cfg.n\n    rmse = sqrt(mse)\n    mae = fsum(abs_errs) / cfg.n\n\n    digest = sha256(\n        json.dumps(\n            {\n                \"w_true\": w_true,\n                \"b_true\": b_true,\n                \"w_hat\": w_hat,\n                \"b_hat\": b_hat,\n                \"y_samples\": y_samples,\n            },\n            sort_keys=True,\n            separators=(\",\", \":\"),\n        ).encode(\"utf-8\")\n    ).hexdigest()\n\n    return {\n        \"case_id\": \"benchmark_case_001\",\n        \"seed\": seed,\n        \"config\": cfg.to_dict(),\n        \"metrics\": {\"mse\": mse, \"rmse\": rmse, \"mae\": mae},\n        \"artifacts\": {\n            \"w_true_l2\": _l2(w_true),\n            \"w_hat_l2\": _l2(w_hat),\n            \"sample_digest_sha256\": digest,\n            \"y_samples\": y_samples,\n        },\n    }\"\"\",\n\"\"\"def reproduce(case_id: str, *, seed: int = 0) -> Dict[str, Any]:\n    \\\"\\\"\\\"Reproduce a supported benchmark case.\\\"\\\"\\\"\n    if case_id != \"benchmark_case_001\":\n        raise ValueError(f\"Unsupported case_id: {case_id!r}\")\n    return run_benchmark_case_001(seed=seed)\"\"\",\n\"\"\"def write_json(data: Dict[str, Any], path: Path) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    path.write_text(json.dumps(data, indent=2, sort_keys=True) + \"\\\\n\", encoding=\"utf-8\")\"\"\",\n\"\"\"def verify_against_expected(\n    produced: Dict[str, Any],\n    expected_path: Path,\n    *,\n    rtol: float = 1e-7,\n    atol: float = 1e-9,\n) -> None:\n    \\\"\\\"\\\"Verify produced output against expected JSON using tolerant comparison.\n\n    Uses src.benchmark.json_compare if available; otherwise falls back to strict\n    equality for non-floats and tight float tolerance.\n    \\\"\\\"\\\"\n    expected = json.loads(expected_path.read_text(encoding=\"utf-8\"))\n\n    try:\n        from .json_compare import assert_json_close  # type: ignore\n    except Exception:\n        assert_json_close = None  # type: ignore\n\n    if assert_json_close is not None:\n        assert_json_close(produced, expected, rtol=rtol, atol=atol)\n        return\n\n    def _close(a: Any, b: Any) -> bool:\n        if isinstance(a, (int, str, bool)) or a is None:\n            return a == b\n        if isinstance(a, float) and isinstance(b, float):\n            return abs(a - b) <= (atol + rtol * abs(b))\n        if isinstance(a, list) and isinstance(b, list) and len(a) == len(b):\n            return all(_close(x, y) for x, y in zip(a, b))\n        if isinstance(a, dict) and isinstance(b, dict) and a.keys() == b.keys():\n            return all(_close(a[k], b[k]) for k in a.keys())\n        return a == b\n\n    if not _close(produced, expected):\n        raise AssertionError(\"Produced JSON did not match expected within tolerances.\")\"\"\",\n\"\"\"def main(argv: Optional[list[str]] = None) -> int:\n    import argparse\n\n    p = argparse.ArgumentParser(description=\"Reproduce deterministic benchmark outputs.\")\n    p.add_argument(\"case_id\", choices=[\"benchmark_case_001\"])\n    p.add_argument(\"--seed\", type=int, default=0)\n    p.add_argument(\"--out\", type=Path, required=True, help=\"Output JSON path.\")\n    p.add_argument(\"--expected\", type=Path, default=None, help=\"Optional expected JSON to verify against.\")\n    p.add_argument(\"--rtol\", type=float, default=1e-7)\n    p.add_argument(\"--atol\", type=float, default=1e-9)\n    ns = p.parse_args(argv)\n\n    produced = reproduce(ns.case_id, seed=ns.seed)\n    write_json(produced, ns.out)\n    if ns.expected is not None:\n        verify_against_expected(produced, ns.expected, rtol=ns.rtol, atol=ns.atol)\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/benchmark/reproduce.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949b60f8e1081909c7f4a8b8e6ed6e207e0eb243d8f5f64",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/benchmark/reproduce.py\nDIR_STATE:[\"src/benchmark/reproduce.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_07e69c8b9003ca5b006949b6466c948195a79cc267c33a7cbd",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/benchmark/reproduce.py` to deterministically run `benchmark_case_001` with best-effort global seeding, emit stable JSON output, and optionally verify against an expected JSON using a tolerant comparator (preferring `json_compare` if available, with a tight fallback)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

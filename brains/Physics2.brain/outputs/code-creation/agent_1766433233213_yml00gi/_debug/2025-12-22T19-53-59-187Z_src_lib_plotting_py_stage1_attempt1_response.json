@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/lib/plotting.py` with compact, dependency-light matplotlib helpers to generate publication-ready figures for hypothesis rankings, constraint/forecast projections (with allowed bands), posterior summaries (credible intervals + optional truths), and robustness diagnostics (box+strip across variants), including consistent styling and optional save-to-disk support.",
+  "reasoning": "",
+  "responseId": "resp_0f66bf73e41257f5006949a412680881959e145ec9efde109d",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4289,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2755,
+    "output_tokens_details": {
+      "reasoning_tokens": 2687
+    },
+    "total_tokens": 7044
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0f66bf73e41257f5006949a41328048195a0b6c7ea73c52923",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0f66bf73e41257f5006949a4184a688195b32659be0beb3ef7",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re, math, statistics\ntarget_path = Path('/mnt/data').joinpath('src/lib/plotting.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"Plotting utilities.\n\nDesigned for publication-ready figures used across the project:\n- hypothesis rankings\n- constraint projections / forecasts\n- posterior summaries\n- robustness diagnostics\n\nAll functions return (fig, ax) and can optionally save to disk.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Union\n\nimport numpy as np\n\"\"\")\n\nchunks.append(\"\"\"\ndef _lazy_import_mpl():\n    import matplotlib as mpl  # noqa: WPS433\n    import matplotlib.pyplot as plt  # noqa: WPS433\n    return mpl, plt\n\n\ndef set_mpl_style(\n    *,\n    base: str = \"seaborn-v0_8-whitegrid\",\n    fontsize: int = 10,\n    linewidth: float = 1.2,\n) -> None:\n    \\\"\\\"\\\"Set a clean, consistent matplotlib style (idempotent).\\\"\\\"\\\"\n    mpl, _ = _lazy_import_mpl()\n    try:\n        mpl.style.use(base)\n    except Exception:\n        pass\n    mpl.rcParams.update(\n        {\n            \"font.size\": fontsize,\n            \"axes.labelsize\": fontsize,\n            \"axes.titlesize\": fontsize + 1,\n            \"legend.fontsize\": fontsize - 1,\n            \"xtick.labelsize\": fontsize - 1,\n            \"ytick.labelsize\": fontsize - 1,\n            \"axes.linewidth\": linewidth,\n            \"grid.alpha\": 0.35,\n            \"figure.dpi\": 120,\n            \"savefig.bbox\": \"tight\",\n            \"savefig.transparent\": False,\n        }\n    )\n\n\ndef savefig(fig, path: Union[str, Path], *, dpi: int = 300) -> Path:\n    \\\"\\\"\\\"Save figure to *path* (creating parents). Returns resolved Path.\\\"\\\"\\\"\n    out = Path(path)\n    out.parent.mkdir(parents=True, exist_ok=True)\n    fig.savefig(out, dpi=dpi)\n    return out.resolve()\n\"\"\")\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass Band:\n    ymin: float\n    ymax: float\n    label: str = \"\"\n    color: str = \"C0\"\n    alpha: float = 0.12\n\n\ndef plot_hypothesis_ranking(\n    table: Any,\n    *,\n    label_col: str = \"hypothesis\",\n    score_col: str = \"score\",\n    err_col: Optional[str] = None,\n    top_n: int = 15,\n    title: str = \"Hypothesis ranking\",\n    xlabel: str = \"Score\",\n    color: str = \"C0\",\n    figsize: Tuple[float, float] = (6.2, 4.0),\n    save_to: Optional[Union[str, Path]] = None,\n):\n    \\\"\\\"\\\"Horizontal bar ranking with optional uncertainty (err_col).\\\"\\\"\\\"\n    mpl, plt = _lazy_import_mpl()\n    set_mpl_style()\n\n    df = table.copy() if hasattr(table, \"copy\") else table\n    df = df.sort_values(score_col, ascending=True).tail(top_n)\n    labels = df[label_col].astype(str).to_numpy()\n    scores = df[score_col].to_numpy()\n    errs = df[err_col].to_numpy() if err_col and err_col in df.columns else None\n\n    fig, ax = plt.subplots(figsize=figsize)\n    y = np.arange(len(labels))\n    ax.barh(y, scores, xerr=errs, color=color, alpha=0.9, ecolor=\"0.2\", capsize=2)\n    ax.set_yticks(y)\n    ax.set_yticklabels(labels)\n    ax.set_xlabel(xlabel)\n    ax.set_title(title)\n    ax.axvline(0.0, color=\"0.3\", lw=1.0)\n    ax.margins(y=0.02)\n\n    if save_to is not None:\n        savefig(fig, save_to)\n    return fig, ax\n\"\"\")\n\nchunks.append(\"\"\"\ndef plot_constraint_projection(\n    x: Sequence[float],\n    y: Sequence[float],\n    *,\n    yerr: Optional[Sequence[float]] = None,\n    bands: Optional[Sequence[Band]] = None,\n    xlabel: str = \"Model parameter\",\n    ylabel: str = \"Observable\",\n    title: str = \"Constraint projection\",\n    label: str = \"prediction\",\n    color: str = \"C0\",\n    figsize: Tuple[float, float] = (6.2, 4.0),\n    save_to: Optional[Union[str, Path]] = None,\n):\n    \\\"\\\"\\\"Line/points with error bars and optional horizontal allowed bands.\\\"\\\"\\\"\n    _, plt = _lazy_import_mpl()\n    set_mpl_style()\n\n    x = np.asarray(x, dtype=float)\n    y = np.asarray(y, dtype=float)\n    yerr_arr = None if yerr is None else np.asarray(yerr, dtype=float)\n\n    fig, ax = plt.subplots(figsize=figsize)\n    if bands:\n        for b in bands:\n            ax.axhspan(b.ymin, b.ymax, color=b.color, alpha=b.alpha, label=b.label or None)\n\n    if yerr_arr is None:\n        ax.plot(x, y, color=color, lw=2.0, label=label)\n    else:\n        ax.errorbar(x, y, yerr=yerr_arr, fmt=\"o-\", color=color, lw=1.6, ms=3.5, capsize=2, label=label)\n\n    ax.set_xlabel(xlabel)\n    ax.set_ylabel(ylabel)\n    ax.set_title(title)\n    if bands or label:\n        ax.legend(frameon=True, loc=\"best\")\n    ax.grid(True, which=\"both\")\n    if save_to is not None:\n        savefig(fig, save_to)\n    return fig, ax\n\"\"\")\n\nchunks.append(\"\"\"\ndef _credible_interval(a: np.ndarray, q: Tuple[float, float] = (0.16, 0.84)) -> Tuple[float, float, float]:\n    a = np.asarray(a, dtype=float)\n    a = a[np.isfinite(a)]\n    if a.size == 0:\n        return np.nan, np.nan, np.nan\n    lo, med, hi = np.quantile(a, [q[0], 0.5, q[1]])\n    return float(lo), float(med), float(hi)\n\n\ndef plot_posterior_summary(\n    samples: Mapping[str, Sequence[float]],\n    *,\n    truths: Optional[Mapping[str, float]] = None,\n    q: Tuple[float, float] = (0.16, 0.84),\n    title: str = \"Posterior summary\",\n    xlabel: str = \"Parameter\",\n    ylabel: str = \"Value\",\n    color: str = \"C0\",\n    figsize: Tuple[float, float] = (6.2, 4.0),\n    save_to: Optional[Union[str, Path]] = None,\n):\n    \\\"\\\"\\\"Compact 1D posterior summary (median + credible intervals per parameter).\\\"\\\"\\\"\n    _, plt = _lazy_import_mpl()\n    set_mpl_style()\n\n    names = list(samples.keys())\n    stats = [_credible_interval(np.asarray(samples[n]), q=q) for n in names]\n    lo = np.array([s[0] for s in stats])\n    med = np.array([s[1] for s in stats])\n    hi = np.array([s[2] for s in stats])\n\n    fig, ax = plt.subplots(figsize=figsize)\n    x = np.arange(len(names))\n    ax.vlines(x, lo, hi, color=color, lw=2.0, alpha=0.9)\n    ax.scatter(x, med, color=color, s=22, zorder=3, label=\"median\")\n    if truths:\n        t = np.array([truths.get(n, np.nan) for n in names], dtype=float)\n        ax.scatter(x, t, color=\"C3\", s=18, marker=\"x\", zorder=4, label=\"truth\")\n\n    ax.set_xticks(x)\n    ax.set_xticklabels(names, rotation=30, ha=\"right\")\n    ax.set_ylabel(ylabel)\n    ax.set_xlabel(xlabel)\n    ax.set_title(title)\n    ax.legend(frameon=True, loc=\"best\")\n    ax.margins(x=0.02)\n    if save_to is not None:\n        savefig(fig, save_to)\n    return fig, ax\n\"\"\")\n\nchunks.append(\"\"\"\ndef plot_robustness_diagnostics(\n    table: Any,\n    *,\n    variant_col: str = \"variant\",\n    metric_col: str = \"metric\",\n    value_col: str = \"value\",\n    title: str = \"Robustness diagnostics\",\n    ylabel: str = \"Metric value\",\n    figsize: Tuple[float, float] = (7.0, 4.0),\n    save_to: Optional[Union[str, Path]] = None,\n):\n    \\\"\\\"\\\"Box/strip plot of metric values across compactification/flux variants.\\\"\\\"\\\"\n    _, plt = _lazy_import_mpl()\n    set_mpl_style()\n\n    df = table.copy() if hasattr(table, \"copy\") else table\n    metrics = df[metric_col].astype(str).unique().tolist()\n    variants = df[variant_col].astype(str).unique().tolist()\n\n    fig, ax = plt.subplots(figsize=figsize)\n    positions, labels = [], []\n    pos = 0\n    for m in metrics:\n        for v in variants:\n            vals = df[(df[metric_col] == m) & (df[variant_col] == v)][value_col].to_numpy(dtype=float)\n            if vals.size == 0:\n                continue\n            positions.append(pos)\n            labels.append(f\"{m}\\\\n{v}\")\n            ax.boxplot(vals, positions=[pos], widths=0.6, showfliers=False, patch_artist=True,\n                       boxprops=dict(facecolor=\"0.85\", edgecolor=\"0.3\"),\n                       medianprops=dict(color=\"C0\", linewidth=1.6),\n                       whiskerprops=dict(color=\"0.3\"), capprops=dict(color=\"0.3\"))\n            jitter = (np.random.RandomState(0).rand(vals.size) - 0.5) * 0.18\n            ax.scatter(np.full(vals.size, pos) + jitter, vals, s=10, color=\"0.25\", alpha=0.6, zorder=3)\n            pos += 1\n        pos += 0.6  # gap between metrics\n\n    ax.set_xticks(positions)\n    ax.set_xticklabels(labels, rotation=0)\n    ax.set_ylabel(ylabel)\n    ax.set_title(title)\n    ax.grid(True, axis=\"y\")\n    if save_to is not None:\n        savefig(fig, save_to)\n    return fig, ax\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/lib/plotting.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949a1d497e081909a00da1af070d618029e616ce667a0de",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/lib/plotting.py\nDIR_STATE:[\"src/lib/io.py\", \"src/lib/plotting.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0f66bf73e41257f5006949a43545a081958b1c55ec65791b19",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/lib/plotting.py` with compact, dependency-light matplotlib helpers to generate publication-ready figures for hypothesis rankings, constraint/forecast projections (with allowed bands), posterior summaries (credible intervals + optional truths), and robustness diagnostics (box+strip across variants), including consistent styling and optional save-to-disk support."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

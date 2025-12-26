@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement/verify CI job that (1) fresh-clone installs deps, (2) runs `python scripts/run_pipeline.py`, (3) asserts required artifacts exist in `./outputs/` and are deterministic via checksum/golden-file comparison, and (4) gates merges on pass.
+Project: generated_script_1766554289288 (python script)
+
+Target file details:
+- Path: .github/workflows/pipeline-ci.yml
+- Purpose: GitHub Actions CI workflow that fresh-clones, installs dependencies, runs scripts/run_pipeline.py, validates required outputs via checksum/golden comparison, and gates merges on success.
+- Category: config
+
+Other planned files (for context only):
+- scripts/ci/validate_artifacts.py: Artifact validation script that asserts required files exist under outputs/ and verifies determinism by comparing computed checksums to a tracked golden manifest.
+- outputs/golden_manifest.json: Golden checksum manifest for required pipeline artifacts under outputs/ used by CI to enforce deterministic builds.
+- scripts/ci/README.md: Documentation describing how the CI pipeline runs, which artifacts are required, how determinism is enforced, and how to update the golden manifest intentionally.
+
+Reference insights:
+- [CONSOLIDATED] Standardize a minimal, reproducible pipeline that deterministically produces, exports, and validates a canonical set of audit
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Invest in infrastructure lemmas: compactness/tightness, decomposition (structured+pseudorandom)
+- [AGENT: agent_1766550864729_p9ds97q] Across the implications-and-consequences, systems-thinking, and psychological perspectives, the dominan
+- [AGENT INSIGHT: agent_1766550864729_t9or71v] Assumptions are design variables and integration dependencies: they must be explicitly chosen, 
+
+Key requirements:
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: GitHub Actions CI workflow that fresh-clones, installs dependencies, runs scripts/run_pipeline.py, validates required outputs via checksum/golden comparison, and gates merges on success.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('.github/workflows/pipeline-ci.yml')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:.github/workflows/pipeline-ci.yml')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside .github/workflows/pipeline-ci.yml.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

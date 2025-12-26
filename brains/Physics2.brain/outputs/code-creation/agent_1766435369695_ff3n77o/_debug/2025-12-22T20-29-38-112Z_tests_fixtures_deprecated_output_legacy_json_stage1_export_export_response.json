@@ -1,0 +1,56 @@
+{
+  "content": "FILE_EXPORT:{\"path\":\"tests/fixtures/deprecated_output_legacy.json\",\"size\":1273,\"encoding\":\"base64\",\"sha256\":\"6748ed531d7c68738b5be5650a6b61ab208a60bc275d3039e5ef00dc39ad0dc9\",\"content\":\"ewogICJiZW5jaG1hcmsiOiAibGVnYWN5X21pY3JvYmVuY2hfdjAiLAogICJnZW5lcmF0ZWRfYXQiOiAiMjAyMC0wNy0xNFQxMjozNDo1NloiLAogICJnaXQiOiB7CiAgICAic2hhIjogImRlYWRiZWVmZGVhZGJlZWZkZWFkYmVlZmRlYWRiZWVmZGVhZGJlZWYiLAogICAgImRpcnR5IjogdHJ1ZSwKICAgICJicmFuY2giOiAiZmVhdHVyZS9vbGQtb3V0cHV0IgogIH0sCiAgImVudiI6IHsKICAgICJweXRob24iOiAiMy44LjEwIiwKICAgICJwbGF0Zm9ybSI6ICJsaW51eCIsCiAgICAiY3B1IjogIkludGVsKFIpIFhlb24oUikgQ1BVIiwKICAgICJncHUiOiBudWxsLAogICAgInJhbV9nYiI6IDMyCiAgfSwKICAiY29uZmlnIjogewogICAgIndhcm11cCI6IDMsCiAgICAiaXRlcmF0aW9ucyI6IDEwLAogICAgInNlZWQiOiAxMjMsCiAgICAibm90ZXMiOiAiVGhpcyBmaXh0dXJlIHJlcHJlc2VudHMgYW4gYWQtaG9jIGxlZ2FjeSBmb3JtYXQgdGhhdCBwcmVkYXRlcyBKU09OIFNjaGVtYSBlbmZvcmNlbWVudC4iCiAgfSwKICAicmVzdWx0cyI6IFsKICAgIHsKICAgICAgIm5hbWUiOiAidG9rZW5pemVfc21hbGwiLAogICAgICAidGltZV9tcyI6IDEuMjMsCiAgICAgICJ0aHJvdWdocHV0IjogODEyMy40LAogICAgICAidW5pdCI6ICJvcHMvcyIsCiAgICAgICJwNTBfbXMiOiAxLjEwLAogICAgICAicDk1X21zIjogMS44MCwKICAgICAgInA5OV9tcyI6IDIuMTAsCiAgICAgICJleHRyYSI6IHsKICAgICAgICAicmF3X3RpbWVzX21zIjogWzEuMSwgMS4yLCAxLjMsIDEuMCwgMS40XSwKICAgICAgICAidGFncyI6IFsibGVnYWN5IiwgIm1pY3JvIl0KICAgICAgfQogICAgfSwKICAgIHsKICAgICAgIm5hbWUiOiAidG9rZW5pemVfbGFyZ2UiLAogICAgICAidGltZV9tcyI6IDEyLjcsCiAgICAgICJ0aHJvdWdocHV0IjogNzg5LjAsCiAgICAgICJ1bml0IjogIm9wcy9zIiwKICAgICAgInA1MF9tcyI6IDEyLjAsCiAgICAgICJwOTVfbXMiOiAxNS41LAogICAgICAicDk5X21zIjogMTguMCwKICAgICAgInN0YXR1cyI6ICJvayIKICAgIH0KICBdLAogICJzdW1tYXJ5IjogewogICAgInRvdGFsX3Rlc3RzIjogMiwKICAgICJmYWlsZWQiOiAwLAogICAgImR1cmF0aW9uX3NlYyI6IDUuNAogIH0sCiAgInNjaGVtYV92ZXJzaW9uIjogImxlZ2FjeV92MCIsCiAgIl93YXJuaW5nIjogIkRlcHJlY2F0ZWQ6IHRoaXMgb3V0cHV0IGlzIGludGVudGlvbmFsbHkgbm90IGNvbXBhdGlibGUgd2l0aCBvdXRwdXRzL3NjaGVtYXMvYmVuY2htYXJrX3NjaGVtYS5qc29uIgp9Cg==\"}\nDIR_STATE:[\"tests/fixtures/deprecated_output_legacy.json\",\"tests/fixtures/valid_output.json\"]",
+  "reasoning": "",
+  "responseId": "resp_09298bf9de0e28d9006949ada324088195bdbe9724500f3184",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2431,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1393,
+    "output_tokens_details": {
+      "reasoning_tokens": 44
+    },
+    "total_tokens": 3824
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_09298bf9de0e28d9006949ada3d7b88195bb197d9abf16a90d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_09298bf9de0e28d9006949ada4f9fc81958c6f3ea3de53a0c5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport base64, json, hashlib, gzip\n\ntarget_path = Path('/mnt/data').joinpath('tests/fixtures/deprecated_output_legacy.json')\nassert target_path.is_file(), 'Expected tests/fixtures/deprecated_output_legacy.json to exist before export'\ndata = target_path.read_bytes()\npayload = {\n    'path': 'tests/fixtures/deprecated_output_legacy.json',\n    'size': len(data),\n    'encoding': 'base64',\n    'sha256': hashlib.sha256(data).hexdigest(),\n    'content': None\n}\nif len(data) > 20000:\n    compressed = gzip.compress(data)\n    payload['encoding'] = 'gzip+base64'\n    payload['content'] = base64.b64encode(compressed).decode('ascii')\nelse:\n    payload['content'] = base64.b64encode(data).decode('ascii')\n\nprint('FILE_EXPORT:' + json.dumps(payload, separators=(',', ':')))\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_EXPORT:{\"path\":\"tests/fixtures/deprecated_output_legacy.json\",\"size\":1273,\"encoding\":\"base64\",\"sha256\":\"6748ed531d7c68738b5be5650a6b61ab208a60bc275d3039e5ef00dc39ad0dc9\",\"content\":\"ewogICJiZW5jaG1hcmsiOiAibGVnYWN5X21pY3JvYmVuY2hfdjAiLAogICJnZW5lcmF0ZWRfYXQiOiAiMjAyMC0wNy0xNFQxMjozNDo1NloiLAogICJnaXQiOiB7CiAgICAic2hhIjogImRlYWRiZWVmZGVhZGJlZWZkZWFkYmVlZmRlYWRiZWVmZGVhZGJlZWYiLAogICAgImRpcnR5IjogdHJ1ZSwKICAgICJicmFuY2giOiAiZmVhdHVyZS9vbGQtb3V0cHV0IgogIH0sCiAgImVudiI6IHsKICAgICJweXRob24iOiAiMy44LjEwIiwKICAgICJwbGF0Zm9ybSI6ICJsaW51eCIsCiAgICAiY3B1IjogIkludGVsKFIpIFhlb24oUikgQ1BVIiwKICAgICJncHUiOiBudWxsLAogICAgInJhbV9nYiI6IDMyCiAgfSwKICAiY29uZmlnIjogewogICAgIndhcm11cCI6IDMsCiAgICAiaXRlcmF0aW9ucyI6IDEwLAogICAgInNlZWQiOiAxMjMsCiAgICAibm90ZXMiOiAiVGhpcyBmaXh0dXJlIHJlcHJlc2VudHMgYW4gYWQtaG9jIGxlZ2FjeSBmb3JtYXQgdGhhdCBwcmVkYXRlcyBKU09OIFNjaGVtYSBlbmZvcmNlbWVudC4iCiAgfSwKICAicmVzdWx0cyI6IFsKICAgIHsKICAgICAgIm5hbWUiOiAidG9rZW5pemVfc21hbGwiLAogICAgICAidGltZV9tcyI6IDEuMjMsCiAgICAgICJ0aHJvdWdocHV0IjogODEyMy40LAogICAgICAidW5pdCI6ICJvcHMvcyIsCiAgICAgICJwNTBfbXMiOiAxLjEwLAogICAgICAicDk1X21zIjogMS44MCwKICAgICAgInA5OV9tcyI6IDIuMTAsCiAgICAgICJleHRyYSI6IHsKICAgICAgICAicmF3X3RpbWVzX21zIjogWzEuMSwgMS4yLCAxLjMsIDEuMCwgMS40XSwKICAgICAgICAidGFncyI6IFsibGVnYWN5IiwgIm1pY3JvIl0KICAgICAgfQogICAgfSwKICAgIHsKICAgICAgIm5hbWUiOiAidG9rZW5pemVfbGFyZ2UiLAogICAgICAidGltZV9tcyI6IDEyLjcsCiAgICAgICJ0aHJvdWdocHV0IjogNzg5LjAsCiAgICAgICJ1bml0IjogIm9wcy9zIiwKICAgICAgInA1MF9tcyI6IDEyLjAsCiAgICAgICJwOTVfbXMiOiAxNS41LAogICAgICAicDk5X21zIjogMTguMCwKICAgICAgInN0YXR1cyI6ICJvayIKICAgIH0KICBdLAogICJzdW1tYXJ5IjogewogICAgInRvdGFsX3Rlc3RzIjogMiwKICAgICJmYWlsZWQiOiAwLAogICAgImR1cmF0aW9uX3NlYyI6IDUuNAogIH0sCiAgInNjaGVtYV92ZXJzaW9uIjogImxlZ2FjeV92MCIsCiAgIl93YXJuaW5nIjogIkRlcHJlY2F0ZWQ6IHRoaXMgb3V0cHV0IGlzIGludGVudGlvbmFsbHkgbm90IGNvbXBhdGlibGUgd2l0aCBvdXRwdXRzL3NjaGVtYXMvYmVuY2htYXJrX3NjaGVtYS5qc29uIgp9Cg==\"}\nDIR_STATE:[\"tests/fixtures/deprecated_output_legacy.json\", \"tests/fixtures/valid_output.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_09298bf9de0e28d9006949ada8fef08195b7952a043bb96a5c",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_EXPORT:{\"path\":\"tests/fixtures/deprecated_output_legacy.json\",\"size\":1273,\"encoding\":\"base64\",\"sha256\":\"6748ed531d7c68738b5be5650a6b61ab208a60bc275d3039e5ef00dc39ad0dc9\",\"content\":\"ewogICJiZW5jaG1hcmsiOiAibGVnYWN5X21pY3JvYmVuY2hfdjAiLAogICJnZW5lcmF0ZWRfYXQiOiAiMjAyMC0wNy0xNFQxMjozNDo1NloiLAogICJnaXQiOiB7CiAgICAic2hhIjogImRlYWRiZWVmZGVhZGJlZWZkZWFkYmVlZmRlYWRiZWVmZGVhZGJlZWYiLAogICAgImRpcnR5IjogdHJ1ZSwKICAgICJicmFuY2giOiAiZmVhdHVyZS9vbGQtb3V0cHV0IgogIH0sCiAgImVudiI6IHsKICAgICJweXRob24iOiAiMy44LjEwIiwKICAgICJwbGF0Zm9ybSI6ICJsaW51eCIsCiAgICAiY3B1IjogIkludGVsKFIpIFhlb24oUikgQ1BVIiwKICAgICJncHUiOiBudWxsLAogICAgInJhbV9nYiI6IDMyCiAgfSwKICAiY29uZmlnIjogewogICAgIndhcm11cCI6IDMsCiAgICAiaXRlcmF0aW9ucyI6IDEwLAogICAgInNlZWQiOiAxMjMsCiAgICAibm90ZXMiOiAiVGhpcyBmaXh0dXJlIHJlcHJlc2VudHMgYW4gYWQtaG9jIGxlZ2FjeSBmb3JtYXQgdGhhdCBwcmVkYXRlcyBKU09OIFNjaGVtYSBlbmZvcmNlbWVudC4iCiAgfSwKICAicmVzdWx0cyI6IFsKICAgIHsKICAgICAgIm5hbWUiOiAidG9rZW5pemVfc21hbGwiLAogICAgICAidGltZV9tcyI6IDEuMjMsCiAgICAgICJ0aHJvdWdocHV0IjogODEyMy40LAogICAgICAidW5pdCI6ICJvcHMvcyIsCiAgICAgICJwNTBfbXMiOiAxLjEwLAogICAgICAicDk1X21zIjogMS44MCwKICAgICAgInA5OV9tcyI6IDIuMTAsCiAgICAgICJleHRyYSI6IHsKICAgICAgICAicmF3X3RpbWVzX21zIjogWzEuMSwgMS4yLCAxLjMsIDEuMCwgMS40XSwKICAgICAgICAidGFncyI6IFsibGVnYWN5IiwgIm1pY3JvIl0KICAgICAgfQogICAgfSwKICAgIHsKICAgICAgIm5hbWUiOiAidG9rZW5pemVfbGFyZ2UiLAogICAgICAidGltZV9tcyI6IDEyLjcsCiAgICAgICJ0aHJvdWdocHV0IjogNzg5LjAsCiAgICAgICJ1bml0IjogIm9wcy9zIiwKICAgICAgInA1MF9tcyI6IDEyLjAsCiAgICAgICJwOTVfbXMiOiAxNS41LAogICAgICAicDk5X21zIjogMTguMCwKICAgICAgInN0YXR1cyI6ICJvayIKICAgIH0KICBdLAogICJzdW1tYXJ5IjogewogICAgInRvdGFsX3Rlc3RzIjogMiwKICAgICJmYWlsZWQiOiAwLAogICAgImR1cmF0aW9uX3NlYyI6IDUuNAogIH0sCiAgInNjaGVtYV92ZXJzaW9uIjogImxlZ2FjeV92MCIsCiAgIl93YXJuaW5nIjogIkRlcHJlY2F0ZWQ6IHRoaXMgb3V0cHV0IGlzIGludGVudGlvbmFsbHkgbm90IGNvbXBhdGlibGUgd2l0aCBvdXRwdXRzL3NjaGVtYXMvYmVuY2htYXJrX3NjaGVtYS5qc29uIgp9Cg==\"}\nDIR_STATE:[\"tests/fixtures/deprecated_output_legacy.json\",\"tests/fixtures/valid_output.json\"]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

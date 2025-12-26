@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Fix remaining syntax_error blockers reported in deliverables and make the codebase parse-clean: scripts/init_repo_skeleton.py (reported syntax_error), src/numeric_compare.py (reported syntax_error), tests/test_cli_smoke.py (reported syntax_error), src/dgpipe/__init__.py (reported syntax_error), and src/experiments/__init__.py + src/experiments/registry.py (reported syntax_error). Ensure 'python -m compileall' succeeds repo-wide.
+Project: generated_cli_tool_1766440777933 (python cli_tool)
+
+Target file details:
+- Path: src/numeric_compare.py
+- Purpose: Implements parse-clean numeric comparison utilities and a small CLI entrypoint for comparing numeric outputs with tolerances.
+- Category: source
+
+Other planned files (for context only):
+- scripts/init_repo_skeleton.py: Provides a parse-clean CLI script that initializes the repository skeleton (directories/files) with safe defaults and clear usage text.
+- tests/test_cli_smoke.py: Contains a minimal smoke test that imports CLI-related modules and ensures they execute without syntax/import errors.
+- src/dgpipe/__init__.py: Defines the dgpipe package public interface and version metadata in a syntax-error-free manner.
+- src/experiments/__init__.py: Initializes the experiments package and exposes the registry interface without side effects or syntax issues.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-22T21-50-52-771Z_tests_test_syntax_imports_py_stage1_attempt1_prompt.txt from code-creation agent agent_176644024681
+- [AGENT: agent_1766440379610_hhonegh] {"agentId":"agent_1766440379610_hhonegh","goalId":"goal_35","containerId":"cntr_6949bdbf39a88190b86a048
+- [INTROSPECTION] 2025-12-22T21-50-52-771Z_qg_bench_cli_py_stage1_export_export_prompt.txt from code-creation agent agent_1766440246816_afic06
+- [AGENT INSIGHT: agent_1766438119610_eb2aof4] Sub-goal 3/7: Specify recommended collaborations and external partners: list 10–20 candidate gr
+- [AGENT: agent_1766438409884_82yeh6g] {"agentId":"agent_1766438409884_82yeh6g","goalId":"goal_7","containerId":"cntr_6949b60f62d4819083834ab5
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Implements parse-clean numeric comparison utilities and a small CLI entrypoint for comparing numeric outputs with tolerances.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/numeric_compare.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/numeric_compare.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/numeric_compare.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

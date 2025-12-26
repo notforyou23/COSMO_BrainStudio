@@ -1,0 +1,298 @@
+{
+  "content": "Created `outputs/examples/benchmark_case_002.json` as a second schema-style benchmark payload using the `symbolic_rg` experiment with representative non-default parameters.",
+  "reasoning": "",
+  "responseId": "resp_0841e548b37e5274006949be000bd88193b2edc6be50bae430",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4977,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1316,
+    "output_tokens_details": {
+      "reasoning_tokens": 1280
+    },
+    "total_tokens": 6293
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0841e548b37e5274006949be00a4a081939fe05dbcdca2a11b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0841e548b37e5274006949be0128588193bb58fe0b6d958187",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nimport json, os, textwrap, re\nschema_path = Path('/mnt/data/schemas/benchmark.schema.json')\nschema_path.exists(), schema_path\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(False, PosixPath('/mnt/data/schemas/benchmark.schema.json'))"
+        }
+      ]
+    },
+    {
+      "id": "rs_0841e548b37e5274006949be0331e881939befd21f5bd4d77b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0841e548b37e5274006949be03a36c8193b1c37bf0fa2dfc02",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nroot=Path('/mnt/data')\nsorted([p.name for p in root.iterdir()])[:50], len(list(root.iterdir()))\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(['outputs', 'qg_bench', 'src'], 3)"
+        }
+      ]
+    },
+    {
+      "id": "rs_0841e548b37e5274006949be058fc081939e846bbd268e144e",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0841e548b37e5274006949be05c9908193a4ca41c1ab0f8ae5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nroot=Path('/mnt/data')\nmatches=[]\nfor p in root.rglob('benchmark.schema.json'):\n    matches.append(p)\nmatches\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0841e548b37e5274006949be082bd8819396bd6285c984857f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0841e548b37e5274006949be08b3e88193add7186a3da31ba2",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "list(root.rglob('schemas'))[:20]\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0841e548b37e5274006949be0a7704819380a584435db46dcb",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0841e548b37e5274006949be0b15f481939529147bcfa0ff2e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "matches=[]\nfor p in root.rglob('benchmark_case_001.json'):\n    matches.append(p)\nmatches\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/outputs/examples/benchmark_case_001.json')]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0841e548b37e5274006949be0cf24081938986d9ac1cd01a03",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0841e548b37e5274006949be0d350c8193885a75e13c066d3f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import json\np=Path('/mnt/data/outputs/examples/benchmark_case_001.json')\nprint(p.read_text()[:1000])\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "{\n  \"case_id\": \"benchmark_case_001\",\n  \"experiment\": {\n    \"name\": \"toy_ising_emergent_classicality\",\n    \"params\": {\n      \"burn_in\": 10,\n      \"coupling\": 1.0,\n      \"field\": 0.0,\n      \"n_spins\": 32,\n      \"seed\": 0,\n      \"sweeps\": 50,\n      \"temperature\": 2.0\n    }\n  }\n}\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0841e548b37e5274006949be0f3f888193afa04b946a2f4d6c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0841e548b37e5274006949be108df881939d938501ae38acad",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport re, json\nnames=set()\nfor p in Path('/mnt/data/src').rglob('*.py'):\n    txt=p.read_text(encoding='utf-8')\n    for m in re.finditer(r'NAME\\s*=\\s*[\\'\"]([^\\'\"]+)[\\'\"]', txt):\n        names.add(m.group(1))\nnames\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "set()"
+        }
+      ]
+    },
+    {
+      "id": "rs_0841e548b37e5274006949be13ba408193a9dcf4ebfaac0e9f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0841e548b37e5274006949be1413bc8193ae734f25f5605479",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "exp_dir=Path('/mnt/data/src/experiments')\nsorted([p.name for p in exp_dir.glob('*.py')])\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "['symbolic_rg.py',\n 'symbolic_rg_utils.py',\n 'toy_ising_emergent_classicality.py']"
+        }
+      ]
+    },
+    {
+      "id": "rs_0841e548b37e5274006949be161c748193ba61c31cd2172ea7",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0841e548b37e5274006949be1684c481939b7f2894d7fa0572",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "p=Path('/mnt/data/src/experiments/symbolic_rg.py')\nprint(p.read_text()[:1200])\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Symbolic renormalization group (RG) toy experiment.\n\nThis module provides a tiny, syntax-valid experiment implementation for the\nbenchmark pipeline. It is intentionally lightweight (no heavy symbolic algebra\ndependencies) while still behaving like a symbolic RG flow: it evolves a small\nset of coupling \"expressions\" across coarse-graining steps in a deterministic\nway.\n\nPublic API:\n- ExperimentConfig\n- default_config()\n- run_experiment(config=None)\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, asdict\nfrom typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union\n@dataclass(frozen=True)\nclass ExperimentConfig:\n    \"\"\"Configuration for the symbolic RG toy model.\"\"\"\n\n    # Couplings are keyed by simple monomial names (e.g. \"phi^2\", \"phi^4\").\n    couplings: Dict[str, float] = None  # populated by default_config()\n    steps: int = 4\n    scale_factor: float = 2.0\n    mixing_strength: float = 0.05  # small deterministic \"operator mixing\"\n\n    def to_dict(self) -> Dict[str, Any]:\n        d = asdict(self)\n        # dataclasses would include None as couplings if user constructs directly\n        if d[\"couplings\"] is None:\n            d[\"couplings\"\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0841e548b37e5274006949be18a6288193b81536cd1307db7d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0841e548b37e5274006949be195e248193aecb5d76eec07193",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(p.read_text())\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Symbolic renormalization group (RG) toy experiment.\n\nThis module provides a tiny, syntax-valid experiment implementation for the\nbenchmark pipeline. It is intentionally lightweight (no heavy symbolic algebra\ndependencies) while still behaving like a symbolic RG flow: it evolves a small\nset of coupling \"expressions\" across coarse-graining steps in a deterministic\nway.\n\nPublic API:\n- ExperimentConfig\n- default_config()\n- run_experiment(config=None)\n\"\"\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass, asdict\nfrom typing import Any, Dict, Iterable, List, Mapping, Optional, Tuple, Union\n@dataclass(frozen=True)\nclass ExperimentConfig:\n    \"\"\"Configuration for the symbolic RG toy model.\"\"\"\n\n    # Couplings are keyed by simple monomial names (e.g. \"phi^2\", \"phi^4\").\n    couplings: Dict[str, float] = None  # populated by default_config()\n    steps: int = 4\n    scale_factor: float = 2.0\n    mixing_strength: float = 0.05  # small deterministic \"operator mixing\"\n\n    def to_dict(self) -> Dict[str, Any]:\n        d = asdict(self)\n        # dataclasses would include None as couplings if user constructs directly\n        if d[\"couplings\"] is None:\n            d[\"couplings\"] = {}\n        return d\ndef default_config() -> ExperimentConfig:\n    \"\"\"Return a deterministic default configuration.\"\"\"\n    return ExperimentConfig(\n        couplings={\"phi^2\": 1.0, \"phi^4\": 0.1},\n        steps=4,\n        scale_factor=2.0,\n        mixing_strength=0.05,\n    )\n_MONOMIAL_RE = re.compile(r\"^(?P<field>[a-zA-Z_][a-zA-Z0-9_]*)\\^(?P<power>[0-9]+)$\")\n\n\ndef _parse_monomial(name: str) -> Tuple[str, int]:\n    \"\"\"Parse a monomial key like 'phi^4' into ('phi', 4).\"\"\"\n    m = _MONOMIAL_RE.match(name)\n    if not m:\n        raise ValueError(f\"Invalid coupling key: {name!r} (expected like 'phi^4')\")\n    return m.group(\"field\"), int(m.group(\"power\"))\ndef _validate(cfg: ExperimentConfig) -> None:\n    if cfg.couplings is None:\n        raise ValueError(\"couplings must be provided (or use default_config())\")\n    if cfg.steps < 0:\n        raise ValueError(\"steps must be >= 0\")\n    if cfg.scale_factor <= 1.0:\n        raise ValueError(\"scale_factor must be > 1\")\n    if cfg.mixing_strength < 0.0:\n        raise ValueError(\"mixing_strength must be >= 0\")\n    for k, v in cfg.couplings.items():\n        _parse_monomial(k)\n        if not isinstance(v, (int, float)):\n            raise TypeError(f\"Coupling {k!r} must be numeric, got {type(v).__name__}\")\ndef _rg_step(\n    couplings: Mapping[str, float], scale: float, mix: float\n) -> Dict[str, float]:\n    \"\"\"Perform a single toy RG step.\n\n    Rule (toy, deterministic):\n    - A monomial 'phi^n' rescales by scale**(2-n).\n    - A higher operator feeds into a lower one via a small mixing term:\n      phi^(n+2) contributes mix * coeff to phi^n.\n    \"\"\"\n    out: Dict[str, float] = {}\n    parsed: List[Tuple[str, int, float]] = []\n    for name, coeff in couplings.items():\n        field, power = _parse_monomial(name)\n        parsed.append((field, power, float(coeff)))\n\n    for field, power, coeff in parsed:\n        # naive engineering dimension in 2D: dim(phi^n) ~ n, so exponent (2-n)\n        rescaled = coeff * (scale ** (2 - power))\n        key = f\"{field}^{power}\"\n        out[key] = out.get(key, 0.0) + rescaled\n\n    # operator mixing: phi^(p) feeds into phi^(p-2) for p>=4\n    for field, power, coeff in parsed:\n        if power >= 4:\n            lower = f\"{field}^{power-2}\"\n            out[lower] = out.get(lower, 0.0) + mix * coeff\n\n    # small cleanup: drop near-zero entries for stable JSON outputs\n    out = {k: float(v) for k, v in out.items() if abs(v) > 1e-15}\n    return dict(sorted(out.items()))\ndef run_experiment(\n    config: Optional[Union[ExperimentConfig, Dict[str, Any]]] = None\n) -> Dict[str, Any]:\n    \"\"\"Run the symbolic RG flow and return JSON-serializable results.\"\"\"\n    if config is None:\n        cfg = default_config()\n    elif isinstance(config, ExperimentConfig):\n        cfg = config\n    elif isinstance(config, dict):\n        cfg = ExperimentConfig(**config)\n    else:\n        raise TypeError(\"config must be None, ExperimentConfig, or dict\")\n\n    _validate(cfg)\n\n    history: List[Dict[str, float]] = [dict(sorted({k: float(v) for k, v in cfg.couplings.items()}.items()))]\n    for _ in range(cfg.steps):\n        history.append(_rg_step(history[-1], cfg.scale_factor, cfg.mixing_strength))\n\n    # Simple \"fixed point\" heuristic: L2 norm of delta between last two steps.\n    if len(history) >= 2:\n        keys = sorted(set(history[-1]) | set(history[-2]))\n        delta2 = 0.0\n        for k in keys:\n            delta = history[-1].get(k, 0.0) - history[-2].get(k, 0.0)\n            delta2 += delta * delta\n        flow_norm = delta2 ** 0.5\n    else:\n        flow_norm = 0.0\n\n    return {\n        \"experiment\": \"symbolic_rg\",\n        \"config\": cfg.to_dict(),\n        \"observables\": {\n            \"couplings_by_step\": history,\n            \"final_couplings\": history[-1] if history else {},\n            \"flow_norm\": flow_norm,\n            \"n_steps\": cfg.steps,\n        },\n    }\n__all__ = [\"ExperimentConfig\", \"default_config\", \"run_experiment\"]\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0841e548b37e5274006949be1b365481938618ad995ff8ca9f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0841e548b37e5274006949be1d3ea88193b1233030b7acf49c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport re\ncli=Path('/mnt/data/qg_bench')\nprint([p.name for p in cli.iterdir()])\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "['cli.py']\n"
+        }
+      ]
+    },
+    {
+      "id": "ci_0841e548b37e5274006949be1f56a081939e7519ee083bb169",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(Path('/mnt/data/qg_bench/cli.py').read_text()[:400])\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"qg_bench CLI.\n\nThis module intentionally keeps a small, dependency-light surface so the\nbenchmark pipeline can invoke it reliably in minimal environments.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport sys\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, Optional, Tuple\nEXIT_OK = 0\nEXIT_RUNTIME_ERROR = 1\nEXIT_USAGE_ERROR = 2\nEXIT_VALIDATION_ERROR = 3\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0841e548b37e5274006949be216690819385df5bad8448b6df",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0841e548b37e5274006949be21af148193bce3749ae7038c39",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "txt=Path('/mnt/data/qg_bench/cli.py').read_text()\nfor pat in [\"toy_ising\",\"symbolic_rg\",\"experiments\"]:\n    print(pat, pat in txt)\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "toy_ising False\nsymbolic_rg False\nexperiments True\n"
+        }
+      ]
+    },
+    {
+      "id": "ci_0841e548b37e5274006949be2414d08193ab0bcd527e396743",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import re\nm=re.search(r\"def _load_experiment.*\", txt)\nprint(m.group(0) if m else None)\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "None\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0841e548b37e5274006949be27922c8193a505e5b1eed43434",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0841e548b37e5274006949be2acfe88193ad7fe2f6eddee0c2",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\ntarget_path = Path('/mnt/data').joinpath('outputs/examples/benchmark_case_002.json')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\npayload = {\n  \"case_id\": \"benchmark_case_002\",\n  \"experiment\": {\n    \"name\": \"symbolic_rg\",\n    \"params\": {\n      \"couplings\": {\"phi^2\": 0.8, \"phi^4\": 0.25, \"phi^6\": 0.02},\n      \"steps\": 3,\n      \"scale_factor\": 2.0,\n      \"mixing_strength\": 0.1\n    }\n  }\n}\ntext=json.dumps(payload, indent=2, sort_keys=False) + \"\\n\"\ntarget_path.write_text(text, encoding='utf-8')\nprint('FILE_WRITTEN:outputs/examples/benchmark_case_002.json')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:outputs/examples/benchmark_case_002.json\nDIR_STATE:[\"outputs/examples/benchmark_case_001.json\", \"outputs/examples/benchmark_case_002.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0841e548b37e5274006949be2fe09081939a1ec9eb68197171",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `outputs/examples/benchmark_case_002.json` as a second schema-style benchmark payload using the `symbolic_rg` experiment with representative non-default parameters."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

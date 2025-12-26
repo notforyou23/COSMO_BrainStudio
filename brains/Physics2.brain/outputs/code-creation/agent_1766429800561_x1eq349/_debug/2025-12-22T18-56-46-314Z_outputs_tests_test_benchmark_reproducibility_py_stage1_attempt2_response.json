@@ -1,0 +1,365 @@
+{
+  "content": "FILE_WRITTEN:outputs/tests/test_benchmark_reproducibility.py  \nDIR_STATE:[\"outputs/tests/test_benchmark_reproducibility.py\", \"outputs/tests/test_schema_conformance.py\"]\n\nAdded a pytest that recomputes the committed benchmark result artifact deterministically from its inputs and asserts the produced JSON matches the golden expected JSON exactly.",
+  "reasoning": "",
+  "responseId": "resp_0c08a887f1e98f780069499642ee088197a6f92a66931ec5c0",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 10285,
+    "input_tokens_details": {
+      "cached_tokens": 1280
+    },
+    "output_tokens": 2821,
+    "output_tokens_details": {
+      "reasoning_tokens": 2749
+    },
+    "total_tokens": 13106
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0c08a887f1e98f780069499643b7c08197b7ce402188fb6ce7",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c08a887f1e98f7800694996448898819799a24ff5cadfbbfa",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nlist(base.iterdir())[:10]\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/pyproject.toml'),\n PosixPath('/mnt/data/.github'),\n PosixPath('/mnt/data/outputs')]"
+        }
+      ]
+    },
+    {
+      "id": "ci_0c08a887f1e98f780069499646ad188197964116aa520acf08",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "outputs=base/\"outputs\"\nsorted([p.relative_to(base).as_posix() for p in outputs.rglob(\"*\")])[:50]\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "['outputs/README.md',\n 'outputs/examples',\n 'outputs/examples/benchmark_case_001.json',\n 'outputs/expected',\n 'outputs/expected/benchmark_case_001.expected.json',\n 'outputs/schemas',\n 'outputs/schemas/benchmark.schema.json',\n 'outputs/src',\n 'outputs/src/benchmarks',\n 'outputs/src/benchmarks/__init__.py',\n 'outputs/src/benchmarks/cli.py',\n 'outputs/src/benchmarks/compute.py',\n 'outputs/src/benchmarks/schema.py',\n 'outputs/tests',\n 'outputs/tests/test_schema_conformance.py']"
+        }
+      ]
+    },
+    {
+      "id": "rs_0c08a887f1e98f78006949964898a48197b1e53a22a0c2a82e",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c08a887f1e98f78006949964934d881978479b7cd49bd7813",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import textwrap, json\nprint((outputs/\"src/benchmarks/cli.py\").read_text()[:4000])\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Benchmarks CLI.\n\nThis CLI is used by developers and CI to generate deterministic benchmark\nartifacts under the repository's ``outputs/`` directory.\n\nTypical use:\n  python -m benchmarks.cli example\n\"\"\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport json\nfrom pathlib import Path\nfrom typing import Any, Dict, Optional, Sequence\n\nfrom . import compute as compute_mod\nfrom . import schema as schema_mod\ndef _outputs_dir() -> Path:\n    # outputs/src/benchmarks/cli.py -> outputs/\n    return Path(__file__).resolve().parents[2]\n\n\ndef _read_json(path: Path) -> Any:\n    return json.loads(path.read_text(encoding=\"utf-8\"))\n\n\ndef _write_json(path: Path, obj: Any) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    path.write_text(json.dumps(obj, indent=2, sort_keys=True) + \"\\n\", encoding=\"utf-8\")\ndef make_example_input() -> Dict[str, Any]:\n    \"\"\"Return a deterministic example benchmark input artifact.\"\"\"\n    return {\n        \"schema_version\": 1,\n        \"artifact\": \"benchmark_input\",\n        \"benchmark\": {\n            \"name\": \"example\",\n            \"cases\": [\n                {\"id\": \"case_a\", \"values\": [1, 2, 3, 4]},\n                {\"id\": \"case_b\", \"values\": [-2.5, 0, 2.5, 5]},\n            ],\n        },\n    }\n\n\ndef run_end_to_end(\n    *,\n    outdir: Path,\n    schema_path: Optional[Path] = None,\n    overwrite: bool = False,\n) -> Dict[str, Path]:\n    \"\"\"Generate example input+output JSON and validate them against schema.\"\"\"\n    outdir = outdir.resolve()\n    outdir.mkdir(parents=True, exist_ok=True)\n    schema_path = schema_path or schema_mod.default_schema_path()\n\n    input_path = outdir / \"example.input.json\"\n    output_path = outdir / \"example.output.json\"\n\n    if not overwrite and (input_path.exists() or output_path.exists()):\n        raise FileExistsError(f\"refusing to overwrite existing artifacts in {outdir}\")\n\n    input_obj = make_example_input()\n    schema_mod.validate_or_raise(input_obj, schema_path=schema_path)\n    _write_json(input_path, input_obj)\n\n    # Compute module also validates if schema exists; we validate explicitly for clear errors.\n    output_obj = compute_mod.compute(input_obj)\n    schema_mod.validate_or_raise(output_obj, schema_path=schema_path)\n    _write_json(output_path, output_obj)\n\n    return {\"input\": input_path, \"output\": output_path, \"schema\": schema_path}\ndef _cmd_example(args: argparse.Namespace) -> int:\n    outdir = Path(args.outdir) if args.outdir else (_outputs_dir() / \"benchmarks\")\n    paths = run_end_to_end(outdir=outdir, schema_path=Path(args.schema) if args.schema else None, overwrite=args.overwrite)\n    print(str(paths[\"input\"]))\n    print(str(paths[\"output\"]))\n    return 0\n\n\ndef _cmd_run(args: argparse.Namespace) -> int:\n    schema_path = Path(args.schema) if args.schema else None\n    compute_mod.run(Path(args.input), Path(args.output), schema_path=schema_path, validate_output=not args.no_validate_output)\n    print(str(Path(args.output)))\n    return 0\n\n\ndef _cmd_validate(args: argparse.Namespace) -> int:\n    schema_path = Path(args.schema) if args.schema else schema_mod.default_schema_path()\n    obj = _read_json(Path(args.path))\n    schema_mod.validate_or_raise(obj, schema_path=schema_path)\n    print(\"OK\")\n    return 0\ndef main(argv: Optional[Sequence[str]] = None) -> int:\n    p = argparse.ArgumentParser(prog=\"benchmarks\", description=__doc__)\n    sub = p.add_subparsers(dest=\"cmd\", required=True)\n\n    ex = sub.add_parser(\"example\", help=\"Generate deterministic example artifacts under outputs/\")\n    ex.add_argument(\"--outdir\", default=None, help=\"Output directory (default: outputs/benchmarks)\")\n    ex.add_argument(\"--schema\", default=None, help=\"Optional schema path (default: outputs/schemas/benchmark.schema.json)\")\n    ex.add_argument(\"--overwrite\", action=\"store_true\", help=\"Overwrite existing artifacts\")\n    ex.set_defaults(func=_cmd_example)\n\n    run = sub.add_parser(\"run\", help=\"Run benchmark from an input JSON to an output JSON\")\n    run.add_argument(\"input\", help=\"Path\n"
+        }
+      ]
+    },
+    {
+      "id": "ci_0c08a887f1e98f78006949964c26c48197b55fbf32698d98de",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((outputs/\"src/benchmarks/cli.py\").read_text()[4000:8000])\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": " to benchmark input JSON\")\n    run.add_argument(\"output\", help=\"Path to write benchmark output JSON\")\n    run.add_argument(\"--schema\", default=None, help=\"Optional schema path\")\n    run.add_argument(\"--no-validate-output\", action=\"store_true\", help=\"Skip output validation\")\n    run.set_defaults(func=_cmd_run)\n\n    val = sub.add_parser(\"validate\", help=\"Validate a JSON artifact against the benchmark schema\")\n    val.add_argument(\"path\", help=\"Path to JSON file to validate\")\n    val.add_argument(\"--schema\", default=None, help=\"Optional schema path\")\n    val.set_defaults(func=_cmd_validate)\n\n    args = p.parse_args(argv)\n    return int(args.func(args))\n\n\nif __name__ == \"__main__\":  # pragma: no cover\n    raise SystemExit(main())\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0c08a887f1e98f78006949964e19108197946300ed603952bb",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c08a887f1e98f78006949964e58e881978f3d10a30396e92e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((outputs/\"src/benchmarks/compute.py\").read_text()[:4000])\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Deterministic benchmark computation.\n\nThis module reads a benchmark input JSON, validates it (optionally via JSON\nSchema), computes deterministic summary statistics, and writes a normalized\noutput JSON.\n\nThe intention is to provide a stable end-to-end artifact for CI.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport hashlib\nimport json\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence, Tuple\n\ntry:  # Optional dependency; tests/CI are expected to install it.\n    import jsonschema  # type: ignore\nexcept Exception:  # pragma: no cover\n    jsonschema = None  # type: ignore\nNumber = float\n\n\ndef _read_json(path: Path) -> Any:\n    return json.loads(path.read_text(encoding=\"utf-8\"))\n\n\ndef _write_json(path: Path, obj: Any) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    path.write_text(json.dumps(obj, indent=2, sort_keys=True) + \"\\n\", encoding=\"utf-8\")\n\n\ndef _default_schema_path() -> Path:\n    # outputs/src/benchmarks/compute.py -> outputs/schemas/benchmark.schema.json\n    return Path(__file__).resolve().parents[2] / \"schemas\" / \"benchmark.schema.json\"\n\n\ndef _validate_with_schema(instance: Any, schema_path: Path) -> None:\n    if jsonschema is None:\n        raise RuntimeError(\"jsonschema is required for validation but is not installed.\")\n    schema = _read_json(schema_path)\n    jsonschema.validate(instance=instance, schema=schema)\ndef _as_number_list(values: Any, case_id: str) -> List[Number]:\n    if not isinstance(values, list) or not values:\n        raise ValueError(f\"case {case_id!r} must have non-empty list 'values'\")\n    out: List[Number] = []\n    for v in values:\n        if isinstance(v, bool) or not isinstance(v, (int, float)):\n            raise ValueError(f\"case {case_id!r} contains non-numeric value: {v!r}\")\n        out.append(float(v))\n    return out\n\n\ndef _stats(values: Sequence[Number]) -> Dict[str, Any]:\n    n = len(values)\n    s = float(sum(values))\n    mn = float(min(values))\n    mx = float(max(values))\n    mean = s / n\n    # Deterministic \"signature\" so tests can detect any ordering changes.\n    h = hashlib.sha256((\",\".join(f\"{x:.12g}\" for x in values)).encode(\"utf-8\")).hexdigest()\n    return {\n        \"count\": n,\n        \"sum\": s,\n        \"mean\": mean,\n        \"min\": mn,\n        \"max\": mx,\n        \"sha256\": h,\n    }\ndef compute(input_obj: Mapping[str, Any]) -> Dict[str, Any]:\n    \"\"\"Compute a normalized output artifact from an input artifact.\"\"\"\n    if not isinstance(input_obj, Mapping):\n        raise TypeError(\"benchmark input must be a JSON object\")\n\n    benchmark = input_obj.get(\"benchmark\")\n    if not isinstance(benchmark, Mapping):\n        raise ValueError(\"input must contain object field 'benchmark'\")\n    name = benchmark.get(\"name\")\n    if not isinstance(name, str) or not name:\n        raise ValueError(\"benchmark.name must be a non-empty string\")\n    cases = benchmark.get(\"cases\")\n    if not isinstance(cases, list) or not cases:\n        raise ValueError(\"benchmark.cases must be a non-empty list\")\n\n    out_cases: List[Dict[str, Any]] = []\n    for i, c in enumerate(cases):\n        if not isinstance(c, Mapping):\n            raise ValueError(f\"case at index {i} must be an object\")\n        cid = c.get(\"id\", str(i))\n        if not isinstance(cid, str) or not cid:\n            raise ValueError(f\"case at index {i} has invalid 'id'\")\n        values = _as_number_list(c.get(\"values\"), cid)\n        out_cases.append({\"id\": cid, \"values\": values, \"stats\": _stats(values)})\n\n    # Normalize: stable ordering and canonical floats (via json dumps later).\n    out_cases.sort(key=lambda x: x[\"id\"])\n\n    total_values = [v for c in out_cases for v in c[\"values\"]]\n    output: Dict[str, Any] = {\n        \"schema_version\": input_obj.get(\"schema_version\", 1),\n        \"artifact\": \"benchmark_output\",\n        \"benchmark\": {\n            \"name\": name,\n            \"case_count\": len(out_cases),\n            \"cases\": out_cases,\n            \"overall\": _stats(total_values\n"
+        }
+      ]
+    },
+    {
+      "id": "ci_0c08a887f1e98f7800694996502960819795202b46a7eec7e3",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((outputs/\"src/benchmarks/compute.py\").read_text()[4000:8000])\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "),\n        },\n    }\n    return output\ndef run(\n    input_path: Path,\n    output_path: Path,\n    schema_path: Optional[Path] = None,\n    validate_output: bool = True,\n) -> Dict[str, Any]:\n    input_obj = _read_json(input_path)\n    schema_path = schema_path or _default_schema_path()\n    if schema_path.exists():\n        _validate_with_schema(input_obj, schema_path)\n    output_obj = compute(input_obj)\n    if validate_output and schema_path.exists():\n        _validate_with_schema(output_obj, schema_path)\n    _write_json(output_path, output_obj)\n    return output_obj\n\n\ndef main(argv: Optional[Sequence[str]] = None) -> int:\n    p = argparse.ArgumentParser(description=__doc__)\n    p.add_argument(\"input\", type=Path, help=\"Path to benchmark input JSON\")\n    p.add_argument(\"output\", type=Path, help=\"Path to write benchmark output JSON\")\n    p.add_argument(\"--schema\", type=Path, default=None, help=\"Optional JSON Schema path\")\n    p.add_argument(\"--no-validate-output\", action=\"store_true\", help=\"Skip output validation\")\n    args = p.parse_args(argv)\n    run(args.input, args.output, schema_path=args.schema, validate_output=not args.no_validate_output)\n    return 0\n\n\nif __name__ == \"__main__\":  # pragma: no cover\n    raise SystemExit(main())\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0c08a887f1e98f78006949965201e081978021a143d57b5aa3",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c08a887f1e98f7800694996524db48197b51f23e1f6ed03ec",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import json, pathlib\ninp=json.loads((outputs/\"examples/benchmark_case_001.json\").read_text())\nexp=json.loads((outputs/\"expected/benchmark_case_001.expected.json\").read_text())\ninp, exp.keys()\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "({'schema_version': '1.0.0',\n  'case_id': 'benchmark_case_001',\n  'name': 'Basic statistics on small integer dataset',\n  'description': 'Deterministic end-to-end benchmark: compute basic statistics on a small integer vector.',\n  'computation': {'type': 'basic_statistics',\n   'version': 'v1',\n   'parameters': {'variance': 'population'}},\n  'inputs': {'data': [1, 2, 3, 4, 5]},\n  'expected_outputs': {'count': 5,\n   'sum': 15,\n   'mean': 3.0,\n   'min': 1,\n   'max': 5,\n   'variance': 2.0,\n   'std_dev': 1.4142135623730951},\n  'comparison': {'numeric_tolerance': {'abs': 1e-12, 'rel': 1e-12}}},\n dict_keys(['artifact_type', 'case_id', 'checksums', 'created_utc', 'inputs', 'name', 'results', 'schema_version']))"
+        }
+      ]
+    },
+    {
+      "id": "rs_0c08a887f1e98f78006949965460308197a9d3f80ded6233b6",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c08a887f1e98f780069499654b96c8197b33423981ec02a78",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((outputs/\"schemas/benchmark.schema.json\").read_text()[:4000])\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"$id\": \"https://example.invalid/schemas/benchmark.schema.json\",\n  \"title\": \"Benchmark Artifact Schema\",\n  \"type\": \"object\",\n  \"additionalProperties\": false,\n  \"required\": [\n    \"schema_version\",\n    \"case_id\",\n    \"input\",\n    \"expected_output\"\n  ],\n  \"properties\": {\n    \"schema_version\": {\n      \"type\": \"string\",\n      \"description\": \"Version of this benchmark artifact schema.\",\n      \"pattern\": \"^\\\\d+\\\\.\\\\d+\\\\.\\\\d+$\"\n    },\n    \"case_id\": {\n      \"type\": \"string\",\n      \"description\": \"Stable identifier for this benchmark case.\",\n      \"pattern\": \"^[A-Za-z0-9][A-Za-z0-9_\\\\-\\\\.]{2,128}$\"\n    },\n    \"description\": {\n      \"type\": \"string\"\n    },\n    \"created_at\": {\n      \"type\": \"string\",\n      \"format\": \"date-time\"\n    },\n    \"metadata\": {\n      \"type\": \"object\",\n      \"description\": \"Free-form metadata not used for computation; values must be JSON-serializable scalars.\",\n      \"additionalProperties\": {\n        \"type\": [\n          \"string\",\n          \"number\",\n          \"integer\",\n          \"boolean\",\n          \"null\"\n        ]\n      }\n    },\n    \"input\": {\n      \"type\": \"object\",\n      \"additionalProperties\": false,\n      \"required\": [\n        \"numbers\"\n      ],\n      \"properties\": {\n        \"numbers\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"number\"\n          },\n          \"minItems\": 1,\n          \"description\": \"Numeric inputs to the reference computation.\"\n        }\n      }\n    },\n    \"expected_output\": {\n      \"type\": \"object\",\n      \"additionalProperties\": false,\n      \"required\": [\n        \"sum\",\n        \"mean\"\n      ],\n      \"properties\": {\n        \"sum\": {\n          \"type\": \"number\"\n        },\n        \"mean\": {\n          \"type\": \"number\"\n        },\n        \"tolerance\": {\n          \"type\": \"number\",\n          \"minimum\": 0,\n          \"description\": \"Optional absolute tolerance to use when comparing floating-point outputs.\"\n        }\n      }\n    },\n    \"computed_output\": {\n      \"type\": \"object\",\n      \"description\": \"Optional field for storing locally computed outputs; not required for conformance.\",\n      \"additionalProperties\": true\n    }\n  }\n}\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0c08a887f1e98f780069499656cdf0819792084741f25f4905",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c08a887f1e98f780069499657390481979528215e7b16cf57",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((outputs/\"tests/test_schema_conformance.py\").read_text())\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "from __future__ import annotations\n\nfrom pathlib import Path\nfrom typing import Any, Dict, List, Mapping, Tuple\n\nimport pytest\nfrom jsonschema import Draft202012Validator, ValidationError\n\n\ndef _outputs_dir() -> Path:\n    return Path(__file__).resolve().parents[1]\n\n\ndef _load_json(path: Path) -> Any:\n    import json\n\n    return json.loads(path.read_text(encoding=\"utf-8\"))\n\n\n@pytest.fixture(scope=\"session\")\ndef schema() -> Mapping[str, Any]:\n    schema_path = _outputs_dir() / \"schemas\" / \"benchmark.schema.json\"\n    return _load_json(schema_path)\n\n\ndef _validate(instance: Any, schema: Mapping[str, Any]) -> None:\n    Draft202012Validator.check_schema(schema)\n    Draft202012Validator(schema).validate(instance)\n\n\ndef _compute(numbers: List[float]) -> Dict[str, float]:\n    total = float(sum(numbers))\n    mean = total / float(len(numbers))\n    return {\"sum\": total, \"mean\": mean}\n\n\ndef _example_artifact(numbers: List[float]) -> Dict[str, Any]:\n    computed = _compute(numbers)\n    return {\n        \"schema_version\": \"1.0.0\",\n        \"case_id\": \"example_case_001\",\n        \"input\": {\"numbers\": numbers},\n        \"expected_output\": {\"sum\": computed[\"sum\"], \"mean\": computed[\"mean\"], \"tolerance\": 0.0},\n        \"computed_output\": computed,\n    }\n@pytest.mark.parametrize(\n    \"numbers\",\n    [\n        [1, 2, 3, 4],\n        [0.5, 1.5, 2.5],\n        [-1.0, 0.0, 1.0],\n    ],\n)\ndef test_example_artifact_conforms_to_schema(schema: Mapping[str, Any], numbers: List[float]) -> None:\n    artifact = _example_artifact(numbers)\n    _validate(artifact, schema)\n\n\ndef test_schema_rejects_unknown_top_level_keys(schema: Mapping[str, Any]) -> None:\n    artifact = _example_artifact([1, 2, 3])\n    artifact[\"unexpected\"] = True\n    with pytest.raises(ValidationError):\n        _validate(artifact, schema)\n\n\ndef test_reference_computation_matches_expected_output(schema: Mapping[str, Any]) -> None:\n    artifact = _example_artifact([1.0, 2.0, 3.0, 4.0])\n    _validate(artifact, schema)\n\n    tol = float(artifact[\"expected_output\"].get(\"tolerance\", 0.0))\n    computed = _compute(list(artifact[\"input\"][\"numbers\"]))\n    assert abs(computed[\"sum\"] - float(artifact[\"expected_output\"][\"sum\"])) <= tol\n    assert abs(computed[\"mean\"] - float(artifact[\"expected_output\"][\"mean\"])) <= tol\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0c08a887f1e98f78006949965984cc8197b0b454fca34e86de",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c08a887f1e98f78006949965a3a4c819784480603d2da20da",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((outputs/\"README.md\").read_text()[:4000])\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "# Outputs: benchmarks, schemas, and tests\n\nThis repository is designed to be runnable end-to-end: a small benchmark artifact (JSON) is validated against a JSON Schema and a reference computation is re-run to ensure the expected outputs are reproducible.\n\n## What lives under `outputs/`\n\n- `outputs/schemas/`\n  - `benchmark.schema.json`: JSON Schema describing the required structure of benchmark artifacts.\n- `outputs/examples/`\n  - `benchmark_case_001.json`: A minimal example benchmark case used by tests/CI.\n- `outputs/README.md` (this file): How to run the benchmark workflow and test suite.\n\n## Local setup\n\nThis project uses a standard Python tooling stack:\n- `pytest` for tests\n- `jsonschema` for schema validation\n\nCreate a virtual environment and install dependencies (choose one approach):\n\n### Option A: `pip` (recommended for CI parity)\n\n```bash\npython -m venv .venv\n# Linux/macOS:\nsource .venv/bin/activate\n# Windows (PowerShell):\n# .venv\\Scripts\\Activate.ps1\n\npython -m pip install -U pip\npython -m pip install -e .\n```\n\n### Option B: `pip` without editable install\n\n```bash\npython -m pip install -U pip\npython -m pip install -r requirements.txt\n```\n\n(If your project does not ship a `requirements.txt`, use Option A.)\n\n## Run the full test suite\n\nFrom the repository root:\n\n```bash\npytest -q\n```\n\nThe tests are expected to:\n1. Load `outputs/examples/benchmark_case_001.json`\n2. Validate it against `outputs/schemas/benchmark.schema.json`\n3. Recompute the benchmark outputs deterministically\n4. Compare the recomputed outputs to the expected outputs embedded in the example JSON\n\nIf any of these steps fail, `pytest` exits non-zero (and CI will fail).\n\n## How CI runs\n\nGitHub Actions (see `.github/workflows/ci.yml`) runs essentially the same commands:\n\n1. Set up the requested Python version\n2. Install the project (and test dependencies)\n3. Run `pytest`\n\nCI is intended to catch:\n- Schema changes that invalidate existing benchmark artifacts\n- Logic changes that break reproducibility of the example benchmark computation\n- Accidental edits to expected outputs\n\n## Notes on reproducibility\n\n- Benchmark example JSON files should be fully self-contained and deterministic:\n  - Avoid timestamps, random seeds without fixed values, or environment-dependent behavior.\n- When updating the computation logic, update the example artifact only when the new outputs are intended and reviewed. Schema validation should still pass.\n\n## Troubleshooting\n\n- If schema validation fails: inspect the validation error path and compare your example JSON to `outputs/schemas/benchmark.schema.json`.\n- If output comparison fails: ensure the computation uses only the inputs in the benchmark JSON and is deterministic across platforms.\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0c08a887f1e98f78006949965c090081979e3581cb81175951",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c08a887f1e98f78006949965e1a6c8197b847471d8f5bdab2",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((outputs/\"examples/benchmark_case_001.json\").read_text())\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "{\n  \"schema_version\": \"1.0.0\",\n  \"case_id\": \"benchmark_case_001\",\n  \"name\": \"Basic statistics on small integer dataset\",\n  \"description\": \"Deterministic end-to-end benchmark: compute basic statistics on a small integer vector.\",\n  \"computation\": {\n    \"type\": \"basic_statistics\",\n    \"version\": \"v1\",\n    \"parameters\": {\n      \"variance\": \"population\"\n    }\n  },\n  \"inputs\": {\n    \"data\": [\n      1,\n      2,\n      3,\n      4,\n      5\n    ]\n  },\n  \"expected_outputs\": {\n    \"count\": 5,\n    \"sum\": 15,\n    \"mean\": 3.0,\n    \"min\": 1,\n    \"max\": 5,\n    \"variance\": 2.0,\n    \"std_dev\": 1.4142135623730951\n  },\n  \"comparison\": {\n    \"numeric_tolerance\": {\n      \"abs\": 1e-12,\n      \"rel\": 1e-12\n    }\n  }\n}\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0c08a887f1e98f78006949966074508197a9a1559fbb480047",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c08a887f1e98f780069499662e68c819791fa015a16df26b3",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((outputs/\"src/benchmarks/schema.py\").read_text()[:2000])\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Schema loading and JSON Schema validation helpers.\n\nThese utilities are shared by the CLI and the automated test suite.\nThey intentionally keep I/O and error messages deterministic to make CI reliable.\n\"\"\"\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Optional, Union\n\nimport json\n\nfrom jsonschema import FormatChecker, ValidationError, validators\nJSONMapping = Dict[str, Any]\n\n\n@dataclass(frozen=True)\nclass SchemaValidationResult:\n    \"\"\"Result of a schema validation run.\"\"\"\n\n    valid: bool\n    errors: List[str]\ndef default_schema_path(filename: str = \"benchmark.schema.json\") -> Path:\n    \"\"\"Return the default schema location within the repository layout.\n\n    Assumes this file lives at: outputs/src/benchmarks/schema.py and the schema at\n    outputs/schemas/<filename>.\n    \"\"\"\n    outputs_dir = Path(__file__).resolve().parents[2]\n    return outputs_dir / \"schemas\" / filename\ndef load_schema(path: Optional[Union[str, Path]] = None) -> JSONMapping:\n    \"\"\"Load and parse a JSON Schema file.\n\n    Args:\n        path: Optional path to a schema JSON file. If omitted, uses the default\n            schema location.\n\n    Raises:\n        FileNotFoundError: if the schema path does not exist.\n        json.JSONDecodeError: if the schema file is not valid JSON.\n    \"\"\"\n    schema_path = Path(path) if path is not None else default_schema_path()\n    text = schema_path.read_text(encoding=\"utf-8\")\n    return json.loads(text)\ndef _validator_for_schema(schema: JSONMapping):\n    \"\"\"Construct an appropriate jsonschema validator for the given schema.\"\"\"\n    cls = validators.validator_for(schema)\n    cls.check_schema(schema)\n    return cls(schema, format_checker=FormatChecker())\ndef iter_validation_errors(\n    instance: Any,\n    *,\n    schema: Optional[JSONMapping] = None,\n    schema_path: Optional[Union[str, Path]] = None,\n) -> Iterable[ValidationError]:\n    \"\"\"Yield JSON Schema validation error\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0c08a887f1e98f780069499664c7ac8197a7db0a9ce20918fe",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c08a887f1e98f780069499668074c8197ae1cfd87d48660fa",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import re, os\nmatches=[]\nfor p in (outputs/\"src\").rglob(\"*.py\"):\n    txt=p.read_text()\n    if \"basic_statistics\" in txt or \"variance\" in txt or \"std_dev\" in txt:\n        matches.append(p)\nmatches\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0c08a887f1e98f78006949966aa36c81979e4dc84b81c723e8",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c08a887f1e98f78006949966c033c819792c83d9a73b120df",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print((outputs/\"expected/benchmark_case_001.expected.json\").read_text()[:4000])\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "{\n  \"artifact_type\": \"benchmark_result\",\n  \"case_id\": \"benchmark_case_001\",\n  \"checksums\": {\n    \"series_sha256\": \"ef58d7c6937c627ace93d94e1045c06ff884c23bbb9f4aa5c1bb276842be4629\"\n  },\n  \"created_utc\": \"2025-01-01T00:00:00Z\",\n  \"inputs\": {\n    \"series\": [\n      1,\n      2,\n      3,\n      4,\n      5,\n      6,\n      7,\n      8,\n      9,\n      10\n    ],\n    \"weights\": [\n      1,\n      1,\n      1,\n      1,\n      1,\n      1,\n      1,\n      1,\n      1,\n      1\n    ]\n  },\n  \"name\": \"Deterministic toy benchmark: summary statistics over fixed numeric series\",\n  \"results\": {\n    \"count\": 10,\n    \"max\": 10.0,\n    \"mean\": 5.5,\n    \"min\": 1.0,\n    \"population_stddev\": 2.8722813232690143,\n    \"population_variance\": 8.25,\n    \"sum\": 55.0,\n    \"weighted_mean\": 5.5\n  },\n  \"schema_version\": \"1.0.0\"\n}\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0c08a887f1e98f78006949966e25588197a0e0aee0c11ec37c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c08a887f1e98f78006949967746b0819792f90b3d6225703d",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import hashlib, json, math\nexpected=json.loads((outputs/\"expected/benchmark_case_001.expected.json\").read_text())\nseries=expected[\"inputs\"][\"series\"]\ndef sha_join(fmt):\n    s=\",\".join(fmt(x) for x in series)\n    return hashlib.sha256(s.encode()).hexdigest()\nsha_join(lambda x:str(x))[:10], expected[\"checksums\"][\"series_sha256\"][:10]\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "('d10434d8c3', 'ef58d7c693')"
+        }
+      ]
+    },
+    {
+      "id": "rs_0c08a887f1e98f780069499679fcb881979eb4f645088106c9",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c08a887f1e98f78006949967ab6448197a67aea9a62e3833b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "hashlib.sha256(json.dumps(series, separators=(\",\",\":\"), sort_keys=True).encode()).hexdigest()[:10], expected[\"checksums\"][\"series_sha256\"][:10]\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "('ef58d7c693', 'ef58d7c693')"
+        }
+      ]
+    },
+    {
+      "id": "rs_0c08a887f1e98f78006949967d2bfc81979852f61d76f68a20",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c08a887f1e98f78006949967f292c8197b806c299ad3c35ce",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "series=[float(x) for x in series]\nmean=sum(series)/len(series)\nvar=sum((x-mean)**2 for x in series)/len(series)\nstd=math.sqrt(var)\nmean,var,std\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(5.5, 8.25, 2.8722813232690143)"
+        }
+      ]
+    },
+    {
+      "id": "rs_0c08a887f1e98f78006949968210ac8197984154805bd127b4",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c08a887f1e98f780069499685b0d081978260517e238b0f2a",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, math, hashlib\ntarget_path = Path('/mnt/data').joinpath('outputs/tests/test_benchmark_reproducibility.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\"\"\"from __future__ import annotations\n\nimport hashlib\nimport json\nimport math\nfrom pathlib import Path\nfrom typing import Any, Dict, List, Mapping\n\nimport pytest\n\n\ndef _outputs_dir() -> Path:\n    # outputs/tests/... -> outputs/\n    return Path(__file__).resolve().parents[1]\n\n\ndef _load_json(path: Path) -> Any:\n    return json.loads(path.read_text(encoding=\"utf-8\"))\n\n\ndef _sha256_canonical_json(obj: Any) -> str:\n    payload = json.dumps(obj, separators=(\",\", \":\"), sort_keys=True).encode(\"utf-8\")\n    return hashlib.sha256(payload).hexdigest()\n\n\ndef _population_variance(xs: List[float], mean: float) -> float:\n    return sum((x - mean) ** 2 for x in xs) / float(len(xs))\n\n\ndef _weighted_mean(xs: List[float], ws: List[float]) -> float:\n    denom = float(sum(ws))\n    if denom == 0.0:\n        raise ValueError(\"sum(weights) must be non-zero\")\n    return float(sum(w * x for w, x in zip(ws, xs))) / denom\n\n\ndef _compute_result_artifact(case: Mapping[str, Any]) -> Dict[str, Any]:\n    series = [float(x) for x in case[\"inputs\"][\"series\"]]\n    weights = [float(w) for w in case[\"inputs\"][\"weights\"]]\n    if len(series) != len(weights):\n        raise ValueError(\"series and weights must have same length\")\n    if not series:\n        raise ValueError(\"series must be non-empty\")\n\n    total = float(sum(series))\n    mean = total / float(len(series))\n    var = _population_variance(series, mean)\n    std = float(math.sqrt(var))\n    wmean = _weighted_mean(series, weights)\n\n    return {\n        \"artifact_type\": \"benchmark_result\",\n        \"case_id\": case[\"case_id\"],\n        \"checksums\": {\"series_sha256\": _sha256_canonical_json(case[\"inputs\"][\"series\"])},\n        \"created_utc\": case[\"created_utc\"],\n        \"inputs\": {\"series\": case[\"inputs\"][\"series\"], \"weights\": case[\"inputs\"][\"weights\"]},\n        \"name\": case[\"name\"],\n        \"results\": {\n            \"count\": len(series),\n            \"max\": float(max(series)),\n            \"mean\": mean,\n            \"min\": float(min(series)),\n            \"population_stddev\": std,\n            \"population_variance\": var,\n            \"sum\": total,\n            \"weighted_mean\": wmean,\n        },\n        \"schema_version\": case[\"schema_version\"],\n    }\n\n\n@pytest.mark.parametrize(\n    \"expected_path\",\n    [Path(\"expected\") / \"benchmark_case_001.expected.json\"],\n)\ndef test_benchmark_computation_reproduces_golden_expected_json(expected_path: Path) -> None:\n    expected_full_path = _outputs_dir() / expected_path\n    expected = _load_json(expected_full_path)\n\n    computed = _compute_result_artifact(expected)\n\n    # Exact structural equality: keys/values must match the committed golden file.\n    assert computed == expected\n\"\"\"]\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:outputs/tests/test_benchmark_reproducibility.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:outputs/tests/test_benchmark_reproducibility.py\nDIR_STATE:[\"outputs/tests/test_benchmark_reproducibility.py\", \"outputs/tests/test_schema_conformance.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0c08a887f1e98f78006949968f5dec81978a16dd7a3282ecc2",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c08a887f1e98f78006949969031b481979b2427c6e7f6d0fd",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import subprocess, textwrap, os, sys, json, pathlib, shlex, re\nres=subprocess.run([\"pytest\",\"-q\"],cwd=\"/mnt/data\",capture_output=True,text=True)\nres.returncode, res.stdout, res.stderr[:3000]\n",
+      "container_id": "cntr_6949946c70308190aa4b76eaffb9e4c007ebf24b1fd8b741",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(0,\n '\\x1b[32m.\\x1b[0m\\x1b[32m.\\x1b[0m\\x1b[32m.\\x1b[0m\\x1b[32m.\\x1b[0m\\x1b[32m.\\x1b[0m\\x1b[32m.\\x1b[0m\\x1b[33m                                                                   [100%]\\x1b[0m\\n\\x1b[33m=============================== warnings summary ===============================\\x1b[0m\\n../../home/sandbox/.local/lib/python3.11/site-packages/_pytest/config/__init__.py:1507\\n  /home/sandbox/.local/lib/python3.11/site-packages/_pytest/config/__init__.py:1507: PytestConfigWarning: No files were found in testpaths; consider removing or adjusting your testpaths configuration. Searching recursively from the current directory instead.\\n    self.args, self.args_source = self._decide_args(\\n\\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\\n',\n \"/home/sandbox/.local/lib/python3.11/site-packages/ddtrace/vendor/psutil/_pslinux.py:527: RuntimeWarning: 'sin' and 'sout' swap memory stats couldn't be determined and were set to 0 ([Errno 2] No such file or directory: '/proc/vmstat')\\n  warnings.warn(msg, RuntimeWarning)\\n\")"
+        }
+      ]
+    },
+    {
+      "id": "msg_0c08a887f1e98f78006949969781fc81979bc7fd033b5aa84c",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_WRITTEN:outputs/tests/test_benchmark_reproducibility.py  \nDIR_STATE:[\"outputs/tests/test_benchmark_reproducibility.py\", \"outputs/tests/test_schema_conformance.py\"]\n\nAdded a pytest that recomputes the committed benchmark result artifact deterministically from its inputs and asserts the produced JSON matches the golden expected JSON exactly."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

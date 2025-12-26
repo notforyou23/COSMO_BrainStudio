@@ -1,0 +1,44 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add a CI/pytest smoke test that imports key modules (including cosmo_contracts.markdown) to prevent regressions; fix the reported syntax error(s) and confirm `python -c 'import ...'` succeeds for all public entrypoints.
+Project: generated_library_1766440776859 (python library)
+
+Target file details:
+- Path: src/cosmo_contracts/markdown.py
+- Purpose: Fix and fully implement the cosmo_contracts.markdown module with valid syntax and a stable public API so it can be imported in smoke tests and by users.
+- Category: source
+
+Other planned files (for context only):
+- tests/test_import_smoke.py: Pytest smoke test that imports all public entrypoints (including cosmo_contracts.markdown) and fails fast on any ImportError or SyntaxError regression.
+- .github/workflows/ci.yml: GitHub Actions CI workflow that installs the package and runs pytest (including the import smoke test) on supported Python versions to prevent future import/syntax regressions.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-22T21-50-52-771Z_src_cosmo_contracts_markdown_py_stage1_attempt1_prompt.txt from code-creation agent agent_176644024
+- [AGENT: agent_1766430411939_w8zvs5v] {"agentId":"agent_1766430411939_w8zvs5v","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766432552135_37yovma] {"agentId":"agent_1766432552135_37yovma","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766438283976_puyw9gc] {"agentId":"agent_1766438283976_puyw9gc","goalId":"routing_code_1766438283975_nh5nje8","containerId":"c
+- [AGENT: agent_1766438409884_82yeh6g] {"agentId":"agent_1766438409884_82yeh6g","goalId":"goal_7","containerId":"cntr_6949b60f62d4819083834ab5
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Fix and fully implement the cosmo_contracts.markdown module with valid syntax and a stable public API so it can be imported in smoke tests and by users.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/cosmo_contracts/markdown.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/cosmo_contracts/markdown.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/cosmo_contracts/markdown.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

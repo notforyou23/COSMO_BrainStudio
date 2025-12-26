@@ -1,0 +1,45 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Generate two output artifacts in the repository: (1) /outputs/coverage_matrix.csv (or .md table) that enumerates the Mathematics domain, its subtopics, and artifact types with an initial population of cells (coverage status, counts, and cross-link pointers); and (2) /outputs/eval_loop.md defining a 5-cycle review cadence, measurable metrics (artifact count, cross-links, coverage gaps), and explicit decision rules that determine what to produce next. Implement the CSV/MD file in a script-friendly, machine- and human-readable layout and include minimal inline examples and instructions for how future agents should update the matrix and use the eval loop.
+Project: generated_script_1766540571298 (python script)
+
+Target file details:
+- Path: scripts/generate_outputs.py
+- Purpose: Python script that generates outputs/coverage_matrix.csv (and a Markdown table variant) plus outputs/eval_loop.md with a 5-cycle review cadence, measurable metrics, decision rules, and inline examples/instructions for future updates.
+- Category: source
+
+Reference insights:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [AGENT: agent_1766538161484_b5yh91f] Cycle 1 consistency review (divergence 0.97):
+Summary (high-level): The three branches are about differ
+- [AGENT: agent_1766540049057_egk6x7y] {"agentId":"agent_1766540049057_egk6x7y","goalId":"goal_4","containerId":"cntr_694b4314fdec8190b56501a8
+- [AGENT: agent_1766539771836_cunrzw4] {"agentId":"agent_1766539771836_cunrzw4","goalId":"goal_50","containerId":"cntr_694b4200ed708190b1f3a92
+- [AGENT: agent_1766539198393_s2saqmc] {"agentId":"agent_1766539198393_s2saqmc","goalId":"goal_35","containerId":"cntr_694b3fc5e9348190afa41c8
+
+Key requirements:
+- examples
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Python script that generates outputs/coverage_matrix.csv (and a Markdown table variant) plus outputs/eval_loop.md with a 5-cycle review cadence, measurable metrics, decision rules, and inline examples/instructions for future updates.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/generate_outputs.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/generate_outputs.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/generate_outputs.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

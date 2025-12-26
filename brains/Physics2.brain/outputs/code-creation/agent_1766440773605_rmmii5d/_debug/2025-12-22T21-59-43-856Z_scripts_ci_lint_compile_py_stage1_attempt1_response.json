@@ -1,0 +1,56 @@
+{
+  "content": "Created `scripts/ci_lint_compile.py`, a CI helper that runs ruff/black checks when available, performs AST parsing and `compileall` compilation passes, optionally smoke-imports the root package, and writes detailed logs under `artifacts/ci_lint_compile` for artifact upload on failure.",
+  "reasoning": "",
+  "responseId": "resp_09b85c76fb36e951006949bf674fc4819484c264c1704810ae",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3290,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1755,
+    "output_tokens_details": {
+      "reasoning_tokens": 290
+    },
+    "total_tokens": 5045
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_09b85c76fb36e951006949bf6815248194a4fe6023801d3f37",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_09b85c76fb36e951006949bf6e6650819486c84ae03496dc07",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('scripts/ci_lint_compile.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"#!/usr/bin/env python3\n\\\"\\\"\\\"CI helper: lint/format checks + compilation/import sanity.\n\nDesigned for GitHub Actions: always writes logs under artifacts/ci_lint_compile\nso the workflow can upload them on failure.\n\\\"\\\"\\\"\nfrom __future__ import annotations\n\nimport ast\nimport os\nimport subprocess\nimport sys\nfrom pathlib import Path\nfrom typing import Iterable, Sequence, Tuple\n\n\nEXCLUDE_DIRS = {\".git\", \".venv\", \"venv\", \"__pycache__\", \"build\", \"dist\", \".mypy_cache\", \".pytest_cache\"}\nARTIFACT_DIR = Path(\"artifacts\") / \"ci_lint_compile\"\n\n\ndef repo_root() -> Path:\n    here = Path(__file__).resolve()\n    return here.parent.parent\n\n\ndef iter_py_files(root: Path) -> Iterable[Path]:\n    for p in root.rglob(\"*.py\"):\n        parts = set(p.parts)\n        if any(d in parts for d in EXCLUDE_DIRS):\n            continue\n        yield p\n\n\ndef run_cmd(cmd: Sequence[str], cwd: Path, log_path: Path, env: dict | None = None) -> int:\n    log_path.parent.mkdir(parents=True, exist_ok=True)\n    with log_path.open(\"w\", encoding=\"utf-8\") as f:\n        f.write(\"$ \" + \" \".join(cmd) + \"\\\\n\\\\n\")\n        proc = subprocess.run(cmd, cwd=str(cwd), env=env, text=True, capture_output=True)\n        if proc.stdout:\n            f.write(proc.stdout)\n        if proc.stderr:\n            f.write(\"\\\\n[stderr]\\\\n\" + proc.stderr)\n        f.write(f\"\\\\n\\\\n[exit_code] {proc.returncode}\\\\n\")\n    return proc.returncode\n\n\ndef tool_exists(argv0: str) -> bool:\n    from shutil import which\n    return which(argv0) is not None\n\n\ndef ast_parse_check(files: Sequence[Path], log_path: Path) -> int:\n    \\\"\\\"\\\"Fast syntax check that yields readable file/line errors.\\\"\\\"\\\"\n    log_path.parent.mkdir(parents=True, exist_ok=True)\n    failures: list[str] = []\n    for p in files:\n        try:\n            ast.parse(p.read_text(encoding=\"utf-8\"), filename=str(p))\n        except Exception as e:  # SyntaxError, UnicodeDecodeError, etc.\n            failures.append(f\"{p}: {e.__class__.__name__}: {e}\")\n    with log_path.open(\"w\", encoding=\"utf-8\") as f:\n        f.write(\"AST parse check\\\\n\\\\n\")\n        if failures:\n            f.write(\"\\\\n\".join(failures) + \"\\\\n\")\n        else:\n            f.write(\"OK\\\\n\")\n    return 1 if failures else 0\n\n\ndef compileall_check(root: Path, log_path: Path) -> int:\n    # compileall is a good proxy for bytecode compilation across the repo.\n    cmd = [sys.executable, \"-m\", \"compileall\", \"-q\", str(root)]\n    return run_cmd(cmd, cwd=root, log_path=log_path)\n\n\ndef lint_and_format(root: Path, log_dir: Path) -> Tuple[int, list[Path]]:\n    \\\"\\\"\\\"Runs ruff/black if available; otherwise emits a note and succeeds.\\\"\\\"\\\"\n    codes: list[int] = []\n    logs: list[Path] = []\n\n    # Prefer ruff for lint + formatting check.\n    if tool_exists(\"ruff\"):\n        p1 = log_dir / \"ruff_check.log\"\n        codes.append(run_cmd([\"ruff\", \"check\", \".\"], cwd=root, log_path=p1))\n        logs.append(p1)\n        p2 = log_dir / \"ruff_format_check.log\"\n        codes.append(run_cmd([\"ruff\", \"format\", \"--check\", \".\"], cwd=root, log_path=p2))\n        logs.append(p2)\n    else:\n        p = log_dir / \"lint_missing_tools.log\"\n        p.write_text(\"ruff not found on PATH; skipping lint/format checks.\\\\n\", encoding=\"utf-8\")\n        logs.append(p)\n\n    # Optional black check (some repos still use it); doesn't fail if missing.\n    if tool_exists(\"black\"):\n        p = log_dir / \"black_check.log\"\n        codes.append(run_cmd([\"black\", \"--check\", \".\"], cwd=root, log_path=p))\n        logs.append(p)\n\n    return (0 if all(c == 0 for c in codes) else 1), logs\n\n\ndef main(argv: Sequence[str]) -> int:\n    root = repo_root()\n    os.chdir(root)\n    ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)\n\n    files = sorted(iter_py_files(root))\n    if not files:\n        (ARTIFACT_DIR / \"note.log\").write_text(\"No Python files found.\\\\n\", encoding=\"utf-8\")\n        return 0\n\n    exit_code = 0\n\n    lint_rc, _ = lint_and_format(root, ARTIFACT_DIR)\n    exit_code |= lint_rc\n\n    exit_code |= ast_parse_check(files, ARTIFACT_DIR / \"ast_parse.log\")\n    exit_code |= compileall_check(root, ARTIFACT_DIR / \"compileall.log\")\n\n    # A lightweight import smoke test for the package root if present.\n    # Import errors often indicate missing deps; we still record them as CI failures.\n    pkg = next((p for p in root.iterdir() if p.is_dir() and (p / \"__init__.py\").is_file()), None)\n    if pkg is not None:\n        exit_code |= run_cmd(\n            [sys.executable, \"-c\", f\"import importlib; importlib.import_module('{pkg.name}')\"],\n            cwd=root,\n            log_path=ARTIFACT_DIR / \"import_root_pkg.log\",\n            env=dict(os.environ, PYTHONPATH=str(root)),\n        )\n\n    print(f\"ci_lint_compile: logs at {ARTIFACT_DIR}\")\n    return exit_code\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main(sys.argv[1:]))\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:scripts/ci_lint_compile.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bf4d82d48190914ab1de1631f7580f09298ef9bbb62e",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:scripts/ci_lint_compile.py\nDIR_STATE:[\"scripts/ci_lint_compile.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_09b85c76fb36e951006949bf82cda08194bd6680b7bf686478",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `scripts/ci_lint_compile.py`, a CI helper that runs ruff/black checks when available, performs AST parsing and `compileall` compilation passes, optionally smoke-imports the root package, and writes detailed logs under `artifacts/ci_lint_compile` for artifact upload on failure."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

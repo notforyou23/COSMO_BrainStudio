@@ -1,0 +1,56 @@
+{
+  "content": "Created `src/sf_gft_diagnostics/__init__.py` to expose a stable, best-effort public API (with lazy submodule access and safe re-exports) for observables, scaling utilities, metrics, and RG I/O adapters.",
+  "reasoning": "",
+  "responseId": "resp_01d7f64b6ffc922a0069499ba4fe008196a3f0666bda9effcc",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2856,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1312,
+    "output_tokens_details": {
+      "reasoning_tokens": 327
+    },
+    "total_tokens": 4168
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_01d7f64b6ffc922a0069499ba5b7a881969a262ed7cc62a0aa",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01d7f64b6ffc922a0069499baeb0a88196987ca85e466e6762",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/sf_gft_diagnostics/__init__.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"sf_gft_diagnostics\n\nContinuum-recovery diagnostics and cross-validation utilities for spin-foam / GFT\nrenormalization studies.\n\nThe package is organized around four submodules:\n\n- ``observables``: catalog + estimators for candidate continuum observables and\n  scaling quantities.\n- ``scaling``: effective exponents, finite-size scaling collapses, bootstrap/error\n  propagation helpers.\n- ``metrics``: mutually comparable distances/consistency metrics for RG flows and\n  semiclassical benchmarks.\n- ``rg_io``: lightweight adapters/loaders to unify tensor-network/lattice RG\n  outputs and spin-foam/GFT coarse-graining logs.\n\nThis ``__init__`` exposes a small, stable public API while remaining robust when\noptional submodules are not yet available (e.g., during staged development).\n\\\"\\\"\\\"\"\"\",\n\"\"\"from __future__ import annotations\n\nfrom importlib import import_module\nfrom types import ModuleType\nfrom typing import Iterable, List, Optional\n\n__all__: List[str] = []\n__version__ = \"0.1.0\"\n\"\"\",\n\"\"\"def _safe_import(module: str, names: Optional[Iterable[str]] = None) -> Optional[ModuleType]:\n    \\\"\\\"\\\"Import *module* and optionally re-export *names* into this namespace.\n\n    The import is best-effort: if the module does not exist (e.g., in a partial\n    install), this function returns ``None`` without raising. If the module is\n    present but a requested symbol is missing, the underlying ``AttributeError``\n    is raised to surface API mismatches early.\n    \\\"\\\"\\\"\n    try:\n        mod = import_module(f\\\"{__name__}.{module}\\\")\n    except ModuleNotFoundError:\n        return None\n\n    if names is None:\n        return mod\n\n    g = globals()\n    for name in names:\n        g[name] = getattr(mod, name)\n        if name not in __all__:\n            __all__.append(name)\n    return mod\n\"\"\",\n\"\"\"# Public re-exports (best-effort; submodules may be added in later stages).\n_safe_import(\n    \"observables\",\n    names=[\n        \"ObservableSpec\",\n        \"ObservableCatalog\",\n        \"DEFAULT_CATALOG\",\n        \"estimate_observable\",\n        \"list_observables\",\n    ],\n)\n\n_safe_import(\n    \"scaling\",\n    names=[\n        \"effective_exponent\",\n        \"finite_size_collapse\",\n        \"hyperscaling_check\",\n        \"bootstrap_ci\",\n        \"propagate_errors\",\n    ],\n)\n\n_safe_import(\n    \"metrics\",\n    names=[\n        \"js_distance\",\n        \"wasserstein_distance\",\n        \"kl_divergence_surrogate\",\n        \"curve_distance\",\n        \"trajectory_distance\",\n        \"consistency_score\",\n    ],\n)\n\n_safe_import(\n    \"rg_io\",\n    names=[\n        \"RGDataset\",\n        \"load_rg_dataset\",\n        \"from_tensor_network_rg\",\n        \"from_gft_coarse_graining_log\",\n    ],\n)\n\"\"\",\n\"\"\"def available_symbols() -> List[str]:\n    \\\"\\\"\\\"Return a sorted list of public API symbols that are currently available.\\\"\\\"\\\"\n    return sorted(__all__)\n\n\ndef __getattr__(name: str):\n    \\\"\\\"\\\"Lazy attribute resolution for submodule members.\n\n    This enables ``sf_gft_diagnostics.metrics`` etc. even when only the package\n    is imported. If a requested attribute matches a known submodule name, the\n    submodule is imported and returned.\n    \\\"\\\"\\\"\n    if name in {\"observables\", \"scaling\", \"metrics\", \"rg_io\"}:\n        return import_module(f\"{__name__}.{name}\")\n    raise AttributeError(f\"module {__name__!r} has no attribute {name!r}\")\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/sf_gft_diagnostics/__init__.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499b97284881909e58fb047f14c1e300fdec2b43878464",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/sf_gft_diagnostics/__init__.py\nDIR_STATE:[\"src/sf_gft_diagnostics/__init__.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_01d7f64b6ffc922a0069499bc05d408196b396bdcf5e0aaa6b",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `src/sf_gft_diagnostics/__init__.py` to expose a stable, best-effort public API (with lazy submodule access and safe re-exports) for observables, scaling utilities, metrics, and RG I/O adapters."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

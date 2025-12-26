@@ -1,0 +1,64 @@
+{
+  "acceptance_criteria": {
+    "benchmark_diff_within_tolerance": true,
+    "diff_failure_policy": "fail_if_any_task_exceeds_tolerance",
+    "pytest_must_pass": true
+  },
+  "artifacts": {
+    "diff_report_filename": "diff_report.json",
+    "input_manifest": "manifest.json",
+    "output_filename": "output.json",
+    "summary_filename": "summary.json"
+  },
+  "contract_version": "0.1",
+  "diff": {
+    "numeric": {
+      "absolute_tolerance": 1e-08,
+      "inf_equal": true,
+      "nan_equal": true,
+      "relative_tolerance": 1e-06
+    },
+    "structured": {
+      "float_format": "full_precision",
+      "ignore_paths": [],
+      "unordered_collections": true
+    }
+  },
+  "invocation": {
+    "benchmark": "python -m src.run_benchmark --contract benchmarks/contracts/v0_1.json",
+    "pytest": "pytest -q"
+  },
+  "name": "v0.1 benchmark contract",
+  "paths": {
+    "contracts_dir": "benchmarks/contracts",
+    "data_root": "benchmarks/data/v0_1",
+    "golden_root": "benchmarks/golden/v0_1",
+    "project_root": ".",
+    "runs_root": "benchmarks/runs/v0_1"
+  },
+  "purpose": "Canonical contract describing required metadata, I/O paths, reference algorithm selection, and tolerance thresholds for v0.1 benchmark tasks.",
+  "reference_algorithm": {
+    "callable": "run",
+    "description": "Deterministic reference implementation used to generate benchmark outputs for v0.1 tasks.",
+    "id": "reference",
+    "module": "src.reference"
+  },
+  "tasks": [
+    {
+      "description": "Default v0.1 task; concrete inputs are discovered from the input_manifest under data_root.",
+      "golden_outputs": [
+        "{golden_dir}/{output_filename}"
+      ],
+      "io": {
+        "golden_dir": "{golden_root}/default",
+        "inputs_dir": "{data_root}",
+        "run_dir": "{runs_root}/default"
+      },
+      "outputs": [
+        "{run_dir}/{output_filename}"
+      ],
+      "task_id": "default",
+      "tolerance_overrides": {}
+    }
+  ]
+}

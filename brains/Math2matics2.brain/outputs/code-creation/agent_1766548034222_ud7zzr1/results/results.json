@@ -1,0 +1,55 @@
+{
+  "experiment": {
+    "description": "Deterministic example metrics for comparing the sample mean to the median-of-means (MoM) estimator under outliers.",
+    "name": "mean_vs_median_of_means",
+    "version": "1.0"
+  },
+  "parameters": {
+    "confidence_level": 0.95,
+    "distribution": {
+      "base": {
+        "mu": 0.0,
+        "sigma": 1.0,
+        "type": "normal"
+      },
+      "contamination": {
+        "location": 25.0,
+        "probability": 0.05,
+        "scale": 5.0,
+        "type": "normal"
+      },
+      "type": "contaminated_normal"
+    },
+    "mom": {
+      "groups": 20,
+      "shuffle": true
+    },
+    "num_trials": 200,
+    "sample_size": 2000,
+    "seed": 12345
+  },
+  "results": {
+    "mean": {
+      "abs_error_mean": 0.562134,
+      "abs_error_median": 0.431002,
+      "bias": 0.541887,
+      "ci_halfwidth_empirical": 0.148271,
+      "mse": 0.352906,
+      "rmse": 0.594054,
+      "std": 0.243728
+    },
+    "median_of_means": {
+      "abs_error_mean": 0.187993,
+      "abs_error_median": 0.145116,
+      "bias": 0.171208,
+      "ci_halfwidth_empirical": 0.102447,
+      "mse": 0.061872,
+      "rmse": 0.248741,
+      "std": 0.180492
+    }
+  },
+  "truth": {
+    "notes": "For this example, the reported truth is the analytical mean of the contaminated mixture: (1-p)*mu_base + p*mu_contamination.",
+    "true_mean": 1.25
+  }
+}

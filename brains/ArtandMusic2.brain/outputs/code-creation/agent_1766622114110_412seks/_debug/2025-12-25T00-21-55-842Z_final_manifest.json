@@ -1,0 +1,270 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766622114110_412seks",
+  "agentType": "code-creation",
+  "goalId": "goal_209",
+  "missionId": "urgent_goal_209_1766622114110",
+  "spawnCycle": 93,
+  "coordinatorReview": null,
+  "spawnedBy": "meta_coordinator_urgent",
+  "triggerSource": "urgent_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-25T00:22:01.441Z",
+  "completedAt": "2025-12-25T00:27:19.008Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "qa/run.py",
+      "description": "Implements a single CLI entrypoint that runs the QA gate against DRAFT_REPORT_v0.md plus pilot artifacts and emits QA_REPORT.json and QA_REPORT.md with per-check status, errors, and remediation pointers.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:qa/run.py\nDIR_STATE:[\"qa/run.py\"]\nSUMMARY: Implemented qa.run CLI to run a lightweight QA gate over DRAFT_REPORT_v0.md and pilot artifacts and emit QA_REPORT.json and QA_REPORT.md.\n",
+          "timestamp": "2025-12-25T00:22:38.855Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:qa/run.py\nDIR_STATE:[\"qa/run.py\"]\nSummary: Implemented qa/run.py as a single CLI entrypoint that runs QA checks on the draft report and artifacts and writes QA_REPORT.json and QA_REPORT.md.\n",
+          "timestamp": "2025-12-25T00:23:21.027Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:22:01.441Z",
+      "failedAt": "2025-12-25T00:23:21.027Z"
+    },
+    {
+      "path": "qa/checks.py",
+      "description": "Defines the catalog of QA checks and executes them over the report and artifact inputs, returning normalized per-check results and remediation guidance.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-25T00:23:50.898Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:qa/checks.py\nDIR_STATE:[\"qa/checks.py\", \"qa/run.py\"]\nSUMMARY: Implemented a QA check catalog and runner that returns normalized per-check results with remediation guidance for report/artifact inputs.\n",
+          "timestamp": "2025-12-25T00:24:16.081Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:22:01.441Z",
+      "failedAt": "2025-12-25T00:24:16.081Z"
+    },
+    {
+      "path": "qa/io.py",
+      "description": "Provides robust filesystem discovery and loading utilities for DRAFT_REPORT_v0.md and pilot artifacts with path canonicalization and safe reads.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:qa/io.py\nDIR_STATE:[\"qa/checks.py\", \"qa/io.py\", \"qa/run.py\"]\nSummary: Implemented robust path discovery and safe loading utilities for the draft report and pilot artifacts with canonicalization and size-limited reads.\n",
+          "timestamp": "2025-12-25T00:24:37.581Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:qa/io.py\nDIR_STATE:[\"qa/checks.py\", \"qa/io.py\", \"qa/run.py\"]\nSummary: Implemented robust input discovery, path canonicalization, and safe read utilities for the draft report and pilot artifacts.\n",
+          "timestamp": "2025-12-25T00:25:01.205Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:22:01.441Z",
+      "failedAt": "2025-12-25T00:25:01.205Z"
+    },
+    {
+      "path": "qa/report.py",
+      "description": "Renders and writes QA_REPORT.json and QA_REPORT.md from normalized check results including summary, per-check status, and remediation pointers.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:qa/report.py\nDIR_STATE:[\"qa/checks.py\", \"qa/io.py\", \"qa/report.py\", \"qa/run.py\"]\nSummary: Implemented qa/report.py to normalize check results and render/write QA_REPORT.json and QA_REPORT.md with summaries, per-check status, messages, pointers, and remediation items.\n",
+          "timestamp": "2025-12-25T00:25:33.534Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:qa/report.py\nDIR_STATE:[\"qa/checks.py\", \"qa/io.py\", \"qa/report.py\", \"qa/run.py\"]\nSUMMARY: Implemented QA report rendering and writers for JSON/Markdown with per-check status, messages, and remediation pointers.\n",
+          "timestamp": "2025-12-25T00:25:57.687Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:22:01.441Z",
+      "failedAt": "2025-12-25T00:25:57.687Z"
+    },
+    {
+      "path": "qa/schema.py",
+      "description": "Defines the JSON schema (as Python structures) and validation helpers for the QA report output format to ensure machine-validated structure.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:qa/schema.py\nDIR_STATE:[\"qa/checks.py\", \"qa/io.py\", \"qa/report.py\", \"qa/run.py\", \"qa/schema.py\"]\nSummary: Implemented a dependency-free QA report schema and validator to enforce a machine-validated QA_REPORT structure.\n",
+          "timestamp": "2025-12-25T00:26:17.835Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:qa/schema.py\nDIR_STATE:[\"qa/checks.py\", \"qa/io.py\", \"qa/report.py\", \"qa/run.py\", \"qa/schema.py\"]\nSUMMARY: Added a versioned QA report schema and compact validation/normalization helpers for machine-checked QA_REPORT outputs.\n",
+          "timestamp": "2025-12-25T00:26:34.592Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:22:01.441Z",
+      "failedAt": "2025-12-25T00:26:34.592Z"
+    },
+    {
+      "path": "qa/__init__.py",
+      "description": "Marks the qa package and exposes the public run API for module execution.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:qa/__init__.py\nDIR_STATE:[\"qa/__init__.py\", \"qa/checks.py\", \"qa/io.py\", \"qa/report.py\", \"qa/run.py\", \"qa/schema.py\"]\nSUMMARY: qa is now a proper package exposing a stable public run(argv=None) API for module execution and programmatic use.\n",
+          "timestamp": "2025-12-25T00:26:43.290Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:qa/__init__.py\nDIR_STATE:[\"qa/__init__.py\", \"qa/checks.py\", \"qa/io.py\", \"qa/report.py\", \"qa/run.py\", \"qa/schema.py\"]\nSummary: Implemented qa package initializer that exposes a stable public run/main API with lazy import for CLI execution.\n",
+          "timestamp": "2025-12-25T00:26:49.711Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:22:01.441Z",
+      "failedAt": "2025-12-25T00:26:49.711Z"
+    },
+    {
+      "path": "scripts/qa_run.sh",
+      "description": "Provides a single-command shell wrapper to run the QA gate and generate QA_REPORT.json and QA_REPORT.md in one invocation.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "y\", \"scripts/update_project_tracker.py\", \"scripts/validate_case_studies_schema.py\", \"scripts/validate_linkcheck_report.py\", \"scripts/validate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_rights_and_licensing.py\", \"scripts/validate_scaffold.py\"]\nSummary: Added a single-command shell wrapper to run the QA gate and generate QA_REPORT.json and QA_REPORT.md in one invocation.\n",
+          "timestamp": "2025-12-25T00:26:56.609Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "py\", \"scripts/update_project_tracker.py\", \"scripts/validate_case_studies_schema.py\", \"scripts/validate_linkcheck_report.py\", \"scripts/validate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_rights_and_licensing.py\", \"scripts/validate_scaffold.py\"]\nSUMMARY: Added a single-command qa_run.sh wrapper that runs the QA gate and verifies QA_REPORT.json/QA_REPORT.md were produced.\n",
+          "timestamp": "2025-12-25T00:27:06.990Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:22:01.441Z",
+      "failedAt": "2025-12-25T00:27:06.990Z"
+    },
+    {
+      "path": "pyproject.toml",
+      "description": "Configures the minimal Python project metadata and defines a console script entrypoint for running the QA gate as a single command.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-25T00:27:13.215Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-25T00:27:19.007Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:22:01.441Z",
+      "failedAt": "2025-12-25T00:27:19.007Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Implement a single command that (a) runs the QA gate against DRAFT_REPORT_v0.md + pilot artifacts, then (b) emits QA_REPORT.json and QA_REPORT.md with per-check status, error messages, and remediation pointers.",
+  "missionSuccessCriteria": [
+    "Complete the urgent task identified by Meta-Coordinator",
+    "Curated insight (actionability 8-9/10): Operationalizes the QA gate by producing the canonical QA_REPORT.json/md artifacts, enabling consistent evaluation of draft outputs and accelerating iteration by making failures explicit and machine-r..."
+  ],
+  "projectName": "generated_script_1766622114585",
+  "language": "json",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-25T00:27:19.008Z",
+  "summary": {
+    "completed": 0,
+    "failed": 8,
+    "total": 8
+  }
+}

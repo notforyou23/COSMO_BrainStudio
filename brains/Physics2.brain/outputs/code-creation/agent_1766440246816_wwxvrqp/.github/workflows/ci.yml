@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest jsonschema
+
+      - name: Run pytest
+        env:
+          PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/src
+        run: |
+          pytest -q
+
+      - name: Validate JSON examples against schema (if present)
+        env:
+          PYTHONPATH: ${{ github.workspace }}:${{ github.workspace }}/src
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          try:
+            import jsonschema
+          except Exception as e:
+            print(f"jsonschema unavailable, skipping: {e}")
+            raise SystemExit(0)
+
+          root = Path(".").resolve()
+          schema_path = root / "schemas" / "benchmark.schema.json"
+          if not schema_path.exists():
+            print("No schemas/benchmark.schema.json found; skipping schema validation.")
+            raise SystemExit(0)
+
+          schema = json.loads(schema_path.read_text(encoding="utf-8"))
+          Validator = jsonschema.validators.validator_for(schema)
+          Validator.check_schema(schema)
+          v = Validator(schema)
+
+          examples = []
+          for pattern in ("outputs/examples/*.json", "examples/*.json"):
+            examples += sorted(root.glob(pattern))
+          if not examples:
+            print("No example JSON files found; nothing to validate.")
+            raise SystemExit(0)
+
+          for p in examples:
+            inst = json.loads(p.read_text(encoding="utf-8"))
+            v.validate(inst)
+            print(f"OK {p.as_posix()}")
+          PY

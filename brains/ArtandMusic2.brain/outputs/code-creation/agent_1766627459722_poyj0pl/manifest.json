@@ -1,0 +1,270 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766627459722_poyj0pl",
+  "agentType": "code-creation",
+  "goalId": "goal_255",
+  "missionId": "strategic_goal_255_1766627459722",
+  "spawnCycle": 139,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-25T01:51:08.134Z",
+  "completedAt": "2025-12-25T01:57:14.389Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/canonicalize_outputs.py",
+      "description": "End-to-end canonicalization CLI that scans scattered agent/runtime output locations, selects one authoritative QA runner and one authoritative schema, copies/migrates chosen artifacts into a single canonical outputs/ tree, and regenerates outputs/ARTIFACT_INDEX.md with canonical paths only.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "lidate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_rights_and_licensing.py\", \"scripts/validate_scaffold.py\", \"scripts/verifier_benchmark.py\", \"scripts/write_log_bundle.py\"]\nSUMMARY: Wrote an end-to-end canonicalization CLI that selects an authoritative QA runner and schema, migrates them into outputs/, and regenerates outputs/ARTIFACT_INDEX.md with canonical paths only.\n",
+          "timestamp": "2025-12-25T01:51:36.886Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "y\", \"scripts/validate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_rights_and_licensing.py\", \"scripts/validate_scaffold.py\", \"scripts/verifier_benchmark.py\", \"scripts/write_log_bundle.py\"]\nSummary: Wrote a deterministic canonicalization CLI that discovers, selects, copies authoritative QA runner and schema into outputs/canonical and regenerates outputs/ARTIFACT_INDEX.md.\n",
+          "timestamp": "2025-12-25T01:52:22.669Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:51:08.134Z",
+      "failedAt": "2025-12-25T01:52:22.669Z"
+    },
+    {
+      "path": "scripts/lib/canonicalize/__init__.py",
+      "description": "Package initializer for canonicalization library code used by the canonicalize_outputs script.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/lib/canonicalize/__init__.py\nDIR_STATE:[\"scripts/lib/canonicalize/__init__.py\"]\nSUMMARY: Added a resilient canonicalize package initializer with a stable public surface and optional imports to support staged builds.\n",
+          "timestamp": "2025-12-25T01:52:34.005Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/lib/canonicalize/__init__.py\nDIR_STATE:[\"scripts/lib/canonicalize/__init__.py\"]\nSUMMARY: Added canonicalize package initializer with stable re-exports for discovery, selection, and migration helpers.\n",
+          "timestamp": "2025-12-25T01:52:43.305Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:51:08.134Z",
+      "failedAt": "2025-12-25T01:52:43.305Z"
+    },
+    {
+      "path": "scripts/lib/canonicalize/discovery.py",
+      "description": "Filesystem discovery utilities that locate candidate QA runners, schema files, and output artifacts across agent/runtime directories with ignore rules and deterministic ordering.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/lib/canonicalize/discovery.py\nDIR_STATE:[\"scripts/lib/canonicalize/__init__.py\", \"scripts/lib/canonicalize/discovery.py\"]\nSummary: Implemented deterministic filesystem discovery utilities for QA runners, schemas, and outputs with ignore rules and stable ordering.\n",
+          "timestamp": "2025-12-25T01:53:05.608Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/lib/canonicalize/discovery.py\nDIR_STATE:[\"scripts/lib/canonicalize/__init__.py\", \"scripts/lib/canonicalize/discovery.py\"]\nSummary: Implemented deterministic filesystem discovery utilities for QA runners, schema candidates, and outputs artifacts with ignore rules.\n",
+          "timestamp": "2025-12-25T01:53:33.771Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:51:08.134Z",
+      "failedAt": "2025-12-25T01:53:33.771Z"
+    },
+    {
+      "path": "scripts/lib/canonicalize/selection.py",
+      "description": "Deterministic scoring and selection logic to choose a single authoritative QA runner and schema based on heuristics (recency, completeness, validation success, and naming conventions).",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/lib/canonicalize/selection.py\nDIR_STATE:[\"scripts/lib/canonicalize/__init__.py\", \"scripts/lib/canonicalize/discovery.py\", \"scripts/lib/canonicalize/selection.py\"]\nSummary: Implemented deterministic, heuristic-based scoring and selection utilities to pick authoritative QA runner and schema candidates.\n",
+          "timestamp": "2025-12-25T01:53:59.110Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/lib/canonicalize/selection.py\nDIR_STATE:[\"scripts/lib/canonicalize/__init__.py\", \"scripts/lib/canonicalize/discovery.py\", \"scripts/lib/canonicalize/selection.py\"]\nSUMMARY: Implemented deterministic candidate scoring and selection utilities for choosing one authoritative QA runner and one authoritative schema based on validation, naming, extension, completeness, and recency.\n",
+          "timestamp": "2025-12-25T01:54:26.347Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:51:08.134Z",
+      "failedAt": "2025-12-25T01:54:26.347Z"
+    },
+    {
+      "path": "scripts/lib/canonicalize/migrate.py",
+      "description": "Safe migration/copy routines that create the canonical outputs/ tree, copy selected artifacts with collision handling, and optionally prune superseded canonical files.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/lib/canonicalize/migrate.py\nDIR_STATE:[\"scripts/lib/canonicalize/__init__.py\", \"scripts/lib/canonicalize/discovery.py\", \"scripts/lib/canonicalize/migrate.py\", \"scripts/lib/canonicalize/selection.py\"]\nSummary: Implemented safe canonical outputs migration utilities with collision-handling copy and optional pruning of superseded files.\n",
+          "timestamp": "2025-12-25T01:54:44.513Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/lib/canonicalize/migrate.py\nDIR_STATE:[\"scripts/lib/canonicalize/__init__.py\", \"scripts/lib/canonicalize/discovery.py\", \"scripts/lib/canonicalize/migrate.py\", \"scripts/lib/canonicalize/selection.py\"]\nSummary: Implemented collision-safe copy/migration utilities plus optional pruning for canonical outputs.\n",
+          "timestamp": "2025-12-25T01:55:09.812Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:51:08.134Z",
+      "failedAt": "2025-12-25T01:55:09.812Z"
+    },
+    {
+      "path": "scripts/lib/canonicalize/indexer.py",
+      "description": "Markdown index generator that produces a refreshed outputs/ARTIFACT_INDEX.md referencing only canonical outputs/ paths with stable sections and file metadata.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/lib/canonicalize/indexer.py\nDIR_STATE:[\"scripts/lib/canonicalize/__init__.py\", \"scripts/lib/canonicalize/discovery.py\", \"scripts/lib/canonicalize/indexer.py\", \"scripts/lib/canonicalize/migrate.py\", \"scripts/lib/canonicalize/selection.py\"]\nSUMMARY: Implemented a deterministic markdown index generator for canonical outputs/ artifacts with stable grouping and file metadata.\n",
+          "timestamp": "2025-12-25T01:55:27.823Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-25T01:55:49.182Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:51:08.134Z",
+      "failedAt": "2025-12-25T01:55:49.182Z"
+    },
+    {
+      "path": "scripts/lib/canonicalize/reporting.py",
+      "description": "Structured logging and JSON report helpers for summarizing scan results, selection decisions, and migration actions for CI-friendly diagnostics.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "e/reporting.py\nDIR_STATE:[\"scripts/lib/canonicalize/__init__.py\", \"scripts/lib/canonicalize/discovery.py\", \"scripts/lib/canonicalize/indexer.py\", \"scripts/lib/canonicalize/migrate.py\", \"scripts/lib/canonicalize/reporting.py\", \"scripts/lib/canonicalize/selection.py\"]\nSUMMARY:Added structured JSONL logging and a CI-friendly canonicalization report helper with event recording and JSON serialization.\n",
+          "timestamp": "2025-12-25T01:56:08.545Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "ib/canonicalize/reporting.py\nDIR_STATE:[\"scripts/lib/canonicalize/__init__.py\", \"scripts/lib/canonicalize/discovery.py\", \"scripts/lib/canonicalize/indexer.py\", \"scripts/lib/canonicalize/migrate.py\", \"scripts/lib/canonicalize/reporting.py\", \"scripts/lib/canonicalize/selection.py\"]\nSUMMARY: Added CI-friendly structured event logging plus JSON report helpers for scan/selection/migration diagnostics.\n",
+          "timestamp": "2025-12-25T01:56:28.056Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:51:08.134Z",
+      "failedAt": "2025-12-25T01:56:28.056Z"
+    },
+    {
+      "path": "scripts/README_CANONICALIZE.md",
+      "description": "Usage documentation for the canonicalization workflow including CLI examples, selection rules, expected directory layout, and troubleshooting notes.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-25T01:56:52.611Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "take.py\", \"scripts/validate_linkcheck_report.py\", \"scripts/validate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_rights_and_licensing.py\", \"scripts/validate_scaffold.py\", \"scripts/verifier_benchmark.py\", \"scripts/write_log_bundle.py\"]\nSUMMARY: Wrote canonicalization usage documentation covering CLI examples, selection rules, canonical outputs layout, and troubleshooting.\n",
+          "timestamp": "2025-12-25T01:57:14.389Z"
+        }
+      ],
+      "createdAt": "2025-12-25T01:51:08.134Z",
+      "failedAt": "2025-12-25T01:57:14.389Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Canonicalize deliverables by selecting ONE authoritative QA runner + ONE authoritative schema from the existing created files, then migrate/copy the best-known versions into a single canonical /outputs/ tree and generate a refreshed /outputs/ARTIFACT_INDEX.md that points only to canonical paths (not agent-specific runtime/outputs locations).",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Current state contains heavy duplication and path drift (/outputs vs runtime/outputs), preventing reliable discovery and validation. A single canonical set is required before standard QA enforcement."
+  ],
+  "projectName": "generated_script_1766627459880",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-25T01:57:14.389Z",
+  "summary": {
+    "completed": 0,
+    "failed": 8,
+    "total": 8
+  }
+}

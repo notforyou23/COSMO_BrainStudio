@@ -1,0 +1,37 @@
+You are planning a python script implementation for the following mission:
+Generate two output artifacts in the repository: (1) /outputs/coverage_matrix.csv (or .md table) that enumerates the Mathematics domain, its subtopics, and artifact types with an initial population of cells (coverage status, counts, and cross-link pointers); and (2) /outputs/eval_loop.md defining a 5-cycle review cadence, measurable metrics (artifact count, cross-links, coverage gaps), and explicit decision rules that determine what to produce next. Implement the CSV/MD file in a script-friendly, machine- and human-readable layout and include minimal inline examples and instructions for how future agents should update the matrix and use the eval loop.
+
+Relevant context:
+- [AGENT: agent_1766538470010_nvdr7ld] Cycle 4 consistency review (divergence 0.96):
+Summary judgement: the three branches are largely compati
+- [AGENT: agent_1766538161484_b5yh91f] Cycle 1 consistency review (divergence 0.97):
+Summary (high-level): The three branches are about differ
+- [AGENT: agent_1766540049057_egk6x7y] {"agentId":"agent_1766540049057_egk6x7y","goalId":"goal_4","containerId":"cntr_694b4314fdec8190b56501a8
+- [AGENT: agent_1766539771836_cunrzw4] {"agentId":"agent_1766539771836_cunrzw4","goalId":"goal_50","containerId":"cntr_694b4200ed708190b1f3a92
+- [AGENT: agent_1766539198393_s2saqmc] {"agentId":"agent_1766539198393_s2saqmc","goalId":"goal_35","containerId":"cntr_694b3fc5e9348190afa41c8
+- [AGENT: agent_1766539198393_s2saqmc] File validation complete: 3 valid, 0 invalid.
+- [AGENT: agent_1766538303516_vzdy0s1] {"agentId":"agent_1766538303516_vzdy0s1","goalId":"goal_1","containerId":"cntr_694b3c44ffe48190b5b5d7ff
+- [AGENT: agent_1766539771836_cunrzw4] {"agentId":"agent_1766539771836_cunrzw4","goalId":"goal_50","containerId":"cntr_694b4200ed708190b1f3a92
+
+Explicit requirements:
+- examples
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

@@ -1,0 +1,187 @@
+{
+  "content": "Created `tests/test_examples_validate.py` to automatically discover example JSON files, verify they parse as JSON objects, and (when `schemas/benchmark.schema.json` exists) validate each example against the benchmark schema using `jsonschema`, skipping schema validation cleanly if the schema or dependency is unavailable.",
+  "reasoning": "",
+  "responseId": "resp_0ed63078817e0a89006949be613f1081959f6b2849d4854a2e",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3419,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1511,
+    "output_tokens_details": {
+      "reasoning_tokens": 887
+    },
+    "total_tokens": 4930
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0ed63078817e0a89006949be6210e88195880d9a4886d0c4e1",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ed63078817e0a89006949be62fbf08195b8c2aabfde627484",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nsorted([str(p.relative_to(base)) for p in base.rglob(\"*\") if p.is_file()][:50])[:50]\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "['.pytest_cache/.gitignore',\n '.pytest_cache/CACHEDIR.TAG',\n '.pytest_cache/README.md',\n '.pytest_cache/v/cache/nodeids',\n '.pytest_cache/v/cache/stepwise',\n 'outputs/examples/benchmark_case_001.json',\n 'outputs/examples/benchmark_case_002.json',\n 'qg_bench/__pycache__/cli.cpython-311.pyc',\n 'qg_bench/cli.py',\n 'src/experiments/symbolic_rg.py',\n 'src/experiments/symbolic_rg_utils.py',\n 'src/experiments/toy_ising_emergent_classicality.py',\n 'tests/__pycache__/test_cli_smoke.cpython-311-pytest-8.2.2.pyc',\n 'tests/test_cli_smoke.py']"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ed63078817e0a89006949be650b108195a05e86faf107714b",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ed63078817e0a89006949be65c29c81958b288b59d95f2e21",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "schema_files=list(base.rglob(\"benchmark.schema.json\"))\nschema_files\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ed63078817e0a89006949be67a2dc8195a5799a47c3b2b959",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ed63078817e0a89006949be684bc0819595fafe80b4cd200e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "sorted([str(p.relative_to(base)) for p in base.rglob(\"*schema*\") if p.is_file()])\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ed63078817e0a89006949be6a494081958ba0a89c1b53a831",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ed63078817e0a89006949be6c0a048195b65abb5c055f7cf9",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "sorted([str(p.relative_to(base)) for p in base.iterdir()])\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "['.pytest_cache', 'outputs', 'qg_bench', 'src', 'tests']"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ed63078817e0a89006949be6e19e0819596b13e13f85b27e3",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ed63078817e0a89006949be6ea8dc8195957f22487682f8ef",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import re, os\nmatches=[]\nfor p in base.rglob(\"*.json\"):\n    txt=p.read_text()\n    if \"schema\" in txt.lower():\n        matches.append(str(p))\nmatches\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ed63078817e0a89006949be711f3881958d336b0978f61d45",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ed63078817e0a89006949be7a94fc8195b3c25cebe77b70b2",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import json\nfrom pathlib import Path\nex=Path(\"/mnt/data/outputs/examples/benchmark_case_001.json\")\njson.load(ex.open())\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "{'case_id': 'benchmark_case_001',\n 'experiment': {'name': 'toy_ising_emergent_classicality',\n  'params': {'burn_in': 10,\n   'coupling': 1.0,\n   'field': 0.0,\n   'n_spins': 32,\n   'seed': 0,\n   'sweeps': 50,\n   'temperature': 2.0}}}"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ed63078817e0a89006949be7ceda081958664a3fccf97dea1",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ed63078817e0a89006949be7d361c8195b04ccbbf2e90d4bf",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "json.load(open(\"/mnt/data/outputs/examples/benchmark_case_002.json\"))\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "{'case_id': 'benchmark_case_002',\n 'experiment': {'name': 'symbolic_rg',\n  'params': {'couplings': {'phi^2': 0.8, 'phi^4': 0.25, 'phi^6': 0.02},\n   'steps': 3,\n   'scale_factor': 2.0,\n   'mixing_strength': 0.1}}}"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ed63078817e0a89006949be7f1958819586ed5972d6294323",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0ed63078817e0a89006949be7fe2d88195a0c3e26f296b6289",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_examples_validate.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(r\"\"\"\nfrom __future__ import annotations\n\nimport json\nfrom pathlib import Path\n\nimport pytest\n\n\ndef _repo_root() -> Path:\n    # tests/ -> repo root\n    return Path(__file__).resolve().parents[1]\n\n\ndef _schema_path() -> Path:\n    return _repo_root() / \"schemas\" / \"benchmark.schema.json\"\n\n\ndef _example_paths() -> list[Path]:\n    root = _repo_root()\n    candidates = []\n    for pattern in (\"outputs/examples/*.json\", \"examples/*.json\"):\n        candidates.extend(sorted(root.glob(pattern)))\n    # De-duplicate while preserving order\n    seen: set[Path] = set()\n    out: list[Path] = []\n    for p in candidates:\n        if p not in seen and p.is_file():\n            out.append(p)\n            seen.add(p)\n    return out\n\n\n@pytest.mark.parametrize(\"example_path\", _example_paths())\ndef test_examples_are_valid_json(example_path: Path) -> None:\n    # This test is intentionally schema-agnostic: it ensures examples stay parseable.\n    with example_path.open(\"r\", encoding=\"utf-8\") as f:\n        data = json.load(f)\n    assert isinstance(data, dict), \"Example root must be a JSON object\"\n\n\n@pytest.mark.parametrize(\"example_path\", _example_paths())\ndef test_examples_conform_to_benchmark_schema(example_path: Path) -> None:\n    schema_path = _schema_path()\n    if not schema_path.exists():\n        pytest.skip(\"Schema not present at schemas/benchmark.schema.json\")\n\n    try:\n        import jsonschema\n    except Exception as e:  # pragma: no cover\n        pytest.skip(f\"jsonschema not available: {e}\")\n\n    with schema_path.open(\"r\", encoding=\"utf-8\") as f:\n        schema = json.load(f)\n\n    with example_path.open(\"r\", encoding=\"utf-8\") as f:\n        instance = json.load(f)\n\n    Validator = jsonschema.validators.validator_for(schema)\n    Validator.check_schema(schema)\n    Validator(schema).validate(instance)\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:tests/test_examples_validate.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd39e9648190add521ed2534943602cf67abff19a77f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_examples_validate.py\nDIR_STATE:[\"tests/test_cli_smoke.py\", \"tests/test_examples_validate.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0ed63078817e0a89006949be8a6dd081958cfda3255422ca77",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0ed63078817e0a89006949be8b8f908195b37e8ed8a83e36f9",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/test_examples_validate.py` to automatically discover example JSON files, verify they parse as JSON objects, and (when `schemas/benchmark.schema.json` exists) validate each example against the benchmark schema using `jsonschema`, skipping schema validation cleanly if the schema or dependency is unavailable."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/experiments/sweep.py` as a compact, dependency-light sweep orchestration module with deterministic grid generation, robust sweep execution (including error capture), optional JSONL persistence/loading (delegating to `experiments.io` when available), and an optional plotting hook that delegates to `experiments.plotting`.",
+  "reasoning": "",
+  "responseId": "resp_0e50af5021bbd06800694b4e42f08c8195997fdca3609d76bb",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3533,
+    "input_tokens_details": {
+      "cached_tokens": 1408
+    },
+    "output_tokens": 1894,
+    "output_tokens_details": {
+      "reasoning_tokens": 312
+    },
+    "total_tokens": 5427
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0e50af5021bbd06800694b4e439cac819596b5e2fbf28e93e9",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0e50af5021bbd06800694b4e48cab8819592c57d8dcf430691",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, itertools, traceback\ntarget_path = Path('/mnt/data').joinpath('src/experiments/sweep.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\n\\\"\\\"\\\"Experiment sweep orchestration.\n\nThis module provides small, dependency-light utilities to:\n- build parameter grids\n- run a sweep with a user-supplied experiment function\n- optionally persist results and hand them to plotting helpers\n\nThe I/O and plotting integrations are optional; if sibling modules are present,\nthey will be used, otherwise lightweight fallbacks are applied.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom itertools import product\nfrom pathlib import Path\nfrom typing import Any, Callable, Dict, Iterable, List, Mapping, MutableMapping, Optional, Sequence, Tuple, Union\nimport json\nimport traceback\n\"\"\")\n\nchunks.append(\"\"\"\nParams = Mapping[str, Sequence[Any]]\nConfig = Dict[str, Any]\nRecord = Dict[str, Any]\nRunner = Callable[[Config], Any]\nOnResult = Callable[[int, Config, Any, Optional[BaseException]], None]\n\"\"\")\n\nchunks.append(\"\"\"\ndef expand_grid(params: Params) -> List[Config]:\n    \\\"\\\"\\\"Return a deterministic full-factorial grid as a list of configs.\\\"\\\"\\\"\n    keys = list(params.keys())\n    values: List[Sequence[Any]] = []\n    for k in keys:\n        v = params[k]\n        if not isinstance(v, Sequence) or isinstance(v, (str, bytes)):\n            raise TypeError(f\\\"Parameter '{k}' must be a sequence of values.\\\")\n        if len(v) == 0:\n            raise ValueError(f\\\"Parameter '{k}' has no values.\\\")\n        values.append(list(v))\n    return [dict(zip(keys, combo)) for combo in product(*values)]\n\"\"\")\n\nchunks.append(\"\"\"\ndef iter_grid(params: Params) -> Iterable[Config]:\n    \\\"\\\"\\\"Yield configs lazily for a full-factorial sweep.\\\"\\\"\\\"\n    keys = list(params.keys())\n    values: List[Sequence[Any]] = []\n    for k in keys:\n        v = params[k]\n        if not isinstance(v, Sequence) or isinstance(v, (str, bytes)):\n            raise TypeError(f\\\"Parameter '{k}' must be a sequence of values.\\\")\n        if len(v) == 0:\n            raise ValueError(f\\\"Parameter '{k}' has no values.\\\")\n        values.append(list(v))\n    for combo in product(*values):\n        yield dict(zip(keys, combo))\n\"\"\")\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass SweepRun:\n    \\\"\\\"\\\"Container for sweep outputs.\\\"\\\"\\\"\n\n    records: List[Record]\n    errors: int = 0\n\n    def to_jsonl(self, path: Union[str, Path]) -> Path:\n        \\\"\\\"\\\"Write records as JSONL. Uses experiments.io if available.\\\"\\\"\\\"\n        p = Path(path)\n        try:\n            from .io import write_jsonl  # type: ignore\n        except Exception:\n            write_jsonl = None\n        if write_jsonl is not None:\n            write_jsonl(p, self.records)\n        else:\n            p.parent.mkdir(parents=True, exist_ok=True)\n            with p.open(\\\"w\\\", encoding=\\\"utf-8\\\") as f:\n                for r in self.records:\n                    f.write(json.dumps(r, ensure_ascii=False) + \\\"\\\\n\\\")\n        return p\n\"\"\")\n\nchunks.append(\"\"\"\ndef run_sweep(\n    runner: Runner,\n    grid: Union[Iterable[Config], Params],\n    *,\n    base_config: Optional[Mapping[str, Any]] = None,\n    on_result: Optional[OnResult] = None,\n    raise_errors: bool = False,\n) -> SweepRun:\n    \\\"\\\"\\\"Run an experiment function over a grid.\n\n    Args:\n        runner: Callable that accepts a config dict and returns either:\n            - a mapping (merged into the record), or\n            - any other value (stored under 'result').\n        grid: Either an iterable of configs or a Params mapping to be expanded.\n        base_config: Extra config values merged into each config (base < grid).\n        on_result: Optional callback (i, config, output, exception).\n        raise_errors: If True, raise the first encountered exception.\n\n    Returns:\n        SweepRun with a list of records (one per config).\n    \\\"\\\"\\\"\n    configs = expand_grid(grid) if isinstance(grid, Mapping) else list(grid)\n    base = dict(base_config or {})\n    records: List[Record] = []\n    errors = 0\n\n    for i, cfg in enumerate(configs):\n        config = {**base, **cfg}\n        out: Any = None\n        err: Optional[BaseException] = None\n        try:\n            out = runner(dict(config))\n        except BaseException as e:  # capture KeyboardInterrupt too if desired\n            err = e\n            errors += 1\n            if raise_errors:\n                raise\n        rec: Record = dict(config)\n        if err is not None:\n            rec[\\\"error\\\"] = type(err).__name__\n            rec[\\\"traceback\\\"] = \\\"\\\".join(traceback.format_exception(type(err), err, err.__traceback__))\n        else:\n            if isinstance(out, Mapping):\n                rec.update(out)  # type: ignore[arg-type]\n            else:\n                rec[\\\"result\\\"] = out\n        records.append(rec)\n        if on_result is not None:\n            on_result(i, config, out, err)\n    return SweepRun(records=records, errors=errors)\n\"\"\")\n\nchunks.append(\"\"\"\ndef load_records(path: Union[str, Path]) -> List[Record]:\n    \\\"\\\"\\\"Load sweep records from JSONL. Uses experiments.io if available.\\\"\\\"\\\"\n    p = Path(path)\n    try:\n        from .io import read_jsonl  # type: ignore\n    except Exception:\n        read_jsonl = None\n    if read_jsonl is not None:\n        return list(read_jsonl(p))\n    records: List[Record] = []\n    with p.open(\\\"r\\\", encoding=\\\"utf-8\\\") as f:\n        for line in f:\n            line = line.strip()\n            if line:\n                records.append(json.loads(line))\n    return records\n\"\"\")\n\nchunks.append(\"\"\"\ndef maybe_plot(records: Sequence[Record], *args: Any, **kwargs: Any) -> Any:\n    \\\"\\\"\\\"Optional plotting hook; delegates to experiments.plotting if present.\\\"\\\"\\\"\n    try:\n        from .plotting import plot_records  # type: ignore\n    except Exception:\n        plot_records = None\n    if plot_records is None:\n        raise RuntimeError(\\\"Plotting helpers are unavailable (experiments.plotting not importable).\\\")\n    return plot_records(records, *args, **kwargs)\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/experiments/sweep.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4d8e36dc8190b33c31668379700e0f2b66b245dabab1",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/sweep.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/_common.py\", \"src/experiments/io.py\", \"src/experiments/plotting.py\", \"src/experiments/sweep.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0e50af5021bbd06800694b4e5643d08195a93f2fbdb734dcd7",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/experiments/sweep.py` as a compact, dependency-light sweep orchestration module with deterministic grid generation, robust sweep execution (including error capture), optional JSONL persistence/loading (delegating to `experiments.io` when available), and an optional plotting hook that delegates to `experiments.plotting`."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

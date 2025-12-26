@@ -1,0 +1,92 @@
+{
+  "content": "Created `tests/test_artifacts.py`, a pytest end-to-end smoke test that discovers and runs the project entrypoint with a fixed seed into a temp output directory, then asserts output artifacts exist, validates key JSON contract fields, verifies any manifest-referenced files exist, and performs basic image sanity checks (size bounds + hash computation for debugging).",
+  "reasoning": "",
+  "responseId": "resp_093be6c1f68ab5fd00694b5c5cd8308195af5c45b1166e2ef1",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4258,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2806,
+    "output_tokens_details": {
+      "reasoning_tokens": 1195
+    },
+    "total_tokens": 7064
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_093be6c1f68ab5fd00694b5c5dc29081958ecf844f73364c24",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_093be6c1f68ab5fd00694b5c5e2fa48195b88aa9d323d91b35",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path('/mnt/data')\nsorted([p.name for p in base.iterdir()])[:50], len(list(base.iterdir()))\n",
+      "container_id": "cntr_694b5c597d248190a612ca6def27d901075ce9e7cec24790",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "([], 0)"
+        }
+      ]
+    },
+    {
+      "id": "rs_093be6c1f68ab5fd00694b5c6054848195996927820199c1a8",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_093be6c1f68ab5fd00694b5c6173908195a80e81c6d761df1d",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import os, pathlib\nos.getcwd(), list(pathlib.Path('.').iterdir())[:20]\n",
+      "container_id": "cntr_694b5c597d248190a612ca6def27d901075ce9e7cec24790",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "('/home/sandbox',\n [PosixPath('.ipython'),\n  PosixPath('.profile'),\n  PosixPath('.config'),\n  PosixPath('.bashrc'),\n  PosixPath('.local'),\n  PosixPath('.openai_internal'),\n  PosixPath('.cache'),\n  PosixPath('.bash_logout'),\n  PosixPath('uvicorn_logging.config')])"
+        }
+      ]
+    },
+    {
+      "id": "rs_093be6c1f68ab5fd00694b5c639a648195b2ba188cfe782a4a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_093be6c1f68ab5fd00694b5c7340b88195b25363b580b69ab7",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re, sys, hashlib, subprocess, time\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_artifacts.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [r\"\"\"\nimport hashlib\nimport json\nimport os\nimport re\nimport subprocess\nimport sys\nfrom pathlib import Path\n\nimport pytest\n\n\ndef _repo_root() -> Path:\n    return Path(__file__).resolve().parents[1]\n\n\ndef _find_entrypoint(repo: Path) -> Path:\n    # Prefer likely entrypoints, else fall back to any top-level *.py with __main__ guard.\n    preferred = [\n        repo / \"main.py\",\n        repo / \"run.py\",\n        repo / \"app.py\",\n        repo / \"run_pipeline.py\",\n        repo / \"pipeline.py\",\n        repo / \"generated_script_1766546521995.py\",\n        repo / \"script.py\",\n    ]\n    for p in preferred:\n        if p.is_file():\n            return p\n\n    candidates = [p for p in repo.glob(\"*.py\") if p.name != \"conftest.py\"]\n    for p in candidates:\n        try:\n            txt = p.read_text(encoding=\"utf-8\", errors=\"ignore\")\n        except OSError:\n            continue\n        if re.search(r\"if\\s+__name__\\s*==\\s*['\\\"]__main__['\\\"]\\s*:\", txt):\n            return p\n    if candidates:\n        return sorted(candidates)[0]\n    raise FileNotFoundError(\"Could not locate a runnable entrypoint script in repo root\")\n\n\ndef _run_entrypoint(entrypoint: Path, outdir: Path, seed: int = 123) -> None:\n    # Try a small set of common CLI conventions (seed + output dir).\n    attempts = [\n        [sys.executable, str(entrypoint), \"--seed\", str(seed), \"--output-dir\", str(outdir)],\n        [sys.executable, str(entrypoint), \"--seed\", str(seed), \"--outdir\", str(outdir)],\n        [sys.executable, str(entrypoint), \"--seed\", str(seed), \"--output\", str(outdir)],\n        [sys.executable, str(entrypoint), \"--seed\", str(seed), str(outdir)],\n        [sys.executable, str(entrypoint), str(outdir), \"--seed\", str(seed)],\n        [sys.executable, str(entrypoint)],\n    ]\n    env = os.environ.copy()\n    env.setdefault(\"PYTHONHASHSEED\", \"0\")\n    env.setdefault(\"SEED\", str(seed))\n    env.setdefault(\"OUTPUT_DIR\", str(outdir))\n\n    last = None\n    for cmd in attempts:\n        last = subprocess.run(cmd, cwd=str(_repo_root()), env=env, capture_output=True, text=True, timeout=180)\n        if last.returncode == 0:\n            return\n    msg = (last.stdout[-2000:] if last else \"\") + \"\\n\" + (last.stderr[-2000:] if last else \"\")\n    raise AssertionError(f\"Entrypoint failed for all CLI patterns. Last output:\\n{msg}\")\n\n\ndef _pick_manifest_json(outdir: Path) -> Path:\n    preferred = [\"artifacts.json\", \"manifest.json\", \"output.json\", \"outputs.json\", \"results.json\", \"report.json\"]\n    for name in preferred:\n        p = outdir / name\n        if p.is_file():\n            return p\n    js = sorted(outdir.glob(\"*.json\"))\n    if not js:\n        raise AssertionError(f\"No JSON artifacts found in {outdir}\")\n    return js[0]\n\n\ndef _sha256(path: Path) -> str:\n    h = hashlib.sha256()\n    with path.open(\"rb\") as f:\n        for b in iter(lambda: f.read(1024 * 1024), b\"\"):\n            h.update(b)\n    return h.hexdigest()\n\n\ndef _validate_json_schema(data: dict) -> None:\n    assert isinstance(data, dict) and data, \"Top-level JSON must be a non-empty object\"\n    seed_keys = {\"seed\", \"random_seed\", \"rng_seed\"}\n    assert (seed_keys & set(data.keys())) or (str(data.get(\"metadata\", {}).get(\"seed\", \"\")) != \"\"), (\n        \"JSON must include a seed (seed/random_seed/rng_seed) or metadata.seed\"\n    )\n    # Require at least one of these keys to ensure a stable-ish contract across runs.\n    contract_keys = {\"artifacts\", \"outputs\", \"files\", \"results\", \"images\"}\n    assert contract_keys & set(data.keys()), f\"JSON missing expected contract keys; got: {sorted(data.keys())}\"\n\n\ndef _validate_output_files(outdir: Path, manifest: dict) -> None:\n    # If manifest lists artifacts with paths, ensure they exist.\n    def iter_paths(obj):\n        if isinstance(obj, dict):\n            for k, v in obj.items():\n                if k in {\"path\", \"filepath\", \"file\", \"filename\"} and isinstance(v, str):\n                    yield v\n                yield from iter_paths(v)\n        elif isinstance(obj, list):\n            for it in obj:\n                yield from iter_paths(it)\n\n    for rel in set(iter_paths(manifest)):\n        p = (outdir / rel).resolve() if not Path(rel).is_absolute() else Path(rel)\n        # Only enforce paths under outdir to avoid accidental absolute references.\n        if outdir.resolve() in p.parents or p == outdir.resolve():\n            assert p.exists(), f\"Manifest references missing file: {rel}\"\n\n\ndef _validate_images(outdir: Path) -> None:\n    imgs = list(outdir.rglob(\"*.png\")) + list(outdir.rglob(\"*.jpg\")) + list(outdir.rglob(\"*.jpeg\"))\n    for p in imgs:\n        size = p.stat().st_size\n        assert 1_000 <= size <= 10_000_000, f\"Unexpected image size for {p.name}: {size} bytes\"\n        # Hash is useful for debugging; we don't pin it to avoid brittleness across platforms.\n        _ = _sha256(p)\n\n\n@pytest.mark.smoke\ndef test_artifacts_end_to_end(tmp_path: Path):\n    repo = _repo_root()\n    entrypoint = _find_entrypoint(repo)\n\n    outdir = tmp_path / \"out\"\n    outdir.mkdir(parents=True, exist_ok=True)\n\n    _run_entrypoint(entrypoint, outdir, seed=123)\n\n    # Existence checks\n    json_path = _pick_manifest_json(outdir)\n    assert json_path.exists(), \"Expected a JSON artifact to be created\"\n    assert any(outdir.iterdir()), \"Output directory is empty after successful run\"\n\n    manifest = json.loads(json_path.read_text(encoding=\"utf-8\"))\n    _validate_json_schema(manifest)\n    _validate_output_files(outdir, manifest)\n    _validate_images(outdir)\n\"\"\".strip(\"\\n\")]\n\nfinal_text = \"\\n\".join(block.strip(\"\\n\") for block in chunks).strip() + \"\\n\"\ntarget_path.write_text(final_text, encoding=\"utf-8\")\nprint(\"FILE_WRITTEN:tests/test_artifacts.py\")\nprint(\"DIR_STATE:\" + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob(\"*\") if p.is_file())))\n",
+      "container_id": "cntr_694b5c597d248190a612ca6def27d901075ce9e7cec24790",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_artifacts.py\nDIR_STATE:[\"tests/test_artifacts.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_093be6c1f68ab5fd00694b5c85ad088195957a5758d9cd0c0f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/test_artifacts.py`, a pytest end-to-end smoke test that discovers and runs the project entrypoint with a fixed seed into a temp output directory, then asserts output artifacts exist, validates key JSON contract fields, verifies any manifest-referenced files exist, and performs basic image sanity checks (size bounds + hash computation for debugging)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

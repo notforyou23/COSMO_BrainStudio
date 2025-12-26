@@ -1,0 +1,56 @@
+{
+  "content": "Created `scripts/run_evidence_pack.py`, a CLI entrypoint that adds the repo root to `sys.path`, delegates to `src.pipeline.run_evidence_pack(...)` (or falls back to `src.pipeline.run(...)`), and supports `--outputs-dir`, `--seed`, and `--run-tests` to drive end-to-end evidence pack generation into the outputs directory.",
+  "reasoning": "",
+  "responseId": "resp_0b0e573ad672719a00694b4b45a720819480d06659e963f424",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2770,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1315,
+    "output_tokens_details": {
+      "reasoning_tokens": 302
+    },
+    "total_tokens": 4085
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0b0e573ad672719a00694b4b464d74819497f0e31e7edcc724",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0b0e573ad672719a00694b4b4b4934819497018176abd18908",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('scripts/run_evidence_pack.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"#!/usr/bin/env python3\n\\\"\\\"\\\"CLI entrypoint to run the end-to-end evidence-pack pipeline.\n\nThis script delegates to :mod:`src.pipeline` and ensures the project root is on\n``sys.path`` when invoked as ``python scripts/run_evidence_pack.py``.\n\\\"\\\"\\\"\"\"\",\n\"\"\"from __future__ import annotations\n\nimport argparse\nimport sys\nfrom pathlib import Path\nfrom typing import Any, Dict, Optional\"\"\",\n\"\"\"def _add_project_root_to_syspath() -> Path:\n    # scripts/ -> project_root/\n    project_root = Path(__file__).resolve().parents[1]\n    if str(project_root) not in sys.path:\n        sys.path.insert(0, str(project_root))\n    return project_root\"\"\",\n\"\"\"def _parse_args(argv: Optional[list[str]] = None) -> argparse.Namespace:\n    p = argparse.ArgumentParser(description=\"Run the single-cycle evidence pack pipeline.\")\n    p.add_argument(\n        \"--outputs-dir\",\n        type=Path,\n        default=None,\n        help=\"Directory to write artifacts into (default: <repo>/outputs).\",\n    )\n    p.add_argument(\n        \"--seed\",\n        type=int,\n        default=0,\n        help=\"Deterministic seed passed through to the pipeline (default: 0).\",\n    )\n    p.add_argument(\n        \"--run-tests\",\n        action=\"store_true\",\n        help=\"If supported by the pipeline, execute smoke tests and write test.log.\",\n    )\n    p.add_argument(\n        \"--quiet\",\n        action=\"store_true\",\n        help=\"Suppress non-essential stdout (errors still print).\",\n    )\n    return p.parse_args(argv)\"\"\",\n\"\"\"def _run_pipeline(outputs_dir: Path, seed: int, run_tests: bool) -> Dict[str, Any]:\n    try:\n        from src import pipeline  # type: ignore\n    except Exception as e:  # pragma: no cover\n        raise RuntimeError(\n            \"Could not import src.pipeline. Ensure you are running from the repository root \"\n            \"or that the project is installed as a package.\"\n        ) from e\n\n    # Prefer a dedicated entrypoint if present; otherwise fall back to a generic run().\n    if hasattr(pipeline, \"run_evidence_pack\"):\n        fn = getattr(pipeline, \"run_evidence_pack\")\n        return fn(outputs_dir=outputs_dir, seed=seed, run_tests=run_tests)\n    if hasattr(pipeline, \"run\"):\n        fn = getattr(pipeline, \"run\")\n        try:\n            return fn(outputs_dir=outputs_dir, seed=seed, run_tests=run_tests)\n        except TypeError:\n            # Back-compat: allow older signature without run_tests.\n            return fn(outputs_dir=outputs_dir, seed=seed)\n    raise RuntimeError(\"src.pipeline is missing a callable run_evidence_pack(...) or run(...).\")\"\"\",\n\"\"\"def main(argv: Optional[list[str]] = None) -> int:\n    project_root = _add_project_root_to_syspath()\n    args = _parse_args(argv)\n\n    outputs_dir = args.outputs_dir or (project_root / \"outputs\")\n    outputs_dir = outputs_dir.resolve()\n\n    try:\n        result = _run_pipeline(outputs_dir=outputs_dir, seed=int(args.seed), run_tests=bool(args.run_tests))\n    except Exception as e:\n        print(f\"ERROR: {e}\", file=sys.stderr)\n        return 2\n\n    if not args.quiet:\n        # Keep stdout short while still being useful in CI logs.\n        status = result.get(\"status\") if isinstance(result, dict) else None\n        print(f\"OK: pipeline finished (status={status!r})\")\n        print(f\"OK: outputs_dir={outputs_dir}\")\n    return 0\"\"\",\n\"\"\"if __name__ == \"__main__\":  # pragma: no cover\n    raise SystemExit(main())\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:scripts/run_evidence_pack.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_694b4aec1e8081909daf775a3b668d2c0adc623df7df482c",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:scripts/run_evidence_pack.py\nDIR_STATE:[\"scripts/run_evidence_pack.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0b0e573ad672719a00694b4b54da8c819493e713b654c2dd49",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `scripts/run_evidence_pack.py`, a CLI entrypoint that adds the repo root to `sys.path`, delegates to `src.pipeline.run_evidence_pack(...)` (or falls back to `src.pipeline.run(...)`), and supports `--outputs-dir`, `--seed`, and `--run-tests` to drive end-to-end evidence pack generation into the outputs directory."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

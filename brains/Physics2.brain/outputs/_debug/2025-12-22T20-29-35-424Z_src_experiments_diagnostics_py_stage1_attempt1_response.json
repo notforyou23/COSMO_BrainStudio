@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/experiments/diagnostics.py` with NumPy-only quantum/classical diagnostics: von Neumann entropy, purity, partial trace, mutual information, two-point correlators (with Pauli helpers), coherence/dephasing-based decoherence metrics, plus a runnable Bell-state example.",
+  "reasoning": "",
+  "responseId": "resp_0bd22b9e25b631a2006949aad8f89081949661d74af9c81834",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3911,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2396,
+    "output_tokens_details": {
+      "reasoning_tokens": 365
+    },
+    "total_tokens": 6307
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0bd22b9e25b631a2006949aad9c1308194ad8740c36f4ce0b2",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0bd22b9e25b631a2006949aae2136081948ad9622a4931535c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, numpy as np\ntarget_path = Path('/mnt/data').joinpath('src/experiments/diagnostics.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Quantum/classical diagnostics for small finite-dimensional systems.\n\nUtilities here are intentionally lightweight (NumPy-only) and aimed at toy\nexperiments: entanglement entropy, mutual information, correlators, and simple\ndecoherence/coherence metrics for density matrices.\n\\\"\\\"\\\"\"\"\",\n\"\"\"from __future__ import annotations\n\nimport numpy as np\n\n_EPS = 1e-12\n\nPAULI = {\n    \"I\": np.array([[1, 0], [0, 1]], dtype=complex),\n    \"X\": np.array([[0, 1], [1, 0]], dtype=complex),\n    \"Y\": np.array([[0, -1j], [1j, 0]], dtype=complex),\n    \"Z\": np.array([[1, 0], [0, -1]], dtype=complex),\n}\"\"\",\n\"\"\"def ket_to_rho(psi: np.ndarray) -> np.ndarray:\n    \\\"\\\"\\\"Projector |psi><psi| for a state vector (normalized or not).\\\"\\\"\\\"\n    psi = np.asarray(psi, dtype=complex).reshape(-1)\n    nrm = np.vdot(psi, psi).real\n    if nrm < _EPS:\n        raise ValueError(\"State has (near-)zero norm.\")\n    psi = psi / np.sqrt(nrm)\n    return np.outer(psi, psi.conj())\n\n\ndef _log(x: np.ndarray, base: float) -> np.ndarray:\n    return np.log(x) / np.log(base)\n\n\ndef entropy_vn(rho: np.ndarray, base: float = 2.0) -> float:\n    \\\"\\\"\\\"Von Neumann entropy S(ρ) = -Tr ρ log ρ (default in bits).\\\"\\\"\\\"\n    rho = np.asarray(rho, dtype=complex)\n    evals = np.linalg.eigvalsh((rho + rho.conj().T) / 2.0)\n    evals = np.clip(evals.real, 0.0, 1.0)\n    nz = evals[evals > _EPS]\n    return float(-np.sum(nz * _log(nz, base)))\n\n\ndef purity(rho: np.ndarray) -> float:\n    \\\"\\\"\\\"Purity Tr(ρ²).\\\"\\\"\\\"\n    rho = np.asarray(rho, dtype=complex)\n    return float(np.trace(rho @ rho).real)\n\n\ndef dephase(rho: np.ndarray) -> np.ndarray:\n    \\\"\\\"\\\"Return fully dephased ρ in the computational basis (keep diagonal).\\\"\\\"\\\"\n    rho = np.asarray(rho, dtype=complex)\n    return np.diag(np.diag(rho))\n\n\ndef coherence_l1(rho: np.ndarray) -> float:\n    \\\"\\\"\\\"L1 coherence: sum_{i≠j} |ρ_{ij}| in computational basis.\\\"\\\"\\\"\n    rho = np.asarray(rho, dtype=complex)\n    return float(np.sum(np.abs(rho)) - np.sum(np.abs(np.diag(rho))))\n\n\ndef decoherence_diagnostics(rho: np.ndarray, base: float = 2.0) -> dict:\n    \\\"\\\"\\\"Convenience bundle of simple 'quantum vs classical' metrics.\\\"\\\"\\\"\n    rho = np.asarray(rho, dtype=complex)\n    rho_d = dephase(rho)\n    return {\n        \"entropy\": entropy_vn(rho, base=base),\n        \"purity\": purity(rho),\n        \"coherence_l1\": coherence_l1(rho),\n        \"diag_entropy\": entropy_vn(rho_d, base=base),\n        \"offdiag_ratio\": float(coherence_l1(rho) / (np.sum(np.abs(np.diag(rho))) + _EPS)),\n    }\"\"\",\n\"\"\"def partial_trace(rho: np.ndarray, dims: tuple[int, ...], keep: tuple[int, ...]) -> np.ndarray:\n    \\\"\\\"\\\"Partial trace over subsystems not in 'keep'.\n\n    Args:\n        rho: density matrix on ⊗_k C^{dims[k]} (shape (D,D))\n        dims: subsystem dimensions, product equals D\n        keep: indices of subsystems to keep (e.g. (0,2))\n    \\\"\\\"\\\"\n    rho = np.asarray(rho, dtype=complex)\n    dims = tuple(int(d) for d in dims)\n    keep = tuple(int(i) for i in keep)\n    n = len(dims)\n    D = int(np.prod(dims))\n    if rho.shape != (D, D):\n        raise ValueError(\"rho shape incompatible with dims.\")\n    if any(i < 0 or i >= n for i in keep):\n        raise ValueError(\"keep contains invalid subsystem index.\")\n    trace = tuple(i for i in range(n) if i not in keep)\n    resh = rho.reshape(*dims, *dims)  # (a0..a_{n-1}, b0..b_{n-1})\n    for i in sorted(trace, reverse=True):\n        resh = np.trace(resh, axis1=i, axis2=i + resh.ndim // 2)\n    kept_dims = [dims[i] for i in keep]\n    dK = int(np.prod(kept_dims)) if kept_dims else 1\n    return resh.reshape(dK, dK)\"\"\",\n\"\"\"def mutual_information(rho: np.ndarray, dims: tuple[int, ...], A: tuple[int, ...], B: tuple[int, ...], base: float = 2.0) -> float:\n    \\\"\\\"\\\"Mutual information I(A:B)=S(A)+S(B)-S(AB) for disjoint A,B.\\\"\\\"\\\"\n    A, B = tuple(A), tuple(B)\n    if set(A) & set(B):\n        raise ValueError(\"A and B must be disjoint.\")\n    rhoA = partial_trace(rho, dims, A)\n    rhoB = partial_trace(rho, dims, B)\n    rhoAB = partial_trace(rho, dims, tuple(sorted(set(A) | set(B))))\n    return entropy_vn(rhoA, base) + entropy_vn(rhoB, base) - entropy_vn(rhoAB, base)\"\"\",\n\"\"\"def kron_n(ops: list[np.ndarray]) -> np.ndarray:\n    \\\"\\\"\\\"Kronecker product of a list of operators.\\\"\\\"\\\"\n    out = np.array([[1.0 + 0j]])\n    for op in ops:\n        out = np.kron(out, np.asarray(op, dtype=complex))\n    return out\n\n\ndef local_op(op: np.ndarray, site: int, n: int, d: int = 2) -> np.ndarray:\n    \\\"\\\"\\\"Operator acting as op on 'site' and identity elsewhere (qudits size d).\\\"\\\"\\\"\n    if site < 0 or site >= n:\n        raise ValueError(\"site out of range.\")\n    I = np.eye(d, dtype=complex)\n    ops = [I] * n\n    ops[site] = np.asarray(op, dtype=complex)\n    return kron_n(ops)\n\n\ndef correlator(rho: np.ndarray, op_i: np.ndarray, i: int, op_j: np.ndarray, j: int, n: int, d: int = 2) -> complex:\n    \\\"\\\"\\\"Two-point correlator ⟨op_i op_j⟩ for an n-site qudit chain.\\\"\\\"\\\"\n    Oi = local_op(op_i, i, n, d)\n    Oj = local_op(op_j, j, n, d)\n    return complex(np.trace(np.asarray(rho, complex) @ (Oi @ Oj)))\"\"\",\n\"\"\"def example_bell_state() -> dict:\n    \\\"\\\"\\\"Example diagnostics for |Φ+> Bell state on 2 qubits.\\\"\\\"\\\"\n    psi = (np.kron([1, 0], [1, 0]) + np.kron([0, 1], [0, 1])) / np.sqrt(2)\n    rho = ket_to_rho(psi)\n    S_A = entropy_vn(partial_trace(rho, (2, 2), (0,)))\n    I_AB = mutual_information(rho, (2, 2), (0,), (1,))\n    zz = correlator(rho, PAULI[\"Z\"], 0, PAULI[\"Z\"], 1, n=2)\n    return {\"S(A)\": S_A, \"I(A:B)\": I_AB, \"<Z0 Z1>\": float(np.real_if_close(zz))}\n\n\nif __name__ == \"__main__\":\n    out = example_bell_state()\n    print(\"example_bell_state:\", out)\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/experiments/diagnostics.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949aa2cd9908190a540c44a4880beb40f550cedb5ceca86",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/diagnostics.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/diagnostics.py\", \"src/experiments/registry.py\", \"src/experiments/shared.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0bd22b9e25b631a2006949aafdab808194bd0539e1c59813dc",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/experiments/diagnostics.py` with NumPy-only quantum/classical diagnostics: von Neumann entropy, purity, partial trace, mutual information, two-point correlators (with Pauli helpers), coherence/dephasing-based decoherence metrics, plus a runnable Bell-state example."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

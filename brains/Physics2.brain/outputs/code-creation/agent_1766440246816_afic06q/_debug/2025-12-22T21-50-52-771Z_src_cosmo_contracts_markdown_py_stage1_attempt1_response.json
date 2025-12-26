@@ -1,0 +1,92 @@
+{
+  "content": "Wrote a clean, import-safe `src/cosmo_contracts/markdown.py` that fixes syntax issues and provides stable, dependency-free Markdown helper functions (headings, lists, code blocks, tables, and key/value table rendering).",
+  "reasoning": "",
+  "responseId": "resp_02b7cadcf73f1a24006949bd5c7d74819096352167cfa58f77",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3759,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2261,
+    "output_tokens_details": {
+      "reasoning_tokens": 2209
+    },
+    "total_tokens": 6020
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_02b7cadcf73f1a24006949bd5d434081908c1045d55641d38a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_02b7cadcf73f1a24006949bd5ebd18819097334cc2a2edf4e6",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nlist(base.joinpath(\"src\",\"cosmo_contracts\").glob(\"*\"))[:20]\n",
+      "container_id": "cntr_6949bd3ad3008190ae5a8c57bd6f39a6057985b8d7003fbc",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[]"
+        }
+      ]
+    },
+    {
+      "id": "rs_02b7cadcf73f1a24006949bd6189a08190a9740e4c2d58645c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_02b7cadcf73f1a24006949bd6215148190a6ebe3eec9278d45",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import os, itertools, json\nbase=Path(\"/mnt/data\")\nfor p in base.glob(\"*\"):\n    print(p)\n",
+      "container_id": "cntr_6949bd3ad3008190ae5a8c57bd6f39a6057985b8d7003fbc",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "/mnt/data/qg_bench\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_02b7cadcf73f1a24006949bd649840819080fd8bdf85f60fdf",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_02b7cadcf73f1a24006949bd6962d0819094d5278bc7a72d56",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, re\n\ntarget_path = Path('/mnt/data').joinpath('src/cosmo_contracts/markdown.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\\\"\\\"\\\"cosmo_contracts.markdown\n\nSmall, dependency-free helpers for generating Markdown text.\n\nThe project uses these helpers at runtime (e.g., CLI output and reports), so this\nmodule must be import-safe and free of heavy dependencies.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Iterable, List, Mapping, Optional, Sequence, Tuple, Union\n\n\n__all__ = [\n    \"escape_markdown\",\n    \"heading\",\n    \"paragraph\",\n    \"bullet_list\",\n    \"code_block\",\n    \"inline_code\",\n    \"link\",\n    \"blockquote\",\n    \"table\",\n    \"join_blocks\",\n    \"KeyValue\",\n    \"key_value_table\",\n]\n\"\"\")\n\nchunks.append(\"\"\"def escape_markdown(text: str) -> str:\n    \\\"\\\"\\\"Escape characters that commonly affect Markdown rendering.\n\n    This is intentionally conservative: it escapes characters that are frequently\n    interpreted by common Markdown renderers (GitHub-flavored Markdown).\n    \\\"\\\"\\\"\n    if text is None:\n        return \"\"\n    # Backslash first, then other specials.\n    specials = r\"\\\\\\\\`*_{}\\\\[\\\\]()#+\\\\-.!|>\"\n    out: List[str] = []\n    for ch in str(text):\n        if ch == \"\\\\\\\\\":  # already special-cased\n            out.append(\"\\\\\\\\\\\\\\\\\")\n        elif ch in \"`*_{}[]()#+-.!|>\":\n            out.append(\"\\\\\\\\\" + ch)\n        else:\n            out.append(ch)\n    return \"\".join(out)\n\"\"\")\n\nchunks.append(\"\"\"def heading(text: str, level: int = 1) -> str:\n    \\\"\\\"\\\"Return a Markdown heading.\\\"\\\"\\\"\n    lvl = 1 if level is None else int(level)\n    lvl = 1 if lvl < 1 else (6 if lvl > 6 else lvl)\n    return f\\\"{'#' * lvl} {text}\\\".rstrip()\n\n\ndef paragraph(text: str) -> str:\n    \\\"\\\"\\\"Normalize a string to a single Markdown paragraph.\\\"\\\"\\\"\n    if text is None:\n        return \"\"\n    # Collapse internal whitespace/newlines while keeping intentional spaces.\n    lines = [ln.strip() for ln in str(text).splitlines() if ln.strip()]\n    return \" \".join(lines)\n\n\ndef inline_code(code: str) -> str:\n    \\\"\\\"\\\"Format inline code, choosing a delimiter that doesn't conflict.\\\"\\\"\\\"\n    s = \"\" if code is None else str(code)\n    # If code contains backticks, use longer runs.\n    max_run = 0\n    run = 0\n    for ch in s:\n        if ch == \"`\":\n            run += 1\n            max_run = max(max_run, run)\n        else:\n            run = 0\n    delim = \"`\" * (max_run + 1 or 1)\n    return f\\\"{delim}{s}{delim}\\\"\n\"\"\")\n\nchunks.append(\"\"\"def code_block(code: str, language: str = \"\") -> str:\n    \\\"\\\"\\\"Return a fenced Markdown code block.\n\n    If the code contains triple backticks, a longer fence is chosen.\n    \\\"\\\"\\\"\n    s = \"\" if code is None else str(code)\n    # Choose a fence longer than any backtick run in the code.\n    max_run = 0\n    run = 0\n    for ch in s:\n        if ch == \"`\":\n            run += 1\n            max_run = max(max_run, run)\n        else:\n            run = 0\n    fence = \"`\" * max(3, max_run + 1)\n    lang = (language or \"\").strip()\n    header = f\\\"{fence}{lang}\\\".rstrip()\n    return \\\"\\\\n\\\".join([header, s.rstrip(\\\"\\\\n\\\"), fence])\n\"\"\")\n\nchunks.append(\"\"\"def bullet_list(items: Iterable[str], ordered: bool = False, start: int = 1) -> str:\n    \\\"\\\"\\\"Render a Markdown list from items.\\\"\\\"\\\"\n    if items is None:\n        return \"\"\n    lines: List[str] = []\n    n = int(start) if ordered else 0\n    for item in items:\n        if item is None:\n            continue\n        txt = str(item).strip()\n        if not txt:\n            continue\n        if ordered:\n            lines.append(f\\\"{n}. {txt}\\\")\n            n += 1\n        else:\n            lines.append(f\\\"- {txt}\\\")\n    return \\\"\\\\n\\\".join(lines)\n\n\ndef link(label: str, url: str) -> str:\n    \\\"\\\"\\\"Return a Markdown link.\\\"\\\"\\\"\n    return f\\\"[{label}]({url})\\\"\n\n\ndef blockquote(text: str) -> str:\n    \\\"\\\"\\\"Return a Markdown blockquote.\\\"\\\"\\\"\n    if text is None:\n        return \"\"\n    lines = str(text).splitlines() or [\"\"]\n    return \\\"\\\\n\\\".join([f\\\"> {ln}\\\" if ln else \\\">\\\" for ln in lines])\n\"\"\")\n\nchunks.append(\"\"\"def _format_cell(value: object) -> str:\n    s = \"\" if value is None else str(value)\n    # Keep tables readable: escape pipes and collapse newlines.\n    s = s.replace(\"|\", \"\\\\\\\\|\")\n    s = \" \".join(ln.strip() for ln in s.splitlines() if ln.strip())\n    return s\n\n\ndef table(\n    headers: Sequence[str],\n    rows: Sequence[Sequence[object]],\n    align: Optional[Sequence[str]] = None,\n) -> str:\n    \\\"\\\"\\\"Render a simple GitHub-flavored Markdown table.\n\n    align may contain 'left', 'right', 'center' entries (case-insensitive).\n    \\\"\\\"\\\"\n    hdr = [str(h) for h in (headers or ())]\n    if not hdr:\n        return \"\"\n    ncol = len(hdr)\n    def norm_align(a: str) -> str:\n        a = (a or \"\").lower()\n        if a in {\"r\", \"right\"}:\n            return \"---:\"\n        if a in {\"c\", \"center\", \"centre\"}:\n            return \":---:\"\n        return \":---\"  # default left\n    aligns = [norm_align(a) for a in (align or [])]\n    aligns = (aligns + [\":---\"] * ncol)[:ncol]\n\n    def row_line(cells: Sequence[object]) -> str:\n        cells = list(cells or ())\n        cells = (cells + [\"\"] * ncol)[:ncol]\n        return \"| \" + \" | \".join(_format_cell(c) for c in cells) + \" |\"\n\n    lines = [row_line(hdr), \"| \" + \" | \".join(aligns) + \" |\"]\n    for r in rows or ():\n        lines.append(row_line(r))\n    return \"\\\\n\".join(lines)\n\"\"\")\n\nchunks.append(\"\"\"def join_blocks(*blocks: Optional[str]) -> str:\n    \\\"\\\"\\\"Join markdown blocks with a single blank line between non-empty blocks.\\\"\\\"\\\"\n    out: List[str] = []\n    for b in blocks:\n        if not b:\n            continue\n        s = str(b).strip()\n        if s:\n            out.append(s)\n    return \"\\\\n\\\\n\".join(out)\n\n\n@dataclass(frozen=True)\nclass KeyValue:\n    key: str\n    value: str\n\n\ndef key_value_table(items: Union[Mapping[str, object], Sequence[KeyValue], Sequence[Tuple[str, object]]]) -> str:\n    \\\"\\\"\\\"Render a two-column table from key/value pairs.\\\"\\\"\\\"\n    pairs: List[Tuple[str, object]] = []\n    if items is None:\n        return \"\"\n    if isinstance(items, Mapping):\n        pairs = [(str(k), v) for k, v in items.items()]\n    else:\n        for it in items:\n            if isinstance(it, KeyValue):\n                pairs.append((it.key, it.value))\n            else:\n                k, v = it  # type: ignore[misc]\n                pairs.append((str(k), v))\n    return table([\"Key\", \"Value\"], [(k, v) for k, v in pairs])\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/cosmo_contracts/markdown.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bd3ad3008190ae5a8c57bd6f39a6057985b8d7003fbc",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/cosmo_contracts/markdown.py\nDIR_STATE:[\"src/cosmo_contracts/markdown.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_02b7cadcf73f1a24006949bd8871548190a78253c38019b535",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Wrote a clean, import-safe `src/cosmo_contracts/markdown.py` that fixes syntax issues and provides stable, dependency-free Markdown helper functions (headings, lists, code blocks, tables, and key/value table rendering)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

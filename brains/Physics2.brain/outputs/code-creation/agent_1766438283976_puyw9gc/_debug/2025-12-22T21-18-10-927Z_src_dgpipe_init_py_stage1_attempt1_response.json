@@ -1,0 +1,56 @@
+{
+  "content": "Created a lightweight, side-effect-free `src/dgpipe/__init__.py` that exposes `__version__`/`version()` and provides a lazy-loaded public API surface via `__getattr__`, `__all__`, and `__dir__`.",
+  "reasoning": "",
+  "responseId": "resp_0b1b2772cd19db71006949b5d4a7d48194964d9a955f896f7c",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2695,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1140,
+    "output_tokens_details": {
+      "reasoning_tokens": 258
+    },
+    "total_tokens": 3835
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0b1b2772cd19db71006949b5d551d8819485dea4673b33c64a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0b1b2772cd19db71006949b5dae72881949194c076d12fd8a8",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/dgpipe/__init__.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\\\"\\\"\\\"dgpipe package.\n\nThis module is the package entrypoint and public API surface. It is intentionally\nlightweight: it avoids importing submodules at import time to prevent side\neffects and to keep import costs low.\n\nPublic objects are exposed via lazy attribute access (PEP 562).\\\"\\\"\\\"\"\"\")\n\nchunks.append(\"\"\"from __future__ import annotations\"\"\")\n\nchunks.append(\"\"\"from importlib import metadata as _metadata\"\"\")\n\nchunks.append(r\"\"\"def _read_version() -> str:\n    \\\"\\\"\\\"Return the installed package version, or a safe fallback.\\\"\\\"\\\"\n    try:\n        return _metadata.version(\"dgpipe\")\n    except _metadata.PackageNotFoundError:\n        # Running from source (not installed) or during tooling.\n        return \"0.0.0\"\n\"\"\")\n\nchunks.append(\"\"\"__version__ = _read_version()\"\"\")\n\nchunks.append(r\"\"\"def version() -> str:\n    \\\"\\\"\\\"Convenience accessor for :data:`__version__`.\\\"\\\"\\\"\n    return __version__\n\"\"\")\n\nchunks.append(r\"\"\"# Lazy exports: map public attribute names to (module, attribute).\n# These modules are expected to exist in the full project, but are not imported\n# eagerly to keep this entrypoint side-effect free.\n_LAZY_EXPORTS: dict[str, tuple[str, str]] = {\n    # models\n    \"PipelineSpec\": (\"dgpipe.models\", \"PipelineSpec\"),\n    \"StageSpec\": (\"dgpipe.models\", \"StageSpec\"),\n    \"StageResult\": (\"dgpipe.models\", \"StageResult\"),\n    \"PipelineResult\": (\"dgpipe.models\", \"PipelineResult\"),\n    \"RunConfig\": (\"dgpipe.models\", \"RunConfig\"),\n    # protocols\n    \"Stage\": (\"dgpipe.protocols\", \"Stage\"),\n    \"Runner\": (\"dgpipe.protocols\", \"Runner\"),\n    \"ArtifactStore\": (\"dgpipe.protocols\", \"ArtifactStore\"),\n    \"Logger\": (\"dgpipe.protocols\", \"Logger\"),\n}\n\"\"\")\n\nchunks.append(r\"\"\"__all__ = [\"__version__\", \"version\", *_LAZY_EXPORTS.keys()]\n\"\"\")\n\nchunks.append(r\"\"\"def __getattr__(name: str):\n    \\\"\\\"\\\"Dynamically import exported objects on first access.\n\n    This allows users to import from the package root (e.g. ``from dgpipe import\n    PipelineSpec``) without importing submodules during ``import dgpipe``.\n    \\\"\\\"\\\"\n    try:\n        module_name, attr_name = _LAZY_EXPORTS[name]\n    except KeyError as exc:\n        raise AttributeError(f\"module 'dgpipe' has no attribute {name!r}\") from exc\n\n    from importlib import import_module\n\n    module = import_module(module_name)\n    try:\n        value = getattr(module, attr_name)\n    except AttributeError as exc:\n        raise AttributeError(\n            f\"Lazy export {name!r} not found as {module_name}.{attr_name}\"\n        ) from exc\n    globals()[name] = value  # cache for subsequent lookups\n    return value\n\"\"\")\n\nchunks.append(r\"\"\"def __dir__() -> list[str]:\n    \\\"\\\"\\\"Return a helpful list of attributes for introspection tools.\\\"\\\"\\\"\n    return sorted(list(globals().keys()) + list(_LAZY_EXPORTS.keys()))\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/dgpipe/__init__.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949b590d1548190ae21728e2f723cbf0045b034ab97adc3",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/dgpipe/__init__.py\nDIR_STATE:[\"src/dgpipe/__init__.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0b1b2772cd19db71006949b5e864908194b9e737a203b4201c",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a lightweight, side-effect-free `src/dgpipe/__init__.py` that exposes `__version__`/`version()` and provides a lazy-loaded public API surface via `__getattr__`, `__all__`, and `__dir__`."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

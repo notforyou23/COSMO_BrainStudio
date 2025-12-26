@@ -1,0 +1,51 @@
+{
+  "content": "Created `README.md` documenting how to run the end-to-end pipeline, where the evidence-pack artifacts are written under `outputs/`, and how CI/CD validates the pack via the smoke test.",
+  "reasoning": "",
+  "responseId": "resp_07b6f02a0f94291b00694b4b83e3948194adf72db3d5a2f3f0",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2184,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 708,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 2892
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "ci_07b6f02a0f94291b00694b4b84b69c8194a50ae7bd0bbbf250",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('README.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"# Single-cycle Evidence Pack\n\nThis repo generates a deterministic “evidence pack” in one end-to-end pipeline run. The pack is a canonical set of artifacts under `/outputs/` that can be validated in CI.\n\n## What the pipeline produces\n\nRunning the pipeline creates/overwrites:\n\n- `outputs/results.json` — structured run results (metrics + metadata)\n- `outputs/figure.png` — canonical plot derived from `results.json`\n- `outputs/run.log` — structured text log from the pipeline run\n- `outputs/test.log` — captured test output (when run via the suggested command below)\n- `outputs/STATUS.md` — short status summary: what ran, where outputs are, and what passed\n\nAll outputs are written relative to the project root (the repository working directory).\n\n## Quickstart\n\n### 1) Run the pipeline\n\n```bash\npython -m src.pipeline\n```\n\nThis runs the single-cycle pipeline end-to-end and writes the evidence pack into `./outputs/`.\n\n### 2) Run tests and capture a test log\n\n```bash\npytest -q | tee outputs/test.log\n```\n\nThe smoke test validates that the pipeline can run and that the required evidence-pack artifacts are created and minimally valid.\n\n## Determinism / reproducibility\n\nThe pipeline is intended to be deterministic across runs on the same platform:\n\n- fixed seed(s) are used for any stochastic steps\n- timestamps, if included in metadata, are captured in a reproducible/controlled way\n- plotting uses consistent styling to produce a canonical `figure.png`\n\nIf you re-run the pipeline, expect the files in `outputs/` to be overwritten.\n\n## CI/CD validation\n\nCI is expected to:\n\n1. run the pipeline (`python -m src.pipeline`)\n2. run the test suite (`pytest`)\n3. ensure the evidence pack exists and is valid:\n   - required files present in `outputs/`\n   - `results.json` is parseable JSON with expected keys\n   - `figure.png` is created\n   - `STATUS.md` indicates the run completed and tests passed\n\nThe authoritative checks live in `tests/test_pipeline_smoke.py`; the goal is to keep the pipeline + evidence pack stable so CI can gate changes reliably.\n\n## Repository layout (relevant parts)\n\n- `src/pipeline.py` — orchestrates the end-to-end run and writes `outputs/*`\n- `src/plotting.py` — deterministic figure rendering helpers\n- `src/io_utils.py` — logging + JSON IO + output-directory helpers\n- `tests/test_pipeline_smoke.py` — smoke test for artifact creation and basic validity\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:README.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_694b4aec1e8081909daf775a3b668d2c0adc623df7df482c",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:README.md\nDIR_STATE:[\"README.md\", \"requirements.txt\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_07b6f02a0f94291b00694b4b8da0608194b6dffae0ddf04613",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `README.md` documenting how to run the end-to-end pipeline, where the evidence-pack artifacts are written under `outputs/`, and how CI/CD validates the pack via the smoke test."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

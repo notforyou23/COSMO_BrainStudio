@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create ./outputs/roadmap_scope_success_criteria.md (or roadmap_v1.md) with: thesis/through-line, explicit inclusions/exclusions, subtopic list, prioritization policy, and DoD checklist; link it from an outputs index/manifest.
+Project: ./outputs/roadmap_scope_success_criteria.md (or roadmap_v1.md) with: thesis/through-line, explicit inclusions/exclusions, subtopic list, prioritization policy, and DoD checklist; link it from an outputs index/manifest. (python script)
+
+Target file details:
+- Path: outputs/roadmap_scope_success_criteria.md
+- Purpose: Roadmap document containing the thesis/through-line, explicit inclusions/exclusions, subtopic list, prioritization policy, and Definition of Done checklist.
+- Category: documentation
+
+Other planned files (for context only):
+- scripts/generate_roadmap.py: CLI script that generates outputs/roadmap_scope_success_criteria.md (or roadmap_v1.md) and ensures it is linked from an outputs index/manifest deterministically.
+- outputs/manifest.md: Human-readable outputs index/manifest that lists generated artifacts and includes a link to the roadmap file.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T03-32-03-700Z_src_define_comprehensive_v1_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766547118
+- [INTROSPECTION] 2025-12-24T03-32-03-700Z_src_define_comprehensive_v1_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766547118
+- [INTROSPECTION] 2025-12-24T01-29-38-707Z_scripts_run_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766539771836_cun
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+- [AGENT: agent_1766539516432_lwvqffa] Cycle 13 consistency review (divergence 0.97):
+Summary of agreement
+- All branches aim to improve predi
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Roadmap document containing the thesis/through-line, explicit inclusions/exclusions, subtopic list, prioritization policy, and Definition of Done checklist.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/roadmap_scope_success_criteria.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/roadmap_scope_success_criteria.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/roadmap_scope_success_criteria.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

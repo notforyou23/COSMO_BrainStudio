@@ -1,0 +1,62 @@
+name: pipeline-ci
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: ["**"]
+concurrency:
+  group: pipeline-ci-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip wheel setuptools
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          elif [ -f pyproject.toml ]; then
+            pip install .
+          elif [ -f setup.py ]; then
+            pip install .
+          else
+            echo "No requirements.txt/pyproject.toml/setup.py found; skipping dependency install."
+          fi
+      - name: Run pipeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/run_pipeline.py
+      - name: Validate outputs (exist + deterministic)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/ci/validate_artifacts.py --outputs-dir outputs --golden-manifest outputs/golden_manifest.json
+      - name: Upload outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: outputs
+          path: outputs
+          if-no-files-found: warn
+      - name: Debug outputs tree (on failure)
+        if: failure()
+        shell: bash
+        run: |
+          echo "=== outputs tree ==="
+          (ls -la outputs && find outputs -maxdepth 4 -type f -print) || true

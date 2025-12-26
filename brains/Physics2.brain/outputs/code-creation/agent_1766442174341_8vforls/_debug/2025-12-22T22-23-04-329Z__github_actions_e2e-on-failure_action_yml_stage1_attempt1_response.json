@@ -1,0 +1,56 @@
+{
+  "content": "Created a modular composite GitHub Action at `.github/actions/e2e-on-failure/action.yml` that validates inputs, collects E2E diagnostics (via an optional repo script with a robust inline fallback), and uploads them as an artifact only when the job is in a failure state.",
+  "reasoning": "",
+  "responseId": "resp_01a3c8a67d9fb35f006949c4cc875c8195adfdd062aebf3d90",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2951,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1377,
+    "output_tokens_details": {
+      "reasoning_tokens": 211
+    },
+    "total_tokens": 4328
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_01a3c8a67d9fb35f006949c4cd7fbc819598ec42b124bd4254",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01a3c8a67d9fb35f006949c4d12db481959e5b3cf3dba04275",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('.github/actions/e2e-on-failure/action.yml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"name: e2e-on-failure\ndescription: Collect and upload E2E diagnostics as an artifact, but only when the job is failing.\ninputs:\n  artifact-name:\n    description: Artifact name to upload diagnostics under.\n    required: false\n    default: e2e-diagnostics\n  diagnostics-dir:\n    description: Directory where diagnostics will be assembled.\n    required: false\n    default: e2e-diagnostics\n  collect-script:\n    description: Optional path to a repo script that collects diagnostics (preferred).\n    required: false\n    default: scripts/e2e/collect_diagnostics.sh\n  retention-days:\n    description: Artifact retention in days.\n    required: false\n    default: \"14\"\n  upload:\n    description: Set to false to skip artifact upload (collection still runs).\n    required: false\n    default: \"true\"\nruns:\n  using: composite\n  steps:\n    - name: Validate inputs\n      if: ${{ failure() }}\n      shell: bash\n      run: |\n        set -euo pipefail\n        [[ -n \"${{ inputs.artifact-name }}\" ]] || { echo \"artifact-name is empty\"; exit 2; }\n        [[ -n \"${{ inputs.diagnostics-dir }}\" ]] || { echo \"diagnostics-dir is empty\"; exit 2; }\n        [[ \"${{ inputs.upload }}\" == \"true\" || \"${{ inputs.upload }}\" == \"false\" ]] || { echo \"upload must be true/false\"; exit 2; }\n        [[ \"${{ inputs.retention-days }}\" =~ ^[0-9]+$ ]] || { echo \"retention-days must be an integer\"; exit 2; }\n\n    - name: Collect diagnostics\n      if: ${{ failure() }}\n      shell: bash\n      run: |\n        set -euo pipefail\n        diag=\"${{ inputs.diagnostics-dir }}\"\n        mkdir -p \"$diag\"\n        echo \"Diagnostics dir: $diag\"\n        # Prefer a dedicated repo script if present.\n        if [[ -f \"${{ inputs.collect-script }}\" ]]; then\n          chmod +x \"${{ inputs.collect-script }}\" || true\n          \"${{ inputs.collect-script }}\" \"$diag\" || true\n        else\n          # Minimal inline collection fallback (kept intentionally small/robust).\n          {\n            echo \"date_utc=$(date -u +\"%Y-%m-%dT%H:%M:%SZ\")\"\n            echo \"runner_os=${RUNNER_OS:-}\"\n            echo \"runner_arch=${RUNNER_ARCH:-}\"\n            echo \"workflow=${GITHUB_WORKFLOW:-}\"\n            echo \"job=${GITHUB_JOB:-}\"\n            echo \"run_id=${GITHUB_RUN_ID:-}\"\n            echo \"run_attempt=${GITHUB_RUN_ATTEMPT:-}\"\n            echo \"sha=${GITHUB_SHA:-}\"\n            echo \"ref=${GITHUB_REF:-}\"\n          } > \"$diag/metadata.env\"\n          (git rev-parse HEAD 2>/dev/null || true) > \"$diag/git_head.txt\"\n          (git status --porcelain=v1 2>/dev/null || true) > \"$diag/git_status.txt\"\n          (env | sort) > \"$diag/env.txt\"\n          (uname -a 2>/dev/null || true) > \"$diag/uname.txt\"\n          (df -h 2>/dev/null || true) > \"$diag/df.txt\"\n          (free -h 2>/dev/null || true) > \"$diag/free.txt\"\n          (docker ps -a 2>/dev/null || true) > \"$diag/docker_ps.txt\"\n          (docker logs $(docker ps -aq) 2>/dev/null || true) > \"$diag/docker_logs_all.txt\"\n          # Collect common E2E outputs if they exist.\n          for p in playwright-report test-results cypress/videos cypress/screenshots artifacts logs; do\n            [[ -e \"$p\" ]] && tar -czf \"$diag/${p//\\//_}.tgz\" \"$p\" 2>/dev/null || true\n          done\n        fi\n        echo \"Collected files:\"\n        (find \"$diag\" -maxdepth 2 -type f -printf \"%p\\n\" 2>/dev/null || ls -R \"$diag\") | head -n 200\n\n    - name: Upload diagnostics artifact\n      if: ${{ failure() && inputs.upload == 'true' }}\n      uses: actions/upload-artifact@v4\n      with:\n        name: ${{ inputs.artifact-name }}\n        path: ${{ inputs.diagnostics-dir }}\n        if-no-files-found: warn\n        retention-days: ${{ inputs.retention-days }}\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:.github/actions/e2e-on-failure/action.yml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949c4c596008190acfa409a64608da20b039f16c5820fcb",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:.github/actions/e2e-on-failure/action.yml\nDIR_STATE:[\".github/actions/e2e-on-failure/action.yml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_01a3c8a67d9fb35f006949c4dda72081959a922be3ddcca3e3",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created a modular composite GitHub Action at `.github/actions/e2e-on-failure/action.yml` that validates inputs, collects E2E diagnostics (via an optional repo script with a robust inline fallback), and uploads them as an artifact only when the job is in a failure state."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

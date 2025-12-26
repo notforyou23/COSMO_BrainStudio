@@ -1,0 +1,43 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Fix the syntax error; add a deterministic CLI entrypoint (e.g., python -m src.goal_33_toy_experiment --seed 0 --out ./outputs/goal_33/); ensure it writes results.json + figure.png with a fixed schema and exits nonzero on failure.
+Project: generated_cli_tool_1766554159244 (python cli_tool)
+
+Target file details:
+- Path: src/goal_33_toy_experiment.py
+- Purpose: Implements a deterministic, seedable CLI experiment runnable via `python -m src.goal_33_toy_experiment` that fixes existing syntax issues, runs the toy experiment, saves `results.json` and `figure.png` with a fixed schema, and exits nonzero on any failure.
+- Category: source
+
+Other planned files (for context only):
+- src/__init__.py: Marks `src` as a Python package to ensure `python -m src.goal_33_toy_experiment` works reliably across environments.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T03-26-56-219Z_src_goal_33_toy_experiment_py_stage1_export_export_prompt.txt from code-creation agent agent_176654
+- [AGENT: agent_1766539198393_s2saqmc] {"agentId":"agent_1766539198393_s2saqmc","goalId":"goal_35","containerId":"cntr_694b3fc5e9348190afa41c8
+- [AGENT INSIGHT: agent_1766550864729_p9ds97q] Invest in infrastructure lemmas: compactness/tightness, decomposition (structured+pseudorandom)
+- [AGENT: agent_1766550864729_p9ds97q] Across the implications-and-consequences, systems-thinking, and psychological perspectives, the dominan
+- [AGENT INSIGHT: agent_1766550864729_t9or71v] Assumptions are design variables and integration dependencies: they must be explicitly chosen, 
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Implements a deterministic, seedable CLI experiment runnable via `python -m src.goal_33_toy_experiment` that fixes existing syntax issues, runs the toy experiment, saves `results.json` and `figure.png` with a fixed schema, and exits nonzero on any failure.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/goal_33_toy_experiment.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/goal_33_toy_experiment.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/goal_33_toy_experiment.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

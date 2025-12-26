@@ -1,0 +1,91 @@
+name: e2e (on failure)
+
+on:
+  workflow_run:
+    workflows: ["e2e"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Optional: workflow run id to triage (defaults to current run for workflow_run events)."
+        required: false
+        type: string
+      artifact_name:
+        description: "Artifact name to download from the e2e run (if present)."
+        required: false
+        default: e2e-artifacts
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: e2e-failure-${{ github.event.workflow_run.id || github.run_id }}
+  cancel-in-progress: false
+jobs:
+  triage:
+    name: Collect diagnostics and upload bundle
+    runs-on: ubuntu-latest
+    if: >-
+      ${{
+        github.event_name == 'workflow_dispatch' ||
+        (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success')
+      }}
+    env:
+      E2E_ARTIFACTS_DIR: .e2e_failure_artifacts
+      E2E_LOGS_DIR: .e2e_failure_logs
+steps:
+  - name: Checkout
+    uses: actions/checkout@v4
+
+  - name: Common e2e setup (python, cache, deps)
+    uses: ./.github/actions/e2e-common
+    with:
+      python-version: "3.11"
+      requirements-path: docs/e2e/requirements-ci.txt
+      cache-key-prefix: e2e
+
+  - name: Resolve run id
+    id: run
+    shell: bash
+    run: |
+      set -euo pipefail
+      if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.run_id }}" ]]; then
+        echo "id=${{ inputs.run_id }}" >> "$GITHUB_OUTPUT"
+      else
+        echo "id=${{ github.event.workflow_run.id || github.run_id }}" >> "$GITHUB_OUTPUT"
+      fi
+
+  - name: Prepare directories
+    shell: bash
+    run: |
+      set -euo pipefail
+      mkdir -p "${E2E_ARTIFACTS_DIR}" "${E2E_LOGS_DIR}"
+- name: Download artifacts from e2e run (best-effort)
+  continue-on-error: true
+  uses: actions/download-artifact@v4
+  with:
+    name: ${{ inputs.artifact_name || 'e2e-artifacts' }}
+    path: ${{ env.E2E_ARTIFACTS_DIR }}
+    run-id: ${{ steps.run.outputs.id }}
+    github-token: ${{ secrets.GITHUB_TOKEN }}
+
+- name: Failure-only diagnostics + upload
+  uses: ./.github/actions/e2e-on-failure
+  with:
+    artifacts-dir: ${{ env.E2E_ARTIFACTS_DIR }}
+    logs-dir: ${{ env.E2E_LOGS_DIR }}
+    source-run-id: ${{ steps.run.outputs.id }}
+    upload-name: e2e-failure-bundle
+    summary-title: "E2E failure triage"
+
+- name: Always show directory state (debug)
+  if: always()
+  shell: bash
+  run: |
+    set -euo pipefail
+    echo "Artifacts dir:"
+    ls -la "${E2E_ARTIFACTS_DIR}" || true
+    echo "Logs dir:"
+    ls -la "${E2E_LOGS_DIR}" || true

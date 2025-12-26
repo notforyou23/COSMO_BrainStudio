@@ -1,0 +1,61 @@
+{
+  "content": "Implemented `symbolic_rg_flow.py`, a self-contained SymPy+SciPy+Matplotlib experiment that derives and evaluates the one-loop \\(\\phi^4\\) RG flow in \\(4-\\epsilon\\), integrates it numerically, and writes a reproducible PNG plot plus a JSON summary (including LaTeX for \\(\\lambda(t)\\)).",
+  "reasoning": "",
+  "responseId": "resp_0dd5863a021c22c2006949ab489db4819582030f9fb7c0574e",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3873,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2332,
+    "output_tokens_details": {
+      "reasoning_tokens": 311
+    },
+    "total_tokens": 6205
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0dd5863a021c22c2006949ab49426481958ae341cec30e51bd",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0dd5863a021c22c2006949ab4ea28881958f436c7da1244270",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, sys, math\ntarget_path = Path('/mnt/data').joinpath('src/experiments/symbolic_rg_flow.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\n\\\"\\\"\\\"Symbolic + numerical RG flow toy model (phi^4 in 4-eps).\n\nImplements the one-loop beta function\n    dλ/dt = -ε λ + a λ^2,   a = 3/(16π^2)\nwith t = log(μ/μ0). Produces reproducible plots and a small JSON summary.\n\nRun:\n    python -m experiments.symbolic_rg_flow --outdir outputs/rg\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nimport argparse\nimport json\nimport math\n\nimport numpy as np\nimport sympy as sp\nfrom scipy.integrate import solve_ivp\nimport matplotlib.pyplot as plt\n\"\"\")\n\nchunks.append(\"\"\"\nA_DEFAULT = 3.0 / (16.0 * math.pi**2)\n\n\n@dataclass(frozen=True)\nclass RGModel:\n    eps: float = 0.1\n    a: float = A_DEFAULT\n\n    def beta(self, lam: float) -> float:\n        return -self.eps * lam + self.a * lam * lam\n\n    def fixed_points(self) -> tuple[float, float]:\n        return (0.0, 0.0 if self.a == 0 else self.eps / self.a)\n\"\"\")\n\nchunks.append(\"\"\"\ndef symbolic_derivation(eps: float, a: float) -> dict[str, str]:\n    \\\"\\\"\\\"Return SymPy expressions (as strings) for beta, fixed points, and λ(t).\\\"\\\"\\\"\n    t = sp.Symbol(\\\"t\\\", real=True)\n    lam = sp.Function(\\\"lam\\\")\n    eps_s = sp.Symbol(\\\"eps\\\", real=True)\n    a_s = sp.Symbol(\\\"a\\\", real=True)\n\n    ode = sp.Eq(sp.Derivative(lam(t), t), -eps_s * lam(t) + a_s * lam(t) ** 2)\n    sol = sp.dsolve(ode)\n    rhs = sp.simplify(sol.rhs)\n\n    # Express in terms of an initial condition lam0 at t=0\n    lam0 = sp.Symbol(\\\"lam0\\\", real=True)\n    C1 = sp.Symbol(\\\"C1\\\")\n    rhs_ic = sp.simplify(rhs.subs(C1, 1 / lam0 - a_s / eps_s))\n    rhs_ic = sp.simplify(rhs_ic.subs({eps_s: eps, a_s: a}))\n\n    beta = sp.simplify(-eps_s * sp.Symbol(\\\"λ\\\") + a_s * sp.Symbol(\\\"λ\\\") ** 2)\n    fp = sp.solve(sp.Eq(beta, 0), sp.Symbol(\\\"λ\\\"))\n\n    return {\n        \\\"ode\\\": str(ode),\n        \\\"solution_general\\\": str(rhs),\n        \\\"solution_ic\\\": str(rhs_ic),\n        \\\"beta\\\": str(beta),\n        \\\"fixed_points\\\": str(fp),\n        \\\"latex_solution_ic\\\": sp.latex(rhs_ic),\n    }\n\"\"\")\n\nchunks.append(\"\"\"\ndef analytic_lambda(t: np.ndarray, lam0: float, eps: float, a: float) -> np.ndarray:\n    \\\"\\\"\\\"Closed-form solution for dλ/dt = -ε λ + a λ^2 with λ(0)=λ0.\\\"\\\"\\\"\n    t = np.asarray(t, dtype=float)\n    if abs(eps) < 1e-14:\n        # dλ/dt = a λ^2 => 1/λ(t) = 1/λ0 - a t\n        return 1.0 / (1.0 / lam0 - a * t)\n    expm = np.exp(-eps * t)\n    denom = (1.0 / lam0 - a / eps) * expm + a / eps\n    return 1.0 / denom\n\n\ndef integrate_numeric(model: RGModel, lam0: float, t_span: tuple[float, float], n: int = 400):\n    t_eval = np.linspace(t_span[0], t_span[1], n)\n    sol = solve_ivp(lambda tt, y: model.beta(float(y[0])), t_span, [lam0], t_eval=t_eval, rtol=1e-9, atol=1e-12)\n    return sol.t, sol.y[0]\n\"\"\")\n\nchunks.append(\"\"\"\ndef plot_flows(outdir: Path, model: RGModel, lam0_list: list[float], tmax: float) -> dict:\n    outdir.mkdir(parents=True, exist_ok=True)\n    plt.rcParams.update({\n        \\\"figure.dpi\\\": 130,\n        \\\"savefig.dpi\\\": 130,\n        \\\"axes.grid\\\": True,\n        \\\"font.size\\\": 10,\n    })\n\n    t_span = (0.0, float(tmax))\n    t = np.linspace(*t_span, 600)\n\n    fig, ax = plt.subplots(figsize=(6.2, 3.8))\n    for lam0 in lam0_list:\n        lam_a = analytic_lambda(t, lam0, model.eps, model.a)\n        tn, lam_n = integrate_numeric(model, lam0, t_span)\n        ax.plot(t, lam_a, lw=2, label=f\\\"analytic λ0={lam0:g}\\\")\n        ax.plot(tn, lam_n, lw=1, ls=\\\"--\\\", color=ax.lines[-1].get_color(), label=f\\\"numeric  λ0={lam0:g}\\\")\n\n    fp0, fp1 = model.fixed_points()\n    ax.axhline(fp0, color=\\\"k\\\", lw=1, alpha=0.5)\n    if fp1 != fp0:\n        ax.axhline(fp1, color=\\\"k\\\", lw=1, alpha=0.5)\n        ax.text(0.02 * tmax, fp1, f\\\"  λ*={fp1:.4g}\\\", va=\\\"bottom\\\")\n\n    ax.set_xlabel(\\\"t = log(μ/μ0)\\\")\n    ax.set_ylabel(\\\"λ(t)\\\")\n    ax.set_title(f\\\"RG flow: dλ/dt = -ε λ + a λ² (ε={model.eps:g}, a={model.a:.4g})\\\")\n    ax.set_ylim(bottom=min(-0.5, np.nanmin([ax.get_ylim()[0]])))\n    ax.legend(ncol=2, fontsize=8, frameon=True)\n\n    png = outdir / \\\"rg_flow.png\\\"\n    fig.tight_layout()\n    fig.savefig(png)\n    plt.close(fig)\n\n    return {\\\"plot\\\": str(png), \\\"fixed_points\\\": [fp0, fp1]}\n\"\"\")\n\nchunks.append(\"\"\"\ndef main(argv: list[str] | None = None) -> int:\n    ap = argparse.ArgumentParser(description=__doc__)\n    ap.add_argument(\\\"--eps\\\", type=float, default=0.1, help=\\\"epsilon in 4-eps (default: 0.1)\\\")\n    ap.add_argument(\\\"--a\\\", type=float, default=A_DEFAULT, help=\\\"one-loop coefficient a (default: 3/(16π²))\\\")\n    ap.add_argument(\\\"--tmax\\\", type=float, default=8.0, help=\\\"max RG time (default: 8)\\\")\n    ap.add_argument(\\\"--lam0\\\", type=float, nargs=\\\"*\\\", default=[0.05, 0.2, 0.6], help=\\\"initial λ values\\\")\n    ap.add_argument(\\\"--outdir\\\", type=Path, default=Path(\\\"outputs/rg_flow\\\"), help=\\\"output directory\\\")\n    args = ap.parse_args(argv)\n\n    model = RGModel(eps=args.eps, a=args.a)\n    sym = symbolic_derivation(args.eps, args.a)\n    res = plot_flows(args.outdir, model, list(args.lam0), args.tmax)\n\n    payload = {\n        \\\"model\\\": {\\\"eps\\\": model.eps, \\\"a\\\": model.a},\n        \\\"symbolic\\\": sym,\n        \\\"results\\\": res,\n        \\\"lam0\\\": list(args.lam0),\n        \\\"tmax\\\": args.tmax,\n    }\n    jpath = args.outdir / \\\"rg_flow_summary.json\\\"\n    jpath.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding=\\\"utf-8\\\")\n\n    print(f\\\"WROTE {res['plot']}\\\")\n    print(f\\\"WROTE {jpath}\\\")\n    print(\\\"LATEX λ(t) =\\\", sym[\\\"latex_solution_ic\\\"])\n    return 0\n\n\nif __name__ == \\\"__main__\\\":\n    raise SystemExit(main())\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/experiments/symbolic_rg_flow.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949aa2cd9908190a540c44a4880beb40f550cedb5ceca86",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/symbolic_rg_flow.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/diagnostics.py\", \"src/experiments/registry.py\", \"src/experiments/shared.py\", \"src/experiments/symbolic_rg_flow.py\", \"src/experiments/toy_lattice_decoherence.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0dd5863a021c22c2006949ab6e31e481958da873efe6212b30",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0dd5863a021c22c2006949ab6e55448195a33167f10f7fd90b",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `symbolic_rg_flow.py`, a self-contained SymPy+SciPy+Matplotlib experiment that derives and evaluates the one-loop \\(\\phi^4\\) RG flow in \\(4-\\epsilon\\), integrates it numerically, and writes a reproducible PNG plot plus a JSON summary (including LaTeX for \\(\\lambda(t)\\))."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

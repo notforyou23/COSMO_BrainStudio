@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "generated_library_1766542288533"
+version = "0.1.0"
+description = "Reproducible SymPy/NumPy/SciPy experiments with parameter sweeps, plotting, and tests."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [{name = "OpenAI", email = "noreply@openai.com"}]
+dependencies = [
+  "sympy>=1.12",
+  "numpy>=1.26",
+  "scipy>=1.11",
+  "matplotlib>=3.8",
+  "pandas>=2.1",
+  "pytest>=7.4",
+]
+
+[project.urls]
+Homepage = "https://example.invalid/generated_library_1766542288533"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = false
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+minversion = "7.4"
+testpaths = ["tests"]
+addopts = ["-q", "--disable-warnings", "--maxfail=1"]
+filterwarnings = [
+  "error::DeprecationWarning",
+  "ignore:the matrix subclass is not the recommended way.*:PendingDeprecationWarning",
+]

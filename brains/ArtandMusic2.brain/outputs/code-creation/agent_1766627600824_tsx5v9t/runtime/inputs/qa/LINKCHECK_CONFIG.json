@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "defaults": {
+    "timeout_seconds": 15,
+    "connect_timeout_seconds": 7,
+    "read_timeout_seconds": 15,
+    "max_redirects": 10,
+    "retries": 1,
+    "retry_backoff_seconds": 1.0,
+    "respect_robots_txt": false,
+    "user_agent": "COSMO-LinkCheck/1.0 (+local QA; contact: none)"
+  },
+  "input_discovery": {
+    "exemplar_urls_csv": "runtime/inputs/qa/EXEMPLAR_URLS.csv",
+    "media_catalog_csv_globs": [
+      "runtime/inputs/**/MEDIA_CATALOG*.csv",
+      "runtime/inputs/**/media_catalog*.csv",
+      "runtime/inputs/**/media*.csv"
+    ],
+    "case_study_text_globs": [
+      "runtime/inputs/**/pilot_case_study*.md",
+      "runtime/inputs/**/pilot_case_study*.txt",
+      "runtime/inputs/**/case_study*.md",
+      "runtime/inputs/**/case_study*.txt",
+      "runtime/inputs/**/README*.md"
+    ],
+    "url_extraction": {
+      "include_schemes": ["http", "https"],
+      "ignore_schemes": ["mailto", "tel", "javascript"],
+      "drop_trailing_punctuation": true,
+      "dedupe": true
+    }
+  },
+  "output": {
+    "report_csv": "runtime/outputs/qa/LINK_CHECK_REPORT.csv",
+    "report_columns": [
+      "url",
+      "final_url",
+      "status",
+      "ok",
+      "error",
+      "checked_at_utc",
+      "response_time_ms",
+      "content_type",
+      "content_length",
+      "redirect_count",
+      "archive_attempted",
+      "archive_status",
+      "archive_url"
+    ]
+  },
+  "archival_snapshot_policy": {
+    "enabled": false,
+    "provider": "wayback",
+    "attempt_on_ok": false,
+    "attempt_on_status_codes": [404, 410, 500, 502, 503, 504],
+    "attempt_on_errors": true,
+    "min_seconds_between_requests": 2.0,
+    "max_archive_attempts_per_run": 10
+  }
+}

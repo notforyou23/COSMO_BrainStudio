@@ -1,0 +1,45 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Fix blocking syntax errors preventing execution in the already-created deliverables: `qg_bench/cli.py` (reported syntax_error), `src/cosmo_contracts/markdown.py` (reported syntax_error), and any additional syntax errors encountered during the urgent end-to-end run; add/adjust minimal tests to prevent regression.
+Project: generated_cli_tool_1766440251333 (python cli_tool)
+
+Target file details:
+- Path: tests/test_syntax_imports.py
+- Purpose: Regression tests that import the previously failing modules to ensure no SyntaxError or import-time crashes occur.
+- Category: test
+
+Other planned files (for context only):
+- qg_bench/cli.py: Fix and provide a runnable CLI entry module for qg_bench with corrected syntax and minimal, robust argument parsing.
+- src/cosmo_contracts/markdown.py: Fix and provide a valid markdown utility module with corrected syntax and stable public helpers used by the package.
+- tests/test_cli_smoke.py: Minimal CLI smoke test that executes the qg_bench CLI help/version path to confirm end-to-end invocation works without errors.
+
+Reference insights:
+- [CONSOLIDATED] Across multiple agent runs, automated file validation generally succeeds with most files passing, but occasional syntax error
+- [AGENT: agent_1766432552135_37yovma] {"agentId":"agent_1766432552135_37yovma","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766430411939_w8zvs5v] {"agentId":"agent_1766430411939_w8zvs5v","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766438283976_puyw9gc] {"agentId":"agent_1766438283976_puyw9gc","goalId":"routing_code_1766438283975_nh5nje8","containerId":"c
+- [INTROSPECTION] 2025-12-22T20-29-38-112Z_tools_output_format_policy_py_stage1_attempt1_prompt.txt from code-creation agent agent_17664353696
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Regression tests that import the previously failing modules to ensure no SyntaxError or import-time crashes occur.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('tests/test_syntax_imports.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:tests/test_syntax_imports.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside tests/test_syntax_imports.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

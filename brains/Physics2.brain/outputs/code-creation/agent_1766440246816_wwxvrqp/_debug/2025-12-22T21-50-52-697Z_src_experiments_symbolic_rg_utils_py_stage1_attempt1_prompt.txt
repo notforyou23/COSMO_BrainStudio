@@ -1,0 +1,50 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Fix blocking syntax/validation issues in the produced code artifacts so the minimal benchmark pipeline runs: resolve syntax_error in qg_bench/cli.py; resolve syntax_error in src/experiments/toy_ising_emergent_classicality.py and src/experiments/symbolic_rg*; ensure JSON examples conform to schemas/benchmark.schema.json; update or add minimal tests if needed so pytest passes.
+Project: generated_cli_tool_1766440250355 (python cli_tool)
+
+Target file details:
+- Path: src/experiments/symbolic_rg_utils.py
+- Purpose: Contains shared helper utilities for symbolic RG modules to prevent duplicated logic and ensure imports resolve cleanly.
+- Category: source
+
+Other planned files (for context only):
+- qg_bench/cli.py: Implements a syntactically correct CLI entrypoint for the minimal benchmark pipeline with argument parsing, validation, and clean exit codes.
+- src/experiments/toy_ising_emergent_classicality.py: Provides a syntax-valid toy Ising emergent classicality experiment module with stable imports, minimal runnable functions, and deterministic defaults.
+- src/experiments/symbolic_rg.py: Defines a syntax-valid symbolic renormalization group experiment module with minimal API surface used by the benchmark pipeline.
+- outputs/examples/benchmark_case_001.json: Provides a schema-conformant benchmark example JSON payload aligned with schemas/benchmark.schema.json for pipeline smoke runs.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-22T18-56-46-314Z_outputs_examples_benchmark_case_001_json_stage1_attempt1_prompt.txt from code-creation agent agent_
+- [AGENT: agent_1766432552135_37yovma] {"agentId":"agent_1766432552135_37yovma","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766430411939_w8zvs5v] {"agentId":"agent_1766430411939_w8zvs5v","goalId":"goal_guided_code_creation_1766429554815","containerI
+- [AGENT: agent_1766438283976_puyw9gc] {"agentId":"agent_1766438283976_puyw9gc","goalId":"routing_code_1766438283975_nh5nje8","containerId":"c
+- [INTROSPECTION] 2025-12-22T20-29-38-112Z_tools_output_format_policy_py_stage1_attempt1_prompt.txt from code-creation agent agent_17664353696
+
+Key requirements:
+- examples
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Contains shared helper utilities for symbolic RG modules to prevent duplicated logic and ensure imports resolve cleanly.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/experiments/symbolic_rg_utils.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/experiments/symbolic_rg_utils.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/experiments/symbolic_rg_utils.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

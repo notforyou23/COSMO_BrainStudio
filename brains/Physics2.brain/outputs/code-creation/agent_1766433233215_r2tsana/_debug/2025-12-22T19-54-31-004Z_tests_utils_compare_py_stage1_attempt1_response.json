@@ -1,0 +1,56 @@
+{
+  "content": "Created `tests/utils_compare.py` implementing recursive JSON-like comparisons with configurable absolute/relative numeric tolerances plus readable, path-qualified diff formatting for pytest assertions.",
+  "reasoning": "",
+  "responseId": "resp_079193be904bb83d006949a2ad8bb8819599edf0cbd49a4eab",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3179,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1647,
+    "output_tokens_details": {
+      "reasoning_tokens": 134
+    },
+    "total_tokens": 4826
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_079193be904bb83d006949a2ae3c708195a224e17cb0bff6b4",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_079193be904bb83d006949a2b1276081958eee896cd6633821",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, math, numbers\n\ntarget_path = Path('/mnt/data').joinpath('tests/utils_compare.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"Utilities for comparing nested JSON-like structures in tests.\n\nDesigned for pytest assertions with informative diffs and numeric tolerances.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport math\nfrom typing import Any, Iterable, List, Tuple\n\n\nPathStr = str\nDiff = Tuple[PathStr, Any, Any, str]  # (path, actual, expected, reason)\n\n\ndef _is_number(x: Any) -> bool:\n    # bool is a subclass of int; treat it as non-numeric for comparisons.\n    return isinstance(x, (int, float)) and not isinstance(x, bool)\n\n\ndef _fmt_value(x: Any, maxlen: int = 200) -> str:\n    s = repr(x)\n    return s if len(s) <= maxlen else s[: maxlen - 3] + \"...\"\n\n\ndef _num_equal(a: float, b: float, *, atol: float, rtol: float) -> bool:\n    # Handle NaN/inf in a predictable way.\n    if math.isnan(a) and math.isnan(b):\n        return True\n    if math.isinf(a) or math.isinf(b):\n        return a == b\n    return math.isclose(a, b, rel_tol=rtol, abs_tol=atol)\n\n\ndef compare_json_like(\n    actual: Any,\n    expected: Any,\n    *,\n    atol: float = 1e-8,\n    rtol: float = 1e-6,\n    path: str = \"\",\n    max_diffs: int | None = None,\n) -> List[Diff]:\n    \\\"\\\"\\\"Recursively compare JSON-like structures.\n\n    Returns a list of diffs. An empty list means equal within tolerances.\n    \\\"\\\"\\\"\n\n    diffs: List[Diff] = []\n\n    def add(reason: str, a: Any = actual, e: Any = expected) -> None:\n        diffs.append((path or \"$\", a, e, reason))\n\n    # Type-based dispatch\n    if _is_number(actual) and _is_number(expected):\n        if not _num_equal(float(actual), float(expected), atol=atol, rtol=rtol):\n            add(f\"numbers differ (atol={atol}, rtol={rtol})\")\n        return diffs\n\n    if actual is None or expected is None:\n        if actual is not expected:\n            add(\"one is None\")\n        return diffs\n\n    if isinstance(expected, dict):\n        if not isinstance(actual, dict):\n            add(f\"type mismatch: {type(actual).__name__} != dict\")\n            return diffs\n        a_keys = set(actual.keys())\n        e_keys = set(expected.keys())\n        for k in sorted(e_keys - a_keys):\n            diffs.append((f\"{path or '$'}.{k}\", None, expected[k], \"missing key\"))\n            if max_diffs is not None and len(diffs) >= max_diffs:\n                return diffs\n        for k in sorted(a_keys - e_keys):\n            diffs.append((f\"{path or '$'}.{k}\", actual[k], None, \"unexpected key\"))\n            if max_diffs is not None and len(diffs) >= max_diffs:\n                return diffs\n        for k in sorted(a_keys & e_keys, key=lambda x: str(x)):\n            subpath = f\"{path or '$'}.{k}\"\n            diffs.extend(\n                compare_json_like(\n                    actual[k],\n                    expected[k],\n                    atol=atol,\n                    rtol=rtol,\n                    path=subpath,\n                    max_diffs=None if max_diffs is None else max_diffs - len(diffs),\n                )\n            )\n            if max_diffs is not None and len(diffs) >= max_diffs:\n                return diffs\n        return diffs\n\n    if isinstance(expected, (list, tuple)):\n        if not isinstance(actual, (list, tuple)):\n            add(f\"type mismatch: {type(actual).__name__} != list\")\n            return diffs\n        if len(actual) != len(expected):\n            add(f\"length mismatch: {len(actual)} != {len(expected)}\", actual, expected)\n            if max_diffs is not None and len(diffs) >= max_diffs:\n                return diffs\n        n = min(len(actual), len(expected))\n        for i in range(n):\n            subpath = f\"{path or '$'}[{i}]\"\n            diffs.extend(\n                compare_json_like(\n                    actual[i],\n                    expected[i],\n                    atol=atol,\n                    rtol=rtol,\n                    path=subpath,\n                    max_diffs=None if max_diffs is None else max_diffs - len(diffs),\n                )\n            )\n            if max_diffs is not None and len(diffs) >= max_diffs:\n                return diffs\n        return diffs\n\n    # Fallback: strict equality (covers str, bool, etc.)\n    if actual != expected:\n        add(\"value mismatch\")\n    return diffs\n\n\ndef format_diffs(diffs: Iterable[Diff], *, max_lines: int = 30) -> str:\n    \\\"\\\"\\\"Human-friendly multiline diff for assertion errors.\\\"\\\"\\\"\n    diffs = list(diffs)\n    if not diffs:\n        return \"\"\n    lines: List[str] = []\n    show = diffs[:max_lines]\n    for p, a, e, reason in show:\n        lines.append(f\"- {p}: {reason}\")\n        lines.append(f\"    actual:   {_fmt_value(a)}\")\n        lines.append(f\"    expected: {_fmt_value(e)}\")\n    if len(diffs) > len(show):\n        lines.append(f\"... {len(diffs) - len(show)} more differences not shown\")\n    return \"\\\\n\".join(lines)\n\n\ndef assert_json_like_equal(\n    actual: Any,\n    expected: Any,\n    *,\n    atol: float = 1e-8,\n    rtol: float = 1e-6,\n    max_diffs: int = 50,\n) -> None:\n    \\\"\\\"\\\"Assert equality with numeric tolerances; raises AssertionError with diff.\\\"\\\"\\\"\n    diffs = compare_json_like(actual, expected, atol=atol, rtol=rtol, max_diffs=max_diffs)\n    if diffs:\n        raise AssertionError(\n            \"JSON-like structures differ:\\\\n\" + format_diffs(diffs, max_lines=max_diffs)\n        )\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:tests/utils_compare.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949a1f4d2c881908a8c0b7968ab83a502e1863ff81ebb71",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/utils_compare.py\nDIR_STATE:[\"tests/conftest.py\", \"tests/test_benchmark_case_001.py\", \"tests/test_schema_conformance.py\", \"tests/utils_compare.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_079193be904bb83d006949a2c19e1081959c09d9a09392c276",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `tests/utils_compare.py` implementing recursive JSON-like comparisons with configurable absolute/relative numeric tolerances plus readable, path-qualified diff formatting for pytest assertions."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

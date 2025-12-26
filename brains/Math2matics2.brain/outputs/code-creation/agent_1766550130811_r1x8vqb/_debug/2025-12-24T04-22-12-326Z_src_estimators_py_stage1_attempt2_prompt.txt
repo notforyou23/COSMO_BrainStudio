@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a toy experiment (e.g., simulate heavy-tailed data; compare sample mean vs median-of-means error), save ./outputs/results.json and ./outputs/mom_vs_mean.png, and record run metadata in a log file.
+Project: generated_script_1766550130997 (json script)
+
+Target file details:
+- Path: src/estimators.py
+- Purpose: Implements robust estimators including sample mean and median-of-means with configurable block counts and deterministic RNG handling.
+- Category: source
+
+Other planned files (for context only):
+- scripts/run_experiment.py: CLI script that simulates heavy-tailed data, compares sample mean vs median-of-means errors over repeated trials, writes outputs/results.json and outputs/mom_vs_mean.png, and logs run metadata.
+- src/simulate.py: Provides heavy-tailed data generators (e.g., Student-t/Pareto mixtures) and trial execution utilities returning structured results for saving and plotting.
+- src/plotting.py: Creates the mom_vs_mean.png figure from experiment results with consistent styling and labeled comparisons.
+- src/io_utils.py: Handles creation of outputs directory, atomic JSON saving to outputs/results.json, and simple append-only run logging to a log file.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-24T03-47-16-054Z_README_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766548034222_ud7zzr1: You are 
+- [AGENT: agent_1766541933970_kpux1wi] {"agentId":"agent_1766541933970_kpux1wi","goalId":"goal_18","containerId":"cntr_694b4a714b208190ab6f0ee
+- [AGENT: agent_1766538747481_xj9s0e3] Cycle 7 consistency review (divergence 0.98):
+Summary judgment
+All three branches are complementary per
+- [AGENT: agent_1766543291642_15ryvxl] {"agentId":"agent_1766543291642_15ryvxl","goalId":"goal_43","containerId":"cntr_694b4fc317a48190a1321c4
+- [AGENT: agent_1766546811071_ja90ubu] {"agentId":"agent_1766546811071_ja90ubu","goalId":"goal_83","containerId":"cntr_694b5d7e1d248190a76614b
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Implements robust estimators including sample mean and median-of-means with configurable block counts and deterministic RNG handling.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/estimators.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/estimators.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/estimators.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

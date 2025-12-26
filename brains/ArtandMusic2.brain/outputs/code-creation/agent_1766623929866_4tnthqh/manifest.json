@@ -1,0 +1,330 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766623929866_4tnthqh",
+  "agentType": "code-creation",
+  "goalId": "goal_134",
+  "missionId": "strategic_goal_134_1766623929866",
+  "spawnCycle": 108,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-25T00:52:18.187Z",
+  "completedAt": "2025-12-25T00:58:47.794Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "schemas/METADATA_SCHEMA.json",
+      "description": "Defines the single authoritative JSON Schema for case study metadata used across the repository.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:schemas/METADATA_SCHEMA.json\nDIR_STATE:[\"schemas/METADATA_SCHEMA.json\", \"schemas/case-study.schema.json\", \"schemas/catalog.schema.json\"]\nSUMMARY:Wrote a single authoritative case study metadata JSON Schema to schemas/METADATA_SCHEMA.json for repository-wide validation.\n",
+          "timestamp": "2025-12-25T00:52:37.969Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:schemas/METADATA_SCHEMA.json\nDIR_STATE:[\"schemas/METADATA_SCHEMA.json\", \"schemas/case-study.schema.json\", \"schemas/catalog.schema.json\"]\nSUMMARY: Wrote the single authoritative case study metadata JSON Schema to schemas/METADATA_SCHEMA.json for repository-wide validation.\n",
+          "timestamp": "2025-12-25T00:53:03.167Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:18.187Z",
+      "failedAt": "2025-12-25T00:53:03.167Z"
+    },
+    {
+      "path": "tools/metadata_cli.py",
+      "description": "Implements the single blessed CLI entrypoint to scaffold, validate, and report on case study metadata against the authoritative schema.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/metadata_cli.py\nDIR_STATE:[\"tools/__init__.py\", \"tools/metadata_cli.py\", \"tools/pipeline.py\"]\nSUMMARY: Implemented a single metadata_cli.py entrypoint providing scaffold/validate/report commands against schemas/METADATA_SCHEMA.json.\n",
+          "timestamp": "2025-12-25T00:53:29.361Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/metadata_cli.py\nDIR_STATE:[\"tools/__init__.py\", \"tools/metadata_cli.py\", \"tools/pipeline.py\", \"tools/qa_gate.py\"]\nSUMMARY: Implemented a single blessed metadata CLI entrypoint with scaffold/validate/report commands wired to the authoritative METADATA_SCHEMA.json.\n",
+          "timestamp": "2025-12-25T00:53:57.065Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:18.187Z",
+      "failedAt": "2025-12-25T00:53:57.065Z"
+    },
+    {
+      "path": "tools/__init__.py",
+      "description": "Marks the tools directory as a Python package to support module execution and imports for the metadata CLI.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/__init__.py\nDIR_STATE:[\"tools/__init__.py\", \"tools/metadata_cli.py\", \"tools/pipeline.py\", \"tools/qa_gate.py\"]\nSummary: Initialized the tools directory as a side-effect-free Python package to support module execution and imports for the metadata CLI.\n",
+          "timestamp": "2025-12-25T00:54:03.781Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/__init__.py\nDIR_STATE:[\"tools/__init__.py\", \"tools/metadata_cli.py\", \"tools/pipeline.py\", \"tools/qa_gate.py\"]\nSUMMARY: Created a lightweight tools package initializer that enables module execution and provides a stable CLI entrypoint import.\n",
+          "timestamp": "2025-12-25T00:54:11.717Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:18.187Z",
+      "failedAt": "2025-12-25T00:54:11.717Z"
+    },
+    {
+      "path": "tools/_schema_loader.py",
+      "description": "Provides shared utilities to locate, load, and cache the authoritative METADATA_SCHEMA.json for runtime validation.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/_schema_loader.py\nDIR_STATE:[\"tools/__init__.py\", \"tools/_schema_loader.py\", \"tools/metadata_cli.py\", \"tools/pipeline.py\", \"tools/qa_gate.py\"]\nSummary: Added a dependency-free schema loader that reliably locates and caches the authoritative METADATA_SCHEMA.json for runtime validation.\n",
+          "timestamp": "2025-12-25T00:54:28.593Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/_schema_loader.py\nDIR_STATE:[\"tools/__init__.py\", \"tools/_schema_loader.py\", \"tools/metadata_cli.py\", \"tools/pipeline.py\", \"tools/qa_gate.py\"]\nWrote tools/_schema_loader.py to reliably locate, load, and cache the single authoritative schemas/METADATA_SCHEMA.json for runtime validation.\n",
+          "timestamp": "2025-12-25T00:54:41.642Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:18.187Z",
+      "failedAt": "2025-12-25T00:54:41.642Z"
+    },
+    {
+      "path": "tools/_validation.py",
+      "description": "Contains the complete JSON Schema validation logic and human-readable error formatting used by the CLI.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/_validation.py\nDIR_STATE:[\"tools/__init__.py\", \"tools/_schema_loader.py\", \"tools/_validation.py\", \"tools/metadata_cli.py\", \"tools/pipeline.py\", \"tools/qa_artifacts.py\", \"tools/qa_gate.py\"]\nSUMMARY: Implemented a compact jsonschema-based validator with structured issues and human-readable error formatting for CLI use.\n",
+          "timestamp": "2025-12-25T00:54:58.378Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-25T00:55:16.239Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:18.187Z",
+      "failedAt": "2025-12-25T00:55:16.239Z"
+    },
+    {
+      "path": "tools/_scaffold.py",
+      "description": "Generates metadata template files and canonical directory/file layouts that conform to the authoritative schema and workflow.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "TATE:[\"tools/__init__.py\", \"tools/_scaffold.py\", \"tools/_schema_loader.py\", \"tools/_validation.py\", \"tools/metadata_cli.py\", \"tools/pipeline.py\", \"tools/qa_artifacts.py\", \"tools/qa_gate.py\"]\nSummary: Wrote a standalone scaffolding module that creates the canonical case-study directory layout and a schema-derived metadata.json template compatible with the single authoritative METADATA_SCHEMA.json.\n",
+          "timestamp": "2025-12-25T00:55:35.215Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/_scaffold.py\nDIR_STATE:[\"tools/__init__.py\", \"tools/_scaffold.py\", \"tools/_schema_loader.py\", \"tools/_validation.py\", \"tools/metadata_cli.py\", \"tools/pipeline.py\", \"tools/qa_artifacts.py\", \"tools/qa_gate.py\"]\nSummary: Wrote a side-effect-free scaffolding module that creates a canonical case_studies/<slug>/ layout and metadata.json template aligned to the single-schema workflow.\n",
+          "timestamp": "2025-12-25T00:55:58.361Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:18.187Z",
+      "failedAt": "2025-12-25T00:55:58.361Z"
+    },
+    {
+      "path": "tools/_report.py",
+      "description": "Creates deterministic validation reports (JSON and text) in runtime/outputs/tools for use in CI and local development.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/_report.py\nDIR_STATE:[\"tools/__init__.py\", \"tools/_report.py\", \"tools/_scaffold.py\", \"tools/_schema_loader.py\", \"tools/_validation.py\", \"tools/metadata_cli.py\", \"tools/pipeline.py\", \"tools/qa_artifacts.py\", \"tools/qa_gate.py\"]\nSummary: Wrote a dependency-free, deterministic JSON/text validation report writer module for CI and local workflows.\n",
+          "timestamp": "2025-12-25T00:56:29.191Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/_report.py\nDIR_STATE:[\"tools/__init__.py\", \"tools/_report.py\", \"tools/_scaffold.py\", \"tools/_schema_loader.py\", \"tools/_validation.py\", \"tools/metadata_cli.py\", \"tools/pipeline.py\", \"tools/qa_artifacts.py\", \"tools/qa_gate.py\"]\nSUMMARY: Implemented a deterministic JSON+text validation report writer with a small CLI to persist reports under runtime/outputs/tools.\n",
+          "timestamp": "2025-12-25T00:57:08.197Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:18.187Z",
+      "failedAt": "2025-12-25T00:57:08.197Z"
+    },
+    {
+      "path": "tools/deprecated/validate_case_study_metadata.py",
+      "description": "Deprecated compatibility wrapper that forwards to tools/metadata_cli.py and emits a clear deprecation notice.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/deprecated/validate_case_study_metadata.py\nDIR_STATE:[\"tools/deprecated/validate_case_study_metadata.py\"]\nSUMMARY: Wrote a deprecated wrapper that emits a clear warning and forwards execution to the single blessed tools.metadata_cli entrypoint.\n",
+          "timestamp": "2025-12-25T00:57:23.023Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/deprecated/validate_case_study_metadata.py\nDIR_STATE:[\"tools/deprecated/validate_case_study_metadata.py\"]\nSUMMARY: Added a deprecated wrapper that warns clearly and forwards all arguments to tools.metadata_cli.\n",
+          "timestamp": "2025-12-25T00:57:36.310Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:18.187Z",
+      "failedAt": "2025-12-25T00:57:36.310Z"
+    },
+    {
+      "path": "tools/deprecated/SCHEMA_DEPRECATION_NOTICE.md",
+      "description": "Documents which legacy schemas/scripts are deprecated, what the single authoritative replacements are, and the migration steps.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/deprecated/SCHEMA_DEPRECATION_NOTICE.md\nDIR_STATE:[\"tools/deprecated/SCHEMA_DEPRECATION_NOTICE.md\", \"tools/deprecated/validate_case_study_metadata.py\"]\nSummary: Deprecated all competing metadata schemas/validators in favor of schemas/METADATA_SCHEMA.json and python -m tools.metadata_cli, with clear migration steps.\n",
+          "timestamp": "2025-12-25T00:57:57.770Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/deprecated/SCHEMA_DEPRECATION_NOTICE.md\nDIR_STATE:[\"tools/deprecated/SCHEMA_DEPRECATION_NOTICE.md\", \"tools/deprecated/validate_case_study_metadata.py\"]\nSummary: Deprecated all non-METADATA_SCHEMA.json schemas and non-metadata_cli validators, documenting the single authoritative replacements and migration steps.\n",
+          "timestamp": "2025-12-25T00:58:20.518Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:18.187Z",
+      "failedAt": "2025-12-25T00:58:20.518Z"
+    },
+    {
+      "path": "runtime/outputs/tools/README.md",
+      "description": "Describes the single blessed workflow (commands and expected outputs) for scaffolding and validating metadata using the authoritative schema and CLI.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-25T00:58:35.987Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runtime/outputs/tools/README.md\nDIR_STATE:[\"runtime/outputs/tools/README.md\", \"runtime/outputs/tools/__init__.py\", \"runtime/outputs/tools/new_case_study.py\", \"runtime/outputs/tools/validate_outputs.py\"]\nSummary: Wrote a concise README documenting the single authoritative metadata schema and CLI workflow for scaffolding, validating, and reporting.\n",
+          "timestamp": "2025-12-25T00:58:47.794Z"
+        }
+      ],
+      "createdAt": "2025-12-25T00:52:18.187Z",
+      "failedAt": "2025-12-25T00:58:47.794Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Consolidate duplicate schemas/tools by selecting ONE authoritative case study schema (e.g., METADATA_SCHEMA.json) and ONE authoritative validator entrypoint. Deprecate or rename competing scripts/schemas and write runtime/outputs/tools/README.md describing the single blessed workflow (commands + expected outputs).",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Multiple overlapping validators/schemas increase drift and make QA gate ambiguous; consolidation is required for a stable pipeline."
+  ],
+  "projectName": "generated_cli_tool_1766623930043",
+  "language": "json",
+  "type": "cli_tool",
+  "status": "failed",
+  "requirements": [
+    "include_documentation"
+  ],
+  "lastSavedAt": "2025-12-25T00:58:47.794Z",
+  "summary": {
+    "completed": 0,
+    "failed": 10,
+    "total": 10
+  }
+}

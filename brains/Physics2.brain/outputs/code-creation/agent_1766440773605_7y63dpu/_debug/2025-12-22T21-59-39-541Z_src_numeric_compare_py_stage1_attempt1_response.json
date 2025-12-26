@@ -1,0 +1,56 @@
+{
+  "content": "Implemented a parse-clean `src/numeric_compare.py` providing numeric/JSON-list comparison utilities with tolerances plus a minimal CLI entrypoint (`main`) for comparing expected vs actual values or files.",
+  "reasoning": "",
+  "responseId": "resp_0132b1e8bcb2c1a1006949bf7192648190bc871cc70822ee69",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3306,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1774,
+    "output_tokens_details": {
+      "reasoning_tokens": 315
+    },
+    "total_tokens": 5080
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0132b1e8bcb2c1a1006949bf72731481908c48b423c53ce84e",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0132b1e8bcb2c1a1006949bf7914a081909a1c77e6508fa6a4",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/numeric_compare.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"numeric_compare\n\nSmall numeric comparison helpers plus a tiny CLI.\n\nTypical use:\n    python -m numeric_compare --expected 1.0 --actual 1.0001 --rtol 1e-3\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nimport argparse\nimport json\nimport math\nimport os\nfrom pathlib import Path\nfrom typing import Any, Iterable, Sequence, Tuple, Union\n\nNumber = Union[int, float]\nJSONLike = Union[Number, Sequence[Any]]\n\n\n@dataclass(frozen=True)\nclass CompareResult:\n    ok: bool\n    max_abs_err: float\n    max_rel_err: float\n    message: str = \"\"\n\n\ndef _is_number(x: Any) -> bool:\n    return isinstance(x, (int, float)) and not isinstance(x, bool)\n\n\ndef _as_float(x: Any) -> float:\n    try:\n        return float(x)\n    except Exception as e:  # pragma: no cover\n        raise TypeError(f\\\"Not a number: {x!r}\\\") from e\"\"\",\n\"\"\"def _scalar_ok(a: float, b: float, *, rtol: float, atol: float) -> Tuple[bool, float, float]:\n    if not (math.isfinite(a) and math.isfinite(b)):\n        return (a == b), float(\\\"nan\\\"), float(\\\"nan\\\")\n    abs_err = abs(a - b)\n    denom = max(abs(a), abs(b), 1e-300)\n    rel_err = abs_err / denom\n    ok = abs_err <= (atol + rtol * max(abs(a), abs(b)))\n    return ok, abs_err, rel_err\n\n\ndef compare_numeric(expected: Any, actual: Any, *, rtol: float = 1e-6, atol: float = 0.0) -> CompareResult:\n    \\\"\\\"\\\"Compare numbers or nested JSON-like sequences.\n\n    Returns the maximum absolute/relative error over all scalar elements.\n    \\\"\\\"\\\"\n    if _is_number(expected) and _is_number(actual):\n        ok, aerr, rerr = _scalar_ok(_as_float(expected), _as_float(actual), rtol=rtol, atol=atol)\n        msg = \\\"OK\\\" if ok else f\\\"FAIL abs_err={aerr:g} rel_err={rerr:g}\\\"\n        return CompareResult(ok=ok, max_abs_err=aerr, max_rel_err=rerr, message=msg)\n\n    if isinstance(expected, (list, tuple)) and isinstance(actual, (list, tuple)):\n        if len(expected) != len(actual):\n            return CompareResult(False, float(\\\"inf\\\"), float(\\\"inf\\\"), f\\\"Length mismatch: {len(expected)} != {len(actual)}\\\")\n        max_abs = 0.0\n        max_rel = 0.0\n        for e, a in zip(expected, actual):\n            r = compare_numeric(e, a, rtol=rtol, atol=atol)\n            if not r.ok:\n                return CompareResult(False, max(max_abs, r.max_abs_err), max(max_rel, r.max_rel_err), r.message)\n            max_abs = max(max_abs, r.max_abs_err)\n            max_rel = max(max_rel, r.max_rel_err)\n        return CompareResult(True, max_abs, max_rel, \\\"OK\\\")\n\n    return CompareResult(False, float(\\\"inf\\\"), float(\\\"inf\\\"), f\\\"Type mismatch: {type(expected).__name__} vs {type(actual).__name__}\\\")\"\"\",\n\"\"\"def _read_text_if_path(s: str) -> str:\n    p = Path(s)\n    if p.exists() and p.is_file():\n        return p.read_text(encoding=\\\"utf-8\\\").strip()\n    return s.strip()\n\n\ndef parse_value(text_or_path: str) -> JSONLike:\n    \\\"\\\"\\\"Parse a scalar number or a JSON array from a string or file path.\\\"\\\"\\\"\n    text = _read_text_if_path(text_or_path)\n    # Try JSON first (handles lists, ints, floats)\n    try:\n        v = json.loads(text)\n        if _is_number(v) or isinstance(v, (list, tuple)):\n            return v\n    except Exception:\n        pass\n    # Fallback: first token as float\n    tok = text.split()[0] if text else \\\"\\\"\n    try:\n        return float(tok)\n    except Exception as e:\n        raise ValueError(f\\\"Could not parse numeric value from {text_or_path!r}\\\") from e\n\n\ndef build_arg_parser() -> argparse.ArgumentParser:\n    p = argparse.ArgumentParser(prog=\\\"numeric_compare\\\", description=\\\"Compare numeric values with tolerances.\\\")\n    p.add_argument(\\\"--expected\\\", required=True, help=\\\"Expected number / JSON list, or path to a file containing it.\\\")\n    p.add_argument(\\\"--actual\\\", required=True, help=\\\"Actual number / JSON list, or path to a file containing it.\\\")\n    p.add_argument(\\\"--rtol\\\", type=float, default=1e-6, help=\\\"Relative tolerance (default: 1e-6).\\\")\n    p.add_argument(\\\"--atol\\\", type=float, default=0.0, help=\\\"Absolute tolerance (default: 0.0).\\\")\n    p.add_argument(\\\"--quiet\\\", action=\\\"store_true\\\", help=\\\"Suppress OK output; only print failures.\\\")\n    return p\n\n\ndef main(argv: Iterable[str] | None = None) -> int:\n    args = build_arg_parser().parse_args(list(argv) if argv is not None else None)\n    expected = parse_value(args.expected)\n    actual = parse_value(args.actual)\n    res = compare_numeric(expected, actual, rtol=args.rtol, atol=args.atol)\n    if res.ok:\n        if not args.quiet:\n            print(f\\\"OK max_abs_err={res.max_abs_err:g} max_rel_err={res.max_rel_err:g}\\\")\n        return 0\n    print(res.message or \\\"FAIL\\\")\n    return 1\n\n\nif __name__ == \\\"__main__\\\":  # pragma: no cover\n    raise SystemExit(main())\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/numeric_compare.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bf49646c819096b016c3e92a33230ce550ef4271a753",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/numeric_compare.py\nDIR_STATE:[\"src/numeric_compare.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0132b1e8bcb2c1a1006949bf89700481908f614d6dc325541c",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented a parse-clean `src/numeric_compare.py` providing numeric/JSON-list comparison utilities with tolerances plus a minimal CLI entrypoint (`main`) for comparing expected vs actual values or files."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

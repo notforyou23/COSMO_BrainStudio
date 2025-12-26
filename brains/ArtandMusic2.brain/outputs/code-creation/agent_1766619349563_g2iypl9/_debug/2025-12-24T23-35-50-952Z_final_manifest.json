@@ -1,0 +1,328 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766619349563_g2iypl9",
+  "agentType": "code-creation",
+  "goalId": "goal_157",
+  "missionId": "urgent_goal_157_1766619349563",
+  "spawnCycle": 68,
+  "coordinatorReview": null,
+  "spawnedBy": "meta_coordinator_urgent",
+  "triggerSource": "urgent_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-24T23:36:03.002Z",
+  "completedAt": "2025-12-24T23:45:36.918Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "config/claim_card_schema.json",
+      "description": "Defines the authoritative JSON Schema requiring verbatim claim text, context (speaker/date/link), and a provenance anchor with strict required-field rules.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:config/claim_card_schema.json\nDIR_STATE:[\"config/claim_card.schema.yaml\", \"config/claim_card_schema.json\", \"config/qa_gates.yaml\"]\nSummary: Updated claim card JSON Schema to strictly require verbatim claim text, speaker/date/link context, and a provenance anchor with mandatory abstention-on-missing criteria.\n",
+          "timestamp": "2025-12-24T23:36:36.270Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:config/claim_card_schema.json\nDIR_STATE:[\"config/claim_card.schema.json\", \"config/claim_card.schema.yaml\", \"config/claim_card_schema.json\", \"config/qa_gates.yaml\"]\nSUMMARY: Updated claim card JSON Schema to strictly require verbatim claim text, context (speaker/date/link), and a provenance anchor with abstention criteria annotations.\n",
+          "timestamp": "2025-12-24T23:37:05.870Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.001Z",
+      "failedAt": "2025-12-24T23:37:05.870Z"
+    },
+    {
+      "path": "src/claim_cards/models.py",
+      "description": "Implements typed dataclasses/Pydantic-style models for claim cards and provenance metadata aligned to the schema for consistent parsing and validation.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claim_cards/models.py\nDIR_STATE:[\"src/claim_cards/__init__.py\", \"src/claim_cards/cli.py\", \"src/claim_cards/models.py\", \"src/claim_cards/parser.py\", \"src/claim_cards/validator.py\"]\nSummary: Added strict typed models for claim cards enforcing verbatim claim text, required context (speaker/date/link), provenance anchor, and abstention-ready missing-field detection.\n",
+          "timestamp": "2025-12-24T23:37:36.431Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claim_cards/models.py\nDIR_STATE:[\"src/claim_cards/__init__.py\", \"src/claim_cards/cli.py\", \"src/claim_cards/models.py\", \"src/claim_cards/parser.py\", \"src/claim_cards/validator.py\"]\nSUMMARY: Added strict typed models for claim cards with required verbatim claim text, context, and provenance anchor plus abstention-oriented validation helpers.\n",
+          "timestamp": "2025-12-24T23:37:58.765Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.001Z",
+      "failedAt": "2025-12-24T23:37:58.765Z"
+    },
+    {
+      "path": "src/claim_cards/validator.py",
+      "description": "Provides full validation logic (schema + custom rules) and explicit abstention criteria when required fields are missing or non-verbatim/unsupported.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claim_cards/validator.py\nDIR_STATE:[\"src/claim_cards/__init__.py\", \"src/claim_cards/cli.py\", \"src/claim_cards/models.py\", \"src/claim_cards/parser.py\", \"src/claim_cards/validator.py\"]\nSUMMARY: Updated claim card validator to enforce verbatim claim + context + provenance anchor with explicit abstention when required fields are missing or unsupported.\n",
+          "timestamp": "2025-12-24T23:38:32.088Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/claim_cards/validator.py\nDIR_STATE:[\"src/claim_cards/__init__.py\", \"src/claim_cards/cli.py\", \"src/claim_cards/models.py\", \"src/claim_cards/parser.py\", \"src/claim_cards/validator.py\"]\nSUMMARY: Implemented schema-aware claim card validation with explicit abstention rules requiring verbatim claim text, context (speaker/date/link), and a provenance anchor.\n",
+          "timestamp": "2025-12-24T23:39:09.348Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.001Z",
+      "failedAt": "2025-12-24T23:39:09.348Z"
+    },
+    {
+      "path": "scripts/validate_outputs.py",
+      "description": "CLI script to scan output claim cards (.md/.json), enforce the updated intake checklist requirements, and fail/abstain with actionable error reporting.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "_tracker.py\", \"scripts/run_scaffold.py\", \"scripts/update_project_tracker.py\", \"scripts/validate_linkcheck_report.py\", \"scripts/validate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_scaffold.py\"]\nSUMMARY:Wrote a CLI validator that scans claim cards and enforces verbatim claim text, speaker/date/link context, and a provenance anchor with explicit abstention/fail reporting.\n",
+          "timestamp": "2025-12-24T23:39:41.429Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "ts/run_scaffold.py\", \"scripts/update_project_tracker.py\", \"scripts/validate_linkcheck_report.py\", \"scripts/validate_outputs.py\", \"scripts/validate_pilot_case_study.py\", \"scripts/validate_scaffold.py\"]\nSummary: Added a CLI validator that scans .md/.json claim cards and abstains with actionable errors when verbatim claim, context (speaker/date/link), or provenance anchor fields are missing/invalid.\n",
+          "timestamp": "2025-12-24T23:40:16.787Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.001Z",
+      "failedAt": "2025-12-24T23:40:16.787Z"
+    },
+    {
+      "path": "src/claim_cards/md_parser.py",
+      "description": "Parses CLAIM_CARD_TEMPLATE.md-style markdown into structured objects, extracting verbatim claim, context fields, and provenance anchors reliably.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-24T23:41:03.359Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "File not found after execution",
+          "timestamp": "2025-12-24T23:41:36.417Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.001Z",
+      "failedAt": "2025-12-24T23:41:36.417Z"
+    },
+    {
+      "path": "outputs/CLAIM_CARD_TEMPLATE.md",
+      "description": "Updates the claim card template to mandate verbatim claim text plus context (speaker/date/link) and a provenance anchor field with clear instructions.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "\", \"outputs/PROJECT_TRACKER.csv\", \"outputs/PROJECT_TRACKER.json\", \"outputs/README.md\", \"outputs/REPORT_OUTLINE.md\", \"outputs/RIGHTS_AND_LICENSING_CHECKLIST.md\", \"outputs/RIGHTS_LOG.csv\"]\nSUMMARY: Updated the claim card template to require verbatim claim text, full context (speaker/date/link), a precise provenance anchor, and explicit validation/abstention rules when any required field is missing.\n",
+          "timestamp": "2025-12-24T23:42:10.080Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "\", \"outputs/PROJECT_TRACKER.csv\", \"outputs/PROJECT_TRACKER.json\", \"outputs/README.md\", \"outputs/REPORT_OUTLINE.md\", \"outputs/RIGHTS_AND_LICENSING_CHECKLIST.md\", \"outputs/RIGHTS_LOG.csv\"]\nSummary: Updated the claim card template to require verbatim claim text, full context (speaker/date/link), a precise provenance anchor, and explicit validation/abstention rules when any required field is missing.\n",
+          "timestamp": "2025-12-24T23:42:32.853Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.001Z",
+      "failedAt": "2025-12-24T23:42:32.853Z"
+    },
+    {
+      "path": "docs/intake_checklist.md",
+      "description": "Documents the updated intake checklist requirements and abstention/validation rules for missing verbatim/context/provenance fields.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docs/intake_checklist.md\nDIR_STATE:[\"docs/claim_card_workflow.md\", \"docs/intake_checklist.md\"]\nSUMMARY:Updated the intake checklist to require verbatim claim text with speaker/date/link context plus a specific provenance anchor, and to mandate validation/abstention when any required field is missing or non-verbatim.\n",
+          "timestamp": "2025-12-24T23:42:59.641Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docs/intake_checklist.md\nDIR_STATE:[\"docs/claim_card_workflow.md\", \"docs/intake_checklist.md\"]\nSUMMARY: Updated the intake checklist to require verbatim claim text plus speaker/date/link context and a precise provenance anchor, with explicit validation/abstention criteria for missing or non-verbatim fields.\n",
+          "timestamp": "2025-12-24T23:43:24.344Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.001Z",
+      "failedAt": "2025-12-24T23:43:24.344Z"
+    },
+    {
+      "path": "tests/test_claim_card_validation.py",
+      "description": "End-to-end unit tests covering valid cards, missing required fields, non-verbatim claims, missing context, and provenance anchor abstention behavior.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/test_claim_card_validation.py\nDIR_STATE:[\"tests/test_claim_card_validation.py\", \"tests/test_intake_validation.py\"]\nSUMMARY: Added end-to-end pytest coverage for valid claim cards plus abstention/validation behavior for missing required fields, missing context, missing provenance anchor, and non-verbatim claim text.\n",
+          "timestamp": "2025-12-24T23:43:55.030Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/test_claim_card_validation.py\nDIR_STATE:[\"tests/test_claim_card_validation.py\", \"tests/test_intake_validation.py\"]\nSummary: Added end-to-end pytest coverage for valid claim cards and strict abstention/validation behavior when verbatim text, context, or provenance anchor requirements are missing or violated.\n",
+          "timestamp": "2025-12-24T23:44:42.130Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.001Z",
+      "failedAt": "2025-12-24T23:44:42.130Z"
+    },
+    {
+      "path": "tests/fixtures/claim_cards/valid_minimal.json",
+      "description": "Provides a minimal valid claim card fixture including verbatim claim, full context (speaker/date/link), and provenance anchor for validation tests.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/fixtures/claim_cards/valid_minimal.json\nDIR_STATE:[\"tests/fixtures/claim_cards/valid_minimal.json\"]\nSUMMARY:Wrote a minimal valid claim card fixture requiring verbatim claim text, full context (speaker/date/link), and a provenance anchor.\n",
+          "timestamp": "2025-12-24T23:44:58.905Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/fixtures/claim_cards/valid_minimal.json\nDIR_STATE:[\"tests/fixtures/claim_cards/valid_minimal.json\"]\nSUMMARY:Wrote a minimal valid claim card fixture including verbatim claim text, full context (speaker/date/link), and a provenance anchor for validation tests.\n",
+          "timestamp": "2025-12-24T23:45:11.756Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.001Z",
+      "failedAt": "2025-12-24T23:45:11.756Z"
+    },
+    {
+      "path": "tests/fixtures/claim_cards/invalid_missing_fields.json",
+      "description": "Provides an invalid claim card fixture missing required verbatim/context/provenance fields to verify abstention and error reporting.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/fixtures/claim_cards/invalid_missing_fields.json\nDIR_STATE:[\"tests/fixtures/claim_cards/invalid_missing_fields.json\", \"tests/fixtures/claim_cards/valid_minimal.json\"]\nSUMMARY: Wrote an intentionally invalid claim card fixture that omits verbatim claim text, required context (speaker/date/link), and a provenance anchor to exercise abstention and error reporting.\n",
+          "timestamp": "2025-12-24T23:45:23.692Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/fixtures/claim_cards/invalid_missing_fields.json\nDIR_STATE:[\"tests/fixtures/claim_cards/invalid_missing_fields.json\", \"tests/fixtures/claim_cards/valid_minimal.json\"]\nSUMMARY: Wrote an intentionally invalid claim card fixture that omits verbatim/context/provenance-anchor fields to exercise abstention and error reporting.\n",
+          "timestamp": "2025-12-24T23:45:36.918Z"
+        }
+      ],
+      "createdAt": "2025-12-24T23:36:03.001Z",
+      "failedAt": "2025-12-24T23:45:36.918Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Update the intake checklist to require exact claim text (verbatim) + context (speaker/date/link) + provenance anchor, and add validation rules/abstention criteria when any required field is missing.",
+  "missionSuccessCriteria": [
+    "Complete the urgent task identified by Meta-Coordinator",
+    "Curated insight (actionability 8-9/10): Identifies the primary blocker that caused pilot work to stall (missing verbatim claim text), enabling a hard gate in the intake checklist so agents cannot begin without required fields...."
+  ],
+  "projectName": "generated_script_1766619349769",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-24T23:45:36.918Z",
+  "summary": {
+    "completed": 0,
+    "failed": 10,
+    "total": 10
+  }
+}

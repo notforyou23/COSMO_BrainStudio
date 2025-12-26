@@ -1,0 +1,42 @@
+{
+  "content": "[\n  {\n    \"path\": \"scripts/qa_run.py\",\n    \"description\": \"Canonical QA runner that prefers Docker container execution but deterministically falls back to a failsafe no-container mode that always writes /outputs/qa/QA_REPORT.json and logs with stable exit codes.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa_failsafe.py\",\n    \"description\": \"Pure-Python failsafe QA implementation reusing existing checks (file presence, JSON schema validation, optional linkcheck) and producing a deterministic QA_REPORT payload for the main runner.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa_docker.py\",\n    \"description\": \"Docker integration helpers for the QA runner including container availability detection, robust invocation, log capture, and explicit error classification to trigger failsafe mode.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa_report.py\",\n    \"description\": \"Shared report/logging utilities that guarantee report directory creation, atomic JSON writing of QA_REPORT.json, and consistent exit-code mapping across container and failsafe modes.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa_checks.py\",\n    \"description\": \"Reusable check logic (expected output file presence, JSON parseability, schema validation via pure-Python, and linkcheck adapter) consumed by both container and no-container execution paths.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"schemas/qa_report.schema.json\",\n    \"description\": \"JSON Schema defining the required structure of /outputs/qa/QA_REPORT.json to ensure machine-validated, stable reporting across all execution environments.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"scripts/vendor/jsonschema_min.py\",\n    \"description\": \"Minimal pure-Python JSON Schema validator shim (supporting the subset used by this project) to avoid external dependencies in failsafe no-container mode.\",\n    \"category\": \"support\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_012547cc635b2f7200694c98c48abc81938775620e28f30205",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 665,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 601,
+    "output_tokens_details": {
+      "reasoning_tokens": 175
+    },
+    "total_tokens": 1266
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_012547cc635b2f7200694c98c4cbfc8193a6092dffcc231a59",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_012547cc635b2f7200694c98c8a8448193a0de53d9bc43aee9",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"scripts/qa_run.py\",\n    \"description\": \"Canonical QA runner that prefers Docker container execution but deterministically falls back to a failsafe no-container mode that always writes /outputs/qa/QA_REPORT.json and logs with stable exit codes.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa_failsafe.py\",\n    \"description\": \"Pure-Python failsafe QA implementation reusing existing checks (file presence, JSON schema validation, optional linkcheck) and producing a deterministic QA_REPORT payload for the main runner.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa_docker.py\",\n    \"description\": \"Docker integration helpers for the QA runner including container availability detection, robust invocation, log capture, and explicit error classification to trigger failsafe mode.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa_report.py\",\n    \"description\": \"Shared report/logging utilities that guarantee report directory creation, atomic JSON writing of QA_REPORT.json, and consistent exit-code mapping across container and failsafe modes.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/qa_checks.py\",\n    \"description\": \"Reusable check logic (expected output file presence, JSON parseability, schema validation via pure-Python, and linkcheck adapter) consumed by both container and no-container execution paths.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"schemas/qa_report.schema.json\",\n    \"description\": \"JSON Schema defining the required structure of /outputs/qa/QA_REPORT.json to ensure machine-validated, stable reporting across all execution environments.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"scripts/vendor/jsonschema_min.py\",\n    \"description\": \"Minimal pure-Python JSON Schema validator shim (supporting the subset used by this project) to avoid external dependencies in failsafe no-container mode.\",\n    \"category\": \"support\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

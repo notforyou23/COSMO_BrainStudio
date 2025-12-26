@@ -1,0 +1,56 @@
+{
+  "content": "Created `README.md` documenting how to run the Mathematics coverage CLI, what deterministic artifacts are generated in `/outputs`, and the safe rules for extending the taxonomy without destabilizing diffs or downstream consumers.",
+  "reasoning": "",
+  "responseId": "resp_0fc5dcab991d1be400694b47111c008194ac4481723108314f",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2865,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1326,
+    "output_tokens_details": {
+      "reasoning_tokens": 1282
+    },
+    "total_tokens": 4191
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0fc5dcab991d1be400694b4711cae48194808250f905024a7d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0fc5dcab991d1be400694b47130c6c8194a96d81ded13839e5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('README.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\"\"\"# next — Mathematics coverage artifacts\n\nThis project provides a small, deterministic CLI that generates two artifacts for the **Mathematics** domain in `/outputs/`:\n\n1. `coverage_matrix.csv` — machine-readable matrix of domains × subtopics × artifact types, with status and cross-link fields.\n2. `eval_loop.md` — a human-readable 5-cycle evaluation cadence with metrics and decision rules for what to create next.\n\nThe outputs are designed to be versioned, diffed, and consumed by downstream agents or tooling.\n\n## Quickstart\n\n### Requirements\n- Python 3.10+ recommended.\n\n### Run the CLI\nFrom the repository root:\n\n```bash\npython -m src.math_coverage_cli --outdir outputs\n```\n\nCommon options (exact flags may vary by implementation, see `--help`):\n\n```bash\npython -m src.math_coverage_cli --help\npython -m src.math_coverage_cli --outdir outputs --format csv\npython -m src.math_coverage_cli --outdir outputs --emit-markdown-table\n```\n\nThe CLI is expected to be deterministic: given the same taxonomy and code, it writes the same outputs (stable ordering, normalized line endings).\n\n## What gets produced in /outputs\n\nAfter a successful run, you should see:\n\n- `/outputs/coverage_matrix.csv`\n  - One row per (domain, subtopic, artifact_type).\n  - Typical columns:\n    - `domain`, `subtopic`, `artifact_type`\n    - `status` (e.g., `missing`, `planned`, `draft`, `complete`)\n    - `cross_links` (delimited list of references/paths/ids)\n    - `notes` (short free text; keep stable if you care about diffs)\n  - Intended use: programmatic coverage checks (count uncovered cells, filter by status, etc.).\n\n- `/outputs/eval_loop.md`\n  - Describes a 5-cycle review cadence, metrics to track, and decision rules.\n  - Intended use: human process policy for iterative expansion and quality control.\n\n## Taxonomy overview (how the matrix is populated)\n\nThe matrix is generated from `src/math_taxonomy.py`, which should define:\n- A **domain taxonomy** (top-level domains like Algebra, Calculus, etc.).\n- For each domain, a list of **subtopics**.\n- A fixed set of **artifact types** to track per subtopic (e.g., `explanation`, `examples`, `exercises`, `solutions`, `cheatsheet`, `reference`).\n- Default values for `status` and `cross_links` placeholders.\n\nThe CLI combines these into a cartesian product:\n`rows = domains × subtopics × artifact_types`, then renders to CSV (and optionally a markdown table).\n\n## Extending the taxonomy safely (for stable diffs)\n\nTo add or modify coverage without breaking consumers:\n\n1. **Prefer appending over reordering**\n   - Keep existing domain/subtopic/artifact_type ordering stable.\n   - Append new items at the end of lists to reduce diff noise.\n\n2. **Use stable identifiers**\n   - Use consistent spelling/casing for `domain`, `subtopic`, and `artifact_type`.\n   - Avoid punctuation churn (e.g., switching between “Number Theory” and “Number-Theory”).\n\n3. **Avoid deletions when possible**\n   - If something is deprecated, keep it and mark its `status` accordingly (e.g., `deprecated`) rather than removing rows.\n\n4. **Keep artifact types fixed**\n   - Changing the global artifact type list changes the shape of the matrix.\n   - If you must add a new artifact type, add it once globally and regenerate outputs; expect all subtopics to gain a new row.\n\n5. **Cross-links should be parseable**\n   - Store cross-links as a deterministic, delimited list (for example `;`-separated).\n   - Use paths relative to repo root when linking to files (e.g., `docs/algebra/groups.md`).\n\n6. **Determinism checks**\n   - Ensure renderers sort rows consistently and normalize line endings to `\\\\n`.\n   - Write files atomically (write temp then replace) to avoid partial outputs.\n\n## Typical workflow\n\n1. Update `src/math_taxonomy.py` (add domains/subtopics or adjust defaults).\n2. Run the CLI to regenerate `/outputs/coverage_matrix.csv` and `/outputs/eval_loop.md`.\n3. Review diffs:\n   - Are there new uncovered cells (`status=missing`)?\n   - Are cross-links preserved and well-formed?\n   - Did ordering remain stable?\n\n## Consuming the artifacts\n\n- CSV can be read by any tooling (Python, spreadsheets, CI checks).\n- The evaluation loop document provides the cadence and decision rules that a reviewer or agent can follow to decide what to create next based on:\n  - artifact counts by status\n  - number of cross-links per subtopic\n  - number of uncovered cells (missing/planned)\n\nIf you build additional automation, treat `/outputs/coverage_matrix.csv` as the source of truth for coverage state and `/outputs/eval_loop.md` as the human policy layer.\n\"\"\"]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:README.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b46a6881c81909c860794a76234b305db56a8985c57db",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:README.md\nDIR_STATE:[\"README.md\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0fc5dcab991d1be400694b472297248194a73ff1e75cd04526",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `README.md` documenting how to run the Mathematics coverage CLI, what deterministic artifacts are generated in `/outputs`, and the safe rules for extending the taxonomy without destabilizing diffs or downstream consumers."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

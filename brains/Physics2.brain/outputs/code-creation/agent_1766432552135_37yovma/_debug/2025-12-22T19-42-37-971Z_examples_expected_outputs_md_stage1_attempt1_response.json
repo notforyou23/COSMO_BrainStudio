@@ -1,0 +1,401 @@
+{
+  "content": "Implemented `examples/expected_outputs.md`, documenting the expected plots/tables for each experiment (CLI and standalone modules) and providing brief guidance on how to interpret the key diagnostics.",
+  "reasoning": "",
+  "responseId": "resp_0021a4479749b367006949a11299c8819781cc54a7d20bf491",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 11685,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2829,
+    "output_tokens_details": {
+      "reasoning_tokens": 2790
+    },
+    "total_tokens": 14514
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0021a4479749b367006949a113e6188197a203a39d973fb3a1",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0021a4479749b367006949a117173c819783c81f2bd96c8d45",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path(\"/mnt/data\")\nlist(base.glob(\"**/*\"))[:20], sum(1 for _ in base.glob(\"**/*\"))\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "([PosixPath('/mnt/data/README.md'),\n  PosixPath('/mnt/data/requirements.txt'),\n  PosixPath('/mnt/data/src'),\n  PosixPath('/mnt/data/examples'),\n  PosixPath('/mnt/data/src/cli.py'),\n  PosixPath('/mnt/data/src/lib'),\n  PosixPath('/mnt/data/src/experiments'),\n  PosixPath('/mnt/data/src/lib/io.py'),\n  PosixPath('/mnt/data/src/lib/plotting.py'),\n  PosixPath('/mnt/data/src/lib/graphs.py'),\n  PosixPath('/mnt/data/src/lib/quantum.py'),\n  PosixPath('/mnt/data/src/experiments/entanglement_diagnostics.py'),\n  PosixPath('/mnt/data/src/experiments/rg_flow_toy.py'),\n  PosixPath('/mnt/data/src/experiments/emergent_classicality_graph.py'),\n  PosixPath('/mnt/data/examples/run_all.sh')],\n 15)"
+        }
+      ]
+    },
+    {
+      "id": "rs_0021a4479749b367006949a119aa80819799e7efcace682fc8",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0021a4479749b367006949a11a1ac48197b1bf0f7785c4a401",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport textwrap, re, json, os, itertools\ndef read(p):\n    return Path(p).read_text(encoding=\"utf-8\")\nprint(read(\"/mnt/data/src/experiments/entanglement_diagnostics.py\")[:1200])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Entanglement diagnostics for small qubit systems.\n\nProvides reproducible toy experiments computing von Neumann entanglement entropy\nand mutual information for (i) small transverse-field Ising chains (exact\ndiagonalization) and (ii) graph/cluster states (CZ-on-|+> construction).\n\"\"\"\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Dict, Iterable, List, Sequence, Tuple\n\nimport numpy as np\n\ntry:\n    from scipy.linalg import eigh\nexcept Exception as _e:  # pragma: no cover\n    eigh = None\n# --- Basic quantum utilities ---\n\n\ndef _bits(x: int, n: int) -> List[int]:\n    return [(x >> k) & 1 for k in range(n)]\n\n\ndef state_plus(n: int) -> np.ndarray:\n    \"\"\"|+>^{⊗n} statevector.\"\"\"\n    psi = np.ones(2**n, dtype=complex) / np.sqrt(2**n)\n    return psi\n\n\ndef ghz_state(n: int) -> np.ndarray:\n    psi = np.zeros(2**n, dtype=complex)\n    psi[0] = psi[-1] = 1 / np.sqrt(2)\n    return psi\n\n\ndef bell_state() -> np.ndarray:\n    return ghz_state(2)\n\n\ndef w_state(n: int) -> np.ndarray:\n    psi = np.zeros(2**n, dtype=complex)\n    for k in range(n):\n        psi[1 << k] = 1 / np.sqrt(n)\n    return psi\n\n\ndef graph_state(n: int, edges: Sequence[Tuple[int, int]]) -> \n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0021a4479749b367006949a123cb2c8197a173afa52094deff",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0021a4479749b367006949a123f9808197a61e1f714900638b",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(read(\"/mnt/data/src/experiments/entanglement_diagnostics.py\")[1200:2400])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "np.ndarray:\n    \"\"\"Graph state: apply CZ for each undirected edge on |+>^{⊗n}.\"\"\"\n    psi = state_plus(n).copy()\n    for i, j in edges:\n        if i == j:\n            continue\n        if i > j:\n            i, j = j, i\n        mask = (1 << i) | (1 << j)\n        for idx in range(2**n):\n            if (idx & mask) == mask:\n                psi[idx] *= -1\n    return psi\ndef reduced_density_matrix(psi: np.ndarray, keep: Sequence[int], n: int) -> np.ndarray:\n    \"\"\"Reduced density matrix ρ_keep for a pure state |ψ> on n qubits.\"\"\"\n    keep = list(keep)\n    if any((k < 0 or k >= n) for k in keep):\n        raise ValueError(\"keep indices out of range\")\n    if len(set(keep)) != len(keep):\n        raise ValueError(\"keep has duplicates\")\n    psi_t = psi.reshape((2,) * n)\n    trace = [i for i in range(n) if i not in keep]\n    rho = np.tensordot(psi_t, psi_t.conj(), axes=(trace, trace))\n    d = 2 ** len(keep)\n    return rho.reshape((d, d))\n\n\ndef von_neumann_entropy(rho: np.ndarray, base: float = 2.0) -> float:\n    \"\"\"S(ρ) = -Tr ρ log ρ, numerically stable for small matrices.\"\"\"\n    vals = np.linalg.eigvalsh((rho + rho.conj().T) / 2)\n    vals = np.clip(vals.real, 0.0, 1.0)\n    nz = vals[vals > 1e-\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0021a4479749b367006949a125db5c8197a69b58125951dd94",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0021a4479749b367006949a12627dc819797023d6eeed8037a",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "txt=read(\"/mnt/data/src/experiments/entanglement_diagnostics.py\")\n# find dataclass result or main function\nimport re\nfor m in re.finditer(r\"def run_\", txt):\n    print(m.start(), txt[m.start():m.start()+80])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "5138 def run_examples(seed: int = 0) -> List[Dict[str, object]]:\n    \"\"\"Return exampl\n"
+        }
+      ]
+    },
+    {
+      "id": "ci_0021a4479749b367006949a128cf4481979efbf32f27d4b3f0",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(txt[5000:6200])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "nglementResult(name=name, n=n, partition=(tuple(A), tuple(B)), S_A=S_A, S_B=S_B, I_AB=I_AB)\n# --- Reproducible toy experiment suite ---\n\n\ndef run_examples(seed: int = 0) -> List[Dict[str, object]]:\n    \"\"\"Return example diagnostics as JSON-serializable dicts.\"\"\"\n    np.random.seed(seed)\n    out: List[EntanglementResult] = []\n\n    # Bell pair: maximal entanglement; I(A:B)=2 bits.\n    psi = bell_state()\n    out.append(diagnose_state(\"bell\", psi, A=[0], B=[1], n=2))\n\n    # GHZ_4: any single qubit vs rest has S=1; pairwise MI between two single qubits is 1.\n    psi = ghz_state(4)\n    out.append(diagnose_state(\"ghz4_0|1\", psi, A=[0], B=[1], n=4))\n    out.append(diagnose_state(\"ghz4_0|123\", psi, A=[0], B=[1, 2, 3], n=4))\n\n    # 1D 4-qubit cluster state (line graph).\n    edges = [(0, 1), (1, 2), (2, 3)]\n    psi = graph_state(4, edges)\n    out.append(diagnose_state(\"cluster4_01|23\", psi, A=[0, 1], B=[2, 3], n=4))\n    out.append(diagnose_state(\"cluster4_1|2\", psi, A=[1], B=[2], n=4))\n\n    # TFIM ground state: compare weak vs strong field.\n    for h in (0.3, 1.5):\n        psi = tfim_ground_state(6, J=1.0, h=h, periodic=False)\n        out.append(diagnose_state(f\"tfim6_h{h:.1f}_012|345\", psi, \n"
+        }
+      ]
+    },
+    {
+      "id": "ci_0021a4479749b367006949a12ad7208197a925890cc955f48c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(txt[6200:7600])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "A=[0, 1, 2], B=[3, 4, 5], n=6))\n\n    return [r.as_dict() for r in out]\n\n\nif __name__ == \"__main__\":  # pragma: no cover\n    rows = run_examples(seed=0)\n    for r in rows:\n        print(r)\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0021a4479749b367006949a12d0f9c8197af0c7bf3be54e6a3",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0021a4479749b367006949a12db124819792eafe9de4d68e37",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(read(\"/mnt/data/src/cli.py\")[:2000])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Command-line entrypoint for reproducible toy experiments.\n\nThis module is intentionally lightweight: it manages seeding and output\ndirectories and writes plots/tables deterministically for later inspection.\n\"\"\"\nfrom __future__ import annotations\n\nimport argparse\nimport csv\nimport json\nfrom dataclasses import asdict, dataclass\nfrom pathlib import Path\nfrom typing import Any, Dict, Iterable, List, Tuple\n\nimport numpy as np\ndef _ensure_dir(p: Path) -> Path:\n    p.mkdir(parents=True, exist_ok=True)\n    return p\n\n\ndef _write_json(path: Path, obj: Any) -> None:\n    path.write_text(json.dumps(obj, indent=2, sort_keys=True) + \"\\n\", encoding=\"utf-8\")\n\n\ndef _write_csv(path: Path, header: Iterable[str], rows: Iterable[Iterable[Any]]) -> None:\n    with path.open(\"w\", newline=\"\", encoding=\"utf-8\") as f:\n        w = csv.writer(f)\n        w.writerow(list(header))\n        for r in rows:\n            w.writerow(list(r))\n\n\ndef _rng(seed: int) -> np.random.Generator:\n    # Centralized RNG creation so every experiment is deterministic given seed.\n    return np.random.default_rng(int(seed))\ndef _savefig(path: Path) -> None:\n    # Matplotlib import is intentionally delayed to keep import time low.\n    import matplotlib.pyplot as plt  # type: ignore\n\n    path.parent.mkdir(parents=True, exist_ok=True)\n    plt.tight_layout()\n    plt.savefig(path, dpi=160)\n    plt.close()\n\n\ndef _run_dir(root: Path, exp: str, seed: int, name: str | None) -> Path:\n    # Deterministic path: avoids timestamps unless user supplies a name.\n    run = f\"{exp}_seed{seed}\" + (f\"_{name}\" if name else \"\")\n    return _ensure_dir(root / exp / run)\n@dataclass(frozen=True)\nclass CommonArgs:\n    out: Path\n    seed: int\n    name: str | None\n\n\ndef _common_parser(p: argparse.ArgumentParser) -> None:\n    p.add_argument(\"--out\", type=Path, default=Path(\"outputs\"), help=\"Output root directory\")\n    p.add_argument(\"--seed\", type=int, default=0, help=\"RNG seed (deterministic)\")\n    p.add_argument(\"--name\", type=str, default=None, \n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0021a4479749b367006949a12fb4648197a1b1fa4fadbeed4a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0021a4479749b367006949a1302af88197902f0e8397d3a7cc",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "txt=read(\"/mnt/data/src/cli.py\")\nimport re\nfor exp in [\"entanglement\",\"rg\",\"emergent\"]:\n    print(exp, exp in txt)\n# locate subcommands\nfor m in re.finditer(r\"def cmd_\", txt):\n    print(m.group(0), m.start())\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "entanglement True\nrg True\nemergent False\n"
+        }
+      ]
+    },
+    {
+      "id": "ci_0021a4479749b367006949a133685c8197a92dc0d05eae896e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "for m in re.finditer(r\"cmd_[a-z_]+\", txt):\n    pass\n# print relevant sections\nstart=txt.find(\"def cmd_entanglement\")\nprint(txt[start:start+1800])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0021a4479749b367006949a135f52081979e0dae321fb4f671",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0021a4479749b367006949a1364fac8197aa59a3d883a6e9c5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import re\nnames=set(re.findall(r\"def (cmd_[a-z_]+)\\(\", txt))\nnames\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "set()"
+        }
+      ]
+    },
+    {
+      "id": "rs_0021a4479749b367006949a1389ddc8197b0f07aadcf04f78c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0021a4479749b367006949a138eaf88197b815d13552deb93f",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(txt[2000:4200])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "help=\"Optional run name suffix\")\ndef exp_random_walk(args: argparse.Namespace) -> Path:\n    \"\"\"1D random walk ensemble; saves trajectory table and summary plot.\"\"\"\n    common = CommonArgs(out=args.out, seed=args.seed, name=args.name)\n    run = _run_dir(common.out, \"random_walk\", common.seed, common.name)\n    rng = _rng(common.seed)\n\n    steps = int(args.steps)\n    n = int(args.n)\n    # Steps are +/-1; positions include x0=0 so length steps+1.\n    jumps = rng.choice([-1, 1], size=(n, steps))\n    x = np.cumsum(jumps, axis=1)\n    x = np.concatenate([np.zeros((n, 1), dtype=int), x], axis=1)\n\n    _write_csv(run / \"trajectories.csv\", [\"traj\", \"t\", \"x\"], ((i, t, int(x[i, t])) for i in range(n) for t in range(steps + 1)))\n    summary = {\n        \"experiment\": \"random_walk\",\n        \"seed\": common.seed,\n        \"steps\": steps,\n        \"n\": n,\n        \"final_mean\": float(np.mean(x[:, -1])),\n        \"final_var\": float(np.var(x[:, -1])),\n    }\n    _write_json(run / \"summary.json\", summary)\n    _write_json(run / \"args.json\", {**asdict(common), \"steps\": steps, \"n\": n})\n\n    import matplotlib.pyplot as plt  # type: ignore\n\n    t = np.arange(steps + 1)\n    for i in range(min(n, 20)):\n        plt.plot(t, x[i], alpha=0.5, lw=1)\n    plt.xlabel(\"t\")\n    plt.ylabel(\"x(t)\")\n    plt.title(\"1D random walk (first 20 trajectories)\")\n    _savefig(run / \"trajectories.png\")\n\n    plt.hist(x[:, -1], bins=25, density=True)\n    plt.xlabel(\"x(T)\")\n    plt.ylabel(\"density\")\n    plt.title(\"Final position distribution\")\n    _savefig(run / \"final_hist.png\")\n    return run\ndef _ent_entropy_two_qubit_state(psi: np.ndarray) -> float:\n    # psi is shape (4,), pure state on A(2) x B(2).\n    psi = psi / np.linalg.norm(psi)\n    rho = np.outer(psi, np.conjugate(psi))  # 4x4\n    # partial trace over B:\n    rho_a = np.zeros((2, 2), dtype=complex)\n    for b in range(2):\n        idx = [2 * 0 + b, 2 * 1 + b]\n        rho_a += rho[np.ix_(idx, idx)]\n    evals = np.linalg.eigvalsh(rho_a).real\n    evals = np.clip(evals, 0.0, 1.0)\n    nz = evals[evals > 0]\n    return float(-np.sum(nz * np.log2(nz)))\n\n\ndef exp_two_qubit_entanglement(args: argparse.Namespace) -> Path:\n    \"\"\"Samples random two-qubit pure states and plot\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0021a4479749b367006949a13ac8b08197a6d11038036f6e83",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0021a4479749b367006949a13aeec8819785dcc242bf0b0013",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(txt[4200:6400])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "s entanglement entropy.\"\"\"\n    common = CommonArgs(out=args.out, seed=args.seed, name=args.name)\n    run = _run_dir(common.out, \"two_qubit_entanglement\", common.seed, common.name)\n    rng = _rng(common.seed)\n\n    n = int(args.n)\n    # Complex Gaussian -> Haar-random direction after normalization.\n    psi = rng.normal(size=(n, 4)) + 1j * rng.normal(size=(n, 4))\n    ent = np.array([_ent_entropy_two_qubit_state(psi[i]) for i in range(n)], dtype=float)\n\n    _write_csv(run / \"entropies.csv\", [\"i\", \"S_bits\"], ((i, float(ent[i])) for i in range(n)))\n    _write_json(run / \"summary.json\", {\"experiment\": \"two_qubit_entanglement\", \"seed\": common.seed, \"n\": n, \"mean_S\": float(ent.mean())})\n    _write_json(run / \"args.json\", {**asdict(common), \"n\": n})\n\n    import matplotlib.pyplot as plt  # type: ignore\n\n    plt.hist(ent, bins=30, range=(0, 1), density=True)\n    plt.xlabel(\"S(ρ_A) [bits]\")\n    plt.ylabel(\"density\")\n    plt.title(\"Entanglement entropy of random two-qubit pure states\")\n    _savefig(run / \"entropy_hist.png\")\n    return run\ndef build_parser() -> argparse.ArgumentParser:\n    p = argparse.ArgumentParser(prog=\"toy-exp\", description=\"Reproducible toy-model experiments (numerical/symbolic).\")\n    sub = p.add_subparsers(dest=\"experiment\", required=True)\n\n    p_rw = sub.add_parser(\"random-walk\", help=\"1D random walk ensemble\")\n    _common_parser(p_rw)\n    p_rw.add_argument(\"--steps\", type=int, default=200)\n    p_rw.add_argument(\"--n\", type=int, default=200)\n    p_rw.set_defaults(_fn=exp_random_walk)\n\n    p_ent = sub.add_parser(\"two-qubit-entanglement\", help=\"Entanglement entropy of random two-qubit states\")\n    _common_parser(p_ent)\n    p_ent.add_argument(\"--n\", type=int, default=5000)\n    p_ent.set_defaults(_fn=exp_two_qubit_entanglement)\n    return p\n\n\ndef main(argv: List[str] | None = None) -> int:\n    args = build_parser().parse_args(argv)\n    run = args._fn(args)\n    print(str(run))\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0021a4479749b367006949a13cf32c8197b913b2a9120f9ce9",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0021a4479749b367006949a13f15988197ac92286fd42d771e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(read(\"/mnt/data/README.md\")[:2000])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "# generated_script_1766432556417 — Reproducible toy-model experiments\n\nThis repo is a small, reproducible “code interpreter friendly” sandbox for numerical/symbolic toy experiments that probe how classical-looking structure can emerge from quantum rules (and how diagnostics like entanglement respond under simple dynamics).\n\nThe emphasis is on **determinism** (seeded runs), **small-scale** models (lattices/graphs you can run on a laptop), and **artifact saving** (plots + tables you can re-generate byte-for-byte).\n## What you can reproduce\n\nExperiments are intentionally lightweight; each produces one or more plots and a CSV/JSON summary in an output directory:\n\n- **Small lattice Hamiltonians (exact diagonalization)**: ground-state energy gaps and **bipartite entanglement entropy** vs. a control parameter.\n- **Toy decoherence / “classicalization”**: a small system coupled to an environment; track purity/entropy and pointer-basis stability.\n- **Symbolic mini-derivations**: closed-form checks (e.g., simple effective-action terms / beta-function-style flows) to validate numerics.\n\nAll experiments are runnable via `src/cli.py`, and share common utilities in `src/lib/io.py` (seeding + saving) and `src/lib/plotting.py` (styling + deterministic figure output).\n## Installation\n\nRequirements are pinned in `requirements.txt`.\n\n```bash\npython -m venv .venv\n# Linux/macOS:\nsource .venv/bin/activate\n# Windows (PowerShell):\n# .venv\\Scripts\\Activate.ps1\n\npython -m pip install --upgrade pip\npip install -r requirements.txt\n```\n## Quickstart (run one experiment)\n\nAll runs take a seed and an output directory. Re-running with the same args should reproduce the same files.\n\n```bash\n# Show available experiments / flags\npython -m src.cli --help\n\n# Example: exact diagonalization toy model with entanglement diagnostics\npython -m src.cli run ising_ed --L 10 --g_min 0.2 --g_max 2.0 --num 25 --seed 0 --out outputs/ising_ed\n\n# Example: system+environment toy decoherence diagnostic\npython -m src.cli\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0021a4479749b367006949a1413008819784a10c16d296f897",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0021a4479749b367006949a1437a1c81979c897a2496fb4497",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(read(\"/mnt/data/src/experiments/rg_flow_toy.py\")[:2000])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Toy renormalization-group (RG) flow experiment: 1D Ising decimation.\n\nWe consider the zero-field 1D Ising model with coupling K = beta * J.\nDecimating every other spin (block size b=2) yields the exact map:\n    K' = 0.5 * log(cosh(2K))\n(up to an additive constant in the free energy, which we ignore).\n\nThis script generates:\n- A table (CSV) of K, K', and beta(K)=K'-K over a grid.\n- A beta-function plot and example flow trajectories (PNG).\n\nRun:\n  python -m src.experiments.rg_flow_toy --out outputs/rg_toy\n\"\"\"\nfrom __future__ import annotations\n\nimport argparse\nimport csv\nimport json\nimport math\nfrom dataclasses import asdict, dataclass\nfrom pathlib import Path\nfrom typing import Dict, Iterable, List, Tuple\n\nimport numpy as np\n\n\ndef rg_map(K: np.ndarray) -> np.ndarray:\n    \"\"\"Exact decimation map for 1D Ising coupling K.\"\"\"\n    K = np.asarray(K, dtype=float)\n    return 0.5 * np.log(np.cosh(2.0 * K))\n\n\ndef beta_function(K: np.ndarray) -> np.ndarray:\n    \"\"\"Discrete beta function for b=2: beta(K) = K' - K.\"\"\"\n    return rg_map(K) - np.asarray(K, dtype=float)\n\n\ndef iterate_flow(K0: float, n_steps: int) -> np.ndarray:\n    \"\"\"Iterate RG map starting at K0.\"\"\"\n    Ks = [float(K0)]\n    K = float(K0)\n    for _ in range(n_steps):\n        K = float(rg_map(K))\n        Ks.append(K)\n    return np.array(Ks, dtype=float)\n\n\n@dataclass(frozen=True)\nclass Config:\n    out: str\n    n_grid: int = 301\n    k_max: float = 3.0\n    n_steps: int = 12\n    n_traj: int = 7\n    seed: int = 0\n\n\ndef _ensure_dir(p: Path) -> None:\n    p.mkdir(parents=True, exist_ok=True)\n\n\ndef _write_csv(path: Path, rows: Iterable[Dict[str, float]]) -> None:\n    rows = list(rows)\n    with path.open(\"w\", newline=\"\", encoding=\"utf-8\") as f:\n        w = csv.DictWriter(f, fieldnames=list(rows[0].keys()))\n        w.writeheader()\n        w.writerows(rows)\n\n\ndef make_plots(out_dir: Path, grid_K: np.ndarray, Kp: np.ndarray, beta: np.ndarray, trajs: List[np.ndarray]) -> None:\n    import matplotlib.pyplot as plt\n\n    # Beta-fu\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0021a4479749b367006949a145836c8197965a1559b01a6ad7",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0021a4479749b367006949a145aa2481979652a3345972159d",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "txt=read(\"/mnt/data/src/experiments/rg_flow_toy.py\")\nprint(txt[2000:3400])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "nction plot\n    fig, ax = plt.subplots(figsize=(6, 4))\n    ax.plot(grid_K, beta, lw=2)\n    ax.axhline(0.0, color=\"k\", lw=1)\n    ax.set_xlabel(r\"Coupling $K$\")\n    ax.set_ylabel(r\"$\\beta(K)=K'-K$\")\n    ax.set_title(\"1D Ising decimation: discrete beta function (b=2)\")\n    ax.grid(True, alpha=0.3)\n    fig.tight_layout()\n    fig.savefig(out_dir / \"rg_beta.png\", dpi=160)\n    plt.close(fig)\n\n    # Flow trajectories K_n vs step\n    fig, ax = plt.subplots(figsize=(6, 4))\n    for Ks in trajs:\n        ax.plot(np.arange(len(Ks)), Ks, marker=\"o\", ms=3)\n    ax.set_xlabel(\"RG step n\")\n    ax.set_ylabel(r\"$K_n$\")\n    ax.set_title(\"RG flow trajectories under decimation\")\n    ax.grid(True, alpha=0.3)\n    fig.tight_layout()\n    fig.savefig(out_dir / \"flow_trajectories.png\", dpi=160)\n    plt.close(fig)\n\n    # K' vs K with diagonal\n    fig, ax = plt.subplots(figsize=(5, 5))\n    ax.plot(grid_K, Kp, lw=2, label=r\"$K' = f(K)$\")\n    ax.plot(grid_K, grid_K, lw=1, color=\"k\", alpha=0.7, label=r\"$K'=K$\")\n    ax.set_xlabel(r\"$K$\")\n    ax.set_ylabel(r\"$K'$\")\n    ax.set_title(\"RG map (fixed points at intersections)\")\n    ax.legend(frameon=False)\n    ax.grid(True, alpha=0.3)\n    fig.tight_layout()\n    fig.savefig(out_dir / \"rg_map.png\", dpi=160)\n    plt.close(fig)\n\n\ndef run(cfg: Config) -> Dict[str, str]:\n    out_dir = Path(cfg.out)\n    _ensure_dir(out_dir)\n\n    rng = np.random.default_rng(cfg.seed)\n    grid_\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0021a4479749b367006949a147b3f48197a8bf08281849a316",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0021a4479749b367006949a1480290819788fd99e4ffe00441",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(txt[3400:5200])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "K = np.linspace(0.0, float(cfg.k_max), int(cfg.n_grid))\n    Kp = rg_map(grid_K)\n    beta = Kp - grid_K\n\n    rows = ({\"K\": float(k), \"K_prime\": float(kp), \"beta\": float(b)} for k, kp, b in zip(grid_K, Kp, beta))\n    _write_csv(out_dir / \"rg_table.csv\", rows)\n\n    # Pick some initial couplings for trajectories (include small and moderate K)\n    K0s = np.r_[np.linspace(0.05, 0.6, cfg.n_traj // 2), np.linspace(0.8, min(2.5, cfg.k_max), cfg.n_traj - cfg.n_traj // 2)]\n    K0s = (K0s + 0.02 * rng.normal(size=K0s.shape)).clip(0.0, cfg.k_max)\n    trajs = [iterate_flow(float(k0), int(cfg.n_steps)) for k0 in K0s]\n\n    make_plots(out_dir, grid_K, Kp, beta, trajs)\n\n    # Small-K linearization slope: f(K) ~ a K^2 (no linear term) for this map\n    # Estimate numerically by fitting log(f(K)) ~ log(a) + 2 log(K) over small K.\n    small = grid_K[1:40]\n    loga = np.mean(np.log(rg_map(small) / (small**2 + 1e-300)))\n    a_est = float(np.exp(loga))\n\n    meta = {\n        \"config\": asdict(cfg),\n        \"notes\": \"1D Ising, zero field, exact decimation map K' = 0.5*log(cosh(2K)).\",\n        \"fixed_points\": {\"K=0\": \"stable\", \"K->infty\": \"stable (flows upward for large K)\"},\n        \"small_K_asymptotic\": {\"f(K) ~ a K^2\": a_est},\n        \"artifacts\": [\"rg_table.csv\", \"rg_beta.png\", \"flow_trajectories.png\", \"rg_map.png\"],\n    }\n    (out_dir / \"meta.json\").write_text(json.dumps(meta, indent=2), encoding=\"utf-8\")\n    return {\"out_dir\": str(out_dir)}\n\n\ndef build_argparser() -> argparse.ArgumentParser:\n    p = argparse.ArgumentParser(description=__doc__)\n    p.add_argument(\"--out\", type=str, required=True, help=\"Output directory.\")\n    p.add_argument(\"--n-grid\", type=int, default=Config.n_grid)\n    p.add_argument(\"--k-max\", type=float, default=Config.k_max)\n    p.add_argument(\"--n-steps\", type=int, defa\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0021a4479749b367006949a14a354481978797cc3480fb047f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0021a4479749b367006949a14a7bb08197b221d56c172b6ae5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(read(\"/mnt/data/src/experiments/emergent_classicality_graph.py\")[:2200])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "\"\"\"Emergent classicality on a small qubit graph via environment-induced dephasing.\n\nModel: n qubits on an undirected graph with Ising ZZ couplings (unitary entangling step)\nfollowed by local dephasing (environment coupling) in the Z basis.\nDiagnostics: basis-dependent coherence (off-diagonal L1 mass) in Z vs X basis and entropy.\n\"\"\"\n\nfrom __future__ import annotations\n\nimport argparse\nfrom dataclasses import dataclass\nfrom pathlib import Path\nimport numpy as np\n\n\ndef _kron_n(ops):\n    out = ops[0]\n    for op in ops[1:]:\n        out = np.kron(out, op)\n    return out\n\n\ndef _unitary_from_h(H, dt):\n    w, v = np.linalg.eigh(H)\n    return (v * np.exp(-1j * dt * w)) @ v.conj().T\n\n\ndef _graph_edges(n: int, kind: str, p: float, rng: np.random.Generator):\n    if kind == \"ring\":\n        return [(i, (i + 1) % n) for i in range(n)]\n    if kind == \"er\":\n        edges = []\n        for i in range(n):\n            for j in range(i + 1, n):\n                if rng.random() < p:\n                    edges.append((i, j))\n        return edges\n    raise ValueError(f\"unknown graph kind: {kind}\")\n\n\ndef _ising_hamiltonian(n: int, edges, J: float):\n    I = np.eye(2, dtype=complex)\n    Z = np.array([[1, 0], [0, -1]], dtype=complex)\n    H = np.zeros((2**n, 2**n), dtype=complex)\n    for i, j in edges:\n        ops = [I] * n\n        ops[i] = Z\n        ops[j] = Z\n        H += J * _kron_n(ops)\n    return H\n\n\ndef _dephase_z(rho, n: int, p: float):\n    I = np.eye(2, dtype=complex)\n    Z = np.array([[1, 0], [0, -1]], dtype=complex)\n    for q in range(n):\n        ops = [I] * n\n        ops[q] = Z\n        Zq = _kron_n(ops)\n        rho = (1 - p) * rho + p * (Zq @ rho @ Zq)\n    return rho\n\n\ndef _coherence_l1(rho, U=None):\n    if U is not None:\n        rho = U @ rho @ U.conj().T\n    off = rho - np.diag(np.diag(rho))\n    d = rho.shape[0]\n    return float(np.sum(np.abs(off)) / (d * (d - 1)))\n\n\ndef _von_neumann_entropy(rho):\n    w = np.linalg.eigvalsh((rho + rho.conj().T) / 2)\n    w = np.clip(np.real(w), 0.0, 1.0)\n    w = w[w > 1e-15]\n    return float(-np.sum(w * np.log2(w)))\n\n\n@dataclass\nclass Result:\n    t: np.ndarray\n    coh_z: np.ndarray\n    coh_x: np.ndarray\n    entropy: np.ndarray\n\n\ndef run(n=5, steps=\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0021a4479749b367006949a14c951c8197982ba3a87cf02ca5",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0021a4479749b367006949a14cc4bc8197ad05648d150f8585",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "txt=read(\"/mnt/data/src/experiments/emergent_classicality_graph.py\")\nprint(txt[2200:4200])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "40, dt=0.35, J=1.0, p_dephase=0.08, graph=\"ring\", er_p=0.4, seed=0) -> Result:\n    rng = np.random.default_rng(seed)\n    edges = _graph_edges(n, graph, er_p, rng)\n    H = _ising_hamiltonian(n, edges, J)\n    U = _unitary_from_h(H, dt)\n\n    H1 = (1 / np.sqrt(2)) * np.array([[1, 1], [1, -1]], dtype=complex)\n    HX = _kron_n([H1] * n)\n\n    psi = np.zeros(2**n, dtype=complex)\n    psi[0] = 1 / np.sqrt(2)\n    psi[-1] = 1 / np.sqrt(2)  # |00..0> + |11..1>\n    rho = np.outer(psi, psi.conj())\n\n    t = np.arange(steps + 1)\n    cz = np.zeros_like(t, dtype=float)\n    cx = np.zeros_like(t, dtype=float)\n    S = np.zeros_like(t, dtype=float)\n\n    for k in range(steps + 1):\n        cz[k] = _coherence_l1(rho)\n        cx[k] = _coherence_l1(rho, U=HX)\n        S[k] = _von_neumann_entropy(rho)\n        if k < steps:\n            rho = U @ rho @ U.conj().T\n            rho = _dephase_z(rho, n, p_dephase)\n\n    return Result(t=t, coh_z=cz, coh_x=cx, entropy=S)\n\n\ndef save_plot(res: Result, outdir: Path):\n    import matplotlib.pyplot as plt\n\n    outdir.mkdir(parents=True, exist_ok=True)\n    fig, ax = plt.subplots(1, 1, figsize=(6.4, 3.6), dpi=140)\n    ax.plot(res.t, res.coh_z, label=\"coherence (Z basis)\", lw=2)\n    ax.plot(res.t, res.coh_x, label=\"coherence (X basis)\", lw=2)\n    ax.set_xlabel(\"step\")\n    ax.set_ylabel(\"normalized off-diagonal L1 mass\")\n    ax.grid(True, alpha=0.3)\n    ax.legend(frameon=False)\n    fig.tight_layout()\n    fig.savefig(outdir / \"coherence_pointer_basis.png\")\n    plt.close(fig)\n\n    fig, ax = plt.subplots(1, 1, figsize=(6.4, 3.6), dpi=140)\n    ax.plot(res.t, res.entropy, color=\"black\", lw=2)\n    ax.set_xlabel(\"step\")\n    ax.set_ylabel(\"von Neumann entropy (bits)\")\n    ax.grid(True, alpha=0.3)\n    fig.tight_layout()\n    fig.savefig(outdir / \"entropy_growth.png\")\n    plt.close(fig)\n\n\ndef main():\n    ap = argparse.ArgumentParser()\n    ap.add_argument(\"--n\", type=int, default=5)\n    ap.add_argument(\"--steps\", type=int, default=40)\n    ap.add_argument(\"--dt\", type=float, d\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0021a4479749b367006949a14ec1f88197b0de1385e76bf8a4",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0021a4479749b367006949a14ef1b08197b4665d5be4be9471",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(txt[4200:6000])\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "efault=0.35)\n    ap.add_argument(\"--J\", type=float, default=1.0)\n    ap.add_argument(\"--p-dephase\", type=float, default=0.08)\n    ap.add_argument(\"--graph\", choices=[\"ring\", \"er\"], default=\"ring\")\n    ap.add_argument(\"--er-p\", type=float, default=0.4)\n    ap.add_argument(\"--seed\", type=int, default=0)\n    ap.add_argument(\"--outdir\", type=Path, default=Path(\"outputs/emergent_classicality_graph\"))\n    args = ap.parse_args()\n\n    res = run(n=args.n, steps=args.steps, dt=args.dt, J=args.J, p_dephase=args.p_dephase,\n              graph=args.graph, er_p=args.er_p, seed=args.seed)\n    save_plot(res, args.outdir)\n    print(f\"saved: {args.outdir/'coherence_pointer_basis.png'}\")\n    print(f\"saved: {args.outdir/'entropy_growth.png'}\")\n    print(f\"final coherence Z={res.coh_z[-1]:.4f} | X={res.coh_x[-1]:.4f} ; S={res.entropy[-1]:.3f} bits\")\n\n\nif __name__ == \"__main__\":\n    main()\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0021a4479749b367006949a150c7bc8197aefa89a23f17d73c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0021a4479749b367006949a151eeb8819780fb7f0be2fa42e7",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "print(read(\"/mnt/data/examples/run_all.sh\"))\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "#!/usr/bin/env bash\nset -euo pipefail\n\n# Run all CLI-exposed toy experiments and collect artifacts in a single folder.\n# Usage:\n#   bash examples/run_all.sh [OUT_DIR]\n#\n# The CLI prints the run directory path for each experiment; this script echoes it.\n\nSCRIPT_DIR=\"$(cd \"$(dirname \"${BASH_SOURCE[0]}\")\" && pwd)\"\nREPO_ROOT=\"$(cd \"${SCRIPT_DIR}/..\" && pwd)\"\ncd \"${REPO_ROOT}\"\n\nOUT_DIR=\"${1:-outputs_example}\"\nmkdir -p \"${OUT_DIR}\"\n\n# Make plotting deterministic + headless-friendly.\nexport MPLBACKEND=\"${MPLBACKEND:-Agg}\"\n\necho \"Writing outputs under: ${OUT_DIR}\"\necho \"----\"\n\necho \"[1/2] random-walk\"\nRUN_DIR=\"$(python -m src.cli random-walk --out \"${OUT_DIR}\" --seed 0 --steps 200 --n 200)\"\necho \"  -> ${RUN_DIR}\"\necho \"----\"\n\necho \"[2/2] two-qubit-entanglement\"\nRUN_DIR=\"$(python -m src.cli two-qubit-entanglement --out \"${OUT_DIR}\" --seed 0 --n 5000)\"\necho \"  -> ${RUN_DIR}\"\necho \"----\"\n\necho \"Done. Inspect: ${OUT_DIR}\n\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0021a4479749b367006949a153f9288197bfeaa913ac58ae06",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0021a4479749b367006949a15557848197bb8586cefed72184",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap\ntarget_path = Path('/mnt/data').joinpath('examples/expected_outputs.md')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"# Expected outputs (plots/tables) — toy experiments\n\nThis guide describes the **files you should see** after running each included experiment, plus a high-level interpretation of the diagnostics.\n\nAll runs are deterministic given the same CLI flags (notably `--seed`) and are written under an output directory of the form:\n\n- `OUT/<experiment>/<experiment>_seed<seed>[_<name>]/...` (CLI experiments), or\n- a user-specified `--out` / `--outdir` (standalone modules in `src/experiments/`).\n\n---\n\n## 1) `random-walk` (CLI)\n\nRun (example):\n```bash\npython -m src.cli random-walk --out outputs_example --seed 0 --steps 200 --n 200\n```\n\n### Files produced\nIn `.../random_walk/random_walk_seed0/`:\n\n- `args.json` — exact parameters used (`seed`, `steps`, `n`, etc.).\n- `summary.json` — scalar summary statistics:\n  - `final_mean`: mean of final position `x(T)` over trajectories\n  - `final_var`: variance of `x(T)` over trajectories\n- `trajectories.csv` — long-form table with columns:\n  - `traj` (trajectory index), `t` (time step), `x` (position)\n- `trajectories.png` — line plot of the first ~20 trajectories `x(t)`.\n- `final_hist.png` — histogram estimate of the final-position distribution `x(T)`.\n\n### How to interpret\n- `final_hist.png` should look approximately symmetric and bell-shaped around 0.\n- `final_var` should scale roughly like `T` (diffusive scaling), illustrating how a macroscopic “classical” distribution emerges from simple microscopic stochastic rules.\n\n---\n\n## 2) `two-qubit-entanglement` (CLI)\n\nRun (example):\n```bash\npython -m src.cli two-qubit-entanglement --out outputs_example --seed 0 --n 5000\n```\n\n### Files produced\nIn `.../two_qubit_entanglement/two_qubit_entanglement_seed0/`:\n\n- `args.json` — exact parameters used (`seed`, `n`).\n- `summary.json` — includes:\n  - `mean_S`: mean entanglement entropy (bits) over sampled states\n- `entropies.csv` — per-sample entanglement entropy table:\n  - `i` (sample index), `S_bits` (von Neumann entropy of subsystem A)\n- `entropy_hist.png` — histogram of `S_bits` across Haar-random pure states.\n\n### How to interpret\n- `S_bits` is in `[0, 1]` for two qubits (maximal entanglement is 1 bit).\n- The histogram should be biased toward larger entanglement (typical random pure states are highly entangled), serving as a baseline for “generic” quantum correlations.\n\n---\n\n# Standalone experiment modules (`src/experiments/`)\n\nThese are runnable directly as modules/scripts and are useful for numerical/symbolic diagnostics beyond the CLI surface.\n\n## A) `rg_flow_toy` — 1D Ising decimation RG map\n\nRun (example):\n```bash\npython -m src.experiments.rg_flow_toy --out outputs_example/rg_toy\n```\n\n### Files produced (`--out` directory)\n- `rg_table.csv` — grid table with columns:\n  - `K` (coupling), `K_prime` (after decimation), `beta` = `K_prime - K`\n- `rg_beta.png` — plot of the discrete beta function `beta(K)`.\n- `rg_map.png` — plot of `K'` vs `K` with the diagonal `K'=K` (fixed points at intersections).\n- `flow_trajectories.png` — several iterated RG flows `K_n` vs step `n`.\n- `meta.json` — configuration + notes + estimated small-`K` asymptotics.\n\n### How to interpret\n- For this exact 1D map, `K=0` is a stable fixed point (flows toward the disordered limit under decimation).\n- `rg_map.png` and `flow_trajectories.png` visualize how coarse-graining changes effective couplings; `rg_beta.png` summarizes this as a “flow field”.\n\n## B) `entanglement_diagnostics` — exact/state-prep entanglement checks\n\nRun (example, prints dict rows to stdout):\n```bash\npython -m src.experiments.entanglement_diagnostics\n```\n\n### Output produced (stdout)\nA small list of JSON-like dictionaries (one per case) with keys such as:\n- `name`, `n` (qubit count)\n- `partition_A`, `partition_B` (subsystems)\n- `S_A`, `S_B` (entanglement entropies in bits)\n- `I_AB` (mutual information in bits)\n\n### How to interpret\n- **Bell**: `S_A ≈ 1`, `I_AB ≈ 2` (maximally entangled pair).\n- **GHZ**: single-qubit vs rest has `S ≈ 1`, while pairwise correlations reflect global entanglement structure.\n- **TFIM ground state**: varying `h` changes how entanglement spreads across the bipartition, giving a toy signature of “more/less correlated” phases.\n\n## C) `emergent_classicality_graph` — unitary entangling + dephasing (“pointer basis”)\n\nRun (example):\n```bash\npython -m src.experiments.emergent_classicality_graph --outdir outputs_example/emergent_graph --seed 0\n```\n\n### Files produced (`--outdir` directory)\n- `coherence_pointer_basis.png` — coherence (normalized off-diagonal L1 mass) vs step in:\n  - the dephasing/pointer **Z** basis\n  - the complementary **X** basis\n- `entropy_growth.png` — von Neumann entropy vs step (mixing due to dephasing).\n\n### How to interpret\n- Coherence in the **Z basis** should decay fastest (environment monitors Z), while coherence in **X** can persist differently.\n- Entropy typically increases from 0 as the state becomes mixed, illustrating a minimal “classicalization” mechanism: information leakage selects a preferred basis and suppresses superpositions in that basis.\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:examples/expected_outputs.md')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_69499f2beed0819091d7200aed27166600097c954be5142f",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:examples/expected_outputs.md\nDIR_STATE:[\"examples/expected_outputs.md\", \"examples/run_all.sh\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0021a4479749b367006949a16b5a048197885631984afd76b5",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `examples/expected_outputs.md`, documenting the expected plots/tables for each experiment (CLI and standalone modules) and providing brief guidance on how to interpret the key diagnostics."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

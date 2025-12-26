@@ -1,0 +1,56 @@
+{
+  "content": "Created `src/math_coverage_cli.py`, a deterministic Python CLI that generates `outputs/coverage_matrix.csv` (optionally `outputs/coverage_matrix.md`) and `outputs/eval_loop.md` for the Mathematics domain.",
+  "reasoning": "",
+  "responseId": "resp_037551d542dbfb3a00694b46ac7c5481968a0c6ca2983d2302",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3768,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2197,
+    "output_tokens_details": {
+      "reasoning_tokens": 230
+    },
+    "total_tokens": 5965
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_037551d542dbfb3a00694b46ad2eac81969832d4805b36bf6d",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_037551d542dbfb3a00694b46b03f9c81969ada37ddc44b48d8",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, csv, argparse, tempfile\n\ntarget_path = Path('/mnt/data').joinpath('src/math_coverage_cli.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(r\"\"\"\n#!/usr/bin/env python3\nfrom __future__ import annotations\n\nimport argparse\nimport csv\nfrom dataclasses import dataclass\nfrom pathlib import Path\nfrom typing import Iterable, List, Dict, Tuple\n\nROOT = Path(__file__).resolve().parents[1]\nOUTPUTS_DIR = ROOT / \"outputs\"\n\nARTIFACT_TYPES: Tuple[str, ...] = (\n    \"overview\",          # high-level explainer / notes\n    \"worked_examples\",   # solved problems\n    \"exercises\",         # practice prompts\n    \"solutions\",         # answer keys\n    \"implementation\",    # code / algorithms where relevant\n    \"tests\",             # verification / unit tests\n    \"references\",        # citations / links\n)\n\nTAXONOMY: Dict[str, List[str]] = {\n    \"Algebra\": [\"Linear equations\", \"Polynomials\", \"Abstract algebra\"],\n    \"Calculus\": [\"Limits\", \"Derivatives\", \"Integrals\", \"Series\"],\n    \"Discrete Mathematics\": [\"Logic\", \"Combinatorics\", \"Graph theory\", \"Number theory\"],\n    \"Geometry\": [\"Euclidean geometry\", \"Analytic geometry\", \"Linear algebra geometry\"],\n    \"Probability & Statistics\": [\"Probability\", \"Random variables\", \"Inference\"],\n}\n\nCSV_HEADERS: Tuple[str, ...] = (\n    \"cell_id\",\n    \"domain\",\n    \"subtopic\",\n    \"artifact_type\",\n    \"status\",\n    \"primary_link\",\n    \"cross_links\",\n)\n\nSTATUS_DEFAULT = \"uncovered\"\n\n\n@dataclass(frozen=True)\nclass Cell:\n    cell_id: str\n    domain: str\n    subtopic: str\n    artifact_type: str\n    status: str = STATUS_DEFAULT\n    primary_link: str = \"\"\n    cross_links: str = \"\"\n\n\ndef _atomic_write_text(path: Path, text: str) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    tmp = path.with_suffix(path.suffix + \".tmp\")\n    tmp.write_text(text.replace(\"\\r\\n\", \"\\n\").replace(\"\\r\", \"\\n\"), encoding=\"utf-8\", newline=\"\\n\")\n    tmp.replace(path)\n\n\ndef _atomic_write_csv(path: Path, rows: Iterable[Dict[str, str]], headers: Tuple[str, ...]) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    tmp = path.with_suffix(path.suffix + \".tmp\")\n    with tmp.open(\"w\", encoding=\"utf-8\", newline=\"\") as f:\n        w = csv.DictWriter(f, fieldnames=list(headers), lineterminator=\"\\n\")\n        w.writeheader()\n        for r in rows:\n            w.writerow({k: r.get(k, \"\") for k in headers})\n    tmp.replace(path)\n\n\ndef iter_cells() -> List[Cell]:\n    out: List[Cell] = []\n    for domain in sorted(TAXONOMY):\n        for subtopic in TAXONOMY[domain]:\n            for atype in ARTIFACT_TYPES:\n                cell_id = f\"math::{domain}::{subtopic}::{atype}\".replace(\" \", \"_\").lower()\n                out.append(Cell(cell_id=cell_id, domain=domain, subtopic=subtopic, artifact_type=atype))\n    return out\n\n\ndef render_markdown_table(cells: List[Cell]) -> str:\n    lines = [\n        \"# Mathematics coverage matrix (cells)\",\n        \"\",\n        \"| domain | subtopic | artifact_type | status | primary_link | cross_links |\",\n        \"|---|---|---|---|---|---|\",\n    ]\n    for c in cells:\n        lines.append(f\"| {c.domain} | {c.subtopic} | {c.artifact_type} | {c.status} | {c.primary_link} | {c.cross_links} |\")\n    lines.append(\"\")\n    return \"\\n\".join(lines)\n\n\ndef render_eval_loop_md(total_cells: int) -> str:\n    return \"\\n\".join([\n        \"# Mathematics evaluation loop (5-cycle cadence)\",\n        \"\",\n        \"This document defines a deterministic review cadence for the Mathematics domain artifacts generated from the coverage matrix.\",\n        \"\",\n        \"## Inputs\",\n        f\"- Coverage matrix: `outputs/coverage_matrix.csv` ({total_cells} cells = domains × subtopics × artifact types).\",\n        \"- Optional table: `outputs/coverage_matrix.md` (human scanning only).\",\n        \"\",\n        \"## Metrics to track (per cycle)\",\n        \"- **artifact_count**: number of produced artifacts that map to cells (status != `uncovered`).\",\n        \"- **cross_links_count**: total non-empty cross-links; and average cross-links per covered cell.\",\n        \"- **uncovered_cells**: count of cells with status `uncovered` (goal: monotone decrease).\",\n        \"- **coverage_by_domain**: covered cells / total cells per domain (detect imbalance).\",\n        \"- **staleness**: days since last update per domain/subtopic (optional, if timestamps exist).\",\n        \"\",\n        \"## 5-cycle review cadence\",\n        \"1. **Cycle 1 — Inventory & gaps**: validate taxonomy, count uncovered cells, and pick the smallest set of artifacts that unlock the most downstream work.\",\n        \"2. **Cycle 2 — Core explanations**: create/upgrade `overview` artifacts for the highest-priority subtopics; add references and minimal cross-links.\",\n        \"3. **Cycle 3 — Worked examples**: produce `worked_examples` aligned to each overview; ensure each example links back to its overview and prerequisite cells.\",\n        \"4. **Cycle 4 — Exercises + solutions**: add `exercises` and `solutions` for cells that already have an overview (avoid orphan exercises).\",\n        \"5. **Cycle 5 — Implementation + tests + refactor**: add computational artifacts where meaningful; create tests; standardize formatting and cross-links.\",\n        \"\",\n        \"## Decision rules (what to create next)\",\n        \"Apply in order; stop at the first rule that selects work:\",\n        \"1. **Unblock rule**: If any domain has `overview` coverage < 50%, create overviews there first.\",\n        \"2. **Dependency rule**: For a subtopic, do not create `exercises` unless `overview` exists; do not create `tests` unless `implementation` exists.\",\n        \"3. **Balance rule**: If one domain's coverage ratio is > 2× another's, prioritize the least-covered domain until ratios normalize.\",\n        \"4. **Cross-link rule**: If covered cells have average cross-links < 2, prioritize adding prerequisite/related links before creating new artifacts.\",\n        \"5. **Lowest-effort rule**: Choose the next cell that can be completed with the smallest artifact that increases coverage (typically: `overview` → `worked_examples`).\",\n        \"\",\n        \"## Status field semantics (for the matrix)\",\n        \"- `uncovered`: no artifact exists for this cell.\",\n        \"- `draft`: artifact exists but needs review/corrections.\",\n        \"- `reviewed`: content checked for correctness and clarity.\",\n        \"- `complete`: stable; only minor edits expected.\",\n        \"\",\n        \"## Updating the matrix\",\n        \"- When an artifact is created, set the corresponding cell status to at least `draft` and set `primary_link` to a stable path/URL.\",\n        \"- Add `cross_links` as a semicolon-separated list of other cell_ids or stable paths.\",\n        \"\",\n    ]) + \"\\n\"\n\n\ndef main(argv: List[str] | None = None) -> int:\n    p = argparse.ArgumentParser(description=\"Generate Mathematics coverage matrix and evaluation loop policy.\")\n    p.add_argument(\"--outputs-dir\", default=str(OUTPUTS_DIR), help=\"Output directory (default: repo_root/outputs).\")\n    p.add_argument(\"--write-markdown\", action=\"store_true\", help=\"Also write outputs/coverage_matrix.md.\")\n    args = p.parse_args(argv)\n\n    outdir = Path(args.outputs_dir)\n    cells = iter_cells()\n\n    csv_path = outdir / \"coverage_matrix.csv\"\n    _atomic_write_csv(csv_path, (c.__dict__ for c in cells), CSV_HEADERS)\n\n    if args.write_markdown:\n        md_path = outdir / \"coverage_matrix.md\"\n        _atomic_write_text(md_path, render_markdown_table(cells))\n\n    eval_path = outdir / \"eval_loop.md\"\n    _atomic_write_text(eval_path, render_eval_loop_md(total_cells=len(cells)))\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/math_coverage_cli.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b46a6881c81909c860794a76234b305db56a8985c57db",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/math_coverage_cli.py\nDIR_STATE:[\"src/math_coverage_cli.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_037551d542dbfb3a00694b46c34df481968979ec0bb294ba32",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `src/math_coverage_cli.py`, a deterministic Python CLI that generates `outputs/coverage_matrix.csv` (optionally `outputs/coverage_matrix.md`) and `outputs/eval_loop.md` for the Mathematics domain."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

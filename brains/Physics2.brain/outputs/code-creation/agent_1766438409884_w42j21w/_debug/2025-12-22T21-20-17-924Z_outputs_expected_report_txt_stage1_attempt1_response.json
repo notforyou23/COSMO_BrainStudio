@@ -1,0 +1,56 @@
+{
+  "content": "Created `outputs/expected_report.txt` containing a complete PASS validation report for the worked example, listing key run fields and confirming schema validation with no errors.",
+  "reasoning": "",
+  "responseId": "resp_0dd1beaed60d781c006949b742c2748196a3b80ca269f001f5",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2016,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 561,
+    "output_tokens_details": {
+      "reasoning_tokens": 144
+    },
+    "total_tokens": 2577
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0dd1beaed60d781c006949b743eb348196b3ffee5044466889",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0dd1beaed60d781c006949b74707b88196ba112932e6f99966",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('outputs/expected_report.txt')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"Benchmark run validation report\n================================\n\nResult: PASS (no validation errors)\n\nKey run fields\n--------------\n\nrun_id: example-run-001\nschema_version: 1.0\nbenchmark: minimal_example\nsuite: worked_example\ndescription: Minimal worked example benchmark run used by the reference validator.\nproducer: generated_library_1766438416249\n\nTiming\n------\n\nstarted_at: 2025-01-01T00:00:00Z\nended_at:   2025-01-01T00:00:01Z\nduration_s: 1.0\n\nSystem / environment\n--------------------\n\nplatform: linux\npython: 3.x\nhardware: cpu\nnotes: Example values; not used for scoring.\n\nModel / agent under test\n------------------------\n\nmodel_name: example-model\nmodel_version: 0.1\nparameters: default\n\nOutputs / results\n-----------------\n\ncases_total: 2\ncases_passed: 2\ncases_failed: 0\n\nAggregate metrics\n-----------------\n\naccuracy: 1.0\n\nJSON Schema validation\n----------------------\n\n- Schema loaded successfully\n- Instance validated successfully\n- No additionalProperties violations detected\n- All required fields present\n\nEnd of report\n\"\"\"\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:outputs/expected_report.txt')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949b60fb7788190a002552a17d4f4220ae1306796e44b72",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:outputs/expected_report.txt\nDIR_STATE:[\"outputs/expected_report.txt\", \"outputs/expected_validation.json\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0dd1beaed60d781c006949b74f2ccc8196b40ee6959081e5ab",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `outputs/expected_report.txt` containing a complete PASS validation report for the worked example, listing key run fields and confirming schema validation with no errors."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

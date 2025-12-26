@@ -1,0 +1,69 @@
+{
+  "content": "Created `scripts/generate_outputs.py`, a runnable generator that writes `outputs/coverage_matrix.csv`, `outputs/coverage_matrix.md`, and `outputs/eval_loop.md` with an initial Mathematics coverage matrix plus a 5-cycle evaluation cadence, measurable metrics, decision rules, and minimal inline update examples/instructions.",
+  "reasoning": "",
+  "responseId": "resp_02d27a73b14f4e3600694b451eeaf881949ae8f4454e2a47ca",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4281,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2783,
+    "output_tokens_details": {
+      "reasoning_tokens": 2716
+    },
+    "total_tokens": 7064
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_02d27a73b14f4e3600694b451fa4a881948757b02134659dfc",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_02d27a73b14f4e3600694b45244dac81949d01309621b75335",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, pandas as pd\n",
+      "container_id": "cntr_694b451b086c8190823746c48974796b0b636c6d9f3f208c",
+      "outputs": []
+    },
+    {
+      "id": "rs_02d27a73b14f4e3600694b452649788194909bae7622dd788c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_02d27a73b14f4e3600694b4526bc7881948fe0d53c453856b7",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\ntarget_path = Path('/mnt/data').joinpath('scripts/generate_outputs.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"#!/usr/bin/env python3\n\\\"\\\"\\\"Generate project planning artifacts.\n\nOutputs:\n- outputs/coverage_matrix.csv : long-form, script-friendly coverage matrix\n- outputs/coverage_matrix.md  : human-friendly table + update instructions\n- outputs/eval_loop.md        : 5-cycle review cadence, metrics, decision rules\n\nUsage:\n  python scripts/generate_outputs.py\n\\\"\\\"\\\"\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nimport csv\nfrom datetime import date\"\"\")\n\nchunks.append(\"\"\"@dataclass(frozen=True)\nclass Cell:\n    status: str  # MISSING | PLANNED | IN_PROGRESS | COMPLETE | NEEDS_REVIEW\n    count: int = 0\n    links: str = \\\"\\\"  # semicolon-separated repo pointers or URLs\n\ndef seed_cells() -> dict[tuple[str, str], Cell]:\n    # Key: (subtopic, artifact_type). Keep small seeds as inline examples.\n    return {\n        (\\\"Calculus\\\", \\\"concept_notes\\\"): Cell(\\\"PLANNED\\\", 0, \\\"notes/calculus/limits.md\\\"),\n        (\\\"Linear Algebra\\\", \\\"worked_examples\\\"): Cell(\\\"PLANNED\\\", 0, \\\"examples/linear_algebra/basis_change.md\\\"),\n        (\\\"Probability\\\", \\\"practice_problems\\\"): Cell(\\\"PLANNED\\\", 0, \\\"problems/probability/basic_sets.md\\\"),\n        (\\\"Discrete Math\\\", \\\"proofs\\\"): Cell(\\\"PLANNED\\\", 0, \\\"proofs/induction/template.md\\\"),\n    }\"\"\")\n\nchunks.append(\"\"\"def build_rows() -> list[dict[str, str]]:\n    domain = \\\"Mathematics\\\"\n    subtopics = [\n        \\\"Arithmetic & Prealgebra\\\",\n        \\\"Algebra\\\",\n        \\\"Functions\\\",\n        \\\"Geometry\\\",\n        \\\"Trigonometry\\\",\n        \\\"Calculus\\\",\n        \\\"Linear Algebra\\\",\n        \\\"Differential Equations\\\",\n        \\\"Probability\\\",\n        \\\"Statistics\\\",\n        \\\"Discrete Math\\\",\n        \\\"Number Theory\\\",\n        \\\"Logic & Set Theory\\\",\n        \\\"Optimization\\\",\n        \\\"Numerical Methods\\\",\n    ]\n    artifact_types = [\n        \\\"concept_notes\\\",\n        \\\"worked_examples\\\",\n        \\\"practice_problems\\\",\n        \\\"quizzes\\\",\n        \\\"proofs\\\",\n        \\\"visuals\\\",\n        \\\"code_notebooks\\\",\n        \\\"reference_sheets\\\",\n    ]\n    seeds = seed_cells()\n    rows: list[dict[str, str]] = []\n    for st in subtopics:\n        for at in artifact_types:\n            cell = seeds.get((st, at), Cell(\\\"MISSING\\\", 0, \\\"\\\"))\n            rows.append(\n                {\n                    \\\"domain\\\": domain,\n                    \\\"subtopic\\\": st,\n                    \\\"artifact_type\\\": at,\n                    \\\"status\\\": cell.status,\n                    \\\"count\\\": str(cell.count),\n                    \\\"links\\\": cell.links,\n                    \\\"last_updated\\\": date.today().isoformat(),\n                }\n            )\n    return rows\"\"\")\n\nchunks.append(\"\"\"def write_csv(path: Path, rows: list[dict[str, str]]) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    fieldnames = [\\\"domain\\\", \\\"subtopic\\\", \\\"artifact_type\\\", \\\"status\\\", \\\"count\\\", \\\"links\\\", \\\"last_updated\\\"]\n    with path.open(\\\"w\\\", encoding=\\\"utf-8\\\", newline=\\\"\\\") as f:\n        w = csv.DictWriter(f, fieldnames=fieldnames)\n        w.writeheader()\n        w.writerows(rows)\n\ndef md_escape(s: str) -> str:\n    return s.replace(\\\"|\\\", \\\"\\\\\\\\|\\\")\"\"\")\n\nchunks.append(\"\"\"def write_matrix_md(path: Path, rows: list[dict[str, str]]) -> None:\n    # Compact pivot: one row per subtopic; each cell is \\\"STATUS(count) -> links\\\".\n    artifact_types = []\n    for r in rows:\n        if r[\\\"artifact_type\\\"] not in artifact_types:\n            artifact_types.append(r[\\\"artifact_type\\\"])\n    subtopics = []\n    for r in rows:\n        if r[\\\"subtopic\\\"] not in subtopics:\n            subtopics.append(r[\\\"subtopic\\\"])\n\n    by = {(r[\\\"subtopic\\\"], r[\\\"artifact_type\\\"]): r for r in rows}\n\n    lines = []\n    lines.append(\\\"# Coverage matrix — Mathematics\\\\n\\\")\n    lines.append(\\\"This is a *planning* matrix. Update the CSV first; regenerate this MD by rerunning the script.\\\\n\\\")\n    lines.append(\\\"## Status vocabulary\\\\n\\\")\n    lines.append(\\\"- MISSING: nothing exists yet\\\\n- PLANNED: pointer exists, work not started\\\\n- IN_PROGRESS\\\\n- COMPLETE\\\\n- NEEDS_REVIEW\\\\n\\\")\n    lines.append(\\\"## Table (cells = STATUS(count) → links)\\\\n\\\")\n    header = [\\\"Subtopic\\\"] + artifact_types\n    lines.append(\\\"| \\\" + \\\" | \\\".join(header) + \\\" |\\\\n\\\")\n    lines.append(\\\"|\\\" + \\\"|\\\".join([\\\"---\\\"] * len(header)) + \\\"|\\\\n\\\")\n    for st in subtopics:\n        row = [st]\n        for at in artifact_types:\n            r = by[(st, at)]\n            cell = f\\\"{r['status']}({r['count']})\\\"\n            if r[\\\"links\\\"]:\n                cell += f\\\" → {r['links']}\\\"\n            row.append(md_escape(cell))\n        lines.append(\\\"| \\\" + \\\" | \\\".join(row) + \\\" |\\\\n\\\")\n\n    lines.append(\\\"\\\\n## How to update (minimal example)\\\\n\\\")\n    lines.append(\\\"Edit `outputs/coverage_matrix.csv` (or a derived source of truth) and change fields. Example row:\\\\n\\\\n\\\")\n    lines.append(\\\"```csv\\\\n\\\")\n    lines.append(\\\"domain,subtopic,artifact_type,status,count,links,last_updated\\\\n\\\")\n    lines.append(\\\"Mathematics,Calculus,concept_notes,IN_PROGRESS,1,notes/calculus/limits.md,2025-01-01\\\\n\\\")\n    lines.append(\\\"```\\\\n\\\")\n    lines.append(\\\"Conventions: `links` is semicolon-separated (e.g., `a.md;b.md`). `count` is the number of artifacts of that type for that subtopic.\\\\n\\\")\n    path.write_text(\\\"\\\".join(lines), encoding=\\\"utf-8\\\")\"\"\")\n\nchunks.append(\"\"\"def write_eval_loop_md(path: Path) -> None:\n    path.parent.mkdir(parents=True, exist_ok=True)\n    md = f\\\"\\\"\\\"# Evaluation loop (5-cycle cadence)\n\nPurpose: drive measurable, repeatable expansion of Mathematics coverage while keeping artifacts cross-linked and reviewable.\n\n## Cadence (repeat every planning iteration)\n1. **Cycle 1 — Inventory & normalize**\n   - Regenerate `coverage_matrix.csv`/`.md`.\n   - Normalize subtopic names and artifact types (no duplicates; stable strings).\n2. **Cycle 2 — Fill highest-impact gaps**\n   - Produce artifacts for the largest *coverage gaps* (see metrics).\n3. **Cycle 3 — Cross-linking & coherence**\n   - Add prerequisite and \\\"see also\\\" links between artifacts/subtopics.\n4. **Cycle 4 — Quality pass**\n   - Run consistency review across branches/variants; fix divergences and mark NEEDS_REVIEW → COMPLETE.\n5. **Cycle 5 — Regression & next-plan**\n   - Recompute metrics; decide next cycle’s production targets using decision rules.\n\n## Metrics (computed from `outputs/coverage_matrix.csv`)\n- **Artifact count**: sum of `count` over rows.\n- **Coverage ratio**: COMPLETE rows / total rows (optionally include IN_PROGRESS as partial).\n- **Coverage gaps**:\n  - A row with status MISSING or PLANNED and `count == 0` is a gap.\n  - A subtopic gap score = number of gap rows for that subtopic.\n- **Cross-link density**:\n  - link_rows = number of rows where `links` is non-empty.\n  - density = link_rows / total rows.\n\nMinimal manual tally example:\n- If a subtopic has 8 artifact types and 6 are MISSING, its gap score is 6.\n\n## Decision rules (what to produce next)\nApply in order; stop when the planned work queue is full for the next cycle.\n\n1. **If coverage ratio < 0.20**:\n   - Produce `concept_notes` + 2 `worked_examples` for the top-3 subtopics by gap score.\n2. **Else if any subtopic has gap score ≥ 5**:\n   - Produce one artifact in each missing type for that subtopic, prioritizing:\n     `concept_notes` → `worked_examples` → `practice_problems` → `quizzes`.\n3. **Else if cross-link density < 0.35**:\n   - Add/curate links: at least 2 links per subtopic (prereq + follow-on), stored in `links`.\n4. **Else**:\n   - Quality: convert IN_PROGRESS/NEEDS_REVIEW to COMPLETE by addressing review notes,\n     and add `reference_sheets` for the 5 most-used subtopics.\n\n## Update protocol (machine-friendly)\n- Source of truth is `outputs/coverage_matrix.csv`.\n- Update a cell by editing its row:\n  - increment `count`\n  - set `status`\n  - append `links` using semicolons\n  - refresh `last_updated` (ISO date)\n- Then rerun: `python scripts/generate_outputs.py` to rebuild Markdown views.\n\n## Notes\nPrior consistency reviews reported high alignment across branches (divergence ~0.96–0.97). Use Cycle 4 to keep that divergence low as new artifacts are added.\n\\\"\\\"\\\"\n    path.write_text(md, encoding=\\\"utf-8\\\")\"\"\")\n\nchunks.append(\"\"\"def main() -> None:\n    root = Path(__file__).resolve().parents[1]\n    out_dir = root / \\\"outputs\\\"\n    rows = build_rows()\n    write_csv(out_dir / \\\"coverage_matrix.csv\\\", rows)\n    write_matrix_md(out_dir / \\\"coverage_matrix.md\\\", rows)\n    write_eval_loop_md(out_dir / \\\"eval_loop.md\\\")\n\nif __name__ == \\\"__main__\\\":\n    main()\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:scripts/generate_outputs.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b451b086c8190823746c48974796b0b636c6d9f3f208c",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:scripts/generate_outputs.py\nDIR_STATE:[\"scripts/generate_outputs.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_02d27a73b14f4e3600694b453e322c81948aaa34b3955428da",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Created `scripts/generate_outputs.py`, a runnable generator that writes `outputs/coverage_matrix.csv`, `outputs/coverage_matrix.md`, and `outputs/eval_loop.md` with an initial Mathematics coverage matrix plus a 5-cycle evaluation cadence, measurable metrics, decision rules, and minimal inline update examples/instructions."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `tools/schema_docs.py` as a dependency-free CLI that can generate Markdown documentation from a JSON Schema file and optionally infer/write a JSON Schema stub from ```json``` examples embedded in a Markdown document to help keep schema and docs synchronized.",
+  "reasoning": "",
+  "responseId": "resp_0c9fd95a4993a23e006949aa7ddc9c8193afe4ad7489899d85",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3783,
+    "input_tokens_details": {
+      "cached_tokens": 1280
+    },
+    "output_tokens": 2291,
+    "output_tokens_details": {
+      "reasoning_tokens": 283
+    },
+    "total_tokens": 6074
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0c9fd95a4993a23e006949aa7ed11c8193b1630435b5e305ed",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c9fd95a4993a23e006949aa85cff08193b90a2d3e7091826c",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, re\n\ntarget_path = Path('/mnt/data').joinpath('tools/schema_docs.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(r\"\"\"#!/usr/bin/env python3\n\"\"\"\n\"\"\"\\\"\\\"\\\"schema_docs.py\n\nCLI to:\n1) Generate Markdown documentation from a JSON Schema file.\n2) Optionally infer a schema *stub* from JSON examples embedded in a Markdown doc.\n\nDesigned to keep schema and docs in sync without external dependencies.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport json\nimport re\nfrom pathlib import Path\nfrom typing import Any, Dict, List, Tuple\n\"\"\")\n\nchunks.append(r\"\"\"def _json_load(path: Path) -> Any:\n    return json.loads(path.read_text(encoding=\"utf-8\"))\n\n\ndef _type_str(schema: Dict[str, Any]) -> str:\n    t = schema.get(\"type\")\n    if isinstance(t, list):\n        return \" | \".join(map(str, t))\n    if isinstance(t, str):\n        return t\n    if \"enum\" in schema:\n        return \"enum\"\n    if \"$ref\" in schema:\n        return f\"ref({schema['$ref']})\"\n    return \"any\"\n\n\ndef _md_escape(s: str) -> str:\n    return s.replace(\"|\", r\"\\|\").replace(\"\\n\", \" \").strip()\n\"\"\")\n\nchunks.append(r\"\"\"def _collect_props(schema: Dict[str, Any], prefix: str = \"\") -> List[Tuple[str, Dict[str, Any], bool]]:\n    out: List[Tuple[str, Dict[str, Any], bool]] = []\n    if schema.get(\"type\") != \"object\":\n        return out\n    props = schema.get(\"properties\", {}) or {}\n    req = set(schema.get(\"required\", []) or [])\n    for k, v in sorted(props.items()):\n        path = f\"{prefix}.{k}\" if prefix else k\n        out.append((path, v, k in req))\n        out.extend(_collect_props(v, path))\n    return out\n\n\ndef schema_to_markdown(schema: Dict[str, Any], schema_path: Path) -> str:\n    title = schema.get(\"title\") or schema_path.stem\n    desc = schema.get(\"description\", \"\")\n    lines = [f\"# {title}\", \"\"]\n    if desc:\n        lines += [desc.strip(), \"\"]\n    lines += [\"## Overview\", \"\"]\n    lines += [f\"- **$schema**: `{schema.get('$schema','')}`\" if schema.get(\"$schema\") else \"- **$schema**: (not set)\"]\n    if \"$id\" in schema:\n        lines += [f\"- **$id**: `{schema['$id']}`\"]\n    lines += [f\"- **Root type**: `{_type_str(schema)}`\", \"\"]\n    if schema.get(\"type\") == \"object\":\n        lines += [\"## Fields\", \"\"]\n        lines += [\"| Field | Type | Required | Description |\", \"|---|---|:---:|---|\"]\n        for path, subs, is_req in _collect_props(schema):\n            d = subs.get(\"description\", \"\")\n            lines.append(f\"| `{path}` | `{_type_str(subs)}` | {'yes' if is_req else 'no'} | {_md_escape(d)} |\")\n        lines.append(\"\")\n    examples = schema.get(\"examples\") or []\n    if examples:\n        lines += [\"## Examples\", \"\"]\n        for ex in examples:\n            lines += [\"```json\", json.dumps(ex, indent=2, sort_keys=True), \"```\", \"\"]\n    lines += [\"## Notes\", \"\", \"This document is generated from JSON Schema. To keep docs and schema aligned, prefer adding examples and descriptions in the schema itself.\", \"\"]\n    return \"\\n\".join(lines).rstrip() + \"\\n\"\n\"\"\")\n\nchunks.append(r\"\"\"_JSON_BLOCK_RE = re.compile(r\"```json\\s*(\\{.*?\\}|\\[.*?\\])\\s*```\", re.DOTALL | re.IGNORECASE)\n\n\ndef extract_json_examples_from_markdown(md_text: str) -> List[Any]:\n    out: List[Any] = []\n    for m in _JSON_BLOCK_RE.finditer(md_text):\n        block = m.group(1).strip()\n        out.append(json.loads(block))\n    return out\n\n\ndef _merge_types(a: Any, b: Any) -> Any:\n    if a == b:\n        return a\n    ta = a if isinstance(a, list) else [a]\n    tb = b if isinstance(b, list) else [b]\n    merged = []\n    for t in ta + tb:\n        if t not in merged:\n            merged.append(t)\n    return merged if len(merged) > 1 else merged[0]\n\"\"\")\n\nchunks.append(r\"\"\"def infer_schema_stub(value: Any) -> Dict[str, Any]:\n    if value is None:\n        return {\"type\": \"null\"}\n    if isinstance(value, bool):\n        return {\"type\": \"boolean\"}\n    if isinstance(value, int) and not isinstance(value, bool):\n        return {\"type\": \"integer\"}\n    if isinstance(value, float):\n        return {\"type\": \"number\"}\n    if isinstance(value, str):\n        return {\"type\": \"string\"}\n    if isinstance(value, list):\n        if not value:\n            return {\"type\": \"array\", \"items\": {}}\n        item = infer_schema_stub(value[0])\n        for v in value[1:]:\n            item_t = item.get(\"type\", \"any\")\n            vt = infer_schema_stub(v).get(\"type\", \"any\")\n            item[\"type\"] = _merge_types(item_t, vt)\n        return {\"type\": \"array\", \"items\": item}\n    if isinstance(value, dict):\n        props: Dict[str, Any] = {}\n        req: List[str] = []\n        for k, v in value.items():\n            props[k] = infer_schema_stub(v)\n            req.append(k)\n        return {\"type\": \"object\", \"properties\": props, \"required\": sorted(req), \"additionalProperties\": True}\n    return {}\n\"\"\")\n\nchunks.append(r\"\"\"def examples_to_schema_stub(examples: List[Any], title: str = \"Inferred Schema Stub\") -> Dict[str, Any]:\n    if not examples:\n        raise SystemExit(\"No JSON examples found to infer a schema stub.\")\n    root = infer_schema_stub(examples[0])\n    for ex in examples[1:]:\n        t = root.get(\"type\", \"any\")\n        et = infer_schema_stub(ex).get(\"type\", \"any\")\n        root[\"type\"] = _merge_types(t, et)\n    return {\"$schema\": \"https://json-schema.org/draft/2020-12/schema\", \"title\": title, **root, \"examples\": examples}\n\n\ndef main(argv: List[str] | None = None) -> int:\n    ap = argparse.ArgumentParser(description=\"Generate Markdown docs from JSON Schema; optionally infer schema stubs from JSON examples in Markdown.\")\n    ap.add_argument(\"--schema\", type=Path, help=\"Path to schema.json (for docs generation).\")\n    ap.add_argument(\"--out\", type=Path, help=\"Output Markdown path (for docs generation). Use '-' for stdout.\")\n    ap.add_argument(\"--from-markdown\", type=Path, help=\"Path to Markdown doc to extract ```json``` examples from.\")\n    ap.add_argument(\"--stub-out\", type=Path, help=\"Write inferred schema stub JSON to this path (or '-' for stdout).\")\n    ap.add_argument(\"--title\", default=\"Inferred Schema Stub\", help=\"Title used when writing inferred schema stubs.\")\n    args = ap.parse_args(argv)\n\n    did = False\n    if args.schema and args.out:\n        schema = _json_load(args.schema)\n        md = schema_to_markdown(schema, args.schema)\n        if str(args.out) == \"-\":\n            print(md, end=\"\")\n        else:\n            args.out.parent.mkdir(parents=True, exist_ok=True)\n            args.out.write_text(md, encoding=\"utf-8\")\n        did = True\n\n    if args.from_markdown and args.stub_out:\n        md_text = args.from_markdown.read_text(encoding=\"utf-8\")\n        examples = extract_json_examples_from_markdown(md_text)\n        stub = examples_to_schema_stub(examples, title=args.title)\n        text = json.dumps(stub, indent=2, sort_keys=True) + \"\\n\"\n        if str(args.stub_out) == \"-\":\n            print(text, end=\"\")\n        else:\n            args.stub_out.parent.mkdir(parents=True, exist_ok=True)\n            args.stub_out.write_text(text, encoding=\"utf-8\")\n        did = True\n\n    if not did:\n        ap.error(\"Nothing to do. Provide --schema/--out and/or --from-markdown/--stub-out.\")\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main())\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:tools/schema_docs.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tools/schema_docs.py\nDIR_STATE:[\"tools/schema_docs.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0c9fd95a4993a23e006949aaa58d7481938ce55bad4acfdf15",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `tools/schema_docs.py` as a dependency-free CLI that can generate Markdown documentation from a JSON Schema file and optionally infer/write a JSON Schema stub from ```json``` examples embedded in a Markdown document to help keep schema and docs synchronized."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

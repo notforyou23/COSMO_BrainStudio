@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0",
+  "purpose": "Machine-readable manifest of pipeline runs (command, inputs, outputs, sha256 checksums).",
+  "created_at": "2025-12-24T04:27:07.607868+00:00",
+  "updated_at": "2025-12-24T04:27:07.607868+00:00",
+  "runs": [],
+  "run_fields": {
+    "run_id": "string (unique id for the run, e.g., timestamp or uuid)",
+    "timestamp": "string (ISO-8601 UTC timestamp)",
+    "command": "string (exact command executed)",
+    "cwd": "string (working directory at execution time)",
+    "inputs": [
+      {
+        "path": "string (relative to project root where possible)",
+        "sha256": "string (hex) or null if missing/unreadable"
+      }
+    ],
+    "produced_files": [
+      {
+        "path": "string (relative to project root where possible)",
+        "sha256": "string (hex) or null if missing/unreadable",
+        "bytes": "int or null"
+      }
+    ],
+    "key_artifacts": {
+      "results.json": {
+        "path": "string or null",
+        "sha256": "string (hex) or null"
+      },
+      "figure.png": {
+        "path": "string or null",
+        "sha256": "string (hex) or null"
+      },
+      "logs": [
+        {
+          "path": "string",
+          "sha256": "string (hex) or null"
+        }
+      ]
+    }
+  }
+}

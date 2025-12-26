@@ -1,0 +1,105 @@
+{
+  "content": "Added a fast-failing pytest import smoke test at `tests/test_import_smoke.py` that ensures `cosmo_contracts` and `cosmo_contracts.markdown` can be imported without ImportError/SyntaxError (including when running from a local `src/` layout).",
+  "reasoning": "",
+  "responseId": "resp_024ac2f92757cbb7006949bf7cb26881908b9f2ab72ba16a19",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2559,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1002,
+    "output_tokens_details": {
+      "reasoning_tokens": 548
+    },
+    "total_tokens": 3561
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_024ac2f92757cbb7006949bf7d579081908a57a4075dc9fb63",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_024ac2f92757cbb7006949bf7f15bc8190857e752c1cb60fd9",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path, PurePosixPath\nbase=Path('/mnt/data')\nlist(base.iterdir())[:10]\n",
+      "container_id": "cntr_6949bf4868f48190afb7ac7aab80c24301c1c0df42eb0f40",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('/mnt/data/src')]"
+        }
+      ]
+    },
+    {
+      "id": "ci_024ac2f92757cbb7006949bf8161948190a7dfc196e6c5677d",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "src=base/'src'\nsorted([p.relative_to(src) for p in src.rglob('*.py')])[:50], len(list(src.rglob('*.py')))\n",
+      "container_id": "cntr_6949bf4868f48190afb7ac7aab80c24301c1c0df42eb0f40",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "([PosixPath('cosmo_contracts/markdown.py')], 1)"
+        }
+      ]
+    },
+    {
+      "id": "rs_024ac2f92757cbb7006949bf83e6108190ad661480a437f4a5",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_024ac2f92757cbb7006949bf8514e48190a759ee98fd007968",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "sorted([p.relative_to(src) for p in src.rglob('*')])\n",
+      "container_id": "cntr_6949bf4868f48190afb7ac7aab80c24301c1c0df42eb0f40",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "[PosixPath('cosmo_contracts'), PosixPath('cosmo_contracts/markdown.py')]"
+        }
+      ]
+    },
+    {
+      "id": "rs_024ac2f92757cbb7006949bf87045881909512add6892432eb",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_024ac2f92757cbb7006949bf8f21b88190afc08898eb9e5aa1",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('tests/test_import_smoke.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Import smoke tests.\n\nThese tests are intentionally small and strict: they fail fast on any\nImportError/SyntaxError so CI catches broken packaging or invalid syntax.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport importlib\nimport sys\nfrom pathlib import Path\n\nimport pytest\"\"\",\n\"\"\"# Ensure the local `src/` layout is importable when running tests without an\n# installed wheel (e.g. `pytest` from a fresh checkout).\n_REPO_ROOT = Path(__file__).resolve().parents[1]\n_SRC = _REPO_ROOT / \"src\"\nif _SRC.is_dir() and str(_SRC) not in sys.path:\n    sys.path.insert(0, str(_SRC))\"\"\",\n\"\"\"PUBLIC_ENTRYPOINTS = [\n    # Top-level package (namespace package is OK).\n    \"cosmo_contracts\",\n    # Key module explicitly mentioned in the mission summary.\n    \"cosmo_contracts.markdown\",\n]\"\"\",\n\"\"\"@pytest.mark.parametrize(\"module_name\", PUBLIC_ENTRYPOINTS)\ndef test_import_public_entrypoints(module_name: str) -> None:\n    \\\"\\\"\\\"Import each public entrypoint; any ImportError/SyntaxError fails.\\\"\\\"\\\"\n    importlib.import_module(module_name)\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:tests/test_import_smoke.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949bf4868f48190afb7ac7aab80c24301c1c0df42eb0f40",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:tests/test_import_smoke.py\nDIR_STATE:[\"tests/test_import_smoke.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_024ac2f92757cbb7006949bf97b2d88190b79da804177379c4",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Added a fast-failing pytest import smoke test at `tests/test_import_smoke.py` that ensures `cosmo_contracts` and `cosmo_contracts.markdown` can be imported without ImportError/SyntaxError (including when running from a local `src/` layout)."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

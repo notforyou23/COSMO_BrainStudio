@@ -1,0 +1,37 @@
+{
+  "content": "[\n  {\n    \"path\": \"Makefile\",\n    \"description\": \"Defines a single end-to-end command (make e2e) that runs the full pipeline, captures logs, and prepares artifacts for upload in CI.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \".github/workflows/e2e.yml\",\n    \"description\": \"GitHub Actions workflow that runs the full pipeline via make e2e, uploads logs/artifacts, and triggers automatic issue creation on failures.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"scripts/e2e.py\",\n    \"description\": \"Python orchestrator that runs all pipeline stages, captures stdout/stderr and timing, writes structured logs/artifacts, and emits a failure summary for CI.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/artifacts.py\",\n    \"description\": \"Artifact utilities to package logs/results (e.g., tar/zip), redact secrets, and produce a deterministic artifact manifest for upload and debugging.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/issue_on_failure.py\",\n    \"description\": \"GitHub issue automation script that reads the failure summary, generates minimal reproduction steps, and opens or updates deduplicated issues via the GitHub API.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/repro_steps.py\",\n    \"description\": \"Generates minimal reproduction commands and environment details from pipeline context and failing stage metadata.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \".github/ISSUE_TEMPLATE/e2e_failure.yml\",\n    \"description\": \"Issue template for automated E2E failures including required fields, repro steps, logs/artifact links, and environment metadata.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"scripts/README_e2e.md\",\n    \"description\": \"Documentation describing how to run make e2e locally and in CI, how artifacts/logs are produced, and how failure issues are created and deduplicated.\",\n    \"category\": \"documentation\"\n  },\n  {\n    \"path\": \"scripts/requirements-ci.txt\",\n    \"description\": \"Pinned minimal Python dependencies for CI automation (requests/pyyaml etc.) used by the e2e runner and issue automation scripts.\",\n    \"category\": \"config\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_047894b87b9ce7fc006949be318f088193acb44d5a9593ce84",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 704,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 499,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 1203
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "msg_047894b87b9ce7fc006949be31d6108193bdacdf1c05dfb05b",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"Makefile\",\n    \"description\": \"Defines a single end-to-end command (make e2e) that runs the full pipeline, captures logs, and prepares artifacts for upload in CI.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \".github/workflows/e2e.yml\",\n    \"description\": \"GitHub Actions workflow that runs the full pipeline via make e2e, uploads logs/artifacts, and triggers automatic issue creation on failures.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"scripts/e2e.py\",\n    \"description\": \"Python orchestrator that runs all pipeline stages, captures stdout/stderr and timing, writes structured logs/artifacts, and emits a failure summary for CI.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/artifacts.py\",\n    \"description\": \"Artifact utilities to package logs/results (e.g., tar/zip), redact secrets, and produce a deterministic artifact manifest for upload and debugging.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/issue_on_failure.py\",\n    \"description\": \"GitHub issue automation script that reads the failure summary, generates minimal reproduction steps, and opens or updates deduplicated issues via the GitHub API.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/repro_steps.py\",\n    \"description\": \"Generates minimal reproduction commands and environment details from pipeline context and failing stage metadata.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \".github/ISSUE_TEMPLATE/e2e_failure.yml\",\n    \"description\": \"Issue template for automated E2E failures including required fields, repro steps, logs/artifact links, and environment metadata.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"scripts/README_e2e.md\",\n    \"description\": \"Documentation describing how to run make e2e locally and in CI, how artifacts/logs are produced, and how failure issues are created and deduplicated.\",\n    \"category\": \"documentation\"\n  },\n  {\n    \"path\": \"scripts/requirements-ci.txt\",\n    \"description\": \"Pinned minimal Python dependencies for CI automation (requests/pyyaml etc.) used by the e2e runner and issue automation scripts.\",\n    \"category\": \"config\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

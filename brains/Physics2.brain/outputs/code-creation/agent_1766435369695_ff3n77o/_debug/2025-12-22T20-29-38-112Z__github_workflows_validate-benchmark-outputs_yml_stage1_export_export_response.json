@@ -1,0 +1,56 @@
+{
+  "content": "FILE_EXPORT:{\"path\":\".github/workflows/validate-benchmark-outputs.yml\",\"size\":999,\"encoding\":\"base64\",\"sha256\":\"103a2398c8ee5f3a554629fe9c9524cd416cdc88f37fa34432bef32ca3a699ef\",\"content\":\"bmFtZTogVmFsaWRhdGUgYmVuY2htYXJrIG91dHB1dHMKCm9uOgogIHB1bGxfcmVxdWVzdDoKICBwdXNoOgogICAgYnJhbmNoZXM6IFttYWluXQogIHdvcmtmbG93X2Rpc3BhdGNoOgoKcGVybWlzc2lvbnM6CiAgY29udGVudHM6IHJlYWQKCmNvbmN1cnJlbmN5OgogIGdyb3VwOiB2YWxpZGF0ZS1iZW5jaG1hcmstb3V0cHV0cy0ke3sgZ2l0aHViLnJlZiB9fQogIGNhbmNlbC1pbi1wcm9ncmVzczogdHJ1ZQoKam9iczoKICB2YWxpZGF0ZToKICAgIG5hbWU6IFZhbGlkYXRlIGJlbmNobWFyayBvdXRwdXRzIGFnYWluc3Qgc2NoZW1hCiAgICBydW5zLW9uOiB1YnVudHUtbGF0ZXN0CiAgICBzdGVwczoKICAgICAgLSBuYW1lOiBDaGVja291dAogICAgICAgIHVzZXM6IGFjdGlvbnMvY2hlY2tvdXRAdjQKCiAgICAgIC0gbmFtZTogU2V0IHVwIFB5dGhvbgogICAgICAgIHVzZXM6IGFjdGlvbnMvc2V0dXAtcHl0aG9uQHY1CiAgICAgICAgd2l0aDoKICAgICAgICAgIHB5dGhvbi12ZXJzaW9uOiAiMy4xMSIKICAgICAgICAgIGNhY2hlOiAicGlwIgoKICAgICAgLSBuYW1lOiBJbnN0YWxsIHZhbGlkYXRvciBkZXBlbmRlbmNpZXMKICAgICAgICBydW46IHwKICAgICAgICAgIHB5dGhvbiAtbSBwaXAgaW5zdGFsbCAtLXVwZ3JhZGUgcGlwCiAgICAgICAgICAjIEtlZXAgdGhpcyB3b3JrZmxvdyBpbmRlcGVuZGVudCBvZiByZXBvIHBhY2thZ2luZzsgaW5zdGFsbCBydW50aW1lIGRlcHMgZGlyZWN0bHkuCiAgICAgICAgICBweXRob24gLW0gcGlwIGluc3RhbGwgImpzb25zY2hlbWE+PTQuMTgiICJyZWZlcmVuY2luZz49MC4zMCIKCiAgICAgIC0gbmFtZTogVmFsaWRhdGUgYmVuY2htYXJrIG91dHB1dHMKICAgICAgICBydW46IHwKICAgICAgICAgIHB5dGhvbiB0b29scy92YWxpZGF0ZV9iZW5jaG1hcmtfb3V0cHV0cy5weSAgICAgICAgICAgICAtLXNjaGVtYSBvdXRwdXRzL3NjaGVtYXMvYmVuY2htYXJrX3NjaGVtYS5qc29uICAgICAgICAgICAgIC0tcmVwby1yb290IC4K\"}\nDIR_STATE:[\".github/workflows/validate-benchmark-outputs.yml\"]",
+  "reasoning": "",
+  "responseId": "resp_09ec25158fe3015a006949ad4893ac8196819d3796024dbb6a",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2212,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1169,
+    "output_tokens_details": {
+      "reasoning_tokens": 37
+    },
+    "total_tokens": 3381
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_09ec25158fe3015a006949ad494adc819696b62471e0dd4b3a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_09ec25158fe3015a006949ad4a5acc81969ce058575c8bb4f6",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport base64, json, hashlib, gzip\n\ntarget_path = Path('/mnt/data').joinpath('.github/workflows/validate-benchmark-outputs.yml')\nassert target_path.is_file(), 'Expected .github/workflows/validate-benchmark-outputs.yml to exist before export'\ndata = target_path.read_bytes()\npayload = {\n  'path': '.github/workflows/validate-benchmark-outputs.yml',\n  'size': len(data),\n  'encoding': 'base64',\n  'sha256': hashlib.sha256(data).hexdigest(),\n  'content': None\n}\nif len(data) > 20000:\n    compressed = gzip.compress(data)\n    payload['encoding'] = 'gzip+base64'\n    payload['content'] = base64.b64encode(compressed).decode('ascii')\nelse:\n    payload['content'] = base64.b64encode(data).decode('ascii')\n\nprint('FILE_EXPORT:' + json.dumps(payload, separators=(',', ':')))\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_6949aa2efc508190b33cc8a2fa37128d0ed399944418a6c8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_EXPORT:{\"path\":\".github/workflows/validate-benchmark-outputs.yml\",\"size\":999,\"encoding\":\"base64\",\"sha256\":\"103a2398c8ee5f3a554629fe9c9524cd416cdc88f37fa34432bef32ca3a699ef\",\"content\":\"bmFtZTogVmFsaWRhdGUgYmVuY2htYXJrIG91dHB1dHMKCm9uOgogIHB1bGxfcmVxdWVzdDoKICBwdXNoOgogICAgYnJhbmNoZXM6IFttYWluXQogIHdvcmtmbG93X2Rpc3BhdGNoOgoKcGVybWlzc2lvbnM6CiAgY29udGVudHM6IHJlYWQKCmNvbmN1cnJlbmN5OgogIGdyb3VwOiB2YWxpZGF0ZS1iZW5jaG1hcmstb3V0cHV0cy0ke3sgZ2l0aHViLnJlZiB9fQogIGNhbmNlbC1pbi1wcm9ncmVzczogdHJ1ZQoKam9iczoKICB2YWxpZGF0ZToKICAgIG5hbWU6IFZhbGlkYXRlIGJlbmNobWFyayBvdXRwdXRzIGFnYWluc3Qgc2NoZW1hCiAgICBydW5zLW9uOiB1YnVudHUtbGF0ZXN0CiAgICBzdGVwczoKICAgICAgLSBuYW1lOiBDaGVja291dAogICAgICAgIHVzZXM6IGFjdGlvbnMvY2hlY2tvdXRAdjQKCiAgICAgIC0gbmFtZTogU2V0IHVwIFB5dGhvbgogICAgICAgIHVzZXM6IGFjdGlvbnMvc2V0dXAtcHl0aG9uQHY1CiAgICAgICAgd2l0aDoKICAgICAgICAgIHB5dGhvbi12ZXJzaW9uOiAiMy4xMSIKICAgICAgICAgIGNhY2hlOiAicGlwIgoKICAgICAgLSBuYW1lOiBJbnN0YWxsIHZhbGlkYXRvciBkZXBlbmRlbmNpZXMKICAgICAgICBydW46IHwKICAgICAgICAgIHB5dGhvbiAtbSBwaXAgaW5zdGFsbCAtLXVwZ3JhZGUgcGlwCiAgICAgICAgICAjIEtlZXAgdGhpcyB3b3JrZmxvdyBpbmRlcGVuZGVudCBvZiByZXBvIHBhY2thZ2luZzsgaW5zdGFsbCBydW50aW1lIGRlcHMgZGlyZWN0bHkuCiAgICAgICAgICBweXRob24gLW0gcGlwIGluc3RhbGwgImpzb25zY2hlbWE+PTQuMTgiICJyZWZlcmVuY2luZz49MC4zMCIKCiAgICAgIC0gbmFtZTogVmFsaWRhdGUgYmVuY2htYXJrIG91dHB1dHMKICAgICAgICBydW46IHwKICAgICAgICAgIHB5dGhvbiB0b29scy92YWxpZGF0ZV9iZW5jaG1hcmtfb3V0cHV0cy5weSAgICAgICAgICAgICAtLXNjaGVtYSBvdXRwdXRzL3NjaGVtYXMvYmVuY2htYXJrX3NjaGVtYS5qc29uICAgICAgICAgICAgIC0tcmVwby1yb290IC4K\"}\nDIR_STATE:[\".github/workflows/validate-benchmark-outputs.yml\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_09ec25158fe3015a006949ad4ee0448196821846e00fcbe9a1",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_EXPORT:{\"path\":\".github/workflows/validate-benchmark-outputs.yml\",\"size\":999,\"encoding\":\"base64\",\"sha256\":\"103a2398c8ee5f3a554629fe9c9524cd416cdc88f37fa34432bef32ca3a699ef\",\"content\":\"bmFtZTogVmFsaWRhdGUgYmVuY2htYXJrIG91dHB1dHMKCm9uOgogIHB1bGxfcmVxdWVzdDoKICBwdXNoOgogICAgYnJhbmNoZXM6IFttYWluXQogIHdvcmtmbG93X2Rpc3BhdGNoOgoKcGVybWlzc2lvbnM6CiAgY29udGVudHM6IHJlYWQKCmNvbmN1cnJlbmN5OgogIGdyb3VwOiB2YWxpZGF0ZS1iZW5jaG1hcmstb3V0cHV0cy0ke3sgZ2l0aHViLnJlZiB9fQogIGNhbmNlbC1pbi1wcm9ncmVzczogdHJ1ZQoKam9iczoKICB2YWxpZGF0ZToKICAgIG5hbWU6IFZhbGlkYXRlIGJlbmNobWFyayBvdXRwdXRzIGFnYWluc3Qgc2NoZW1hCiAgICBydW5zLW9uOiB1YnVudHUtbGF0ZXN0CiAgICBzdGVwczoKICAgICAgLSBuYW1lOiBDaGVja291dAogICAgICAgIHVzZXM6IGFjdGlvbnMvY2hlY2tvdXRAdjQKCiAgICAgIC0gbmFtZTogU2V0IHVwIFB5dGhvbgogICAgICAgIHVzZXM6IGFjdGlvbnMvc2V0dXAtcHl0aG9uQHY1CiAgICAgICAgd2l0aDoKICAgICAgICAgIHB5dGhvbi12ZXJzaW9uOiAiMy4xMSIKICAgICAgICAgIGNhY2hlOiAicGlwIgoKICAgICAgLSBuYW1lOiBJbnN0YWxsIHZhbGlkYXRvciBkZXBlbmRlbmNpZXMKICAgICAgICBydW46IHwKICAgICAgICAgIHB5dGhvbiAtbSBwaXAgaW5zdGFsbCAtLXVwZ3JhZGUgcGlwCiAgICAgICAgICAjIEtlZXAgdGhpcyB3b3JrZmxvdyBpbmRlcGVuZGVudCBvZiByZXBvIHBhY2thZ2luZzsgaW5zdGFsbCBydW50aW1lIGRlcHMgZGlyZWN0bHkuCiAgICAgICAgICBweXRob24gLW0gcGlwIGluc3RhbGwgImpzb25zY2hlbWE+PTQuMTgiICJyZWZlcmVuY2luZz49MC4zMCIKCiAgICAgIC0gbmFtZTogVmFsaWRhdGUgYmVuY2htYXJrIG91dHB1dHMKICAgICAgICBydW46IHwKICAgICAgICAgIHB5dGhvbiB0b29scy92YWxpZGF0ZV9iZW5jaG1hcmtfb3V0cHV0cy5weSAgICAgICAgICAgICAtLXNjaGVtYSBvdXRwdXRzL3NjaGVtYXMvYmVuY2htYXJrX3NjaGVtYS5qc29uICAgICAgICAgICAgIC0tcmVwby1yb290IC4K\"}\nDIR_STATE:[\".github/workflows/validate-benchmark-outputs.yml\"]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

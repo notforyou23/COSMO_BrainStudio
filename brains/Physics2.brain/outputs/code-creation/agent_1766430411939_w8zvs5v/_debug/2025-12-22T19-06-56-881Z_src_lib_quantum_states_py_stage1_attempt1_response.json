@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/lib/quantum_states.py` with compact, reproducible utilities for constructing common small quantum states and density matrices, generating seeded random states, computing partial traces, and evaluating von Neumann/Rényi entropies.",
+  "reasoning": "",
+  "responseId": "resp_0c0982c07be155ba006949980959d88195807537899998bedd",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3736,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2208,
+    "output_tokens_details": {
+      "reasoning_tokens": 113
+    },
+    "total_tokens": 5944
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0c0982c07be155ba006949980a14a8819580548f28bf069518",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0c0982c07be155ba006949980c842c8195a42cb706f43fdc2a",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, numpy as np\ntarget_path = Path('/mnt/data').joinpath('src/lib/quantum_states.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\n\\\"\\\"\\\"Small quantum-state utilities.\n\nProvides constructors for common n-qubit states, density-matrix helpers,\npartial traces, and von Neumann/Rényi entropies (base-2 by default).\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Iterable, List, Sequence, Tuple, Union, Optional\n\nimport numpy as np\n\nArray = np.ndarray\n\"\"\")\n\nchunks.append(\"\"\"\ndef set_seed(seed: Optional[int] = None) -> np.random.Generator:\n    \\\"\\\"\\\"Return a reproducible RNG (NumPy Generator).\\\"\\\"\\\"\n    return np.random.default_rng(seed)\n\n\ndef _as_complex(a: Array) -> Array:\n    a = np.asarray(a)\n    return a.astype(np.complex128, copy=False)\n\n\ndef normalize_state(psi: Array) -> Array:\n    \\\"\\\"\\\"Normalize a statevector.\\\"\\\"\\\"\n    psi = _as_complex(psi).reshape(-1)\n    n = np.linalg.norm(psi)\n    if n == 0:\n        raise ValueError(\"Cannot normalize zero state.\")\n    return psi / n\n\n\ndef ket(bit: int) -> Array:\n    \\\"\\\"\\\"Computational basis ket |0>, |1>.\\\"\\\"\\\"\n    if bit not in (0, 1):\n        raise ValueError(\"bit must be 0 or 1\")\n    v = np.zeros(2, dtype=np.complex128)\n    v[bit] = 1.0\n    return v\n\n\ndef kron(*ops: Array) -> Array:\n    \\\"\\\"\\\"Kronecker product of many arrays.\\\"\\\"\\\"\n    out = np.array([1.0], dtype=np.complex128)\n    for op in ops:\n        out = np.kron(out, _as_complex(op))\n    return out\n\"\"\")\n\nchunks.append(\"\"\"\ndef density_matrix_from_state(psi: Array) -> Array:\n    \\\"\\\"\\\"|psi><psi| for a (possibly unnormalized) statevector.\\\"\\\"\\\"\n    psi = normalize_state(psi)\n    return np.outer(psi, np.conjugate(psi))\n\n\ndef is_hermitian(rho: Array, tol: float = 1e-10) -> bool:\n    rho = _as_complex(rho)\n    return np.allclose(rho, rho.conj().T, atol=tol, rtol=0)\n\n\ndef random_pure_state(dim: int, rng: Optional[np.random.Generator] = None) -> Array:\n    \\\"\\\"\\\"Haar-ish random pure state via complex normal + normalization.\\\"\\\"\\\"\n    rng = rng or np.random.default_rng()\n    x = rng.normal(size=dim) + 1j * rng.normal(size=dim)\n    return normalize_state(x)\n\n\ndef random_density_matrix(\n    dim: int, rank: Optional[int] = None, rng: Optional[np.random.Generator] = None\n) -> Array:\n    \\\"\\\"\\\"Random density matrix from Wishart ensemble (optionally low rank).\\\"\\\"\\\"\n    rng = rng or np.random.default_rng()\n    r = dim if rank is None else int(rank)\n    x = rng.normal(size=(dim, r)) + 1j * rng.normal(size=(dim, r))\n    rho = x @ x.conj().T\n    rho = rho / np.trace(rho)\n    return _as_complex(rho)\n\"\"\")\n\nchunks.append(\"\"\"\ndef bell_state(label: str = \"phi+\") -> Array:\n    \\\"\\\"\\\"Return 2-qubit Bell statevector (phi+/phi-/psi+/psi-).\\\"\\\"\\\"\n    z0, z1 = ket(0), ket(1)\n    if label == \"phi+\":\n        psi = (kron(z0, z0) + kron(z1, z1)) / np.sqrt(2)\n    elif label == \"phi-\":\n        psi = (kron(z0, z0) - kron(z1, z1)) / np.sqrt(2)\n    elif label == \"psi+\":\n        psi = (kron(z0, z1) + kron(z1, z0)) / np.sqrt(2)\n    elif label == \"psi-\":\n        psi = (kron(z0, z1) - kron(z1, z0)) / np.sqrt(2)\n    else:\n        raise ValueError(\"label must be one of phi+, phi-, psi+, psi-\")\n    return _as_complex(psi)\n\n\ndef ghz_state(n: int) -> Array:\n    \\\"\\\"\\\"n-qubit GHZ: (|0..0> + |1..1>)/sqrt(2).\\\"\\\"\\\"\n    if n < 1:\n        raise ValueError(\"n must be >= 1\")\n    z0, z1 = ket(0), ket(1)\n    psi0 = z0\n    psi1 = z1\n    for _ in range(n - 1):\n        psi0 = kron(psi0, z0)\n        psi1 = kron(psi1, z1)\n    return _as_complex((psi0 + psi1) / np.sqrt(2))\n\n\ndef w_state(n: int) -> Array:\n    \\\"\\\"\\\"n-qubit W state: uniform superposition of Hamming-weight-1 basis states.\\\"\\\"\\\"\n    if n < 1:\n        raise ValueError(\"n must be >= 1\")\n    dim = 2**n\n    psi = np.zeros(dim, dtype=np.complex128)\n    for i in range(n):\n        psi[1 << (n - 1 - i)] = 1.0\n    return normalize_state(psi)\n\"\"\")\n\nchunks.append(\"\"\"\ndef partial_trace(\n    rho: Array, dims: Sequence[int], keep: Sequence[int]\n) -> Array:\n    \\\"\\\"\\\"Partial trace of density matrix.\n\n    Args:\n        rho: (D,D) density matrix with D=prod(dims)\n        dims: subsystem dimensions, e.g. [2,2,2]\n        keep: indices of subsystems to keep (0-based)\n    Returns:\n        Reduced density matrix on kept subsystems.\n    \\\"\\\"\\\"\n    rho = _as_complex(rho)\n    dims = list(map(int, dims))\n    n = len(dims)\n    keep = list(map(int, keep))\n    if rho.ndim != 2 or rho.shape[0] != rho.shape[1]:\n        raise ValueError(\"rho must be a square matrix\")\n    D = int(np.prod(dims))\n    if rho.shape[0] != D:\n        raise ValueError(\"rho shape incompatible with dims\")\n    if any(k < 0 or k >= n for k in keep):\n        raise ValueError(\"keep indices out of range\")\n    trace_out = [i for i in range(n) if i not in keep]\n\n    reshaped = rho.reshape(*dims, *dims)  # (i1..in, j1..jn)\n    for ax in sorted(trace_out, reverse=True):\n        reshaped = np.trace(reshaped, axis1=ax, axis2=ax + n)\n    kept_dims = [dims[i] for i in keep]\n    dkeep = int(np.prod(kept_dims)) if kept_dims else 1\n    return reshaped.reshape(dkeep, dkeep)\n\"\"\")\n\nchunks.append(\"\"\"\ndef _safe_eigvals(rho: Array, tol: float = 1e-15) -> Array:\n    rho = _as_complex(rho)\n    # Ensure Hermitian for numerical stability\n    rho = 0.5 * (rho + rho.conj().T)\n    vals = np.linalg.eigvalsh(rho)\n    vals = np.real(vals)\n    vals[vals < tol] = 0.0\n    s = vals.sum()\n    if s > 0 and not np.isclose(s, 1.0):\n        vals = vals / s\n    return vals\n\n\ndef von_neumann_entropy(rho: Array, base: float = 2.0) -> float:\n    \\\"\\\"\\\"S(rho) = -Tr rho log rho.\\\"\\\"\\\"\n    p = _safe_eigvals(rho)\n    nz = p[p > 0]\n    if nz.size == 0:\n        return 0.0\n    log = np.log(nz) / np.log(base)\n    return float(-np.sum(nz * log))\n\n\ndef renyi_entropy(rho: Array, alpha: float = 2.0, base: float = 2.0) -> float:\n    \\\"\\\"\\\"Rényi entropy S_α(rho). Uses eigenvalues; alpha=1 -> von Neumann.\\\"\\\"\\\"\n    if alpha <= 0:\n        raise ValueError(\"alpha must be > 0\")\n    if np.isclose(alpha, 1.0):\n        return von_neumann_entropy(rho, base=base)\n    p = _safe_eigvals(rho)\n    val = np.sum(p**alpha)\n    if val <= 0:\n        return 0.0\n    return float(np.log(val) / (1.0 - alpha) / np.log(base))\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/lib/quantum_states.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694996cf1f0881908fd6ebe4e5dd54140c8f193d7d2aa5f8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/lib/quantum_states.py\nDIR_STATE:[\"src/lib/quantum_states.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0c0982c07be155ba006949982971e48195bc17f3637a188967",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/lib/quantum_states.py` with compact, reproducible utilities for constructing common small quantum states and density matrices, generating seeded random states, computing partial traces, and evaluating von Neumann/Rényi entropies."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

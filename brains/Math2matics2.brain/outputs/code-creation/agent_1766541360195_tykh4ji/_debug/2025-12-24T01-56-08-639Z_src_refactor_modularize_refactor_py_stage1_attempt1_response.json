@@ -1,0 +1,56 @@
+{
+  "content": "Implemented a compact Stage 1 refactoring engine in `src/refactor_modularize/refactor.py` that extracts repeated documentation/code fragments (fenced code blocks and paragraph blocks), deduplicates them into deterministic module files, and rewrites artifacts to reference those modules via stable include tokens.",
+  "reasoning": "",
+  "responseId": "resp_01e4d157edd54f1300694b487d9ce08190831a97a442c13435",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3703,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2097,
+    "output_tokens_details": {
+      "reasoning_tokens": 407
+    },
+    "total_tokens": 5800
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_01e4d157edd54f1300694b487e50d08190bde1971452ad8989",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_01e4d157edd54f1300694b4883ffc081908a12fbe1e3e26651",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/refactor_modularize/refactor.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(\"\"\"\n\\\"\\\"\\\"refactor_modularize.refactor\n\nA small, self-contained refactoring engine for Stage 1.\n\nIt detects repeated *verbatim* fragments across input artifacts (both documentation and\ncode-like text), extracts them into reusable modules, and rewrites the original\nartifacts to reference the extracted modules.\n\nDesign notes:\n- Fragment detection is conservative: only identical blocks after light normalization\n  (trim + newline canonicalization) are deduplicated.\n- Rewrites are deterministic and stable for the same inputs.\n- This module does not perform I/O; callers pass/receive in-memory text.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nimport hashlib\nimport re\nfrom typing import Dict, Iterable, List, Mapping, Sequence, Tuple\n\n\n_INCLUDE_TOKEN = \\\"<<module:{name}>>\\\"\n_CODE_FENCE_RE = re.compile(r\\\"(^```[\\\\w+-]*\\\\n.*?^```\\\\s*$)\\\", re.M | re.S)\n\"\"\")\n\nchunks.append(\"\"\"\n@dataclass(frozen=True)\nclass Artifact:\n    \\\"\\\"\\\"A single input file (code or documentation).\\\"\\\"\\\"\n\n    name: str\n    text: str\n    kind: str = \\\"text\\\"  # e.g. \\\"md\\\", \\\"py\\\", \\\"toml\\\", \\\"text\\\"\n\n\n@dataclass(frozen=True)\nclass Fragment:\n    \\\"\\\"\\\"A reusable fragment occurrence within an artifact.\\\"\\\"\\\"\n\n    artifact: str\n    start: int\n    end: int\n    raw: str\n    norm: str\n    digest: str\n\n\n@dataclass(frozen=True)\nclass RefactorResult:\n    \\\"\\\"\\\"Refactoring plan result.\n\n    - rewritten: artifact name -> rewritten content\n    - modules: module filename -> extracted content\n    - index: module filename -> list of (artifact, start, end) occurrences\n    \\\"\\\"\\\"\n\n    rewritten: Mapping[str, str]\n    modules: Mapping[str, str]\n    index: Mapping[str, Sequence[Tuple[str, int, int]]]\n\"\"\")\n\nchunks.append(\"\"\"\ndef _normalize_block(block: str) -> str:\n    block = block.replace(\\\"\\\\r\\\\n\\\", \\\"\\\\n\\\").replace(\\\"\\\\r\\\", \\\"\\\\n\\\")\n    return \\\"\\\\n\\\".join(line.rstrip() for line in block.strip().split(\\\"\\\\n\\\")).strip() + \\\"\\\\n\\\"\n\n\ndef _digest(norm: str) -> str:\n    return hashlib.sha256(norm.encode(\\\"utf-8\\\")).hexdigest()\n\n\ndef _split_paragraph_blocks(text: str) -> List[Tuple[int, int, str]]:\n    # Split on 2+ newlines while keeping spans; skip tiny blocks.\n    spans: List[Tuple[int, int, str]] = []\n    text_n = text.replace(\\\"\\\\r\\\\n\\\", \\\"\\\\n\\\").replace(\\\"\\\\r\\\", \\\"\\\\n\\\")\n    parts = re.split(r\\\"\\\\n{2,}\\\", text_n)\n    cursor = 0\n    for part in parts:\n        start = text_n.find(part, cursor)\n        end = start + len(part)\n        cursor = end\n        if len(part.strip()) >= 40:\n            spans.append((start, end, part))\n    return spans\n\n\ndef extract_fragments(artifact: Artifact) -> List[Fragment]:\n    \\\"\\\"\\\"Extract candidate fragments from an artifact.\n\n    Candidates include fenced code blocks (```...```) and paragraph-like blocks.\n    \\\"\\\"\\\"\n    text = artifact.text\n    frags: List[Fragment] = []\n    for m in _CODE_FENCE_RE.finditer(text):\n        raw = m.group(1)\n        norm = _normalize_block(raw)\n        frags.append(Fragment(artifact.name, m.start(1), m.end(1), raw, norm, _digest(norm)))\n    for start, end, raw in _split_paragraph_blocks(text):\n        norm = _normalize_block(raw)\n        frags.append(Fragment(artifact.name, start, end, raw, norm, _digest(norm)))\n    return frags\n\"\"\")\n\nchunks.append(\"\"\"\ndef _module_filename(kind: str, digest: str, n: int) -> str:\n    ext = {\\\"md\\\": \\\"md\\\", \\\"markdown\\\": \\\"md\\\", \\\"py\\\": \\\"py\\\"}.get(kind.lower(), \\\"txt\\\")\n    return f\\\"module_{n:03d}_{digest[:10]}.{ext}\\\"\n\n\ndef plan_refactor(artifacts: Sequence[Artifact], min_dupes: int = 2) -> RefactorResult:\n    \\\"\\\"\\\"Plan + apply refactor in one step for Stage 1.\n\n    Deduplicates exact repeated fragments across artifacts and replaces each\n    occurrence with a deterministic include token: ``<<module:FILE>>``.\n    \\\"\\\"\\\"\n    all_frags: List[Fragment] = []\n    for a in artifacts:\n        all_frags.extend(extract_fragments(a))\n\n    by_digest: Dict[str, List[Fragment]] = {}\n    for f in all_frags:\n        by_digest.setdefault(f.digest, []).append(f)\n\n    # Keep only fragments that appear in >= min_dupes artifacts/occurrences.\n    reusable = {d: fs for d, fs in by_digest.items() if len(fs) >= min_dupes}\n    digests_sorted = sorted(reusable, key=lambda d: (-(len(reusable[d])), d))\n\n    modules: Dict[str, str] = {}\n    index: Dict[str, List[Tuple[str, int, int]]] = {}\n    digest_to_module: Dict[str, str] = {}\n\n    for i, d in enumerate(digests_sorted, start=1):\n        fs = reusable[d]\n        kind = next((a.kind for a in artifacts if a.name == fs[0].artifact), \\\"text\\\")\n        fname = _module_filename(kind, d, i)\n        digest_to_module[d] = fname\n        modules[fname] = fs[0].norm\n        index[fname] = [(f.artifact, f.start, f.end) for f in fs]\n\n    rewritten: Dict[str, str] = {}\n    frags_by_art: Dict[str, List[Fragment]] = {}\n    for f in all_frags:\n        if f.digest in digest_to_module:\n            frags_by_art.setdefault(f.artifact, []).append(f)\n\n    for a in artifacts:\n        frs = sorted(frags_by_art.get(a.name, []), key=lambda f: (f.start, f.end))\n        # Avoid overlapping replacements: keep earliest, then skip overlaps.\n        kept: List[Fragment] = []\n        last_end = -1\n        for f in frs:\n            if f.start >= last_end:\n                kept.append(f)\n                last_end = f.end\n        out, pos = [], 0\n        for f in kept:\n            out.append(a.text[pos:f.start])\n            out.append(_INCLUDE_TOKEN.format(name=digest_to_module[f.digest]))\n            pos = f.end\n        out.append(a.text[pos:])\n        rewritten[a.name] = \\\"\\\".join(out)\n\n    return RefactorResult(rewritten=rewritten, modules=modules, index=index)\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/refactor_modularize/refactor.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b48372d7081909f70f3661941a95b001f3dc92161f15d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/refactor_modularize/refactor.py\nDIR_STATE:[\"src/refactor_modularize/__init__.py\", \"src/refactor_modularize/artifacts.py\", \"src/refactor_modularize/cli.py\", \"src/refactor_modularize/refactor.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_01e4d157edd54f1300694b489279188190979d21b7fb9e847a",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented a compact Stage 1 refactoring engine in `src/refactor_modularize/refactor.py` that extracts repeated documentation/code fragments (fenced code blocks and paragraph blocks), deduplicates them into deterministic module files, and rewrites artifacts to reference those modules via stable include tokens."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

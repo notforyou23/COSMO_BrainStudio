@@ -1,0 +1,74 @@
+{
+  "content": "Implemented `toy_ising_emergent_classicality.py`, a reproducible 2D Ising Metropolis + post-sweep bit-flip “decoherence noise” experiment that sweeps temperature/noise, computes order/correlation/entropy diagnostics, and writes a CSV plus heatmap plots to an outputs subdirectory.",
+  "reasoning": "",
+  "responseId": "resp_00c55e11579791a5006949973232e08196903a6a546373423e",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4130,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2560,
+    "output_tokens_details": {
+      "reasoning_tokens": 2490
+    },
+    "total_tokens": 6690
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_00c55e11579791a50069499732eaf88196b916ca496cc139e4",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_00c55e11579791a5006949973d9cf88196baeb0fd322e26d7d",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re, math, datetime\ntarget_path = Path('/mnt/data').joinpath('src/experiments/toy_ising_emergent_classicality.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\ncode = r\"\"\"\n#!/usr/bin/env python3\n\\\"\\\"\\\"Toy 2D Ising experiment: temperature + decoherence-like noise -> classicality diagnostics.\n\nRuns Metropolis sampling on an LxL lattice with optional post-sweep bit-flip noise (p_noise),\nthen reports magnetization, energy, short-range correlations, a crude correlation-length proxy,\nand single-site Shannon entropy. Produces a CSV and summary heatmaps.\n\\\"\\\"\\\"\nfrom __future__ import annotations\nimport argparse\nfrom dataclasses import dataclass\nfrom pathlib import Path\nimport time\nimport numpy as np\nimport pandas as pd\nimport matplotlib.pyplot as plt\n\ndef metropolis_sweep(spins: np.ndarray, beta: float, rng: np.random.Generator) -> None:\n    L = spins.shape[0]\n    for _ in range(L * L):\n        i = rng.integers(0, L); j = rng.integers(0, L)\n        s = spins[i, j]\n        nn = spins[(i+1)%L, j] + spins[(i-1)%L, j] + spins[i, (j+1)%L] + spins[i, (j-1)%L]\n        dE = 2.0 * s * nn\n        if dE <= 0.0 or rng.random() < np.exp(-beta * dE):\n            spins[i, j] = -s\n\ndef apply_noise(spins: np.ndarray, p: float, rng: np.random.Generator) -> None:\n    if p <= 0: return\n    mask = rng.random(spins.shape) < p\n    spins[mask] *= -1\n\ndef energy_per_spin(spins: np.ndarray) -> float:\n    right = np.roll(spins, -1, axis=1)\n    down = np.roll(spins, -1, axis=0)\n    E = -(spins * right + spins * down).sum()\n    return E / spins.size\n\ndef corr_along_x(spins: np.ndarray, max_r: int) -> np.ndarray:\n    c = []\n    for r in range(1, max_r + 1):\n        c.append(np.mean(spins * np.roll(spins, -r, axis=1)))\n    return np.array(c, float)\n\ndef binary_entropy(p: float) -> float:\n    p = float(np.clip(p, 1e-12, 1 - 1e-12))\n    return -(p*np.log2(p) + (1-p)*np.log2(1-p))\n\ndef corr_length_proxy(c: np.ndarray) -> float:\n    # Use ratio C(2)/C(1) if meaningful; else threshold at 1/e\n    if len(c) >= 2 and c[0] > 1e-6 and c[1] > 1e-6 and c[1] < c[0]:\n        return 1.0 / max(1e-6, np.log(c[0]/c[1]))\n    thr = c[0]/np.e if len(c) else 0.0\n    idx = np.where(c < thr)[0]\n    return float(idx[0] + 1) if len(idx) else float(len(c))\n\n@dataclass\nclass Params:\n    L: int = 24\n    sweeps_eq: int = 200\n    sweeps_sample: int = 200\n    thin: int = 2\n    temps: int = 10\n    tmin: float = 1.5\n    tmax: float = 3.5\n    noises: int = 6\n    pmin: float = 0.0\n    pmax: float = 0.15\n    seed: int = 0\n    outdir: Path = Path(\\\"outputs\\\")\n\ndef run(params: Params) -> pd.DataFrame:\n    rng = np.random.default_rng(params.seed)\n    Ts = np.linspace(params.tmin, params.tmax, params.temps)\n    Ps = np.linspace(params.pmin, params.pmax, params.noises)\n    rows = []\n    for T in Ts:\n        beta = 1.0 / T\n        for p in Ps:\n            spins = rng.choice(np.array([-1, 1], int), size=(params.L, params.L))\n            for _ in range(params.sweeps_eq):\n                metropolis_sweep(spins, beta, rng); apply_noise(spins, p, rng)\n            mags = []; ens = []; ent1 = []; c1 = []; xi = []\n            max_r = max(2, params.L // 4)\n            for s in range(params.sweeps_sample):\n                metropolis_sweep(spins, beta, rng); apply_noise(spins, p, rng)\n                if s % params.thin: continue\n                m = float(np.mean(spins))\n                mags.append(abs(m))\n                ens.append(energy_per_spin(spins))\n                pup = 0.5 * (1.0 + m)\n                ent1.append(binary_entropy(pup))\n                c = corr_along_x(spins, max_r)\n                c1.append(float(c[0]))\n                xi.append(corr_length_proxy(c))\n            rows.append(dict(T=T, p_noise=p, m_abs=np.mean(mags), e=np.mean(ens),\n                             s1=np.mean(ent1), c1=np.mean(c1), xi=np.mean(xi)))\n    return pd.DataFrame(rows)\n\ndef plot_heatmap(df: pd.DataFrame, x: str, y: str, z: str, path: Path, title: str) -> None:\n    piv = df.pivot(index=y, columns=x, values=z).sort_index(ascending=True)\n    plt.figure(figsize=(6.2, 4.5))\n    im = plt.imshow(piv.values, origin=\\\"lower\\\", aspect=\\\"auto\\\",\n                    extent=[piv.columns.min(), piv.columns.max(), piv.index.min(), piv.index.max()])\n    plt.colorbar(im, label=z)\n    plt.xlabel(x); plt.ylabel(y); plt.title(title)\n    plt.tight_layout(); plt.savefig(path, dpi=160); plt.close()\n\ndef main() -> None:\n    ap = argparse.ArgumentParser()\n    ap.add_argument(\\\"--L\\\", type=int, default=24)\n    ap.add_argument(\\\"--sweeps-eq\\\", type=int, default=200)\n    ap.add_argument(\\\"--sweeps-sample\\\", type=int, default=200)\n    ap.add_argument(\\\"--thin\\\", type=int, default=2)\n    ap.add_argument(\\\"--temps\\\", type=int, default=10)\n    ap.add_argument(\\\"--tmin\\\", type=float, default=1.5)\n    ap.add_argument(\\\"--tmax\\\", type=float, default=3.5)\n    ap.add_argument(\\\"--noises\\\", type=int, default=6)\n    ap.add_argument(\\\"--pmin\\\", type=float, default=0.0)\n    ap.add_argument(\\\"--pmax\\\", type=float, default=0.15)\n    ap.add_argument(\\\"--seed\\\", type=int, default=0)\n    ap.add_argument(\\\"--outdir\\\", type=Path, default=Path(\\\"outputs\\\"))\n    args = ap.parse_args()\n    params = Params(L=args.L, sweeps_eq=args.sweeps_eq, sweeps_sample=args.sweeps_sample,\n                    thin=args.thin, temps=args.temps, tmin=args.tmin, tmax=args.tmax,\n                    noises=args.noises, pmin=args.pmin, pmax=args.pmax,\n                    seed=args.seed, outdir=args.outdir)\n    tstamp = time.strftime(\\\"%Y%m%d_%H%M%S\\\")\n    out = params.outdir / f\\\"toy_ising_emergent_classicality_{tstamp}\\\"\n    out.mkdir(parents=True, exist_ok=True)\n    df = run(params)\n    df.to_csv(out / \\\"summary.csv\\\", index=False)\n    plot_heatmap(df, \\\"T\\\", \\\"p_noise\\\", \\\"m_abs\\\", out / \\\"m_abs_heatmap.png\\\", \\\"|m| (order parameter)\\\")\n    plot_heatmap(df, \\\"T\\\", \\\"p_noise\\\", \\\"s1\\\", out / \\\"s1_heatmap.png\\\", \\\"single-site Shannon entropy\\\")\n    plot_heatmap(df, \\\"T\\\", \\\"p_noise\\\", \\\"xi\\\", out / \\\"xi_heatmap.png\\\", \\\"correlation length proxy\\\")\n    print(f\\\"WROTE:{out}\\\")\n\nif __name__ == \\\"__main__\\\":\n    main()\n\"\"\"\nlines = [l for l in code.strip(\"\\n\").splitlines()]\nlen(lines)\n",
+      "container_id": "cntr_694996cf1f0881908fd6ebe4e5dd54140c8f193d7d2aa5f8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "138"
+        }
+      ]
+    },
+    {
+      "id": "rs_00c55e11579791a50069499756c41c8196a1181a82078ea166",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_00c55e11579791a50069499757553c81969a7049b3327db3f5",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\ntarget_path = Path('/mnt/data').joinpath('src/experiments/toy_ising_emergent_classicality.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [code.strip(\"\\n\")]\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/experiments/toy_ising_emergent_classicality.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694996cf1f0881908fd6ebe4e5dd54140c8f193d7d2aa5f8",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/toy_ising_emergent_classicality.py\nDIR_STATE:[\"src/experiments/toy_ising_emergent_classicality.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_00c55e11579791a5006949975a7740819699e7d211fd8420c5",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `toy_ising_emergent_classicality.py`, a reproducible 2D Ising Metropolis + post-sweep bit-flip “decoherence noise” experiment that sweeps temperature/noise, computes order/correlation/entropy diagnostics, and writes a CSV plus heatmap plots to an outputs subdirectory."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

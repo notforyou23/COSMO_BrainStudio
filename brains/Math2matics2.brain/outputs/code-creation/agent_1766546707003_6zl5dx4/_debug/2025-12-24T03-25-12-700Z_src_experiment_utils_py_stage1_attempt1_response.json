@@ -1,0 +1,56 @@
+{
+  "content": "Wrote `src/experiment_utils.py` with deterministic seeding, safe directory creation, and stable/atomic JSON read-write helpers suitable for producing reproducible test artifacts.",
+  "reasoning": "",
+  "responseId": "resp_0e4a45d906073ae000694b5d3549e8819680309b6c53d6c8b5",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2582,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1106,
+    "output_tokens_details": {
+      "reasoning_tokens": 170
+    },
+    "total_tokens": 3688
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0e4a45d906073ae000694b5d35f5e88196b27c38fddfdd08f2",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0e4a45d906073ae000694b5d38e8008196be82932cdd861bec",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/experiment_utils.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"experiment_utils.py\n\nSmall helpers shared by toy experiments.\n\nGoals:\n- Deterministic seeding across common RNG libraries.\n- Safe output directory creation.\n- Stable, reproducible JSON artifact writing.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom pathlib import Path\nimport json\nimport os\nimport random\nfrom typing import Any, Mapping, Optional\n\"\"\",\n\"\"\"def seed_everything(seed: int) -> int:\n    \\\"\\\"\\\"Seed common PRNGs and return the normalized seed.\n\n    This function tries to seed:\n    - Python's `random`\n    - NumPy (if available)\n    - PyTorch (if available)\n\n    It also sets PYTHONHASHSEED to make hashing deterministic in subprocesses.\n    \\\"\\\"\\\"\n    if seed is None:\n        raise TypeError(\"seed must be an int, not None\")\n    seed = int(seed) & 0xFFFFFFFF\n    os.environ[\"PYTHONHASHSEED\"] = str(seed)\n\n    random.seed(seed)\n\n    try:\n        import numpy as np  # type: ignore\n\n        np.random.seed(seed)\n    except Exception:\n        pass\n\n    try:\n        import torch  # type: ignore\n\n        torch.manual_seed(seed)\n        if torch.cuda.is_available():\n            torch.cuda.manual_seed_all(seed)\n        torch.backends.cudnn.deterministic = True  # type: ignore[attr-defined]\n        torch.backends.cudnn.benchmark = False  # type: ignore[attr-defined]\n    except Exception:\n        pass\n\n    return seed\n\"\"\",\n\"\"\"def ensure_dir(path: str | Path) -> Path:\n    \\\"\\\"\\\"Create *path* as a directory (including parents) and return it.\\\"\\\"\\\"\n    p = Path(path)\n    p.mkdir(parents=True, exist_ok=True)\n    return p\n\"\"\",\n\"\"\"def _json_default(obj: Any) -> Any:\n    \\\"\\\"\\\"Best-effort JSON conversion for a few common numeric/container types.\\\"\\\"\\\"\n    try:\n        import numpy as np  # type: ignore\n\n        if isinstance(obj, (np.integer,)):\n            return int(obj)\n        if isinstance(obj, (np.floating,)):\n            return float(obj)\n        if isinstance(obj, (np.ndarray,)):\n            return obj.tolist()\n    except Exception:\n        pass\n\n    # Fallback: let json raise for unsupported types.\n    raise TypeError(f\"Object of type {type(obj).__name__} is not JSON serializable\")\n\"\"\",\n\"\"\"def write_json(\n    path: str | Path,\n    data: Mapping[str, Any],\n    *,\n    indent: int = 2,\n    sort_keys: bool = True,\n    newline: str = \"\\\\n\",\n) -> Path:\n    \\\"\\\"\\\"Write JSON deterministically and atomically.\n\n    - Sorts keys by default.\n    - Uses a stable indentation.\n    - Writes to a temporary file then replaces to avoid partial artifacts.\n    \\\"\\\"\\\"\n    out_path = Path(path)\n    out_path.parent.mkdir(parents=True, exist_ok=True)\n\n    text = json.dumps(\n        data,\n        indent=indent,\n        sort_keys=sort_keys,\n        ensure_ascii=False,\n        default=_json_default,\n    )\n    if not text.endswith(newline):\n        text += newline\n\n    tmp_path = out_path.with_suffix(out_path.suffix + \".tmp\")\n    tmp_path.write_text(text, encoding=\"utf-8\")\n    tmp_path.replace(out_path)\n    return out_path\n\"\"\",\n\"\"\"def read_json(path: str | Path) -> Any:\n    \\\"\\\"\\\"Read JSON from *path* using UTF-8 encoding.\\\"\\\"\\\"\n    return json.loads(Path(path).read_text(encoding=\"utf-8\"))\n\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/experiment_utils.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))",
+      "container_id": "cntr_694b5d16df288190a9669fba1e3086060e3da45af80e27f2",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiment_utils.py\nDIR_STATE:[\"src/experiment_utils.py\", \"src/goal_33_toy_experiment.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0e4a45d906073ae000694b5d43293c81969e87051352dad61a",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Wrote `src/experiment_utils.py` with deterministic seeding, safe directory creation, and stable/atomic JSON read-write helpers suitable for producing reproducible test artifacts."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

@@ -1,0 +1,56 @@
+{
+  "content": "FILE_WRITTEN:.github/workflows/e2e_failure.yml  \nDIR_STATE:[\".github/workflows/e2e_failure.yml\"]  \n\nThis workflow now triggers on failed `e2e` runs (or manually), reuses the standardized `.github/actions/e2e-common` setup, and delegates failure-only diagnostics and artifact bundling to `.github/actions/e2e-on-failure` with consistent inputs.",
+  "reasoning": "",
+  "responseId": "resp_0f0647bdb18b91a1006949c295a9848195be5b73aa50ce145b",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 2864,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1312,
+    "output_tokens_details": {
+      "reasoning_tokens": 1226
+    },
+    "total_tokens": 4176
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0f0647bdb18b91a1006949c296729c819590cbdee92687bb05",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0f0647bdb18b91a1006949c29cc85881959582201ce54f40f0",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, re\ntarget_path = Path('/mnt/data').joinpath('.github/workflows/e2e_failure.yml')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(textwrap.dedent(\"\"\"\\\nname: e2e (on failure)\n\non:\n  workflow_run:\n    workflows: [\"e2e\"]\n    types: [completed]\n  workflow_dispatch:\n    inputs:\n      run_id:\n        description: \"Optional: workflow run id to triage (defaults to current run for workflow_run events).\"\n        required: false\n        type: string\n      artifact_name:\n        description: \"Artifact name to download from the e2e run (if present).\"\n        required: false\n        default: e2e-artifacts\n        type: string\n\npermissions:\n  contents: read\n  actions: read\n\nconcurrency:\n  group: e2e-failure-${{ github.event.workflow_run.id || github.run_id }}\n  cancel-in-progress: false\n\"\"\"))\n\nchunks.append(textwrap.dedent(\"\"\"\\\njobs:\n  triage:\n    name: Collect diagnostics and upload bundle\n    runs-on: ubuntu-latest\n    if: >-\n      ${{\n        github.event_name == 'workflow_dispatch' ||\n        (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success')\n      }}\n    env:\n      E2E_ARTIFACTS_DIR: .e2e_failure_artifacts\n      E2E_LOGS_DIR: .e2e_failure_logs\n\"\"\"))\n\nchunks.append(textwrap.dedent(\"\"\"\\\n    steps:\n      - name: Checkout\n        uses: actions/checkout@v4\n\n      - name: Common e2e setup (python, cache, deps)\n        uses: ./.github/actions/e2e-common\n        with:\n          python-version: \"3.11\"\n          requirements-path: docs/e2e/requirements-ci.txt\n          cache-key-prefix: e2e\n\n      - name: Resolve run id\n        id: run\n        shell: bash\n        run: |\n          set -euo pipefail\n          if [[ \"${{ github.event_name }}\" == \"workflow_dispatch\" && -n \"${{ inputs.run_id }}\" ]]; then\n            echo \"id=${{ inputs.run_id }}\" >> \"$GITHUB_OUTPUT\"\n          else\n            echo \"id=${{ github.event.workflow_run.id || github.run_id }}\" >> \"$GITHUB_OUTPUT\"\n          fi\n\n      - name: Prepare directories\n        shell: bash\n        run: |\n          set -euo pipefail\n          mkdir -p \"${E2E_ARTIFACTS_DIR}\" \"${E2E_LOGS_DIR}\"\n\"\"\"))\n\nchunks.append(textwrap.dedent(\"\"\"\\\n      - name: Download artifacts from e2e run (best-effort)\n        continue-on-error: true\n        uses: actions/download-artifact@v4\n        with:\n          name: ${{ inputs.artifact_name || 'e2e-artifacts' }}\n          path: ${{ env.E2E_ARTIFACTS_DIR }}\n          run-id: ${{ steps.run.outputs.id }}\n          github-token: ${{ secrets.GITHUB_TOKEN }}\n\n      - name: Failure-only diagnostics + upload\n        uses: ./.github/actions/e2e-on-failure\n        with:\n          artifacts-dir: ${{ env.E2E_ARTIFACTS_DIR }}\n          logs-dir: ${{ env.E2E_LOGS_DIR }}\n          source-run-id: ${{ steps.run.outputs.id }}\n          upload-name: e2e-failure-bundle\n          summary-title: \"E2E failure triage\"\n\n      - name: Always show directory state (debug)\n        if: always()\n        shell: bash\n        run: |\n          set -euo pipefail\n          echo \"Artifacts dir:\"\n          ls -la \"${E2E_ARTIFACTS_DIR}\" || true\n          echo \"Logs dir:\"\n          ls -la \"${E2E_LOGS_DIR}\" || true\n\"\"\"))\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:.github/workflows/e2e_failure.yml')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\nprint(\"LINES:\", len(final_text.splitlines()))\n",
+      "container_id": "cntr_6949c289d32c81909670b17a73e06bb5058924e5a7d358e0",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:.github/workflows/e2e_failure.yml\nDIR_STATE:[\".github/workflows/e2e_failure.yml\"]\nLINES: 91\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0f0647bdb18b91a1006949c2b1287c8195b38aaf1974bc281f",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_WRITTEN:.github/workflows/e2e_failure.yml  \nDIR_STATE:[\".github/workflows/e2e_failure.yml\"]  \n\nThis workflow now triggers on failed `e2e` runs (or manually), reuses the standardized `.github/actions/e2e-common` setup, and delegates failure-only diagnostics and artifact bundling to `.github/actions/e2e-on-failure` with consistent inputs."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

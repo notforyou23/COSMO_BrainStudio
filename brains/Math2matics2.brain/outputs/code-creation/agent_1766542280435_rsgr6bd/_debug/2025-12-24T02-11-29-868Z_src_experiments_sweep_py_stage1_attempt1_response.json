@@ -1,0 +1,56 @@
+{
+  "content": "Implemented a compact, deterministic parameter sweep harness in `src/experiments/sweep.py` supporting grid and Latin-hypercube sampling, reproducible per-run seeding, tidy list-of-dicts result aggregation, and CSV save/load utilities.",
+  "reasoning": "",
+  "responseId": "resp_013bc00417567e5c00694b4c719bcc8194aef8a2f9a58c1c64",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3278,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1709,
+    "output_tokens_details": {
+      "reasoning_tokens": 274
+    },
+    "total_tokens": 4987
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_013bc00417567e5c00694b4c7249a48194a6481d9253241f64",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_013bc00417567e5c00694b4c7782c88194bf58356c7c068fcd",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\n\ntarget_path = Path('/mnt/data').joinpath('src/experiments/sweep.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = [\n\"\"\"\\\"\\\"\\\"Parameter sweep harness.\n\nProvides grid and Latin hypercube sweeps with deterministic seeding and\ntidy tabular aggregation (list-of-dicts) plus CSV I/O helpers.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom itertools import product\nfrom typing import Any, Callable, Dict, Iterable, Iterator, List, Mapping, MutableMapping, Optional, Sequence, Tuple\n\nimport csv\nimport numpy as np\"\"\",\n\"\"\"Row = Dict[str, Any]\nParams = Dict[str, Any]\nRunFn = Callable[[Params], Mapping[str, Any]]\n\n\ndef _stable_items(d: Mapping[str, Any]) -> List[Tuple[str, Any]]:\n    return sorted(d.items(), key=lambda kv: kv[0])\n\n\ndef grid_points(param_grid: Mapping[str, Sequence[Any]]) -> List[Params]:\n    \\\"\\\"\\\"Cartesian product of parameter values.\n\n    Returns a list of dicts with stable key order (sorted keys).\n    \\\"\\\"\\\"\n    keys = [k for k, _ in _stable_items(param_grid)]\n    values = [list(param_grid[k]) for k in keys]\n    return [dict(zip(keys, vals)) for vals in product(*values)]\n\n\ndef latin_hypercube_points(\n    bounds: Mapping[str, Tuple[float, float]],\n    n: int,\n    *,\n    seed: Optional[int] = None,\n) -> List[Params]:\n    \\\"\\\"\\\"Latin hypercube sample in [low, high] per parameter.\n\n    Uses one RNG stream and permutes bins per dimension for LHS structure.\n    \\\"\\\"\\\"\n    if n <= 0:\n        return []\n    rng = np.random.default_rng(seed)\n    keys = [k for k, _ in _stable_items(bounds)]\n    u = (np.arange(n) + rng.random(n)) / n  # stratified in [0,1)\n    pts: List[Params] = [dict() for _ in range(n)]\n    for k in keys:\n        lo, hi = bounds[k]\n        perm = rng.permutation(n)\n        x = lo + (hi - lo) * u[perm]\n        for i in range(n):\n            pts[i][k] = float(x[i])\n    return pts\"\"\",\n\"\"\"@dataclass(frozen=True)\nclass SweepSpec:\n    \\\"\\\"\\\"Defines either a grid or Latin hypercube sweep.\\\"\\\"\\\"\n\n    kind: str  # \\\"grid\\\" or \\\"latin\\\"\n    grid: Optional[Mapping[str, Sequence[Any]]] = None\n    bounds: Optional[Mapping[str, Tuple[float, float]]] = None\n    n: int = 0\n    seed: Optional[int] = None\n\n    def points(self) -> List[Params]:\n        if self.kind == \\\"grid\\\":\n            if self.grid is None:\n                raise ValueError(\\\"grid sweep requires 'grid'\\\")\n            return grid_points(self.grid)\n        if self.kind == \\\"latin\\\":\n            if self.bounds is None:\n                raise ValueError(\\\"latin sweep requires 'bounds'\\\")\n            return latin_hypercube_points(self.bounds, self.n, seed=self.seed)\n        raise ValueError(f\\\"unknown sweep kind: {self.kind!r}\\\")\"\"\",\n\"\"\"def run_sweep(\n    run_fn: RunFn,\n    points: Sequence[Params],\n    *,\n    seed: Optional[int] = None,\n    include_index: bool = True,\n    seed_key: str = \\\"run_seed\\\",\n) -> List[Row]:\n    \\\"\\\"\\\"Execute run_fn across points and aggregate into tidy rows.\n\n    Determinism: if seed is provided, each run receives a derived integer seed\n    under `seed_key` and the master RNG is not otherwise used.\n    \\\"\\\"\\\"\n    rows: List[Row] = []\n    ss = np.random.SeedSequence(seed) if seed is not None else None\n    child_seeds = ss.spawn(len(points)) if ss is not None else [None] * len(points)\n    for i, (p, cs) in enumerate(zip(points, child_seeds)):\n        params: Params = dict(p)\n        if cs is not None:\n            params[seed_key] = int(np.random.default_rng(cs).integers(0, 2**32 - 1))\n        out = dict(run_fn(params))\n        row: Row = {}\n        if include_index:\n            row[\\\"run\\\"] = i\n        row.update(params)\n        row.update(out)\n        rows.append(row)\n    return rows\n\n\ndef sweep(\n    run_fn: RunFn,\n    spec: SweepSpec,\n    *,\n    master_seed: Optional[int] = None,\n    include_index: bool = True,\n) -> List[Row]:\n    \\\"\\\"\\\"Convenience wrapper: generate points from spec and execute.\\\"\\\"\\\"\n    pts = spec.points()\n    return run_sweep(run_fn, pts, seed=master_seed, include_index=include_index)\"\"\",\n\"\"\"def save_csv(rows: Sequence[Mapping[str, Any]], path: str) -> None:\n    \\\"\\\"\\\"Save tidy rows to CSV (union of keys across rows).\\\"\\\"\\\"\n    p = Path(path)\n    p.parent.mkdir(parents=True, exist_ok=True)\n    keys: List[str] = []\n    seen = set()\n    for r in rows:\n        for k in r.keys():\n            if k not in seen:\n                seen.add(k)\n                keys.append(k)\n    with p.open(\\\"w\\\", newline=\\\"\\\", encoding=\\\"utf-8\\\") as f:\n        w = csv.DictWriter(f, fieldnames=keys)\n        w.writeheader()\n        for r in rows:\n            w.writerow({k: r.get(k, \\\"\\\") for k in keys})\n\n\ndef load_csv(path: str) -> List[Row]:\n    \\\"\\\"\\\"Load CSV produced by save_csv.\\\"\\\"\\\"\n    with Path(path).open(\\\"r\\\", newline=\\\"\\\", encoding=\\\"utf-8\\\") as f:\n        r = csv.DictReader(f)\n        return [dict(row) for row in r]\"\"\",\n]\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\n\nprint('FILE_WRITTEN:src/experiments/sweep.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_694b4bd0381081909cae03b5047a4b910a942f49460a0d3d",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/sweep.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/numeric.py\", \"src/experiments/sweep.py\", \"src/experiments/symbolic.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_013bc00417567e5c00694b4c861ef4819494ff558d518139e7",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented a compact, deterministic parameter sweep harness in `src/experiments/sweep.py` supporting grid and Latin-hypercube sampling, reproducible per-run seeding, tidy list-of-dicts result aggregation, and CSV save/load utilities."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

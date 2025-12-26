@@ -1,0 +1,56 @@
+{
+  "content": "FILE_WRITTEN:scripts/e2e/validate_config.py  \nDIR_STATE:[\"scripts/e2e/collect_diagnostics.sh\",\"scripts/e2e/validate_config.py\"]\n\nWrote a CI-focused Python validator that checks GitHub Actions environment expectations plus key inputs (artifact name, retention days, diagnostics dir safety, and collector script presence) and exits with actionable errors.",
+  "reasoning": "",
+  "responseId": "resp_075b1dceb59d7705006949c51a72ac8194b485b2e6bc891060",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 3483,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 1936,
+    "output_tokens_details": {
+      "reasoning_tokens": 1857
+    },
+    "total_tokens": 5419
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_075b1dceb59d7705006949c51b11cc81949f5878c608c66c4f",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_075b1dceb59d7705006949c521d00c819481893e1eb5259e86",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, sys\ntarget_path = Path('/mnt/data').joinpath('scripts/e2e/validate_config.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\nchunks = []\nchunks.append(\"\"\"#!/usr/bin/env python3\n\\\"\\\"\\\"Validate E2E-on-failure configuration for CI.\n\nThis script is intended to run early in a job (or inside a composite action)\nto fail fast with actionable diagnostics when required inputs/environment\nassumptions for E2E failure artifact collection are not met.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport argparse\nimport os\nimport re\nimport sys\nfrom pathlib import Path\"\"\")\nchunks.append(\"\"\"def _eprint(msg: str) -> None:\n    print(msg, file=sys.stderr)\n\n\ndef fail(msg: str, *, code: int = 2) -> \"never\":\n    _eprint(f\"ERROR: {msg}\")\n    raise SystemExit(code)\n\n\ndef warn(msg: str) -> None:\n    _eprint(f\"WARNING: {msg}\")\n\n\ndef is_truthy(v: str | None) -> bool:\n    return str(v or \"\").strip().lower() in {\"1\", \"true\", \"yes\", \"y\", \"on\"}\"\"\")\nchunks.append(\"\"\"def validate_artifact_name(name: str) -> None:\n    if not name.strip():\n        fail(\"artifact-name is required and cannot be empty.\")\n    if len(name) > 128:\n        fail(\"artifact-name must be <= 128 characters (GitHub artifact UI limit).\")\n    # Keep it conservative for cross-platform filesystems and upload action.\n    if not re.fullmatch(r\"[A-Za-z0-9][A-Za-z0-9._-]*\", name):\n        fail(\n            \"artifact-name contains unsupported characters. \"\n            \"Use only letters, numbers, '.', '_', '-' and start with a letter/number.\"\n        )\"\"\")\nchunks.append(\"\"\"def validate_retention_days(retention_days: int) -> None:\n    if retention_days < 1 or retention_days > 90:\n        fail(\"retention-days must be between 1 and 90 (inclusive).\")\"\"\")\nchunks.append(\"\"\"def validate_diagnostics_dir(path_str: str, workspace: Path | None) -> Path:\n    if not path_str.strip():\n        fail(\"diagnostics-dir is required and cannot be empty.\")\n    p = Path(path_str)\n    if p.is_absolute() and workspace:\n        # Absolute is okay only if it is inside workspace.\n        try:\n            p.relative_to(workspace)\n        except ValueError:\n            fail(\n                f\"diagnostics-dir '{p}' must be within GITHUB_WORKSPACE '{workspace}'. \"\n                \"Use a relative path like 'e2e-diagnostics'.\"\n            )\n    if not p.is_absolute() and workspace:\n        p = workspace / p\n\n    # Ensure parent exists (collector will create the directory itself).\n    parent = p.parent\n    if not parent.exists():\n        fail(f\"Parent directory for diagnostics-dir does not exist: '{parent}'.\")\n    if parent.is_file():\n        fail(f\"Parent path for diagnostics-dir is a file, expected directory: '{parent}'.\")\n    return p\"\"\")\nchunks.append(\"\"\"def validate_environment(require_github_actions: bool) -> tuple[Path | None, dict]:\n    env = os.environ\n    in_gha = is_truthy(env.get(\"GITHUB_ACTIONS\"))\n    if require_github_actions and not in_gha:\n        fail(\n            \"This validator is configured to require GitHub Actions, but \"\n            \"GITHUB_ACTIONS is not 'true'. If running locally, pass --allow-non-gha.\"\n        )\n\n    workspace = env.get(\"GITHUB_WORKSPACE\")\n    ws_path = Path(workspace) if workspace else None\n    if in_gha:\n        missing = [k for k in (\"GITHUB_REPOSITORY\", \"GITHUB_RUN_ID\", \"GITHUB_SHA\") if not env.get(k)]\n        if missing:\n            fail(\n                \"Missing required GitHub Actions environment variables: \"\n                + \", \".join(missing)\n                + \". Ensure this runs in a normal Actions job context.\"\n            )\n        if not ws_path:\n            fail(\"GITHUB_WORKSPACE is not set; cannot safely resolve diagnostics paths.\")\n        if not ws_path.exists():\n            fail(f\"GITHUB_WORKSPACE path does not exist: '{ws_path}'.\")\n        if not ws_path.is_dir():\n            fail(f\"GITHUB_WORKSPACE is not a directory: '{ws_path}'.\")\n\n    return ws_path, {\"in_github_actions\": in_gha}\"\"\")\nchunks.append(\"\"\"def main(argv: list[str]) -> int:\n    ap = argparse.ArgumentParser(description=__doc__)\n    ap.add_argument(\"--diagnostics-dir\", required=True, help=\"Directory where diagnostics will be written.\")\n    ap.add_argument(\"--artifact-name\", required=True, help=\"Artifact name used when uploading diagnostics.\")\n    ap.add_argument(\"--retention-days\", type=int, default=7, help=\"Artifact retention (1-90). Default: 7.\")\n    ap.add_argument(\n        \"--allow-non-gha\",\n        action=\"store_true\",\n        help=\"Allow running outside GitHub Actions (skips GHA env checks).\",\n    )\n    ap.add_argument(\n        \"--require-collector\",\n        default=\"scripts/e2e/collect_diagnostics.sh\",\n        help=\"Path (relative to workspace) to the diagnostics collector script.\",\n    )\n    ns = ap.parse_args(argv)\n\n    workspace, meta = validate_environment(require_github_actions=not ns.allow_non_gha)\n    validate_artifact_name(ns.artifact_name)\n    validate_retention_days(ns.retention_days)\n    diag_dir = validate_diagnostics_dir(ns.diagnostics_dir, workspace)\n\n    collector = Path(ns.require_collector)\n    if workspace and not collector.is_absolute():\n        collector = workspace / collector\n    if not collector.exists():\n        fail(\n            f\"Collector script not found at '{collector}'. \"\n            \"Verify the repo checkout and require-collector path.\"\n        )\n    if collector.is_dir():\n        fail(f\"Collector path points to a directory, expected file: '{collector}'.\")\n    if not os.access(collector, os.X_OK):\n        warn(f\"Collector script is not marked executable: '{collector}'. It may still run via 'bash ...'.\")\n\n    # Helpful hints for common misconfigurations.\n    if diag_dir.exists() and diag_dir.is_file():\n        fail(f\"diagnostics-dir already exists but is a file: '{diag_dir}'.\")\n    if workspace and not str(diag_dir).startswith(str(workspace)):\n        warn(\"Resolved diagnostics-dir is not under workspace; artifact upload may not find files.\")\n\n    print(\"OK: configuration validated.\")\n    if is_truthy(os.environ.get(\"CI\")):\n        print(f\"OK: diagnostics-dir-resolved={diag_dir}\")\n    return 0\n\n\nif __name__ == \"__main__\":\n    raise SystemExit(main(sys.argv[1:]))\"\"\")\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:scripts/e2e/validate_config.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949c4c596008190acfa409a64608da20b039f16c5820fcb",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:scripts/e2e/validate_config.py\nDIR_STATE:[\"scripts/e2e/collect_diagnostics.sh\", \"scripts/e2e/validate_config.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_075b1dceb59d7705006949c5394cf88194b506b5cc31183c27",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "FILE_WRITTEN:scripts/e2e/validate_config.py  \nDIR_STATE:[\"scripts/e2e/collect_diagnostics.sh\",\"scripts/e2e/validate_config.py\"]\n\nWrote a CI-focused Python validator that checks GitHub Actions environment expectations plus key inputs (artifact name, retention days, diagnostics dir safety, and collector script presence) and exits with actionable errors."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

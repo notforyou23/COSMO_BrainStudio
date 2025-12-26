@@ -1,0 +1,159 @@
+{
+  "content": "Implemented a compact, reproducible toy qubit-lattice decoherence experiment that unitary-evolves a system qubit coupled to an interacting environment chain, computes reduced-state coherence/purity/entropy diagnostics, and writes a timeseries CSV, a coupling-sweep summary CSV, and a decoherence/entanglement plot.",
+  "reasoning": "",
+  "responseId": "resp_0d8b12f4ed761ce9006949ab0073d88190b1f67b11992a0c43",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 5185,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 3238,
+    "output_tokens_details": {
+      "reasoning_tokens": 3169
+    },
+    "total_tokens": 8423
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0d8b12f4ed761ce9006949ab0130108190ab10afa5b3c04f42",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d8b12f4ed761ce9006949ab0b3d988190a400f3109570409e",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, numpy as np\ntarget_path = Path('/mnt/data').joinpath('src/experiments/toy_lattice_decoherence.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\nchunks.append(r\"\"\"\n\"\"\"\n)\n",
+      "container_id": "cntr_6949aa2cd9908190a540c44a4880beb40f550cedb5ceca86",
+      "outputs": []
+    },
+    {
+      "id": "rs_0d8b12f4ed761ce9006949ab0e410c8190ad5398ef1d1555e0",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d8b12f4ed761ce9006949ab0f25888190af85d32aec0c1570",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\ntarget_path = Path('/mnt/data/src/experiments/toy_lattice_decoherence.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\\\n\\\"\\\"\\\"Toy lattice/graph decoherence experiment.\n\nModel: one system qubit coupled (sigma_z ⊗ sigma_z) to an N-site environment\nchain with weak nearest-neighbor XX interactions. Starting from a global pure\nstate, the reduced system state decoheres and its entropy tracks system-env\nentanglement.\n\nRun:\n  python -m src.experiments.toy_lattice_decoherence --help\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nimport argparse\nfrom dataclasses import dataclass\nfrom pathlib import Path\n\nimport numpy as np\n\n\n# --- small dense-qubit utilities (N <= ~9 is fine) ---\nI2 = np.eye(2, dtype=complex)\nX = np.array([[0, 1], [1, 0]], dtype=complex)\nZ = np.array([[1, 0], [0, -1]], dtype=complex)\n\n\ndef kron(ops):\n    out = ops[0]\n    for op in ops[1:]:\n        out = np.kron(out, op)\n    return out\n\n\ndef op_on(n, i, op):\n    ops = [I2] * n\n    ops[i] = op\n    return kron(ops)\n\n\ndef two_body(n, i, j, opi, opj):\n    ops = [I2] * n\n    ops[i], ops[j] = opi, opj\n    return kron(ops)\n\n\ndef ptrace_env(rho, n_sys=1):\n    \\\"\\\"\\\"Trace out environment qubits from a (2^N x 2^N) density matrix.\\\"\\\"\\\"\n    n = int(np.log2(rho.shape[0]))\n    dS, dE = 2**n_sys, 2 ** (n - n_sys)\n    r = rho.reshape(dS, dE, dS, dE)\n    return np.einsum(\\\"a b c b -> a c\\\", r)\n\n\ndef von_neumann_entropy(rho, eps=1e-12):\n    w = np.linalg.eigvalsh((rho + rho.conj().T) / 2)\n    w = np.clip(w.real, eps, 1.0)\n    return float(-(w * np.log2(w)).sum())\n\n\ndef unitary_from_h(H, t):\n    w, v = np.linalg.eigh(H)\n    return v @ np.diag(np.exp(-1j * w * t)) @ v.conj().T\n\n\n@dataclass\nclass Results:\n    t: np.ndarray\n    coherence: np.ndarray\n    purity: np.ndarray\n    entropy: np.ndarray\n\n\ndef simulate(n_env=5, g=1.0, j=0.2, t_max=12.0, n_t=200) -> Results:\n    \\\"\\\"\\\"Evolve |+>_S ⊗ |+...+>_E under H and compute reduced-state diagnostics.\\\"\\\"\\\"\n    n = 1 + n_env  # total qubits, system is site 0\n    # Hamiltonian: env XX chain + system-env ZZ couplings (graph: star from system)\n    H = np.zeros((2**n, 2**n), dtype=complex)\n    for k in range(1, n):  # system-env coupling\n        H += g * two_body(n, 0, k, Z, Z)\n    for k in range(1, n - 1):  # env chain interactions\n        H += j * (two_body(n, k, k + 1, X, X) + two_body(n, k, k + 1, Z, Z) * 0)\n        H += j * two_body(n, k, k + 1, X, X)  # simple XX (duplicated kept minimal)\n    # initial state |+>^{⊗n}\n    plus = (np.array([1.0, 1.0], dtype=complex) / np.sqrt(2))\n    psi0 = kron([plus] * n)\n    rho0 = np.outer(psi0, psi0.conj())\n\n    t = np.linspace(0.0, float(t_max), int(n_t))\n    coh = np.empty_like(t)\n    pur = np.empty_like(t)\n    ent = np.empty_like(t)\n    for idx, ti in enumerate(t):\n        U = unitary_from_h(H, ti)\n        rho = U @ rho0 @ U.conj().T\n        rhoS = ptrace_env(rho, n_sys=1)\n        coh[idx] = abs(rhoS[0, 1]) * 2  # normalized: 1 at t=0 for |+>\n        pur[idx] = float(np.real(np.trace(rhoS @ rhoS)))\n        ent[idx] = von_neumann_entropy(rhoS)\n    return Results(t=t, coherence=coh, purity=pur, entropy=ent)\n\n\ndef main(argv=None) -> int:\n    p = argparse.ArgumentParser(description=__doc__)\n    p.add_argument(\\\"--n-env\\\", type=int, default=5)\n    p.add_argument(\\\"--g\\\", type=float, default=1.0, help=\\\"system-env ZZ strength\\\")\n    p.add_argument(\\\"--j\\\", type=float, default=0.2, help=\\\"env XX coupling\\\")\n    p.add_argument(\\\"--t-max\\\", type=float, default=12.0)\n    p.add_argument(\\\"--n-t\\\", type=int, default=200)\n    p.add_argument(\\\"--outdir\\\", type=Path, default=Path(\\\"outputs/toy_lattice_decoherence\\\"))\n    args = p.parse_args(argv)\n\n    args.outdir.mkdir(parents=True, exist_ok=True)\n    res = simulate(args.n_env, args.g, args.j, args.t_max, args.n_t)\n\n    # Save a quick table and a plot illustrating decoherence + entanglement growth.\n    import matplotlib.pyplot as plt  # optional dependency at runtime\n\n    fig, ax = plt.subplots(2, 1, sharex=True, figsize=(7, 5))\n    ax[0].plot(res.t, res.coherence, label=\\\"|rho01| normalized\\\")\n    ax[0].set_ylabel(\\\"coherence\\\")\n    ax[0].set_ylim(0, 1.05)\n    ax[0].grid(True, alpha=0.3)\n    ax[1].plot(res.t, res.entropy, color=\\\"C1\\\", label=\\\"S(ρ_S)\\\")\n    ax[1].set_xlabel(\\\"time\\\")\n    ax[1].set_ylabel(\\\"entropy (bits)\\\")\n    ax[1].set_ylim(0, 1.05)\n    ax[1].grid(True, alpha=0.3)\n    fig.suptitle(f\\\"Toy decoherence: n_env={args.n_env}, g={args.g}, j={args.j}\\\")\n    fig.tight_layout()\n    fig.savefig(args.outdir / \\\"decoherence_entropy.png\\\", dpi=160)\n\n    csv_path = args.outdir / \\\"timeseries.csv\\\"\n    data = np.c_[res.t, res.coherence, res.purity, res.entropy]\n    header = \\\"t,coherence,purity,entropy_bits\\\"\n    np.savetxt(csv_path, data, delimiter=\\\",\\\", header=header, comments=\\\"\\\")\n    # Small parameter sweep summary (illustrates coupling-strength dependence)\n    sweep_g = [0.0, args.g / 2, args.g, 2 * args.g]\n    rows = []\n    for gi in sweep_g:\n        r = simulate(args.n_env, gi, args.j, args.t_max, max(60, args.n_t // 3))\n        rows.append((gi, float(r.coherence[-1]), float(r.entropy[-1])))\n    summary_path = args.outdir / \\\"summary_g_sweep.csv\\\"\n    np.savetxt(summary_path, np.array(rows), delimiter=\\\",\\\", header=\\\"g,final_coherence,final_entropy_bits\\\", comments=\\\"\\\")\n\n    print(f\\\"WROTE {csv_path} and {summary_path} and decoherence_entropy.png\\\")\n    return 0\n\n\nif __name__ == \\\"__main__\\\":\n    raise SystemExit(main())\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/experiments/toy_lattice_decoherence.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949aa2cd9908190a540c44a4880beb40f550cedb5ceca86",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/toy_lattice_decoherence.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/diagnostics.py\", \"src/experiments/registry.py\", \"src/experiments/shared.py\", \"src/experiments/toy_lattice_decoherence.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "rs_0d8b12f4ed761ce9006949ab28427c819091d104c9d5fc2f46",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d8b12f4ed761ce9006949ab29b8c08190a6c4a3ea9356d6ce",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "import runpy, sys, pathlib, importlib.util, types, os, numpy as np\n# just import module to ensure no syntax errors\nspec = importlib.util.spec_from_file_location(\"toy\", \"/mnt/data/src/experiments/toy_lattice_decoherence.py\")\nmod = importlib.util.module_from_spec(spec)\nspec.loader.exec_module(mod)\nmod.simulate(3, g=0.5, j=0.1, t_max=2.0, n_t=20).coherence[:3]\n",
+      "container_id": "cntr_6949aa2cd9908190a540c44a4880beb40f550cedb5ceca86",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "array([1.        , 0.98349146, 0.9352912 ])"
+        }
+      ]
+    },
+    {
+      "id": "rs_0d8b12f4ed761ce9006949ab2ed8a48190890fa3e8ada975ac",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d8b12f4ed761ce9006949ab2f564c8190b576a549dd39b7c0",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "text = Path(\"/mnt/data/src/experiments/toy_lattice_decoherence.py\").read_text().splitlines()\nlen(text)\n",
+      "container_id": "cntr_6949aa2cd9908190a540c44a4880beb40f550cedb5ceca86",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "150"
+        }
+      ]
+    },
+    {
+      "id": "rs_0d8b12f4ed761ce9006949ab31adf081909a9e879d9bb5e33a",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d8b12f4ed761ce9006949ab343b3881909e0cee89f69331ae",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, re\npath = Path(\"/mnt/data/src/experiments/toy_lattice_decoherence.py\")\nlines = path.read_text().splitlines()\n# find env chain interactions block lines containing duplicated\nfor i,l in enumerate(lines):\n    if \"env chain interactions\" in l:\n        start=i\nstart, lines[start:start+6]\n",
+      "container_id": "cntr_6949aa2cd9908190a540c44a4880beb40f550cedb5ceca86",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(79,\n ['    for k in range(1, n - 1):  # env chain interactions',\n  '        H += j * (two_body(n, k, k + 1, X, X) + two_body(n, k, k + 1, Z, Z) * 0)',\n  '        H += j * two_body(n, k, k + 1, X, X)  # simple XX (duplicated kept minimal)',\n  '    # initial state |+>^{⊗n}',\n  '    plus = (np.array([1.0, 1.0], dtype=complex) / np.sqrt(2))',\n  '    psi0 = kron([plus] * n)'])"
+        }
+      ]
+    },
+    {
+      "id": "rs_0d8b12f4ed761ce9006949ab37ba488190a3a00c871936abdd",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d8b12f4ed761ce9006949ab38a0648190a689c93beabfa518",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\npath = Path(\"/mnt/data/src/experiments/toy_lattice_decoherence.py\")\nlines = path.read_text().splitlines()\nnew=[]\ni=0\nwhile i < len(lines):\n    if lines[i].strip().startswith(\"for k in range(1, n - 1):\") and \"env chain interactions\" in lines[i]:\n        new.append(lines[i])\n        new.append(\"        H += j * two_body(n, k, k + 1, X, X)  # env XX chain\")\n        i += 3\n        continue\n    new.append(lines[i]); i+=1\npath.write_text(\"\\n\".join(new).strip()+\"\\n\", encoding=\"utf-8\")\nlen(new), new[79:83]\n",
+      "container_id": "cntr_6949aa2cd9908190a540c44a4880beb40f550cedb5ceca86",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "(149,\n ['    for k in range(1, n - 1):  # env chain interactions',\n  '        H += j * two_body(n, k, k + 1, X, X)  # env XX chain',\n  '    # initial state |+>^{⊗n}',\n  '    plus = (np.array([1.0, 1.0], dtype=complex) / np.sqrt(2))'])"
+        }
+      ]
+    },
+    {
+      "id": "rs_0d8b12f4ed761ce9006949ab3ed6dc8190a42cd37f684af73c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_0d8b12f4ed761ce9006949ab40c6448190bf4e5b9249fcacef",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json\ntarget_path = Path('/mnt/data/src/experiments/toy_lattice_decoherence.py')\nprint('FILE_WRITTEN:src/experiments/toy_lattice_decoherence.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949aa2cd9908190a540c44a4880beb40f550cedb5ceca86",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/experiments/toy_lattice_decoherence.py\nDIR_STATE:[\"src/experiments/__init__.py\", \"src/experiments/diagnostics.py\", \"src/experiments/registry.py\", \"src/experiments/shared.py\", \"src/experiments/toy_lattice_decoherence.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_0d8b12f4ed761ce9006949ab44e4dc8190b70112c4c8175862",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented a compact, reproducible toy qubit-lattice decoherence experiment that unitary-evolves a system qubit coupled to an interacting environment chain, computes reduced-state coherence/purity/entropy diagnostics, and writes a timeseries CSV, a coupling-sweep summary CSV, and a decoherence/entanglement plot."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

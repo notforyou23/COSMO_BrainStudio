@@ -1,0 +1,56 @@
+{
+  "content": "Implemented `src/dgpipe/models.py` defining discrete-gravity-inspired effective dispersions (relativistic, Lifshitz UV-modified, causal-set-like interpolating UV correction), finite-volume discrete mode spectra, mappings to measurable 1D finite-size Wightman/equal-time correlators, and a compact Gaussian two-mode logarithmic-negativity entanglement diagnostic driven by those correlators.",
+  "reasoning": "",
+  "responseId": "resp_021de2ed74da7cf6006949b1b157fc8195b0612f6d06c95847",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 4069,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 2524,
+    "output_tokens_details": {
+      "reasoning_tokens": 456
+    },
+    "total_tokens": 6593
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_021de2ed74da7cf6006949b1b21d04819584fab1d643400aa9",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "ci_021de2ed74da7cf6006949b1bdd4308195a2b6d874a8dac826",
+      "type": "code_interpreter_call",
+      "status": "completed",
+      "code": "from pathlib import Path\nimport json, textwrap, os, numpy as np\ntarget_path = Path('/mnt/data').joinpath('src/dgpipe/models.py')\ntarget_path.parent.mkdir(parents=True, exist_ok=True)\n\nchunks = []\n\nchunks.append(\"\"\"\n\\\"\\\"\\\"Discrete-gravity-inspired effective free-field models and observables.\n\nThis module provides (i) modified dispersion/propagators motivated by discrete\nmicrostructure (causal sets, discrete spectra) and (ii) mappings to measurable\nGaussian correlators and simple entanglement diagnostics in analogue platforms.\n\\\"\\\"\\\"\n\nfrom __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom typing import Callable, Optional\n\nimport numpy as np\n\"\"\")\n\nchunks.append(\"\"\"\ndef coth(x: np.ndarray) -> np.ndarray:\n    x = np.asarray(x, dtype=float)\n    out = np.empty_like(x)\n    small = np.abs(x) < 1e-6\n    out[small] = 1.0 / x[small] + x[small] / 3.0  # series for stability\n    out[~small] = np.cosh(x[~small]) / np.sinh(x[~small])\n    return out\n\n\n@dataclass(frozen=True)\nclass Dispersion:\n    \\\"\\\"\\\"Callable dispersion ω(k) with physical metadata.\\\"\\\"\\\"\n\n    name: str\n    omega: Callable[[np.ndarray], np.ndarray]\n    mass: float = 0.0\n    params: tuple = ()\n\n    def __call__(self, k: np.ndarray) -> np.ndarray:\n        return self.omega(np.asarray(k, dtype=float))\n\"\"\")\n\nchunks.append(\"\"\"\ndef relativistic_dispersion(mass: float = 0.0, c: float = 1.0) -> Dispersion:\n    def omega(k: np.ndarray) -> np.ndarray:\n        return np.sqrt((c * k) ** 2 + mass**2)\n\n    return Dispersion(name=\"relativistic\", omega=omega, mass=mass, params=(c,))\n\n\ndef lifshitz_dispersion(\n    mass: float = 0.0, c: float = 1.0, z: int = 2, k0: float = 1.0\n) -> Dispersion:\n    \\\"\\\"\\\"ω^2 = m^2 + c^2 k^2 + (k/k0)^(2z) k0^2; mimics UV discreteness.\\\"\\\"\\\"\n\n    def omega(k: np.ndarray) -> np.ndarray:\n        return np.sqrt(mass**2 + (c * k) ** 2 + (np.abs(k) / k0) ** (2 * z) * k0**2)\n\n    return Dispersion(name=f\"lifshitz_z{z}\", omega=omega, mass=mass, params=(c, z, k0))\n\n\ndef causalset_like_dispersion(\n    mass: float = 0.0, ell: float = 1.0, alpha: float = 1.0, p: int = 2\n) -> Dispersion:\n    \\\"\\\"\\\"Smooth nonlocal/causal-set inspired UV correction.\n\n    ω^2 = m^2 + k^2 * (1 + α (ℓ k)^p)/(1 + (ℓ k)^p), interpolating IR→UV.\n    \\\"\\\"\\\"\n\n    def omega(k: np.ndarray) -> np.ndarray:\n        kk = np.abs(k)\n        u = (ell * kk) ** p\n        eff = kk**2 * (1.0 + alpha * u) / (1.0 + u)\n        return np.sqrt(mass**2 + eff)\n\n    return Dispersion(name=\"causalset_like\", omega=omega, mass=mass, params=(ell, alpha, p))\n\"\"\")\n\nchunks.append(\"\"\"\ndef finite_volume_modes_1d(L: float, nmax: int, periodic: bool = True) -> np.ndarray:\n    \\\"\\\"\\\"Discrete momenta k_n for a 1D box; periodic uses k=2πn/L.\\\"\\\"\\\"\n    n = np.arange(-nmax, nmax + 1, dtype=int)\n    if periodic:\n        return 2.0 * np.pi * n / L\n    return np.pi * n / L  # e.g. Dirichlet/Neumann up to phase conventions\n\n\ndef thermal_occupation(omega: np.ndarray, T: float) -> np.ndarray:\n    if T <= 0:\n        return np.zeros_like(omega, dtype=float)\n    x = omega / T\n    x = np.clip(x, 1e-12, 7e2)\n    return 1.0 / (np.exp(x) - 1.0)\n\n\ndef power_spectrum_equal_time(omega: np.ndarray, T: float = 0.0) -> np.ndarray:\n    \\\"\\\"\\\"P(k)=⟨|φ_k|^2⟩ for a free scalar at temperature T.\\\"\\\"\\\"\n    omega = np.asarray(omega, dtype=float)\n    if T <= 0:\n        return 1.0 / (2.0 * omega)\n    return 0.5 / omega * coth(omega / (2.0 * T))\n\"\"\")\n\nchunks.append(\"\"\"\ndef wightman_1d_sum(\n    dispersion: Dispersion,\n    x: float,\n    t: float,\n    L: float,\n    nmax: int,\n    T: float = 0.0,\n    periodic: bool = True,\n) -> complex:\n    \\\"\\\"\\\"Finite-volume Wightman function in 1D from discrete mode sum.\\\"\\\"\\\"\n    k = finite_volume_modes_1d(L=L, nmax=nmax, periodic=periodic)\n    w = dispersion(k)\n    n = thermal_occupation(w, T)\n    phase = np.exp(1j * k * x)\n    term = (n + 1.0) * np.exp(-1j * w * t) + n * np.exp(1j * w * t)\n    return np.sum(phase * term / (2.0 * w)) / L\n\n\ndef equal_time_correlators_1d(\n    dispersion: Dispersion, x: float, L: float, nmax: int, T: float = 0.0\n) -> tuple[float, float]:\n    \\\"\\\"\\\"Return (⟨φ(0)φ(x)⟩, ⟨π(0)π(x)⟩) at equal time in 1D finite volume.\\\"\\\"\\\"\n    k = finite_volume_modes_1d(L=L, nmax=nmax, periodic=True)\n    w = dispersion(k)\n    P = power_spectrum_equal_time(w, T)\n    cxx = float(np.sum(np.cos(k * x) * P) / L)\n    cpp = float(np.sum(np.cos(k * x) * (w**2) * P) / L)\n    return cxx, cpp\n\"\"\")\n\nchunks.append(\"\"\"\ndef log_negativity_two_mode(cxx0: float, cpp0: float, cxx: float, cpp: float) -> float:\n    \\\"\\\"\\\"Logarithmic negativity for two equal-time modes of a stationary 1D Gaussian field.\n\n    Assumes ⟨φπ⟩=0 and symmetric sites with local variances (cxx0, cpp0) and\n    cross-correlations (cxx, cpp). Output in nats.\n    \\\"\\\"\\\"\n    A = np.diag([cxx0, cpp0])\n    C = np.diag([cxx, cpp])\n    detA = float(np.linalg.det(A))\n    detC = float(np.linalg.det(C))\n    detV = float(np.linalg.det(np.block([[A, C], [C, A]])))\n    delta_tilde = detA + detA - 2.0 * detC  # partial transpose flips sign of one momentum corr.\n    # Symplectic eigenvalue of partially transposed state:\n    nu_tilde = np.sqrt(0.5 * (delta_tilde - np.sqrt(max(delta_tilde**2 - 4.0 * detV, 0.0))))\n    return float(max(0.0, -np.log(2.0 * nu_tilde)))\n\n\ndef entanglement_diagnostic_1d(\n    dispersion: Dispersion, x: float, L: float, nmax: int, T: float = 0.0\n) -> float:\n    \\\"\\\"\\\"Convenience wrapper: compute two-point log-negativity proxy vs separation x.\\\"\\\"\\\"\n    cxx0, cpp0 = equal_time_correlators_1d(dispersion, x=0.0, L=L, nmax=nmax, T=T)\n    cxx, cpp = equal_time_correlators_1d(dispersion, x=x, L=L, nmax=nmax, T=T)\n    return log_negativity_two_mode(cxx0, cpp0, cxx, cpp)\n\"\"\")\n\nfinal_text = '\\n'.join(block.strip('\\n') for block in chunks).strip() + '\\n'\ntarget_path.write_text(final_text, encoding='utf-8')\nprint('FILE_WRITTEN:src/dgpipe/models.py')\nprint('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path(\"/mnt/data\"))) for p in target_path.parent.glob('*') if p.is_file())))\n",
+      "container_id": "cntr_6949aff88f24819097f165c497ce475e074f2320f5d510c4",
+      "outputs": [
+        {
+          "type": "logs",
+          "logs": "FILE_WRITTEN:src/dgpipe/models.py\nDIR_STATE:[\"src/dgpipe/__init__.py\", \"src/dgpipe/cli.py\", \"src/dgpipe/models.py\", \"src/dgpipe/protocols.py\"]\n"
+        }
+      ]
+    },
+    {
+      "id": "msg_021de2ed74da7cf6006949b1e17e6481959d02a1d7c84831f1",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "Implemented `src/dgpipe/models.py` defining discrete-gravity-inspired effective dispersions (relativistic, Lifshitz UV-modified, causal-set-like interpolating UV correction), finite-volume discrete mode spectra, mappings to measurable 1D finite-size Wightman/equal-time correlators, and a compact Gaussian two-mode logarithmic-negativity entanglement diagnostic driven by those correlators."
+        }
+      ],
+      "role": "assistant"
+    }
+  ],
+  "codeResults": []
+}

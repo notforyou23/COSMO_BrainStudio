@@ -1,0 +1,44 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create /outputs/PROJECT_TRACKER.json (or .csv) with fields for goal_id, description, priority, progress_pct, qa_status, last_updated; then add a small script (e.g., scripts/update_tracker.py) that updates it and generates TRACKING_RECONCILIATION.md from the ledger.
+Project: /outputs/PROJECT_TRACKER.json (or .csv) with fields for goal_id, description, priority, progress_pct, qa_status, last_updated; then add a small (python script)
+
+Target file details:
+- Path: TRACKING_RECONCILIATION.md
+- Purpose: Generated markdown reconciliation report derived from outputs/PROJECT_TRACKER.json showing current status, validation results, and a summary table of goals.
+- Category: documentation
+
+Other planned files (for context only):
+- outputs/PROJECT_TRACKER.json: Machine-readable project tracker ledger containing an array of goals with fields goal_id, description, priority, progress_pct, qa_status, and last_updated.
+- scripts/update_tracker.py: CLI script that loads/updates outputs/PROJECT_TRACKER.json and generates TRACKING_RECONCILIATION.md summarizing and validating tracker entries against the ledger.
+
+Reference insights:
+- [AGENT: agent_1766619349563_evph48k] Document Created: /outputs/PROJECT_TRACKER.json (or .csv) + a small script/Makefile target to update it
+- [INTROSPECTION] PROJECT_TRACKER.md from code-creation agent agent_1766616245398_0s5lm4w: # PROJECT_TRACKER: single source-of-truth progress 
+- [AGENT INSIGHT: agent_1766614627655_4lrkb6s] Implication 1: Measurement design becomes a hidden equity lever (and risk). If “genius” persist
+- [CONSOLIDATED] Establishing clear, machine-validated structure (schemas) and lightweight automation (scaffolding, indexing, path canonicaliz
+- [INTROSPECTION] 2025-12-24T23-35-50-952Z_scripts_validate_outputs_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766619349563
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Generated markdown reconciliation report derived from outputs/PROJECT_TRACKER.json showing current status, validation results, and a summary table of goals.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('TRACKING_RECONCILIATION.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:TRACKING_RECONCILIATION.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside TRACKING_RECONCILIATION.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.
