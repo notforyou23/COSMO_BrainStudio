@@ -269,15 +269,15 @@ function getHTML() {
   <main class="main">
     <section class="section">
       <div class="section-header">
-        <div class="section-title">💎 Crystallized Intelligence <span class="section-count" id="brainCount">0</span></div>
-        <div style="font-size: 12px; color: var(--text-muted);">Portable knowledge artifacts. Ready for distribution and compound research.</div>
+        <div class="section-title">📚 Brain Library <span class="section-count" id="brainCount">0</span></div>
+        <div style="font-size: 12px; color: var(--text-muted);">Published knowledge artifacts. Portable, versioned, and ready to be shared or built upon.</div>
       </div>
       <div id="brainPackagesGrid" class="brain-grid"><div class="loading"></div></div>
     </section>
     <section class="section">
       <div class="section-header">
-        <div class="section-title">🌊 Liquid Research <span class="section-count" id="runCount">0</span></div>
-        <div style="font-size: 12px; color: var(--text-muted);">Active staging area. High-entropy research data waiting to be crystallized.</div>
+        <div class="section-title">🛠️ Research Workspace <span class="section-count" id="runCount">0</span></div>
+        <div style="font-size: 12px; color: var(--text-muted);">Active staging area. Work-in-progress research that is ready to be published as a stable version.</div>
       </div>
       <div id="runsGrid" class="brain-grid"><div class="loading"></div></div>
     </section>
@@ -307,12 +307,12 @@ function getHTML() {
     function renderGrid(id, brains, isPackage) {
       const grid = document.getElementById(id);
       if (brains.length === 0) {
-        grid.innerHTML = '<div class="empty-state">No ' + (isPackage ? 'crystallized brains' : 'liquid research runs') + ' found.</div>';
+        grid.innerHTML = '<div class="empty-state">No ' + (isPackage ? 'published brains' : 'research workspaces') + ' found.</div>';
         return;
       }
       grid.innerHTML = brains.map(b => \`
         <div class="brain-card">
-          <div class="brain-type \${b.type}">\${b.type === 'brain' ? '💎 Crystallized' : '🌊 Liquid'}</div>
+          <div class="brain-type \${b.type}">\${b.type === 'brain' ? '📚 Published' : '🛠️ Workspace'}</div>
           <div class="brain-name">\${escapeHtml(b.displayName)}</div>
           <div class="brain-domain">\${escapeHtml(b.domain) || 'No description available'}</div>
           <div class="brain-stats">
@@ -322,7 +322,7 @@ function getHTML() {
           </div>
           <div class="brain-actions">
             <button class="btn btn-view" onclick="launch('\${b.relativePath.replace(/'/g, "\\\\'")}')">👁️ Explore</button>
-            \${b.type === 'run' ? \`<button class="btn btn-export" onclick="exportRun('\${b.name}')" title="Distill this research into a portable, high-density knowledge artifact.">✨ Crystallize</button>\` : ''}
+            \${b.type === 'run' ? \`<button class="btn btn-export" onclick="exportRun('\${b.name}')" title="Publish this workspace as a stable, versioned .brain artifact.">🚀 Publish Version</button>\` : ''}
           </div>
         </div>
       \`).join('');
@@ -343,18 +343,18 @@ function getHTML() {
     }
 
     async function exportRun(name) {
-      if (!confirm('Crystallize "' + name + '"? This will distill the raw research into a portable .brain artifact.')) return;
-      showToast('✨ Crystallizing knowledge...');
+      if (!confirm('Publish a stable version of "' + name + '"? This will create a portable .brain artifact ready for sharing.')) return;
+      showToast('🚀 Publishing new version...');
       const res = await fetch('/api/export-run', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ runName: name })
       }).then(r => r.json());
       if (res.success) {
-        alert('✅ Crystallization complete! Created in brains/ folder.');
+        alert('✅ Version published! Created in Brain Library.');
         location.reload();
       } else {
-        alert('❌ Crystallization failed: ' + res.error);
+        alert('❌ Publishing failed: ' + res.error);
       }
     }
 

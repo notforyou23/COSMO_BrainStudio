@@ -1,30 +1,29 @@
 # 🧠 COSMO Brain Platform
 
-> **The "MP3" for AI Knowledge.**
-> Just as the MP3 decoupled music from the recording studio, the `.brain` format decouples intelligence from the research engine. **Research in COSMO. Review in the Run. Crystallize into a Brain.**
+> **Research in COSMO. Review in the Workspace. Publish to the Library.**
 
-COSMO Brain Platform is a portable, high-performance environment designed to host, query, and extend research artifacts. It is the **Intelligence Player** for the next generation of synthetic researchers, built on the vision of **Knowledge Crystallization**.
+COSMO Brain Platform is a portable, high-performance environment designed to host, query, and extend research artifacts. It is the **Intelligence Player** for the next generation of synthetic researchers, built on the vision of a **Universal Knowledge Lifecycle**.
 
-## 🔬 The Philosophy: Liquid vs. Crystallized
+## 🔬 The Philosophy: Workspace vs. Library
 
-Think of a COSMO research run as a high-end recording session. It is full of raw data, intermediate tracks, and technical noise. The `.brain` is the finished, portable "song" that the world can actually hear.
+Just as GitHub separates your local code from your stable releases, this platform separates the *process* of research from the *product* of knowledge.
 
-1.  **🌊 Liquid Research (Staging)**: Raw, high-entropy output from an active COSMO research run. This includes every agent thought, failed calculation, and raw telemetry. It's for development and monitoring.
-2.  **💎 Crystallized Intelligence (Releases)**: Distilled, immutable knowledge artifacts. By "Crystallizing" a run, you strip away the noise and package only the high-density Knowledge Graph, curated insights, and final deliverables into a portable **.brain** file.
+1.  **🛠️ Research Workspace (Staging)**: This is where the raw research happens. It contains the high-entropy output of active COSMO runs—including agent thoughts, failed hypotheses, and raw telemetry. It is for monitoring and steering.
+2.  **📚 Brain Library (Releases)**: When research reaches a milestone, you "Publish" it. This distilllation process strips away the technical noise and packages only the high-density Knowledge Graph and final deliverables into a portable, versioned **.brain** file.
 
 ## 🚀 Key Features
 
-*   **Brain Browser**: A visual dashboard to manage your library of crystallized intelligence and liquid staging runs.
-*   **✨ Crystallization Engine**: One-click distillation of raw research into portable, shareable artifacts.
+*   **Brain Browser**: A visual dashboard to manage your stable Brain Library and active Research Workspaces.
+*   **🚀 One-Click Publishing**: Instantly distill raw research into portable, shareable knowledge artifacts.
 *   **Knowledge Query**: Deep interrogation of knowledge graphs powered by GPT-5.2.
-*   **AI IDE**: Collaborative document editing and research extension in a Cursor-style environment.
+*   **AI-Augmented IDE**: Collaborative document editing and research extension in a professional web environment.
 
 ## 📦 Included Showcase Brains
 
-This repository includes several pre-crystallized research artifacts:
-*   **Art and Music**: A dense knowledge graph (5,000+ edges) covering the history of human expression.
-*   **Mathematics**: Advanced modeling across algebra, calculus, and probability.
-*   **Physics**: Comprehensive research into fundamental physical dynamics.
+This repository includes several pre-crystallized research artifacts in the `brains/` directory:
+*   **Art and Music**: A dense knowledge graph (5,000+ edges) covering the history of human expression and aesthetics.
+*   **Mathematics**: Advanced modeling across algebra, calculus, geometry, and probability.
+*   **Physics**: Comprehensive research into fundamental physical laws and dynamics.
 
 ## 🛠️ Quick Start
 
