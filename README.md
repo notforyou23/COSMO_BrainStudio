@@ -2,7 +2,7 @@
 
 > **The Standalone Explorer for Synthetic Intelligence.**
 
-COSMO Brain Platform is a portable, high-performance environment designed to host, query, and extend research artifacts produced by the COSMO Autonomous Research System. It brings the power of persistent, compound intelligence to a standalone, deployable package.
+COSMO Brain Platform is a portable, high-performance environment designed to host, query, and extend research artifacts produced by the COSMO Autonomous Research System. It brings the power of persistent, compound intelligence to a standalone, deployable package. 
 
 ## 🚀 Key Features
 
@@ -54,4 +54,4 @@ Built for **Trusted Local Environments**:
 *   **Terminal Gating**: The AI can execute terminal commands to assist in research. Always review proposed actions in the "AI Edits" panel.
 
 ---
-*COSMO Brain Platform v2.1 | Powered by [cosmo.evobrew.com](https://cosmo.evobrew.com)*
+*COSMO Brain Platform v2.1 | Powered by [cosmo.evobrew.com](https://cosmo.evobrew.com)* .peace.
