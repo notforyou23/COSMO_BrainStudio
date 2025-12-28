@@ -1,0 +1,241 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766735664537_aq3w5yg",
+  "agentType": "code-creation",
+  "goalId": "goal_94",
+  "missionId": "strategic_goal_94_1766735664537",
+  "spawnCycle": 119,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T07:54:31.274Z",
+  "completedAt": "2025-12-26T08:00:47.188Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "config/run_config.json",
+      "description": "JSON configuration defining input CSV path, output build directory, estimator options, and plot/export settings for the one-command run.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:config/run_config.json\nDIR_STATE:[\"config/artifact_gate_paths.json\", \"config/run_config.json\"]\nSummary: Wrote a complete run_config.json that points to the toy extraction CSV, deterministic build directory, estimator options, plot settings, and run logging for a one-command pipeline run.\n",
+          "timestamp": "2025-12-26T07:54:44.749Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:config/run_config.json\nDIR_STATE:[\"config/artifact_gate_paths.json\", \"config/run_config.json\"]\nSUMMARY: Wrote a deterministic one-command pipeline configuration pointing to the toy extraction CSV and runtime/_build outputs, with pooled exports, one forest plot, and a run log.\n",
+          "timestamp": "2025-12-26T07:54:59.401Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:54:31.274Z",
+      "failedAt": "2025-12-26T07:54:59.401Z"
+    },
+    {
+      "path": "data/toy_extraction.csv",
+      "description": "Toy meta-analysis extraction CSV aligned to the project extraction template for deterministic end-to-end runs.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:data/toy_extraction.csv\nDIR_STATE:[\"data/example_meta_analysis_input.json\", \"data/reference_corpus.jsonl\", \"data/toy_extraction.csv\", \"data/toy_meta_input.csv\"]\nSUMMARY: Wrote a small, end-to-end toy meta-analysis extraction CSV with plausible effect sizes and standard errors aligned to detected template columns.\n",
+          "timestamp": "2025-12-26T07:55:36.412Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:data/toy_extraction.csv\nDIR_STATE:[\"data/example_meta_analysis_input.json\", \"data/reference_corpus.jsonl\", \"data/toy_extraction.csv\", \"data/toy_meta_input.csv\"]\nSUMMARY:Wrote a deterministic toy extraction CSV with 8 studies and computed variances aligned to any detected extraction template header or a safe default schema.\n",
+          "timestamp": "2025-12-26T07:56:05.349Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:54:31.274Z",
+      "failedAt": "2025-12-26T07:56:05.349Z"
+    },
+    {
+      "path": "src/run_pipeline.py",
+      "description": "Single entry-point script that loads JSON config, runs the meta-analysis, writes pooled estimates (CSV/JSON), generates one plot (PNG/PDF), and emits a run log into runtime/_build/.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T07:56:53.745Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "reshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSUMMARY: Added a single entry-point pipeline script that auto-creates a toy extraction CSV + default config (if missing), runs fixed/random meta-analysis, exports pooled results (CSV/JSON), generates a forest plot, and writes a structured run log to runtime/_build/.\n",
+          "timestamp": "2025-12-26T07:57:43.880Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:54:31.274Z",
+      "failedAt": "2025-12-26T07:57:43.880Z"
+    },
+    {
+      "path": "src/io_utils.py",
+      "description": "Utilities for deterministic output folder creation, atomic file writes, and structured run logging with captured parameters and environment info.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "\", \"src/run_meta_analysis.py\", \"src/run_pipeline.py\", \"src/schema_utils.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSummary: Wrote io_utils.py with deterministic build dir helpers, atomic writers, and a structured RunLogger capturing params, outputs, events, and environment info.\n",
+          "timestamp": "2025-12-26T07:58:07.561Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "\", \"src/run_meta_analysis.py\", \"src/run_pipeline.py\", \"src/schema_utils.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSUMMARY: Added io_utils utilities for deterministic output dirs, atomic writes, and structured JSON/JSONL run logging with captured parameters and environment info.\n",
+          "timestamp": "2025-12-26T07:58:30.765Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:54:31.274Z",
+      "failedAt": "2025-12-26T07:58:30.765Z"
+    },
+    {
+      "path": "src/meta_analysis.py",
+      "description": "Core meta-analysis implementation that reads the extraction CSV, computes fixed/random effects pooled estimates, and returns tidy result tables for export.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": ".py\", \"src/run_meta_analysis.py\", \"src/run_pipeline.py\", \"src/schema_utils.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSummary: Implemented core meta-analysis module to read extraction CSVs, compute fixed/random (DerSimonian–Laird) pooled estimates, and return tidy result tables.\n",
+          "timestamp": "2025-12-26T07:59:01.703Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "policy.py\", \"src/run_meta_analysis.py\", \"src/run_pipeline.py\", \"src/schema_utils.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSUMMARY: Implemented core fixed-effect and DerSimonian–Laird random-effects meta-analysis reading extraction CSV and returning tidy pooled estimate tables.\n",
+          "timestamp": "2025-12-26T07:59:26.927Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:54:31.274Z",
+      "failedAt": "2025-12-26T07:59:26.927Z"
+    },
+    {
+      "path": "src/plotting.py",
+      "description": "Plotting routines to generate a single deterministic forest (or summary) plot from the pooled results and save as PNG/PDF per config.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "src/provenance.py\", \"src/routing_policy.py\", \"src/run_meta_analysis.py\", \"src/run_pipeline.py\", \"src/schema_utils.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSUMMARY: Implemented deterministic forest-plot routines that load pooled results and save PNG/PDF outputs based on config.\n",
+          "timestamp": "2025-12-26T08:00:02.974Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "src/routing_policy.py\", \"src/run_meta_analysis.py\", \"src/run_pipeline.py\", \"src/schema_utils.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSummary: Implemented deterministic forest plot utilities that read pooled results, infer key columns, and save PNG/PDF outputs based on config.\n",
+          "timestamp": "2025-12-26T08:00:36.676Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:54:31.274Z",
+      "failedAt": "2025-12-26T08:00:36.676Z"
+    },
+    {
+      "path": "runtime/_build/.gitkeep",
+      "description": "Placeholder file ensuring the deterministic runtime build directory exists in version control.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runtime/_build/.gitkeep\nDIR_STATE:[\"runtime/_build/.gitkeep\", \"runtime/_build/execution_diagnostics.md\"]\nSummary: Created the runtime/_build/.gitkeep placeholder to ensure the deterministic build directory exists in version control.\n",
+          "timestamp": "2025-12-26T08:00:42.037Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runtime/_build/.gitkeep\nDIR_STATE:[\"runtime/_build/.gitkeep\", \"runtime/_build/execution_diagnostics.md\"]\nSummary: Created the runtime/_build/.gitkeep placeholder to ensure the deterministic build directory is tracked.\n",
+          "timestamp": "2025-12-26T08:00:47.188Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:54:31.274Z",
+      "failedAt": "2025-12-26T08:00:47.188Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Add a toy dataset CSV aligned to the extraction template; implement a one-command run that outputs (1) pooled estimate table (CSV/JSON) and (2) one plot (PNG/PDF) into a deterministic folder (e.g., runtime/_build/) with a run log.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Transforms templates into a verifiable, end-to-end demo that produces saved outputs (pooled estimate table + figure), proving the starter kit is executable and setting a standard for reproducible anal..."
+  ],
+  "projectName": "generated_configuration_1766735664709",
+  "language": "json",
+  "type": "configuration",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-26T08:00:47.188Z",
+  "summary": {
+    "completed": 0,
+    "failed": 7,
+    "total": 7
+  }
+}

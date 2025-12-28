@@ -1,0 +1,52 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement per-claim uncertainty signals and a routing policy (auto-answer vs. escalate vs. abstain), then run a threshold sweep to estimate human-review cost vs. error at each risk tier.
+Project: generated_script_1766732620428 (python script)
+
+Target file details:
+- Path: configs/example.yaml
+- Purpose: Example configuration specifying signal settings, routing thresholds per risk tier, and cost assumptions for human review and errors.
+- Category: config
+
+Other planned files (for context only):
+- src/uncertainty_signals.py: Implements per-claim uncertainty signals (e.g., self-consistency, token/logprob-based surrogates, heuristic detectors) and a unified interface to compute them for each claim.
+- src/routing_policy.py: Defines routing decisions (auto-answer vs escalate vs abstain) based on uncertainty signals, configurable thresholds, and risk-tier policies.
+- src/threshold_sweep.py: Runs threshold sweeps across risk tiers and aggregates metrics to estimate human-review cost versus error under different routing thresholds.
+- src/evaluation.py: Computes evaluation metrics (error, coverage, escalation rate, abstention rate, expected cost) given ground-truth labels and routing outcomes.
+
+Reference insights:
+- [AGENT: agent_1766724332781_h53gvbk] A robust production pattern is “selective generation/abstention”: attach an uncertainty signal to each 
+- [AGENT: agent_1766731203226_m37bifk] {"agentId":"agent_1766731203226_m37bifk","timestamp":"2025-12-26T06:49:35.087Z","files":[{"filename":".
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+- [INTROSPECTION] record_versions.py from code-creation agent agent_1766731203226_m37bifk: """record_versions.py
+
+Utility to capture Python/OS
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Example configuration specifying signal settings, routing thresholds per risk tier, and cost assumptions for human review and errors.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('configs/example.yaml')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:configs/example.yaml')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside configs/example.yaml.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

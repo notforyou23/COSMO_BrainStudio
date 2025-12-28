@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+jobs:
+  taxonomy-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run taxonomy annotation validation
+        run: node scripts/run_taxonomy_validation.js
+
+      - name: Upload taxonomy validation report
+        uses: actions/upload-artifact@v4
+        with:
+          name: taxonomy_validation
+          path: runtime/_build/reports/taxonomy_validation.json
+          if-no-files-found: error

@@ -1,0 +1,120 @@
+# Example configuration for per-claim uncertainty signals + routing policy + threshold sweep.
+# Intended to be small but complete; adapt weights/thresholds to your domain.
+
+version: 1
+
+signals:
+  enabled:
+    - self_consistency
+    - lexical_hedges
+    - numeric_mismatch
+    - citation_missing
+    - refusal_or_safety
+  # Each signal returns a value in [0, 1] where higher = more uncertain/risky.
+  # The router aggregates a weighted sum, then applies tier thresholds.
+  weights:
+    self_consistency: 0.45
+    lexical_hedges: 0.15
+    numeric_mismatch: 0.20
+    citation_missing: 0.10
+    refusal_or_safety: 0.10
+  # Per-signal configuration hints (your implementation may ignore fields it doesn't use).
+  config:
+    self_consistency:
+      n_samples: 5
+      temperature: 0.7
+      agreement_metric: "f1_overlap"  # or "exact", "bleu", etc.
+    lexical_hedges:
+      phrases:
+        - "might"
+        - "may"
+        - "could"
+        - "possibly"
+        - "likely"
+        - "approximately"
+        - "not sure"
+        - "uncertain"
+      max_score_at_count: 4
+    numeric_mismatch:
+      tolerance_relative: 0.02
+      tolerance_absolute: 0.5
+    citation_missing:
+      require_citations_for_risk_tiers: ["high", "critical"]
+      citation_regex: "\[[0-9]+\]|\(https?://[^\s\)]+\)"
+    refusal_or_safety:
+      refusal_phrases:
+        - "I can't help with that"
+        - "I cannot help with that"
+        - "I won't be able to"
+        - "as an AI"
+        - "I can't provide"
+        - "I cannot provide"
+
+routing:
+  # risk_tier: low | medium | high | critical
+  # decision order: abstain if risk_score >= abstain_threshold; else escalate if >= escalate_threshold; else auto_answer.
+  # If escalate_threshold is null, escalating is disabled for that tier (only auto vs abstain).
+  risk_tiers:
+    low:
+      escalate_threshold: 0.65
+      abstain_threshold: 0.90
+    medium:
+      escalate_threshold: 0.55
+      abstain_threshold: 0.85
+    high:
+      escalate_threshold: 0.40
+      abstain_threshold: 0.75
+    critical:
+      escalate_threshold: 0.25
+      abstain_threshold: 0.60
+
+evaluation:
+  # How to treat escalations/abstentions during evaluation/costing.
+  # - "escalate": assumed handled by human review (cost added; error avoided).
+  # - "abstain": no answer given (may incur an "abstain_cost" and may still be considered an error depending on your metric).
+  treat_escalation_as_correct: true
+  abstain_counts_as_error: false
+
+costs:
+  # Expected-cost model used by threshold_sweep/evaluation.
+  # Units are arbitrary (e.g., dollars); use consistent units across costs.
+  human_review_cost:
+    low: 0.50
+    medium: 2.00
+    high: 10.00
+    critical: 25.00
+  error_cost:
+    low: 1.00
+    medium: 8.00
+    high: 50.00
+    critical: 200.00
+  abstain_cost:
+    low: 0.10
+    medium: 0.50
+    high: 2.00
+    critical: 5.00
+
+threshold_sweep:
+  # Sweep only the escalate_threshold per tier; abstain_threshold remains fixed unless overridden.
+  # The sweep should evaluate expected cost vs. error/coverage at each sweep point.
+  grid:
+    low:
+      min: 0.30
+      max: 0.80
+      step: 0.05
+    medium:
+      min: 0.20
+      max: 0.75
+      step: 0.05
+    high:
+      min: 0.10
+      max: 0.60
+      step: 0.05
+    critical:
+      min: 0.05
+      max: 0.50
+      step: 0.05
+  report:
+    include_by_tier: true
+    include_confusion_like: true
+    sort_by: "expected_total_cost"

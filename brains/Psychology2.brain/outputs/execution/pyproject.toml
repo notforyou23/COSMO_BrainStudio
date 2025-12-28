@@ -1,0 +1,22 @@
+[build-system]
+requires = ["hatchling>=1.24.2"]
+build-backend = "hatchling.build"
+[project]
+name = "generated_cli_tool_1766738413937"
+version = "0.1.0"
+description = "Single canonical runner CLI emitting structured run artifacts."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "cli_tool" }]
+dependencies = [
+  "typer>=0.12.3",
+  "rich>=13.7.1",
+  "pydantic>=2.8.2",
+  "python-dateutil>=2.9.0.post0",
+  "platformdirs>=4.2.2",
+]
+[project.scripts]
+cli-tool = "cli_tool.cli:app"
+[tool.hatch.build.targets.wheel]
+packages = ["src/cli_tool"]

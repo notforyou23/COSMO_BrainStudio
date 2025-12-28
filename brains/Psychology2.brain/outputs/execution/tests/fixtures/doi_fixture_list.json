@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "description": "Fixed DOI fixture list for integration testing; each entry declares expected success/failure and rationale.",
+  "fixtures": [
+    {
+      "id": "valid_crossref_classic",
+      "doi": "10.1038/nphys1170",
+      "expect": {
+        "success": true
+      },
+      "notes": "Widely indexed Nature Physics DOI; should resolve via standard DOI metadata sources."
+    },
+    {
+      "id": "valid_science_old",
+      "doi": "10.1126/science.169.3946.635",
+      "expect": {
+        "success": true
+      },
+      "notes": "Classic Science DOI; good for testing older records and pagination metadata."
+    },
+    {
+      "id": "valid_acm_conference",
+      "doi": "10.1145/3366423.3380212",
+      "expect": {
+        "success": true
+      },
+      "notes": "ACM proceedings DOI; useful for publisher-specific metadata shapes."
+    },
+    {
+      "id": "valid_plos",
+      "doi": "10.1371/journal.pone.0000308",
+      "expect": {
+        "success": true
+      },
+      "notes": "PLOS ONE DOI; open-access and typically stable for integration tests."
+    },
+    {
+      "id": "url_prefixed_doi",
+      "doi": "https://doi.org/10.1038/nphys1170",
+      "expect": {
+        "success": false
+      },
+      "notes": "Deliberately URL-prefixed to assert the pipeline either rejects or requires normalization (documented expected failure)."
+    },
+    {
+      "id": "malformed_missing_prefix",
+      "doi": "1038/nphys1170",
+      "expect": {
+        "success": false
+      },
+      "notes": "Missing '10.' prefix; should be rejected by DOI validation."
+    },
+    {
+      "id": "malformed_bad_chars",
+      "doi": "10.1038/nphys 1170",
+      "expect": {
+        "success": false
+      },
+      "notes": "Contains whitespace; should fail strict DOI parsing/validation."
+    },
+    {
+      "id": "nonexistent_but_well_formed",
+      "doi": "10.5555/does.not.exist.123456",
+      "expect": {
+        "success": false
+      },
+      "notes": "Well-formed DOI that should not resolve; expected to produce not-found/lookup failure."
+    }
+  ]
+}

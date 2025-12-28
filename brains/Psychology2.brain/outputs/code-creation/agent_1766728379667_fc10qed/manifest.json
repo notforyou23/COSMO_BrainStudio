@@ -1,0 +1,156 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766728379667_fc10qed",
+  "agentType": "code-creation",
+  "goalId": "goal_95",
+  "missionId": "urgent_goal_95_1766728379667",
+  "spawnCycle": 46,
+  "coordinatorReview": null,
+  "spawnedBy": "meta_coordinator_urgent",
+  "triggerSource": "urgent_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T05:53:04.803Z",
+  "completedAt": "2025-12-26T05:55:23.429Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "description": "GitHub Actions workflow that sets up Python, installs dependencies, runs the validator and demo runner, hard-fails on missing expected outputs (reports/figures), and uploads runtime/_build as CI artifacts.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\"]\nSummary: Added a minimal GitHub Actions CI workflow that installs dependencies, runs the CI runner, hard-fails on missing reports/figures outputs, and uploads runtime/_build as an artifact.\n",
+          "timestamp": "2025-12-26T05:53:22.814Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\"]\nSUMMARY: Added a minimal GitHub Actions CI workflow that installs dependencies, runs the validator/demo CI runner, hard-fails on missing reports/figures outputs, and uploads runtime/_build as an artifact.\n",
+          "timestamp": "2025-12-26T05:53:39.867Z"
+        }
+      ],
+      "createdAt": "2025-12-26T05:53:04.803Z",
+      "failedAt": "2025-12-26T05:53:39.867Z"
+    },
+    {
+      "path": "scripts/ci_run.py",
+      "description": "Python CI entrypoint that runs the repo's validator and demo runner commands, verifies required output paths exist, and exits nonzero with actionable diagnostics when outputs are missing.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/ci_run.py\nDIR_STATE:[\"scripts/ci_run.py\", \"scripts/create_meta_analysis_starter_kit.py\", \"scripts/run_artifact_gate.py\", \"scripts/toy_meta_analysis.py\"]\nSummary: Wrote a CI entrypoint script that runs validator/demo commands and hard-fails with diagnostics if expected output paths are missing.\n",
+          "timestamp": "2025-12-26T05:54:03.832Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/ci_run.py\nDIR_STATE:[\"scripts/ci_run.py\", \"scripts/create_meta_analysis_starter_kit.py\", \"scripts/run_artifact_gate.py\", \"scripts/toy_meta_analysis.py\"]\nSUMMARY: Wrote scripts/ci_run.py to run validator+demos and hard-fail CI if required outputs under runtime/_build are missing.\n",
+          "timestamp": "2025-12-26T05:54:31.787Z"
+        }
+      ],
+      "createdAt": "2025-12-26T05:53:04.803Z",
+      "failedAt": "2025-12-26T05:54:31.787Z"
+    },
+    {
+      "path": "scripts/ci_expectations.json",
+      "description": "Declarative list of required CI output files/directories (e.g., reports and figures) used by the CI runner to enforce hard failures when artifacts are missing.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/ci_expectations.json\nDIR_STATE:[\"scripts/ci_expectations.json\", \"scripts/ci_run.py\", \"scripts/create_meta_analysis_starter_kit.py\", \"scripts/run_artifact_gate.py\", \"scripts/toy_meta_analysis.py\"]\nSUMMARY: Added a declarative CI expectations config that requires non-empty reports/ and figures/ under runtime/_build and at least one file in each.\n",
+          "timestamp": "2025-12-26T05:54:43.379Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/ci_expectations.json\nDIR_STATE:[\"scripts/ci_expectations.json\", \"scripts/ci_run.py\", \"scripts/create_meta_analysis_starter_kit.py\", \"scripts/run_artifact_gate.py\", \"scripts/toy_meta_analysis.py\"]\nSUMMARY: Added a declarative CI expectations file listing required build outputs (reports/figures) to hard-fail CI when artifacts are missing.\n",
+          "timestamp": "2025-12-26T05:54:52.558Z"
+        }
+      ],
+      "createdAt": "2025-12-26T05:53:04.803Z",
+      "failedAt": "2025-12-26T05:54:52.558Z"
+    },
+    {
+      "path": "scripts/README_CI_EXAMPLES.md",
+      "description": "Examples documenting how to run the CI checks locally (validator + demo runner + output assertions) and how to customize expected outputs.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T05:55:09.615Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T05:55:23.428Z"
+        }
+      ],
+      "createdAt": "2025-12-26T05:53:04.803Z",
+      "failedAt": "2025-12-26T05:55:23.428Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Create a minimal CI workflow (e.g., GitHub Actions) that installs deps, runs the validator + demo runner, asserts expected outputs exist (reports/figures), and uploads runtime/_build as CI artifacts; make missing outputs a hard failure.",
+  "missionSuccessCriteria": [
+    "Complete the urgent task identified by Meta-Coordinator",
+    "Curated insight (actionability 8-9/10): Adds enforcement: CI runs the full pipeline (gate → validator → meta-analysis demo) and fails fast if required artifacts are missing, ensuring ongoing compliance with repo structure, schema validity, ..."
+  ],
+  "projectName": "minimal CI workflow (e.g., GitHub Actions) that installs deps, runs the validator + demo runner, asserts expected outputs exist (reports/figures), and uploads runtime/_build as CI artifacts; make missing outputs a hard failure.",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [
+    "include_examples"
+  ],
+  "lastSavedAt": "2025-12-26T05:55:23.429Z",
+  "summary": {
+    "completed": 0,
+    "failed": 4,
+    "total": 4
+  }
+}

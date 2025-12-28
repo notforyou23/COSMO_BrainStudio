@@ -1,0 +1,42 @@
+{
+  "content": "[\n  {\n    \"path\": \"pyproject.toml\",\n    \"description\": \"Project metadata and pinned runtime dependencies for retrieval, NLP, and evaluation tooling.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"README.md\",\n    \"description\": \"Usage-focused documentation describing the retrieve-then-verify pipeline, data formats, calibration, and audit logs.\",\n    \"category\": \"documentation\"\n  },\n  {\n    \"path\": \"src/verifier_policy/__init__.py\",\n    \"description\": \"Package initializer exposing the primary pipeline entry points and version information.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/verifier_policy/schemas.py\",\n    \"description\": \"Typed dataclasses/Pydantic-style models defining inputs/outputs for claims, passages, quotes, decisions, and audit events.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/verifier_policy/retrieval.py\",\n    \"description\": \"Retriever implementation that fetches top-k source passages with deterministic caching and normalized provenance metadata.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/verifier_policy/quote_alignment.py\",\n    \"description\": \"Quote-level alignment module that maps each decomposed claim to minimal supporting/refuting spans within retrieved passages.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/verifier_policy/constraints.py\",\n    \"description\": \"Deterministic constraint checks enforcing required evidence, quote coverage, provenance validity, and other policy rules.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/verifier_policy/verifier.py\",\n    \"description\": \"Core verifier that performs claim decomposition orchestration, retrieve-then-verify, applies constraints, and emits per-claim decisions with evidence.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/verifier_policy/calibration.py\",\n    \"description\": \"Threshold calibration utilities that fit and apply calibrated decision thresholds on a held-out set and report metrics.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/verifier_policy/audit_log.py\",\n    \"description\": \"Structured audit logging that records per-claim evidence failures, constraint violations, and provenance for downstream review.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"src/verifier_policy/record_versions.py\",\n    \"description\": \"Utility to capture and persist Python/OS/library version fingerprints to ensure deterministic, auditable runs.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"src/main.py\",\n    \"description\": \"Runnable CLI that loads a dataset, runs retrieve-then-verify, calibrates thresholds on held-out data, and writes decisions plus audit logs to disk.\",\n    \"category\": \"source\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_0546d394fda575c300694e41dd66188196ac0a68393d97397d",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 657,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 684,
+    "output_tokens_details": {
+      "reasoning_tokens": 89
+    },
+    "total_tokens": 1341
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0546d394fda575c300694e41ddc07c819683345ee77197fd40",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0546d394fda575c300694e41df5a24819681526d67e0929c3a",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"pyproject.toml\",\n    \"description\": \"Project metadata and pinned runtime dependencies for retrieval, NLP, and evaluation tooling.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"README.md\",\n    \"description\": \"Usage-focused documentation describing the retrieve-then-verify pipeline, data formats, calibration, and audit logs.\",\n    \"category\": \"documentation\"\n  },\n  {\n    \"path\": \"src/verifier_policy/__init__.py\",\n    \"description\": \"Package initializer exposing the primary pipeline entry points and version information.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/verifier_policy/schemas.py\",\n    \"description\": \"Typed dataclasses/Pydantic-style models defining inputs/outputs for claims, passages, quotes, decisions, and audit events.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/verifier_policy/retrieval.py\",\n    \"description\": \"Retriever implementation that fetches top-k source passages with deterministic caching and normalized provenance metadata.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/verifier_policy/quote_alignment.py\",\n    \"description\": \"Quote-level alignment module that maps each decomposed claim to minimal supporting/refuting spans within retrieved passages.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/verifier_policy/constraints.py\",\n    \"description\": \"Deterministic constraint checks enforcing required evidence, quote coverage, provenance validity, and other policy rules.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/verifier_policy/verifier.py\",\n    \"description\": \"Core verifier that performs claim decomposition orchestration, retrieve-then-verify, applies constraints, and emits per-claim decisions with evidence.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/verifier_policy/calibration.py\",\n    \"description\": \"Threshold calibration utilities that fit and apply calibrated decision thresholds on a held-out set and report metrics.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/verifier_policy/audit_log.py\",\n    \"description\": \"Structured audit logging that records per-claim evidence failures, constraint violations, and provenance for downstream review.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"src/verifier_policy/record_versions.py\",\n    \"description\": \"Utility to capture and persist Python/OS/library version fingerprints to ensure deterministic, auditable runs.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"src/main.py\",\n    \"description\": \"Runnable CLI that loads a dataset, runs retrieve-then-verify, calibrates thresholds on held-out data, and writes decisions plus audit logs to disk.\",\n    \"category\": \"source\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

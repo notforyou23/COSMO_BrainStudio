@@ -1,0 +1,26 @@
+# Primary dependencies for reproducible local/Docker/CI execution
+# Use constraints.txt (fully pinned) for deterministic installs when available.
+
+# Core runtime utilities
+packaging>=23.2,<26
+pydantic>=2.6,<3
+python-dotenv>=1.0,<2
+requests>=2.31,<3
+rich>=13.7,<14
+tenacity>=8.2,<10
+typing-extensions>=4.10,<5
+
+# Diagnostics / process stability helpers
+psutil>=5.9,<7
+
+# Testing / smoke-test tooling
+pytest>=7.4,<9
+pytest-timeout>=2.2,<3
+
+# Docker/CI integration
+docker>=7.0,<8
+
+# Installer/build helpers (avoid resolver/build variability)
+pip-tools>=7.4,<8
+setuptools>=69,<76
+wheel>=0.42,<1

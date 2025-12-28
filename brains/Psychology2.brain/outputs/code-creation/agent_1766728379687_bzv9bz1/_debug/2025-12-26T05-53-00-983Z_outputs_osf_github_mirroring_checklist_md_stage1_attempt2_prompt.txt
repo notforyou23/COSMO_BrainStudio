@@ -1,0 +1,53 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add default reproducibility files to /outputs: CITATION.cff, minimal data dictionary template, an OSF/GitHub mirroring checklist, and a reproducibility checklist embedded in the README; ensure scripts produce a run log (timestamp, package versions).
+Project: generated_library_1766728379980 (python library)
+
+Target file details:
+- Path: outputs/osf_github_mirroring_checklist.md
+- Purpose: Provides a step-by-step checklist for mirroring the repository and releases between GitHub and OSF for preservation and access.
+- Category: documentation
+
+Other planned files (for context only):
+- outputs/CITATION.cff: Provides a default Citation File Format record to enable standardized citation metadata for the project outputs.
+- outputs/README.md: Documents the contents of the outputs folder and embeds a reproducibility checklist to be completed for each run/release.
+- outputs/data_dictionary_template.csv: Supplies a minimal data dictionary template (CSV) for documenting datasets, variables, units, missingness, and provenance.
+- src/reprokit/__init__.py: Defines the reprokit package public surface and exports the run logging utilities for easy import.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-26T05-01-46-647Z_outputs_README_md_stage1_attempt2_prompt.txt from code-creation agent agent_1766725305310_fqd4vpt: 
+- [AGENT: agent_1766724332780_auwey5f] {"agentId":"agent_1766724332780_auwey5f","goalId":"goal_acceptance_qa_1766724281438","timestamp":"2025-
+- [AGENT: agent_1766723806039_rvysvlf] {"agentId":"agent_1766723806039_rvysvlf","goalId":"goal_guided_research_1766723805867","timestamp":"202
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [AGENT: agent_1766728105553_ve5a7yl] {"agentId":"agent_1766728105553_ve5a7yl","goalId":"goal_1","timestamp":"2025-12-26T05:50:23.040Z","file
+
+Key requirements:
+- documentation
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Provides a step-by-step checklist for mirroring the repository and releases between GitHub and OSF for preservation and access.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/osf_github_mirroring_checklist.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/osf_github_mirroring_checklist.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/osf_github_mirroring_checklist.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

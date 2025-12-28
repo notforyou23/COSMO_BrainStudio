@@ -1,0 +1,316 @@
+# Generated report
+
+*Auto-compiled from COSMO memory (GPT-5.2 unavailable)*
+
+## Summary
+
+Based on 30 memory nodes about Write a one-page scope memo: target effect family, inclusion/exclusion criteria,:
+
+1. [AGENT: agent_1766724059835_bifv53h] Document Created: one-page preregistration template + analysis plan stub (saved in /outputs) tailored to the flagship goal_2 meta-analysis, including primary outcome definition, inclusion criteria, moderator plan, and sensitivity analyses.
+
+# one-page preregistration template + analysis plan stub (saved in /outputs) tailored to the flagship goal_2 meta-analysis, including primary outcome definition, inclusion criteria, moderator plan, and sensitivity analyses.
+
+*Auto-compiled from COSMO memory (GPT-5.2 unavailable)*
+
+## Summary
+
+Based on 8 memory nodes about Create a one-page preregistration template + analysis plan stub (saved in /outpu:
+
+1. [AGENT: agent_1766723822731_qlsh7fi] Cycle 1 consistency review (divergence 0.94):
+Summary verdict: The three branches are largely complementary — they describe distinct mechanisms (cognitive heuristics, gut-brain biology, and action-planning) that can each influence real-world choice and procrastination — but they imply different loci for intervention (choice architecture vs. biological modulation vs. individual planning), which creates tensions about what “works” and why. Below are agreements, specific conflicts, and a recommended synthesis and next actions.
+
+1) Areas of agreement
+- All three treat choice outcomes as malleable: behavior is not fixed; interventions can shift decisions without assuming wholesale changes to deep preferences.
+- Interventions can be low-cost and scalable (choice architecture tweaks, implementation intentions, dietary/probiotic changes).
+- Mechanisms operate by changing proximate processes that shape choice (perception/attention/valuation/timing of action), so mediators should be targeted and measured.
+- Experimental evaluation is needed: randomized tests with behavioral outcomes and mediators (e.g., time perception, response latency, compliance).
+- Multi-level approaches are plausible: environmental design and individual strategies can be combined.
+
+2) Conflicting points (mechanism and intervention focus)
+- Locus of change
+  - Branch 1: Changes should target external choice environments (defaults, framing) and assumes biases are cognitive processing shortcuts that persist unless environments are restructured.
+  - Branch 2: Emphasizes
+
+2. [AGENT: agent_1766723822731_qlsh7fi] Cycle 1 consistency review (divergence 0.94):
+Summary verdict: The three branches are largely complementary — they describe distinct mechanisms (cognitive heuristics, gut-brain biology, and action-planning) that can each influence real-world choice and procrastination — but they imply different loci for intervention (choice architecture vs. biological modulation vs. individual planning), which creates tensions about what “works” and why. Below are agreements, specific conflicts, and a recommended synthesis and next actions.
+
+1) Areas of agreement
+- All three treat choice outcomes as malleable: behavior is not fixed; interventions can shift decisions without assuming wholesale changes to deep preferences.
+- Interventions can be low-cost and scalable (choice architecture tweaks, implementation intentions, dietary/probiotic changes).
+- Mechanisms operate by changing proximate processes that shape choice (perception/attention/valuation/timing of action), so mediators should be targeted and measured.
+- Experimental evaluation is needed: randomized tests with behavioral outcomes and mediators (e.g., time perception, response latency, compliance).
+- Multi-level approaches are plausible: environmental design and individual strategies can be combined.
+
+2) Conflicting points (mechanism and intervention focus)
+- Locus of change
+  - Branch 1: Changes should target external choice environments (defaults, framing) and assumes biases are cognitive processing shortcuts that persist unless environments are restructured.
+  - Branch 2: Emphasizes internal, biological modulation of subjective time perception via gut-brain signaling — implying changing physiology can shift intertemporal choice.
+  - Branch 3: Focuses on individual-level planning to automate action, bypassing deliberation.
+  Conflict: Should interventions primarily change environments, biology, or individual plans? Each implies different causal lever and scalability/ethics.
+
+- Nature of the target
+  - Branch 1 treats biases as systematic cognitive errors that require architectural fixes, not changes in subjective time perception.
+  - Branch 2 frames preference shifts as changes in perceived temporal distance (a perceptual/neurochemical mediator), not just valuation biases addressed by framing.
+  Conflict: Is impatience best modeled as a valuation bias or as altered time perception? The answer matters for intervention choice.
+
+- Degree of voluntariness and autonomy
+  - Branch 1 and 3 preserve individual agency (nudges + planning) and aim to work within preferences.
+  - Branch 2 involves altering physiology (diet/probiotics), raising different ethical/privacy/consent issues and uncertainty about side effects.
+
+3) Recommended synthesis and next actions (concise, actionable)
+- Synthesis principle: Combine levels. Use choice architecture to reduce decision friction and default unfavorable options, use implementation intentions to automate task-initiation, and treat gut-brain modulation as a plausible adjunctive route to alter time perception that requires stronger empirical validation before deployment.
+- Short-term experiments (preregistered RCTs)
+  - Factorial design crossing (A) choice-architecture nudges vs. control, (B) implementation-intention training vs. control, (C) safe gut-brain manipulation vs. placebo (e.g., dietary timing or validated probiotic with prior safety data).
+  - Primary outcomes: objectively measured intertemporal choices, task initiation and completion, procrastination metrics.
+  - Mediators: subjective time-perception scales, serotonin/vagal biomarkers (if feasible), response times, reported decision effort.
+  - Safety/ethics: restrict biological arms to interventions with established safety; obtain ethics approval and informed consent.
+- Measurement priorities
+  - Include both behavioral outcomes and mechanistic mediators so you can parse which pathway drove change (environmental salience vs. time perception vs. action automation).
+  - Use ecological/longitudinal measures (daily diaries, passive phone sensors) to assess real-world durability.
+- Operational recommendation for practitioners (if immediate action needed)
+  - Implement defaults and friction-reducing environmental tweaks for critical decisions.
+  - Teach and deploy implementation intentions as a low-cost behavioral tool to reduce procrastination.
+  - Consider dietary/sleep/circadian hygiene as low-risk supports for self-control (promote evidence-backed practices first); do not recommend routine probiotic/pharmacological interventions until stronger causal human evidence exists.
+- If constrained to one intervention now: start with implementation intentions plus a small set of choice-architecture changes — high benefit, low risk, easy to scale — and collect data to inform whether biological modulation is worth pursuing in your population.
+
+If you want, I can draft a specific factorial trial protocol (sample size estimates, measures, timeline) or an implementation checklist (default settings + implementation-intention templates) tailored to your population.
+
+3. [AGENT: agent_1766724144474_v4ynwtw] Cycle 4 consistency review (divergence 0.93):
+Summary (given divergence score 0.93 — substantial disagreement across branches)
+
+1) Areas of agreement
+- Human behavior is strongly shaped by both fast, intuitive processes (heuristics/System 1) and time/physiological factors (motivation/reward sensitivity). All three branches accept that predictable cognitive patterns can be used to design interventions.
+- Simple, low-cost interventions can improve outcomes: prompts/delays and implementation intentions are evidence-based ways to reduce errors and increase follow-through; scheduling work to match when someone feels better/more motivated can improve productivity.
+- Combining situational scaffolds (environmental or timing changes) with psychological scaffolds (plans, prompts, brief deliberation) is a plausible route to reduce failures of self-control and judgment.
+
+2) Conflicting points (where branches diverge or possibly contradict)
+- Mechanism wording in Branch 1: it claims “interventions that slow deliberation … can markedly reduce errors.” Practically, effective interventions typically increase deliberation on specific decisions (prompting reflection, brief delay) rather than “slowing” global deliberative capacity. This is a semantic/operational inconsistency that can be misread.
+- Scope and primacy of solutions:
+  - Branch 1 emphasizes meta-cognitive prompts/delays to overcome heuristic biases.
+  - Branch 3 emphasizes precommitment/implementation intentions to counter present bias.
+  - Branch 2 prioritizes aligning tasks with biological motivation windows (circadian/dopamine peaks).
+  These are not mutually exclusive but they prioritize different levers (judgment processes vs. foresight/commitment vs. motivational timing). High divergence indicates they may recommend different first-line interventions for the same problem.
+- Practical conflict: Branch 2’s reliance on identifying a “dopamine window” assumes stable, measurable intra-day reward sensitivity; in many people this is noisy and interacts with sleep, stress, and task context. If present bias (Branch 3) or strong heuristics (Branch 1) are dominant, mere timing may be insufficient—commitment devices or prompts might still be required.
+- Implementation conflict: If you schedule demanding work for a peak window (Branch 2) but still rely on System 1 habits (Branch 1) or face powerful immediate temptations (Branch 3), productivity gains may be reduced unless combined with planning or nudges.
+
+3) Recommended synthesis and next actions (concise, actionable)
+Synthesis principle: Use a hybrid, hierarchical approach — optimize when you do tasks (Branch 2) and protect those periods with precommitment plans (Branch 3) plus targeted reflective prompts for high-stakes decisions (Branch 1).
+
+Practical next steps (n-of-1 experiments you can run quickly)
+- Identify your peak window:
+  - Track for 1–2 weeks: sleep/wake times, mood/energy ratings, simple productivity metric for tasks (30–60 min blocks).
+  - Tentatively label highest-consistency blocks as “peak.”
+- Schedule: assign high-effort/creative work to those peak blocks.
+- Layer commitment: before each peak block, set simple precommitments (calendar blocks with accountability, automatic website blockers, or implementation intentions like “If I open X, then I will close it and …”).
+- Use prompts/delays for critical judgments: for decisions with evident bias risk (high stakes, irreversible), add a brief forced delay or a “why” prompt checklist to invoke deliberation.
+- Measure: compare completion, quality, and subjective difficulty across matched tasks done in peak vs non-peak windows, and with vs without commitment/prompts. Run for 2–4 weeks and iterate.
+
+When to favor which lever
+- If errors are judgemental and systematic (e.g., framing, anchoring): prioritize Branch 1 interventions (prompts, forced pause).
+- If failure is failure-to-start or procrastination: prioritize Branch 2 (timing) + Branch 3 (implementation intentions).
+- If temptations repeatedly derail plans: prioritize Branch 3 (commitment devices) and add timing adjustments where feasible.
+
+Concise recommendation: combine timing (schedule hard work in your physiological peaks) with precommitments that lock in behavior, and use brief reflective prompts only for high-stakes decisions. Run short, tracked experiments to validate which combination works for you.
+
+4. [AGENT: agent_1766724479793_l5s4pac] Cycle 9 consistency review (divergence 0.96):
+Summary (high divergence: 0.96) — the three branches overlap in theme (how internal processes, environment, and simple interventions shape decisions) but emphasize different mechanisms and scales (developmental cognitive-emotional change; methodological/historical bias from behaviorism and algorithmic environments; and a pragmatic micro-reward intervention). Below are agreements, conflicts, and a concise recommended synthesis + immediate next actions.
+
+1) Areas of agreement
+- All three branches treat decision-making as malleable: internal states (memory, emotion, metacognition), external contingencies (algorithms, reinforcement), and simple behavioral engineering (micro-rewards) can each change choices.
+- Memory and affect strongly bias probability estimates and motivation — these biases can be magnified or attenuated by context (Branch 1 and 2 converge here).
+- Interventions that change short-term reinforcement schedules (Branch 3) are a plausible way to alter behavior even when underlying biases persist.
+- Methodological pluralism is implied: combining objective behavioral measures with subjective/self-report (Branch 2’s call for first-person reports dovetails with Branch 1’s concerns about internal processes and Branch 3’s behavior change testing).
+
+2) Conflicting points
+- Mechanism focus: Branch 1 centers on cognitive-developmental mechanisms (working memory, emotion regulation) that change susceptibility to memory-driven biases; Branch 2 argues that external algorithmic reinforcement and the legacy of behaviorist method can mask or reframe internal processes — this suggests the environment may be primary driver, whereas Branch 1 treats internal development as primary.
+- Level of explanation/practice: Branch 2 critiques over-reliance on observable reinforcement as explanatory; Branch 3 implicitly endorses manipulating reinforcement (micro-rewards) as a practical route. This is a methodological tension: are we merely changing reinforcement contingencies (behaviorist approach) or targeting internal capabilities and metacognition for durable change?
+- Generalizability vs. pragmatic testing: Branch 1 seeks developmental-general mechanisms across adolescence; Branch 3 is a brief, individual-level behavioral test that may produce short-term habit change without addressing developmental susceptibility or algorithmic shaping.
+- Epistemic priority: Branch 2 questions whether behaviors in algorithmic environments reflect “natural” preferences — implying that simple lab/field interventions (Branch 3) may not reveal stable preferences but context-specific compliance.
+
+3) Recommended synthesis / next actions (concise, actionable)
+A. Research synthesis design (integrative study)
+- Run a preregistered mixed-methods pilot combining:
+  - Population: adolescents (to target Branch 1 developmental claims) and an adult comparison group.
+  - Measures: working memory tasks, validated emotion-regulation scales/behavioral tasks, metacognitive assessments, and probability-estimation tasks using salient vs. neutral event primes.
+  - Context manipulation: two environmental conditions — curated/algorithmic-style reinforcement (simulated recommender interface providing salient, emotionally-valenced, frequent exposures and feedback) vs. neutral/random exposure.
+  - Intervention arm: micro-reward habit formation protocol (Branch 3) vs. no micro-reward.
+  - Outcomes: susceptibility to memory-driven risk bias, stability of choices across contexts, habit adherence, and first-person qualitative reports about motives/values.
+- Purpose: test interactions — does adolescent working memory/emotion regulation moderate susceptibility to memory-driven biases? Does an algorithmic reinforcement environment amplify biases? Does micro-rewarding boost consistent behavior across these contexts or only in narrow contingencies?
+
+B. Practical, immediate actions (for applied testing)
+- If you want an individual test (Branch 3): try the one-week micro-step + immediate small reward protocol, while logging context (social feed exposure) and subjective reports each day. Track consistency and perceived effort; compare with a baseline week.
+- For methodology: always combine behavioral outcomes with first-person reports and measures of internal state — this mitigates the behaviorist blind spot Branch 2 flags.
+
+C. Broader recommendations
+- Use longitudinal designs to distinguish developmental change from context effects.
+- When studying “preferences” in algorithmic contexts, experimentally vary reinforcement schedules to assess stability and authenticity of observed choices.
+- Report both aggregate behavior and individual differences (working memory, emotion regulation, metacognition) to explain heterogeneity.
+
+If you want, I can:
+- Draft a short preregistered pilot protocol (measures, sample size calc, tasks) implementing the integrative study above.
+- Or create a one-week micro-reward tracking sheet and quick instructions for self-test. Which would you like?
+
+5. [AGENT: agent_1766723806039_rvysvlf] Intervention effectiveness finding (meta-analytic): Choice-architecture nudges show an overall small-to-medium behavior-change effect (approximately d≈0.45; 200+ studies; 450+ effect sizes; n>2 million), with larger effects for decision-structure changes (e.g., defaults) than for re-description-only interventions; debiasing training in educational settings shows smaller improvements (approximately g≈0.26) with concerns about study quality and limited evidence of broad transfer.
+
+6. [AGENT: agent_1766724059835_bifv53h] {"title":"one-page preregistration template + analysis plan stub (saved in /outputs) tailored to the flagship goal_2 meta-analysis, including primary outcome definition, inclusion criteria, moderator plan, and sensitivity analyses.","type":"report","format":"markdown","filePath":"/Users/jtr/_JTR23_/COSMO/runtime/outputs/document-creation/agent_1766724059835_bifv53h/agent_1766724059835_bifv53h_report_01.md","createdAt":"2025-12-26T04:41:38.980Z","wordCount":1607,"mode":"fallback_compilation"}
+
+7. [AGENT: agent_1766724059820_0aytve4] {"source":"document_analysis_agent","timestamp":"2025-12-26T04:41:25.666Z","documentCount":3,"documents":[{"filename":"research_findings.json","path":"/Users/jtr/_JTR23_/COSMO/runtime/outputs/research/agent_1766723806039_rvysvlf/research_findings.json","content":"{\n  \"agentId\": \"agent_1766723806039_rvysvlf\",\n  \"goalId\": \"goal_guided_research_1766723805867\",\n  \"mission\": \"Conduct a comprehensive literature search across peer-reviewed journals, classic texts, and reputable books/websites to collect primary sources and authoritative secondary sources on: cognition, behavior, perception, development, motivation, decision-making, and the history of psychology. Prioritize seminal works, meta-analyses, recent high-impact reviews (last 10 years), and historical primary sources (e.g., works by Wundt, James, Piaget, Skinner, Freud, Lewin).\",\n  \"timestamp\": \"2025-12-26T04:38:35.397Z\",\n  \"findings\": [\n    {\n      \"id\": 1,\n      \"content\": \"Primary-source access finding: High-utility repositories (e.g., York University’s PsychClassics; Project Gutenberg) provide full-text access to seminal works (e.g., Wundt, James, Watson), but accurate scholarly use often requires triangulating edition and translation details before quotation/page citation—especially for non-English originals.\",\n      \"timestamp\": \"2025-12-26T04:38:35.397Z\"\n    },\n    {\n      \"id\": 2,\n      \"content\": \"Cognition–decision performance finding (meta-analytic): Reflective thinking shows a modest positive association with normatively correct decision performance (approximately r≈.11 across 89 samples; N≈17,700), while intuitive thinking shows a modest negative association (approximately r≈−.09), with effects varying by task type, time pressure, and sample characteristics.\",\n      \"timestamp\": \"2025-12-26T04:38:35.397Z\"\n    },\n    {\n      \"id\": 3,\n      \"content\": \"Cognitive resource constraint finding (meta-analytic): Experimentally manipulated sleep restriction has a reliable negative effect on neurocognitive functioning relevant to decision quality (overall approximately g≈−0.38), including executive functioning and sustained attention.\",\n      \"timestamp\": \"2025-12-26T04:38:35.397Z\"\n    },\n    {\n      \"id\": 4,\n      \"content\": \"Affect–risk finding (meta-analytic): Fear/anxiety is associated with decreased risk taking and increased risk estimation (average approximately r≈0.22) but with high heterogeneity and stronger effects in tasks with tangible outcomes and in clinically anxious samples—indicating strong state- and task-dependence.\",\n      \"timestamp\": \"2025-12-26T04:38:35.397Z\"\n    },\n    {\n      \"id\": 5,\n      \"content\": \"Intervention effectiveness finding (meta-analytic): Choice-architecture nudges show an overall small-to-medium behavior-change effect (approximately d≈0.45; 200+ studies; 450+ effect sizes; n>2 million), with larger effects for decision-structure changes (e.g., defaults) than for re-description-only interventions; debiasing training in educational settings shows smaller improvements (approximately g≈0.26) with concerns about study quality and limited evidence of broad transfer.\",\n      \"timestamp\": \"2025-12-26T04:38:35.397Z\"\n    }\n  ],\n  \"summary\": \"The collected findings cluster into three complementary strands: (1) access to psychology’s historical primary sources, (2) meta-analytic evidence on cognition/affect and decision performance, and (3) contemporary longitudinal approaches that update classic developmental debates (Piaget–Vygotsky) with growth-model methods and mechanistic constructs (e.g., executive function, processing speed).\\n\\nHistorically, the workflow emphasis is practical and source-critical: begin with stable, openly hosted primary texts (e.g., PsychClassics, Project Gutenberg), then verify edition/translation provenance before quoting or page-citing—especially for works originally published in German or French. In parallel, the modern evidence base on decision-making suggests modest average effects with substantial heterogeneity: reflective thinking predicts slightly better normative performance, sleep restriction reliably harms neurocognitive functioning relevant to decisions, and emotion/context (e.g., anxiety) meaningfully shifts risk-related judgments. Intervention syntheses indicate that “nudges” can produce small-to-medium behavior change on average, whereas debiasing training tends to yield smaller improvements with limited transfer beyond trained contexts.\\n\\nDevelopmentally, recent longitudinal research reframes stage-like interpretations into continuous, multi-wave models where within-child change in information-processing and executive function predicts later higher-order outcomes (e.g., reasoning). Cultural-historical (Vygotskian) reviews stress conceptual precision—particularly distinguishing ZPD from generic “scaffolding”—and call for better operationalization of social support (type, timing, fading), aligning theory with intervention-relevant measurement.\",\n  \"successAssessment\": \"The success criteria were not met. The work produced a small set of relevant sources and credible, specific meta-analytic effect-size summaries plus several classic primary-source pointers, but it did not create the required annotated bibliography (minimum 30 sources) in APA style, did not provide 150–300 word annotations with tags for domain/method/level of evidence, and did not save outputs to runtime/outputs/annotated_bibliography.json and runtime/outputs/annotated_bibliography.md. Coverage is also incomplete relative to the mission (e.g., perception, motivation, broader behavior/development subareas, and a fuller set of historical figures like Freud, Lewin, Pavlov, Piaget primary texts). To meet the criteria, the next step would be a structured literature expansion (seeded by these meta-analyses and classics), followed by standardized APA entries, annotations, tagging, and export to the specified files.\",\n  \"metadata\": {\n    \"queriesExecuted\": 3,\n    \"sourcesFound\": 106,\n    \"findingsCount\": 5\n  }\n}","size":5787,"wordCount":633,"modified":"2025-12-26T04:38:35.399Z","metadata":{"filename":"research_findings.json","extension":".json","size":5787,"created":"2025-12-26T04:41:02.060Z","modified":"2025-12-26T04:38:35.399Z","accessed":"2025-12-26T04:41:02.060Z","wordCount":633,"characterCount":5739,"lineCount":40,"mimeType":"application/json","encoding":"utf8","hasTitle":false,"hasHeaders":false,"hasLinks":false,"hasImages":false,"hasCode":false,"hasTables":false,"versionIndicators":[],"revisionMarkers":[]}},{"filename":"research_summary.md","path":"/Users/jtr/_JTR23_/COSMO/runtime/outputs/research/agent_1766723806039_rvysvlf/research_summary.md","content":"# Research Summary\n\n**Agent:** agent_1766723806039_rvysvlf\n**Mission:** Conduct a comprehensive literature search across peer-reviewed journals, classic texts, and reputable books/websites to collect primary sources and authoritative secondary sources on: cognition, behavior, perception, development, motivation, decision-making, and the history of psychology. Prioritize seminal works, meta-analyses, recent high-impact reviews (last 10 years), and historical primary sources (e.g., works by Wundt, James, Piaget, Skinner, Freud, Lewin).\n**Completed:** 2025-12-26T04:38:35.405Z\n\n## Summary\n\nThe collected findings cluster into three complementary strands: (1) access to psychology’s historical primary sources, (2) meta-analytic evidence on cognition/affect and decision performance, and (3) contemporary longitudinal approaches that update classic developmental debates (Piaget–Vygotsky) with growth-model methods and mechanistic constructs (e.g., executive function, processing speed).\n\nHistorically, the workflow emphasis is practical and source-critical: begin with stable, openly hosted primary texts (e.g., PsychClassics, Project Gutenberg), then verify edition/translation provenance before quoting or page-citing—especially for works originally published in German or French. In parallel, the modern evidence base on decision-making suggests modest average effects with substantial heterogeneity: reflective thinking predicts slightly better normative performance, sleep restriction reliably harms neurocognitive functioning relevant to decisions, and emotion/context (e.g., anxiety) meaningfully shifts risk-related judgments. Intervention syntheses indicate that “nudges” can produce small-to-medium behavior change on average, whereas debiasing training tends to yield smaller improvements with limited transfer beyond trained contexts.\n\nDevelopmentally, recent longitudinal research reframes stage-like interpretations into continuous, multi-wave models where within-child change in information-processing and executive function predicts later higher-order outcomes (e.g., reasoning). Cultural-historical (Vygotskian) reviews stress conceptual precision—particularly distinguishing ZPD from generic “scaffolding”—and call for better operationalization of social support (type, timing, fading), aligning theory with intervention-relevant measurement.\n\n## Key Findings\n\n1. Primary-source access finding: High-utility repositories (e.g., York University’s PsychClassics; Project Gutenberg) provide full-text access to seminal works (e.g., Wundt, James, Watson), but accurate scholarly use often requires triangulating edition and translation details before quotation/page citation—especially for non-English originals.\n\n2. Cognition–decision performance finding (meta-analytic): Reflective thinking shows a modest positive association with normatively correct decision performance (approximately r≈.11 across 89 samples; N≈17,700), while intuitive thinking shows a modest negative association (approximately r≈−.09), with effects varying by task type, time pressure, and sample characteristics.\n\n3. Cognitive resource constraint finding (meta-analytic): Experimentally manipulated sleep restriction has a reliable negative effect on neurocognitive functioning relevant to decision quality (overall approximately g≈−0.38), including executive functioning and sustained attention.\n\n4. Affect–risk finding (meta-analytic): Fear/anxiety is associated with decreased risk taking and increased risk estimation (average approximately r≈0.22) but with high heterogeneity and stronger effects in tasks with tangible outcomes and in clinically anxious samples—indicating strong state- and task-dependence.\n\n5. Intervention effectiveness finding (meta-analytic): Choice-architecture nudges show an overall small-to-medium behavior-change effect (approximately d≈0.45; 200+ studies; 450+ effect sizes; n>2 million), with larger effects for decision-structure changes (e.g., defaults) than for re-description-only interventions; debiasing training in educational settings shows smaller improvements (approximately g≈0.26) with concerns about study quality and limited evidence of broad transfer.\n\n## Research Queries\n\n1. seminal works history of psychology primary sources\n2. meta-analysis cognition and decision-making 2015-2025\n3. developmental psychology Piaget Vygotsky longitudinal studies review\n\n## Sources\n\nTotal sources consulted: 106\n\nSee `bibliography.bib` for citation-ready BibTeX entries.\n","size":4547,"wordCount":510,"modified":"2025-12-26T04:38:35.406Z","metadata":{"filename":"research_summary.md","extension":".md","size":4547,"created":"2025-12-26T04:41:04.625Z","modified":"2025-12-26T04:38:35.406Z","accessed":"2025-12-26T04:41:04.625Z","wordCount":510,"characterCount":4501,"lineCount":38,"mimeType":"text/markdown","encoding":"utf8","hasTitle":true,"hasHeaders":true,"hasLinks":false,"hasImages":false,"hasCode":false,"hasTables":false,"versionIndicators":[],"revisionMarkers":[]}},{"filename":"manifest.json","path":"/Users/jtr/_JTR23_/COSMO/runtime/outputs/research/agent_1766723806039_rvysvlf/manifest.json","content":"{\n  \"agentId\": \"agent_1766723806039_rvysvlf\",\n  \"agentType\": \"research\",\n  \"goalId\": \"goal_guided_research_1766723805867\",\n  \"mission\": \"Conduct a comprehensive literature search across peer-reviewed journals, classic texts, and reputable books/websites to collect primary sources and authoritative secondary sources on: cognition, behavior, perception, development, motivation, decision-making, and the history of psychology. Prioritize seminal works, meta-analyses, recent high-impact reviews (last 10 years), and historical primary sources (e.g., works by Wundt, James, Piaget, Skinner, Freud, Lewin).\",\n  \"createdAt\": \"2025-12-26T04:38:35.409Z\",\n  \"files\": [\n    {\n      \"filename\": \"research_findings.json\",\n      \"relativePath\": \"runtime/outputs/research/agent_1766723806039_rvysvlf/research_findings.json\",\n      \"size\": 5512\n    },\n    {\n      \"filename\": \"bibliography.bib\",\n      \"relativePath\": \"runtime/outputs/research/agent_1766723806039_rvysvlf/bibliography.bib\",\n      \"size\": 24014\n    },\n    {\n      \"filename\": \"research_summary.md\",\n      \"relativePath\": \"runtime/outputs/research/agent_1766723806039_rvysvlf/research_summary.md\",\n      \"size\": 4501\n    },\n    {\n      \"filename\": \"sources.json\",\n      \"relativePath\": \"runtime/outputs/research/agent_1766723806039_rvysvlf/sources.json\",\n      \"size\": 15756\n    }\n  ],\n  \"summary\": {\n    \"queriesExecuted\": 3,\n    \"sourcesFound\": 106,\n    \"findingsGenerated\": 5,\n    \"filesExported\": 4\n  }\n}","size":1461,"wordCount":113,"modified":"2025-12-26T04:38:35.410Z","metadata":{"filename":"manifest.json","extension":".json","size":1461,"created":"2025-12-26T04:41:00.037Z","modified":"2025-12-26T04:38:35.410Z","accessed":"2025-12-26T04:41:00.037Z","wordCount":113,"characterCount":1461,"lineCount":35,"mimeType":"application/json","encoding":"utf8","hasTitle":false,"hasHeaders":false,"hasLinks":false,"hasImages":false,"hasCode":false,"hasTables":false,"versionIndicators":[],"revisionMarkers":[]}}]}
+
+8. [AGENT: agent_1766725061841_k9ooek5] Cycle 15 consistency review (divergence 0.92):
+High-level summary: all three branches investigate how constraints (cognitive load, cultural narratives, physiological state) shift reliance on heuristics and thereby shape choices and longer-term preferences/behaviors. They diverge on timescale, level of analysis, and primary mechanism, producing complementary but partly incompatible emphases. Below are areas of agreement, key conflicts, and concise recommended synthesis/actions.
+
+1) Areas of agreement
+- Mechanistic overlap: each branch treats heuristics as core mediators between constraint/exposure and decision outcomes — when resources, norms, or capacity are limited/biased, people rely more on heuristics.
+- Short-to-long-term linkage: repeated use of heuristics can stabilize into habits, preferences, or belief patterns (habit-formation, consolidation, culturally transmitted heuristics).
+- Importance of context and exposure: social/environmental inputs (teaching, narratives, sleep environment, task demands) shape which heuristics are used and reinforced.
+- Intervention potential: targeted changes to environment, training, or policy could reduce harmful biases (e.g., cognitive aids, curricular changes, sleep interventions).
+- Need for longitudinal, multi-level methods: all branches benefit from longitudinal designs, mixed methods, and designs that span individual and societal scales.
+
+2) Conflicting points (or tensions)
+- Level of explanation: Branch 1 is intra-individual, process-focused (resource depletion -> heuristic use). Branch 2 is cultural/societal (collective narratives shaping which heuristics are socially reinforced). These imply different causal loci and intervention points; they can be complementary but sometimes predict different leverage points (individual training vs cultural reform).
+- Timescale and persistence: Branch 1 emphasizes transient states accumulating into long-term change through repetition; Branch 2 emphasizes sustained, institutionally transmitted narratives that shape baseline priors from childhood. Which dominates long-term preference formation (accumulated state-based habits vs early-embedded cultural priors) is unresolved.
+- Mechanisms of change: Branch 3 invokes biological/developmental mechanisms (sleep affecting impulsivity) that vary by age; Branch 1 emphasizes cognitive resource allocation and retrieval/integration processes. That raises potential conflict over whether observed long-term biases are cognitive-habitual or neurophysiological in origin.
+- Measurement and inference: Branch 1 often uses lab cognitive-load paradigms; Branch 2 requires historical/cultural analysis and complex causal inference; Branch 3 requires developmental medical/experimental designs. These methods can yield non-commensurable evidence unless harmonized.
+
+3) Recommended synthesis / next actions (concise, prioritized)
+A. Conceptual synthesis
+- Build a multilevel framework: (a) proximal state factors (cognitive load, sleep, stress) modulate heuristic selection; (b) intermediate reinforcement (repetition, social approval) consolidates heuristics into habits/preferences; (c) distal cultural priors shape which heuristics are available and socially rewarded. Explicitly model interactions: e.g., cultural priors bias heuristic choice under load; sleep/developmental vulnerability modulates sensitivity to cultural reinforcement.
+
+B. Empirical program (prioritized, feasible steps)
+1. Short longitudinal lab + ecological study: recruit a diverse cohort and repeatedly measure decision tasks under manipulated load and naturalistic sleep variation. Track change in heuristic reliance and preference stability over months.
+2. Cross-sectional developmental comparison: controlled sleep-deprivation experiments comparing adolescents vs adults on risk/impulsivity tasks, with follow-ups to assess persistence and learning effects.
+3. Cross-cultural / historical survey module: measure exposure to psychological narratives (education, media), baseline heuristics, and normative endorsement to test whether cultural memory predicts which heuristics people habitually use under load.
+4. Integrative modeling: fit hierarchical models that include state (load/sleep), reinforcement (frequency, social rewards), and cultural priors to predict long-term preference change.
+
+C. Interventions to test
+- State-targeted: cognitive aids, sleep-improvement programs, workload redesign.
+- Reinforcement-targeted: habit-retraining and feedback delivered during low-load windows to shift consolidation.
+- Culture-targeted: educational curricula or public messaging that foregrounds alternative mental models; evaluate downstream effects on heuristic prevalence.
+
+D. Measurement recommendations
+- Use convergent measures: behavioral tasks for heuristic reliance, implicit/explicit belief measures, ecological sampling (EMA), institutional/curricular exposure metrics.
+- Pre-register causal mediation analyses to separate immediate state effects from reinforcement and cultural priors.
+
+Short actionable next step (one-paragraph): convene a small multi-disciplinary pilot integrating a short longitudinal study that measures decision-making under manipulated cognitive load and natural sleep variation, collects participants’ exposure to psychological/cultural narratives, and follows them for 3–6 months to measure consolidation of heuristics. Use this pilot to estimate effect sizes for a larger cross-cultural/developmental program and to test the proposed multilevel model.
+
+If you want, I can draft a concrete study protocol for the pilot (sample size, tasks, measures, analysis plan) or map specific interventions matched to each level.
+
+9. [AGENT: agent_1766724682364_faw24q4] Cycle 12 consistency review (divergence 0.91):
+Summary judgment: these three branches overlap substantially in proposing that learned predictive models and heuristic systems—shaped early by sensory, social and linguistic experience—drive later judgment patterns (including risk preferences and political choices). They diverge mainly on the proposed causal levers (developmental linguistic exposure vs general heuristic/environment mismatch vs motivated/social identity processes) and on which interventions will be most effective (architecture/feedback/incentives vs epistemic-humility training).
+
+1) Areas of agreement
+- Core mechanism: All branches assume a predictive-processing / prior-driven account of cognition — early experience builds priors or hierarchical prediction systems that bias later perception and decision-making.
+- Role of social information: Each hypothesis treats social cues as a salient dimension that can be differentially weighted by the predictive system and thereby influence decisions (risk, reward, political judgments).
+- Errors as mismatch: Branch 1’s idea of heuristics producing systematic biases when environment changes aligns with Branch 3’s view that confirmation and motivated reasoning are partly predictable outputs of prior-weighted processing rather than pure irrationality.
+- Interventions matter: All branches endorse interventions can change outcomes — whether by changing architecture/feedback/incentives, reshaping experience early, or cultivating epistemic humility.
+- Empirical approach: Implicitly agree on need for developmental, behavioral and intervention studies (longitudinal, cross-context comparisons, RCTs).
+
+2) Conflicting points (or tensions)
+- Causal emphasis: 
+  - Branch 2 assigns a specific causal role to early multilingual exposure in strengthening hierarchical prediction and social-weighting, implying a relatively domain-specific developmental effect.
+  - Branch 1 emphasizes more general mechanisms (heuristics × environment mismatch) that do not require language-specific priming.
+  - Branch 3 emphasizes motivated reasoning and identity-driven processes that may operate above and beyond early-sensory priors.
+  Tension: Are later social biases primarily the product of early perceptual/linguistic priors, general heuristic dynamics, or identity/motivation processes — or what balance among them?
+- Specificity of bilingual effect: Branch 2’s claim that bilingualism systematically changes adult risk preferences in social vs nonsocial contexts is a substantive empirical claim that may conflict with Branch 1 and 3 unless mediated by broader experience or identity factors.
+- Intervention focus and efficacy:
+  - Branch 1 favors structural interventions (architecture, feedback, incentives) to reduce heuristic mismatches.
+  - Branch 3 foregrounds epistemic-humility interventions to reduce polarization.
+  Potential conflict: which interventions are more effective, for which outcomes, and at what life stages? They may not be mutually exclusive but priorities differ.
+- Timescale and malleability:
+  - Branch 2 implies developmental windows where exposure has long-term effects.
+  - Branch 1 and 3 allow for substantial change in adulthood via architecture or training. This raises the question whether adult interventions can overcome early-formed priors.
+
+3) Recommended synthesis and next actions
+Synthesis framework (concise):
+- Adopt a hierarchical, multi-level model: (a) early sensory/social/linguistic experience shapes low- and mid-level priors and hierarchical prediction weights; (b) fast heuristics emerge from these priors and from cost-saving architectures; (c) motivated reasoning and identity-level processes act on and modulate the weighting of social priors and heuristic outputs; (d) interventions operate at different levels (developmental exposure, environment/architecture/incentives, and epistemic/identity-focused training), and their effectiveness depends on timing, target mechanism, and outcome domain (perception, risk, political decisions).
+
+Practical next actions (empirical + applied, prioritized):
+1. Pre-registration and multi-site longitudinal study:
+   - Measure early sensory/social/language exposure (including multilingualism), track predictive-processing markers (perceptual inference tasks, hierarchical learning tasks), and later decision outcomes (social vs nonsocial risk tasks; political information evaluation).
+   - Include measures of social identity strength and motivated reasoning.
+   - Outcome: estimate relative contributions of early experience vs later motivation to adult decision patterns.
+
+2. Targeted experimental interventions (adult and developmental):
+   - Compare intervention types head-to-head: (A) structural/environmental (feedback, decision architecture, incentives), (B) epistemic-humility training, (C) combined approaches.
+   - Use randomized trials with transfer measures: risk in social/nonsocial contexts, susceptibility to confirmation bias in political tasks, and real-world behavior proxies.
+   - If feasible, include bilingual vs monolingual subgroups to test Branch 2 mechanisms.
+
+3. Computational modeling:
+   - Build hierarchical Bayesian models that incorporate learned priors from early exposure, a fast-heuristic module (cost-sensitive policy), and an identity/motivational weighting term. Fit to behavioral and neural data to quantify parameter contributions and predict intervention effects.
+
+4. Short-term applied recommendations (policy/practice):
+   - For polarization reduction: combine epistemic-humility training with environmental design that reduces strong confirmation cascades (e.g., curated, balanced information flows and incentives for information diversity).
+   - For decision-quality improvements in high-stakes domains: prioritize decision architecture and feedback systems (Branch 1 approaches) where rapid heuristics produce predictable errors.
+   - In education and early-childhood programs: encourage socially-rich, variable communicative exposure (including multilingual opportunities where possible) to test whether this yields broader social-sensitivity in predictive models.
+
+Concluding note: These hypotheses are complementary rather than mutually exclusive if framed within a layered model where early experience shapes priors, heuristics implement resource-rational shortcuts, and motivated/identity processes modulate outputs. Empirical action should triangulate developmental, intervention, and modeling work to allocate causal weight to each mechanism and identify the most scalable interventions for each outcome domain.
+
+10. How do short-term behavioral interventions produce durable changes in decision-making and motivation across diverse developmental stages? A key limitation is that many studies use short follow-ups and homogeneous samples, which undermines claims about long-term generalizability and real-world effectiveness.
+
+11. [AGENT: agent_1766723806039_rvysvlf] Cognition–decision performance finding (meta-analytic): Reflective thinking shows a modest positive association with normatively correct decision performance (approximately r≈.11 across 89 samples; N≈17,700), while intuitive thinking shows a modest negative association (approximately r≈−.09), with effects varying by task type, time pressure, and sample characteristics.
+
+12. Motivation: aligning demanding tasks with an individual's circadian-driven dopamine peaks—rather than arbitrary clock hours—can substantially boost intrinsic motivation and reduce procrastination, because reward sensitivity fluctuates predictably across the day. Practically, this means scheduling creative or high-effort work during your personal "dopamine window" (learned from sleep/wake patterns and mood tracking) yields bigger productivity gains than equal time allotted at mismatched times.
+
+13. [AGENT: agent_1766723806039_rvysvlf] {"agentId":"agent_1766723806039_rvysvlf","goalId":"goal_guided_research_1766723805867","timestamp":"2025-12-26T04:38:35.410Z","files":[{"filename":"research_findings.json","relativePath":"runtime/outputs/research/agent_1766723806039_rvysvlf/research_findings.json","size":5512},{"filename":"bibliography.bib","relativePath":"runtime/outputs/research/agent_1766723806039_rvysvlf/bibliography.bib","size":24014},{"filename":"research_summary.md","relativePath":"runtime/outputs/research/agent_1766723806039_rvysvlf/research_summary.md","size":4501},{"filename":"sources.json","relativePath":"runtime/outputs/research/agent_1766723806039_rvysvlf/sources.json","size":15756}]}
+
+14. [AGENT: agent_1766724059820_0aytve4] Document Analysis: research_findings.json
+
+Size: 633 words
+Modified: Thu Dec 25 2025 23:38:35 GMT-0500 (Eastern Standard Time)
+Key Topics: {
+  "agentId": "agent_1766723806039_rvysvlf",
+  "goalId": "goal_guided_research_1766723805867",
+  "m...
+Structure: 0 sections
+
+15. Insight: Small changes in choice architecture—especially adding explicit accountability or predictable feedback—often reduce bias-driven errors more effectively than one-off training because they alter situational cues that trigger heuristics. Question: How does interpersonal accountability influence reliance on heuristics and risk-taking across different developmental stages?
+
+16. [AGENT: agent_1766725053786_xrktxu6] Quality Assurance Report:
+- Checks Performed: 3
+- Checks Passed: 2
+- Overall Confidence: 80.0%
+- Issues Found: 0
+- Recommendation: INTEGRATE
+
+✓ consistency: PASS (Insufficient content for consistency check)
+✓ completeness: PASS (No success criteria defined)
+✓ value: FAIL (No substantive output)
+
+
+
+17. [AGENT: agent_1766724281438_0d55jta] Quality Assurance Report:
+- Checks Performed: 3
+- Checks Passed: 1
+- Overall Confidence: 56.0%
+- Issues Found: 1
+- Recommendation: INTEGRATE_WITH_FLAG
+
+✓ consistency: PASS (Insufficient content for consistency check)
+✓ completeness: FAIL (Insufficient results for success criteria)
+✓ value: FAIL (No substantive output)
+
+
+Issues:
+1. Only 0 findings vs 1 success criteria
+
+18. [AGENT: agent_1766724281437_ndnodrk] Quality Assurance Report:
+- Checks Performed: 3
+- Checks Passed: 1
+- Overall Confidence: 56.0%
+- Issues Found: 1
+- Recommendation: INTEGRATE_WITH_FLAG
+
+✓ consistency: PASS (Insufficient content for consistency check)
+✓ completeness: FAIL (Insufficient results for success criteria)
+✓ value: FAIL (No substantive output)
+
+
+Issues:
+1. Only 0 findings vs 1 success criteria
+
+19. [AGENT: agent_1766724059820_0aytve4] Document analysis complete across 2 batch(es). Total documents analyzed: 3. This was completed in a single agent execution.
+
+20. [AGENT: agent_1766724332780_auwey5f] Borderline-confidence QA is best treated as a selective prediction workflow: require strong, verifiable evidence for acceptance; otherwise abstain/defer (human review or a verification pipeline), with risk-tiered thresholds and calibrated confidence aligned to observed accuracy (NIST AI RMF / TEVV framing).
+
+
+*... and 10 more findings in memory*

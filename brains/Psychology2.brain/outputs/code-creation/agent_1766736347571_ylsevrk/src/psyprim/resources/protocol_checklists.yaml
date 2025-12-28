@@ -1,0 +1,195 @@
+version: 1
+domain: history_of_psychology_primary_sources
+license: CC-BY-4.0
+defaults:
+  checklist_style: tickbox
+  severity_levels: [must, should, could]
+  provenance_flags: [verified_primary, unverified_primary, secondary_only, inferred, disputed]
+metadata_schema:
+  id: psyprim_record_v1
+  description: Minimal interoperable schema for primary-source records and citations.
+  required: [record_id, title, creators, date, doc_type, repository, identifiers, citation_target, access, provenance]
+  fields:
+    record_id: {type: string, note: Stable local ID; use slug/uuid; never reuse.}
+    title: {type: string}
+    creators: {type: list, items: {type: string}, note: Author(s)/creator(s) as on item; keep order.}
+    date:
+      type: object
+      required: [display]
+      fields:
+        display: {type: string, note: "As written (e.g., 'c. 1895', '1895-03-10')."}
+        iso: {type: string, note: ISO 8601 when known; allow partial (YYYY, YYYY-MM).}
+        certainty: {type: string, enum: [exact, approximate, inferred]}
+    doc_type: {type: string, enum: [letter, diary, manuscript, published_article, book, case_notes, lab_notebook, report, interview, artifact, other]}
+    language: {type: string, note: BCP-47 tag when possible (e.g., en, de, fr).}
+    repository:
+      type: object
+      required: [name]
+      fields:
+        name: {type: string}
+        collection: {type: string}
+        series: {type: string}
+        box: {type: string}
+        folder: {type: string}
+        call_number: {type: string}
+        city: {type: string}
+        country: {type: string}
+    identifiers:
+      type: object
+      fields:
+        doi: {type: string}
+        isbn: {type: string}
+        issn: {type: string}
+        ark: {type: string}
+        hdl: {type: string}
+        oclc: {type: string}
+        url: {type: string}
+        local: {type: list, items: {type: string}, note: Any archive-provided IDs.}
+    citation_target:
+      type: object
+      required: [type]
+      fields:
+        type: {type: string, enum: [repository_item, scan, transcript, edition]}
+        anchor: {type: string, note: "Granular locator: page/folio, timestamp, image index."}
+        canonical_cite: {type: string, note: Rendered citation string used in manuscripts.}
+        citekey: {type: string, note: BibTeX/Zotero key if applicable.}
+        linked_records: {type: list, items: {type: string}, note: IDs of related variants/editions.}
+    access:
+      type: object
+      required: [date_accessed]
+      fields:
+        date_accessed: {type: string, note: ISO date of access.}
+        restrictions: {type: string, enum: [open, reading_room_only, permission_required, embargoed, unknown]}
+        rights_note: {type: string}
+    provenance:
+      type: object
+      required: [flag, basis]
+      fields:
+        flag: {type: string, enum: [verified_primary, unverified_primary, secondary_only, inferred, disputed]}
+        basis: {type: string, note: "How primary status/claims were checked (catalog, physical inspection, curator email, etc.)."}
+        checked_by: {type: string}
+        checked_on: {type: string, note: ISO date.}
+        notes: {type: string}
+    variants:
+      type: list
+      items:
+        type: object
+        required: [variant_no, kind]
+        fields:
+          variant_no: {type: integer, note: "1..n; monotonic; never renumber."}
+          kind: {type: string, enum: [original, scan, transcript, translation, edited_edition, excerpt]}
+          derived_from: {type: integer, note: Parent variant_no when applicable.}
+          file_ref: {type: string, note: Relative path or URI; include checksum if stored.}
+          checksum: {type: string, note: sha256 if file_ref is local.}
+          normalization: {type: string, enum: [none, light, diplomatic], note: For transcripts/editions.}
+          change_log: {type: string}
+checklists:
+  - id: project_setup_v1
+    title: "Project setup (standardized primary-source workflow)"
+    applies_to: [project]
+    items:
+      - {id: scope, level: must, text: "Define research question(s) and primary-source inclusion/exclusion criteria."}
+      - {id: prereg, level: should, text: "Create preregistration/analysis-plan stub (hypotheses, endpoints, audit metrics)."}
+      - {id: roles, level: should, text: "Assign roles: intake, transcription, verification, citation QA."}
+      - {id: storage, level: must, text: "Set repository for artifacts (metadata, scans, transcripts) with versioning."}
+      - {id: conventions, level: must, text: "Adopt naming: record_id; variant_no; file_ref; checksum policy."}
+      - {id: ethics, level: must, text: "Document rights/restrictions; anonymize sensitive personal data if required."}
+
+  - id: source_intake_v1
+    title: "Source intake and verification"
+    applies_to: [record]
+    items:
+      - {id: capture_catalog, level: must, text: "Record full repository path (collection/series/box/folder/call no.)."}
+      - {id: capture_ids, level: must, text: "Record persistent identifiers (DOI/ARK/URL/local IDs) when available."}
+      - {id: primary_check, level: must, text: "Assign provenance.flag and basis; note what was inspected."}
+      - {id: access_log, level: must, text: "Record date_accessed and restriction status."}
+      - {id: variant_init, level: must, text: "Create variant_no=1 for original description; add linked variants as created."}
+      - {id: citation_seed, level: must, text: "Generate canonical_cite string + citekey; include granular anchor."}
+
+  - id: digitization_transcription_v1
+    title: "Digitization, transcription, and normalization"
+    applies_to: [variant]
+    items:
+      - {id: scan_meta, level: should, text: "For scans: store file_ref + sha256 checksum; record resolution and page range."}
+      - {id: transcript_method, level: must, text: "For transcripts: declare normalization (none/light/diplomatic) and rules."}
+      - {id: uncertain_text, level: should, text: "Mark uncertainties (illegible, supplied text) with consistent notation."}
+      - {id: pagination, level: must, text: "Maintain page/folio mapping; ensure anchors match scan/transcript."}
+      - {id: qa_double, level: should, text: "Second-pass check on a sample (>=10% or 2 pages) for transcription errors."}
+
+  - id: analysis_citation_qc_v1
+    title: "Analysis and citation quality control"
+    applies_to: [record, manuscript]
+    items:
+      - {id: link_claims, level: must, text: "For each quoted/used passage, store anchor + variant_no used."}
+      - {id: repository_linking, level: must, text: "Ensure citation links to repository item AND specific accessed surrogate (scan/transcript/edition)."}
+      - {id: provenance_flags, level: must, text: "Display provenance.flag in notes when primary status is unverified/inferred/disputed."}
+      - {id: variant_numbering, level: must, text: "Use variant_no in all internal references; never overwrite prior variants."}
+      - {id: citation_audit, level: should, text: "Run citation audit: completeness, locators, identifiers, access date; fix failures."}
+
+  - id: sharing_reproducibility_v1
+    title: "Sharing and reproducibility package"
+    applies_to: [project]
+    items:
+      - {id: export, level: must, text: "Export machine-readable metadata (YAML/JSON) and citation report."}
+      - {id: artifact_manifest, level: must, text: "Provide manifest of variants with checksums and derivation links."}
+      - {id: limitations, level: should, text: "Document missing access, restrictions, and unresolved provenance disputes."}
+      - {id: replication_notes, level: should, text: "Provide stepwise reproduction notes: how sources were found and verified."}
+tooling_minimum_viable_features:
+  - id: provenance_flagging
+    description: "Per-record provenance.flag with visible warnings and audit export."
+    required_fields: [provenance.flag, provenance.basis, provenance.checked_on]
+  - id: variant_numbering
+    description: "Monotonic variant_no with derived_from graph; prevents silent overwrite."
+    rules:
+      - "variant_no starts at 1; increment only."
+      - "derived_from references parent variant_no when creating scan/transcript/edition."
+  - id: repository_citation_linking
+    description: "Link citations to repository metadata + accessed surrogate; support granular anchors."
+    outputs: [canonical_cite, citekey, citation_report]
+  - id: checklist_runner
+    description: "Run checklists, store pass/fail with timestamps and actor; export for audits."
+  - id: metadata_validation
+    description: "Validate required schema fields and controlled vocab; report actionable errors."
+  - id: evaluation_exports
+    description: "Produce de-identified metrics for surveys/audits: time-on-task, error counts, completeness."
+
+evaluation_design:
+  outcomes:
+    citation_accuracy:
+      definition: "Percent citations passing completeness+locator+identifier checks; adjudicated against repository records."
+      primary_metrics: [missing_locator_rate, wrong_repository_rate, missing_access_date_rate, identifier_mismatch_rate]
+    reproducibility:
+      definition: "Independent retriever can locate the exact referenced passage/item within time limit."
+      primary_metrics: [retrieval_success_rate, median_retrieval_time_min, variant_trace_success_rate]
+    researcher_effort:
+      definition: "Time and perceived burden to create/maintain records and citations."
+      primary_metrics: [minutes_per_record, nasa_tlx_short, perceived_usefulness_likert]
+  designs:
+    - id: survey_prepost_v1
+      type: "within-subject pre/post"
+      sample: "Graduate students + faculty in history of psych / adjacent fields"
+      procedure:
+        - "Baseline: self-report current practices; complete 10-item citation knowledge quiz."
+        - "Intervention: use tool+protocol on a small set (n≈3-5) of primary sources."
+        - "Post: usability (SUS), workload (NASA-TLX short), intent-to-adopt, perceived transparency."
+      analysis: "Paired tests + mixed models with participant random intercept; report effect sizes + CIs."
+    - id: audit_study_randomized_v1
+      type: "randomized controlled audit"
+      units: "citation instances or short source-to-claim tasks"
+      arms: ["business_as_usual", "protocol_only", "protocol_plus_tool"]
+      materials: "Curated packet of archival descriptions + scans with known ground truth."
+      procedure:
+        - "Participants produce citations and store source records under assigned condition."
+        - "Blind auditors rate citation completeness and attempt retrieval of referenced passage."
+      analysis: "Compare arms on accuracy/retrieval/effort; preregister stopping rule and exclusion criteria."
+  audit_instruments:
+    citation_audit_check:
+      pass_criteria:
+        - "Repository name + collection path present"
+        - "Locator/anchor present (page/folio/image/timestamp)"
+        - "Identifier or stable URL present when available"
+        - "Access date recorded"
+        - "Variant_no referenced for quotes/claims"
+    reproducibility_attempt:
+      time_limit_min: 20
+      success_definition: "Auditor finds the same passage/item; matches anchor and variant trace."

@@ -1,0 +1,96 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766732620200_ez6mbyg",
+  "agentType": "code-creation",
+  "goalId": "goal_93",
+  "missionId": "strategic_goal_93_1766732620200",
+  "spawnCycle": 88,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T07:03:43.930Z",
+  "completedAt": "2025-12-26T07:05:21.044Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "description": "GitHub Actions CI workflow that checks out the repo, sets up Python, runs the one-command runner, verifies runtime/_build is present and non-empty, and uploads runtime/_build as a build artifact.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/verify-build-artifacts.yml\"]\nSUMMARY: Added a GitHub Actions CI workflow to run the one-command runner, verify runtime/_build is present and non-empty, and upload it as an artifact.\n",
+          "timestamp": "2025-12-26T07:04:10.932Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/verify-build-artifacts.yml\"]\nSummary: Added a GitHub Actions CI workflow that runs the project's runner, verifies runtime/_build is non-empty, and uploads it as an artifact.\n",
+          "timestamp": "2025-12-26T07:04:41.088Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:03:43.930Z",
+      "failedAt": "2025-12-26T07:04:41.088Z"
+    },
+    {
+      "path": "ci/verify_artifacts.py",
+      "description": "Python verification script that fails CI if runtime/_build is missing or contains no files (optionally ignoring common junk files) and prints a concise inventory for debugging.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:ci/verify_artifacts.py\nDIR_STATE:[\"ci/verify_artifacts.py\"]\nSummary: Added a CI-oriented artifact verification script that fails if runtime/_build is missing or empty and prints a concise inventory.\n",
+          "timestamp": "2025-12-26T07:05:00.437Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:ci/verify_artifacts.py\nDIR_STATE:[\"ci/verify_artifacts.py\"]\nSummary: Added a CI verification script that fails when runtime/_build is missing/empty and prints a concise artifact inventory for debugging.\n",
+          "timestamp": "2025-12-26T07:05:21.044Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:03:43.930Z",
+      "failedAt": "2025-12-26T07:05:21.044Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Add minimal CI configuration that runs the one-command runner and then runs the artifact verification step, failing if runtime/_build artifacts are missing/empty and uploading runtime/_build as a CI artifact.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Persistent audits report 0 execution results; CI is required to enforce artifact creation and preserve evidence of successful runs."
+  ],
+  "projectName": "generated_configuration_1766732620467",
+  "language": "python",
+  "type": "configuration",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-26T07:05:21.044Z",
+  "summary": {
+    "completed": 0,
+    "failed": 2,
+    "total": 2
+  }
+}

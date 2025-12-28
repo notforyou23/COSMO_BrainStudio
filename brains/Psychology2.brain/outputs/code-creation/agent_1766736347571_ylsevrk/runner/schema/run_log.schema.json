@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/run_log.schema.json",
+  "title": "Runner Run Log",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "runId", "startedAt", "status", "environment"],
+  "properties": {
+    "schemaVersion": { "type": "string", "description": "Version of this run-log schema." },
+    "runId": { "type": "string", "description": "Unique identifier for this execution run." },
+    "pipeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "entrypoint": { "type": "string" }
+      }
+    },
+    "startedAt": { "type": "string", "format": "date-time" },
+    "endedAt": { "type": "string", "format": "date-time" },
+    "durationMs": { "type": "integer", "minimum": 0 },
+    "status": { "type": "string", "enum": ["success", "failure", "cancelled", "partial"] },
+    "error": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": { "type": "string" },
+        "message": { "type": "string" },
+        "stack": { "type": "string" }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "inputPaths": { "type": "array", "items": { "type": "string" } },
+        "outputPaths": { "type": "array", "items": { "type": "string" } },
+        "logPaths": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "description": "Reproducibility and version metadata for the execution environment.",
+      "additionalProperties": false,
+      "required": ["python", "platform"],
+      "properties": {
+        "python": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["version"],
+          "properties": {
+            "version": { "type": "string", "description": "sys.version (or equivalent)." },
+            "implementation": { "type": "string", "description": "CPython/PyPy/etc." },
+            "executable": { "type": "string" },
+            "pipVersion": { "type": "string" }
+          }
+        },
+        "platform": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["system", "release", "machine"],
+          "properties": {
+            "system": { "type": "string", "description": "OS name (e.g., Linux, Darwin, Windows)." },
+            "release": { "type": "string" },
+            "version": { "type": "string" },
+            "machine": { "type": "string" },
+            "processor": { "type": "string" }
+          }
+        },
+        "container": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "image": { "type": "string" },
+            "imageDigest": { "type": "string" },
+            "runtime": { "type": "string", "description": "docker/podman/other." }
+          }
+        },
+        "dependencies": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "lockfile": { "type": "string", "description": "Path to lock manifest used for this run." },
+            "lockfileSha256": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" },
+            "pipFreeze": { "type": "array", "items": { "type": "string" }, "description": "Raw pip freeze lines (optional)." },
+            "resolved": {
+              "type": "array",
+              "description": "Resolved packages (preferred structured form).",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name", "version"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "version": { "type": "string" },
+                  "specifier": { "type": "string", "description": "Original requirement specifier, if known." },
+                  "direct": { "type": "boolean", "description": "True if direct dependency." }
+                }
+              }
+            }
+          }
+        },
+        "tools": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "runner": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": { "type": "string" },
+                "version": { "type": "string" },
+                "gitCommit": { "type": "string" }
+              }
+            },
+            "validators": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["name"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "version": { "type": "string" },
+                  "command": { "type": "string" }
+                }
+              }
+            },
+            "smokeTest": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": { "type": "string" },
+                "passed": { "type": "boolean" },
+                "details": { "type": "string" },
+                "startedAt": { "type": "string", "format": "date-time" },
+                "endedAt": { "type": "string", "format": "date-time" }
+              }
+            }
+          }
+        },
+        "manifest": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "path": { "type": "string", "description": "Path to environment.manifest.json used for this run." },
+            "sha256": { "type": "string", "pattern": "^[A-Fa-f0-9]{64}$" }
+          }
+        }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "description": "Free-form additional metadata.",
+      "additionalProperties": true
+    }
+  }
+}

@@ -1,0 +1,339 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766738871885_6jrar9j",
+  "agentType": "code-creation",
+  "goalId": "goal_135",
+  "missionId": "strategic_goal_135_1766738871885",
+  "spawnCycle": 152,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T08:48:07.462Z",
+  "completedAt": null,
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "README.md",
+      "description": "Project overview with setup, dataset format, and end-to-end instructions to run the retrieve-then-verify baseline and evaluation outputs.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T08:48:36.252Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T08:49:08.309Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:48:07.462Z",
+      "failedAt": "2025-12-26T08:49:08.309Z"
+    },
+    {
+      "path": "pyproject.toml",
+      "description": "Python project configuration including dependencies, console scripts, and tool settings for a minimal reproducible baseline.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T08:49:22.159Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": ".manifest.json\", \"exec_1766738977638_2n4vixa.py\", \"package.json\", \"protocol_plan.md\", \"pyproject.toml\", \"pytest.ini\", \"requirements.lock.txt\", \"requirements.txt\", \"run_all.py\", \"run_pipeline.py\", \"runner.yaml\", \"verify_artifacts.py\", \"verify_build_artifacts.py\"]\nSUMMARY: Created a minimal pyproject.toml with dependencies, console entrypoints, and lint/test tool configuration for the RTV baseline.\n",
+          "timestamp": "2025-12-26T08:49:37.695Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:48:07.462Z",
+      "failedAt": "2025-12-26T08:49:37.695Z"
+    },
+    {
+      "path": "src/rtv_baseline/__init__.py",
+      "description": "Package initializer exposing the main pipeline and evaluation entrypoints for the retrieve-then-verify baseline.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/rtv_baseline/__init__.py\nDIR_STATE:[\"src/rtv_baseline/__init__.py\"]\nSUMMARY: Added package initializer exposing lazy-imported pipeline and evaluation entrypoints.\n",
+          "timestamp": "2025-12-26T08:50:01.170Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/rtv_baseline/__init__.py\nDIR_STATE:[\"src/rtv_baseline/__init__.py\"]\nSUMMARY: Added a stable package API that exposes pipeline and evaluation entrypoints with lightweight, lazy imports.\n",
+          "timestamp": "2025-12-26T08:50:17.516Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:48:07.462Z",
+      "failedAt": "2025-12-26T08:50:17.516Z"
+    },
+    {
+      "path": "src/rtv_baseline/types.py",
+      "description": "Dataclasses and type definitions for atomic claims, evidence chunks, retrieval results, verification decisions, and evaluation records.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/rtv_baseline/types.py\nDIR_STATE:[\"src/rtv_baseline/__init__.py\", \"src/rtv_baseline/types.py\"]\nSUMMARY: Implemented compact dataclasses and enums for claims, evidence, retrieval, verification, and evaluation records.\n",
+          "timestamp": "2025-12-26T08:50:38.651Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/rtv_baseline/types.py\nDIR_STATE:[\"src/rtv_baseline/__init__.py\", \"src/rtv_baseline/types.py\"]\nSummary: Implemented compact dataclasses and enums for claims, evidence, retrieval, verification, and evaluation records with serialization helpers.\n",
+          "timestamp": "2025-12-26T08:51:01.972Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:48:07.462Z",
+      "failedAt": "2025-12-26T08:51:01.972Z"
+    },
+    {
+      "path": "src/rtv_baseline/claim_decompose.py",
+      "description": "Rule-based claim decomposition that converts an input claim into atomic claims with fixed machine-readable fields (subject, predicate, scope, provenance requirements).",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/rtv_baseline/claim_decompose.py\nDIR_STATE:[\"src/rtv_baseline/__init__.py\", \"src/rtv_baseline/claim_decompose.py\", \"src/rtv_baseline/types.py\"]\nSummary: Added a compact rule-based claim decomposition module that emits atomic claims with subject/predicate/scope fields and provenance requirements.\n",
+          "timestamp": "2025-12-26T08:51:44.583Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/rtv_baseline/claim_decompose.py\nDIR_STATE:[\"src/rtv_baseline/__init__.py\", \"src/rtv_baseline/claim_decompose.py\", \"src/rtv_baseline/types.py\"]\nSUMMARY: Implemented a minimal rule-based claim decomposition that emits atomic claims with subject/predicate/object, scope, and provenance requirements.\n",
+          "timestamp": "2025-12-26T08:52:20.908Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:48:07.462Z",
+      "failedAt": "2025-12-26T08:52:20.908Z"
+    },
+    {
+      "path": "src/rtv_baseline/retrieval.py",
+      "description": "Minimal retriever (BM25-like + optional TF-IDF fallback) over a local corpus with chunking, scoring, and top-k evidence selection.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/rtv_baseline/retrieval.py\nDIR_STATE:[\"src/rtv_baseline/__init__.py\", \"src/rtv_baseline/claim_decompose.py\", \"src/rtv_baseline/retrieval.py\", \"src/rtv_baseline/types.py\"]\nSummary: Wrote a minimal BM25-like retriever with local corpus chunking, scoring, and TF-IDF fallback for top-k evidence selection.\n",
+          "timestamp": "2025-12-26T08:52:51.273Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/rtv_baseline/retrieval.py\nDIR_STATE:[\"src/rtv_baseline/__init__.py\", \"src/rtv_baseline/claim_decompose.py\", \"src/rtv_baseline/retrieval.py\", \"src/rtv_baseline/types.py\"]\nMinimal BM25-like retriever with chunking and TF-IDF fallback written for the baseline pipeline.\n",
+          "timestamp": "2025-12-26T08:53:21.643Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:48:07.462Z",
+      "failedAt": "2025-12-26T08:53:21.643Z"
+    },
+    {
+      "path": "src/rtv_baseline/verify.py",
+      "description": "Quote-attribution checks and support/contradict/insufficient decision logic with an abstain rule based on evidence quality and calibration thresholds.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T08:53:57.682Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/rtv_baseline/verify.py\nDIR_STATE:[\"src/rtv_baseline/__init__.py\", \"src/rtv_baseline/claim_decompose.py\", \"src/rtv_baseline/retrieval.py\", \"src/rtv_baseline/types.py\", \"src/rtv_baseline/verify.py\"]\nSummary: Wrote verify.py implementing quote-attribution scoring, heuristic support/contradict/insufficient labeling, and a calibration-threshold-based abstain rule.\n",
+          "timestamp": "2025-12-26T08:54:45.512Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:48:07.462Z",
+      "failedAt": "2025-12-26T08:54:45.512Z"
+    },
+    {
+      "path": "src/rtv_baseline/calibration.py",
+      "description": "Calibration utilities (temperature scaling / isotonic option) and risk-tier thresholding to control false-accept rates under specified budgets.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "/calibration.py\nDIR_STATE:[\"src/rtv_baseline/__init__.py\", \"src/rtv_baseline/calibration.py\", \"src/rtv_baseline/claim_decompose.py\", \"src/rtv_baseline/retrieval.py\", \"src/rtv_baseline/types.py\", \"src/rtv_baseline/verify.py\"]\nSummary: Added calibration utilities for temperature/isotonic probability calibration plus risk-tier thresholding to control false-accept rates and basic calibration metrics.\n",
+          "timestamp": "2025-12-26T08:55:30.775Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/rtv_baseline/calibration.py\nDIR_STATE:[\"src/rtv_baseline/__init__.py\", \"src/rtv_baseline/calibration.py\", \"src/rtv_baseline/claim_decompose.py\", \"src/rtv_baseline/retrieval.py\", \"src/rtv_baseline/types.py\", \"src/rtv_baseline/verify.py\"]\nSummary: Added calibration utilities (temperature/isotonic), ECE/log-loss metrics, and risk-tier thresholds controlling false-accept rates.\n",
+          "timestamp": "2025-12-26T08:56:09.707Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:48:07.462Z",
+      "failedAt": "2025-12-26T08:56:09.707Z"
+    },
+    {
+      "path": "src/rtv_baseline/eval.py",
+      "description": "Evaluation runner for a curated dataset computing accuracy, abstention, calibration metrics, and false-accept at multiple risk tiers with report export.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T08:56:44.669Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "TATE:[\"src/rtv_baseline/__init__.py\", \"src/rtv_baseline/calibration.py\", \"src/rtv_baseline/claim_decompose.py\", \"src/rtv_baseline/eval.py\", \"src/rtv_baseline/retrieval.py\", \"src/rtv_baseline/types.py\", \"src/rtv_baseline/verify.py\"]\nSUMMARY: Added an evaluation runner that merges predictions, computes accuracy/abstention, calibration, and false-accept-at-risk metrics, and exports JSON/CSV reports.\n",
+          "timestamp": "2025-12-26T08:57:27.394Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:48:07.462Z",
+      "failedAt": "2025-12-26T08:57:27.394Z"
+    },
+    {
+      "path": "src/rtv_baseline/cli.py",
+      "description": "Command-line interface to build the corpus index, run the retrieve-then-verify pipeline on examples, and execute calibrated evaluation with saved artifacts.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "pending",
+      "attempts": 0,
+      "errors": [],
+      "createdAt": "2025-12-26T08:48:07.462Z"
+    },
+    {
+      "path": "data/curated_eval.jsonl",
+      "description": "Small curated evaluation set in JSONL with claims, expected labels, and optional gold evidence to test decomposition, retrieval, verification, and abstention.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "pending",
+      "attempts": 0,
+      "errors": [],
+      "createdAt": "2025-12-26T08:48:07.462Z"
+    },
+    {
+      "path": "tests/test_pipeline_smoke.py",
+      "description": "Smoke tests ensuring decomposition, retrieval, verification, calibration, and evaluation run end-to-end on the curated set with deterministic outputs.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "pending",
+      "attempts": 0,
+      "errors": [],
+      "createdAt": "2025-12-26T08:48:07.462Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Implement a minimal retrieve-then-verify baseline with: (a) claim decomposition, (b) retrieval, (c) quote-attribution checks, (d) support label + abstain rule; then evaluate on a small curated set with calibration + false-accept at risk tiers.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Directly operationalizes an evidence-first disposition for borderline-confidence QA by enforcing retrieve-then-verify with strict source/quote requirements and abstaining when support is weak. This is..."
+  ],
+  "projectName": "generated_script_1766738872100",
+  "language": "python",
+  "type": "script",
+  "status": "in_progress",
+  "requirements": [],
+  "lastSavedAt": "2025-12-26T08:57:27.394Z"
+}

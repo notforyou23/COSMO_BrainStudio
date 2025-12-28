@@ -1,0 +1,214 @@
+version: 1
+plan_id: sample_multiwave_zpd_cog_to_decisions
+title: Multi-wave RCT linking within-child EF/processing speed growth to reasoning & decisions via ZPD support
+design:
+  unit_of_randomization: child
+  masking: open_label_with_blinded_assessors
+  allocation:
+    method: blocked_stratified_randomization
+    strata: [site, grade, baseline_EF_quartile]
+    block_sizes: [8, 12]
+cohorts:
+  - cohort_id: C1_grade3
+    sites: [S1, S2]
+    target_n: 320
+    age_range_years: [8, 10]
+    inclusion: [enrolled_grade_3, caregiver_consent]
+    exclusion: [unmanaged_sleep_disorder, severe_sensory_impairment]
+waves:
+  - wave: W0
+    label: baseline
+    week: 0
+  - wave: W1
+    label: acquisition_1
+    week: 4
+  - wave: W2
+    label: acquisition_2
+    week: 8
+  - wave: W3
+    label: immediate_post
+    week: 12
+  - wave: W4
+    label: transfer_probe
+    week: 20
+  - wave: W5
+    label: durability_followup
+    week: 36
+interventions:
+  factors:
+    - factor_id: arm
+      type: between_subjects
+      levels:
+        - id: control_business_as_usual
+          description: Regular instruction; assessment-only; no added supports.
+        - id: choice_architecture_nudge
+          description: Defaults, option ordering, friction reduction, and salient reminders in learning/decision tasks.
+          components:
+            - default_opt_in_for_practice
+            - simplify_choice_set
+            - timely_prompts_at_choice_points
+            - feedback_with_social_norms
+        - id: targeted_debiasing
+          description: Micro-lessons + practice targeting base-rate neglect, anchoring, and sunk-cost with reflection prompts.
+          components:
+            - debiasing_rules_of_thumb
+            - counterexample_generation
+            - precommitment_checklists
+        - id: sleep_restoration
+          description: Sleep hygiene + light exposure timing + caregiver coaching; optional school schedule adjustments where feasible.
+          components:
+            - bedtime_routine_protocol
+            - morning_light_plan
+            - caffeine_screening
+            - caregiver_support_calls
+    - factor_id: zpd_type
+      type: within_arm_subrandomization
+      levels:
+        - id: modeling
+          description: Adult/peer demonstrates strategy with think-aloud.
+        - id: prompting
+          description: Graduated prompts; cues to next step.
+        - id: metacognitive_questioning
+          description: Why/how questions; error-monitoring prompts.
+    - factor_id: zpd_timing
+      type: within_arm_subrandomization
+      levels:
+        - id: just_in_time
+          description: Triggered by performance/latency thresholds during task.
+        - id: pre_task
+          description: Provided before task as anticipatory scaffold.
+        - id: post_error
+          description: Delivered immediately after an error or impasse.
+    - factor_id: zpd_fading
+      type: within_arm_subrandomization
+      levels:
+        - id: rapid_fade
+          description: High initial support then steep reduction across sessions.
+        - id: gradual_fade
+          description: Stepwise reduction contingent on mastery criteria.
+        - id: none_constant
+          description: Constant support intensity (tests necessity of fading).
+  delivery:
+    session_frequency_per_week: 2
+    session_minutes: 25
+    total_weeks: 12
+    implementers: [trained_RA, teacher_partner]
+    fidelity_capture: [audio_log, checklist, timestamped_prompt_events]
+outcomes_and_measures:
+  proximal_mediators:
+    - id: EF_inhibition
+      construct: executive_function
+      method: task
+      instruments: [go_nogo, flanker]
+      cadence: [W0, W1, W2, W3, W5]
+    - id: EF_updating
+      construct: executive_function
+      method: task
+      instruments: [n_back_child, digit_span_backward]
+      cadence: [W0, W2, W3, W5]
+    - id: working_memory_load_cost
+      construct: processing_efficiency
+      method: task_metric
+      instruments: [dual_task_cost]
+      cadence: [W0, W1, W3, W4, W5]
+    - id: processing_speed
+      construct: processing_speed
+      method: task
+      instruments: [symbol_search, simple_rt]
+      cadence: [W0, W1, W2, W3, W5]
+    - id: sleep_duration_efficiency
+      construct: sleep
+      method: wearable_plus_diary
+      instruments: [actigraphy, sleep_diary]
+      cadence: [W0, W2, W3, W5]
+    - id: zpd_support_dose
+      construct: social_support
+      method: log_derived
+      instruments: [prompt_count, prompt_latency, fade_slope]
+      cadence: [W1, W2, W3]
+  intermediate_constructs:
+    - id: reasoning_fluid
+      construct: reasoning
+      method: task
+      instruments: [matrix_reasoning, relational_reasoning]
+      cadence: [W0, W3, W4, W5]
+    - id: strategy_use
+      construct: self_regulation
+      method: observation_plus_selfreport
+      instruments: [strategy_checklist, think_aloud_coding]
+      cadence: [W1, W3, W4]
+  distal_real_world_outcomes:
+    - id: classroom_decision_quality
+      construct: real_world_decision_making
+      method: teacher_report
+      instruments: [decision_skills_rating]
+      cadence: [W0, W3, W5]
+    - id: risk_time_preferences
+      construct: decision_making
+      method: incentivized_tasks
+      instruments: [delay_discounting, risk_lottery_choice]
+      cadence: [W0, W3, W4, W5]
+    - id: academic_transfer
+      construct: transfer
+      method: records_plus_assessment
+      instruments: [math_word_problems, reading_inference]
+      cadence: [W0, W4, W5]
+transfer_and_durability:
+  transfer_probes:
+    wave: W4
+    domains: [novel_reasoning_tasks, novel_choice_sets, classroom_projects]
+    conditions: [no_scaffold, minimal_scaffold]
+  durability_window:
+    start_wave: W3
+    end_wave: W5
+    maintenance_support:
+      enabled: true
+      schedule: {weeks: [14, 16, 18], minutes: 10}
+analysis_plan:
+  estimands:
+    primary: intention_to_treat
+    secondary: complier_average_causal_effect
+  causal_chain_tests:
+    - id: mediation_EF_to_reasoning
+      type: longitudinal_mediation
+      iv: arm
+      mediator: [EF_inhibition, EF_updating, processing_speed]
+      dv: reasoning_fluid
+      waves: {iv: W0, mediator: [W1, W2, W3], dv: [W3, W4, W5]}
+      model: multilevel_sem_with_random_slopes
+    - id: moderation_by_ZPD
+      type: moderation
+      iv: arm
+      moderators: [zpd_type, zpd_timing, zpd_fading, zpd_support_dose]
+      dv: [reasoning_fluid, risk_time_preferences]
+      model: hierarchical_interaction_models
+    - id: sleep_pathway
+      type: mediation
+      iv: arm
+      mediator: sleep_duration_efficiency
+      dv: [processing_speed, EF_inhibition, classroom_decision_quality]
+      waves: {mediator: [W2, W3], dv: [W3, W5]}
+    - id: transfer_vs_durability
+      type: contrast
+      dv: [academic_transfer, novel_reasoning_tasks, risk_time_preferences]
+      contrasts:
+        - name: immediate_gain
+          waves: [W0, W3]
+        - name: transfer_gain
+          waves: [W0, W4]
+        - name: durability_retention
+          waves: [W3, W5]
+      model: mixed_effects_growth_with_piecewise_slopes
+logistics:
+  data_collection:
+    devices: {tablets: 20, actigraphy_units: 120}
+    assessor_training_hours: 12
+    language_support: [en, es]
+  adherence_and_fidelity:
+    thresholds:
+      min_sessions_attended: 18
+      min_wearable_nights: 10
+    monitoring: [weekly_dashboard, protocol_deviation_review]
+  ethics_and_safety:
+    consent: caregiver_and_child_assent
+    adverse_event_monitoring: [sleep_excessive_daytime_sleepiness_check]

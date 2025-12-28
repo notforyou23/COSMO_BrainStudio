@@ -1,0 +1,386 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766738413567_chx1uai",
+  "agentType": "code-creation",
+  "goalId": "goal_226",
+  "missionId": "urgent_goal_226_1766738413567",
+  "spawnCycle": 145,
+  "coordinatorReview": null,
+  "spawnedBy": "meta_coordinator_urgent",
+  "triggerSource": "urgent_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T08:40:25.826Z",
+  "completedAt": "2025-12-26T08:52:05.912Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "src/cli_tool/__init__.py",
+      "description": "Defines the cli_tool package version and exports the canonical public entrypoints used by the runner and CLI.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/cli_tool/__init__.py\nDIR_STATE:[\"src/cli_tool/__init__.py\", \"src/cli_tool/changelog.py\", \"src/cli_tool/scaffold.py\"]\nSummary: Added package version resolution and lazy-exported canonical CLI/runner entrypoints for a stable public API.\n",
+          "timestamp": "2025-12-26T08:40:37.779Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/cli_tool/__init__.py\nDIR_STATE:[\"src/cli_tool/__init__.py\", \"src/cli_tool/changelog.py\", \"src/cli_tool/scaffold.py\"]\nSUMMARY: Added package versioning and lazy-exported canonical entrypoints (app, run) for the unified CLI/runner.\n",
+          "timestamp": "2025-12-26T08:40:54.976Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.826Z",
+      "failedAt": "2025-12-26T08:40:54.976Z"
+    },
+    {
+      "path": "src/cli_tool/cli.py",
+      "description": "Implements the single canonical Typer-based CLI entrypoint with flags for risk thresholds and claim decomposition toggling and dispatches runs to the unified runner.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/cli_tool/cli.py\nDIR_STATE:[\"src/cli_tool/__init__.py\", \"src/cli_tool/changelog.py\", \"src/cli_tool/cli.py\", \"src/cli_tool/scaffold.py\"]\nSummary: Added a canonical Typer CLI entrypoint with risk threshold and claim decomposition flags that dispatches to the unified runner.\n",
+          "timestamp": "2025-12-26T08:41:14.963Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/cli_tool/cli.py\nDIR_STATE:[\"src/cli_tool/__init__.py\", \"src/cli_tool/changelog.py\", \"src/cli_tool/cli.py\", \"src/cli_tool/scaffold.py\"]\nImplemented the canonical Typer CLI entrypoint with risk-threshold and claim-decomposition flags that dispatches runs to the unified runner.\n",
+          "timestamp": "2025-12-26T08:41:48.258Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.826Z",
+      "failedAt": "2025-12-26T08:41:48.258Z"
+    },
+    {
+      "path": "src/cli_tool/runner.py",
+      "description": "Implements the single canonical runner that creates one deterministic build directory under runtime/_build/, executes the pipeline, and coordinates structured artifact emission.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/cli_tool/runner.py\nDIR_STATE:[\"src/cli_tool/__init__.py\", \"src/cli_tool/changelog.py\", \"src/cli_tool/cli.py\", \"src/cli_tool/runner.py\", \"src/cli_tool/scaffold.py\"]\nSummary: Implemented a single deterministic canonical runner that creates runtime/_build/<config_hash>, runs the pipeline, and writes logs, manifest, decision traces, and result artifacts.\n",
+          "timestamp": "2025-12-26T08:42:29.797Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/cli_tool/runner.py\nDIR_STATE:[\"src/cli_tool/__init__.py\", \"src/cli_tool/changelog.py\", \"src/cli_tool/cli.py\", \"src/cli_tool/runner.py\", \"src/cli_tool/scaffold.py\"]\nSUMMARY: Implemented a single deterministic canonical runner that creates runtime/_build/<run_id>/ and emits standardized manifest, logs, decision traces, and outputs with preflight determinism checks.\n",
+          "timestamp": "2025-12-26T08:43:05.859Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.826Z",
+      "failedAt": "2025-12-26T08:43:05.859Z"
+    },
+    {
+      "path": "src/cli_tool/artifacts.py",
+      "description": "Provides structured artifact writers for logs, run manifest, and decision traces with stable schemas and deterministic file naming in runtime/_build/.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/cli_tool/artifacts.py\nDIR_STATE:[\"src/cli_tool/__init__.py\", \"src/cli_tool/artifacts.py\", \"src/cli_tool/changelog.py\", \"src/cli_tool/cli.py\", \"src/cli_tool/runner.py\", \"src/cli_tool/scaffold.py\"]\nSUMMARY:Implemented deterministic, stable-schema artifact writers for run manifest, logs, and decision traces under runtime/_build/.\n",
+          "timestamp": "2025-12-26T08:43:26.371Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/cli_tool/artifacts.py\nDIR_STATE:[\"src/cli_tool/__init__.py\", \"src/cli_tool/artifacts.py\", \"src/cli_tool/changelog.py\", \"src/cli_tool/cli.py\", \"src/cli_tool/runner.py\", \"src/cli_tool/scaffold.py\"]\nSummary: Added deterministic, schema-versioned artifact writers for run manifests, structured logs, and decision traces under runtime/_build/.\n",
+          "timestamp": "2025-12-26T08:45:15.665Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.826Z",
+      "failedAt": "2025-12-26T08:45:15.665Z"
+    },
+    {
+      "path": "src/cli_tool/determinism.py",
+      "description": "Enforces deterministic constraint checks and run reproducibility by normalizing environment inputs, seeding, hashing configs, and validating invariants preflight.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/cli_tool/determinism.py\nDIR_STATE:[\"src/cli_tool/__init__.py\", \"src/cli_tool/artifacts.py\", \"src/cli_tool/changelog.py\", \"src/cli_tool/cli.py\", \"src/cli_tool/determinism.py\", \"src/cli_tool/runner.py\", \"src/cli_tool/scaffold.py\"]\nSummary: Added deterministic preflight utilities to normalize environment, seed RNGs, hash configs, and validate invariants for reproducible runs.\n",
+          "timestamp": "2025-12-26T08:45:42.729Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "LE_WRITTEN:src/cli_tool/determinism.py\nDIR_STATE:[\"src/cli_tool/__init__.py\", \"src/cli_tool/artifacts.py\", \"src/cli_tool/changelog.py\", \"src/cli_tool/cli.py\", \"src/cli_tool/determinism.py\", \"src/cli_tool/runner.py\", \"src/cli_tool/scaffold.py\"]\nSummary: Added deterministic preflight utilities for config canonicalization, stable hashing, environment normalization, seeding, and invariant validation.\n",
+          "timestamp": "2025-12-26T08:46:10.988Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.826Z",
+      "failedAt": "2025-12-26T08:46:10.988Z"
+    },
+    {
+      "path": "src/cli_tool/schemas.py",
+      "description": "Defines Pydantic models (or lightweight dataclasses) for run manifest, decision trace events, and risk threshold configuration to ensure structured outputs.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "py\nDIR_STATE:[\"src/cli_tool/__init__.py\", \"src/cli_tool/artifacts.py\", \"src/cli_tool/changelog.py\", \"src/cli_tool/cli.py\", \"src/cli_tool/determinism.py\", \"src/cli_tool/runner.py\", \"src/cli_tool/scaffold.py\", \"src/cli_tool/schemas.py\"]\nSummary: Added stable Pydantic schemas for run manifests, decision trace events, and risk threshold configuration to support structured deterministic run artifacts.\n",
+          "timestamp": "2025-12-26T08:46:26.544Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/cli_tool/schemas.py\nDIR_STATE:[\"src/cli_tool/__init__.py\", \"src/cli_tool/artifacts.py\", \"src/cli_tool/changelog.py\", \"src/cli_tool/cli.py\", \"src/cli_tool/determinism.py\", \"src/cli_tool/runner.py\", \"src/cli_tool/scaffold.py\", \"src/cli_tool/schemas.py\"]\nSUMMARY: Added stable Pydantic schemas for run manifests, decision trace events, and risk/claim-decomposition configuration.\n",
+          "timestamp": "2025-12-26T08:46:57.675Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.826Z",
+      "failedAt": "2025-12-26T08:46:57.675Z"
+    },
+    {
+      "path": "src/cli_tool/risk.py",
+      "description": "Implements risk-threshold evaluation and reporting utilities used by goal_10/goal_12 sweeps and recorded into the decision trace and manifest.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "STATE:[\"src/cli_tool/__init__.py\", \"src/cli_tool/artifacts.py\", \"src/cli_tool/changelog.py\", \"src/cli_tool/cli.py\", \"src/cli_tool/determinism.py\", \"src/cli_tool/risk.py\", \"src/cli_tool/runner.py\", \"src/cli_tool/scaffold.py\", \"src/cli_tool/schemas.py\"]\nSummary: Wrote deterministic risk threshold evaluation utilities that emit stable decision-trace and manifest fragments for goal_10/goal_12 sweeps.\n",
+          "timestamp": "2025-12-26T08:47:22.604Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "_STATE:[\"src/cli_tool/__init__.py\", \"src/cli_tool/artifacts.py\", \"src/cli_tool/changelog.py\", \"src/cli_tool/cli.py\", \"src/cli_tool/determinism.py\", \"src/cli_tool/risk.py\", \"src/cli_tool/runner.py\", \"src/cli_tool/scaffold.py\", \"src/cli_tool/schemas.py\"]\nSUMMARY: Added deterministic risk-threshold parsing and evaluation utilities that emit stable trace/manifest fragments for goal_10/goal_12 sweeps.\n",
+          "timestamp": "2025-12-26T08:47:50.924Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.826Z",
+      "failedAt": "2025-12-26T08:47:50.924Z"
+    },
+    {
+      "path": "src/cli_tool/decomposition.py",
+      "description": "Implements optional claim decomposition logic with a CLI toggle and emits decomposition steps into the decision trace for sweep comparability.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "tifacts.py\", \"src/cli_tool/changelog.py\", \"src/cli_tool/cli.py\", \"src/cli_tool/decomposition.py\", \"src/cli_tool/determinism.py\", \"src/cli_tool/risk.py\", \"src/cli_tool/runner.py\", \"src/cli_tool/scaffold.py\", \"src/cli_tool/schemas.py\"]\nSUMMARY: Added deterministic optional claim decomposition utilities that always emit structured decomposition events into the decision trace for sweep comparability.\n",
+          "timestamp": "2025-12-26T08:48:13.084Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "__.py\", \"src/cli_tool/artifacts.py\", \"src/cli_tool/changelog.py\", \"src/cli_tool/cli.py\", \"src/cli_tool/decomposition.py\", \"src/cli_tool/determinism.py\", \"src/cli_tool/risk.py\", \"src/cli_tool/runner.py\", \"src/cli_tool/scaffold.py\", \"src/cli_tool/schemas.py\"]\nSUMMARY: Added deterministic optional claim decomposition that always emits comparable decision-trace events with detailed steps and outputs.\n",
+          "timestamp": "2025-12-26T08:48:35.698Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.826Z",
+      "failedAt": "2025-12-26T08:48:35.698Z"
+    },
+    {
+      "path": "tests/test_cli_end_to_end.py",
+      "description": "End-to-end tests that invoke the CLI to ensure a single build directory is created and that logs, manifest, and decision traces are written deterministically to runtime/_build/ with the new flags.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "File not found after execution",
+          "timestamp": "2025-12-26T08:49:14.547Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "File not found after execution",
+          "timestamp": "2025-12-26T08:49:52.794Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.826Z",
+      "failedAt": "2025-12-26T08:49:52.794Z"
+    },
+    {
+      "path": "tests/test_determinism_checks.py",
+      "description": "Unit tests for deterministic constraint checks including stable run_id generation, config hashing, and invariant validation failure modes.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "test_must_cite_constraints.py\", \"tests/test_pipeline_vs_self_confidence_far.py\", \"tests/test_plan_outputs.py\", \"tests/test_preflight_logging_and_checks.py\", \"tests/test_roadmap_outputs.py\", \"tests/test_schema_and_provenance.py\", \"tests/test_validator_smoke.py\"]\nSummary: Added unit tests that enforce canonical config hashing, deterministic run_id derivation, and invariant validation failure modes.\n",
+          "timestamp": "2025-12-26T08:50:19.859Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": ", \"tests/test_must_cite_constraints.py\", \"tests/test_pipeline_vs_self_confidence_far.py\", \"tests/test_plan_outputs.py\", \"tests/test_preflight_logging_and_checks.py\", \"tests/test_roadmap_outputs.py\", \"tests/test_schema_and_provenance.py\", \"tests/test_validator_smoke.py\"]\nSummary: Added unit tests covering deterministic config hashing, stable run_id behavior, and invariant validation failure modes.\n",
+          "timestamp": "2025-12-26T08:50:41.290Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.826Z",
+      "failedAt": "2025-12-26T08:50:41.290Z"
+    },
+    {
+      "path": "README.md",
+      "description": "Documents the canonical runner usage, artifact layout under runtime/_build/, deterministic guarantees, and CLI flags for risk thresholds and claim decomposition to support goal_10/goal_12 sweeps.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T08:51:13.970Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T08:51:41.689Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.826Z",
+      "failedAt": "2025-12-26T08:51:41.689Z"
+    },
+    {
+      "path": "pyproject.toml",
+      "description": "Defines the build metadata and console script entrypoint wiring the single canonical runner CLI, plus dependencies for Typer and structured output modeling.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "txt\", \"environment.manifest.json\", \"exec_1766739115485_hv1g6xu.py\", \"package.json\", \"protocol_plan.md\", \"pyproject.toml\", \"pytest.ini\", \"requirements.lock.txt\", \"requirements.txt\", \"run_all.py\", \"run_pipeline.py\", \"runner.yaml\", \"verify_artifacts.py\", \"verify_build_artifacts.py\"]\nSUMMARY: Wrote pyproject.toml defining a single console-script entrypoint and core CLI/structured-output dependencies.\n",
+          "timestamp": "2025-12-26T08:51:55.543Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T08:52:05.911Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.826Z",
+      "failedAt": "2025-12-26T08:52:05.911Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Finalize a single canonical runner (one entrypoint, one build directory) that writes structured outputs (logs, run manifest, decision traces) to runtime/_build/ and enforces deterministic constraint checks; add CLI flags for risk thresholds and toggling claim decomposition to support goal_10/goal_12 sweeps.",
+  "missionSuccessCriteria": [
+    "Complete the urgent task identified by Meta-Coordinator",
+    "Curated insight (actionability 8-9/10): Implements the core orchestration scaffolding needed for integrated verification pipelines (single entrypoint running artifact gate → taxonomy validation → toy demo), enabling systematic experimentati..."
+  ],
+  "projectName": "generated_cli_tool_1766738413937",
+  "language": "python",
+  "type": "cli_tool",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-26T08:52:05.912Z",
+  "summary": {
+    "completed": 0,
+    "failed": 12,
+    "total": 12
+  }
+}

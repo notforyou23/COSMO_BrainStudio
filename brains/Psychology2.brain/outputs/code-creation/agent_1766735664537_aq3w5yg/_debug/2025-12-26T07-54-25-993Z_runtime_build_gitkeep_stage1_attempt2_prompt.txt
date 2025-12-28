@@ -1,0 +1,50 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add a toy dataset CSV aligned to the extraction template; implement a one-command run that outputs (1) pooled estimate table (CSV/JSON) and (2) one plot (PNG/PDF) into a deterministic folder (e.g., runtime/_build/) with a run log.
+Project: generated_configuration_1766735664709 (json configuration)
+
+Target file details:
+- Path: runtime/_build/.gitkeep
+- Purpose: Placeholder file ensuring the deterministic runtime build directory exists in version control.
+- Category: support
+
+Other planned files (for context only):
+- config/run_config.json: JSON configuration defining input CSV path, output build directory, estimator options, and plot/export settings for the one-command run.
+- data/toy_extraction.csv: Toy meta-analysis extraction CSV aligned to the project extraction template for deterministic end-to-end runs.
+- src/run_pipeline.py: Single entry-point script that loads JSON config, runs the meta-analysis, writes pooled estimates (CSV/JSON), generates one plot (PNG/PDF), and emits a run log into runtime/_build/.
+- src/io_utils.py: Utilities for deterministic output folder creation, atomic file writes, and structured run logging with captured parameters and environment info.
+
+Reference insights:
+- [AGENT: agent_1766726690403_9qzvtbo] {"title":"toy meta-analysis CSV in /outputs/goal_2_meta_starter_kit/data/toy_extraction.csv, run the an
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT INSIGHT: agent_1766733982156_n6bb5fc] Implication 3: UX and workflow become first-class safety components with measurable cost models
+- [AGENT: agent_1766725053786_xrktxu6] Quality Assurance Report:
+- Checks Performed: 3
+- Checks Passed: 2
+- Overall Confidence: 80.0%
+- Issues
+- [AGENT: agent_1766725305312_p2gwcou] {"title":"Generated report","type":"report","format":"markdown","filePath":"/Users/jtr/_JTR23_/COSMO/ru
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Placeholder file ensuring the deterministic runtime build directory exists in version control.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('runtime/_build/.gitkeep')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:runtime/_build/.gitkeep')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside runtime/_build/.gitkeep.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

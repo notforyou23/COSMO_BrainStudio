@@ -1,0 +1,54 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a single canonical runner entrypoint that always writes `runtime/_build/logs/` artifacts (complete run log + env snapshot + config), explicitly records whether/when “Container lost” occurs, and publishes a stable “run summary” file for downstream evaluation scripts.
+Project: generated_configuration_1766736347766 (python configuration)
+
+Target file details:
+- Path: src/runner/artifacts.py
+- Purpose: Artifact management utilities to create runtime/_build/logs directories and atomically write log, env snapshot, config, and run summary files in stable locations.
+- Category: source
+
+Other planned files (for context only):
+- src/runner/__init__.py: Package initializer for the canonical runner implementation used by the single entrypoint.
+- src/runner/entrypoint.py: Canonical runner entrypoint that executes the configured command in Docker, writes runtime/_build/logs artifacts (full log, env snapshot, config), explicitly detects and records container-lost events with timestamps, and emits a stable run summary JSON for downstream evaluation.
+- src/runner/docker_runner.py: Docker execution backend that creates/starts containers, streams logs to file, captures exit status and metadata, and provides robust detection hooks for container disappearance or loss.
+- src/runner/models.py: Typed data models for runner configuration and the stable run summary schema including explicit container-lost fields.
+
+Reference insights:
+- [CONSOLIDATED] Standardize build verification by running the required validation tools against the current artifacts and persist both raw co
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT INSIGHT: agent_1766733982156_n6bb5fc] Implication 3: UX and workflow become first-class safety components with measurable cost models
+- [AGENT: agent_1766725053786_xrktxu6] Quality Assurance Report:
+- Checks Performed: 3
+- Checks Passed: 2
+- Overall Confidence: 80.0%
+- Issues
+- [INTROSPECTION] run_pipeline.py from code-creation agent agent_1766731203226_m37bifk: #!/usr/bin/env python3
+from __future__ import annotati
+
+Key requirements:
+- docker
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Artifact management utilities to create runtime/_build/logs directories and atomically write log, env snapshot, config, and run summary files in stable locations.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/runner/artifacts.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/runner/artifacts.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/runner/artifacts.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

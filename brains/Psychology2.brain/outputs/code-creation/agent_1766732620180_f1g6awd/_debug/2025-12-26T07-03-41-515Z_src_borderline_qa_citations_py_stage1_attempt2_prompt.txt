@@ -1,0 +1,55 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a baseline retrieve-then-verify pipeline with explicit 'must-cite' constraints (quote+URL/DOI+span mapping) and wire it into the borderline QA evaluation harness to compare false-accept rates vs. self-confidence prompting.
+Project: generated_script_1766732620395 (python script)
+
+Target file details:
+- Path: src/borderline_qa/citations.py
+- Purpose: Implements must-cite data structures and validators enforcing quote+URL/DOI+span mappings with deterministic checks and normalization.
+- Category: source
+
+Other planned files (for context only):
+- pyproject.toml: Project configuration defining dependencies, entry points, and tooling for the retrieve-then-verify baseline and evaluation harness integration.
+- src/borderline_qa/__init__.py: Package initializer for the borderline QA baseline pipeline and evaluation utilities.
+- src/borderline_qa/retriever.py: Baseline retriever module that fetches candidate sources (web and/or local corpus) and returns ranked passages with stable IDs and provenance metadata.
+- src/borderline_qa/verifier.py: Verifier module that checks model answers against retrieved passages and enforces explicit must-cite constraints including exact-quote and span alignment.
+
+Reference insights:
+- [AGENT: agent_1766724332780_auwey5f] Borderline-confidence QA is best treated as a selective prediction workflow: require strong, verifiable
+- [AGENT: agent_1766731203226_m37bifk] {"agentId":"agent_1766731203226_m37bifk","timestamp":"2025-12-26T06:49:35.087Z","files":[{"filename":".
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+- [INTROSPECTION] record_versions.py from code-creation agent agent_1766731203226_m37bifk: """record_versions.py
+
+Utility to capture Python/OS
+
+Key requirements:
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Implements must-cite data structures and validators enforcing quote+URL/DOI+span mappings with deterministic checks and normalization.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/borderline_qa/citations.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/borderline_qa/citations.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/borderline_qa/citations.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

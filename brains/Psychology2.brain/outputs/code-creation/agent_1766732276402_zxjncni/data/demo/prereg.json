@@ -1,0 +1,40 @@
+{
+  "schema_version": "demo_prereg_v1",
+  "prereg_id": "PREREG-0001",
+  "project_id": "PROJ-DEMO",
+  "created_utc": "2025-12-26T00:00:00Z",
+  "owners": [
+    {"name": "Demo Analyst", "email": "demo@example.org"}
+  ],
+  "links": {
+    "osf": "https://osf.io/demo",
+    "registry": "https://example.org/prereg/PREREG-0001"
+  },
+  "registered_study": {
+    "study_id": "STUDY-9999",
+    "title": "Demo preregistration with intentional ID mismatches",
+    "planned_extraction_id": "EXT_0002",
+    "planned_taxonomy_release_id": "TAX-2025-99",
+    "expected_sample": "N=500"
+  },
+  "analysis_plan": {
+    "primary_outcome_id": "OUT-042",
+    "secondary_outcome_ids": ["OUT-010", "OUT-010"],
+    "eligible_taxonomy_node_ids": ["TAX:0001", "TAX:9999"],
+    "notes": "This prereg file is intentionally inconsistent with extraction CSV and taxonomy JSONL for demo validation."
+  },
+  "mismatch_intent": {
+    "reasons": [
+      "primary study_id does not match extraction/taxonomy references",
+      "planned_extraction_id uses underscore and should fail regex",
+      "duplicate outcome IDs to trigger uniqueness checks",
+      "includes an unknown taxonomy node id TAX:9999"
+    ],
+    "expected_checker_findings": [
+      "ID schema violation: planned_extraction_id EXT_0002",
+      "Duplicate ID within prereg: OUT-010",
+      "Cross-file mismatch: STUDY-9999 not found in extraction",
+      "Cross-file mismatch: TAX:9999 not found in taxonomy"
+    ]
+  }
+}

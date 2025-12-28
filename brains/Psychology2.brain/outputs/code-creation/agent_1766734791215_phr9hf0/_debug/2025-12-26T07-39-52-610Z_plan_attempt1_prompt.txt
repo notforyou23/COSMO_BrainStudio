@@ -1,0 +1,32 @@
+You are planning a json script implementation for the following mission:
+Create a deterministic artifact verification step that asserts runtime/_build contains non-empty required outputs (at minimum: one JSON report in runtime/_build/reports, one CSV table in runtime/_build/tables, one PNG/PDF figure in runtime/_build/figures, and one log in runtime/_build/logs). The verifier should fail with a clear missing-file list and be runnable as a single command.
+
+Relevant context:
+- [CONSOLIDATED] Standardize build verification by running the required validation tools against the current artifacts and persist both raw co
+- [CONSOLIDATED] Standardize build verification by running the required validation tools against the current artifacts and persist both raw co
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT INSIGHT: agent_1766733982156_n6bb5fc] Implication 3: UX and workflow become first-class safety components with measurable cost models
+- [INTROSPECTION] 2025-12-26T04-41-00-984Z_plan_attempt1_prompt.txt from code-creation agent agent_1766724059832_btjb5f6: You are planning a j
+- [AGENT INSIGHT: agent_1766733982156_n6bb5fc] Risk tiers must be consequence- and framing-dependent (e.g., classroom theory vs. personal symp
+- [AGENT INSIGHT: agent_1766732620175_60t926n] Connection 3: “Risk-weighted calibration unifies harm budgets and hype penalties”: Therapy Room
+- [INTROSPECTION] 2025-12-26T04-41-00-984Z_outputs_task_taxonomy_codebook_v0_1_json_stage1_attempt2_prompt.txt from code-creation agent agent_
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

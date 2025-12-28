@@ -1,0 +1,63 @@
+version: "3.8"
+
+name: smallest-repro-preflight
+
+x-common: &common
+  init: true
+  working_dir: /workspace
+  environment:
+    TZ: UTC
+    PYTHONUNBUFFERED: "1"
+    CI: ${CI:-}
+  volumes:
+    - type: bind
+      source: ../../
+      target: /workspace
+    - type: bind
+      source: ../../runtime/_build/incident_reports
+      target: /workspace/runtime/_build/incident_reports
+  stop_grace_period: 5s
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  tmpfs:
+    - /tmp:rw,noexec,nosuid,size=256m
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
+
+services:
+  preflight_smoke:
+    <<: *common
+    container_name: preflight_smoke
+    build:
+      context: ../../
+      dockerfile: docker/preflight/Dockerfile
+    image: smallest-repro-preflight:local
+    command: ["python", "-u", "scripts/preflight_repro.py"]
+    shm_size: "256m"
+    mem_limit: "1024m"
+    cpus: "1.0"
+    pids_limit: 256
+    ulimits:
+      nofile:
+        soft: 8192
+        hard: 8192
+    healthcheck:
+      test: ["CMD-SHELL", "python -c "import sys; sys.exit(0)""]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: "1.0"
+
+networks:
+  default:
+    name: smallest-repro-preflight-net

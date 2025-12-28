@@ -1,0 +1,82 @@
+{
+  "determinism_notes": [
+    "Prefer a Docker image build that runs smoke-test during build and again at container start.",
+    "Avoid mutable caches in the image; exclude venvs, __pycache__, .pytest_cache, and build artifacts via .dockerignore.",
+    "Run validators with fixed locale/timezone where possible (e.g., LANG=C.UTF-8, TZ=UTC)."
+  ],
+  "expectations": {
+    "os": {
+      "container_target": {
+        "constraints": [
+          "linux/amd64 preferred for deterministic wheels",
+          "no system package upgrades at runtime; install via Dockerfile"
+        ],
+        "image_family": "python",
+        "recommended_base": "python:3.11-slim"
+      },
+      "notes": "Runner may be local or containerized; record actual OS in run logs via smoke-test fingerprint."
+    },
+    "packaging": {
+      "dependency_lock": "requirements.lock.txt",
+      "install_mode": [
+        "python -m pip install --upgrade pip",
+        "python -m pip install --require-hashes -r requirements.lock.txt (preferred when hashes present)",
+        "python -m pip install -r requirements.lock.txt (fallback if lock has no hashes)"
+      ],
+      "notes": "Pinning dependencies prevents drift that can trigger instability and non-reproducible validator outcomes."
+    },
+    "python": {
+      "encoding": "utf-8",
+      "hash_seed": "PYTHONHASHSEED=0 (recommended for determinism where applicable)",
+      "minimum_version": "3.10",
+      "recommended_version": "3.11.x"
+    },
+    "tooling": {
+      "dockerfile": "docker/Dockerfile",
+      "dockerignore": "docker/.dockerignore",
+      "smoke_test_script": "scripts/smoke_test.py"
+    }
+  },
+  "generated_at_utc": "2025-12-26T06:42:28.700281+00:00",
+  "manifest_version": "1.0",
+  "name": "COSMO execution environment manifest",
+  "purpose": "Minimal reproducibility manifest describing intended runtime expectations and how to validate them before running the JSON-driven pipeline.",
+  "runlog_integration": {
+    "recording_rule": "If fingerprint generation fails, abort the run early with a clear error rather than proceeding to validators/meta-analysis.",
+    "required_runlog_fields": {
+      "captured_versions": [
+        "python_version",
+        "platform",
+        "pip_version",
+        "selected_packages"
+      ],
+      "environment_fingerprint_path": "runlogs/environment.fingerprint.json",
+      "environment_manifest_path": "environment.manifest.json"
+    }
+  },
+  "validation": {
+    "preflight_sequence": [
+      {
+        "command": "python -c \"import sys; assert sys.version_info>=(3,10), sys.version\"",
+        "id": "python_version_check",
+        "type": "command"
+      },
+      {
+        "command": "python -m pip --version",
+        "id": "pip_sanity",
+        "type": "command"
+      },
+      {
+        "command": "python scripts/smoke_test.py --write-fingerprint runlogs/environment.fingerprint.json",
+        "id": "dependency_imports_and_fingerprint",
+        "type": "command"
+      }
+    ],
+    "success_criteria": [
+      "Smoke-test exits with code 0",
+      "Fingerprint JSON is written and includes python/platform/pip and selected package versions",
+      "Runner records fingerprint + manifest reference into JSON run logs before validators/meta-analysis"
+    ]
+  },
+  "working_directory": "/Users/jtr/_JTR23_/COSMO/runtime/outputs/execution"
+}

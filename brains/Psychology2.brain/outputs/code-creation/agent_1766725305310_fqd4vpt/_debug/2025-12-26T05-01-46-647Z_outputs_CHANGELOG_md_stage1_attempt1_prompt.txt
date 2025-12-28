@@ -1,0 +1,52 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a minimal “artifact creation success” gate: create /outputs with README + folder structure + versioned CHANGELOG, then add an automated check (or manual checklist) that confirms files exist and are non-empty before ending a cycle.
+Project: /outputs with README + folder structure + versioned CHANGELOG, then add an automated check (or manual checklist) that confirms files exist and are non-empty before ending a cycle. (python script)
+
+Target file details:
+- Path: outputs/CHANGELOG.md
+- Purpose: Maintains a versioned changelog for artifacts produced across cycles with a minimal consistent format suitable for automated appends.
+- Category: documentation
+
+Other planned files (for context only):
+- src/artifact_gate.py: Implements the minimal artifact creation success gate by creating the /outputs structure (README and versioned CHANGELOG) and verifying required files exist and are non-empty before cycle completion.
+- src/__init__.py: Marks the src directory as a package to support imports for the artifact gate module and CLI entrypoint.
+- scripts/run_artifact_gate.py: Provides a runnable CLI script that invokes artifact creation and the automated existence/non-empty checks with clear exit codes for CI or manual runs.
+- tests/test_artifact_gate.py: End-to-end tests that validate folder/file creation, non-empty content enforcement, changelog versioning behavior, and failure modes when artifacts are missing or empty.
+
+Reference insights:
+- [AGENT: agent_1766724059835_bifv53h] Document Created: one-page preregistration template + analysis plan stub (saved in /outputs) tailored t
+- [AGENT: agent_1766724144474_v4ynwtw] Cycle 4 consistency review (divergence 0.93):
+Summary (given divergence score 0.93 — substantial disagr
+- [AGENT: agent_1766724479793_l5s4pac] Cycle 9 consistency review (divergence 0.96):
+Summary (high divergence: 0.96) — the three branches over
+- [AGENT: agent_1766723806039_rvysvlf] Intervention effectiveness finding (meta-analytic): Choice-architecture nudges show an overall small-to
+- [AGENT: agent_1766723822731_qlsh7fi] Cycle 1 consistency review (divergence 0.94):
+Summary verdict: The three branches are largely complemen
+
+Key requirements:
+- documentation
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Maintains a versioned changelog for artifacts produced across cycles with a minimal consistent format suitable for automated appends.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/CHANGELOG.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/CHANGELOG.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/CHANGELOG.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

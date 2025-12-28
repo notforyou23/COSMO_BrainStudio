@@ -1,0 +1,61 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Define a canonical StudyID/EffectID convention; add ID columns/fields to CSV + JSONL + prereg template; implement a checker that reports missing/duplicate/mismatched IDs; include a small demo dataset that intentionally triggers a mismatch and documents expected failure behavior.
+Project: generated_configuration_1766728380044 (python configuration)
+
+Target file details:
+- Path: src/demo/run_demo.py
+- Purpose: Runs the checker against the included demo dataset to intentionally trigger an ID mismatch and prints the expected failure behavior.
+- Category: source
+
+Other planned files (for context only):
+- src/ids/convention.py: Defines the canonical StudyID/EffectID format, validation regexes, and helpers to normalize/compare IDs across files.
+- src/ids/checker.py: Implements a CLI-capable checker that loads CSV, JSONL, and prereg templates to report missing, duplicate, and mismatched StudyID/EffectID values with actionable error messages.
+- src/ids/io.py: Provides robust readers/writers for CSV and JSONL and a parser for prereg templates to extract and validate ID fields consistently.
+- src/ids/reporting.py: Builds structured check results and renders human-readable and machine-readable summaries of ID integrity issues.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-26T05-31-29-063Z_plan_attempt1_prompt.txt from code-creation agent agent_1766727087125_7ty4nyb: You are planning a p
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+- [AGENT: agent_1766724281438_0d55jta] Quality Assurance Report:
+- Checks Performed: 3
+- Checks Passed: 1
+- Overall Confidence: 56.0%
+- Issues
+- [AGENT: agent_1766725053786_xrktxu6] Quality Assurance Report:
+- Checks Performed: 3
+- Checks Passed: 2
+- Overall Confidence: 80.0%
+- Issues
+
+Key requirements:
+- examples
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Runs the checker against the included demo dataset to intentionally trigger an ID mismatch and prints the expected failure behavior.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/demo/run_demo.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/demo/run_demo.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/demo/run_demo.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

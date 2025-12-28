@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "description": "Fixed DOI fixtures for integration testing the DOI pipeline/API/CLI. Includes known-good DOIs and intentionally bad inputs to validate expected success/failure behavior.",
+  "fixtures": [
+    {
+      "id": "crossref_valid_plosone_2009",
+      "doi": "10.1371/journal.pone.0006022",
+      "expected": {
+        "success": true
+      },
+      "notes": "Widely indexed Crossref DOI; expected to resolve and return structured metadata."
+    },
+    {
+      "id": "crossref_valid_nature_2019",
+      "doi": "10.1038/s41586-019-1666-5",
+      "expected": {
+        "success": true
+      },
+      "notes": "Commonly used Nature DOI; expected to resolve; tests handling of long suffix with hyphens."
+    },
+    {
+      "id": "crossref_valid_acm_2017",
+      "doi": "10.1145/3097983.3098169",
+      "expected": {
+        "success": true
+      },
+      "notes": "ACM DOI; expected to resolve; useful for verifying publisher variations."
+    },
+    {
+      "id": "format_with_prefix_doi_colon",
+      "doi": "doi:10.1371/journal.pone.0006022",
+      "expected": {
+        "success": true
+      },
+      "notes": "Input includes 'doi:' prefix; pipeline should normalize and still succeed."
+    },
+    {
+      "id": "format_uppercase",
+      "doi": "10.1038/S41586-019-1666-5",
+      "expected": {
+        "success": true
+      },
+      "notes": "Uppercase characters in DOI suffix; DOI matching should be case-insensitive per resolver behavior."
+    },
+    {
+      "id": "invalid_malformed_not_a_doi",
+      "doi": "not-a-doi",
+      "expected": {
+        "success": false
+      },
+      "notes": "Intentionally malformed string; should fail validation/parsing early."
+    },
+    {
+      "id": "invalid_syntax_bad_prefix",
+      "doi": "11.1234/abcd",
+      "expected": {
+        "success": false
+      },
+      "notes": "Invalid DOI prefix (must start with '10.'); should fail validation."
+    },
+    {
+      "id": "likely_nonexistent_but_well_formed",
+      "doi": "10.5555/12345678",
+      "expected": {
+        "success": false
+      },
+      "notes": "Well-formed but commonly non-resolving placeholder; should fail with not-found/resolve error."
+    }
+  ]
+}

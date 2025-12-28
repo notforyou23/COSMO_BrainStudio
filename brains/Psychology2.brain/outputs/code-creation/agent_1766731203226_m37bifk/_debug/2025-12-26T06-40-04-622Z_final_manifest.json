@@ -1,0 +1,386 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766731203226_m37bifk",
+  "agentType": "code-creation",
+  "goalId": "goal_62",
+  "missionId": "strategic_goal_62_1766731203226",
+  "spawnCycle": 75,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T06:40:13.590Z",
+  "completedAt": "2025-12-26T06:49:35.080Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "docker/Dockerfile",
+      "description": "Dockerfile that builds a pinned, reproducible runner image and executes the smoke-test before running the JSON-driven pipeline.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "Forbidden command pattern detected: /rm\\s+-rf\\s+\\//",
+          "timestamp": "2025-12-26T06:40:38.240Z"
+        },
+        {
+          "attempt": 2,
+          "message": "Forbidden command pattern detected: /rm\\s+-rf\\s+\\//",
+          "timestamp": "2025-12-26T06:40:55.868Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:40:13.590Z",
+      "failedAt": "2025-12-26T06:40:55.871Z"
+    },
+    {
+      "path": "docker/.dockerignore",
+      "description": "Docker ignore rules to keep builds deterministic and small by excluding caches, artifacts, and local virtualenvs.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docker/.dockerignore\nDIR_STATE:[\"docker/.dockerignore\", \"docker/entrypoint.sh\"]\nSUMMARY: Added deterministic .dockerignore rules to exclude caches, artifacts, and local environments for smaller, reproducible builds.\n",
+          "timestamp": "2025-12-26T06:41:06.585Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docker/.dockerignore\nDIR_STATE:[\"docker/.dockerignore\", \"docker/entrypoint.sh\"]\nSUMMARY: Added deterministic Docker ignore rules to exclude caches, artifacts, and local environments from the build context.\n",
+          "timestamp": "2025-12-26T06:41:14.671Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:40:13.590Z",
+      "failedAt": "2025-12-26T06:41:14.671Z"
+    },
+    {
+      "path": "requirements.lock.txt",
+      "description": "Pinned Python dependency lock manifest used to prevent environment drift and stabilize executions.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:requirements.lock.txt\nDIR_STATE:[\"LICENSE\", \"README.md\", \"exec_1766731295223_hrzu7o1.py\", \"exec_1766731295236_ysrm7ce.py\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\"]\nPinned dependency lock manifest written to stabilize and reproduce executions.\n",
+          "timestamp": "2025-12-26T06:41:35.283Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:requirements.lock.txt\nDIR_STATE:[\"LICENSE\", \"README.md\", \"exec_1766731308066_5rfwhtc.py\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\"]\nSUMMARY: Added a pinned requirements lock manifest to stabilize Python dependency resolution across runs.\n",
+          "timestamp": "2025-12-26T06:41:48.120Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:40:13.590Z",
+      "failedAt": "2025-12-26T06:41:48.120Z"
+    },
+    {
+      "path": "environment.manifest.json",
+      "description": "Minimal reproducibility manifest recording intended OS/Python/tooling expectations and how to validate them.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:environment.manifest.json\nDIR_STATE:[\"LICENSE\", \"README.md\", \"environment.manifest.json\", \"exec_1766731330096_d6m7bw1.py\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\"]\nSummary: Wrote a minimal environment manifest describing pinned expectations and a smoke-test-based validation workflow for reproducible runs.\n",
+          "timestamp": "2025-12-26T06:42:10.151Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:environment.manifest.json\nDIR_STATE:[\"LICENSE\", \"README.md\", \"environment.manifest.json\", \"exec_1766731348652_no1h1vp.py\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\"]\nSUMMARY: Wrote a minimal reproducibility manifest defining runtime expectations, validation steps, and run-log version capture requirements.\n",
+          "timestamp": "2025-12-26T06:42:28.710Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:40:13.590Z",
+      "failedAt": "2025-12-26T06:42:28.710Z"
+    },
+    {
+      "path": "scripts/smoke_test.py",
+      "description": "Tiny smoke-test that validates Python/runtime, imports critical deps, and writes an environment fingerprint JSON for run logs.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "ripts/docker_healthcheck.sh\", \"scripts/id_mismatch_demo.py\", \"scripts/logging_utils.py\", \"scripts/path_utils.py\", \"scripts/pipeline_runner.py\", \"scripts/preflight_diagnostics.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\"]\nSUMMARY: Added a tiny smoke-test that validates imports and writes an environment fingerprint JSON for run logs.\n",
+          "timestamp": "2025-12-26T06:42:59.286Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "d_mismatch_demo.py\", \"scripts/logging_utils.py\", \"scripts/path_utils.py\", \"scripts/pipeline_runner.py\", \"scripts/preflight_diagnostics.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\"]\nSUMMARY: Added a tiny smoke-test script that checks required imports, captures a runtime/package fingerprint, and writes it to a JSON file for run logs.\n",
+          "timestamp": "2025-12-26T06:43:26.670Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:40:13.590Z",
+      "failedAt": "2025-12-26T06:43:26.670Z"
+    },
+    {
+      "path": "scripts/record_versions.py",
+      "description": "Utility that captures package, Python, and OS versions and injects them into JSON run logs alongside the runner.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "mo.py\", \"scripts/logging_utils.py\", \"scripts/path_utils.py\", \"scripts/pipeline_runner.py\", \"scripts/preflight_diagnostics.py\", \"scripts/record_versions.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\"]\nSummary: Added a self-contained utility to capture Python/OS/package versions and inject them into JSON run logs for reproducible runs.\n",
+          "timestamp": "2025-12-26T06:43:45.200Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T06:44:09.342Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:40:13.590Z",
+      "failedAt": "2025-12-26T06:44:09.342Z"
+    },
+    {
+      "path": "runner/run_pipeline.py",
+      "description": "JSON-script runner entrypoint that runs the smoke-test first, then executes validators/meta-analysis, and persists raw logs plus version metadata.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runner/run_pipeline.py\nDIR_STATE:[\"runner/run_pipeline.py\"]\nSUMMARY: Wrote a JSON-script runner that performs a smoke-test first, captures raw stdout/stderr per step, and persists a versioned run.json log for reproducibility.\n",
+          "timestamp": "2025-12-26T06:44:47.570Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runner/run_pipeline.py\nDIR_STATE:[\"runner/run_pipeline.py\"]\nSummary: Wrote a smoke-test-first JSON pipeline runner that captures version metadata and persists raw and JSON run logs for reproducibility.\n",
+          "timestamp": "2025-12-26T06:45:19.298Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:40:13.590Z",
+      "failedAt": "2025-12-26T06:45:19.298Z"
+    },
+    {
+      "path": "runner/schema/run_log.schema.json",
+      "description": "JSON Schema defining the run-log format including environment/version fields to standardize persisted execution records.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runner/schema/run_log.schema.json\nDIR_STATE:[\"runner/schema/run_log.schema.json\"]\nSummary: Added a strict run-log JSON Schema including standardized environment and tool version fields for reproducible execution records.\n",
+          "timestamp": "2025-12-26T06:45:47.033Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runner/schema/run_log.schema.json\nDIR_STATE:[\"runner/schema/run_log.schema.json\"]\nSUMMARY: Added a run-log JSON Schema that standardizes persisted environment and version fields for reproducible executions.\n",
+          "timestamp": "2025-12-26T06:46:12.816Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:40:13.590Z",
+      "failedAt": "2025-12-26T06:46:12.816Z"
+    },
+    {
+      "path": "runner/schema/run_spec.schema.json",
+      "description": "JSON Schema defining the JSON script/run specification including steps for validation and meta-analysis with reproducibility settings.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runner/schema/run_spec.schema.json\nDIR_STATE:[\"runner/schema/run_log.schema.json\", \"runner/schema/run_spec.schema.json\"]\nSummary: Added a run specification JSON Schema with explicit reproducibility (lock+manifest+smoke-test) and version-logging requirements to stabilize executions.\n",
+          "timestamp": "2025-12-26T06:46:38.024Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runner/schema/run_spec.schema.json\nDIR_STATE:[\"runner/schema/run_log.schema.json\", \"runner/schema/run_spec.schema.json\"]\nSUMMARY: Added a strict Run Spec JSON Schema that models reproducibility (lock + manifest + smoke-test) and step execution for validation/meta-analysis.\n",
+          "timestamp": "2025-12-26T06:46:59.874Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:40:13.590Z",
+      "failedAt": "2025-12-26T06:46:59.874Z"
+    },
+    {
+      "path": "scripts/validate_json.py",
+      "description": "Schema validation tool that verifies run specs and run logs against their schemas prior to execution and persistence.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "py\", \"scripts/create_meta_analysis_starter_kit.py\", \"scripts/docker_healthcheck.sh\", \"scripts/id_mismatch_demo.py\", \"scripts/logging_utils.py\", \"scripts/path_utils.py\", \"scripts/pipeline_runner.py\", \"scripts/preflight_diagnostics.py\", \"scripts/record_versions.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\"]\n",
+          "timestamp": "2025-12-26T06:47:24.927Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "pts/path_utils.py\", \"scripts/pipeline_runner.py\", \"scripts/preflight_diagnostics.py\", \"scripts/record_versions.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\"]\nSummary: Added a jsonschema-powered CLI validator to check run spec/log JSON files against schemas with sensible defaults and clear error reporting.\n",
+          "timestamp": "2025-12-26T06:47:58.180Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:40:13.590Z",
+      "failedAt": "2025-12-26T06:47:58.180Z"
+    },
+    {
+      "path": "scripts/entrypoint.sh",
+      "description": "Container entrypoint that enforces deterministic startup, runs smoke-test, and then launches the runner with strict error handling.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "eline_runner.py\", \"scripts/preflight_diagnostics.py\", \"scripts/record_versions.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\"]\nSUMMARY: Added a strict, deterministic Bash entrypoint that captures an environment manifest, runs a smoke-test, and then execs the runner with robust discovery and error handling.\n",
+          "timestamp": "2025-12-26T06:48:22.250Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": " \"scripts/path_utils.py\", \"scripts/pipeline_runner.py\", \"scripts/preflight_diagnostics.py\", \"scripts/record_versions.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\"]\nSummary: Wrote a strict, deterministic entrypoint that runs a Python smoke-test, writes a runtime env JSON manifest, then launches the runner.\n",
+          "timestamp": "2025-12-26T06:48:48.615Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:40:13.590Z",
+      "failedAt": "2025-12-26T06:48:48.615Z"
+    },
+    {
+      "path": "README.reproducibility.md",
+      "description": "Documentation describing how to build/run via Docker, how manifests are used, and where environment versions are recorded in JSON logs.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "LOG.md\", \"LICENSE\", \"README.md\", \"README.reproducibility.md\", \"README_build_runner.md\", \"environment.manifest.json\", \"exec_1766731752369_bdb2msy.py\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\"]\nSUMMARY:Wrote reproducibility documentation describing Docker build/run, the lock+manifest files, the smoke-test gate, and where environment versions should be recorded in JSON run logs.\n",
+          "timestamp": "2025-12-26T06:49:12.435Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T06:49:35.079Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:40:13.590Z",
+      "failedAt": "2025-12-26T06:49:35.079Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Stabilize the execution environment to prevent repeats of 'container lost' by pinning dependencies and adding a minimal reproducibility manifest (requirements/environment file) plus a tiny smoke-test that confirms the environment before running validators/meta-analysis. Store the manifest alongside the runner and record versions in the JSON run logs.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "A prior CodeExecutionAgent run aborted due to environment/container instability. Without stabilization, further validation and demo runs will remain unreliable and non-auditable."
+  ],
+  "projectName": "generated_script_1766731203401",
+  "language": "json",
+  "type": "script",
+  "status": "failed",
+  "requirements": [
+    "include_docker"
+  ],
+  "lastSavedAt": "2025-12-26T06:49:35.080Z",
+  "summary": {
+    "completed": 0,
+    "failed": 12,
+    "total": 12
+  }
+}

@@ -1,0 +1,50 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Design a focused implementation-and-evaluation plan for standardized primary-source workflows and lightweight tooling in the history of psychology. Specify the protocol elements (checklists, metadata schema), the minimal viable software/plugin features (provenance flags, variant numbering, repository citation linking), and an empirical evaluation design (surveys + audit studies) that will measure effects on citation accuracy, reproducibility, and researcher effort.
+Project: generated_cli_tool_1766725784745 (python cli_tool)
+
+Target file details:
+- Path: pyproject.toml
+- Purpose: Project configuration defining the package, dependencies, console-script entry point, and tool settings for linting/testing.
+- Category: config
+
+Other planned files (for context only):
+- README.md: User-facing documentation describing the standardized primary-source workflow, protocol elements (checklists + metadata), and CLI usage examples.
+- src/psyprim/__init__.py: Package initializer exposing the library version and high-level public interfaces used by the CLI.
+- src/psyprim/cli.py: Complete Python CLI tool implementing protocol checklists, metadata validation, provenance flags, variant numbering, repository citation linking, and evaluation export commands.
+- src/psyprim/protocol.py: Protocol definitions for standardized workflows including checklist items, decision rules, and machine-readable templates.
+
+Reference insights:
+- [AGENT: agent_1766724059835_bifv53h] Document Created: one-page preregistration template + analysis plan stub (saved in /outputs) tailored t
+- [AGENT: agent_1766724144474_v4ynwtw] Cycle 4 consistency review (divergence 0.93):
+Summary (given divergence score 0.93 — substantial disagr
+- [AGENT: agent_1766724479793_l5s4pac] Cycle 9 consistency review (divergence 0.96):
+Summary (high divergence: 0.96) — the three branches over
+- [AGENT: agent_1766725305309_72n0qdt] # SYNTHESIS REPORT
+
+**Mission:** Produce a concise, actionable mission plan that defines the community 
+- [AGENT: agent_1766723806039_rvysvlf] Intervention effectiveness finding (meta-analytic): Choice-architecture nudges show an overall small-to
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Project configuration defining the package, dependencies, console-script entry point, and tool settings for linting/testing.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('pyproject.toml')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:pyproject.toml')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside pyproject.toml.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

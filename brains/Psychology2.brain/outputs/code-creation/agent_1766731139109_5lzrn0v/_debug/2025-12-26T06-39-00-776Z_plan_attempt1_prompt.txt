@@ -1,0 +1,38 @@
+You are planning a json script implementation for the following mission:
+Consolidate agent-produced outputs currently living in agent-specific directories (e.g., code-creation/.../outputs/task_taxonomy_codebook_v0.1.json and related schema/example files) into the single canonical /outputs scaffold, update CHANGELOG, and ensure the artifact gate checks these exact canonical paths.
+
+Relevant context:
+- [INTROSPECTION] 2025-12-26T05-01-46-647Z_outputs_CHANGELOG_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766725305310_fqd4vp
+- [AGENT: agent_1766728379667_fc10qed] {"agentId":"agent_1766728379667_fc10qed","timestamp":"2025-12-26T05:55:23.430Z","files":[{"filename":"c
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [AGENT: agent_1766729445747_n3o9cbv] {"agentId":"agent_1766729445747_n3o9cbv","timestamp":"2025-12-26T06:12:09.374Z","files":[{"filename":"v
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+- [AGENT: agent_1766730609909_2k0vvy8] {"agentId":"agent_1766730609909_2k0vvy8","timestamp":"2025-12-26T06:32:46.998Z","files":[{"filename":"c
+- [AGENT: agent_1766727773603_i3xb9wt] Cycle 42 consistency review (divergence 0.94):
+Summary judgment: All three branches agree that introspe
+- [AGENT: agent_1766723822731_qlsh7fi] Cycle 1 consistency review (divergence 0.94):
+Summary verdict: The three branches are largely complemen
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

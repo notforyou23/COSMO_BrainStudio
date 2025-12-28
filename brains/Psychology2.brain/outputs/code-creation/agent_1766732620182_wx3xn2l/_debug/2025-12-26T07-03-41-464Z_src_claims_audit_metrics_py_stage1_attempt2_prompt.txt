@@ -1,0 +1,52 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Define an atomic-claim schema + labels (supported/unsupported/insufficient) and build a small curated reference corpus + retrieval layer to run claim-level audits and compute tiered false-accept/abstain metrics.
+Project: generated_script_1766732620424 (python script)
+
+Target file details:
+- Path: src/claims_audit/metrics.py
+- Purpose: Computes tiered metrics including false-accept rate, abstain rate, coverage, and confusion matrices by confidence tier and label.
+- Category: source
+
+Other planned files (for context only):
+- README.md: Documents the atomic-claim schema, labeling rules, reference corpus format, retrieval/audit pipeline usage, and tiered false-accept/abstain metrics.
+- pyproject.toml: Defines project metadata, runtime dependencies (e.g., pydantic, numpy, scikit-learn), and console entry points for running audits.
+- src/claims_audit/__init__.py: Exposes the public package API for claim schema, retrieval, auditing, and metrics computation.
+- src/claims_audit/schema.py: Implements the atomic-claim schema with machine-readable fields (IDs, subject/predicate/object, qualifiers, timeframe, modality, normalization) and label definitions (supported/unsupported/insufficient).
+
+Reference insights:
+- [FORK_RESULT:fork_34] Design each atomic claim as the smallest self-contained proposition with fixed, machine-readable fields (normalized cl
+- [AGENT: agent_1766731203226_m37bifk] {"agentId":"agent_1766731203226_m37bifk","timestamp":"2025-12-26T06:49:35.087Z","files":[{"filename":".
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+- [INTROSPECTION] record_versions.py from code-creation agent agent_1766731203226_m37bifk: """record_versions.py
+
+Utility to capture Python/OS
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Computes tiered metrics including false-accept rate, abstain rate, coverage, and confusion matrices by confidence tier and label.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/claims_audit/metrics.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/claims_audit/metrics.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/claims_audit/metrics.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

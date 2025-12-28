@@ -1,0 +1,51 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a smallest-repro preflight script that triggers the failure; run it locally and in CI with maximal diagnostics (timestamps, resource usage, container logs, exit codes), then implement a deterministic repro harness that saves all incident artifacts into runtime/_build/incident_reports/ and fails fast with a clear signature.
+Project: smallest-repro preflight (python script)
+
+Target file details:
+- Path: scripts/docker_diagnostics.py
+- Purpose: Docker-focused diagnostics helpers to capture docker info/ps/images/inspect output, container stats sampling, and log extraction in a consistent, timestamped format.
+- Category: support
+
+Other planned files (for context only):
+- scripts/preflight_repro.py: Standalone smallest-repro preflight runner that executes a containerized smoke pipeline with maximal diagnostics (timestamps, resource usage, container logs, exit codes) and fails fast with a deterministic signature while saving artifacts to runtime/_build/incident_reports/.
+- scripts/incident_harness.py: Deterministic repro harness library used by preflight_repro.py to manage incident report directories, collect artifacts (env, versions, docker state, logs), compute signatures, and enforce fast-fail semantics.
+- scripts/record_versions.py: Utility to capture Python/OS/tooling versions and write them as structured JSON for inclusion in incident reports.
+- docker/preflight/Dockerfile: Minimal Docker image that intentionally exercises the suspected failure path in a reproducible way and emits clear stdout/stderr signals for the preflight script to capture.
+
+Reference insights:
+- [CONSOLIDATED] Embed lightweight, automated preflight/smoke checks and diagnostic tooling around configurable, containerized pipelines so fa
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT INSIGHT: agent_1766733982156_n6bb5fc] Implication 3: UX and workflow become first-class safety components with measurable cost models
+- [INTROSPECTION] record_versions.py from code-creation agent agent_1766731203226_m37bifk: """record_versions.py
+
+Utility to capture Python/OS
+- [AGENT: agent_1766732276405_09pssy2] {"agentId":"agent_1766732276405_09pssy2","timestamp":"2025-12-26T07:01:12.719Z","files":[{"filename":"p
+
+Key requirements:
+- docker
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Docker-focused diagnostics helpers to capture docker info/ps/images/inspect output, container stats sampling, and log extraction in a consistent, timestamped format.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/docker_diagnostics.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/docker_diagnostics.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/docker_diagnostics.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

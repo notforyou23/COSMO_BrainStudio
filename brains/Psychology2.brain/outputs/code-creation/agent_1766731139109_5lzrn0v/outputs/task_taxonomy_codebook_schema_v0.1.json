@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/schemas/task_taxonomy_codebook_schema_v0.1.json",
+  "title": "Task Taxonomy Codebook (v0.1) Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["artifact", "version", "tasks"],
+  "properties": {
+    "artifact": {
+      "type": "string",
+      "const": "task_taxonomy_codebook"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^v?0\\.1(\\.\\d+)?$"
+    },
+    "generated_at": {
+      "type": "string",
+      "description": "ISO-8601 timestamp.",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "project": { "type": "string" },
+        "run_id": { "type": "string" },
+        "notes": { "type": "string" }
+      }
+    },
+    "taxonomy": {
+      "type": "object",
+      "description": "Optional high-level taxonomy metadata.",
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "license": { "type": "string" }
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/task" }
+    },
+    "relationships": {
+      "type": "array",
+      "description": "Optional explicit edges between tasks.",
+      "items": { "$ref": "#/$defs/relationship" }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_./:-]{0,127}$"
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "definition"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "name": { "type": "string", "minLength": 1 },
+        "definition": { "type": "string", "minLength": 1 },
+        "category": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["active", "deprecated", "candidate"]
+        },
+        "aliases": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true
+        },
+        "parents": {
+          "type": "array",
+          "description": "Optional list of parent task IDs (for hierarchy).",
+          "items": { "$ref": "#/$defs/id" },
+          "uniqueItems": true
+        },
+        "children": {
+          "type": "array",
+          "description": "Optional list of child task IDs (for hierarchy).",
+          "items": { "$ref": "#/$defs/id" },
+          "uniqueItems": true
+        },
+        "inputs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/io_spec" }
+        },
+        "outputs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/io_spec" }
+        },
+        "criteria": {
+          "type": "object",
+          "description": "Optional acceptance criteria / rubric.",
+          "additionalProperties": false,
+          "properties": {
+            "success": { "type": "array", "items": { "type": "string" } },
+            "failure": { "type": "array", "items": { "type": "string" } },
+            "edge_cases": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "examples": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/example" }
+        },
+        "notes": { "type": "string" },
+        "metadata": {
+          "type": "object",
+          "description": "Reserved for producer-specific metadata (kept minimal for stability).",
+          "additionalProperties": true
+        }
+      }
+    },
+    "io_spec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "type": { "type": "string" },
+        "description": { "type": "string" },
+        "required": { "type": "boolean" }
+      }
+    },
+    "example": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "title": { "type": "string" },
+        "input": {},
+        "output": {},
+        "notes": { "type": "string" }
+      }
+    },
+    "relationship": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["from", "to", "type"],
+      "properties": {
+        "from": { "$ref": "#/$defs/id" },
+        "to": { "$ref": "#/$defs/id" },
+        "type": {
+          "type": "string",
+          "enum": ["is_a", "part_of", "related_to", "depends_on"]
+        },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}

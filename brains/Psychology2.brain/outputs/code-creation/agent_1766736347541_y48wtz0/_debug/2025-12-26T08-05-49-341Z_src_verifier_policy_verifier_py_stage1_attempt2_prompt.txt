@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a verifier policy that requires (a) retrieved source passages, (b) quote-level alignment to each decomposed claim, and (c) deterministic constraint checks; evaluate against a held-out set with calibrated thresholds and log per-claim evidence failures for audit.
+Project: generated_script_1766736347815 (python script)
+
+Target file details:
+- Path: src/verifier_policy/verifier.py
+- Purpose: Core verifier that performs claim decomposition orchestration, retrieve-then-verify, applies constraints, and emits per-claim decisions with evidence.
+- Category: source
+
+Other planned files (for context only):
+- pyproject.toml: Project metadata and pinned runtime dependencies for retrieval, NLP, and evaluation tooling.
+- README.md: Usage-focused documentation describing the retrieve-then-verify pipeline, data formats, calibration, and audit logs.
+- src/verifier_policy/__init__.py: Package initializer exposing the primary pipeline entry points and version information.
+- src/verifier_policy/schemas.py: Typed dataclasses/Pydantic-style models defining inputs/outputs for claims, passages, quotes, decisions, and audit events.
+
+Reference insights:
+- [AGENT: agent_1766724332780_auwey5f] Evidence-first verification outperforms “self-confidence prompting”: implement retrieve-then-verify wit
+- [AGENT: agent_1766731203226_m37bifk] {"agentId":"agent_1766731203226_m37bifk","timestamp":"2025-12-26T06:49:35.087Z","files":[{"filename":".
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT INSIGHT: agent_1766733982156_n6bb5fc] Implication 3: UX and workflow become first-class safety components with measurable cost models
+- [INTROSPECTION] record_versions.py from code-creation agent agent_1766731203226_m37bifk: """record_versions.py
+
+Utility to capture Python/OS
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Core verifier that performs claim decomposition orchestration, retrieve-then-verify, applies constraints, and emits per-claim decisions with evidence.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/verifier_policy/verifier.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/verifier_policy/verifier.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/verifier_policy/verifier.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

@@ -1,0 +1,63 @@
+{
+  "defaults": {
+    "case_insensitive_extensions": true,
+    "deterministic_order": true,
+    "follow_symlinks": false,
+    "min_bytes": 1,
+    "min_count": 1,
+    "recursive": true
+  },
+  "error_output": {
+    "include_dir_listing_on_failure": true,
+    "include_empty_files": true,
+    "include_missing_sets": true,
+    "max_listed_paths_per_set": 50
+  },
+  "purpose": "Deterministic verification rules for required build artifacts.",
+  "required_sets": [
+    {
+      "extensions": [
+        ".json"
+      ],
+      "id": "reports_json",
+      "label": "JSON report(s)",
+      "min_bytes": 2,
+      "min_count": 1,
+      "relative_dir": "reports"
+    },
+    {
+      "extensions": [
+        ".csv"
+      ],
+      "id": "tables_csv",
+      "label": "CSV table(s)",
+      "min_bytes": 2,
+      "min_count": 1,
+      "relative_dir": "tables"
+    },
+    {
+      "extensions": [
+        ".png",
+        ".pdf"
+      ],
+      "id": "figures_png_pdf",
+      "label": "Figure(s) (PNG/PDF)",
+      "min_bytes": 2,
+      "min_count": 1,
+      "relative_dir": "figures"
+    },
+    {
+      "extensions": [
+        ".log",
+        ".txt"
+      ],
+      "id": "logs",
+      "label": "Log file(s)",
+      "min_bytes": 2,
+      "min_count": 1,
+      "relative_dir": "logs"
+    }
+  ],
+  "root_dir": "runtime/_build",
+  "schema_version": 1
+}

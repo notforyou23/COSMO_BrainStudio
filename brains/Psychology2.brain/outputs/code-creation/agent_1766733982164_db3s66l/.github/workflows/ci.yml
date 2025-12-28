@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            python -m pip install -r requirements.txt
+          elif [ -f pyproject.toml ]; then
+            python -m pip install .
+          fi
+
+      - name: Build (produce runtime/_build artifacts)
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f runtime/build.py ]; then
+            python runtime/build.py
+          elif [ -f build.py ]; then
+            python build.py
+          elif [ -f run.py ]; then
+            python run.py
+          elif [ -f main.py ]; then
+            python main.py
+          else
+            echo "ERROR: No build entrypoint found. Expected one of: runtime/build.py, build.py, run.py, main.py"
+            exit 1
+          fi
+
+      - name: Verify build artifacts (fail loudly if missing/empty)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python verify_build_artifacts.py

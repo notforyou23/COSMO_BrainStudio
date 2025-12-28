@@ -1,0 +1,37 @@
+{
+  "content": "[\n  {\n    \"path\": \"README.md\",\n    \"description\": \"Documents the atomic-claim schema, labeling rules, reference corpus format, retrieval/audit pipeline usage, and tiered false-accept/abstain metrics.\",\n    \"category\": \"documentation\"\n  },\n  {\n    \"path\": \"pyproject.toml\",\n    \"description\": \"Defines project metadata, runtime dependencies (e.g., pydantic, numpy, scikit-learn), and console entry points for running audits.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"src/claims_audit/__init__.py\",\n    \"description\": \"Exposes the public package API for claim schema, retrieval, auditing, and metrics computation.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claims_audit/schema.py\",\n    \"description\": \"Implements the atomic-claim schema with machine-readable fields (IDs, subject/predicate/object, qualifiers, timeframe, modality, normalization) and label definitions (supported/unsupported/insufficient).\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claims_audit/corpus.py\",\n    \"description\": \"Loads and validates a small curated reference corpus (documents and evidence spans) from JSONL/YAML and provides search-ready text views plus metadata.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claims_audit/retrieval.py\",\n    \"description\": \"Provides a lightweight retrieval layer (BM25/TF-IDF) over the reference corpus with top-k evidence selection and deterministic scoring.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claims_audit/audit.py\",\n    \"description\": \"Runs claim-level audits by retrieving evidence for each atomic claim, applying decision logic to assign supported/unsupported/insufficient, and emitting per-claim rationales and traces.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claims_audit/metrics.py\",\n    \"description\": \"Computes tiered metrics including false-accept rate, abstain rate, coverage, and confusion matrices by confidence tier and label.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claims_audit/io.py\",\n    \"description\": \"Handles reading/writing atomic claims, audit outputs, and metric reports in JSONL with stable schemas and versioning fields.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claims_audit/cli.py\",\n    \"description\": \"Implements a CLI to validate inputs, build/load the corpus index, run audits, and print/save tiered metric summaries.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"data/reference_corpus.jsonl\",\n    \"description\": \"Provides a small curated reference corpus with a handful of documents and evidence spans used for retrieval-backed claim audits.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"data/example_claims.jsonl\",\n    \"description\": \"Contains example atomic claims with gold labels to demonstrate auditing and enable end-to-end evaluation of false-accept/abstain metrics.\",\n    \"category\": \"support\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_0890ed6609ef414700694e334dc6308195a204ba71c7886498",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 639,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 680,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 1319
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "msg_0890ed6609ef414700694e334e04bc8195b1b2b0d3a6f0cf61",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"README.md\",\n    \"description\": \"Documents the atomic-claim schema, labeling rules, reference corpus format, retrieval/audit pipeline usage, and tiered false-accept/abstain metrics.\",\n    \"category\": \"documentation\"\n  },\n  {\n    \"path\": \"pyproject.toml\",\n    \"description\": \"Defines project metadata, runtime dependencies (e.g., pydantic, numpy, scikit-learn), and console entry points for running audits.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"src/claims_audit/__init__.py\",\n    \"description\": \"Exposes the public package API for claim schema, retrieval, auditing, and metrics computation.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claims_audit/schema.py\",\n    \"description\": \"Implements the atomic-claim schema with machine-readable fields (IDs, subject/predicate/object, qualifiers, timeframe, modality, normalization) and label definitions (supported/unsupported/insufficient).\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claims_audit/corpus.py\",\n    \"description\": \"Loads and validates a small curated reference corpus (documents and evidence spans) from JSONL/YAML and provides search-ready text views plus metadata.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claims_audit/retrieval.py\",\n    \"description\": \"Provides a lightweight retrieval layer (BM25/TF-IDF) over the reference corpus with top-k evidence selection and deterministic scoring.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claims_audit/audit.py\",\n    \"description\": \"Runs claim-level audits by retrieving evidence for each atomic claim, applying decision logic to assign supported/unsupported/insufficient, and emitting per-claim rationales and traces.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claims_audit/metrics.py\",\n    \"description\": \"Computes tiered metrics including false-accept rate, abstain rate, coverage, and confusion matrices by confidence tier and label.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claims_audit/io.py\",\n    \"description\": \"Handles reading/writing atomic claims, audit outputs, and metric reports in JSONL with stable schemas and versioning fields.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/claims_audit/cli.py\",\n    \"description\": \"Implements a CLI to validate inputs, build/load the corpus index, run audits, and print/save tiered metric summaries.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"data/reference_corpus.jsonl\",\n    \"description\": \"Provides a small curated reference corpus with a handful of documents and evidence spans used for retrieval-backed claim audits.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"data/example_claims.jsonl\",\n    \"description\": \"Contains example atomic claims with gold labels to demonstrate auditing and enable end-to-end evaluation of false-accept/abstain metrics.\",\n    \"category\": \"support\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add an 'ID integrity' QA gate to the project’s artifact gate script: block runs when IDs are non-unique, missing, or non-joinable across artifacts; log pass/fail status and counts of violations to /outputs/logs/.
+Project: generated_script_1766735535723 (python script)
+
+Target file details:
+- Path: src/qa/id_integrity.py
+- Purpose: Implement the ID integrity checks (missing IDs, duplicate IDs, and cross-artifact joinability) with structured results consumable by the artifact gate.
+- Category: source
+
+Other planned files (for context only):
+- src/artifact_gate.py: Update the artifact gate to include an ID integrity QA gate that blocks runs on missing, non-unique, or non-joinable IDs across artifacts and writes pass/fail plus violation counts to /outputs/logs/.
+- src/utils/gate_logging.py: Provide a small logging utility to create /outputs/logs/ and write standardized gate status summaries and metrics for each QA check.
+- scripts/run_artifact_gate.py: Wire the updated artifact gate into the runnable entrypoint script so CI/local runs fail fast when ID integrity violations are detected and logs are emitted to /outputs/logs/.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-26T05-01-46-647Z_src_artifact_gate_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766725305310_fqd4vp
+- [AGENT: agent_1766731203226_m37bifk] {"agentId":"agent_1766731203226_m37bifk","timestamp":"2025-12-26T06:49:35.087Z","files":[{"filename":".
+- [INTROSPECTION] 2025-12-26T05-01-46-647Z_scripts_run_artifact_gate_py_stage1_attempt1_prompt.txt from code-creation agent agent_176672530531
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT INSIGHT: agent_1766733982156_n6bb5fc] Implication 3: UX and workflow become first-class safety components with measurable cost models
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Implement the ID integrity checks (missing IDs, duplicate IDs, and cross-artifact joinability) with structured results consumable by the artifact gate.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/qa/id_integrity.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/qa/id_integrity.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/qa/id_integrity.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

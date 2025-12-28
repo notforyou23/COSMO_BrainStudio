@@ -1,0 +1,40 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a single canonical entrypoint command (or confirm and wire up the existing one from agent outputs) that runs: preflight -> artifact gate -> taxonomy validator -> toy meta-analysis -> manifest writer. It must write runtime/_build/manifest.json and runtime/_build/logs/run.log and exit non-zero on failure. This is needed because many overlapping runner/gate scripts exist across agent directories but no standardized one-command execution exists in practice.
+Project: single canonical entrypoint command (or confirm and wire up the existing one from agent outputs) that runs: preflight -> artifact gate -> taxonomy validator -> toy meta-analysis -> manifest writer. It must write runtime/_build/manifest.json and runtime/_build/logs/run.log and exit non-zero on failure. This is needed because many overlapping runner/gate (json script)
+
+Target file details:
+- Path: run_pipeline.py
+- Purpose: Canonical single-command Python entrypoint that executes preflight -> artifact gate -> taxonomy validator -> toy meta-analysis -> manifest writer, logs to runtime/_build/logs/run.log, writes runtime/_build/manifest.json, and exits non-zero on any failure.
+- Category: source
+
+Reference insights:
+- [INTROSPECTION] 2025-12-26T07-21-10-011Z_plan_attempt1_prompt.txt from code-creation agent agent_1766733668660_28qwtkk: You are planning a p
+- [INTROSPECTION] 2025-12-26T07-21-10-011Z_plan_attempt1_prompt.txt from code-creation agent agent_1766733668660_28qwtkk: You are planning a p
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT INSIGHT: agent_1766733982156_n6bb5fc] Implication 3: UX and workflow become first-class safety components with measurable cost models
+- [INTROSPECTION] 2025-12-26T04-41-00-984Z_plan_attempt1_prompt.txt from code-creation agent agent_1766724059832_btjb5f6: You are planning a j
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Canonical single-command Python entrypoint that executes preflight -> artifact gate -> taxonomy validator -> toy meta-analysis -> manifest writer, logs to runtime/_build/logs/run.log, writes runtime/_build/manifest.json, and exits non-zero on any failure.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('run_pipeline.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:run_pipeline.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside run_pipeline.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

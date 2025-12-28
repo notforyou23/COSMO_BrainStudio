@@ -1,0 +1,183 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766734907661_s19z6vy",
+  "agentType": "code-creation",
+  "goalId": "goal_166",
+  "missionId": "strategic_goal_166_1766734907661",
+  "spawnCycle": 111,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T07:41:56.971Z",
+  "completedAt": "2025-12-26T07:47:47.194Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "tools/consolidate_build_scripts.py",
+      "description": "CLI tool that scans agent output directories for duplicate build_runner.py and verify_artifacts.py, selects the best candidates via heuristics, normalizes paths/imports so the runner always writes to runtime/_build/, and installs the canonical pair into a stable repo location.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/consolidate_build_scripts.py\nDIR_STATE:[\"tools/consolidate_build_scripts.py\"]\nSUMMARY: Wrote a CLI tool that selects the best discovered build_runner.py and verify_artifacts.py and installs canonical wrappers that always target runtime/_build/.\n",
+          "timestamp": "2025-12-26T07:42:57.623Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tools/consolidate_build_scripts.py\nDIR_STATE:[\"tools/consolidate_build_scripts.py\"]\nSummary: Wrote a consolidation CLI that selects and installs canonical build/verify scripts under scripts/ with enforced runtime/_build output.\n",
+          "timestamp": "2025-12-26T07:43:51.640Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:41:56.971Z",
+      "failedAt": "2025-12-26T07:43:51.640Z"
+    },
+    {
+      "path": "scripts/build_runner.py",
+      "description": "Canonical build runner that executes the standardized build workflow and always writes artifacts and logs under runtime/_build/ regardless of invocation directory.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "rd_versions.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/run_default.py\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSUMMARY:Canonical build runner added; it runs from repo root and writes all outputs under runtime/_build/.\n",
+          "timestamp": "2025-12-26T07:44:18.510Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "cripts/run_artifact_gate.py\", \"scripts/run_default.py\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSummary: Wrote a canonical build runner that always resolves repo-relative paths and writes logs, reports, and artifacts under runtime/_build/.\n",
+          "timestamp": "2025-12-26T07:44:41.352Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:41:56.971Z",
+      "failedAt": "2025-12-26T07:44:41.352Z"
+    },
+    {
+      "path": "scripts/verify_artifacts.py",
+      "description": "Canonical artifact verification script that runs the required validation tools against the current artifacts under runtime/_build/ and persists raw command outputs and a summarized report.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "ct_gate.py\", \"scripts/run_default.py\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSummary: Wrote canonical verify_artifacts.py that validates runtime/_build artifacts and persists raw outputs plus a JSON report.\n",
+          "timestamp": "2025-12-26T07:45:21.157Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "ipts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSummary: Wrote a canonical verify_artifacts.py that validates runtime/_build artifacts, saves raw command outputs, and emits JSON/text reports under runtime/_build/verify/.\n",
+          "timestamp": "2025-12-26T07:46:02.962Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:41:56.971Z",
+      "failedAt": "2025-12-26T07:46:02.962Z"
+    },
+    {
+      "path": "scripts/_build_common.py",
+      "description": "Shared utilities used by the canonical runner and verifier for path resolution, subprocess execution, logging, and report persistence to runtime/_build/.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": ", \"scripts/run_smoke_docker.sh\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSUMMARY: Added shared build utilities for stable runtime/_build path resolution, subprocess execution, logging, and report persistence.\n",
+          "timestamp": "2025-12-26T07:46:23.841Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": ", \"scripts/run_smoke_docker.sh\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSummary: Added shared build utilities for stable runtime/_build path resolution, subprocess execution, logging, and report persistence.\n",
+          "timestamp": "2025-12-26T07:46:49.123Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:41:56.971Z",
+      "failedAt": "2025-12-26T07:46:49.123Z"
+    },
+    {
+      "path": "docs/build_script_consolidation.md",
+      "description": "Documentation describing how consolidation works, how candidate scripts are scored/selected, where the canonical scripts live, and the invariant that all outputs go to runtime/_build/.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docs/build_script_consolidation.md\nDIR_STATE:[\"docs/build_script_consolidation.md\", \"docs/demo_expected_failures.md\"]\nSUMMARY: Wrote consolidation documentation describing selection heuristics, canonical script locations, and the runtime/_build/ output invariant.\n",
+          "timestamp": "2025-12-26T07:47:21.046Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docs/build_script_consolidation.md\nDIR_STATE:[\"docs/build_script_consolidation.md\", \"docs/demo_expected_failures.md\"]\nSummary: Wrote documentation describing build script consolidation, selection heuristics, canonical locations, and the runtime/_build/ output invariant.\n",
+          "timestamp": "2025-12-26T07:47:47.193Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:41:56.971Z",
+      "failedAt": "2025-12-26T07:47:47.193Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Consolidate duplicate runner + verification scripts into one canonical pair by selecting the best existing build_runner.py and verify_artifacts.py from agent output directories, placing them in a single stable repo location, and updating imports/paths so the runner always writes to runtime/_build/.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "There are multiple competing runner and verification implementations across agent outputs; without consolidation we cannot enforce goal_143/goal_102/goal_131 or stabilize CI."
+  ],
+  "projectName": "generated_script_1766734907945",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-26T07:47:47.194Z",
+  "summary": {
+    "completed": 0,
+    "failed": 5,
+    "total": 5
+  }
+}

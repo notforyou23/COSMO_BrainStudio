@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a deterministic artifact verification step that asserts runtime/_build contains non-empty required outputs (at minimum: one JSON report in runtime/_build/reports, one CSV table in runtime/_build/tables, one PNG/PDF figure in runtime/_build/figures, and one log in runtime/_build/logs). The verifier should fail with a clear missing-file list and be runnable as a single command.
+Project: deterministic artifact verification step that asserts runtime/_build contains non-empty required outputs (at minimum: one JSON report in runtime/_build/reports, one CSV table in runtime/_build/tables, one PNG/PDF figure in runtime/_build/figures, and one log in runtime/_build/logs). The verifier should fail with a clear missing-file list and be runnable as a single command. (json script)
+
+Target file details:
+- Path: Makefile
+- Purpose: Convenience targets including a single-command entrypoint to run the artifact verification step consistently across environments.
+- Category: support
+
+Other planned files (for context only):
+- scripts/verify_build_artifacts.py: Single-command deterministic verifier that asserts runtime/_build contains non-empty required outputs (JSON report, CSV table, PNG/PDF figure, and log) and fails with a clear missing-file list.
+- scripts/_artifact_verify_utils.py: Shared helper utilities for filesystem scanning, size/non-emptiness checks, deterministic ordering, and human-friendly error reporting used by the verifier.
+- scripts/verify_build_artifacts.json: Configuration describing required artifact directories, accepted extensions, and minimum non-empty constraints for the build artifact verifier.
+- README_verify_artifacts.md: Documentation for running the artifact verifier, interpreting failures, and expected runtime/_build folder structure.
+
+Reference insights:
+- [CONSOLIDATED] Standardize build verification by running the required validation tools against the current artifacts and persist both raw co
+- [CONSOLIDATED] Standardize build verification by running the required validation tools against the current artifacts and persist both raw co
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT INSIGHT: agent_1766733982156_n6bb5fc] Implication 3: UX and workflow become first-class safety components with measurable cost models
+- [INTROSPECTION] 2025-12-26T04-41-00-984Z_plan_attempt1_prompt.txt from code-creation agent agent_1766724059832_btjb5f6: You are planning a j
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Convenience targets including a single-command entrypoint to run the artifact verification step consistently across environments.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('Makefile')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:Makefile')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside Makefile.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

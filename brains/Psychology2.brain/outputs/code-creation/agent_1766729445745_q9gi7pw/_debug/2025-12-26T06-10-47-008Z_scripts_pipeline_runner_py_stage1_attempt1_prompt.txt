@@ -1,0 +1,55 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add a preflight diagnostics step that runs before any pipeline step (disk/memory check, basic container health command, minimal smoke test) and implement retry + structured failure logging that captures the last N lines of stdout/stderr and environment stats into runtime/_build/logs/container_health.jsonl.
+Project: generated_script_1766729445981 (python script)
+
+Target file details:
+- Path: scripts/pipeline_runner.py
+- Purpose: Wraps existing CI/CD pipeline steps to ensure the preflight diagnostics run before any step and to apply consistent retry and structured logging behavior on step failures.
+- Category: source
+
+Other planned files (for context only):
+- scripts/preflight_diagnostics.py: Runs preflight diagnostics (disk/memory checks, container health command, minimal smoke test) with retries and writes structured JSONL failure logs including last N stdout/stderr lines and environment stats to runtime/_build/logs/container_health.jsonl.
+- scripts/_build_logging.py: Provides shared utilities for capturing stdout/stderr tail, collecting environment/system stats, and emitting JSONL records under runtime/_build/logs for diagnostic and failure reporting.
+- scripts/docker_healthcheck.sh: Implements a basic container health command suitable for Docker/CI usage (e.g., checking essential binaries, filesystem writability, and optional service endpoints) to be invoked by preflight diagnostics.
+- scripts/smoke_test.py: Defines a minimal, fast smoke test executed during preflight to verify Python runtime, key imports, and basic filesystem/network sanity without requiring full pipeline execution.
+
+Reference insights:
+- [CONSOLIDATED] Standardize build verification by running the required validation tools against the current artifacts and persist both raw co
+- [AGENT: agent_1766728379667_fc10qed] {"agentId":"agent_1766728379667_fc10qed","timestamp":"2025-12-26T05:55:23.430Z","files":[{"filename":"c
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+- [AGENT: agent_1766727773603_i3xb9wt] Cycle 42 consistency review (divergence 0.94):
+Summary judgment: All three branches agree that introspe
+
+Key requirements:
+- docker
+- ci cd
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Wraps existing CI/CD pipeline steps to ensure the preflight diagnostics run before any step and to apply consistent retry and structured logging behavior on step failures.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/pipeline_runner.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/pipeline_runner.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/pipeline_runner.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

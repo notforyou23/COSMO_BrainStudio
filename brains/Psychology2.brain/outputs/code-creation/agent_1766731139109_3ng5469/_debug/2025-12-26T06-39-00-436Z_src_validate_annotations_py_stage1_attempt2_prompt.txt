@@ -1,0 +1,51 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Publish task_taxonomy_codebook_v0.1 + annotation schema in /outputs, then create 5–10 example annotations and run the validator in CI (or a scripted smoke test) to prove the categories/constraints work.
+Project: 5–10 example annotations and run the validator in CI (or a (python script)
+
+Target file details:
+- Path: src/validate_annotations.py
+- Purpose: Implements a CLI validator that loads the schema, validates JSON/JSONL annotations, and applies additional logical constraints not expressible in pure JSON Schema.
+- Category: source
+
+Other planned files (for context only):
+- outputs/task_taxonomy_codebook_v0.1.json: Publishes the v0.1 task taxonomy codebook as a machine-readable JSON artifact in the outputs directory.
+- outputs/annotation_schema_v0.1.json: Defines the JSON Schema for task annotations (v0.1) including required fields, enums, and cross-field constraints where possible.
+- outputs/example_annotations_v0.1.jsonl: Provides 5–10 example annotations in JSONL format that exercise categories and schema constraints for smoke testing.
+- tests/test_annotation_validator_smoke.py: Runs a smoke test that validates the bundled example annotations against the schema and custom rules to prove constraints work in CI.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-26T04-41-00-984Z_outputs_task_taxonomy_codebook_v0_1_json_stage1_attempt1_prompt.txt from code-creation agent agent_
+- [CONSOLIDATED] Robust task-taxonomy and annotation work should ship as a coherent package—explicit codebook, machine-readable schema, concre
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+- [AGENT: agent_1766727773603_i3xb9wt] Cycle 42 consistency review (divergence 0.94):
+Summary judgment: All three branches agree that introspe
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Implements a CLI validator that loads the schema, validates JSON/JSONL annotations, and applies additional logical constraints not expressible in pure JSON Schema.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/validate_annotations.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/validate_annotations.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/validate_annotations.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

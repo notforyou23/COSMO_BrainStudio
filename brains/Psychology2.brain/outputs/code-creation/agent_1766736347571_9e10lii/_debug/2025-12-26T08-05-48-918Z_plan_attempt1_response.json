@@ -1,0 +1,42 @@
+{
+  "content": "[\n  {\n    \"path\": \"tests/fixtures/doi_fixture_list.json\",\n    \"description\": \"Defines a small, fixed list of DOI test fixtures with metadata (expected success/failure and notes) used by the integration test.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \"tests/integration/test_doi_fixture_integration.py\",\n    \"description\": \"Runs api_server.py (or the CLI) against the fixed DOI fixture list, writes JSON/CSV outputs to runtime/_build or outputs/tools, and asserts expected success/failure behavior per fixture.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \"tests/support/run_api_server_fixture.py\",\n    \"description\": \"Provides a reusable subprocess-based runner that starts api_server.py (or calls the CLI), feeds the DOI fixtures, collects results, and persists artifacts deterministically for CI.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"tests/support/artifact_paths.py\",\n    \"description\": \"Centralizes output directory selection and naming (preferring outputs/tools else runtime/_build) to keep artifact paths consistent across local runs and CI.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"docs/integration_doi_fixture_test.md\",\n    \"description\": \"Documents how to run the DOI fixture integration test, where artifacts are saved, and the expected pass/fail cases with rationale and stabilization criteria for CI gating.\",\n    \"category\": \"documentation\"\n  },\n  {\n    \"path\": \".github/workflows/doi-fixture-integration.yml\",\n    \"description\": \"Adds a CI workflow that executes the DOI fixture integration test and uploads the generated JSON/CSV artifacts, initially as non-blocking until marked stable.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"pytest.ini\",\n    \"description\": \"Configures pytest markers and default options for separating integration tests (e.g., -m integration) and ensuring predictable test discovery in CI.\",\n    \"category\": \"config\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_0cd08615b539ecf100694e41dcf970819599433a16e3d47777",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 677,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 633,
+    "output_tokens_details": {
+      "reasoning_tokens": 207
+    },
+    "total_tokens": 1310
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0cd08615b539ecf100694e41dd45988195a4646503bd922e9c",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0cd08615b539ecf100694e41e11fbc81959a850f17c9b388a8",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"tests/fixtures/doi_fixture_list.json\",\n    \"description\": \"Defines a small, fixed list of DOI test fixtures with metadata (expected success/failure and notes) used by the integration test.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \"tests/integration/test_doi_fixture_integration.py\",\n    \"description\": \"Runs api_server.py (or the CLI) against the fixed DOI fixture list, writes JSON/CSV outputs to runtime/_build or outputs/tools, and asserts expected success/failure behavior per fixture.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \"tests/support/run_api_server_fixture.py\",\n    \"description\": \"Provides a reusable subprocess-based runner that starts api_server.py (or calls the CLI), feeds the DOI fixtures, collects results, and persists artifacts deterministically for CI.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"tests/support/artifact_paths.py\",\n    \"description\": \"Centralizes output directory selection and naming (preferring outputs/tools else runtime/_build) to keep artifact paths consistent across local runs and CI.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"docs/integration_doi_fixture_test.md\",\n    \"description\": \"Documents how to run the DOI fixture integration test, where artifacts are saved, and the expected pass/fail cases with rationale and stabilization criteria for CI gating.\",\n    \"category\": \"documentation\"\n  },\n  {\n    \"path\": \".github/workflows/doi-fixture-integration.yml\",\n    \"description\": \"Adds a CI workflow that executes the DOI fixture integration test and uploads the generated JSON/CSV artifacts, initially as non-blocking until marked stable.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"pytest.ini\",\n    \"description\": \"Configures pytest markers and default options for separating integration tests (e.g., -m integration) and ensuring predictable test discovery in CI.\",\n    \"category\": \"config\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

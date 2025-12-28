@@ -1,0 +1,125 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766733982163_dqpaght",
+  "agentType": "code-creation",
+  "goalId": "goal_176",
+  "missionId": "urgent_goal_176_1766733982157",
+  "spawnCycle": 98,
+  "coordinatorReview": null,
+  "spawnedBy": "meta_coordinator_urgent",
+  "triggerSource": "urgent_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T07:26:33.987Z",
+  "completedAt": "2025-12-26T07:28:15.715Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "verify_build_artifacts.py",
+      "description": "Command-line verification tool that asserts required build artifact file patterns exist under runtime/_build and that each matched file is non-empty, failing with clear diagnostics and a non-zero exit code.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:verify_build_artifacts.py\nDIR_STATE:[\".dockerignore\", \"CHANGELOG.md\", \"LICENSE\", \"README.md\", \"README.reproducibility.md\", \"README_build_runner.md\", \"environment.manifest.json\", \"exec_1766734015842_3hlqr8s.py\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\", \"run_all.py\", \"verify_artifacts.py\", \"verify_build_artifacts.py\"]\n",
+          "timestamp": "2025-12-26T07:26:55.910Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "er.md\", \"environment.manifest.json\", \"exec_1766734036772_sw7p98z.py\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\", \"run_all.py\", \"verify_artifacts.py\", \"verify_build_artifacts.py\"]\nSummary: Implemented verify_build_artifacts.py to validate required artifact patterns exist under runtime/_build and that matched files are non-empty, failing with clear diagnostics and non-zero exit.\n",
+          "timestamp": "2025-12-26T07:27:16.823Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:26:33.987Z",
+      "failedAt": "2025-12-26T07:27:16.823Z"
+    },
+    {
+      "path": "scripts/run_default.py",
+      "description": "Default local runner that executes the normal build pipeline and then invokes verify_build_artifacts.py so missing/empty artifacts cause a loud failure.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "ts/preflight_smoke.py\", \"scripts/record_versions.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/run_default.py\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\"]\nSummary: scripts/run_default.py now runs the build pipeline and then invokes verify_build_artifacts.py to fail loudly on missing/empty artifacts.\n",
+          "timestamp": "2025-12-26T07:27:42.020Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": ".py\", \"scripts/record_versions.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/run_default.py\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\"]\nSummary: scripts/run_default.py now runs the default build entrypoint (or DEFAULT_BUILD_CMD) and then enforces artifact verification via verify_build_artifacts.py.\n",
+          "timestamp": "2025-12-26T07:27:55.896Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:26:33.987Z",
+      "failedAt": "2025-12-26T07:27:55.896Z"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "description": "CI workflow that runs the build and then runs verify_build_artifacts.py to ensure every CI run produces auditable non-empty artifacts or fails.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/verify-build-artifacts.yml\"]\nSummary: Updated CI workflow to run the default build and fail loudly if required non-empty artifacts are missing.\n",
+          "timestamp": "2025-12-26T07:28:05.586Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/verify-build-artifacts.yml\"]\nUpdated CI workflow to run the default build pipeline and fail loudly if required artifacts are missing or empty, while uploading runtime/_build for auditability.\n",
+          "timestamp": "2025-12-26T07:28:15.715Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:26:33.987Z",
+      "failedAt": "2025-12-26T07:28:15.715Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Implement/finish `verify_build_artifacts.py` to assert required files exist and are non-empty (e.g., `runtime/_build/reports/*.json`, `runtime/_build/tables/*.csv`, `runtime/_build/figures/*`), then wire it into the default runner/CI so every run produces auditable artifacts or fails loudly.",
+  "missionSuccessCriteria": [
+    "Complete the urgent task identified by Meta-Coordinator",
+    "Curated insight (actionability 8-9/10): Adds a deterministic artifact-gating/verification layer (required non-empty reports/tables/figures) that supports continuous TEVV-style evaluation runs, reduces 'silent failure' risk, and enables auto..."
+  ],
+  "projectName": "generated_script_1766733982506",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-26T07:28:15.715Z",
+  "summary": {
+    "completed": 0,
+    "failed": 3,
+    "total": 3
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/run_spec.schema.json",
+  "title": "Runner Run Specification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "pipeline", "reproducibility", "steps"],
+  "properties": {
+    "schema_version": { "type": "string", "minLength": 1 },
+    "run_id": { "type": "string", "minLength": 1 },
+    "created_at": { "type": "string", "format": "date-time" },
+    "pipeline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" }
+      }
+    },
+    "paths": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "workspace_root": { "type": "string", "minLength": 1 },
+        "artifacts_dir": { "type": "string", "minLength": 1 }
+      }
+    },
+    "reproducibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_versions", "requirements_lock_path", "environment_manifest_path", "smoke_test"],
+      "properties": {
+        "record_versions": { "type": "boolean", "default": true, "description": "If true, runner records python/platform/tool versions into JSON run logs." },
+        "requirements_lock_path": { "type": "string", "minLength": 1, "description": "Pinned dependency manifest path (e.g., requirements.lock.txt)." },
+        "environment_manifest_path": { "type": "string", "minLength": 1, "description": "Minimal manifest describing expected OS/Python/tooling and validation rules." },
+        "docker": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "enabled": { "type": "boolean", "default": false },
+            "image": { "type": "string", "minLength": 1 },
+            "dockerfile_path": { "type": "string", "minLength": 1 },
+            "build_args": { "type": "object", "additionalProperties": { "type": ["string", "number", "boolean"] } }
+          }
+        },
+        "smoke_test": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled", "command"],
+          "properties": {
+            "enabled": { "type": "boolean", "default": true },
+            "command": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "description": "Command argv to validate environment before validators/meta-analysis." },
+            "timeout_s": { "type": "integer", "minimum": 1, "default": 60 }
+          }
+        }
+      }
+    },
+    "logging": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "run_log_path": { "type": "string", "minLength": 1, "description": "JSON run log written by runner; should include recorded versions when enabled." },
+        "append": { "type": "boolean", "default": false }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/step" }
+    }
+  },
+  "$defs": {
+    "step": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "name"],
+      "properties": {
+        "type": { "type": "string", "enum": ["smoke_test", "validate", "meta_analysis", "custom"] },
+        "name": { "type": "string", "minLength": 1 },
+        "enabled": { "type": "boolean", "default": true },
+        "tool": { "type": "string", "minLength": 1, "description": "Validator/analyzer tool identifier (e.g., 'jsonschema', 'pytest', 'custom')." },
+        "command": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "description": "Command argv for this step (if tool is executed as a process)." },
+        "inputs": { "type": "array", "items": { "type": "string" } },
+        "outputs": { "type": "array", "items": { "type": "string" } },
+        "args": { "type": "object", "additionalProperties": { "type": ["string", "number", "boolean", "null", "array", "object"] } },
+        "timeout_s": { "type": "integer", "minimum": 1 },
+        "on_failure": { "type": "string", "enum": ["stop", "continue"], "default": "stop" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "smoke_test" } }, "required": ["type"] },
+          "then": { "properties": { "tool": { "const": "process" } } }
+        }
+      ]
+    }
+  }
+}

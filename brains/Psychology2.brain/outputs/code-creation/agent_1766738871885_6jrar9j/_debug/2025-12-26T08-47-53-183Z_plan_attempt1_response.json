@@ -1,0 +1,37 @@
+{
+  "content": "[\n  {\n    \"path\": \"README.md\",\n    \"description\": \"Project overview with setup, dataset format, and end-to-end instructions to run the retrieve-then-verify baseline and evaluation outputs.\",\n    \"category\": \"documentation\"\n  },\n  {\n    \"path\": \"pyproject.toml\",\n    \"description\": \"Python project configuration including dependencies, console scripts, and tool settings for a minimal reproducible baseline.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"src/rtv_baseline/__init__.py\",\n    \"description\": \"Package initializer exposing the main pipeline and evaluation entrypoints for the retrieve-then-verify baseline.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/rtv_baseline/types.py\",\n    \"description\": \"Dataclasses and type definitions for atomic claims, evidence chunks, retrieval results, verification decisions, and evaluation records.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/rtv_baseline/claim_decompose.py\",\n    \"description\": \"Rule-based claim decomposition that converts an input claim into atomic claims with fixed machine-readable fields (subject, predicate, scope, provenance requirements).\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/rtv_baseline/retrieval.py\",\n    \"description\": \"Minimal retriever (BM25-like + optional TF-IDF fallback) over a local corpus with chunking, scoring, and top-k evidence selection.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/rtv_baseline/verify.py\",\n    \"description\": \"Quote-attribution checks and support/contradict/insufficient decision logic with an abstain rule based on evidence quality and calibration thresholds.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/rtv_baseline/calibration.py\",\n    \"description\": \"Calibration utilities (temperature scaling / isotonic option) and risk-tier thresholding to control false-accept rates under specified budgets.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/rtv_baseline/eval.py\",\n    \"description\": \"Evaluation runner for a curated dataset computing accuracy, abstention, calibration metrics, and false-accept at multiple risk tiers with report export.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/rtv_baseline/cli.py\",\n    \"description\": \"Command-line interface to build the corpus index, run the retrieve-then-verify pipeline on examples, and execute calibrated evaluation with saved artifacts.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"data/curated_eval.jsonl\",\n    \"description\": \"Small curated evaluation set in JSONL with claims, expected labels, and optional gold evidence to test decomposition, retrieval, verification, and abstention.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"tests/test_pipeline_smoke.py\",\n    \"description\": \"Smoke tests ensuring decomposition, retrieval, verification, calibration, and evaluation run end-to-end on the curated set with deterministic outputs.\",\n    \"category\": \"test\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_0c3645451429e65400694e4bb937f08196a1adac244e0d965a",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 649,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 670,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 1319
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "msg_0c3645451429e65400694e4bbc84988196b55f21a2ec956868",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"README.md\",\n    \"description\": \"Project overview with setup, dataset format, and end-to-end instructions to run the retrieve-then-verify baseline and evaluation outputs.\",\n    \"category\": \"documentation\"\n  },\n  {\n    \"path\": \"pyproject.toml\",\n    \"description\": \"Python project configuration including dependencies, console scripts, and tool settings for a minimal reproducible baseline.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"src/rtv_baseline/__init__.py\",\n    \"description\": \"Package initializer exposing the main pipeline and evaluation entrypoints for the retrieve-then-verify baseline.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/rtv_baseline/types.py\",\n    \"description\": \"Dataclasses and type definitions for atomic claims, evidence chunks, retrieval results, verification decisions, and evaluation records.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/rtv_baseline/claim_decompose.py\",\n    \"description\": \"Rule-based claim decomposition that converts an input claim into atomic claims with fixed machine-readable fields (subject, predicate, scope, provenance requirements).\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/rtv_baseline/retrieval.py\",\n    \"description\": \"Minimal retriever (BM25-like + optional TF-IDF fallback) over a local corpus with chunking, scoring, and top-k evidence selection.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/rtv_baseline/verify.py\",\n    \"description\": \"Quote-attribution checks and support/contradict/insufficient decision logic with an abstain rule based on evidence quality and calibration thresholds.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/rtv_baseline/calibration.py\",\n    \"description\": \"Calibration utilities (temperature scaling / isotonic option) and risk-tier thresholding to control false-accept rates under specified budgets.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/rtv_baseline/eval.py\",\n    \"description\": \"Evaluation runner for a curated dataset computing accuracy, abstention, calibration metrics, and false-accept at multiple risk tiers with report export.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/rtv_baseline/cli.py\",\n    \"description\": \"Command-line interface to build the corpus index, run the retrieve-then-verify pipeline on examples, and execute calibrated evaluation with saved artifacts.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"data/curated_eval.jsonl\",\n    \"description\": \"Small curated evaluation set in JSONL with claims, expected labels, and optional gold evidence to test decomposition, retrieval, verification, and abstention.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"tests/test_pipeline_smoke.py\",\n    \"description\": \"Smoke tests ensuring decomposition, retrieval, verification, calibration, and evaluation run end-to-end on the curated set with deterministic outputs.\",\n    \"category\": \"test\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

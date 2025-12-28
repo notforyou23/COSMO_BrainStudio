@@ -1,0 +1,53 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a minimal CI workflow (e.g., GitHub Actions) that installs deps, runs the validator + demo runner, asserts expected outputs exist (reports/figures), and uploads runtime/_build as CI artifacts; make missing outputs a hard failure.
+Project: minimal CI workflow (e.g., GitHub Actions) that installs deps, runs the validator + demo runner, asserts expected outputs exist (reports/figures), and uploads runtime/_build as CI artifacts; make missing outputs a hard failure. (python script)
+
+Target file details:
+- Path: scripts/README_CI_EXAMPLES.md
+- Purpose: Examples documenting how to run the CI checks locally (validator + demo runner + output assertions) and how to customize expected outputs.
+- Category: documentation
+
+Other planned files (for context only):
+- .github/workflows/ci.yml: GitHub Actions workflow that sets up Python, installs dependencies, runs the validator and demo runner, hard-fails on missing expected outputs (reports/figures), and uploads runtime/_build as CI artifacts.
+- scripts/ci_run.py: Python CI entrypoint that runs the repo's validator and demo runner commands, verifies required output paths exist, and exits nonzero with actionable diagnostics when outputs are missing.
+- scripts/ci_expectations.json: Declarative list of required CI output files/directories (e.g., reports and figures) used by the CI runner to enforce hard failures when artifacts are missing.
+
+Reference insights:
+- [CONSOLIDATED] Standardize build verification by running the required validation tools against the current artifacts and persist both raw co
+- [CONSOLIDATED] Standardize build verification by running the required validation tools against the current artifacts and persist both raw co
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+- [AGENT: agent_1766727773603_i3xb9wt] Cycle 42 consistency review (divergence 0.94):
+Summary judgment: All three branches agree that introspe
+
+Key requirements:
+- examples
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Examples documenting how to run the CI checks locally (validator + demo runner + output assertions) and how to customize expected outputs.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/README_CI_EXAMPLES.md')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/README_CI_EXAMPLES.md')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/README_CI_EXAMPLES.md.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

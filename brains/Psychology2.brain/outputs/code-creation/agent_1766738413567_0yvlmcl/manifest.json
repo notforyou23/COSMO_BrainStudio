@@ -1,0 +1,271 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766738413567_0yvlmcl",
+  "agentType": "code-creation",
+  "goalId": "goal_225",
+  "missionId": "urgent_goal_225_1766738413566",
+  "spawnCycle": 145,
+  "coordinatorReview": null,
+  "spawnedBy": "meta_coordinator_urgent",
+  "triggerSource": "urgent_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T08:40:25.173Z",
+  "completedAt": "2025-12-26T08:48:35.162Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/preflight_repro.py",
+      "description": "Standalone smallest-repro preflight runner that executes a containerized smoke pipeline with maximal diagnostics (timestamps, resource usage, container logs, exit codes) and fails fast with a deterministic signature while saving artifacts to runtime/_build/incident_reports/.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "moke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSummary: Added a standalone docker-based preflight repro runner that captures timestamped diagnostics, saves incident artifacts, computes deterministic failure signatures, and fast-fails with a clear report directory.\n",
+          "timestamp": "2025-12-26T08:41:00.114Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "s/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSUMMARY: Wrote a standalone Docker-based preflight repro runner that captures timestamped diagnostics, saves incident artifacts under runtime/_build/incident_reports/, and fails fast with a deterministic signature.\n",
+          "timestamp": "2025-12-26T08:41:41.787Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.173Z",
+      "failedAt": "2025-12-26T08:41:41.787Z"
+    },
+    {
+      "path": "scripts/incident_harness.py",
+      "description": "Deterministic repro harness library used by preflight_repro.py to manage incident report directories, collect artifacts (env, versions, docker state, logs), compute signatures, and enforce fast-fail semantics.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "sts_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSummary: Wrote a compact incident harness library that creates deterministic incident directories, captures env/docker artifacts, computes signatures, and enforces fast-fail behavior.\n",
+          "timestamp": "2025-12-26T08:42:18.236Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "taxonomy_validation.js\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSummary: incident_harness.py was created as a deterministic incident-report harness with artifact capture, signatures, and fast-fail semantics.\n",
+          "timestamp": "2025-12-26T08:42:47.319Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.173Z",
+      "failedAt": "2025-12-26T08:42:47.319Z"
+    },
+    {
+      "path": "scripts/record_versions.py",
+      "description": "Utility to capture Python/OS/tooling versions and write them as structured JSON for inclusion in incident reports.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "validation.js\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSUMMARY: Implemented scripts/record_versions.py to collect Python/OS/tooling version diagnostics and write them to structured JSON for incident reports.\n",
+          "timestamp": "2025-12-26T08:43:13.218Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "_taxonomy_validation.js\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSUMMARY: Wrote scripts/record_versions.py to collect Python/OS/tooling versions and emit structured JSON to stdout or a specified output file.\n",
+          "timestamp": "2025-12-26T08:43:39.572Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.173Z",
+      "failedAt": "2025-12-26T08:43:39.572Z"
+    },
+    {
+      "path": "scripts/docker_diagnostics.py",
+      "description": "Docker-focused diagnostics helpers to capture docker info/ps/images/inspect output, container stats sampling, and log extraction in a consistent, timestamped format.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "/run_taxonomy_validation.js\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSummary: Added docker_diagnostics helpers to capture docker state, inspect, logs, and sampled stats with consistent timestamped artifacts.\n",
+          "timestamp": "2025-12-26T08:44:17.626Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "nomy_validation.js\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSummary: Added docker_diagnostics helpers to capture timestamped docker state, container inspect/logs, and sampled stats with consistent artifacts.\n",
+          "timestamp": "2025-12-26T08:44:42.949Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.173Z",
+      "failedAt": "2025-12-26T08:44:42.949Z"
+    },
+    {
+      "path": "docker/preflight/Dockerfile",
+      "description": "Minimal Docker image that intentionally exercises the suspected failure path in a reproducible way and emits clear stdout/stderr signals for the preflight script to capture.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "Forbidden command pattern detected: /rm\\s+-rf\\s+\\//",
+          "timestamp": "2025-12-26T08:45:27.330Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docker/preflight/Dockerfile\nDIR_STATE:[\"docker/preflight/Dockerfile\"]\nSUMMARY: Wrote a minimal preflight Dockerfile that deterministically emits rich diagnostics and a clear failure signature/exit code for repro harness capture.\n",
+          "timestamp": "2025-12-26T08:45:53.410Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.173Z",
+      "failedAt": "2025-12-26T08:45:53.410Z"
+    },
+    {
+      "path": "docker/preflight/entrypoint.py",
+      "description": "Container entrypoint that runs a deterministic workload (configurable to trigger failure) while emitting periodic timestamps and resource hints so the host can correlate logs and exit behavior.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docker/preflight/entrypoint.py\nDIR_STATE:[\"docker/preflight/Dockerfile\", \"docker/preflight/entrypoint.py\"]\nSummary: Wrote a deterministic, configurable preflight container entrypoint that emits timestamped ticks and resource hints and can fail with a clear signature.\n",
+          "timestamp": "2025-12-26T08:46:23.752Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docker/preflight/entrypoint.py\nDIR_STATE:[\"docker/preflight/Dockerfile\", \"docker/preflight/entrypoint.py\"]\nSummary: Wrote a deterministic preflight container entrypoint that emits periodic timestamped resource diagnostics and can be configured to fail with a clear signature.\n",
+          "timestamp": "2025-12-26T08:46:56.585Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.173Z",
+      "failedAt": "2025-12-26T08:46:56.585Z"
+    },
+    {
+      "path": "docker/preflight/docker-compose.yml",
+      "description": "Compose definition for the smallest-repro pipeline with fixed image build context, explicit resource limits, and stable container names for deterministic log and artifact capture.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docker/preflight/docker-compose.yml\nDIR_STATE:[\"docker/preflight/Dockerfile\", \"docker/preflight/docker-compose.yml\", \"docker/preflight/entrypoint.py\"]\nSUMMARY:Wrote a deterministic smallest-repro docker-compose with fixed images/build-free services, stable container/network names, explicit resource limits, and an artifacts bind mount for incident capture.\n",
+          "timestamp": "2025-12-26T08:47:23.130Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docker/preflight/docker-compose.yml\nDIR_STATE:[\"docker/preflight/Dockerfile\", \"docker/preflight/docker-compose.yml\", \"docker/preflight/entrypoint.py\"]\nSUMMARY: Wrote a deterministic smallest-repro docker-compose with fixed build context, stable container naming, and explicit resource/logging settings for repeatable diagnostics and artifact capture.\n",
+          "timestamp": "2025-12-26T08:47:39.517Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.173Z",
+      "failedAt": "2025-12-26T08:47:39.517Z"
+    },
+    {
+      "path": ".github/workflows/preflight-repro.yml",
+      "description": "CI workflow that installs Python, ensures Docker availability, runs scripts/preflight_repro.py with verbose diagnostics, uploads runtime/_build/incident_reports/ as artifacts, and fails on signature-matched incidents.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "workflows/preflight-repro.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/doi-fixture-integration.yml\", \".github/workflows/preflight-repro.yml\", \".github/workflows/verify-build-artifacts.yml\"]\nSUMMARY: Added a CI workflow that validates Docker, runs scripts/preflight_repro.py with captured diagnostics, uploads incident reports, and fails on incident signatures or nonzero exit codes.\n",
+          "timestamp": "2025-12-26T08:48:06.977Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/preflight-repro.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/doi-fixture-integration.yml\", \".github/workflows/preflight-repro.yml\", \".github/workflows/verify-build-artifacts.yml\"]\nSUMMARY: Added a CI workflow that runs the smallest-repro preflight with Docker+host diagnostics, uploads incident reports, and enforces deterministic failure signatures.\n",
+          "timestamp": "2025-12-26T08:48:35.162Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:40:25.173Z",
+      "failedAt": "2025-12-26T08:48:35.162Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Create a smallest-repro preflight script that triggers the failure; run it locally and in CI with maximal diagnostics (timestamps, resource usage, container logs, exit codes), then implement a deterministic repro harness that saves all incident artifacts into runtime/_build/incident_reports/ and fails fast with a clear signature.",
+  "missionSuccessCriteria": [
+    "Complete the urgent task identified by Meta-Coordinator",
+    "Curated insight (actionability 8-9/10): Directly addresses recurring execution instability (\"container lost after testing 0/50 files\"), which currently blocks reliable end-to-end evaluation of verification pipelines and any cost/threshold e..."
+  ],
+  "projectName": "smallest-repro preflight",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [
+    "include_docker"
+  ],
+  "lastSavedAt": "2025-12-26T08:48:35.162Z",
+  "summary": {
+    "completed": 0,
+    "failed": 8,
+    "total": 8
+  }
+}

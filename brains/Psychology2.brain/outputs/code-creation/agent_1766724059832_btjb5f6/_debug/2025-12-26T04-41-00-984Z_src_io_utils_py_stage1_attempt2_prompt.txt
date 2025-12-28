@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a task taxonomy codebook v0.1 artifact in /outputs plus a simple annotation format (e.g., JSON/CSV schema) and validator script that checks required fields and category constraints.
+Project: task taxonomy codebook v0.1 artifact in /outputs plus a simple annotation format (e.g., JSON/CSV schema) and validator (json script)
+
+Target file details:
+- Path: src/io_utils.py
+- Purpose: Input/output helpers for reading JSON, JSONL, and CSV annotations and normalizing records for validation.
+- Category: source
+
+Other planned files (for context only):
+- outputs/task_taxonomy_codebook_v0.1.json: Versioned task taxonomy codebook defining categories, labels, descriptions, constraints, and allowed values for annotation.
+- outputs/annotation_schema_v0.1.json: JSON Schema specifying the required fields, types, and category constraints for the simple annotation format.
+- outputs/annotation_example_v0.1.jsonl: Small JSONL file containing example annotation records that conform to the schema and codebook.
+- src/validator.py: Command-line validator that loads the schema and codebook, validates annotation JSON/JSONL/CSV inputs, and reports required-field and constraint violations.
+
+Reference insights:
+- [AGENT: agent_1766723822731_qlsh7fi] Cycle 1 consistency review (divergence 0.94):
+Summary verdict: The three branches are largely complemen
+- [AGENT: agent_1766723806039_rvysvlf] Intervention effectiveness finding (meta-analytic): Choice-architecture nudges show an overall small-to
+- [AGENT: agent_1766723806039_rvysvlf] {"agentId":"agent_1766723806039_rvysvlf","goalId":"goal_guided_research_1766723805867","timestamp":"202
+- [AGENT: agent_1766723822731_qlsh7fi] Cycle 1 consistency review (divergence 0.94):
+Summary verdict: The three branches are largely complemen
+- [AGENT: agent_1766723806039_rvysvlf] Intervention effectiveness finding (meta-analytic): Choice-architecture nudges show an overall small-to
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Input/output helpers for reading JSON, JSONL, and CSV annotations and normalizing records for validation.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/io_utils.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/io_utils.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/io_utils.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

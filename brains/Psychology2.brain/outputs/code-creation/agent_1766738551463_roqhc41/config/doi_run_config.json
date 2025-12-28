@@ -1,0 +1,69 @@
+{
+  "schema_version": "1.0",
+  "run": {
+    "name": "fixed_doi_test_run",
+    "timezone": "UTC",
+    "fail_fast": false,
+    "max_concurrent_requests": 4
+  },
+  "doi_test_set": {
+    "mode": "fixed",
+    "dois": [
+      "10.1038/nphys1170",
+      "10.1126/science.169.3946.635",
+      "10.1145/3290607.3299039",
+      "10.1109/5.771073",
+      "10.1371/journal.pone.0000308",
+      "10.5555/12345678"
+    ]
+  },
+  "providers": {
+    "order": ["crossref", "datacite"],
+    "crossref": {
+      "base_url": "https://api.crossref.org/works/",
+      "timeout_s": 20,
+      "max_retries": 2,
+      "retry_backoff_s": [1, 2, 4],
+      "respect_retry_after": true
+    },
+    "datacite": {
+      "base_url": "https://api.datacite.org/dois/",
+      "timeout_s": 20,
+      "max_retries": 2,
+      "retry_backoff_s": [1, 2, 4],
+      "respect_retry_after": true
+    }
+  },
+  "http": {
+    "user_agent": "COSMO-DOI-Pipeline/1.0 (mailto:contact@example.org)",
+    "accept": "application/json",
+    "timeout_s": 30,
+    "connect_timeout_s": 10,
+    "read_timeout_s": 30
+  },
+  "normalization": {
+    "strip_prefixes": ["doi:", "https://doi.org/", "http://doi.org/", "https://dx.doi.org/", "http://dx.doi.org/"],
+    "uppercase": false
+  },
+  "outputs": {
+    "tables_dir": "runtime/_build/tables",
+    "reports_dir": "runtime/_build/reports",
+    "doi_results_csv": "runtime/_build/tables/doi_results.csv",
+    "doi_run_report_json": "runtime/_build/reports/doi_run_report.json",
+    "write_pretty_json": true
+  },
+  "result_contract": {
+    "per_doi_status_values": ["success", "failure"],
+    "failure_categories": [
+      "invalid_doi",
+      "not_found",
+      "rate_limited",
+      "timeout",
+      "network_error",
+      "provider_error",
+      "parse_error",
+      "unknown_error"
+    ],
+    "require_explicit_failure_reason": true
+  }
+}

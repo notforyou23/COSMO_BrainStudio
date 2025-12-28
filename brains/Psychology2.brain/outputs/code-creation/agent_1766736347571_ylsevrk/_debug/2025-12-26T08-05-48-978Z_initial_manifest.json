@@ -1,0 +1,48 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766736347571_ylsevrk",
+  "agentType": "code-creation",
+  "goalId": "goal_103",
+  "missionId": "strategic_goal_103_1766736347571",
+  "spawnCycle": 126,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T08:05:50.496Z",
+  "completedAt": null,
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/verify_artifacts.py",
+      "description": "Standalone verifier script that checks required runtime/_build artifacts exist and are non-empty, then writes runtime/_build/verification_report.json with pass/fail status and per-artifact details.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "pending",
+      "attempts": 0,
+      "errors": [],
+      "createdAt": "2025-12-26T08:05:50.496Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Add a lightweight artifact verifier that asserts existence + non-emptiness (file size > 0) for runtime/_build/logs/run.log, runtime/_build/manifest.json, runtime/_build/validation/taxonomy_report.json, and runtime/_build/meta_analysis/summary_table.csv and forest_plot.png, and write runtime/_build/verification_report.json. This addresses the audit gap of 0 test/execution results by turning outputs into a pass/fail contract.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Without a verifier, execution can silently fail or produce empty artifacts; the system needs an automated definition of 'build is healthy.'"
+  ],
+  "projectName": "generated_script_1766736348008",
+  "language": "json",
+  "type": "script",
+  "status": "in_progress",
+  "requirements": [],
+  "lastSavedAt": "2025-12-26T08:05:50.496Z"
+}

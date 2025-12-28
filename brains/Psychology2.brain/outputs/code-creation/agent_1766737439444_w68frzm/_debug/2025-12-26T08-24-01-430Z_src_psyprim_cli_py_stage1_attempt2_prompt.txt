@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Design a rigorous, implementable plan for developing and validating standardized workflows, metadata checklists, and lightweight tooling for primary-source scholarship in psychology. The plan should specify steps for community engagement, technical feature set (edition/translation provenance, variant pagination, public-domain citations), empirical evaluation methods (surveys and audit studies), and integration/test milestones.
+Project: generated_cli_tool_1766737439700 (python cli_tool)
+
+Target file details:
+- Path: src/psyprim/cli.py
+- Purpose: Complete Typer-based CLI implementing workflow commands for initializing projects, generating checklists, validating metadata, and producing citation/provenance reports.
+- Category: source
+
+Other planned files (for context only):
+- pyproject.toml: Project configuration defining package metadata, dependencies, and the psyprim console-script entry point.
+- README.md: Documentation describing the mission-aligned workflow plan, community engagement steps, metadata checklists, evaluation methods, and CLI usage examples.
+- src/psyprim/__init__.py: Package initializer exporting the library version and top-level public interfaces.
+- src/psyprim/models.py: Pydantic models for standardized primary-source records including edition/translation provenance, variant pagination, and public-domain citation fields.
+
+Reference insights:
+- [AGENT: agent_1766727087122_6irrcj2] # SYNTHESIS REPORT
+
+**Mission:** Produce a concise, actionable mission specification that defines the s
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT: agent_1766731203226_m37bifk] {"agentId":"agent_1766731203226_m37bifk","timestamp":"2025-12-26T06:49:35.087Z","files":[{"filename":".
+- [AGENT INSIGHT: agent_1766733982156_n6bb5fc] Implication 3: UX and workflow become first-class safety components with measurable cost models
+- [INTROSPECTION] cli.py from code-creation agent agent_1766725784487_bkavju7: """psyprim CLI: standardized primary-source workflows + lightwe
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Complete Typer-based CLI implementing workflow commands for initializing projects, generating checklists, validating metadata, and producing citation/provenance reports.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/psyprim/cli.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/psyprim/cli.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/psyprim/cli.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

@@ -1,0 +1,241 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766731139109_5lzrn0v",
+  "agentType": "code-creation",
+  "goalId": "goal_37",
+  "missionId": "strategic_goal_37_1766731139109",
+  "spawnCycle": 74,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T06:39:17.302Z",
+  "completedAt": "2025-12-26T06:45:00.525Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/consolidate_outputs.py",
+      "description": "Python script that finds agent-specific output artifacts (e.g., code-creation/**/outputs/*), consolidates them into the canonical outputs/ scaffold, and optionally updates CHANGELOG.md while preserving existing canonical files deterministically.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "s/id_mismatch_demo.py\", \"scripts/pipeline_runner.py\", \"scripts/preflight_diagnostics.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\"]\nSUMMARY: Added a deterministic consolidation script that copies agent output artifacts into canonical outputs/ while preserving existing files, recording conflicts, and optionally updating CHANGELOG.md.\n",
+          "timestamp": "2025-12-26T06:39:45.793Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "\", \"scripts/docker_healthcheck.sh\", \"scripts/id_mismatch_demo.py\", \"scripts/pipeline_runner.py\", \"scripts/preflight_diagnostics.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\"]\nSUMMARY:Wrote a deterministic consolidation script to gather agent outputs into canonical outputs/ with optional CHANGELOG updates and safe overwrite controls.\n",
+          "timestamp": "2025-12-26T06:40:13.717Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:39:17.302Z",
+      "failedAt": "2025-12-26T06:40:13.717Z"
+    },
+    {
+      "path": "scripts/check_artifact_gate.py",
+      "description": "Standalone artifact gate checker that validates the required canonical output paths exist and match expectations defined in config/artifact_gate_paths.json, exiting nonzero on any mismatch.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "ts/docker_healthcheck.sh\", \"scripts/id_mismatch_demo.py\", \"scripts/pipeline_runner.py\", \"scripts/preflight_diagnostics.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\"]\nSummary: Added a standalone artifact gate checker that validates required canonical outputs listed in config/artifact_gate_paths.json and exits nonzero on any mismatch.\n",
+          "timestamp": "2025-12-26T06:40:40.403Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": ", \"scripts/docker_healthcheck.sh\", \"scripts/id_mismatch_demo.py\", \"scripts/pipeline_runner.py\", \"scripts/preflight_diagnostics.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\"]\nSummary: Wrote a standalone artifact gate checker that enforces canonical artifact paths from config/artifact_gate_paths.json and exits nonzero on any mismatch.\n",
+          "timestamp": "2025-12-26T06:41:00.763Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:39:17.302Z",
+      "failedAt": "2025-12-26T06:41:00.763Z"
+    },
+    {
+      "path": "config/artifact_gate_paths.json",
+      "description": "Canonical allowlist of required artifact file paths under outputs/ used by the artifact gate checker to enforce exact locations.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:config/artifact_gate_paths.json\nDIR_STATE:[\"config/artifact_gate_paths.json\"]\nSummary: Added canonical outputs/ allowlist paths for artifact gate enforcement in config/artifact_gate_paths.json.\n",
+          "timestamp": "2025-12-26T06:41:08.877Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:config/artifact_gate_paths.json\nDIR_STATE:[\"config/artifact_gate_paths.json\"]\nSummary: Wrote the canonical artifact gate allowlist for required consolidated outputs under outputs/.\n",
+          "timestamp": "2025-12-26T06:41:17.244Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:39:17.302Z",
+      "failedAt": "2025-12-26T06:41:17.244Z"
+    },
+    {
+      "path": "outputs/task_taxonomy_codebook_v0.1.json",
+      "description": "Canonical consolidated task taxonomy codebook artifact JSON produced by agents, placed under the single outputs/ scaffold for gating and downstream use.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "1.py\", \"outputs/annotation_example_v0.1.jsonl\", \"outputs/annotation_schema_v0.1.json\", \"outputs/data_dictionary_template.csv\", \"outputs/data_extraction_template_v1.csv\", \"outputs/screening_log_template_v1.csv\", \"outputs/task_taxonomy_codebook_v0.1.json\"]\nSummary: Wrote the canonical consolidated task taxonomy codebook JSON to outputs/task_taxonomy_codebook_v0.1.json for downstream gating and use.\n",
+          "timestamp": "2025-12-26T06:42:05.717Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "ample_v0.1.jsonl\", \"outputs/annotation_schema_v0.1.json\", \"outputs/data_dictionary_template.csv\", \"outputs/data_extraction_template_v1.csv\", \"outputs/example_annotations_v0.1.jsonl\", \"outputs/screening_log_template_v1.csv\", \"outputs/task_taxonomy_codebook_v0.1.json\"]\nSummary: Wrote the canonical task taxonomy codebook JSON to outputs/task_taxonomy_codebook_v0.1.json for downstream gating and use.\n",
+          "timestamp": "2025-12-26T06:43:03.777Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:39:17.302Z",
+      "failedAt": "2025-12-26T06:43:03.777Z"
+    },
+    {
+      "path": "outputs/task_taxonomy_codebook_schema_v0.1.json",
+      "description": "JSON Schema for outputs/task_taxonomy_codebook_v0.1.json to enable validation and ensure consistent structure for artifact gate and consumers.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "ts/data_dictionary_template.csv\", \"outputs/data_extraction_template_v1.csv\", \"outputs/example_annotations_v0.1.jsonl\", \"outputs/screening_log_template_v1.csv\", \"outputs/task_taxonomy_codebook_schema_v0.1.json\", \"outputs/task_taxonomy_codebook_v0.1.json\"]\nSummary: Wrote a Draft 2020-12 JSON Schema for the canonical task taxonomy codebook artifact at outputs/task_taxonomy_codebook_schema_v0.1.json.\n",
+          "timestamp": "2025-12-26T06:43:33.181Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "outputs/data_dictionary_template.csv\", \"outputs/data_extraction_template_v1.csv\", \"outputs/example_annotations_v0.1.jsonl\", \"outputs/screening_log_template_v1.csv\", \"outputs/task_taxonomy_codebook_schema_v0.1.json\", \"outputs/task_taxonomy_codebook_v0.1.json\"]\nWrote a draft-2020-12 JSON Schema that validates the canonical task taxonomy codebook v0.1 structure for consistent downstream consumption.\n",
+          "timestamp": "2025-12-26T06:43:57.799Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:39:17.302Z",
+      "failedAt": "2025-12-26T06:43:57.799Z"
+    },
+    {
+      "path": "outputs/task_taxonomy_codebook_example_v0.1.json",
+      "description": "Minimal example instance conforming to the task taxonomy codebook schema demonstrating expected fields and formats for documentation and validation.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "extraction_template_v1.csv\", \"outputs/example_annotations_v0.1.jsonl\", \"outputs/screening_log_template_v1.csv\", \"outputs/task_taxonomy_codebook_example_v0.1.json\", \"outputs/task_taxonomy_codebook_schema_v0.1.json\", \"outputs/task_taxonomy_codebook_v0.1.json\"]\nSummary: Wrote a minimal, concrete example JSON instance demonstrating expected task taxonomy codebook fields and formatting for validation.\n",
+          "timestamp": "2025-12-26T06:44:21.330Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "ts/data_extraction_template_v1.csv\", \"outputs/example_annotations_v0.1.jsonl\", \"outputs/screening_log_template_v1.csv\", \"outputs/task_taxonomy_codebook_example_v0.1.json\", \"outputs/task_taxonomy_codebook_schema_v0.1.json\", \"outputs/task_taxonomy_codebook_v0.1.json\"]\nSUMMARY: Wrote a minimal, fully-specified example JSON instance demonstrating expected task taxonomy codebook fields and formatting.\n",
+          "timestamp": "2025-12-26T06:44:42.330Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:39:17.302Z",
+      "failedAt": "2025-12-26T06:44:42.330Z"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "description": "Updated changelog documenting consolidation of agent-produced outputs into outputs/ and the artifact gate update to enforce these canonical paths.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:CHANGELOG.md\nDIR_STATE:[\"CHANGELOG.md\", \"LICENSE\", \"README.md\", \"environment.manifest.json\", \"exec_1766731490903_ji436v2.py\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\"]\nSUMMARY: Updated CHANGELOG.md to document consolidation of agent outputs into the canonical outputs/ scaffold and stricter artifact gate enforcement of canonical paths.\n",
+          "timestamp": "2025-12-26T06:44:50.957Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:CHANGELOG.md\nDIR_STATE:[\"CHANGELOG.md\", \"LICENSE\", \"README.md\", \"README_build_runner.md\", \"environment.manifest.json\", \"exec_1766731500466_sfgh69c.py\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\"]\nSummary: Updated CHANGELOG.md to document output consolidation into canonical outputs/ and artifact-gate enforcement of exact canonical paths.\n",
+          "timestamp": "2025-12-26T06:45:00.524Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:39:17.302Z",
+      "failedAt": "2025-12-26T06:45:00.524Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Consolidate agent-produced outputs currently living in agent-specific directories (e.g., code-creation/.../outputs/task_taxonomy_codebook_v0.1.json and related schema/example files) into the single canonical /outputs scaffold, update CHANGELOG, and ensure the artifact gate checks these exact canonical paths.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Current artifacts exist but are fragmented across directories, which prevents reliable reuse and automated gating. A single canonical location is required for reproducible builds and QA enforcement."
+  ],
+  "projectName": "generated_script_1766731139344",
+  "language": "json",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-26T06:45:00.525Z",
+  "summary": {
+    "completed": 0,
+    "failed": 7,
+    "total": 7
+  }
+}

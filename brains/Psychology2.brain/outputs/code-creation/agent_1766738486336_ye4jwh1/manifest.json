@@ -1,0 +1,154 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766738486336_ye4jwh1",
+  "agentType": "code-creation",
+  "goalId": "goal_131",
+  "missionId": "strategic_goal_131_1766738486336",
+  "spawnCycle": 146,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T08:41:41.684Z",
+  "completedAt": "2025-12-26T08:45:21.911Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/verify_artifacts.py",
+      "description": "Implements artifact verification and manifest generation (runtime/_build/manifest.json) including paths, sizes, hashes, timestamps, schema versions, and hard-fails the build if required artifacts are missing or empty.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "ts/run_taxonomy_validation.js\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSummary: Implemented artifact verification plus manifest emission with hard-fail on missing/undersized required outputs (config-driven).\n",
+          "timestamp": "2025-12-26T08:42:30.086Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "s/run_taxonomy_validation.js\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSummary: Implemented artifact verification and deterministic manifest generation with hard-fail on missing/undersized required artifacts.\n",
+          "timestamp": "2025-12-26T08:43:05.159Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:41:41.684Z",
+      "failedAt": "2025-12-26T08:43:05.159Z"
+    },
+    {
+      "path": "scripts/one_command_runner.py",
+      "description": "Updates the one-command runner to invoke artifact verification after the build so failures propagate and the manifest is always emitted.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "run_taxonomy_validation.js\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSUMMARY: Updated the one-command runner to execute artifact verification after the build so failures propagate and the manifest is emitted.\n",
+          "timestamp": "2025-12-26T08:43:30.553Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "axonomy_validation.js\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSUMMARY: Updated the one-command runner to run artifact verification after build attempts so failures propagate and the manifest can be emitted.\n",
+          "timestamp": "2025-12-26T08:44:00.527Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:41:41.684Z",
+      "failedAt": "2025-12-26T08:44:00.527Z"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "description": "Updates CI to run artifact verification and upload runtime/_build/manifest.json as a build artifact while failing when required artifacts are absent or empty.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/doi-fixture-integration.yml\", \".github/workflows/verify-build-artifacts.yml\"]\nSummary: Updated CI workflow to run artifact verification and upload runtime/_build/manifest.json as a build artifact while failing if missing.\n",
+          "timestamp": "2025-12-26T08:44:15.941Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/doi-fixture-integration.yml\", \".github/workflows/verify-build-artifacts.yml\"]\nSUMMARY: CI now runs artifact verification and uploads runtime/_build/manifest.json while still failing the build on verification errors.\n",
+          "timestamp": "2025-12-26T08:44:40.886Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:41:41.684Z",
+      "failedAt": "2025-12-26T08:44:40.886Z"
+    },
+    {
+      "path": "config/required_artifacts.json",
+      "description": "Defines the required build artifacts (glob/path patterns and minimum size rules) that verify_artifacts.py enforces across local runs and CI.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:config/required_artifacts.json\nDIR_STATE:[\"config/artifact_gate_paths.json\", \"config/required_artifacts.json\", \"config/run_config.json\"]\nSUMMARY: Wrote required artifact rules to config/required_artifacts.json for enforcement by verify_artifacts.py.\n",
+          "timestamp": "2025-12-26T08:45:08.196Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:config/required_artifacts.json\nDIR_STATE:[\"config/artifact_gate_paths.json\", \"config/required_artifacts.json\", \"config/run_config.json\"]\n",
+          "timestamp": "2025-12-26T08:45:21.910Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:41:41.684Z",
+      "failedAt": "2025-12-26T08:45:21.910Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Implement/finish verify_artifacts.py to emit runtime/_build/manifest.json (paths, sizes, hashes, timestamps, schema versions) and make the build fail if required artifacts are absent or empty; add this to CI and the one-command runner.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Establishes a canonical artifact contract via a post-run verification + manifest.json, enabling consistent benchmarking (goal_9) and integrated verification pipeline evaluation (goal_10) with auditabl..."
+  ],
+  "projectName": "generated_script_1766738486541",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-26T08:45:21.911Z",
+  "summary": {
+    "completed": 0,
+    "failed": 4,
+    "total": 4
+  }
+}

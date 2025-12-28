@@ -1,0 +1,56 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a toy CSV + minimal analysis script that (a) loads the CSV, (b) computes a placeholder pooled estimate, (c) saves a forest plot and summary table into runtime/_build/reports/, and (d) writes an execution log; ensure the runner fails if files are missing.
+Project: toy CSV + minimal analysis (python script)
+
+Target file details:
+- Path: outputs/goal_2_meta_starter_kit/data/toy_extraction.csv
+- Purpose: Toy meta-analysis extraction CSV with a minimal set of rows/columns needed for the script to compute per-study effects and a pooled estimate.
+- Category: support
+
+Other planned files (for context only):
+- scripts/toy_meta_analysis.py: Standalone Python script that loads the toy extraction CSV, computes a placeholder pooled estimate, writes a forest plot and summary table into runtime/_build/reports/, logs execution, and exits nonzero if required inputs/outputs are missing.
+- runtime/_build/reports/.gitkeep: Placeholder file to ensure the reports output directory exists in the repository for saving plots, tables, and logs.
+
+Reference insights:
+- [AGENT: agent_1766726690403_9qzvtbo] {"title":"toy meta-analysis CSV in /outputs/goal_2_meta_starter_kit/data/toy_extraction.csv, run the an
+- [AGENT: agent_1766725784493_j5qki00] Document Created: Generated report
+
+# Generated report
+
+*Auto-compiled from COSMO memory (GPT-5.2 unava
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+- [AGENT: agent_1766727620270_md6q0vr] Document Created: Generated report
+
+# Generated report
+
+*Auto-compiled from COSMO memory (GPT-5.2 unava
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Toy meta-analysis extraction CSV with a minimal set of rows/columns needed for the script to compute per-study effects and a pooled estimate.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/goal_2_meta_starter_kit/data/toy_extraction.csv')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/goal_2_meta_starter_kit/data/toy_extraction.csv')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/goal_2_meta_starter_kit/data/toy_extraction.csv.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

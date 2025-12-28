@@ -1,0 +1,67 @@
+{
+  "project": "generated_configuration_1766735664709",
+  "inputs": {
+    "extraction_csv": "/Users/jtr/_JTR23_/COSMO/runtime/outputs/execution/data/toy_extraction.csv",
+    "csv_dialect": {
+      "delimiter": ",",
+      "encoding": "utf-8"
+    }
+  },
+  "build": {
+    "out_dir": "/Users/jtr/_JTR23_/COSMO/runtime/outputs/execution/runtime/_build",
+    "clean_out_dir": true,
+    "run_name": "toy_run",
+    "deterministic": true
+  },
+  "meta_analysis": {
+    "effect": {
+      "metric": "log_rr",
+      "columns": {
+        "study_id": "study_id",
+        "label": "study_label",
+        "yi": "effect",
+        "sei": "se",
+        "n_treat": "n_treat",
+        "n_ctrl": "n_ctrl"
+      }
+    },
+    "estimators": {
+      "fixed": true,
+      "random": true,
+      "random_method": "dl",
+      "ci_level": 0.95
+    },
+    "grouping": {
+      "enabled": true,
+      "column": "outcome"
+    },
+    "filters": []
+  },
+  "exports": {
+    "pooled_table": {
+      "enabled": true,
+      "basename": "pooled_estimates",
+      "formats": [
+        "csv",
+        "json"
+      ]
+    },
+    "run_log": {
+      "enabled": true,
+      "filename": "run_log.json"
+    }
+  },
+  "plots": {
+    "forest_plot": {
+      "enabled": true,
+      "basename": "forest_plot",
+      "formats": [
+        "png"
+      ],
+      "dpi": 200,
+      "max_studies_per_panel": 40,
+      "show_weights": true,
+      "show_ci": true
+    }
+  }
+}

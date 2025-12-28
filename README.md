@@ -1,5 +1,10 @@
 # 🧠 COSMO Brain Platform v2.5
 
+![Version](https://img.shields.io/badge/version-2.5.0-blue)
+![Engine](https://img.shields.io/badge/engine-GPT--5.2-orange)
+![Logic](https://img.shields.io/badge/logic-Agentic-green)
+![Privacy](https://img.shields.io/badge/privacy-Local--First-brightgreen)
+
 > **The World's First Unified Research Browser & Agent IDE.**
 
 COSMO Brain Platform is a high-performance, local-first environment designed to host, query, and extend research artifacts. It is the **Intelligence Player** for the next generation of synthetic researchers—a bridge between deep knowledge retrieval and surgical agentic action.
@@ -42,6 +47,22 @@ The true "insanity" of COSMO is the workflow. You discover a breakthrough or evi
 *   **Portable Knowledge**: Entire fields of study are packaged into versioned, shareable `.brain` snapshots.
 *   **Local-First Privacy**: Your research data stays on your disk. No telemetry is uploaded; the platform operates strictly in your trusted local environment.
 *   **Terminal Gating**: Human-in-the-loop review for all AI-proposed system commands and surgical edits.
+
+---
+
+## 📦 Featured Research Artifacts (Showcase)
+
+COSMO isn't just an empty shell. It comes pre-loaded with high-density, **pre-crystallized research** across multiple domains. These aren't just text files—they are complex knowledge graphs ready for deep interrogation.
+
+| Field | Focus Area | Status |
+| :--- | :--- | :--- |
+| **🎨 Art & Music** | 5,000+ nodes covering human aesthetics & musicology | `Crystallized` |
+| **📐 Mathematics** | Advanced modeling from Algebra to Probability | `Crystallized` |
+| **⚛️ Physics** | Quantum dynamics and Unified Field Theory research | `Crystallized` |
+| **🧠 Psychology** | Behavioral synthesis & cognitive framework analysis | `Crystallized` |
+| **🚗 Big Auto** | Hybrid intelligence on the future of global mobility | `Crystallized` |
+
+> **Pro Tip**: Switch to **🔭 Explore Mode** after launching any of these to see the high-dimensional structure of the data you're working with.
 
 ---
 

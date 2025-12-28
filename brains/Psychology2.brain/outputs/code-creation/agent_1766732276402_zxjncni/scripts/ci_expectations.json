@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "artifact_root": "runtime/_build",
+  "required": [
+    {
+      "path": "runtime/_build",
+      "type": "dir",
+      "description": "Build artifact root uploaded by CI"
+    },
+    {
+      "path": "runtime/_build/reports",
+      "type": "dir",
+      "description": "All generated reports from validator and demos"
+    },
+    {
+      "path": "runtime/_build/figures",
+      "type": "dir",
+      "description": "All generated figures from demos/analysis"
+    },
+    {
+      "path": "runtime/_build/reports",
+      "type": "glob_any",
+      "pattern": "**/*.html",
+      "min_count": 1,
+      "description": "At least one HTML report"
+    },
+    {
+      "path": "runtime/_build/reports",
+      "type": "glob_any",
+      "pattern": "**/*.json",
+      "min_count": 1,
+      "description": "At least one machine-readable report (JSON)"
+    },
+    {
+      "path": "runtime/_build/figures",
+      "type": "glob_any",
+      "pattern": "**/*.{png,svg,pdf}",
+      "min_count": 1,
+      "description": "At least one figure file (PNG/SVG/PDF)"
+    }
+  ]
+}

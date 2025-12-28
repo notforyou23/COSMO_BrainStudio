@@ -1,0 +1,51 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a minimal toy dataset (e.g., 5–10 rows) and an analysis script/notebook that (a) loads the CSV, (b) computes a simple pooled effect (fixed/random), (c) saves a forest plot and summary table into /outputs, and (d) writes a run log with timestamps and file paths.
+Project: generated_script_1766727620507 (python script)
+
+Target file details:
+- Path: src/run_meta_analysis.py
+- Purpose: Standalone Python script that loads the toy CSV, computes fixed/random pooled effects, writes a summary table, saves a forest plot into outputs, and appends a timestamped run log with produced file paths.
+- Category: source
+
+Other planned files (for context only):
+- notebooks/meta_analysis_demo.ipynb: Runnable notebook version of the same workflow (load CSV, compute pooled effect, generate forest plot and summary table, and write a run log) for interactive demonstration.
+- src/meta_utils.py: Utility module implementing effect-size calculations, inverse-variance pooling (fixed/random), heterogeneity statistics, and plotting helpers used by both the script and notebook.
+- outputs/.gitkeep: Placeholder file to ensure the outputs directory exists in version control for generated plots, tables, and logs.
+- README.md: Project documentation explaining how to run the script/notebook, required inputs, and where outputs (forest plot, summary table, run log) are written.
+
+Reference insights:
+- [AGENT: agent_1766726690403_9qzvtbo] Document Created: toy meta-analysis CSV in /outputs/goal_2_meta_starter_kit/data/toy_extraction.csv, ru
+- [AGENT: agent_1766727087123_i8o4pex] {"agentId":"agent_1766727087123_i8o4pex","timestamp":"2025-12-26T05:38:24.080Z","files":[{"filename":"_
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+- [AGENT: agent_1766723822731_qlsh7fi] Cycle 1 consistency review (divergence 0.94):
+Summary verdict: The three branches are largely complemen
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Standalone Python script that loads the toy CSV, computes fixed/random pooled effects, writes a summary table, saves a forest plot into outputs, and appends a timestamped run log with produced file paths.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/run_meta_analysis.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/run_meta_analysis.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/run_meta_analysis.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

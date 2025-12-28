@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a gate/verify_artifacts.py step that asserts required non-empty paths (e.g., runtime/_build/reports/*.json, runtime/_build/tables/*.csv, runtime/_build/logs/*.jsonl) and fails with a clear missing-artifact summary; wire it into the one-command runner as the final step.
+Project: gate/verify_artifacts.py step that asserts required non-empty paths (e.g., runtime/_build/reports/*.json, runtime/_build/tables/*.csv, runtime/_build/logs/*.jsonl) and fails with a clear missing-artifact summary; wire it into the one-command runner as the final step. (python script)
+
+Target file details:
+- Path: gate/verify_artifacts.py
+- Purpose: CLI gate that verifies required artifact glob patterns exist and are non-empty, printing a clear missing/empty artifact summary and exiting non-zero on failure.
+- Category: source
+
+Other planned files (for context only):
+- scripts/run.py: One-command runner updated to invoke the artifact verification gate as the final step after all build/validation steps complete.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-26T05-01-46-647Z_scripts_run_artifact_gate_py_stage1_attempt1_prompt.txt from code-creation agent agent_176672530531
+- [CONSOLIDATED] Standardize build verification by running the required validation tools against the current artifacts and persist both raw co
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+- [AGENT: agent_1766727773603_i3xb9wt] Cycle 42 consistency review (divergence 0.94):
+Summary judgment: All three branches agree that introspe
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: CLI gate that verifies required artifact glob patterns exist and are non-empty, printing a clear missing/empty artifact summary and exiting non-zero on failure.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('gate/verify_artifacts.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:gate/verify_artifacts.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside gate/verify_artifacts.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

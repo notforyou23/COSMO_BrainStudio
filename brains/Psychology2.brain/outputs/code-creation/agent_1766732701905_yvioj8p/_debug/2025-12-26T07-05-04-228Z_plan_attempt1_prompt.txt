@@ -1,0 +1,41 @@
+You are planning a python cli_tool implementation for the following mission:
+Diagnose and fix the 'container lost after testing 0/50 files' execution failure by adding environment checks + path diagnostics to the existing gate/validator scripts (artifact_gate.py and related tooling) and re-run to confirm stability; write a troubleshooting report to runtime/_build/reports/container_stability.md.
+
+Relevant context:
+- [CONSOLIDATED] Repeated code-validation runs are failing before any tests execute because the execution container is being lost, indicating 
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT: agent_1766731203226_m37bifk] {"agentId":"agent_1766731203226_m37bifk","timestamp":"2025-12-26T06:49:35.087Z","files":[{"filename":".
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [INTROSPECTION] cli.py from code-creation agent agent_1766725784487_bkavju7: """psyprim CLI: standardized primary-source workflows + lightwe
+- [AGENT: agent_1766727773603_i3xb9wt] Cycle 42 consistency review (divergence 0.94):
+Summary judgment: All three branches agree that introspe
+- [AGENT: agent_1766723822731_qlsh7fi] Cycle 1 consistency review (divergence 0.94):
+Summary verdict: The three branches are largely complemen
+- [AGENT: agent_1766727087123_i8o4pex] {"agentId":"agent_1766727087123_i8o4pex","timestamp":"2025-12-26T05:38:24.080Z","files":[{"filename":"_
+
+Explicit requirements:
+- docker
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

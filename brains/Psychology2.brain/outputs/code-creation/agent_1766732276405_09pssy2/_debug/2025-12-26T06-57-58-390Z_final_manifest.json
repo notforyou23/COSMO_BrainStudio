@@ -1,0 +1,183 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766732276405_09pssy2",
+  "agentType": "code-creation",
+  "goalId": "goal_91",
+  "missionId": "strategic_goal_91_1766732276405",
+  "spawnCycle": 86,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T06:58:07.770Z",
+  "completedAt": "2025-12-26T07:01:12.717Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/preflight_smoke.py",
+      "description": "Lightweight preflight smoke test that prints environment diagnostics (Python version, cwd, repo root, disk space, write permissions) and exits nonzero with actionable error messages when requirements are not met.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "scripts/pipeline_runner.py\", \"scripts/preflight_diagnostics.py\", \"scripts/preflight_smoke.py\", \"scripts/record_versions.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\"]\nSUMMARY: Added a lightweight preflight smoke test script that prints environment diagnostics and fails fast with actionable error messages.\n",
+          "timestamp": "2025-12-26T06:58:32.074Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "ts/preflight_diagnostics.py\", \"scripts/preflight_smoke.py\", \"scripts/record_versions.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\"]\nSummary: Added a fail-fast preflight smoke test script that prints key environment diagnostics and exits nonzero with actionable errors when unstable conditions are detected.\n",
+          "timestamp": "2025-12-26T06:58:55.533Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:58:07.770Z",
+      "failedAt": "2025-12-26T06:58:55.533Z"
+    },
+    {
+      "path": "scripts/run_tests_with_preflight.sh",
+      "description": "Shell wrapper that runs the preflight smoke test and only then executes the project test command, ensuring early, actionable failures instead of container loss mid-run.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "ght_diagnostics.py\", \"scripts/preflight_smoke.py\", \"scripts/record_versions.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\"]\nSummary: Added a robust test wrapper that runs a preflight smoke test first and then executes the provided test command (or defaults to pytest).\n",
+          "timestamp": "2025-12-26T06:59:07.128Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "\", \"scripts/preflight_smoke.py\", \"scripts/record_versions.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\"]\nSUMMARY: Added a strict bash wrapper that runs preflight diagnostics first, fails fast with actionable errors, then executes the provided or default test command.\n",
+          "timestamp": "2025-12-26T06:59:20.285Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:58:07.770Z",
+      "failedAt": "2025-12-26T06:59:20.285Z"
+    },
+    {
+      "path": "Dockerfile",
+      "description": "Docker image definition that installs dependencies, runs the preflight smoke test during container startup, and provides a stable entrypoint for executing tests inside a reproducible environment.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "Forbidden command pattern detected: /rm\\s+-rf\\s+\\//",
+          "timestamp": "2025-12-26T06:59:45.930Z"
+        },
+        {
+          "attempt": 2,
+          "message": "Forbidden command pattern detected: /rm\\s+-rf\\s+\\//",
+          "timestamp": "2025-12-26T07:00:12.214Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:58:07.770Z",
+      "failedAt": "2025-12-26T07:00:12.215Z"
+    },
+    {
+      "path": "docker/entrypoint.sh",
+      "description": "Container entrypoint that executes the preflight diagnostics, surfaces failures clearly, and then delegates to the requested command (e.g., running tests) to avoid silent container termination.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docker/entrypoint.sh\nDIR_STATE:[\"docker/.dockerignore\", \"docker/entrypoint.sh\"]\nSUMMARY: Added a robust entrypoint that runs a preflight smoke test (repo script if present, otherwise inline) and then execs the requested command with clear failure reporting.\n",
+          "timestamp": "2025-12-26T07:00:34.797Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docker/entrypoint.sh\nDIR_STATE:[\"docker/.dockerignore\", \"docker/entrypoint.sh\"]\nSummary: Wrote a robust docker entrypoint that runs a preflight smoke test with clear diagnostics before delegating to the requested command.\n",
+          "timestamp": "2025-12-26T07:00:48.200Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:58:07.770Z",
+      "failedAt": "2025-12-26T07:00:48.200Z"
+    },
+    {
+      "path": ".dockerignore",
+      "description": "Docker ignore rules to reduce build context size and prevent large or irrelevant files from destabilizing builds and causing container instability.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.dockerignore\nDIR_STATE:[\".dockerignore\", \"CHANGELOG.md\", \"LICENSE\", \"README.md\", \"README.reproducibility.md\", \"README_build_runner.md\", \"environment.manifest.json\", \"exec_1766732459548_j7c7juh.py\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\"]\nUpdated .dockerignore to minimize Docker build context and reduce the risk of container loss during test runs.\n",
+          "timestamp": "2025-12-26T07:00:59.623Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "\nDIR_STATE:[\".dockerignore\", \"CHANGELOG.md\", \"LICENSE\", \"README.md\", \"README.reproducibility.md\", \"README_build_runner.md\", \"environment.manifest.json\", \"exec_1766732472648_q5v7ln6.py\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\"]\nSUMMARY: Added .dockerignore rules to minimize Docker build context and exclude common caches, artifacts, and large files that can destabilize builds.\n",
+          "timestamp": "2025-12-26T07:01:12.717Z"
+        }
+      ],
+      "createdAt": "2025-12-26T06:58:07.770Z",
+      "failedAt": "2025-12-26T07:01:12.717Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Investigate and fix the repeated 'Container lost' failure that prevents CodeExecutionAgents from running any tests (seen in multiple attempts where testing aborted at 0/50). Add a lightweight preflight smoke test that prints environment diagnostics (Python version, working dir, repo root, disk space, write permissions) and exits nonzero with actionable error messages if conditions are not met.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Multiple execution attempts aborted with 'Container lost', blocking validation of existing tooling and preventing production of runtime/_build artifacts."
+  ],
+  "projectName": "generated_script_1766732276612",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [
+    "include_docker"
+  ],
+  "lastSavedAt": "2025-12-26T07:01:12.717Z",
+  "summary": {
+    "completed": 0,
+    "failed": 5,
+    "total": 5
+  }
+}

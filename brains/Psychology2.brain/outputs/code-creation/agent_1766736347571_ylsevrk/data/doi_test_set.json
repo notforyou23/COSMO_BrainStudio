@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0",
+  "name": "Curated DOI test set (edge cases)",
+  "created_at": "2025-12-26T00:00:00Z",
+  "purpose": "Small curated DOI set covering redirects, paywalls, multiple editions (book vs chapter), preprints, datasets, and invalid/retired DOIs. Intended for end-to-end api_server.py resolution + normalization with explicit provenance fields.",
+  "notes": [
+    "Expected behaviors are guidance for the pipeline (resolve DOI -> landing URL; attempt metadata fetch/parse; normalize; emit provenance).",
+    "Failure reason codes are deterministic targets for doi_pipeline/provenance modules (e.g., DOI_NOT_FOUND, NETWORK_ERROR, PARSE_ERROR, PAYWALL_BLOCKED, RATE_LIMITED, UNSUPPORTED_CONTENT_TYPE, METADATA_NOT_AVAILABLE)."
+  ],
+  "cases": [
+    {
+      "id": "basic-crossref-open",
+      "label": "Basic DOI that resolves cleanly (Crossref-friendly; stable landing page)",
+      "doi": "10.1038/nphys1170",
+      "category": "baseline",
+      "edge_case": ["none"],
+      "expected": {
+        "outcome": "success",
+        "parsing_method_hint": ["crossref", "html"],
+        "acceptable_status_codes": [200, 301, 302]
+      }
+    },
+    {
+      "id": "classic-redirect-chain",
+      "label": "Redirect chain via doi.org to publisher; ensure landing_url captures final URL",
+      "doi": "10.1126/science.169.3946.635",
+      "category": "redirects",
+      "edge_case": ["redirects"],
+      "expected": {
+        "outcome": "success",
+        "parsing_method_hint": ["crossref", "html"],
+        "acceptable_status_codes": [200, 301, 302, 303, 307, 308]
+      }
+    },
+    {
+      "id": "acm-dl-paywallish",
+      "label": "ACM Digital Library (often requires JS/cookies; paywall-like HTML). Prefer Crossref metadata if HTML parsing fails.",
+      "doi": "10.1145/2783446.2783605",
+      "category": "paywall_or_dynamic",
+      "edge_case": ["paywall", "dynamic_html"],
+      "expected": {
+        "outcome": "success_or_partial",
+        "parsing_method_hint": ["crossref", "html"],
+        "acceptable_failure_reason_codes": ["PAYWALL_BLOCKED", "METADATA_NOT_AVAILABLE", "PARSE_ERROR"]
+      }
+    },
+    {
+      "id": "elsevier-paywall",
+      "label": "Elsevier / ScienceDirect (frequent paywall or bot checks). Verify provenance.failure_reason_code when blocked.",
+      "doi": "10.1016/S0140-6736(16)30384-0",
+      "category": "paywall",
+      "edge_case": ["paywall"],
+      "expected": {
+        "outcome": "success_or_partial",
+        "parsing_method_hint": ["crossref", "html"],
+        "acceptable_failure_reason_codes": ["PAYWALL_BLOCKED", "METADATA_NOT_AVAILABLE", "RATE_LIMITED", "NETWORK_ERROR"]
+      }
+    },
+    {
+      "id": "wiley-paywall",
+      "label": "Wiley (paywall / bot-check prone). Ensure failure codes are deterministic if HTML fetch/parse fails.",
+      "doi": "10.1002/anie.201410299",
+      "category": "paywall",
+      "edge_case": ["paywall"],
+      "expected": {
+        "outcome": "success_or_partial",
+        "parsing_method_hint": ["crossref", "html"],
+        "acceptable_failure_reason_codes": ["PAYWALL_BLOCKED", "METADATA_NOT_AVAILABLE", "RATE_LIMITED", "NETWORK_ERROR"]
+      }
+    },
+    {
+      "id": "oxford-journals",
+      "label": "Oxford Academic (often OK; tests redirects and metadata extraction)",
+      "doi": "10.1093/nar/gkaa1106",
+      "category": "publisher_site",
+      "edge_case": ["redirects"],
+      "expected": {
+        "outcome": "success",
+        "parsing_method_hint": ["crossref", "html"],
+        "acceptable_status_codes": [200, 301, 302, 303, 307, 308]
+      }
+    },
+    {
+      "id": "preprint-arxiv-doi",
+      "label": "arXiv DOI minted via DataCite; tests non-Crossref metadata + canonical preprint landing URL",
+      "doi": "10.48550/arXiv.1706.03762",
+      "category": "preprint",
+      "edge_case": ["datacite_metadata"],
+      "expected": {
+        "outcome": "success",
+        "parsing_method_hint": ["datacite", "html"],
+        "acceptable_status_codes": [200, 301, 302]
+      }
+    },
+    {
+      "id": "dataset-zenodo-doi",
+      "label": "Zenodo dataset DOI (DataCite; often resolves and provides JSON-LD). Tests dataset type normalization.",
+      "doi": "10.5281/zenodo.3727209",
+      "category": "dataset",
+      "edge_case": ["datacite_metadata", "jsonld"],
+      "expected": {
+        "outcome": "success",
+        "parsing_method_hint": ["datacite", "html"],
+        "acceptable_status_codes": [200, 301, 302]
+      }
+    },
+    {
+      "id": "book-ebook-doi",
+      "label": "Springer book/eBook DOI (tests book normalization, publisher pages, and ISBN-like metadata)",
+      "doi": "10.1007/978-3-030-78118-1",
+      "category": "multiple_editions",
+      "edge_case": ["book"],
+      "expected": {
+        "outcome": "success",
+        "parsing_method_hint": ["crossref", "html"],
+        "acceptable_status_codes": [200, 301, 302]
+      }
+    },
+    {
+      "id": "book-chapter-doi",
+      "label": "Springer book chapter DOI (tests multiple editions/levels: book vs chapter; relationship fields if available)",
+      "doi": "10.1007/978-3-030-78118-1_1",
+      "category": "multiple_editions",
+      "edge_case": ["book_chapter"],
+      "expected": {
+        "outcome": "success",
+        "parsing_method_hint": ["crossref", "html"],
+        "acceptable_status_codes": [200, 301, 302]
+      }
+    },
+    {
+      "id": "invalid-prefix-example",
+      "label": "Intentionally invalid DOI (example prefix). Should deterministically fail with DOI_NOT_FOUND.",
+      "doi": "10.1000/182",
+      "category": "invalid_or_retired",
+      "edge_case": ["invalid"],
+      "expected": {
+        "outcome": "failure",
+        "required_failure_reason_code": "DOI_NOT_FOUND"
+      }
+    },
+    {
+      "id": "nonsense-doi",
+      "label": "Malformed/nonsense DOI string that still matches pattern but should not resolve",
+      "doi": "10.9999/this-doi-should-not-exist-abcdefg",
+      "category": "invalid_or_retired",
+      "edge_case": ["invalid"],
+      "expected": {
+        "outcome": "failure",
+        "acceptable_failure_reason_codes": ["DOI_NOT_FOUND", "RESOLUTION_FAILED", "NETWORK_ERROR"]
+      }
+    }
+  ]
+}

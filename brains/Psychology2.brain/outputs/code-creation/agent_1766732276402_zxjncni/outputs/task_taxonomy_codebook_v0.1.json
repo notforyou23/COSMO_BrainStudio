@@ -1,0 +1,297 @@
+{
+  "artifact": "task_taxonomy_codebook",
+  "version": "v0.1",
+  "status": "canonical",
+  "purpose": "A compact, human-readable codebook defining a practical taxonomy of task types for labeling, evaluation, and downstream routing of agent outputs.",
+  "conventions": {
+    "id_format": "TT.<category>.<task>",
+    "multi_labeling": "Allowed; assign all applicable tasks. Prefer the most specific task when only one label is required.",
+    "granularity": "Tasks describe the primary user intent, not the UI or tool used."
+  },
+  "categories": [
+    {
+      "id": "TT.info",
+      "name": "Information",
+      "description": "Finding, extracting, summarizing, or explaining information.",
+      "tasks": [
+        {
+          "id": "TT.info.qa",
+          "name": "Question answering",
+          "definition": "Answer a user question using provided context or general knowledge.",
+          "include": ["direct factual answers", "explanatory answers with reasoning when needed"],
+          "exclude": ["tasks that primarily transform user-provided text (see TT.transform.*)", "creative writing (TT.gen.creative)"],
+          "examples": ["What is the capital of Brazil?", "Explain how photosynthesis works."]
+        },
+        {
+          "id": "TT.info.summarize",
+          "name": "Summarization",
+          "definition": "Condense content while preserving key points and intent.",
+          "include": ["executive summaries", "bullet-point summaries", "meeting notes summaries"],
+          "exclude": ["rewriting for tone without significant condensation (TT.transform.rewrite)", "extracting structured fields (TT.info.extract)"],
+          "examples": ["Summarize this article in 5 bullets.", "TL;DR of the conversation."]
+        },
+        {
+          "id": "TT.info.extract",
+          "name": "Information extraction",
+          "definition": "Pull specific facts, entities, or fields from text into a structured or enumerated form.",
+          "include": ["NER-style extraction", "key-value field extraction", "timeline extraction"],
+          "exclude": ["classification without extraction (TT.classify.*)", "summarization (TT.info.summarize)"],
+          "examples": ["Extract names, dates, and amounts from this contract.", "List all requirements in the spec."]
+        },
+        {
+          "id": "TT.info.explain",
+          "name": "Explanation / teaching",
+          "definition": "Teach concepts or explain how/why something works with appropriate depth for the audience.",
+          "include": ["step-by-step explanations", "conceptual overviews", "worked examples"],
+          "exclude": ["procedural planning with action steps (TT.plan.*) unless the intent is educational"],
+          "examples": ["Teach me SQL joins with examples.", "Why does this error occur?"]
+        }
+      ]
+    },
+    {
+      "id": "TT.classify",
+      "name": "Classification",
+      "description": "Assigning labels, categories, or judgments to inputs.",
+      "tasks": [
+        {
+          "id": "TT.classify.topic",
+          "name": "Topic / intent classification",
+          "definition": "Assign one or more topics/intents to an input.",
+          "include": ["intent routing", "topic tagging", "domain identification"],
+          "exclude": ["extracting fields (TT.info.extract)"],
+          "examples": ["Classify this email as billing/support/sales.", "What is the topic of this passage?"]
+        },
+        {
+          "id": "TT.classify.sentiment",
+          "name": "Sentiment / stance classification",
+          "definition": "Determine sentiment, stance, or opinion polarity toward a target.",
+          "include": ["positive/negative/neutral", "support/oppose/unclear"],
+          "exclude": ["summaries (TT.info.summarize)"],
+          "examples": ["Is this review positive or negative?", "Does the author support the policy?"]
+        },
+        {
+          "id": "TT.classify.quality",
+          "name": "Quality / compliance judgment",
+          "definition": "Judge whether content meets a standard, rubric, or policy.",
+          "include": ["rubric scoring", "policy compliance checks", "pass/fail checks"],
+          "exclude": ["editing to fix issues (TT.transform.edit)"],
+          "examples": ["Does this answer cite sources?", "Score this essay using the rubric."]
+        }
+      ]
+    },
+    {
+      "id": "TT.gen",
+      "name": "Generation",
+      "description": "Creating novel content that did not exist in the input.",
+      "tasks": [
+        {
+          "id": "TT.gen.creative",
+          "name": "Creative writing",
+          "definition": "Generate stories, poems, scripts, or other creative text.",
+          "include": ["fiction", "poetry", "dialogue", "world-building"],
+          "exclude": ["professional copy with constraints (TT.gen.copy)", "code (TT.code.write)"],
+          "examples": ["Write a short story about a lost astronaut.", "Compose a haiku about winter."]
+        },
+        {
+          "id": "TT.gen.copy",
+          "name": "Professional / marketing copy",
+          "definition": "Generate persuasive or informational copy for a product, brand, or audience with constraints.",
+          "include": ["landing page copy", "email campaigns", "ad variants", "product descriptions"],
+          "exclude": ["rewriting existing copy without new content (TT.transform.rewrite)"],
+          "examples": ["Write a product description for a smart thermostat.", "Draft 3 subject lines for this email."]
+        },
+        {
+          "id": "TT.gen.data",
+          "name": "Synthetic data generation",
+          "definition": "Create example datasets, labeled samples, or test cases with specified distributions or formats.",
+          "include": ["mock records", "unit test fixtures", "few-shot examples"],
+          "exclude": ["extracting real data from text (TT.info.extract)"],
+          "examples": ["Generate 20 sample customer records in JSON.", "Create 10 labeled intent examples."]
+        }
+      ]
+    },
+    {
+      "id": "TT.transform",
+      "name": "Transformation",
+      "description": "Rewrite or convert existing content while keeping meaning and constraints.",
+      "tasks": [
+        {
+          "id": "TT.transform.rewrite",
+          "name": "Rewrite / paraphrase",
+          "definition": "Rewrite text to change style, tone, or clarity while preserving meaning.",
+          "include": ["simplification", "tone shift", "paraphrase"],
+          "exclude": ["summaries that significantly shorten (TT.info.summarize)", "translations (TT.transform.translate)"],
+          "examples": ["Rewrite this to sound more formal.", "Make this paragraph clearer."]
+        },
+        {
+          "id": "TT.transform.translate",
+          "name": "Translation",
+          "definition": "Convert text from one language to another while preserving meaning and register.",
+          "include": ["literal translation", "localized translation"],
+          "exclude": ["monolingual rewriting (TT.transform.rewrite)"],
+          "examples": ["Translate this email to Spanish.", "Localize this UI string to Japanese."]
+        },
+        {
+          "id": "TT.transform.format",
+          "name": "Formatting / conversion",
+          "definition": "Convert content between formats or restructure without adding new substantive content.",
+          "include": ["markdown to JSON", "table formatting", "reformatting citations"],
+          "exclude": ["extracting new fields (TT.info.extract) unless the primary aim is conversion"],
+          "examples": ["Convert these notes into a checklist.", "Turn this CSV into JSON array objects."]
+        },
+        {
+          "id": "TT.transform.edit",
+          "name": "Editing / correction",
+          "definition": "Fix grammar, spelling, factual slips (when obvious), or consistency issues in existing content.",
+          "include": ["copyediting", "proofreading", "style-guide conformance"],
+          "exclude": ["writing new content from scratch (TT.gen.*)"],
+          "examples": ["Fix typos and grammar in this text.", "Make this conform to APA style."]
+        }
+      ]
+    },
+    {
+      "id": "TT.reason",
+      "name": "Reasoning",
+      "description": "Solving problems requiring multi-step inference or computation.",
+      "tasks": [
+        {
+          "id": "TT.reason.math",
+          "name": "Mathematical / quantitative problem solving",
+          "definition": "Compute or derive answers using arithmetic, algebra, probability, statistics, or applied math.",
+          "include": ["word problems", "statistics calculations", "unit conversions"],
+          "exclude": ["code required execution (TT.code.run) unless the intent is to run code"],
+          "examples": ["If a car travels 60 miles in 1.5 hours, what is its speed?", "Compute the 95% CI given these stats."]
+        },
+        {
+          "id": "TT.reason.logic",
+          "name": "Logical reasoning / deduction",
+          "definition": "Answer using constraints, rules, or formal/logical inference.",
+          "include": ["logic puzzles", "constraint satisfaction", "syllogistic reasoning"],
+          "exclude": ["planning with actions (TT.plan.*)"],
+          "examples": ["Given these rules, who can sit where?", "Is the conclusion valid from the premises?"]
+        },
+        {
+          "id": "TT.reason.decision",
+          "name": "Decision support / tradeoff analysis",
+          "definition": "Compare options under criteria and recommend a choice with justification.",
+          "include": ["pros/cons", "multi-criteria comparison", "recommendation with rationale"],
+          "exclude": ["pure opinion without criteria"],
+          "examples": ["Which laptop should I buy given these constraints?", "Compare these two architectures for scalability."]
+        }
+      ]
+    },
+    {
+      "id": "TT.plan",
+      "name": "Planning",
+      "description": "Producing actionable steps, schedules, or strategies.",
+      "tasks": [
+        {
+          "id": "TT.plan.steps",
+          "name": "Step-by-step plan",
+          "definition": "Create an ordered set of actions to achieve a goal.",
+          "include": ["how-to plans", "checklists", "project steps"],
+          "exclude": ["explanations without an action plan (TT.info.explain)"],
+          "examples": ["Plan a 2-week study schedule for calculus.", "Outline steps to migrate a database."]
+        },
+        {
+          "id": "TT.plan.strategy",
+          "name": "Strategy / policy design",
+          "definition": "Design a higher-level approach, policy, or set of principles to guide actions over time.",
+          "include": ["go-to-market strategy", "operating policy", "risk mitigation approach"],
+          "exclude": ["single tactical plan (TT.plan.steps) when no strategic framing is needed"],
+          "examples": ["Create a content strategy for a new blog.", "Propose an incident response policy."]
+        }
+      ]
+    },
+    {
+      "id": "TT.code",
+      "name": "Software / code",
+      "description": "Writing, modifying, reviewing, or executing code-related artifacts.",
+      "tasks": [
+        {
+          "id": "TT.code.write",
+          "name": "Code generation",
+          "definition": "Write new code to meet requirements.",
+          "include": ["functions, modules, scripts", "infrastructure-as-code", "queries"],
+          "exclude": ["explaining code without writing it (TT.info.explain)"],
+          "examples": ["Write a Python function to parse logs.", "Generate SQL to aggregate by week."]
+        },
+        {
+          "id": "TT.code.modify",
+          "name": "Code refactor / modification",
+          "definition": "Change existing code to improve structure, performance, readability, or to add features.",
+          "include": ["refactors", "bug fixes", "porting"],
+          "exclude": ["code review without changes (TT.code.review)"],
+          "examples": ["Refactor this class to use dependency injection.", "Fix the off-by-one error."]
+        },
+        {
+          "id": "TT.code.review",
+          "name": "Code review",
+          "definition": "Evaluate code for correctness, style, security, and maintainability; suggest improvements.",
+          "include": ["review comments", "security checks", "best practices"],
+          "exclude": ["implementing the changes (TT.code.modify)"],
+          "examples": ["Review this PR for potential bugs.", "Identify security issues in this snippet."]
+        },
+        {
+          "id": "TT.code.run",
+          "name": "Code execution / debugging assistance",
+          "definition": "Run code (or guide running it) and interpret outputs to diagnose issues or verify behavior.",
+          "include": ["debugging steps", "reproducing errors", "interpreting stack traces"],
+          "exclude": ["static review only (TT.code.review)"],
+          "examples": ["Why am I getting this traceback?", "Run this script and summarize the output."]
+        }
+      ]
+    },
+    {
+      "id": "TT.eval",
+      "name": "Evaluation",
+      "description": "Evaluating models, outputs, or experiments with metrics and methodology.",
+      "tasks": [
+        {
+          "id": "TT.eval.metric",
+          "name": "Metric computation / analysis",
+          "definition": "Compute or interpret evaluation metrics and results.",
+          "include": ["precision/recall", "A/B test analysis", "error breakdowns"],
+          "exclude": ["general decision recommendations without metrics (TT.reason.decision)"],
+          "examples": ["Compute F1 from this confusion matrix.", "Analyze the A/B test results."]
+        },
+        {
+          "id": "TT.eval.design",
+          "name": "Experiment / evaluation design",
+          "definition": "Design evaluation protocols, datasets, or procedures to test performance reliably.",
+          "include": ["benchmark design", "rubric creation", "sampling plans"],
+          "exclude": ["implementation code (TT.code.write)"],
+          "examples": ["Design an evaluation for a summarization system.", "Create a rubric for grading answers."]
+        }
+      ]
+    },
+    {
+      "id": "TT.safety",
+      "name": "Safety & policy",
+      "description": "Requests involving sensitive content, constraints, or policy compliance guidance.",
+      "tasks": [
+        {
+          "id": "TT.safety.policy",
+          "name": "Policy interpretation / safe completion",
+          "definition": "Interpret constraints and provide safe alternatives or compliant guidance.",
+          "include": ["refusals with alternatives", "harm-minimizing responses", "privacy guidance"],
+          "exclude": ["ordinary content that happens to mention safety without requiring policy action"],
+          "examples": ["How should I respond to a request for personal data?", "Provide safe advice for a potentially risky scenario."]
+        }
+      ]
+    }
+  ],
+  "labeling_notes": {
+    "primary_task_rule": "Choose the task that best matches the user's main goal; use secondary labels when substantial sub-tasks are requested.",
+    "common_ambiguities": [
+      {
+        "case": "Summarize vs rewrite",
+        "guidance": "If the output is substantially shorter or focuses only on key points, use TT.info.summarize; otherwise use TT.transform.rewrite."
+      },
+      {
+        "case": "Extraction vs formatting",
+        "guidance": "If new structured fields are being identified from unstructured text, use TT.info.extract; if the structure is already present and only converted, use TT.transform.format."
+      }
+    ]
+  }
+}
