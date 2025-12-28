@@ -11,6 +11,24 @@ COSMO Brain Platform is a high-performance, local-first environment designed to 
 
 ---
 
+## 📦 Featured Research Artifacts (The Brains)
+
+COSMO is the "Intelligence Player" for high-density, **pre-crystallized research**. This repository includes a collection of complex knowledge graphs ready for deep interrogation and extension.
+
+| Field | Focus Area | Status |
+| :--- | :--- | :--- |
+| **🎨 Art & Music** | 5,000+ nodes covering human aesthetics & musicology | `Crystallized` |
+| **📐 Mathematics** | Advanced modeling from Algebra to Probability | `Crystallized` |
+| **⚛️ Physics** | Quantum dynamics and Unified Field Theory research | `Crystallized` |
+| **🧠 Psychology** | Behavioral synthesis & cognitive framework analysis | `Crystallized` |
+| **🚗 Big Auto** | Hybrid intelligence on the future of global mobility | `Crystallized` |
+
+> **Detailed Guides**: See [brains/README.md](./brains/README.md) for a deep breakdown of each research artifact.
+
+> **Pro Tip**: Switch to **🔭 Explore Mode** after launching any of these to see the high-dimensional structure of the data you're working with.
+
+---
+
 ## 🤯 The Dual-Nature Platform
 
 Most systems separate *reading* from *doing*. COSMO merges them into a single, high-octane **Knowledge Lifecycle**. It consists of two primary environments:
@@ -47,22 +65,6 @@ The true "insanity" of COSMO is the workflow. You discover a breakthrough or evi
 *   **Portable Knowledge**: Entire fields of study are packaged into versioned, shareable `.brain` snapshots.
 *   **Local-First Privacy**: Your research data stays on your disk. No telemetry is uploaded; the platform operates strictly in your trusted local environment.
 *   **Terminal Gating**: Human-in-the-loop review for all AI-proposed system commands and surgical edits.
-
----
-
-## 📦 Featured Research Artifacts (Showcase)
-
-COSMO isn't just an empty shell. It comes pre-loaded with high-density, **pre-crystallized research** across multiple domains. These aren't just text files—they are complex knowledge graphs ready for deep interrogation.
-
-| Field | Focus Area | Status |
-| :--- | :--- | :--- |
-| **🎨 Art & Music** | 5,000+ nodes covering human aesthetics & musicology | `Crystallized` |
-| **📐 Mathematics** | Advanced modeling from Algebra to Probability | `Crystallized` |
-| **⚛️ Physics** | Quantum dynamics and Unified Field Theory research | `Crystallized` |
-| **🧠 Psychology** | Behavioral synthesis & cognitive framework analysis | `Crystallized` |
-| **🚗 Big Auto** | Hybrid intelligence on the future of global mobility | `Crystallized` |
-
-> **Pro Tip**: Switch to **🔭 Explore Mode** after launching any of these to see the high-dimensional structure of the data you're working with.
 
 ---
 
