@@ -47,13 +47,14 @@ function getLocalIP() {
 }
 
 // Initialize AI clients
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-const xai = new OpenAI({ 
+const getOpenAI = () => new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const getAnthropic = () => new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const getXAI = () => new OpenAI({ 
   apiKey: process.env.XAI_API_KEY,
   baseURL: 'https://api.x.ai/v1'
 });
-const codebaseIndexer = new CodebaseIndexer(openai);
+
+const codebaseIndexer = new CodebaseIndexer(getOpenAI());
 
 // Middleware
 app.use(cors());
@@ -694,9 +695,9 @@ app.post('/api/chat', async (req, res) => {
       
       try {
         const result = await handleFunctionCalling(
-          openai,
-          anthropic,
-          xai,
+          getOpenAI(),
+          getAnthropic(),
+          getXAI(),
           codebaseIndexer,
           params,
           eventEmitter
@@ -742,9 +743,9 @@ app.post('/api/chat', async (req, res) => {
     } else {
       // Non-streaming
       const result = await handleFunctionCalling(
-        openai,
-        anthropic,
-        xai,
+        getOpenAI(),
+        getAnthropic(),
+        getXAI(),
         codebaseIndexer,
         params
       );
@@ -1226,6 +1227,37 @@ app.post('/api/brain/query', async (req, res) => {
   }
 });
 
+// Alias for query-tab.js compatibility
+app.post('/api/query', async (req, res) => {
+  const queryEngine = getQueryEngine();
+  if (!queryEngine) return res.status(404).json({ error: 'No brain loaded' });
+  
+  try {
+    const result = await queryEngine.executeQuery(req.body.query, req.body);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Second alias just in case of path resolution issues
+app.post('/query', async (req, res) => {
+  const queryEngine = getQueryEngine();
+  if (!queryEngine) return res.status(404).json({ error: 'No brain loaded' });
+  
+  try {
+    const result = await queryEngine.executeQuery(req.body.query, req.body);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Dummy handler for compiled-docs/all to prevent 404s in standalone mode
+app.get('/api/compiled-docs/all', (req, res) => {
+  res.json({ success: true, systems: [] });
+});
+
 // Get all unique tags from brain nodes
 app.get('/api/tags', (req, res) => {
   const loader = getBrainLoader();
@@ -1248,7 +1280,7 @@ app.get('/api/nodes', (req, res) => {
   const loader = getBrainLoader();
   if (!loader) return res.status(404).json({ error: 'No brain loaded' });
   
-  const { search, tag, limit = 100 } = req.query;
+  const { search, tag, limit } = req.query;
   let nodes = loader.nodes;
   
   // Filter by tag
@@ -1266,10 +1298,27 @@ app.get('/api/nodes', (req, res) => {
     });
   }
   
-  // Limit results
-  nodes = nodes.slice(0, parseInt(limit));
+  // Limit results (if limit is provided and not 'all')
+  if (limit && limit !== 'all') {
+    nodes = nodes.slice(0, parseInt(limit));
+  }
   
   res.json({ nodes, total: nodes.length });
+});
+
+// Get all edges from brain memory
+app.get('/api/edges', (req, res) => {
+  const loader = getBrainLoader();
+  if (!loader) return res.status(404).json({ error: 'No brain loaded' });
+  
+  const { limit } = req.query;
+  let edges = loader.edges;
+  
+  if (limit && limit !== 'all') {
+    edges = edges.slice(0, parseInt(limit));
+  }
+  
+  res.json({ edges, total: edges.length });
 });
 
 // Get a single node by ID with full details

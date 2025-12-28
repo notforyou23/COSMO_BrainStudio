@@ -129,7 +129,8 @@ async function sendMessage() {
     // Get current context
     const fileInfo = getCurrentFile();
     const selectedText = getSelectedText();
-    const model = document.getElementById('model-select').value;
+    const modelSelect = document.getElementById('ai-model-select') || document.getElementById('model-select');
+    const model = modelSelect ? modelSelect.value : 'claude-sonnet-4-5';
     
     // Add user message to chat
     addChatMessage('user', message);

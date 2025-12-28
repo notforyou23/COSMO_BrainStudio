@@ -119,7 +119,7 @@ class BrainScanner {
       const entries = await fs.readdir(dir, { withFileTypes: true });
       
       for (const entry of entries) {
-        if (entry.isDirectory() && !entry.name.startsWith('_') && !entry.name.startsWith('.')) {
+        if (entry.isDirectory() && !entry.name.startsWith('.')) {
           const runPath = path.join(dir, entry.name);
           const metadata = await this.loadRunMetadata(runPath);
           
@@ -474,6 +474,20 @@ async function startServer() {
         for await (const chunk of req) body += chunk;
         const { brainPath } = JSON.parse(body);
 
+        // Reload .env to pick up any new API keys without restarting the browser
+        try {
+          const envPath = path.join(PLATFORM_ROOT, '.env');
+          if (fsSync.existsSync(envPath)) {
+            const envConfig = require('dotenv').parse(fsSync.readFileSync(envPath));
+            for (const k in envConfig) {
+              process.env[k] = envConfig[k];
+            }
+            console.log('[BROWSER] Refreshed .env configuration');
+          }
+        } catch (e) {
+          console.error('[BROWSER] Failed to refresh .env:', e.message);
+        }
+
         let fullPath = path.resolve(PLATFORM_ROOT, brainPath);
         if (!fsSync.existsSync(fullPath) && scanner.externalRunsDir) {
           // Fallback for external runs
@@ -490,7 +504,8 @@ async function startServer() {
           if (process.platform === 'win32') {
             execSync(`for /f "tokens=5" %a in ('netstat -aon ^| findstr :${STUDIO_PORT}') do taskkill /f /pid %a`, { stdio: 'ignore' });
           } else {
-            execSync(`lsof -ti:${STUDIO_PORT} | xargs kill -9`, { stdio: 'ignore' });
+            // More robust cleanup for macOS/Linux
+            execSync(`lsof -ti:${STUDIO_PORT} | xargs kill -9 2>/dev/null || true`, { stdio: 'ignore' });
           }
         } catch (e) {
           // Port was likely not in use, which is fine

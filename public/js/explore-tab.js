@@ -185,12 +185,24 @@ async function loadData() {
   try {
     // Load stats
     const stats = await fetch('/api/brain/stats').then(r => r.json());
-    document.getElementById('stat-nodes').textContent = stats.nodes || 0;
-    document.getElementById('stat-edges').textContent = stats.edges || 0;
+    document.getElementById('stat-nodes').textContent = (stats.nodes || 0).toLocaleString();
+    document.getElementById('stat-edges').textContent = (stats.edges || 0).toLocaleString();
     
-    // Load nodes
-    const nodeData = await fetch('/api/nodes?limit=1000').then(r => r.json());
+    // Load ALL nodes (no limit)
+    const nodeRes = await fetch('/api/nodes?limit=all');
+    if (!nodeRes.ok) throw new Error(`Nodes API failed: ${nodeRes.status}`);
+    const nodeData = await nodeRes.json();
     allNodes = nodeData.nodes || [];
+    
+    // Load ALL edges (no limit)
+    const edgeRes = await fetch('/api/edges?limit=all');
+    if (!edgeRes.ok) {
+      console.warn('Edges API not available or failed. Memory map connections will be limited.');
+      allEdges = [];
+    } else {
+      const edgeData = await edgeRes.json();
+      allEdges = edgeData.edges || [];
+    }
     
     // Count clusters
     const clusters = new Set(allNodes.map(n => n.cluster).filter(c => c !== undefined));
@@ -203,14 +215,14 @@ async function loadData() {
       typeCounts[tag] = (typeCounts[tag] || 0) + 1;
     });
     
-    document.getElementById('count-all').textContent = allNodes.length;
-    document.getElementById('count-analyst').textContent = typeCounts['analyst'] || 0;
-    document.getElementById('count-curiosity').textContent = typeCounts['curiosity'] || 0;
-    document.getElementById('count-critic').textContent = typeCounts['critic'] || 0;
-    document.getElementById('count-agent').textContent = typeCounts['agent_finding'] || 0;
+    document.getElementById('count-all').textContent = allNodes.length.toLocaleString();
+    document.getElementById('count-analyst').textContent = (typeCounts['analyst'] || 0).toLocaleString();
+    document.getElementById('count-curiosity').textContent = (typeCounts['curiosity'] || 0).toLocaleString();
+    document.getElementById('count-critic').textContent = (typeCounts['critic'] || 0).toLocaleString();
+    document.getElementById('count-agent').textContent = (typeCounts['agent_finding'] || 0).toLocaleString();
     
     const highActivation = allNodes.filter(n => (n.activation || 0) > 0.5).length;
-    document.getElementById('count-high').textContent = highActivation;
+    document.getElementById('count-high').textContent = highActivation.toLocaleString();
     
     console.log(`Loaded ${allNodes.length} nodes`);
   } catch (error) {
@@ -252,36 +264,18 @@ async function renderNetwork() {
   // Filter nodes by current filter
   nodes = filterNodes(allNodes);
   
-  // Load edges for visible nodes
+  // Load edges for visible nodes from our pre-loaded allEdges
   const nodeIds = new Set(nodes.map(n => n.id));
-  const edgeSet = new Set();
-  edges = [];
+  edges = allEdges.filter(edge => 
+    nodeIds.has(edge.source) && nodeIds.has(edge.target)
+  ).map(edge => ({
+    ...edge,
+    // Ensure we don't have circular references for D3
+    source: edge.source,
+    target: edge.target
+  }));
   
-  // Load edges from node connections (sample of nodes to avoid overload)
-  const sampleSize = Math.min(200, nodes.length);
-  for (let i = 0; i < sampleSize; i++) {
-    const node = nodes[i];
-    try {
-      const nodeData = await fetch(`/api/nodes/${node.id}`).then(r => r.json());
-      
-      (nodeData.outgoingConnections || []).forEach(conn => {
-        if (nodeIds.has(conn.nodeId)) {
-          const key = `${node.id}-${conn.nodeId}`;
-          if (!edgeSet.has(key)) {
-            edgeSet.add(key);
-            edges.push({
-              source: node.id,
-              target: conn.nodeId,
-              weight: conn.weight || 0
-            });
-          }
-        }
-      });
-    } catch (e) {
-      console.error(`Failed to load connections for node ${node.id}:`, e);
-    }
-  }
-  
+  console.log(`Rendering network: ${nodes.length} nodes, ${edges.length} edges`);
   drawGraph();
   updateStats();
 }
@@ -297,15 +291,23 @@ function filterNodes(nodeList) {
 function drawGraph() {
   g.selectAll('*').remove();
   
+  if (nodes.length > 500) {
+    console.warn(`Rendering large network (${nodes.length} nodes). Simulation might be slow.`);
+  }
+
   const width = svg.node().clientWidth;
   const height = svg.node().clientHeight;
   
+  // Adjust simulation strength based on density
+  const chargeStrength = nodes.length > 500 ? -50 : -300;
+  const linkDistance = nodes.length > 500 ? 50 : 100;
+
   // Create simulation
   simulation = d3.forceSimulation(nodes)
-    .force('link', d3.forceLink(edges).id(d => d.id).distance(100))
-    .force('charge', d3.forceManyBody().strength(-300))
+    .force('link', d3.forceLink(edges).id(d => d.id).distance(linkDistance))
+    .force('charge', d3.forceManyBody().strength(chargeStrength))
     .force('center', d3.forceCenter(width / 2, height / 2))
-    .force('collision', d3.forceCollide().radius(30));
+    .force('collision', d3.forceCollide().radius(nodes.length > 500 ? 10 : 30));
   
   // Draw edges
   linkElements = g.append('g')
