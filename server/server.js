@@ -72,21 +72,25 @@ app.get('/api/folder/browse', async (req, res) => {
     if (!folderPath) {
       return res.status(400).json({ error: 'Path required' });
     }
+
+    // SECURITY: Prevent path traversal
+    const safePath = path.normalize(folderPath).replace(/^(\.\.[\/\\])+/, '');
+    const absolutePath = path.resolve(safePath);
     
     if (recursive === 'true') {
       // Recursive directory listing
-      const files = await readDirRecursive(folderPath);
+      const files = await readDirRecursive(absolutePath);
       res.json({ success: true, files });
     } else {
       // Non-recursive (immediate children only)
-      const entries = await fs.readdir(folderPath, { withFileTypes: true });
+      const entries = await fs.readdir(absolutePath, { withFileTypes: true });
       
       const files = entries
         .filter(e => !e.name.startsWith('.') && e.name !== 'node_modules')
         .map(e => ({
           name: e.name,
           isDirectory: e.isDirectory(),
-          path: path.join(folderPath, e.name)
+          path: path.join(absolutePath, e.name)
         }));
       
       res.json({ success: true, files });
@@ -135,8 +139,12 @@ app.get('/api/folder/read', async (req, res) => {
     if (!filePath) {
       return res.status(400).json({ error: 'Path required' });
     }
+
+    // SECURITY: Prevent path traversal
+    const safePath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, '');
+    const absolutePath = path.resolve(safePath);
     
-    const content = await fs.readFile(filePath, 'utf-8');
+    const content = await fs.readFile(absolutePath, 'utf-8');
     res.json({ success: true, content });
     
   } catch (error) {
@@ -152,10 +160,14 @@ app.put('/api/folder/write', async (req, res) => {
     if (!filePath) {
       return res.status(400).json({ error: 'Path required' });
     }
+
+    // SECURITY: Prevent path traversal
+    const safePath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, '');
+    const absolutePath = path.resolve(safePath);
     
-    console.log(`[WRITE] Writing file: ${filePath} (${content?.length || 0} chars)`);
-    await fs.writeFile(filePath, content, 'utf-8');
-    console.log(`[WRITE] ✓ File written successfully: ${filePath}`);
+    console.log(`[WRITE] Writing file: ${absolutePath} (${content?.length || 0} chars)`);
+    await fs.writeFile(absolutePath, content, 'utf-8');
+    console.log(`[WRITE] ✓ File written successfully: ${absolutePath}`);
     res.json({ success: true });
     
   } catch (error) {
@@ -171,10 +183,14 @@ app.post('/api/folder/create', async (req, res) => {
     if (!filePath) {
       return res.status(400).json({ error: 'Path required' });
     }
+
+    // SECURITY: Prevent path traversal
+    const safePath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, '');
+    const absolutePath = path.resolve(safePath);
     
-    const dir = path.dirname(filePath);
+    const dir = path.dirname(absolutePath);
     await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(filePath, content, 'utf-8');
+    await fs.writeFile(absolutePath, content, 'utf-8');
     
     res.json({ success: true });
     
@@ -191,8 +207,12 @@ app.delete('/api/folder/delete', async (req, res) => {
     if (!filePath) {
       return res.status(400).json({ error: 'Path required' });
     }
+
+    // SECURITY: Prevent path traversal
+    const safePath = path.normalize(filePath).replace(/^(\.\.[\/\\])+/, '');
+    const absolutePath = path.resolve(safePath);
     
-    await fs.unlink(filePath);
+    await fs.unlink(absolutePath);
     res.json({ success: true });
     
   } catch (error) {

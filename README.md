@@ -19,8 +19,15 @@ Your entry point into the ecosystem. This page manages your entire local collect
 ### 2. 🏗️ The Brain Studio (The Workspace)
 A professional, multi-mode environment where you transition between understanding and execution.
 *   **💬 Research Mode (The Scholar)**: Deep interrogation of a Brain's long-term memory. Search thousands of nodes, find evidence, and synthesize complex topics with GPT-5.2 powered reasoning.
-*   **🤖 Agent IDE Mode (The Architect)**: Your operational cockpit. Collaborative document editing, code generation, and terminal command execution. The AI Assistant here performs **surgical edits** directly on your local disk.
-*   **🔭 Explore Mode (The Navigator)**: A visual graph environment to navigate the high-dimensional relationships between research nodes.
+*   **🤖 Agent IDE Mode (The Architect)**: Your operational cockpit. Collaborative document editing, code generation, and terminal command execution.
+    *   **Surgical Edits**: The AI Assistant performs precise, localized edits directly on your local disk—no more copy-pasting code blocks.
+    *   **Human-in-the-Loop Gating**: Review and approve every proposed file change or terminal command in a dedicated edit queue before execution.
+    *   **Integrated Workflow**: Create new research artifacts, run simulations, or manage your project files without leaving the Studio.
+*   **🔭 Explore Mode (The Navigator)**: A high-dimensional visualizer for the Brain's Knowledge Graph.
+    *   **Interactive Visualization**: Navigate thousands of research nodes and their complex relationships in a real-time D3-powered force-directed graph.
+    *   **Advanced Filtering**: Slice through the data using concept search, node-type filters (Analyst, Curiosity, Critic), and spatial clustering.
+    *   **Node Deep-Dives**: Click any node to instantly view its underlying content, metadata, and cross-references.
+    *   **Visual Analysis**: Adjust node size and edge opacity dynamically to reveal the structural "skeleton" of the knowledge field.
 *   **📖 Docs Mode**: Integrated access to platform guides and project documentation.
 
 ---
@@ -42,7 +49,7 @@ The true "insanity" of COSMO is the workflow. You discover a breakthrough or evi
 
 ```bash
 # 1. Setup the environment
-./setup.sh
+npm run setup
 
 # 2. Add your API Keys
 # Edit the .env file with your ANTHROPIC_API_KEY, OPENAI_API_KEY, etc.
