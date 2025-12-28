@@ -51,6 +51,7 @@ function initQueryTab() {
           <label><input type="checkbox" id="evidenceMetrics"> Evidence Metrics</label>
           <label><input type="checkbox" id="enableSynthesis" checked> Synthesis</label>
           <label><input type="checkbox" id="coordinatorInsights" checked> Coordinator Insights</label>
+          <label title="Build on the results of your previous query"><input type="checkbox" id="followUpMode"> Follow-up Mode</label>
         </div>
 
         <!-- Context Options -->
@@ -75,6 +76,14 @@ function initQueryTab() {
         </div>
       </div>
 
+      <!-- Suggestions -->
+      <div id="querySuggestions" class="query-suggestions-container">
+        <div class="suggestions-header">💡 Suggestions:</div>
+        <div id="suggestionsList" class="suggestions-list">
+          <!-- Populated by loadSuggestions() -->
+        </div>
+      </div>
+
       <!-- Loading State -->
       <div id="queryLoading" class="query-loading" style="display: none;">
         <div class="loading-spinner"></div>
@@ -87,13 +96,74 @@ function initQueryTab() {
 
       <!-- History -->
       <div id="queryHistory" style="display: none;">
-        <h3>Query History</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3>Query History</h3>
+          <button onclick="clearQuery()" class="btn-secondary" style="padding: 4px 12px; font-size: 11px;">Clear All</button>
+        </div>
         <div id="historyList"></div>
       </div>
     </div>
   `;
 
   loadQueryHistory();
+  loadSuggestions();
+}
+
+async function loadSuggestions() {
+  const container = document.getElementById('querySuggestions');
+  const list = document.getElementById('suggestionsList');
+  if (!container || !list) return;
+
+  // Standard high-value prompts
+  const standardPrompts = [
+    { label: "🔬 Novel Concepts", text: "What are the most novel concepts discovered in this research?" },
+    { label: "⚡ Actionable Tests", text: "What actionable tests or experiments were proposed?" },
+    { label: "💰 Market Opportunity", text: "Identify the biggest market opportunities from these insights." },
+    { label: "🚀 Commercialization", text: "Propose a strategy for commercialization based on these findings." },
+    { label: "🎯 Strategic Direction", text: "What is the recommended strategic direction moving forward?" },
+    { label: "🔗 Synthesis Results", text: "Summarize the key synthesis results across all research cycles." },
+    { label: "🛡️ Defensible Ideas", text: "What are the most defensible ideas or proprietary insights?" },
+    { label: "💵 Quick Wins", text: "Identify any quick wins or immediate next steps." },
+    { label: "📋 Summary", text: "Provide a high-level executive summary of this entire brain." }
+  ];
+
+  // POPULATE STANDARD PROMPTS IMMEDIATELY
+  let html = standardPrompts.map(p => `
+    <div class="suggestion-chip" onclick="applySuggestion('${escapeHtml(p.text)}')">
+      ${escapeHtml(p.label)}
+    </div>
+  `).join('');
+  
+  list.innerHTML = html;
+  container.style.display = 'block';
+
+  // FETCH DYNAMIC INSIGHTS IN THE BACKGROUND
+  try {
+    const response = await fetch('/api/query/suggestions');
+    const data = await response.json();
+
+    if (data.success && data.suggestions && data.suggestions.length > 0) {
+      // Append dynamic suggestions to existing HTML
+      const dynamicHtml = data.suggestions.map(s => `
+        <div class="suggestion-chip" onclick="applySuggestion('${escapeHtml(s.text || s)}')">
+          ${escapeHtml(s.text || s)}
+        </div>
+      `).join('');
+      
+      list.innerHTML += dynamicHtml;
+    }
+  } catch (e) {
+    console.error('Failed to load dynamic suggestions:', e);
+  }
+}
+
+function applySuggestion(text) {
+  const input = document.getElementById('queryInput');
+  if (input) {
+    input.value = text;
+    input.focus();
+    // No longer auto-executing - let user review
+  }
 }
 
 // Query state
@@ -139,6 +209,7 @@ async function executeQuery() {
   const includeOutputs = document.getElementById('includeOutputs').checked;
   const includeThoughts = document.getElementById('includeThoughts').checked;
   const exportFormat = document.getElementById('exportFormat').value;
+  const followUpMode = document.getElementById('followUpMode').checked;
 
   const btn = document.getElementById('executeQueryBtn');
   const resultsDiv = document.getElementById('queryResults');
@@ -163,7 +234,7 @@ async function executeQuery() {
         includeOutputs,
         includeThoughts,
         exportFormat: exportFormat !== 'none' ? exportFormat : null,
-        priorContext: lastQueryResult ? {
+        priorContext: (followUpMode && lastQueryResult) ? {
           query: lastQueryResult.query,
           answer: lastQueryResult.answer
         } : null
@@ -235,15 +306,18 @@ function displayQueryResult(result) {
 }
 
 function updateQueryHistory() {
-  if (queryHistory.length === 0) return;
-  
   const historyDiv = document.getElementById('queryHistory');
   const listDiv = document.getElementById('historyList');
+  
+  if (queryHistory.length === 0) {
+    if (historyDiv) historyDiv.style.display = 'none';
+    return;
+  }
   
   listDiv.innerHTML = queryHistory.map((item, i) => `
     <div class="history-item" onclick="loadHistoryItem(${i})">
       <div class="history-query">${escapeHtml(item.query || '')}</div>
-      <div class="history-meta">${item.metadata?.mode} · ${new Date(item.metadata?.timestamp).toLocaleString()}</div>
+      <div class="history-meta">${item.metadata?.mode || 'normal'} · ${new Date(item.metadata?.timestamp || Date.now()).toLocaleString()}</div>
     </div>
   `).join('');
   
@@ -254,6 +328,8 @@ function loadHistoryItem(index) {
   const item = queryHistory[index];
   document.getElementById('queryInput').value = item.query || '';
   displayQueryResult(item);
+  // Update lastQueryResult so follow-up mode works from this point
+  lastQueryResult = { query: item.query, answer: item.answer };
 }
 
 function clearQuery() {

@@ -2,37 +2,41 @@
 
 > **The World's First Unified Research Browser & Agent IDE.**
 
-COSMO Brain Studio is a high-performance, local-first environment that bridges the gap between **deep knowledge retrieval** and **surgical agentic action**. It is the "Intelligence Player" designed for the next generation of researchers, architects, and knowledge workers.
+COSMO Brain Platform is a high-performance, local-first environment designed to host, query, and extend research artifacts. It is the **Intelligence Player** for the next generation of synthetic researchers—a bridge between deep knowledge retrieval and surgical agentic action.
 
-## 🤯 This is Insanity: The Dual-Nature Platform
+---
 
-Most tools force you to choose between reading or doing. COSMO gives you both in a seamless, unified lifecycle.
+## 🤯 The Dual-Nature Platform
 
-### 🔬 Part 1: The Brain Browser (Deep Research)
-*   **Query the Unconscious**: Deep interrogation of a Brain's long-term memory.
-*   **Evidence Synthesis**: Don't just ask questions—find the exact nodes, evidence, and failed hypotheses from thousands of research artifacts.
-*   **Global Context**: Search across high-dimensional Knowledge Graphs powered by the latest frontier models.
+Most systems separate *reading* from *doing*. COSMO merges them into a single, high-octane **Knowledge Lifecycle**. It consists of two primary environments:
 
-### 🛠️ Part 2: The Agent IDE (Intelligent Action)
-*   **Surgical Execution**: This isn't just a chatbot. It's a full-blown IDE where the AI can propose precise edits, manage files, and write production-grade code.
-*   **Terminal Integration**: Give the AI the power to execute system commands, run simulations, and verify math—all with human-in-the-loop gating.
-*   **Local-First Workspace**: A professional, dark-mode workspace built for high-entropy research extension.
+### 1. 🌐 The Brain Browser (The Landing Page)
+Your entry point into the ecosystem. This page manages your entire local collection of research.
+*   **📚 Brain Library**: Stable, versioned knowledge artifacts. These are **distilled snapshots** of research, packaged into portable `.brain` files ready for production or sharing.
+*   **🛠️ Research Workspaces**: Active staging areas. This is where **raw research runs** live, containing high-entropy data like agent thought-streams, failed hypotheses, and telemetry.
+*   **🚀 One-Click Launch**: Instantly fire up any brain or workspace into the unified **Brain Studio**.
 
-## 🔄 The Knowledge Lifecycle
-The true "magic" happens in the transition. You find a breakthrough in the **Research Browser**, switch to the **Agent IDE**, and immediately have the AI architect assist you in building a document, script, or paper based on that discovery.
+### 2. 🏗️ The Brain Studio (The Workspace)
+A professional, multi-mode environment where you transition between understanding and execution.
+*   **💬 Research Mode (The Scholar)**: Deep interrogation of a Brain's long-term memory. Search thousands of nodes, find evidence, and synthesize complex topics with GPT-5.2 powered reasoning.
+*   **🤖 Agent IDE Mode (The Architect)**: Your operational cockpit. Collaborative document editing, code generation, and terminal command execution. The AI Assistant here performs **surgical edits** directly on your local disk.
+*   **🔭 Explore Mode (The Navigator)**: A visual graph environment to navigate the high-dimensional relationships between research nodes.
+*   **📖 Docs Mode**: Integrated access to platform guides and project documentation.
 
-## ⚡ Run Your Own Brains
-The Brain Studio is the "Intelligence Player"—but you can also be the creator. With access to the full **COSMO Research System**, you can:
-*   **Trigger Automated Brain Runs**: Launch synthetic research agents across any domain.
-*   **Build Custom Knowledge Artifacts**: Create your own versioned `.brain` files from proprietary data or specialized fields.
-*   **Frontier Power**: Tap into the core research engine that generated the Art, Music, and Physics brains included here.
+---
 
-Learn more about running your own research at [cosmo.evobrew.com](https://cosmo.evobrew.com).
+## ⚡ The Knowledge Lifecycle: Find it. Build it.
+The true "insanity" of COSMO is the workflow. You discover a breakthrough or evidence in **Research Mode**, switch to the **Agent IDE**, and have the AI architect immediately help you draft the paper, write the simulation code, or execute the next phase of the project based on that specific discovery.
+
+---
 
 ## 🚀 Core Capabilities
-*   **Multi-Model Intelligence**: Effortless switching between Claude 4.5, GPT-5.2, and Grok for specialized reasoning.
-*   **Portable Knowledge**: Research is packaged into `.brain` files—versioned, shareable snapshots of an entire field of knowledge.
-*   **Absolute Privacy**: Your research data stays on your local disk. We only send the minimum required context to LLM providers.
+*   **Multi-Model Intelligence**: Effortlessly switch between Claude 4.5, GPT-5.2, and Grok for specialized reasoning.
+*   **Portable Knowledge**: Entire fields of study are packaged into versioned, shareable `.brain` snapshots.
+*   **Local-First Privacy**: Your research data stays on your disk. No telemetry is uploaded; the platform operates strictly in your trusted local environment.
+*   **Terminal Gating**: Human-in-the-loop review for all AI-proposed system commands and surgical edits.
+
+---
 
 ## 🛠️ Quick Start
 
@@ -41,12 +45,19 @@ Learn more about running your own research at [cosmo.evobrew.com](https://cosmo.
 ./setup.sh
 
 # 2. Add your API Keys
-# Edit the .env file with your Anthropic/OpenAI keys.
+# Edit the .env file with your ANTHROPIC_API_KEY, OPENAI_API_KEY, etc.
 
-# 3. Launch the Studio
+# 3. Launch the Platform
 npm start
 ```
-Access the Studio at `http://localhost:3398`.
+Access the Browser at `http://localhost:3398`.
 
 ---
-*COSMO Brain Platform | Explore the frontier at [cosmo.evobrew.com](https://cosmo.evobrew.com)*
+
+## 🔭 Future: Create Your Own Brains
+The Brain Studio is the "Intelligence Player"—but the full **COSMO Research System** allows you to be the creator. Trigger custom automated research runs across any domain and generate your own specialized `.brain` files.
+
+Explore the frontier at [cosmo.evobrew.com](https://cosmo.evobrew.com).
+
+---
+*COSMO Brain Platform | Powered by [evobrew.com](https://cosmo.evobrew.com)*

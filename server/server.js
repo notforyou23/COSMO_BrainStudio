@@ -1244,6 +1244,19 @@ app.post('/api/query', async (req, res) => {
   }
 });
 
+// Get query suggestions for the current brain
+app.get('/api/query/suggestions', async (req, res) => {
+  const queryEngine = getQueryEngine();
+  if (!queryEngine) return res.status(404).json({ error: 'No brain loaded' });
+  
+  try {
+    const suggestions = await queryEngine.getQuerySuggestions();
+    res.json({ success: true, suggestions });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Second alias just in case of path resolution issues
 app.post('/query', async (req, res) => {
   const queryEngine = getQueryEngine();
