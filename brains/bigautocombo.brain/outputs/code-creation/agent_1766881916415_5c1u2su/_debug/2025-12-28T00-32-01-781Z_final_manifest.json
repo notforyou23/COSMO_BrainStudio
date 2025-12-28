@@ -1,0 +1,212 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766881916415_5c1u2su",
+  "agentType": "code-creation",
+  "goalId": "routing_code_1766881916414_9rqcnal",
+  "missionId": null,
+  "spawnCycle": null,
+  "coordinatorReview": null,
+  "spawnedBy": "agent_router",
+  "triggerSource": "orchestrator",
+  "spawningReason": "code_reuse_opportunity",
+  "createdAt": "2025-12-28T00:32:05.809Z",
+  "completedAt": "2025-12-28T00:39:33.956Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "src/spec_crosswalk/overrides/__init__.py",
+      "description": "Package entrypoint that exposes the public overrides API and keeps backwards-compatible imports stable.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/spec_crosswalk/overrides/__init__.py\nDIR_STATE:[\"src/spec_crosswalk/overrides/__init__.py\"]\nSUMMARY: Added a tolerant, backwards-compatible overrides package entrypoint that re-exports public API symbols from refactored or legacy modules when available.\n",
+          "timestamp": "2025-12-28T00:32:17.269Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/spec_crosswalk/overrides/__init__.py\nDIR_STATE:[\"src/spec_crosswalk/overrides/__init__.py\"]\nSUMMARY: Wrote overrides package entrypoint that re-exports a stable public API with lazy, backwards-compatible imports across new and legacy module layouts.\n",
+          "timestamp": "2025-12-28T00:32:33.799Z"
+        }
+      ],
+      "createdAt": "2025-12-28T00:32:05.809Z",
+      "failedAt": "2025-12-28T00:32:33.799Z"
+    },
+    {
+      "path": "src/spec_crosswalk/overrides/schema.py",
+      "description": "Centralized schema/models for overrides with validation helpers and clearly documented dataclasses/types.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/spec_crosswalk/overrides/schema.py\nDIR_STATE:[\"src/spec_crosswalk/overrides/__init__.py\", \"src/spec_crosswalk/overrides/schema.py\"]\nSUMMARY: Added a centralized overrides schema with dataclasses, path normalization, and validation/helpers for reuse across apply/yaml tooling.\n",
+          "timestamp": "2025-12-28T00:33:17.886Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/spec_crosswalk/overrides/schema.py\nDIR_STATE:[\"src/spec_crosswalk/overrides/__init__.py\", \"src/spec_crosswalk/overrides/schema.py\"]\nSummary: Added centralized override dataclasses, enums, and validation/serialization helpers in schema.py.\n",
+          "timestamp": "2025-12-28T00:34:12.682Z"
+        }
+      ],
+      "createdAt": "2025-12-28T00:32:05.809Z",
+      "failedAt": "2025-12-28T00:34:12.682Z"
+    },
+    {
+      "path": "src/spec_crosswalk/overrides/apply.py",
+      "description": "Core logic for applying overrides to in-memory objects/dicts in a deterministic and reusable way.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/spec_crosswalk/overrides/apply.py\nDIR_STATE:[\"src/spec_crosswalk/overrides/__init__.py\", \"src/spec_crosswalk/overrides/apply.py\", \"src/spec_crosswalk/overrides/schema.py\"]\n",
+          "timestamp": "2025-12-28T00:35:37.447Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/spec_crosswalk/overrides/apply.py\nDIR_STATE:[\"src/spec_crosswalk/overrides/__init__.py\", \"src/spec_crosswalk/overrides/apply.py\", \"src/spec_crosswalk/overrides/schema.py\"]\nSUMMARY: Wrote a compact, deterministic override application engine supporting set/delete/merge operations over dict/list/object targets with dot/bracket paths.\n",
+          "timestamp": "2025-12-28T00:35:59.134Z"
+        }
+      ],
+      "createdAt": "2025-12-28T00:32:05.809Z",
+      "failedAt": "2025-12-28T00:35:59.134Z"
+    },
+    {
+      "path": "src/spec_crosswalk/overrides/yaml_support.py",
+      "description": "YAML serialization/deserialization utilities for overrides including safe loading, dumping, and error reporting.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/spec_crosswalk/overrides/yaml_support.py\nDIR_STATE:[\"src/spec_crosswalk/overrides/__init__.py\", \"src/spec_crosswalk/overrides/apply.py\", \"src/spec_crosswalk/overrides/schema.py\", \"src/spec_crosswalk/overrides/yaml_support.py\"]\nSummary: Implemented safe YAML load/dump helpers with a dedicated YamlError carrying line/column context and source snippets for clearer reporting.\n",
+          "timestamp": "2025-12-28T00:36:13.580Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/spec_crosswalk/overrides/yaml_support.py\nDIR_STATE:[\"src/spec_crosswalk/overrides/__init__.py\", \"src/spec_crosswalk/overrides/apply.py\", \"src/spec_crosswalk/overrides/schema.py\", \"src/spec_crosswalk/overrides/yaml_support.py\"]\nSUMMARY: Added safe YAML load/dump utilities with structured parse errors and file helpers for overrides.\n",
+          "timestamp": "2025-12-28T00:36:25.178Z"
+        }
+      ],
+      "createdAt": "2025-12-28T00:32:05.809Z",
+      "failedAt": "2025-12-28T00:36:25.178Z"
+    },
+    {
+      "path": "scripts/overrides_example_yaml.py",
+      "description": "Runnable example script that generates and validates example overrides YAML used by the previously logged prompt artifacts.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-28T00:37:15.498Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/overrides_example_yaml.py\nDIR_STATE:[\"scripts/generate_competitive_map.py\", \"scripts/generate_compliance_artifact.py\", \"scripts/overrides_example_yaml.py\"]\nSUMMARY: Created a runnable script that generates, YAML-serializes, reloads, and validates an example overrides document.\n",
+          "timestamp": "2025-12-28T00:37:35.692Z"
+        }
+      ],
+      "createdAt": "2025-12-28T00:32:05.809Z",
+      "failedAt": "2025-12-28T00:37:35.692Z"
+    },
+    {
+      "path": "docs/overrides_refactor_notes.md",
+      "description": "Documentation describing the new overrides module layout, migration notes from legacy files, and usage examples.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-28T00:38:43.214Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-28T00:39:33.955Z"
+        }
+      ],
+      "createdAt": "2025-12-28T00:32:05.809Z",
+      "failedAt": "2025-12-28T00:39:33.955Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Refactor and modularize reusable code artifacts: overrides_schema.py, overrides.py, yaml_support.py, 2025-12-28T00-21-47-607Z_overrides_example_yaml_stage1_attempt1_prompt.txt, 2025-12-28T00-21-47-607Z_overrides_example_yaml_stage1_attempt2_prompt.txt",
+  "missionSuccessCriteria": [
+    "Modularize code",
+    "Create reusable components"
+  ],
+  "projectName": "generated_script_1766881916611",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-28T00:39:33.956Z",
+  "summary": {
+    "completed": 0,
+    "failed": 6,
+    "total": 6
+  }
+}

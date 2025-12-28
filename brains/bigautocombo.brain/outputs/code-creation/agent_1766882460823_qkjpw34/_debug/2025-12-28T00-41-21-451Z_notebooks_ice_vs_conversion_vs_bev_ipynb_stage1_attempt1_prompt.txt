@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a runnable notebook + CSV template in /outputs with (a) default assumptions by segment (fleet, classic, specialty), (b) sensitivity toggles (energy price, utilization, battery replacement, financing), and (c) preloaded standard drive-cycle proxies (urban/last-mile, mixed, highway) so users can compare ICE vs conversion vs BEV.
+Project: generated_configuration_1766882461411 (python configuration)
+
+Target file details:
+- Path: notebooks/ice_vs_conversion_vs_bev.ipynb
+- Purpose: Runnable Jupyter notebook that loads the CSV template, applies default segment assumptions and sensitivity toggles, runs drive-cycle proxies, and compares ICE vs conversion vs BEV TCO/energy outcomes with plots and tables.
+- Category: source
+
+Other planned files (for context only):
+- outputs/template_user_inputs.csv: CSV template for user-editable inputs (vehicle specs, segment selection, scenario toggles, cycle choice, and key financial/operational parameters) that the notebook can ingest directly.
+- src/evconv_config/assumptions.py: Defines default assumptions by segment (fleet, classic, specialty) and validated schema for merging user overrides with defaults.
+- src/evconv_config/drive_cycles.py: Provides preloaded standard drive-cycle proxies (urban/last-mile, mixed, highway) as time-speed profiles plus helper functions to select and resample cycles.
+- src/evconv_config/model.py: Implements simplified comparative models for ICE vs conversion vs BEV including energy use, battery replacement, financing, and utilization impacts using the configured assumptions and cycles.
+
+Reference insights:
+- [CONSOLIDATED] Build a runnable, test-backed Python prototype that takes user-defined vehicle and performance parameters to size an EV conve
+- [AGENT INSIGHT: agent_1766849571844_wzib9k2] Sub-goal 6/6: Assemble the final design artifact (design_spec.md and/or design_spec.json) that 
+- [CONSOLIDATED] A maintainable thermal-design workflow emerges by standardizing cooling “architectures” as a well-documented, convention-driv
+- [AGENT: agent_1766550864729_p9ds97q] Across the implications-and-consequences, systems-thinking, and psychological perspectives, the dominan
+- [CONSOLIDATED] Prioritize a standardized, modular Python configuration and utility structure that refactors duplicated test/implementation a
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Runnable Jupyter notebook that loads the CSV template, applies default segment assumptions and sensitivity toggles, runs drive-cycle proxies, and compares ICE vs conversion vs BEV TCO/energy outcomes with plots and tables.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('notebooks/ice_vs_conversion_vs_bev.ipynb')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:notebooks/ice_vs_conversion_vs_bev.ipynb')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside notebooks/ice_vs_conversion_vs_bev.ipynb.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

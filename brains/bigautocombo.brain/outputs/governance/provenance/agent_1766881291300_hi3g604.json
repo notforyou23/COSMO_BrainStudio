@@ -1,0 +1,127 @@
+{
+  "agentId": "agent_1766881291300_hi3g604",
+  "timestamp": "2025-12-28T00:23:29.707Z",
+  "mode": "observe",
+  "stats": {
+    "eventsLogged": 335,
+    "actionsClassified": 0,
+    "actionsBlocked": 0,
+    "actionsWarned": 0,
+    "errors": 0
+  },
+  "inventoryHash": "no_inventory",
+  "agentData": {
+    "mission": "QA found borderline confidence - research agent should verify claims",
+    "status": "completed",
+    "results": {
+      "success": true,
+      "queriesExecuted": 3,
+      "findingsAdded": 5,
+      "sourcesFound": 56,
+      "sources": [
+        "https://aclanthology.org/2023.eacl-main.35/",
+        "https://arxiv.org/abs/2306.04590",
+        "https://arxiv.org/abs/2512.19134",
+        "https://arxiv.org/abs/2311.15451",
+        "https://arxiv.org/abs/2310.11689",
+        "https://proceedings.iclr.cc/paper_files/paper/2025/hash/cd96cb9a239c37b39dbf34f3f5a4c56f-Abstract-Conference.html",
+        "https://www.mdpi.com/2079-9292/14/2/386",
+        "https://aclanthology.org/2025.emnlp-main.354/",
+        "https://aclanthology.org/2024.findings-acl.415/",
+        "https://arxiv.org/abs/2311.08669",
+        "https://arxiv.org/abs/2306.10193",
+        "https://aclanthology.org/2023.emnlp-main.330/",
+        "https://arxiv.org/abs/2405.01563",
+        "https://www.media.mit.edu/publications/conformal-prediction-with-large-language-models-for-multi-choice-question-answering/",
+        "https://www.catalyzex.com/paper/revisiting-calibration-for-question-answering",
+        "https://aclanthology.org/2022.findings-emnlp.204/",
+        "https://aclanthology.org/2023.emnlp-main.330/?utm_source=openai",
+        "https://arxiv.org/abs/2311.08669?utm_source=openai",
+        "https://arxiv.org/abs/2306.10193?utm_source=openai",
+        "https://arxiv.org/abs/2311.15451?utm_source=openai",
+        "https://aclanthology.org/2023.eacl-main.35/?utm_source=openai",
+        "https://arxiv.org/abs/2508.15050",
+        "https://arxiv.org/abs/2511.11169",
+        "https://arxiv.org/abs/2402.17124",
+        "https://arxiv.org/abs/2402.15610",
+        "https://proceedings.iclr.cc/paper_files/paper/2025/hash/cd96cb9a239c37b39dbf34f3f5a4c56f-Abstract-Conference.html",
+        "https://aclanthology.org/2022.findings-emnlp.204/",
+        "https://aclanthology.org/2023.eacl-main.35/",
+        "https://aclanthology.org/2023.emnlp-main.330/",
+        "https://www.emergentmind.com/topics/human-in-the-loop-workflow",
+        "https://direct.mit.edu/tacl/article/doi/10.1162/tacl_a_00407/107277/How-Can-We-Know-When-Language-Models-Know-On-the",
+        "https://proceedings.iclr.cc/paper_files/paper/2025/hash/cd96cb9a239c37b39dbf34f3f5a4c56f-Abstract-Conference.html?utm_source=openai",
+        "https://arxiv.org/abs/2402.15610?utm_source=openai",
+        "https://www.srose.biz/wp-content/uploads/2020/08/CTR-Thresholding-and-Calibration.html",
+        "https://github.com/hollance/reliability-diagrams",
+        "https://arxiv.org/abs/2309.12236",
+        "https://arxiv.org/abs/2205.09680",
+        "https://medium.com/data-science/model-calibration-explained-a-visual-guide-with-code-examples-for-beginners-55f368bafe72",
+        "https://ethen8181.github.io/machine-learning/model_selection/prob_calibration/prob_calibration.html",
+        "https://arxiv.org/abs/2409.02446",
+        "https://arxiv.org/abs/2503.18235",
+        "https://www.jmlr.org/papers/v23/22-0658.html",
+        "https://goldinlocks.github.io/Thresholding-and-Calibration-for-Imbalanced-Classification/",
+        "https://arxiv.org/abs/2508.13100",
+        "https://proceedings.mlr.press/v70/guo17a",
+        "https://jasonguojz.github.io/blog/2020/07/30/On%20Calibration%20of%20Modern%20Neural%20Networks/",
+        "https://icml.cc/virtual/2017/poster/808",
+        "https://arxiv.org/abs/1706.04599",
+        "https://link.springer.com/article/10.1007/s10462-023-10562-9",
+        "https://www.emergentmind.com/papers/1706.04599",
+        "https://arxiv.org/abs/2402.11410",
+        "https://huggingface.co/papers/1706.04599",
+        "https://proceedings.mlr.press/v70/guo17a?utm_source=openai",
+        "https://arxiv.org/abs/2205.09680?utm_source=openai",
+        "https://arxiv.org/abs/2309.12236?utm_source=openai",
+        "https://arxiv.org/abs/2508.13100?utm_source=openai"
+      ],
+      "followUpDirections": 3,
+      "metadata": {
+        "findings": [
+          {
+            "type": "finding",
+            "content": "EMNLP 2023 (“Just Ask for Calibration”) reports that for RLHF-tuned chat LLMs, token log-probabilities may be poorly calibrated for QA, while elicited self-reported confidence/probability can be better calibrated on QA benchmarks (e.g., TriviaQA, SciQ, TruthfulQA), reducing calibration error (per the cited EMNLP 2023 paper).",
+            "nodeId": "4d9741_4054",
+            "timestamp": "2025-12-28T00:23:16.806Z"
+          },
+          {
+            "type": "finding",
+            "content": "A 2023 multilingual calibration study reports QA confidence calibration can degrade substantially outside English, and that post-hoc calibration or light regularized tuning using a small set of translated samples can improve calibration (per the cited arXiv study).",
+            "nodeId": "4d9741_4055",
+            "timestamp": "2025-12-28T00:23:17.181Z"
+          },
+          {
+            "type": "finding",
+            "content": "Conformal prediction adapted to LMs (“Conformal Language Modeling”, 2023) can provide distribution-free uncertainty quantification for generative tasks including open-domain QA by returning a set of candidate responses with statistical coverage guarantees that a satisfactory answer is included with high probability (per the cited arXiv paper).",
+            "nodeId": "4d9741_4056",
+            "timestamp": "2025-12-28T00:23:17.537Z"
+          },
+          {
+            "type": "finding",
+            "content": "Borderline-confidence handling in deployed QA systems is best framed as selective prediction/deferral: route low-confidence to abstention or humans, answer high-confidence automatically, and send the middle band to structured human review—this only works well if the confidence score is calibrated or explicitly calibrated/elicited before thresholds are applied (supported by the EMNLP 2023 calibration finding).",
+            "nodeId": "4d9741_4057",
+            "timestamp": "2025-12-28T00:23:18.174Z"
+          },
+          {
+            "type": "finding",
+            "content": "Threshold selection should not rely solely on global ECE/reliability summaries because calibration can be acceptable overall yet wrong near the decision cutoff; use reliability diagrams and local/threshold-region calibration checks, and consider smoothed estimators (e.g., SmoothECE) to reduce binning fragility (supported by Guo et al. 2017 and later calibration-evaluation work).",
+            "nodeId": "4d9741_4058",
+            "timestamp": "2025-12-28T00:23:18.497Z"
+          },
+          {
+            "type": "finding",
+            "content": "{\"agentId\":\"agent_1766881291300_hi3g604\",\"goalId\":\"goal_acceptance_qa_1766881231550\",\"timestamp\":\"2025-12-28T00:23:29.314Z\",\"files\":[{\"filename\":\"research_findings.json\",\"relativePath\":\"runtime/outputs/research/agent_1766881291300_hi3g604/research_findings.json\",\"size\":5079},{\"filename\":\"bibliography.bib\",\"relativePath\":\"runtime/outputs/research/agent_1766881291300_hi3g604/bibliography.bib\",\"size\":12537},{\"filename\":\"research_summary.md\",\"relativePath\":\"runtime/outputs/research/agent_1766881291300_hi3g604/research_summary.md\",\"size\":3895},{\"filename\":\"sources.json\",\"relativePath\":\"runtime/outputs/research/agent_1766881291300_hi3g604/sources.json\",\"size\":8423}]}",
+            "nodeId": "4d9741_4061",
+            "timestamp": "2025-12-28T00:23:29.706Z"
+          }
+        ],
+        "sourcesFound": 56,
+        "urlsValid": 56,
+        "artifactsCreated": 4,
+        "filesCreated": 4,
+        "status": "complete"
+      }
+    }
+  }
+}

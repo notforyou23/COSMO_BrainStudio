@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Refactor and modularize reusable code artifacts: 2025-12-28T00-55-50-580Z_src_evconv_config_io_py_stage1_attempt2_prompt.txt, 2025-12-28T00-55-50-580Z_src_evconv_config_plotting_py_stage1_attempt1_prompt.txt, 2025-12-28T00-55-50-580Z_src_evconv_config_plotting_py_stage1_attempt2_prompt.txt, 2025-12-28T00-55-50-580Z_src_evconv_config_workflow_py_stage1_attempt1_prompt.txt
+Project: generated_configuration_1766883840323 (python configuration)
+
+Target file details:
+- Path: src/evconv/config/__init__.py
+- Purpose: Package entrypoint that exposes the public configuration API and provides versioned, stable imports for IO, plotting, and workflow config utilities.
+- Category: source
+
+Other planned files (for context only):
+- src/evconv/config/types.py: Defines typed, validated dataclasses (and shared enums/constants) for configuration objects used across IO, plotting, and workflow modules.
+- src/evconv/config/io.py: Implements complete configuration loading/saving/merging utilities (YAML/JSON), schema-like validation hooks, and path resolution for the refactored system.
+- src/evconv/config/plotting.py: Provides a reusable, convention-driven plotting configuration layer (themes, rcParams, figure sizing, colormaps) and helpers to apply/serialize plotting settings.
+- src/evconv/config/workflow.py: Defines the modular workflow configuration model (architectures, stages, parameters, presets) and utilities to assemble and validate end-to-end runs.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-28T00-55-50-580Z_src_evconv_config_workflow_py_stage1_attempt1_prompt.txt from code-creation agent agent_17668833451
+- [AGENT INSIGHT: agent_1766849571844_wzib9k2] Sub-goal 6/6: Assemble the final design artifact (design_spec.md and/or design_spec.json) that 
+- [CONSOLIDATED] A maintainable thermal-design workflow emerges by standardizing cooling “architectures” as a well-documented, convention-driv
+- [AGENT: agent_1766550864729_p9ds97q] Across the implications-and-consequences, systems-thinking, and psychological perspectives, the dominan
+- [CONSOLIDATED] Prioritize a standardized, modular Python configuration and utility structure that refactors duplicated test/implementation a
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Package entrypoint that exposes the public configuration API and provides versioned, stable imports for IO, plotting, and workflow config utilities.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/evconv/config/__init__.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/evconv/config/__init__.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/evconv/config/__init__.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

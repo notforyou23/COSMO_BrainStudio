@@ -1,0 +1,51 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Refactor and modularize reusable code artifacts: 2025-12-28T00-10-33-623Z_src_customer_discovery_outputs_py_stage1_attempt1_prompt.txt, 2025-12-28T00-10-33-623Z_src_customer_discovery_outputs_py_stage1_attempt2_prompt.txt, 2025-12-28T00-10-33-623Z_plan_attempt1_prompt.txt, customer_discovery_outputs.py, 2025-12-28T00-10-34-375Z_plan_attempt1_prompt.txt
+Project: generated_script_1766880834212 (python script)
+
+Target file details:
+- Path: src/customer_discovery/prompt_artifacts.py
+- Purpose: Utilities to load, normalize, and manage the historical prompt artifacts (the timestamped *_prompt.txt files) in a reusable, testable way.
+- Category: source
+
+Other planned files (for context only):
+- src/customer_discovery/outputs.py: Refactored, modular implementation of customer discovery output generation (replacing the monolithic logic) with clear public APIs and reusable helpers.
+- src/customer_discovery/rendering.py: Shared rendering/formatting helpers (e.g., deterministic section building, safe markdown/text composition) used by outputs and prompt artifact handling.
+- src/customer_discovery/__init__.py: Package initializer exporting the stable public functions/classes for customer discovery output generation after refactor.
+- customer_discovery_outputs.py: Backward-compatible shim that preserves the existing import/CLI surface while delegating implementation to src/customer_discovery/outputs.py.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-28T00-10-33-623Z_plan_attempt1_prompt.txt from code-creation agent agent_1766880625336_ljll84b: You are planning a p
+- [AGENT: agent_1766871269605_egts9z4] Document Analysis: 2025-12-27T19-57-35-271Z_src_spec_crosswalk_init_py_stage1_attempt2_prompt.txt
+
+Size
+- [AGENT: agent_1766869946008_07kgyc7] Document Analysis: 2025-12-27T19-11-46-591Z_pyproject_toml_stage1_attempt2_prompt.txt
+
+Size: 483 words
+
+- [INTROSPECTION] 2025-12-27T20-30-39-805Z_tools_init_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766867426227_mobx6c7: You 
+- [INTROSPECTION] 2025-12-27T20-43-07-865Z_scripts_build_steps_json_stage1_attempt1_prompt.txt from code-creation agent agent_1766868174334_9f
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Utilities to load, normalize, and manage the historical prompt artifacts (the timestamped *_prompt.txt files) in a reusable, testable way.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/customer_discovery/prompt_artifacts.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/customer_discovery/prompt_artifacts.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/customer_discovery/prompt_artifacts.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

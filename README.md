@@ -1,29 +1,38 @@
-# 🧠 COSMO Brain Platform
+# 🧠 COSMO Brain Platform v2.5
 
-> **Research in COSMO. Review in the Workspace. Publish to the Library.**
+> **The World's First Unified Research Browser & Agent IDE.**
 
-COSMO Brain Platform is a portable, high-performance environment designed to host, query, and extend research artifacts. It is the **Intelligence Player** for the next generation of synthetic researchers, built on the vision of a **Universal Knowledge Lifecycle**.
+COSMO Brain Studio is a high-performance, local-first environment that bridges the gap between **deep knowledge retrieval** and **surgical agentic action**. It is the "Intelligence Player" designed for the next generation of researchers, architects, and knowledge workers.
 
-## 🔬 The Philosophy: Workspace vs. Library
+## 🤯 This is Insanity: The Dual-Nature Platform
 
-Just as GitHub separates your local code from your stable releases, this platform separates the *process* of research from the *product* of knowledge.
+Most tools force you to choose between reading or doing. COSMO gives you both in a seamless, unified lifecycle.
 
-1.  **🛠️ Research Workspace (Staging)**: This is where the raw research happens. It contains the high-entropy output of active COSMO runs—including agent thoughts, failed hypotheses, and raw telemetry. It is for monitoring and steering.
-2.  **📚 Brain Library (Releases)**: When research reaches a milestone, you "Publish" it. This distilllation process strips away the technical noise and packages only the high-density Knowledge Graph and final deliverables into a portable, versioned **.brain** file.
+### 🔬 Part 1: The Brain Browser (Deep Research)
+*   **Query the Unconscious**: Deep interrogation of a Brain's long-term memory.
+*   **Evidence Synthesis**: Don't just ask questions—find the exact nodes, evidence, and failed hypotheses from thousands of research artifacts.
+*   **Global Context**: Search across high-dimensional Knowledge Graphs powered by the latest frontier models.
 
-## 🚀 Key Features
+### 🛠️ Part 2: The Agent IDE (Intelligent Action)
+*   **Surgical Execution**: This isn't just a chatbot. It's a full-blown IDE where the AI can propose precise edits, manage files, and write production-grade code.
+*   **Terminal Integration**: Give the AI the power to execute system commands, run simulations, and verify math—all with human-in-the-loop gating.
+*   **Local-First Workspace**: A professional, dark-mode workspace built for high-entropy research extension.
 
-*   **Brain Browser**: A visual dashboard to manage your stable Brain Library and active Research Workspaces.
-*   **🚀 One-Click Publishing**: Instantly distill raw research into portable, shareable knowledge artifacts.
-*   **Knowledge Query**: Deep interrogation of knowledge graphs powered by GPT-5.2.
-*   **AI-Augmented IDE**: Collaborative document editing and research extension in a professional web environment.
+## 🔄 The Knowledge Lifecycle
+The true "magic" happens in the transition. You find a breakthrough in the **Research Browser**, switch to the **Agent IDE**, and immediately have the AI architect assist you in building a document, script, or paper based on that discovery.
 
-## 📦 Included Showcase Brains
+## ⚡ Run Your Own Brains
+The Brain Studio is the "Intelligence Player"—but you can also be the creator. With access to the full **COSMO Research System**, you can:
+*   **Trigger Automated Brain Runs**: Launch synthetic research agents across any domain.
+*   **Build Custom Knowledge Artifacts**: Create your own versioned `.brain` files from proprietary data or specialized fields.
+*   **Frontier Power**: Tap into the core research engine that generated the Art, Music, and Physics brains included here.
 
-This repository includes several pre-crystallized research artifacts in the `brains/` directory:
-*   **Art and Music**: A dense knowledge graph (5,000+ edges) covering the history of human expression and aesthetics.
-*   **Mathematics**: Advanced modeling across algebra, calculus, geometry, and probability.
-*   **Physics**: Comprehensive research into fundamental physical laws and dynamics.
+Learn more about running your own research at [cosmo.evobrew.com](https://cosmo.evobrew.com).
+
+## 🚀 Core Capabilities
+*   **Multi-Model Intelligence**: Effortless switching between Claude 4.5, GPT-5.2, and Grok for specialized reasoning.
+*   **Portable Knowledge**: Research is packaged into `.brain` files—versioned, shareable snapshots of an entire field of knowledge.
+*   **Absolute Privacy**: Your research data stays on your local disk. We only send the minimum required context to LLM providers.
 
 ## 🛠️ Quick Start
 
@@ -32,19 +41,12 @@ This repository includes several pre-crystallized research artifacts in the `bra
 ./setup.sh
 
 # 2. Add your API Keys
-# Edit the generated .env file
+# Edit the .env file with your Anthropic/OpenAI keys.
 
-# 3. Launch the Platform
+# 3. Launch the Studio
 npm start
 ```
-Browser available at: `http://localhost:3398`
-
-## 🔒 Security & Safety
-
-Built for **Trusted Local Environments**:
-*   **Local-First**: No research data is uploaded; the IDE operates strictly on your local disk.
-*   **Isolated Spawning**: Each Brain Studio instance runs in its own process.
-*   **Terminal Gating**: The AI can execute terminal commands to assist in research. Always review proposed actions in the "AI Edits" panel.
+Access the Studio at `http://localhost:3398`.
 
 ---
-*COSMO Brain Platform v2.1 | Powered by [cosmo.evobrew.com](https://cosmo.evobrew.com)*
+*COSMO Brain Platform | Explore the frontier at [cosmo.evobrew.com](https://cosmo.evobrew.com)*

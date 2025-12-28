@@ -1,0 +1,67 @@
+parameter,value,units,description,allowed_or_hint
+project_name,example_project,,Label used in outputs,
+segment,fleet,,Select default assumption set,"fleet|classic|specialty"
+drive_cycle,mixed,,Select proxy drive cycle,"urban_last_mile|mixed|highway"
+analysis_years,8,years,Ownership/analysis horizon,
+annual_miles,18000,miles/year,Annual distance driven (utilization driver),
+days_per_year,300,days/year,Operating days (used for some utilization views),
+payload_fraction,0.5,,0-1 fraction of typical payload for energy scaling,"0.0-1.0"
+ambient_temp_c,20,degC,Ambient temperature (optional, for future refinement),
+
+vehicle_class,light_duty,,High-level class label,
+vehicle_glider_mass_kg,1800,kg,Base vehicle mass without powertrain (approx),
+frontal_area_m2,2.6,m^2,Frontal area,
+cd,0.33,,Aerodynamic drag coefficient,
+crr,0.010,,Rolling resistance coefficient,
+accessory_load_kw,0.8,kW,Average non-propulsion electrical load,
+regen_efficiency,0.6,,0-1 fraction of braking energy recovered (BEV/conv),
+
+ice_fuel_type,gasoline,,Fuel type for ICE baseline,"gasoline|diesel"
+ice_fuel_economy_mpg,25,mpg,On-road fuel economy for ICE baseline,
+ice_maintenance_per_mile,0.12,USD/mile,Maintenance+repairs variable cost (ICE),
+
+conversion_motor_power_kw,120,kW,Peak motor power for conversion,
+conversion_battery_capacity_kwh,60,kWh,Usable battery capacity for conversion,
+conversion_drivetrain_efficiency,0.88,,Average battery-to-wheel efficiency (conv),
+conversion_charging_efficiency,0.90,,Wall-to-battery efficiency (conv),
+conversion_capex_usd,22000,USD,Upfront conversion kit+labor cost,
+conversion_maintenance_per_mile,0.08,USD/mile,Maintenance+repairs variable cost (conv),
+
+bev_battery_capacity_kwh,75,kWh,Usable battery capacity for BEV,
+bev_drivetrain_efficiency,0.90,,Average battery-to-wheel efficiency (BEV),
+bev_charging_efficiency,0.90,,Wall-to-battery efficiency (BEV),
+bev_purchase_price_usd,42000,USD,Upfront BEV purchase price,
+bev_maintenance_per_mile,0.06,USD/mile,Maintenance+repairs variable cost (BEV),
+
+electricity_price_usd_per_kwh,0.18,USD/kWh,Base electricity price,
+gasoline_price_usd_per_gal,3.60,USD/gal,Base gasoline price (if ICE baseline),
+diesel_price_usd_per_gal,4.10,USD/gal,Base diesel price (if ICE baseline),
+
+toggle_sensitivity_energy_price,0,,Enable energy-price sensitivity run,"0|1"
+sens_electricity_price_multiplier,1.0,,Multiplier applied if sensitivity enabled,
+sens_fuel_price_multiplier,1.0,,Multiplier applied if sensitivity enabled,
+
+toggle_sensitivity_utilization,0,,Enable utilization sensitivity run,"0|1"
+sens_annual_miles_low,12000,miles/year,Low utilization case (if enabled),
+sens_annual_miles_high,24000,miles/year,High utilization case (if enabled),
+
+toggle_battery_replacement,1,,Include battery replacement when thresholds met,"0|1"
+battery_replacement_threshold_fraction,0.70,,Replace when remaining capacity below fraction,"0.5-0.9"
+battery_degradation_per_year,0.02,1/year,Calendar degradation rate (simple model),
+battery_degradation_per_10000_miles,0.01,1 per 10k miles,Cycle degradation rate (simple model),
+replacement_cost_usd_per_kwh,140,USD/kWh,Replacement pack cost basis,
+replacement_labor_usd,1200,USD,Replacement labor/fees,
+
+toggle_financing,1,,Include financing/discounting,"0|1"
+discount_rate,0.08,1/year,Discount rate for NPV,
+down_payment_fraction,0.10,,Upfront fraction paid (rest financed),
+loan_apr,0.07,1/year,Loan APR for financed portion,
+loan_term_years,5,years,Loan term for financed portion,
+
+insurance_per_year_usd,1600,USD/year,Insurance (applies to all; can override),
+registration_per_year_usd,250,USD/year,Registration/taxes (applies to all; can override),
+residual_value_fraction_end,0.25,,Residual value at end of horizon as fraction of upfront price,
+
+co2e_per_kwh,0.35,kgCO2e/kWh,Grid emissions intensity (optional reporting),
+co2e_per_gal_gasoline,8.89,kgCO2e/gal,Gasoline tailpipe+upstream proxy (optional),
+co2e_per_gal_diesel,10.16,kgCO2e/gal,Diesel tailpipe+upstream proxy (optional)

@@ -1,0 +1,51 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Refactor and modularize reusable code artifacts: schema.py, overrides_example_yaml.py, yaml_support.py, 2025-12-28T00-32-01-781Z_docs_overrides_refactor_notes_md_stage1_attempt2_prompt.txt, apply.py
+Project: generated_script_1766882851940 (python script)
+
+Target file details:
+- Path: src/overrides/apply.py
+- Purpose: Implements the core override-application engine that merges validated overrides into target data structures deterministically.
+- Category: source
+
+Other planned files (for context only):
+- src/overrides/schema.py: Defines the override configuration schema and validation utilities used across YAML loading, example generation, and application.
+- src/overrides/yaml_support.py: Provides YAML load/dump helpers with consistent parsing options, error reporting, and round-trip-friendly behavior for overrides files.
+- src/overrides/overrides_example_yaml.py: Generates a canonical example overrides YAML document from the schema, including comments and defaults for user guidance.
+- src/overrides/__init__.py: Exports the public API surface for the overrides package, re-exporting schema, YAML helpers, example generator, and apply functions.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-28T00-32-01-781Z_docs_overrides_refactor_notes_md_stage1_attempt1_prompt.txt from code-creation agent agent_17668819
+- [AGENT: agent_1766871269605_egts9z4] Document Analysis: 2025-12-27T19-57-35-271Z_src_spec_crosswalk_init_py_stage1_attempt2_prompt.txt
+
+Size
+- [AGENT: agent_1766869946008_07kgyc7] Document Analysis: 2025-12-27T19-11-46-591Z_pyproject_toml_stage1_attempt2_prompt.txt
+
+Size: 483 words
+
+- [INTROSPECTION] 2025-12-27T20-30-39-805Z_tools_init_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766867426227_mobx6c7: You 
+- [INTROSPECTION] 2025-12-27T20-43-07-865Z_scripts_build_steps_json_stage1_attempt1_prompt.txt from code-creation agent agent_1766868174334_9f
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Implements the core override-application engine that merges validated overrides into target data structures deterministically.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/overrides/apply.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/overrides/apply.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/overrides/apply.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

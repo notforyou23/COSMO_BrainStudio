@@ -1,0 +1,212 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766882851682_382hmgg",
+  "agentType": "code-creation",
+  "goalId": "routing_code_1766882851682_yw6ipmh",
+  "missionId": null,
+  "spawnCycle": null,
+  "coordinatorReview": null,
+  "spawnedBy": "agent_router",
+  "triggerSource": "orchestrator",
+  "spawningReason": "code_reuse_opportunity",
+  "createdAt": "2025-12-28T00:47:43.020Z",
+  "completedAt": "2025-12-28T00:57:47.582Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "src/overrides/schema.py",
+      "description": "Defines the override configuration schema and validation utilities used across YAML loading, example generation, and application.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/overrides/schema.py\nDIR_STATE:[\"src/overrides/schema.py\"]\nSUMMARY: Added a dependency-free overrides schema module with path parsing and strict document/item validation producing a canonical normalized structure.\n",
+          "timestamp": "2025-12-28T00:48:07.123Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/overrides/schema.py\nDIR_STATE:[\"src/overrides/schema.py\"]\nSUMMARY: Added a compact overrides schema plus path parsing, normalization, and validation utilities for use by YAML IO, example generation, and application.\n",
+          "timestamp": "2025-12-28T00:49:03.652Z"
+        }
+      ],
+      "createdAt": "2025-12-28T00:47:43.020Z",
+      "failedAt": "2025-12-28T00:49:03.652Z"
+    },
+    {
+      "path": "src/overrides/yaml_support.py",
+      "description": "Provides YAML load/dump helpers with consistent parsing options, error reporting, and round-trip-friendly behavior for overrides files.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/overrides/yaml_support.py\nDIR_STATE:[\"src/overrides/schema.py\", \"src/overrides/yaml_support.py\"]\nYAML load/dump helpers were added with consistent options, duplicate-key checks, and path/line-aware error messages with ruamel.yaml support when available.\n",
+          "timestamp": "2025-12-28T00:50:03.235Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/overrides/yaml_support.py\nDIR_STATE:[\"src/overrides/schema.py\", \"src/overrides/yaml_support.py\"]\nThis stage produced a compact YAML load/dump helper module with consistent options and structured error reporting.\n",
+          "timestamp": "2025-12-28T00:50:17.463Z"
+        }
+      ],
+      "createdAt": "2025-12-28T00:47:43.020Z",
+      "failedAt": "2025-12-28T00:50:17.463Z"
+    },
+    {
+      "path": "src/overrides/overrides_example_yaml.py",
+      "description": "Generates a canonical example overrides YAML document from the schema, including comments and defaults for user guidance.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/overrides/overrides_example_yaml.py\nDIR_STATE:[\"src/overrides/overrides_example_yaml.py\", \"src/overrides/schema.py\", \"src/overrides/yaml_support.py\"]\nWrote a reusable example-YAML generator that derives defaults and descriptions from a JSON-schema-like overrides schema and emits commented YAML with ruamel.yaml when available.\n",
+          "timestamp": "2025-12-28T00:50:51.699Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/overrides/overrides_example_yaml.py\nDIR_STATE:[\"src/overrides/overrides_example_yaml.py\", \"src/overrides/schema.py\", \"src/overrides/yaml_support.py\"]\nSUMMARY: Added a schema-driven example overrides YAML generator with deterministic output, optional comments, and a small CLI entrypoint.\n",
+          "timestamp": "2025-12-28T00:51:23.082Z"
+        }
+      ],
+      "createdAt": "2025-12-28T00:47:43.020Z",
+      "failedAt": "2025-12-28T00:51:23.082Z"
+    },
+    {
+      "path": "src/overrides/apply.py",
+      "description": "Implements the core override-application engine that merges validated overrides into target data structures deterministically.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/overrides/apply.py\nDIR_STATE:[\"src/overrides/apply.py\", \"src/overrides/overrides_example_yaml.py\", \"src/overrides/schema.py\", \"src/overrides/yaml_support.py\"]\nSUMMARY: Deterministic override application engine written to src/overrides/apply.py.\n",
+          "timestamp": "2025-12-28T00:53:11.051Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/overrides/apply.py\nDIR_STATE:[\"src/overrides/apply.py\", \"src/overrides/overrides_example_yaml.py\", \"src/overrides/schema.py\", \"src/overrides/yaml_support.py\"]\nSUMMARY: Implemented a deterministic, path-based override application engine supporting set/merge/delete and basic list operations with strict/non-strict modes.\n",
+          "timestamp": "2025-12-28T00:54:40.003Z"
+        }
+      ],
+      "createdAt": "2025-12-28T00:47:43.020Z",
+      "failedAt": "2025-12-28T00:54:40.003Z"
+    },
+    {
+      "path": "src/overrides/__init__.py",
+      "description": "Exports the public API surface for the overrides package, re-exporting schema, YAML helpers, example generator, and apply functions.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/overrides/__init__.py\nDIR_STATE:[\"src/overrides/__init__.py\", \"src/overrides/apply.py\", \"src/overrides/overrides_example_yaml.py\", \"src/overrides/schema.py\", \"src/overrides/yaml_support.py\"]\nSUMMARY: Created src/overrides/__init__.py to define the overrides package public API with module re-exports and stable wrapper functions.\n",
+          "timestamp": "2025-12-28T00:55:34.779Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/overrides/__init__.py\nDIR_STATE:[\"src/overrides/__init__.py\", \"src/overrides/apply.py\", \"src/overrides/overrides_example_yaml.py\", \"src/overrides/schema.py\", \"src/overrides/yaml_support.py\"]\nSummary: Added a public API facade for the overrides package that re-exports schema, YAML helpers, example YAML generation, and apply functions.\n",
+          "timestamp": "2025-12-28T00:56:01.819Z"
+        }
+      ],
+      "createdAt": "2025-12-28T00:47:43.020Z",
+      "failedAt": "2025-12-28T00:56:01.819Z"
+    },
+    {
+      "path": "docs/overrides_refactor_notes.md",
+      "description": "Consolidates and updates the stage notes into a single readable document describing the refactor decisions and module boundaries.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docs/overrides_refactor_notes.md\nDIR_STATE:[\"docs/overrides_refactor_notes.md\"]\nSUMMARY: Consolidated Stage 1 refactor decisions into a single notes document clarifying module boundaries, interfaces, and deterministic override behavior.\n",
+          "timestamp": "2025-12-28T00:56:33.259Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docs/overrides_refactor_notes.md\nDIR_STATE:[\"docs/overrides_refactor_notes.md\"]\nSUMMARY: Consolidated Stage 1 refactor decisions into a single notes document describing module boundaries, responsibilities, data flow, and error/testing conventions.\n",
+          "timestamp": "2025-12-28T00:57:47.582Z"
+        }
+      ],
+      "createdAt": "2025-12-28T00:47:43.020Z",
+      "failedAt": "2025-12-28T00:57:47.582Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Refactor and modularize reusable code artifacts: schema.py, overrides_example_yaml.py, yaml_support.py, 2025-12-28T00-32-01-781Z_docs_overrides_refactor_notes_md_stage1_attempt2_prompt.txt, apply.py",
+  "missionSuccessCriteria": [
+    "Modularize code",
+    "Create reusable components"
+  ],
+  "projectName": "generated_script_1766882851940",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-28T00:57:47.582Z",
+  "summary": {
+    "completed": 0,
+    "failed": 6,
+    "total": 6
+  }
+}

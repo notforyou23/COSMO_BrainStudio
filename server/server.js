@@ -793,6 +793,8 @@ app.get('/api/conversations', async (req, res) => {
           id: file.replace('.json', ''),
           title: data.title,
           timestamp: data.timestamp,
+          folder: data.folder,
+          brainPath: data.brainPath,
           messageCount: data.messages?.length || 0
         });
       }
@@ -838,6 +840,7 @@ app.post('/api/conversations', async (req, res) => {
       title: title || `Conversation ${new Date().toLocaleString()}`,
       timestamp,
       folder: folder || null,
+      brainPath: req.body.brainPath || null,
       messages
     };
     
@@ -864,6 +867,7 @@ app.put('/api/conversations/:id', async (req, res) => {
       title: title !== undefined ? title : existing.title,
       messages: messages !== undefined ? messages : existing.messages,
       folder: folder !== undefined ? folder : existing.folder,
+      brainPath: req.body.brainPath !== undefined ? req.body.brainPath : existing.brainPath,
       updatedAt: new Date().toISOString()
     };
     

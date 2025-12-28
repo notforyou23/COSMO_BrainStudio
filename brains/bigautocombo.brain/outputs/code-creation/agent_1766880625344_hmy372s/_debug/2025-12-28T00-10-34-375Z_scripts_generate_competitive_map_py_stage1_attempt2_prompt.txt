@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a competitive landscape matrix deliverable in /outputs: /outputs/competitive_map.xlsx (or .csv) + /outputs/competitive_summary.md covering kit suppliers, integrators, OEM programs, pricing bands, warranty terms, compliance posture, and differentiation opportunities.
+Project: competitive landscape matrix deliverable in /outputs: /outputs/competitive_map.xlsx (or .csv) + /outputs/competitive_summary.md covering kit suppliers, integrators, OEM (python script)
+
+Target file details:
+- Path: scripts/generate_competitive_map.py
+- Purpose: Standalone CLI script that builds /outputs/competitive_map.xlsx (or .csv fallback) and /outputs/competitive_summary.md from a curated dataset plus optional user overrides.
+- Category: source
+
+Other planned files (for context only):
+- src/competitive_landscape/builder.py: Core library module that loads competitor records, normalizes fields (supplier type, pricing bands, warranty, compliance), scores differentiation opportunities, and writes the matrix and markdown summary.
+- src/competitive_landscape/schemas.py: Dataclass and validation helpers defining the competitive record schema and safe defaults for missing/unknown attributes.
+- data/competitive_landscape/competitors_seed.csv: Seed dataset of kit suppliers, integrators, and OEM programs with columns for pricing, warranty, compliance posture, and notes used to generate the initial competitive matrix.
+- data/competitive_landscape/overrides.example.yaml: Example user override file showing how to add/edit competitors, adjust pricing bands, and annotate compliance and differentiation notes without changing code.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-27T20-30-39-805Z_tools_init_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766867426227_mobx6c7: You 
+- [INTROSPECTION] 2025-12-27T20-43-07-865Z_scripts_build_steps_json_stage1_attempt1_prompt.txt from code-creation agent agent_1766868174334_9f
+- [INTROSPECTION] 2025-12-27T20-51-04-352Z_plan_attempt1_prompt.txt from code-creation agent agent_1766868660129_qbwj496: You are planning a p
+- [INTROSPECTION] README.md from code-creation agent agent_1766869451106_rfguwex: # Scripts: Single Build Runner
+
+This project uses a single t
+- [INTROSPECTION] runtime_smoke_test.py from code-creation agent agent_1766869863829_pih7ns9: """Minimal runtime smoke test for the generators
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Standalone CLI script that builds /outputs/competitive_map.xlsx (or .csv fallback) and /outputs/competitive_summary.md from a curated dataset plus optional user overrides.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/generate_competitive_map.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/generate_competitive_map.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/generate_competitive_map.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

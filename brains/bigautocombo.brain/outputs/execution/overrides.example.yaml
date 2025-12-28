@@ -1,0 +1,141 @@
+# Competitive Landscape Overrides (Example)
+#
+# Purpose
+# - This file demonstrates the supported override structure for a competitive landscape run.
+# - It is designed to be merged on top of a tool's built-in defaults and/or other override files.
+#
+# Merge behavior (canonical)
+# - Scalars (strings/numbers/bools): later files override earlier files.
+# - Mappings (dicts): deep-merged by key; only specified keys are overridden.
+# - Lists:
+#   - If items have an "id" key: merged by id (upsert). Same id => deep-merge item.
+#   - Otherwise: later list replaces earlier list (unless a tool documents append behavior).
+# - Null values:
+#   - If a field is set to null, it is treated as "unset" (tool may keep default or remove key,
+#     depending on the implementation; avoid null unless you intend to clear a value).
+#
+# Notes
+# - Comments are for humans; YAML parsers ignore them.
+# - Keep IDs stable: they are used for deterministic merges and references.
+
+overrides_version: 1
+
+meta:
+  project: generated_script_1766881301111
+  description: >-
+    Example overrides for a competitive landscape configuration, showing
+    how to add/modify companies, sources, taxonomy tags, and scoring knobs.
+  owner: analytics@example.com
+  last_updated: "2025-12-28"
+
+inputs:
+  # You can reference local paths or URLs depending on your runner.
+  # A runner may interpret relative paths relative to the working directory.
+  sources:
+    # List items have id => merge-by-id semantics.
+    - id: web_search
+      type: web
+      enabled: true
+      params:
+        query_template: "{company} {topic}"
+        max_results: 8
+        language: en
+    - id: internal_notes
+      type: file
+      enabled: true
+      params:
+        path: "data/competitive_landscape/internal_notes.md"
+        format: markdown
+
+scope:
+  # Optional scoping that can limit analysis to certain markets or regions.
+  markets: ["cloud observability", "apm", "logging"]
+  regions: ["NA", "EU"]
+  # Optional time window used for recency weighting in scoring.
+  as_of_date: "2025-12-15"
+
+taxonomy:
+  # Define consistent tags and how they should appear in outputs.
+  topics:
+    - id: observability
+      label: Observability
+      synonyms: ["o11y", "telemetry"]
+    - id: security
+      label: Security
+      synonyms: ["infosec", "zero trust"]
+  features:
+    - id: apm
+      label: Application Performance Monitoring
+    - id: logs
+      label: Log Management
+    - id: traces
+      label: Distributed Tracing
+  segments:
+    - id: enterprise
+      label: Enterprise
+    - id: smbs
+      label: SMBs
+
+companies:
+  # Canonical company objects. Use stable IDs; fields deep-merge by id.
+  # Typical merge use-case: upstream defaults define a company; you override a few fields here.
+  - id: acme_observe
+    name: Acme Observe
+    website: https://acme.example.com
+    status: active
+    tags:
+      topics: ["observability"]
+      features: ["apm", "logs", "traces"]
+      segments: ["enterprise"]
+    # Optional: provide hints for entity resolution / retrieval.
+    aliases: ["AcmeObservability", "Acme O11y"]
+    notes: "Strong in enterprise APM; expanding into logs."
+  - id: beta_secure
+    name: Beta Secure
+    website: https://betasecure.example.com
+    status: active
+    tags:
+      topics: ["security"]
+      segments: ["enterprise", "smbs"]
+    # Example of overriding only a nested key via deep merge:
+    # If defaults set tags.features, this override does not delete them unless explicitly cleared.
+  - id: legacy_vendor
+    name: Legacy Vendor
+    website: https://legacy.example.com
+    status: deprecated
+    notes: "Kept for historical comparisons; excluded from some outputs by default."
+
+analysis:
+  # Scoring/weighting knobs (tool-specific but commonly supported).
+  scoring:
+    enabled: true
+    weights:
+      # Higher = contributes more to overall score.
+      market_presence: 0.35
+      product_depth: 0.35
+      momentum: 0.20
+      differentiation: 0.10
+    recency:
+      # Optional recency decay (days). Larger half_life => slower decay.
+      half_life_days: 180
+  # Rules can be used by the runner to include/exclude entities or sources.
+  rules:
+    exclude_companies_by_status: ["deprecated"]
+    require_company_website: true
+    require_source_enabled: true
+
+outputs:
+  # Control what artifacts get generated.
+  formats: ["json", "md"]
+  paths:
+    # Runner may treat these as relative to working directory.
+    directory: "outputs/competitive_landscape"
+  report:
+    include_methodology: true
+    include_sources_appendix: true
+    # Example of overriding a nested field without touching siblings:
+    sections:
+      executive_summary: true
+      company_cards: true
+      scoring_table: true
+      raw_evidence: false

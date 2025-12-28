@@ -1,0 +1,34 @@
+You are planning a python script implementation for the following mission:
+Create a competitive landscape matrix deliverable in /outputs: /outputs/competitive_map.xlsx (or .csv) + /outputs/competitive_summary.md covering kit suppliers, integrators, OEM programs, pricing bands, warranty terms, compliance posture, and differentiation opportunities.
+
+Relevant context:
+- [INTROSPECTION] 2025-12-27T20-30-39-805Z_tools_init_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766867426227_mobx6c7: You 
+- [INTROSPECTION] 2025-12-27T20-43-07-865Z_scripts_build_steps_json_stage1_attempt1_prompt.txt from code-creation agent agent_1766868174334_9f
+- [INTROSPECTION] 2025-12-27T20-51-04-352Z_plan_attempt1_prompt.txt from code-creation agent agent_1766868660129_qbwj496: You are planning a p
+- [INTROSPECTION] README.md from code-creation agent agent_1766869451106_rfguwex: # Scripts: Single Build Runner
+
+This project uses a single t
+- [INTROSPECTION] runtime_smoke_test.py from code-creation agent agent_1766869863829_pih7ns9: """Minimal runtime smoke test for the generators
+- [INTROSPECTION] README_RUNTIME_REGEN.md from code-creation agent agent_1766870355058_gxhb70k: # Runtime Outputs Regeneration (single-command
+- [INTROSPECTION] 2025-12-27T21-37-58-098Z_src_runtime_outputs_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766871469538_91iw
+- [INTROSPECTION] 2025-12-27T22-12-55-943Z_Makefile_stage1_attempt1_prompt.txt from code-creation agent agent_1766873570960_iqpesh3: You are i
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

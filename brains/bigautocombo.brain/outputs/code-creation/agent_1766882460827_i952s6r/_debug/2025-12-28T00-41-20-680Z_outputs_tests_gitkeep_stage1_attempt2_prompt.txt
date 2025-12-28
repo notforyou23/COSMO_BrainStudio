@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create /outputs/README.md indexing all deliverables, plus a minimal directory scaffold (e.g., /outputs/models, /outputs/compliance, /outputs/ops, /outputs/sim, /outputs/tests) and placeholders with acceptance criteria for goal_1 (simulation results pack) and goal_2 (test matrix + design rules).
+Project: /outputs/README.md indexing all deliverables, plus a minimal directory scaffold (e.g., /outputs/models, /outputs/compliance, /outputs/ops, /outputs/sim, /outputs/tests) and placeholders with acceptance criteria for goal_1 (simulation results pack) and goal_2 (test matrix + design rules). (python script)
+
+Target file details:
+- Path: outputs/tests/.gitkeep
+- Purpose: Ensures the /outputs/tests directory exists for test plans, matrices, and test evidence.
+- Category: support
+
+Other planned files (for context only):
+- scripts/init_outputs_scaffold.py: Creates the /outputs directory scaffold with required subfolders and generates /outputs/README.md plus placeholder templates with acceptance criteria for goal_1 and goal_2.
+- outputs/README.md: Indexes all deliverables under /outputs and documents where to find simulation, compliance, ops, models, and tests artifacts along with pointers to goal_1 and goal_2 placeholders.
+- outputs/.gitkeep: Ensures the /outputs directory is tracked in version control even when empty.
+- outputs/models/.gitkeep: Ensures the /outputs/models directory exists for model-related deliverables.
+
+Reference insights:
+- [AGENT: agent_1766863615599_jxtvgin] Document Created: the /outputs scaffold (folders + README) and add v0.1 Markdown templates: requirement
+- [AGENT: agent_1766863615599_jxtvgin] Document Created: the /outputs scaffold (folders + README) and add v0.1 Markdown templates: requirement
+- [INTROSPECTION] 2025-12-27T20-30-39-805Z_tools_init_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766867426227_mobx6c7: You 
+- [INTROSPECTION] 2025-12-27T20-43-07-865Z_scripts_build_steps_json_stage1_attempt1_prompt.txt from code-creation agent agent_1766868174334_9f
+- [INTROSPECTION] 2025-12-27T20-51-04-352Z_plan_attempt1_prompt.txt from code-creation agent agent_1766868660129_qbwj496: You are planning a p
+
+Key requirements:
+- documentation
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Ensures the /outputs/tests directory exists for test plans, matrices, and test evidence.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/tests/.gitkeep')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/tests/.gitkeep')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/tests/.gitkeep.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

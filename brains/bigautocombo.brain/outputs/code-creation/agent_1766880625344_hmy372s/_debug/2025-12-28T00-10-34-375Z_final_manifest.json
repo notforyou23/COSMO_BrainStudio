@@ -1,0 +1,212 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766880625344_hmy372s",
+  "agentType": "code-creation",
+  "goalId": "goal_11",
+  "missionId": "urgent_goal_11_1766880625344",
+  "spawnCycle": 3,
+  "coordinatorReview": null,
+  "spawnedBy": "meta_coordinator_urgent",
+  "triggerSource": "urgent_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-28T00:11:06.707Z",
+  "completedAt": "2025-12-28T00:19:28.681Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/generate_competitive_map.py",
+      "description": "Standalone CLI script that builds /outputs/competitive_map.xlsx (or .csv fallback) and /outputs/competitive_summary.md from a curated dataset plus optional user overrides.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/generate_competitive_map.py\nDIR_STATE:[\"scripts/generate_competitive_map.py\"]\nSummary: Wrote a standalone CLI script to generate competitive_map.xlsx (or CSV fallback) and competitive_summary.md from a seed CSV plus optional overrides.\n",
+          "timestamp": "2025-12-28T00:11:51.202Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/generate_competitive_map.py\nDIR_STATE:[\"scripts/generate_competitive_map.py\"]\nSUMMARY: Wrote a standalone CLI generator that builds competitive_map.xlsx (or CSV fallback) plus a competitive_summary.md from a seed dataset with optional overrides.\n",
+          "timestamp": "2025-12-28T00:12:35.378Z"
+        }
+      ],
+      "createdAt": "2025-12-28T00:11:06.707Z",
+      "failedAt": "2025-12-28T00:12:35.378Z"
+    },
+    {
+      "path": "src/competitive_landscape/builder.py",
+      "description": "Core library module that loads competitor records, normalizes fields (supplier type, pricing bands, warranty, compliance), scores differentiation opportunities, and writes the matrix and markdown summary.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/competitive_landscape/builder.py\nDIR_STATE:[\"src/competitive_landscape/builder.py\"]\nbuilder.py now provides loading, normalization, opportunity scoring, and Excel/CSV + Markdown output writers for the competitive landscape matrix.\n",
+          "timestamp": "2025-12-28T00:13:42.676Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-28T00:14:36.727Z"
+        }
+      ],
+      "createdAt": "2025-12-28T00:11:06.707Z",
+      "failedAt": "2025-12-28T00:14:36.727Z"
+    },
+    {
+      "path": "src/competitive_landscape/schemas.py",
+      "description": "Dataclass and validation helpers defining the competitive record schema and safe defaults for missing/unknown attributes.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/competitive_landscape/schemas.py\nDIR_STATE:[\"src/competitive_landscape/builder.py\", \"src/competitive_landscape/schemas.py\"]\nSUMMARY: Added CompetitiveRecord dataclass with normalization/coercion and validation helpers plus safe defaults for missing or unknown fields.\n",
+          "timestamp": "2025-12-28T00:15:00.439Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/competitive_landscape/schemas.py\nDIR_STATE:[\"src/competitive_landscape/builder.py\", \"src/competitive_landscape/schemas.py\"]\nSUMMARY: Added CompetitiveRecord dataclass plus normalization and validation helpers with safe defaults for missing/unknown fields.\n",
+          "timestamp": "2025-12-28T00:15:22.942Z"
+        }
+      ],
+      "createdAt": "2025-12-28T00:11:06.707Z",
+      "failedAt": "2025-12-28T00:15:22.942Z"
+    },
+    {
+      "path": "data/competitive_landscape/competitors_seed.csv",
+      "description": "Seed dataset of kit suppliers, integrators, and OEM programs with columns for pricing, warranty, compliance posture, and notes used to generate the initial competitive matrix.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-28T00:16:49.646Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:data/competitive_landscape/competitors_seed.csv\nDIR_STATE:[\"data/competitive_landscape/competitors_seed.csv\"]\nSUMMARY:Seeded a normalized competitor CSV spanning kit suppliers, integrators, and OEM programs with pricing bands, warranty, compliance posture, and differentiation notes for matrix generation.\n",
+          "timestamp": "2025-12-28T00:17:40.736Z"
+        }
+      ],
+      "createdAt": "2025-12-28T00:11:06.707Z",
+      "failedAt": "2025-12-28T00:17:40.736Z"
+    },
+    {
+      "path": "data/competitive_landscape/overrides.example.yaml",
+      "description": "Example user override file showing how to add/edit competitors, adjust pricing bands, and annotate compliance and differentiation notes without changing code.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-28T00:18:06.790Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:data/competitive_landscape/overrides.example.yaml\nDIR_STATE:[\"data/competitive_landscape/competitors_seed.csv\", \"data/competitive_landscape/overrides.example.yaml\"]\nSUMMARY: Wrote a ready-to-copy YAML overrides example demonstrating competitor adds/edits/hides, pricing band configuration, and compliance/differentiation annotations.\n",
+          "timestamp": "2025-12-28T00:18:51.620Z"
+        }
+      ],
+      "createdAt": "2025-12-28T00:11:06.707Z",
+      "failedAt": "2025-12-28T00:18:51.620Z"
+    },
+    {
+      "path": "src/competitive_landscape/__init__.py",
+      "description": "Package initializer exposing the public API for building the competitive landscape deliverables.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/competitive_landscape/__init__.py\nDIR_STATE:[\"src/competitive_landscape/__init__.py\", \"src/competitive_landscape/builder.py\", \"src/competitive_landscape/schemas.py\"]\nSUMMARY: Exposed a small, stable public API for building competitive landscape deliverables with safe optional imports.\n",
+          "timestamp": "2025-12-28T00:19:03.045Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/competitive_landscape/__init__.py\nDIR_STATE:[\"src/competitive_landscape/__init__.py\", \"src/competitive_landscape/builder.py\", \"src/competitive_landscape/schemas.py\"]\nSummary: Added a stable public API in competitive_landscape/__init__.py with lazy imports and build/load helpers.\n",
+          "timestamp": "2025-12-28T00:19:28.680Z"
+        }
+      ],
+      "createdAt": "2025-12-28T00:11:06.707Z",
+      "failedAt": "2025-12-28T00:19:28.680Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Create a competitive landscape matrix deliverable in /outputs: /outputs/competitive_map.xlsx (or .csv) + /outputs/competitive_summary.md covering kit suppliers, integrators, OEM programs, pricing bands, warranty terms, compliance posture, and differentiation opportunities.",
+  "missionSuccessCriteria": [
+    "Complete the urgent task identified by Meta-Coordinator",
+    "Missing direction identified: competitive mapping; without it, GTM and differentiation cannot be credibly defined."
+  ],
+  "projectName": "competitive landscape matrix deliverable in /outputs: /outputs/competitive_map.xlsx (or .csv) + /outputs/competitive_summary.md covering kit suppliers, integrators, OEM",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-28T00:19:28.681Z",
+  "summary": {
+    "completed": 0,
+    "failed": 6,
+    "total": 6
+  }
+}

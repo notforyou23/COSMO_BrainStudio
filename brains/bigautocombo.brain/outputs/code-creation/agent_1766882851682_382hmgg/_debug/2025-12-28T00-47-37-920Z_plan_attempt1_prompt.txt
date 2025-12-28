@@ -1,0 +1,39 @@
+You are planning a python script implementation for the following mission:
+Refactor and modularize reusable code artifacts: schema.py, overrides_example_yaml.py, yaml_support.py, 2025-12-28T00-32-01-781Z_docs_overrides_refactor_notes_md_stage1_attempt2_prompt.txt, apply.py
+
+Relevant context:
+- [INTROSPECTION] 2025-12-28T00-32-01-781Z_docs_overrides_refactor_notes_md_stage1_attempt1_prompt.txt from code-creation agent agent_17668819
+- [AGENT: agent_1766871269605_egts9z4] Document Analysis: 2025-12-27T19-57-35-271Z_src_spec_crosswalk_init_py_stage1_attempt2_prompt.txt
+
+Size
+- [AGENT: agent_1766869946008_07kgyc7] Document Analysis: 2025-12-27T19-11-46-591Z_pyproject_toml_stage1_attempt2_prompt.txt
+
+Size: 483 words
+
+- [INTROSPECTION] 2025-12-27T20-30-39-805Z_tools_init_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766867426227_mobx6c7: You 
+- [INTROSPECTION] 2025-12-27T20-43-07-865Z_scripts_build_steps_json_stage1_attempt1_prompt.txt from code-creation agent agent_1766868174334_9f
+- [INTROSPECTION] 2025-12-27T20-51-04-352Z_plan_attempt1_prompt.txt from code-creation agent agent_1766868660129_qbwj496: You are planning a p
+- [INTROSPECTION] README.md from code-creation agent agent_1766869451106_rfguwex: # Scripts: Single Build Runner
+
+This project uses a single t
+- [INTROSPECTION] runtime_smoke_test.py from code-creation agent agent_1766869863829_pih7ns9: """Minimal runtime smoke test for the generators
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

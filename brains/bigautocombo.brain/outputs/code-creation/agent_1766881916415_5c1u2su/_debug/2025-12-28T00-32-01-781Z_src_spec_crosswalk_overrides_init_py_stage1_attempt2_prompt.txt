@@ -1,0 +1,51 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Refactor and modularize reusable code artifacts: overrides_schema.py, overrides.py, yaml_support.py, 2025-12-28T00-21-47-607Z_overrides_example_yaml_stage1_attempt1_prompt.txt, 2025-12-28T00-21-47-607Z_overrides_example_yaml_stage1_attempt2_prompt.txt
+Project: generated_script_1766881916611 (python script)
+
+Target file details:
+- Path: src/spec_crosswalk/overrides/__init__.py
+- Purpose: Package entrypoint that exposes the public overrides API and keeps backwards-compatible imports stable.
+- Category: source
+
+Other planned files (for context only):
+- src/spec_crosswalk/overrides/schema.py: Centralized schema/models for overrides with validation helpers and clearly documented dataclasses/types.
+- src/spec_crosswalk/overrides/apply.py: Core logic for applying overrides to in-memory objects/dicts in a deterministic and reusable way.
+- src/spec_crosswalk/overrides/yaml_support.py: YAML serialization/deserialization utilities for overrides including safe loading, dumping, and error reporting.
+- scripts/overrides_example_yaml.py: Runnable example script that generates and validates example overrides YAML used by the previously logged prompt artifacts.
+
+Reference insights:
+- [AGENT: agent_1766871269605_egts9z4] Document Analysis: 2025-12-27T19-57-35-271Z_src_spec_crosswalk_init_py_stage1_attempt2_prompt.txt
+
+Size
+- [AGENT: agent_1766869946008_07kgyc7] Document Analysis: 2025-12-27T19-11-46-591Z_pyproject_toml_stage1_attempt2_prompt.txt
+
+Size: 483 words
+
+- [INTROSPECTION] 2025-12-27T20-30-39-805Z_tools_init_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766867426227_mobx6c7: You 
+- [INTROSPECTION] 2025-12-27T20-43-07-865Z_scripts_build_steps_json_stage1_attempt1_prompt.txt from code-creation agent agent_1766868174334_9f
+- [INTROSPECTION] 2025-12-27T20-51-04-352Z_plan_attempt1_prompt.txt from code-creation agent agent_1766868660129_qbwj496: You are planning a p
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Package entrypoint that exposes the public overrides API and keeps backwards-compatible imports stable.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/spec_crosswalk/overrides/__init__.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/spec_crosswalk/overrides/__init__.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/spec_crosswalk/overrides/__init__.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

@@ -1,0 +1,56 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Produce a v1 compliance/certification pathway artifact in /outputs: /outputs/compliance_standards_map.md plus a structured table mapping conversion components to applicable standards (FMVSS/UNECE where relevant), required tests (EMC, HV safety, braking, lighting, labeling), documentation package checklist, and an initial certification strategy decision tree.
+Project: generated_library_1766880625858 (python library)
+
+Target file details:
+- Path: scripts/generate_compliance_artifact.py
+- Purpose: Standalone script to run the generator and produce outputs/compliance_standards_map.md in one command for CI or local use.
+- Category: support
+
+Other planned files (for context only):
+- src/compliance_pathway/__init__.py: Package initializer exporting the public API for generating compliance/certification pathway artifacts.
+- src/compliance_pathway/model.py: Defines dataclasses and schemas for standards, components, tests, documentation checklist items, and certification strategy decision nodes.
+- src/compliance_pathway/data.py: Contains curated v1 mappings for FMVSS/UNECE standards, required tests, documentation package checklist, and component-to-standard crosswalk data.
+- src/compliance_pathway/render.py: Renders the compliance standards map, structured mapping table, checklist, and decision tree into a single markdown artifact.
+
+Reference insights:
+- [AGENT: agent_1766871269605_egts9z4] Document Analysis: 2025-12-27T19-57-35-271Z_src_spec_crosswalk_init_py_stage1_attempt2_prompt.txt
+
+Size
+- [AGENT: agent_1766869946008_07kgyc7] Document Analysis: 2025-12-27T19-11-46-591Z_pyproject_toml_stage1_attempt2_prompt.txt
+
+Size: 483 words
+
+- [AGENT: agent_1766870028478_vvoi8hz] {"title":"v0.1 US Regulatory Pathway deliverable in /runtime/outputs/regulatory/ (not just a generic co
+- [AGENT: agent_1766871269605_egts9z4] Document Analysis: 2025-12-27T20-43-07-865Z_scripts_build_all_py_stage1_attempt1_response.json
+
+Size: 9
+- [AGENT: agent_1766871771853_28yz9mj] Document Analysis: 2025-12-27T20-43-06-961Z_requirements_requirements_lock_stage1_attempt1_response.jso
+
+Key requirements:
+- documentation
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Standalone script to run the generator and produce outputs/compliance_standards_map.md in one command for CI or local use.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/generate_compliance_artifact.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/generate_compliance_artifact.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/generate_compliance_artifact.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

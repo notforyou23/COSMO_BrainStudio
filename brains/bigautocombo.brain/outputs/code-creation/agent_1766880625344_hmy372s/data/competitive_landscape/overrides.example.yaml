@@ -1,0 +1,150 @@
+# Example override file for the competitive landscape generator.
+# Copy this file to: data/competitive_landscape/overrides.yaml
+# Then re-run the generator; your overrides will be merged on top of the seed dataset.
+#
+# Supported capabilities:
+# - Add new competitors (append to competitors_add)
+# - Edit existing competitors (by key) (competitors_edit)
+# - Hide competitors (competitors_hide)
+# - Adjust pricing bands (pricing_bands + band_aliases)
+# - Annotate compliance posture & differentiation (notes, compliance, differentiation)
+
+version: 1
+meta:
+  owner: "your-team-or-project"
+  updated: "2025-12-28"
+  scope: "kits, integrators, OEM programs"
+# Normalization controls used by the builder when converting raw text to bands.
+pricing_bands:
+  # Currency defaults; per-competitor pricing can override with its own currency.
+  currency: "USD"
+  # Define what each band means for your market; names should be stable identifiers.
+  bands:
+    - name: "low"
+      label: "< $5k"
+      min: null
+      max: 4999
+    - name: "mid"
+      label: "$5k–$25k"
+      min: 5000
+      max: 25000
+    - name: "high"
+      label: "$25k–$100k"
+      min: 25001
+      max: 100000
+    - name: "enterprise"
+      label: "> $100k"
+      min: 100001
+      max: null
+
+  # Optional: map alternate text labels found in the seed dataset to your preferred band ids.
+  band_aliases:
+    "$0-5k": "low"
+    "$5-25k": "mid"
+    "$25-100k": "high"
+    ">$100k": "enterprise"
+    "starter": "low"
+    "pro": "mid"
+    "enterprise": "enterprise"
+# Add brand-new competitors not present in the seed dataset.
+# Fields are intentionally flexible; unknown fields are preserved as notes/metadata.
+competitors_add:
+  - key: "acme_kitworks"
+    name: "Acme KitWorks"
+    supplier_type: "kit_supplier"   # kit_supplier | integrator | oem_program | hybrid | unknown
+    region: "NA"
+    website: "https://example.com/acme-kitworks"
+    offering: "Pre-certified installation kits + remote commissioning"
+    pricing:
+      band: "mid"
+      typical_range: "$8k–$18k per site"
+      model: "one-time + optional monitoring"
+    warranty:
+      term_months: 24
+      type: "parts"
+      notes: "Extended labor warranty available via certified installer network"
+    compliance:
+      posture: "partial"            # strong | partial | unclear | none
+      frameworks: ["UL", "FCC"]
+      notes: "UL listing on core enclosure; some accessories are self-declared"
+    differentiation:
+      strengths:
+        - "Fast lead times; ships in < 7 days for common SKUs"
+        - "Standardized BOM reduces installer variance"
+      gaps:
+        - "Limited international regulatory coverage"
+      opportunities:
+        - "Offer region-specific compliance bundles (CE/UKCA) to win EU integrators"
+    tags: ["kit", "rapid-ship", "standard-bom"]
+# Edit/augment existing competitors from the seed dataset by key.
+# Use this section to correct pricing, warranty, compliance notes, positioning, etc.
+competitors_edit:
+  # Example: tighten an existing integrator record to reflect current go-to-market.
+  - key: "contoso_integrations"
+    set:
+      supplier_type: "integrator"
+      pricing:
+        band: "high"
+        typical_range: "$40k–$90k per deployment"
+        model: "services-heavy + recurring support"
+      warranty:
+        term_months: 12
+        type: "labor+parts"
+        notes: "Warranty tied to annual support contract; SLAs available"
+      compliance:
+        posture: "strong"
+        frameworks: ["SOC2", "ISO27001"]
+        notes: "Publishes controls mapping; provides compliance packet on request"
+      differentiation:
+        strengths:
+          - "Deep field-services network and project management"
+          - "Reference architectures for regulated customers"
+        opportunities:
+          - "Differentiate with lighter-weight kit option for SMB segment"
+
+  # Example: adjust an OEM program record to clarify channel and warranty.
+  - key: "fabrikam_oem_program"
+    set:
+      supplier_type: "oem_program"
+      offering: "OEM white-label hardware program with partner portal"
+      pricing:
+        band: "enterprise"
+        model: "volume-based; MSRP guidance + rebates"
+      warranty:
+        term_months: 36
+        type: "parts"
+        notes: "Advance replacement for top-tier OEM partners"
+      compliance:
+        posture: "partial"
+        frameworks: ["CE", "RoHS", "REACH"]
+        notes: "Compliance varies by SKU and region; confirm per BOM"
+      notes:
+        - "Primary differentiation is channel leverage and co-marketing funds"
+        - "Watch for lock-in via proprietary management tooling"
+# Hide competitors from the final matrix (e.g., out of scope, duplicate, or defunct).
+competitors_hide:
+  - key: "legacy_vendor_2019"
+    reason: "Defunct / no longer actively selling the product line"
+  - key: "duplicate_record_x"
+    reason: "Duplicate of another competitor key after normalization"
+# Global notes and scoring hints the builder may use when generating the summary.
+# These are safe places to capture strategy without modifying code.
+strategy_overrides:
+  # Signals what you consider "table stakes" for compliance in your target segment.
+  compliance_table_stakes:
+    - "UL/ETL listing for installed equipment"
+    - "CE/UKCA where applicable"
+    - "Documented security posture (SOC2 or equivalent) for cloud-managed offerings"
+
+  # Opportunities the summary should emphasize (kept short; used as bullet prompts).
+  differentiation_opportunity_prompts:
+    - "Bundle compliance documentation + installer checklist as a deliverable"
+    - "Clarify warranty scope (labor vs parts) and make it comparable"
+    - "Offer transparent pricing tiers to undercut services-heavy integrators"
+    - "Create OEM-friendly packaging: branding, portal, and RMA workflows"
+
+  # Optional: terms normalization
+  supplier_type_aliases:
+    "system_integrator": "integrator"
+    "kit": "kit_supplier"
+    "oem": "oem_program"

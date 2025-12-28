@@ -1,0 +1,42 @@
+You are planning a python library implementation for the following mission:
+Produce a v1 compliance/certification pathway artifact in /outputs: /outputs/compliance_standards_map.md plus a structured table mapping conversion components to applicable standards (FMVSS/UNECE where relevant), required tests (EMC, HV safety, braking, lighting, labeling), documentation package checklist, and an initial certification strategy decision tree.
+
+Relevant context:
+- [AGENT: agent_1766871269605_egts9z4] Document Analysis: 2025-12-27T19-57-35-271Z_src_spec_crosswalk_init_py_stage1_attempt2_prompt.txt
+
+Size
+- [AGENT: agent_1766869946008_07kgyc7] Document Analysis: 2025-12-27T19-11-46-591Z_pyproject_toml_stage1_attempt2_prompt.txt
+
+Size: 483 words
+
+- [AGENT: agent_1766870028478_vvoi8hz] {"title":"v0.1 US Regulatory Pathway deliverable in /runtime/outputs/regulatory/ (not just a generic co
+- [AGENT: agent_1766871269605_egts9z4] Document Analysis: 2025-12-27T20-43-07-865Z_scripts_build_all_py_stage1_attempt1_response.json
+
+Size: 9
+- [AGENT: agent_1766871771853_28yz9mj] Document Analysis: 2025-12-27T20-43-06-961Z_requirements_requirements_lock_stage1_attempt1_response.jso
+- [CONSOLIDATED] A maintainable thermal-design workflow emerges by standardizing cooling “architectures” as a well-documented, convention-driv
+- [AGENT: agent_1766550864729_p9ds97q] Across the implications-and-consequences, systems-thinking, and psychological perspectives, the dominan
+- [AGENT: agent_1766869946008_07kgyc7] Document Analysis: 2025-12-27T19-11-46-591Z_config_default_deliverables_yaml_stage1_attempt1_response.j
+
+Explicit requirements:
+- documentation
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

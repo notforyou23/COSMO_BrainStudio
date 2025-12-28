@@ -92,11 +92,39 @@ function initQueryTab() {
       </div>
     </div>
   `;
+
+  loadQueryHistory();
 }
 
 // Query state
 let lastQueryResult = null;
 let queryHistory = [];
+
+function getHistoryKey() {
+  const brainPath = window.currentBrainInfo?.brainPath || 'global';
+  return `cosmo.queryHistory.${brainPath}`;
+}
+
+function saveQueryHistory() {
+  localStorage.setItem(getHistoryKey(), JSON.stringify(queryHistory.slice(0, 50)));
+}
+
+function loadQueryHistory() {
+  const saved = localStorage.getItem(getHistoryKey());
+  if (saved) {
+    try {
+      queryHistory = JSON.parse(saved);
+      updateQueryHistory();
+    } catch (e) {
+      console.error('Failed to load query history:', e);
+      queryHistory = [];
+    }
+  } else {
+    queryHistory = [];
+    const historyDiv = document.getElementById('queryHistory');
+    if (historyDiv) historyDiv.style.display = 'none';
+  }
+}
 
 async function executeQuery() {
   const input = document.getElementById('queryInput');
@@ -155,6 +183,7 @@ async function executeQuery() {
     // Display result
     displayQueryResult(result);
     updateQueryHistory();
+    saveQueryHistory();
 
   } catch (error) {
     resultsDiv.innerHTML = `<div class="error-message">❌ Error: ${error.message}</div>`;
@@ -231,6 +260,14 @@ function clearQuery() {
   document.getElementById('queryInput').value = '';
   document.getElementById('queryResults').style.display = 'none';
   lastQueryResult = null;
+  
+  if (confirm('Clear query history for this brain?')) {
+    queryHistory = [];
+    saveQueryHistory();
+    updateQueryHistory();
+    const historyDiv = document.getElementById('queryHistory');
+    if (historyDiv) historyDiv.style.display = 'none';
+  }
 }
 
 function escapeHtml(text) {

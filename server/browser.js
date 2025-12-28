@@ -234,11 +234,16 @@ function getHTML() {
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Inter', sans-serif; background: var(--bg-primary); color: var(--text-primary); }
     .header { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 20px 40px; position: sticky; top: 0; z-index: 100; }
-    .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+    .header-content { max-width: 1600px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
     .logo { display: flex; align-items: center; gap: 12px; }
     .logo-icon { font-size: 32px; }
     .logo-text h1 { font-size: 24px; font-weight: 700; background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .main { max-width: 1400px; margin: 0 auto; padding: 40px; }
+    
+    /* Layout Overhaul */
+    .app-container { display: flex; height: calc(100vh - 73px); overflow: hidden; }
+    .main { flex: 1; padding: 40px; overflow-y: auto; }
+    .sidebar-docs { width: 380px; background: var(--bg-secondary); border-left: 1px solid var(--border); padding: 40px; overflow-y: auto; display: flex; flex-direction: column; gap: 32px; }
+    
     .section { margin-bottom: 48px; }
     .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     .section-title { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 12px; }
@@ -268,6 +273,10 @@ function getHTML() {
     .lineage-badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; }
     .lineage-badge.linked { background: rgba(88, 166, 255, 0.1); color: var(--accent); border: 1px solid rgba(88, 166, 255, 0.2); }
     .lineage-badge.published { background: rgba(63, 185, 80, 0.1); color: var(--success); border: 1px solid rgba(63, 185, 80, 0.2); }
+    
+    .docs-section h3 { font-size: 16px; font-weight: 700; margin-bottom: 12px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+    .docs-section p { font-size: 13px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 12px; }
+    .docs-tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--bg-tertiary); padding: 2px 6px; border-radius: 4px; color: var(--text-primary); }
   </style>
 </head>
 <body>
@@ -280,22 +289,59 @@ function getHTML() {
       </div>
     </div>
   </header>
-  <main class="main">
-    <section class="section">
-      <div class="section-header">
-        <div class="section-title">📚 Brain Library <span class="section-count" id="brainCount">0</span></div>
-        <div style="font-size: 12px; color: var(--text-muted);">Published knowledge artifacts. Portable, versioned, and ready to be shared or built upon.</div>
+
+  <div class="app-container">
+    <main class="main">
+      <section class="section">
+        <div class="section-header">
+          <div class="section-title">📚 Brain Library <span class="section-count" id="brainCount">0</span></div>
+          <div style="font-size: 12px; color: var(--text-muted);">Published knowledge artifacts. Portable, versioned, and ready to be shared or built upon.</div>
+        </div>
+        <div id="brainPackagesGrid" class="brain-grid"><div class="loading"></div></div>
+      </section>
+      <section class="section">
+        <div class="section-header">
+          <div class="section-title">🛠️ Research Workspace <span class="section-count" id="runCount">0</span></div>
+          <div style="font-size: 12px; color: var(--text-muted);">Active staging area. Work-in-progress research that is ready to be published as a stable version.</div>
+        </div>
+        <div id="runsGrid" class="brain-grid"><div class="loading"></div></div>
+      </section>
+    </main>
+
+    <aside class="sidebar-docs">
+      <div style="margin-bottom: 8px;">
+        <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">Studio Guide</h2>
+        <p style="font-size: 14px; color: var(--text-muted);">Navigation & Methodology</p>
       </div>
-      <div id="brainPackagesGrid" class="brain-grid"><div class="loading"></div></div>
-    </section>
-    <section class="section">
-      <div class="section-header">
-        <div class="section-title">🛠️ Research Workspace <span class="section-count" id="runCount">0</span></div>
-        <div style="font-size: 12px; color: var(--text-muted);">Active staging area. Work-in-progress research that is ready to be published as a stable version.</div>
+
+      <div class="docs-section">
+        <h3>📚 Brain Library</h3>
+        <p>These are <strong>immutable releases</strong> of research. When a research run hits a milestone, it is "Published" into this library as a portable <span class="docs-tag">.brain</span> artifact.</p>
+        <p>Ideal for: Long-term archival, peer review, and serving as a base for future synthetic research.</p>
       </div>
-      <div id="runsGrid" class="brain-grid"><div class="loading"></div></div>
-    </section>
-  </main>
+
+      <div class="docs-section">
+        <h3>🛠️ Research Workspace</h3>
+        <p>The <strong>Staging Area</strong> for active runs. This contains high-entropy data: the agent's raw thought stream, intermediate code artifacts, and execution logs.</p>
+        <p>Use the <span class="docs-tag">Publish</span> button to crystallize a workspace into a stable Library entry.</p>
+      </div>
+
+      <div class="docs-section">
+        <h3>⚡ Dual-Mode Operation</h3>
+        <p>Launching a brain opens the <strong>Brain Studio</strong>, which toggles between two primary cognitive states:</p>
+        <ul style="font-size: 13px; color: var(--text-secondary); margin-left: 20px; line-height: 1.8; margin-bottom: 12px;">
+          <li><strong>Scholar (Research)</strong>: Deep memory interrogation and synthesis of existing knowledge.</li>
+          <li><strong>Architect (Agent IDE)</strong>: Intelligent action, document creation, and terminal-driven execution.</li>
+        </ul>
+      </div>
+
+      <div class="docs-section" style="padding: 24px; background: rgba(88, 166, 255, 0.05); border-radius: 12px; border: 1px solid rgba(88, 166, 255, 0.1); margin-top: auto;">
+        <h3 style="font-size: 14px;">🚀 Future: Create Your Own</h3>
+        <p style="font-size: 12px; line-height: 1.5; margin-bottom: 12px; color: var(--text-primary);">The ability to trigger custom automated research runs and build your own specialized brains is an upcoming feature of the COSMO ecosystem.</p>
+        <p style="font-size: 11px; margin-bottom: 0;"><a href="https://cosmo.evobrew.com" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: 600;">Request Early Access →</a></p>
+      </div>
+    </aside>
+  </div>
   <script>
     async function init() {
       try {
@@ -398,6 +444,7 @@ function getHTML() {
       div.textContent = text || '';
       return div.innerHTML;
     }
+
     init();
   </script>
 </body>

@@ -1,0 +1,51 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Refactor and modularize reusable code artifacts: 2025-12-28T00-10-34-375Z_data_competitive_landscape_overrides_example_yaml_stage1_attempt1_prompt.txt, 2025-12-28T00-10-34-375Z_data_competitive_landscape_overrides_example_yaml_stage1_attempt2_prompt.txt, 2025-12-28T00-10-34-375Z_src_competitive_landscape_init_py_stage1_attempt1_prompt.txt, 2025-12-28T00-10-34-375Z_src_competitive_landscape_init_py_stage1_attempt2_prompt.txt, overrides.example.yaml
+Project: generated_script_1766881301111 (yaml script)
+
+Target file details:
+- Path: src/competitive_landscape/__init__.py
+- Purpose: Package initializer that exposes the public API for competitive landscape overrides loading and validation while keeping internals modular.
+- Category: source
+
+Other planned files (for context only):
+- src/competitive_landscape/overrides.py: Reusable implementation for reading, merging, and validating competitive landscape override YAML files into a normalized in-memory representation.
+- src/competitive_landscape/overrides_schema.py: Centralized schema definitions (dataclasses/types and validation helpers) for competitive landscape overrides to keep parsing and checks consistent.
+- src/competitive_landscape/yaml_support.py: Small YAML utility layer for safe loading/dumping and path resolution to avoid duplication across modules that consume overrides.
+- overrides.example.yaml: Canonical, well-documented example overrides YAML demonstrating supported structure, fields, and merge behavior for competitive landscape configuration.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-26T05-48-26-975Z_outputs_goal_2_meta_starter_kit_data_toy_extraction_csv_stage1_attempt1_prompt.txt from code-creati
+- [AGENT: agent_1766871269605_egts9z4] Document Analysis: 2025-12-27T19-57-35-271Z_src_spec_crosswalk_init_py_stage1_attempt2_prompt.txt
+
+Size
+- [AGENT: agent_1766869946008_07kgyc7] Document Analysis: 2025-12-27T19-11-46-591Z_pyproject_toml_stage1_attempt2_prompt.txt
+
+Size: 483 words
+
+- [INTROSPECTION] 2025-12-26T05-48-26-975Z_outputs_goal_2_meta_starter_kit_data_toy_extraction_csv_stage1_attempt1_prompt.txt from code-creati
+- [INTROSPECTION] 2025-12-22T22-13-32-823Z_plan_attempt1_prompt.txt from code-creation agent agent_1766441606958_qncx1i2: You are planning a y
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Package initializer that exposes the public API for competitive landscape overrides loading and validation while keeping internals modular.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/competitive_landscape/__init__.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/competitive_landscape/__init__.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/competitive_landscape/__init__.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.
