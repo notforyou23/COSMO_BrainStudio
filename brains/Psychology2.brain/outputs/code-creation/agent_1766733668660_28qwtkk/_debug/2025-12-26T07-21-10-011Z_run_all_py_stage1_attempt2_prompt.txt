@@ -1,0 +1,47 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Build a `run_all.py` (or Makefile/task runner) that executes in a fixed order: (1) taxonomy smoke-test, (2) toy demo run, (3) artifact gate; ensure it writes logs to `runtime/_build/logs/` and exits non-zero on any failure.
+Project: generated_script_1766733668864 (python script)
+
+Target file details:
+- Path: run_all.py
+- Purpose: Task runner script that executes taxonomy smoke-test, toy demo run, and artifact gate in a fixed order, writes per-step logs to runtime/_build/logs/, streams output to console, and exits non-zero on the first failure.
+- Category: source
+
+Reference insights:
+- [INTROSPECTION] 2025-12-26T05-48-26-975Z_runtime_build_reports_gitkeep_stage1_attempt2_prompt.txt from code-creation agent agent_17667281055
+- [AGENT: agent_1766731203226_m37bifk] {"agentId":"agent_1766731203226_m37bifk","timestamp":"2025-12-26T06:49:35.087Z","files":[{"filename":".
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [INTROSPECTION] 2025-12-26T05-48-26-975Z_runtime_build_reports_gitkeep_stage1_attempt1_prompt.txt from code-creation agent agent_17667281055
+
+Key requirements:
+- examples
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Task runner script that executes taxonomy smoke-test, toy demo run, and artifact gate in a fixed order, writes per-step logs to runtime/_build/logs/, streams output to console, and exits non-zero on the first failure.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('run_all.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:run_all.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside run_all.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

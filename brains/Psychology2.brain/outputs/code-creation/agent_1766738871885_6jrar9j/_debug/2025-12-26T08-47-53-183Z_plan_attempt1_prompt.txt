@@ -1,0 +1,34 @@
+You are planning a python script implementation for the following mission:
+Implement a minimal retrieve-then-verify baseline with: (a) claim decomposition, (b) retrieval, (c) quote-attribution checks, (d) support label + abstain rule; then evaluate on a small curated set with calibration + false-accept at risk tiers.
+
+Relevant context:
+- [FORK_RESULT:fork_34] Design each atomic claim as the smallest self-contained proposition with fixed, machine-readable fields (normalized cl
+- [AGENT: agent_1766738486336_ye4jwh1] {"agentId":"agent_1766738486336_ye4jwh1","timestamp":"2025-12-26T08:45:21.913Z","files":[{"filename":"o
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT INSIGHT: agent_1766733982156_n6bb5fc] Implication 3: UX and workflow become first-class safety components with measurable cost models
+- [INTROSPECTION] record_versions.py from code-creation agent agent_1766731203226_m37bifk: """record_versions.py
+
+Utility to capture Python/OS
+- [AGENT: agent_1766729445747_n3o9cbv] {"agentId":"agent_1766729445747_n3o9cbv","timestamp":"2025-12-26T06:12:09.374Z","files":[{"filename":"v
+- [AGENT: agent_1766732620201_eac0koj] {"agentId":"agent_1766732620201_eac0koj","timestamp":"2025-12-26T07:04:57.970Z","files":[{"filename":"v
+- [FORK:fork_34] Design atomic-claims as minimal, self-contained propositions with explicit subject, predicate, scope, and required provenance
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

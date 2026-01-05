@@ -1,0 +1,84 @@
+# Reduce Docker build context size and avoid container startup failures from oversized contexts
+# Keep this list conservative: ignore caches, VCS metadata, local envs, and large artifacts.
+
+# VCS
+.git
+.gitignore
+.gitattributes
+.gitmodules
+
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+.nox/
+.tox/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Packaging/build outputs
+build/
+dist/
+*.egg-info/
+*.whl
+
+# Jupyter / notebooks
+.ipynb_checkpoints/
+
+# IDE/editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Logs and temp
+*.log
+logs/
+tmp/
+temp/
+
+# Node / frontend (if present)
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Docker / CI transient
+**/.docker/
+
+# Large data/artifacts (customize if your project needs these)
+data/
+datasets/
+artifacts/
+outputs/
+results/
+*.parquet
+*.arrow
+*.feather
+*.sqlite
+*.db
+*.bin
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.7z
+*.gz
+
+# Runtime execution outputs for this repo (keep source under runtime/_build)
+runtime/outputs/
+
+# Local secrets
+.env
+.env.*

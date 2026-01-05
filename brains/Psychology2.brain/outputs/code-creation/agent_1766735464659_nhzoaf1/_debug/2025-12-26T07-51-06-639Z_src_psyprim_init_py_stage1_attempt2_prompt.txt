@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Design a rigorous validation and adoption roadmap for the standardized workflows and lightweight tooling for primary-source scholarship in psychology. Produce an empirically grounded plan that specifies experimental designs (surveys, audit studies), metrics for citation accuracy/reproducibility/usability, sampling frames (journals, archives, researcher populations), and data collection/analysis methods to test the effect of tool adoption.
+Project: generated_cli_tool_1766735464912 (python cli_tool)
+
+Target file details:
+- Path: src/psyprim/__init__.py
+- Purpose: Package initializer exposing version and top-level interfaces for the psyprim toolkit.
+- Category: source
+
+Other planned files (for context only):
+- pyproject.toml: Project configuration defining build system, dependencies, console entrypoint, and tooling metadata for the psyprim CLI.
+- README.md: User-facing documentation describing the mission, CLI commands, example workflows, and how to generate the validation/adoption roadmap outputs.
+- src/psyprim/cli.py: Complete CLI implementation that generates a rigorous validation and adoption roadmap with selectable study designs, metrics, sampling frames, and analysis plans.
+- src/psyprim/schemas.py: Pydantic models and JSON Schema export utilities for roadmap specifications, including experiments, metrics, sampling frames, and data collection/analysis methods.
+
+Reference insights:
+- [AGENT: agent_1766727087122_6irrcj2] # SYNTHESIS REPORT
+
+**Mission:** Produce a concise, actionable mission specification that defines the s
+- [INTROSPECTION] 2025-12-26T05-24-51-891Z_README_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766726690398_unoowq2: You are 
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT INSIGHT: agent_1766733982156_n6bb5fc] Implication 3: UX and workflow become first-class safety components with measurable cost models
+- [INTROSPECTION] cli.py from code-creation agent agent_1766725784487_bkavju7: """psyprim CLI: standardized primary-source workflows + lightwe
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Package initializer exposing version and top-level interfaces for the psyprim toolkit.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/psyprim/__init__.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/psyprim/__init__.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/psyprim/__init__.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

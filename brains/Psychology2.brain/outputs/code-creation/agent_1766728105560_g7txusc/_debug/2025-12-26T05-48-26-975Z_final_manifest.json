@@ -1,0 +1,125 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766728105560_g7txusc",
+  "agentType": "code-creation",
+  "goalId": "goal_84",
+  "missionId": "urgent_goal_84_1766728105559",
+  "spawnCycle": 44,
+  "coordinatorReview": null,
+  "spawnedBy": "meta_coordinator_urgent",
+  "triggerSource": "urgent_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T05:48:29.831Z",
+  "completedAt": "2025-12-26T05:50:00.173Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/toy_meta_analysis.py",
+      "description": "Standalone Python script that loads the toy extraction CSV, computes a placeholder pooled estimate, writes a forest plot and summary table into runtime/_build/reports/, logs execution, and exits nonzero if required inputs/outputs are missing.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/toy_meta_analysis.py\nDIR_STATE:[\"scripts/create_meta_analysis_starter_kit.py\", \"scripts/run_artifact_gate.py\", \"scripts/toy_meta_analysis.py\"]\nSUMMARY:Wrote a standalone toy meta-analysis script that validates inputs, computes a fixed-effect pooled estimate, saves a forest plot and summary table, and logs execution with nonzero exit on missing files.\n",
+          "timestamp": "2025-12-26T05:49:03.181Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:scripts/toy_meta_analysis.py\nDIR_STATE:[\"scripts/create_meta_analysis_starter_kit.py\", \"scripts/run_artifact_gate.py\", \"scripts/toy_meta_analysis.py\"]\nSUMMARY: Wrote a standalone toy meta-analysis runner that loads a CSV, computes a fixed-effect pooled RR, saves a forest plot/table, logs execution, and fails fast on missing paths.\n",
+          "timestamp": "2025-12-26T05:49:34.541Z"
+        }
+      ],
+      "createdAt": "2025-12-26T05:48:29.831Z",
+      "failedAt": "2025-12-26T05:49:34.541Z"
+    },
+    {
+      "path": "outputs/goal_2_meta_starter_kit/data/toy_extraction.csv",
+      "description": "Toy meta-analysis extraction CSV with a minimal set of rows/columns needed for the script to compute per-study effects and a pooled estimate.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/goal_2_meta_starter_kit/data/toy_extraction.csv\nDIR_STATE:[\"outputs/goal_2_meta_starter_kit/data/toy_extraction.csv\"]\nSummary: Wrote a toy extraction CSV with five studies and the minimal continuous-outcome fields needed for per-study effects and pooling.\n",
+          "timestamp": "2025-12-26T05:49:42.607Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/goal_2_meta_starter_kit/data/toy_extraction.csv\nDIR_STATE:[\"outputs/goal_2_meta_starter_kit/data/toy_extraction.csv\"]\nSUMMARY: Wrote a minimal toy meta-analysis extraction CSV with per-study effect sizes (yi) and standard errors (sei).\n",
+          "timestamp": "2025-12-26T05:49:50.807Z"
+        }
+      ],
+      "createdAt": "2025-12-26T05:48:29.831Z",
+      "failedAt": "2025-12-26T05:49:50.807Z"
+    },
+    {
+      "path": "runtime/_build/reports/.gitkeep",
+      "description": "Placeholder file to ensure the reports output directory exists in the repository for saving plots, tables, and logs.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runtime/_build/reports/.gitkeep\nDIR_STATE:[\"runtime/_build/reports/.gitkeep\"]\nSUMMARY: Created runtime/_build/reports/.gitkeep to ensure the reports output directory exists for generated artifacts.\n",
+          "timestamp": "2025-12-26T05:49:55.737Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:runtime/_build/reports/.gitkeep\nDIR_STATE:[\"runtime/_build/reports/.gitkeep\"]\nSummary: Created runtime/_build/reports/.gitkeep to keep the reports output directory present for generated artifacts.\n",
+          "timestamp": "2025-12-26T05:50:00.172Z"
+        }
+      ],
+      "createdAt": "2025-12-26T05:48:29.831Z",
+      "failedAt": "2025-12-26T05:50:00.172Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Create a toy CSV + minimal analysis script that (a) loads the CSV, (b) computes a placeholder pooled estimate, (c) saves a forest plot and summary table into runtime/_build/reports/, and (d) writes an execution log; ensure the runner fails if files are missing.",
+  "missionSuccessCriteria": [
+    "Complete the urgent task identified by Meta-Coordinator",
+    "Curated insight (actionability 8-9/10): Turns the meta-analysis starter kit from “templates only” into a verifiable end-to-end demo that produces saved outputs (table + figure) and logs—meeting the deliverables audit requirement and enforci..."
+  ],
+  "projectName": "toy CSV + minimal analysis",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-26T05:50:00.173Z",
+  "summary": {
+    "completed": 0,
+    "failed": 3,
+    "total": 3
+  }
+}

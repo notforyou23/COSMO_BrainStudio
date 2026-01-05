@@ -1,0 +1,55 @@
+name: DOI Fixture Integration
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "**" ]
+  pull_request:
+
+permissions:
+  contents: read
+jobs:
+  doi-fixture-integration:
+    name: DOI fixture integration (non-blocking)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        shell: bash
+        run: |
+          python -m pip install -U pip
+          if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
+          python -m pip install -e . || python -m pip install .
+
+      - name: Run DOI fixture integration test
+        shell: bash
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          python -m pytest -q tests/integration/test_doi_fixture_integration.py
+
+      - name: Upload DOI fixture artifacts (outputs/tools)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: doi-fixture-artifacts-outputs-tools
+          path: outputs/tools/**
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload DOI fixture artifacts (runtime/_build)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: doi-fixture-artifacts-runtime-build
+          path: runtime/_build/**
+          if-no-files-found: warn
+          retention-days: 14

@@ -1,0 +1,183 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766734791215_phr9hf0",
+  "agentType": "code-creation",
+  "goalId": "goal_92",
+  "missionId": "strategic_goal_92_1766734791215",
+  "spawnCycle": 109,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T07:39:57.372Z",
+  "completedAt": "2025-12-26T07:42:51.076Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "scripts/verify_build_artifacts.py",
+      "description": "Single-command deterministic verifier that asserts runtime/_build contains non-empty required outputs (JSON report, CSV table, PNG/PDF figure, and log) and fails with a clear missing-file list.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "ns.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/run_default.py\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_build_artifacts.py\"]\nSUMMARY: Added a single-command deterministic verifier script that checks for required non-empty build artifacts and exits with a clear missing-file list.\n",
+          "timestamp": "2025-12-26T07:40:21.149Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "s/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/run_default.py\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_build_artifacts.py\"]\nSummary: Wrote a single-command verifier script that deterministically checks for required non-empty build artifacts and exits with a clear missing-file list on failure.\n",
+          "timestamp": "2025-12-26T07:40:42.707Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:39:57.372Z",
+      "failedAt": "2025-12-26T07:40:42.707Z"
+    },
+    {
+      "path": "scripts/_artifact_verify_utils.py",
+      "description": "Shared helper utilities for filesystem scanning, size/non-emptiness checks, deterministic ordering, and human-friendly error reporting used by the verifier.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "\"scripts/record_versions.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/run_default.py\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_build_artifacts.py\"]\nSUMMARY: Wrote shared deterministic artifact verification utilities for scanning, non-emptiness checks, and human-friendly failures.\n",
+          "timestamp": "2025-12-26T07:40:59.165Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "/record_versions.py\", \"scripts/run.py\", \"scripts/run_artifact_gate.py\", \"scripts/run_default.py\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_build_artifacts.py\"]\nSUMMARY:Wrote shared deterministic artifact verification utilities for scanning, non-emptiness checks, and clear missing-artifact reporting.\n",
+          "timestamp": "2025-12-26T07:41:21.315Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:39:57.372Z",
+      "failedAt": "2025-12-26T07:41:21.315Z"
+    },
+    {
+      "path": "scripts/verify_build_artifacts.json",
+      "description": "Configuration describing required artifact directories, accepted extensions, and minimum non-empty constraints for the build artifact verifier.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": ", \"scripts/run_artifact_gate.py\", \"scripts/run_default.py\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSUMMARY: Wrote a deterministic JSON configuration specifying required non-empty runtime/_build artifact outputs by directory and extension.\n",
+          "timestamp": "2025-12-26T07:41:35.194Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "un_artifact_gate.py\", \"scripts/run_default.py\", \"scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSummary: Wrote a deterministic JSON configuration defining required artifact directories, extensions, and non-empty constraints for build verification.\n",
+          "timestamp": "2025-12-26T07:41:47.151Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:39:57.372Z",
+      "failedAt": "2025-12-26T07:41:47.151Z"
+    },
+    {
+      "path": "Makefile",
+      "description": "Convenience targets including a single-command entrypoint to run the artifact verification step consistently across environments.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "ity.md\", \"README_build_runner.md\", \"environment.manifest.json\", \"exec_1766734920832_fleeydc.py\", \"protocol_plan.md\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\", \"run_all.py\", \"run_pipeline.py\", \"verify_artifacts.py\", \"verify_build_artifacts.py\"]\nSUMMARY:Wrote a Makefile with a single-command, configurable artifact verification entrypoint via make verify-artifacts (and aliases).\n",
+          "timestamp": "2025-12-26T07:42:00.890Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "EADME_build_runner.md\", \"environment.manifest.json\", \"exec_1766734932099_060m0nm.py\", \"protocol_plan.md\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\", \"run_all.py\", \"run_pipeline.py\", \"verify_artifacts.py\", \"verify_build_artifacts.py\"]\nSummary: Added a Makefile with a single-command 'make verify-artifacts' entrypoint to run the deterministic build artifact verifier consistently.\n",
+          "timestamp": "2025-12-26T07:42:12.153Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:39:57.372Z",
+      "failedAt": "2025-12-26T07:42:12.153Z"
+    },
+    {
+      "path": "README_verify_artifacts.md",
+      "description": "Documentation for running the artifact verifier, interpreting failures, and expected runtime/_build folder structure.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "ts.md\", \"environment.manifest.json\", \"exec_1766734952698_htugbsz.py\", \"protocol_plan.md\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\", \"run_all.py\", \"run_pipeline.py\", \"verify_artifacts.py\", \"verify_build_artifacts.py\"]\nSummary: Wrote concise documentation describing how to run the deterministic artifact verifier, expected runtime/_build structure, and how to interpret failures.\n",
+          "timestamp": "2025-12-26T07:42:32.766Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "ronment.manifest.json\", \"exec_1766734971021_d9i61kg.py\", \"protocol_plan.md\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\", \"run_all.py\", \"run_pipeline.py\", \"verify_artifacts.py\", \"verify_build_artifacts.py\"]\nSUMMARY:Added concise documentation describing how to run the deterministic build artifact verifier, what it checks, expected output structure, and how to interpret failures.\n",
+          "timestamp": "2025-12-26T07:42:51.075Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:39:57.372Z",
+      "failedAt": "2025-12-26T07:42:51.075Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Create a deterministic artifact verification step that asserts runtime/_build contains non-empty required outputs (at minimum: one JSON report in runtime/_build/reports, one CSV table in runtime/_build/tables, one PNG/PDF figure in runtime/_build/figures, and one log in runtime/_build/logs). The verifier should fail with a clear missing-file list and be runnable as a single command.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Even after execution succeeds once, we need an automated gate to prevent returning to the current state where artifacts are absent or scattered."
+  ],
+  "projectName": "deterministic artifact verification step that asserts runtime/_build contains non-empty required outputs (at minimum: one JSON report in runtime/_build/reports, one CSV table in runtime/_build/tables, one PNG/PDF figure in runtime/_build/figures, and one log in runtime/_build/logs). The verifier should fail with a clear missing-file list and be runnable as a single command.",
+  "language": "json",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-26T07:42:51.076Z",
+  "summary": {
+    "completed": 0,
+    "failed": 5,
+    "total": 5
+  }
+}

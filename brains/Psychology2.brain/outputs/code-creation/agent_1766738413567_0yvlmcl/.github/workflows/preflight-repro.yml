@@ -1,0 +1,116 @@
+name: preflight-repro
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "scripts/**"
+      - ".github/workflows/preflight-repro.yml"
+  pull_request:
+    paths:
+      - "scripts/**"
+      - ".github/workflows/preflight-repro.yml"
+
+concurrency:
+  group: preflight-repro-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      PYTHONUNBUFFERED: "1"
+      INCIDENT_DIR: "runtime/_build/incident_reports"
+      BLOCKED_SIGNATURES: ""  # optional: comma-separated list of signatures to hard-fail on match
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Preflight diagnostics (host)
+        shell: bash
+        run: |
+          set -euxo pipefail
+          date -u +"%Y-%m-%dT%H:%M:%SZ"
+          uname -a || true
+          python -VV
+          python -c "import platform,sys,json;print(json.dumps({'python':sys.version,'platform':platform.platform()},indent=2))"
+          df -h || true
+          free -h || true
+          ulimit -a || true
+          ps aux --sort=-%mem | head -n 20 || true
+
+      - name: Ensure Docker is available
+        shell: bash
+        run: |
+          set -euxo pipefail
+          docker version
+          docker info
+          docker ps -a || true
+          docker images || true
+      - name: Run smallest-repro preflight (capture exit + logs)
+        id: preflight
+        shell: bash
+        run: |
+          set +e
+          mkdir -p "${INCIDENT_DIR}"
+          echo "TS_START=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" | tee "${INCIDENT_DIR}/ci_timestamps.txt"
+          echo "::group::preflight_repro.py"
+          python -u scripts/preflight_repro.py 2>&1 | tee "${INCIDENT_DIR}/preflight_stdout_stderr.log"
+          code=${PIPESTATUS[0]}
+          echo "::endgroup::"
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          echo "TS_END=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" | tee -a "${INCIDENT_DIR}/ci_timestamps.txt"
+          echo "PRECHECK_EXIT_CODE=$code" | tee "${INCIDENT_DIR}/preflight_exit_code.txt"
+          exit 0
+
+      - name: Upload incident artifacts (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: incident_reports
+          path: runtime/_build/incident_reports
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Enforce failure on incident signature / nonzero exit
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="${{ steps.preflight.outputs.exit_code }}"
+          echo "preflight exit_code=$code"
+          # Signature scan: collect any signature-like files
+          sig_files=$( (find "${INCIDENT_DIR}" -maxdepth 5 -type f -iname "*signature*" -o -iname "*incident*signature*" 2>/dev/null) | sort || true )
+          if [ -n "${sig_files}" ]; then
+            echo "::group::incident signature files"
+            echo "${sig_files}"
+            for f in ${sig_files}; do
+              echo "--- ${f} ---"
+              sed -n '1,200p' "${f}" || true
+            done
+            echo "::endgroup::"
+          fi
+          # Optional blocklist hard-fail if any blocked signature string appears anywhere in incident dir
+          if [ -n "${BLOCKED_SIGNATURES}" ]; then
+            IFS=',' read -r -a blocked <<< "${BLOCKED_SIGNATURES}"
+            for s in "${blocked[@]}"; do
+              s_trim="$(echo "$s" | xargs)"
+              [ -z "$s_trim" ] && continue
+              if grep -RIn --binary-files=without-match -- "${s_trim}" "${INCIDENT_DIR}" >/dev/null 2>&1; then
+                echo "INCIDENT_BLOCKED_SIGNATURE_MATCH:${s_trim}"
+                exit 98
+              fi
+            done
+          fi
+          if [ "${code}" != "0" ]; then
+            echo "INCIDENT_PREFLIGHT_FAILED_EXIT_CODE:${code}"
+            exit "${code}"
+          fi
+          echo "INCIDENT_PREFLIGHT_OK"

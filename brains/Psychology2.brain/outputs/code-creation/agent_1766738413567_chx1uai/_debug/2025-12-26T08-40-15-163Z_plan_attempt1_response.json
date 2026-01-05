@@ -1,0 +1,37 @@
+{
+  "content": "[\n  {\n    \"path\": \"src/cli_tool/__init__.py\",\n    \"description\": \"Defines the cli_tool package version and exports the canonical public entrypoints used by the runner and CLI.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/cli_tool/cli.py\",\n    \"description\": \"Implements the single canonical Typer-based CLI entrypoint with flags for risk thresholds and claim decomposition toggling and dispatches runs to the unified runner.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/cli_tool/runner.py\",\n    \"description\": \"Implements the single canonical runner that creates one deterministic build directory under runtime/_build/, executes the pipeline, and coordinates structured artifact emission.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/cli_tool/artifacts.py\",\n    \"description\": \"Provides structured artifact writers for logs, run manifest, and decision traces with stable schemas and deterministic file naming in runtime/_build/.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/cli_tool/determinism.py\",\n    \"description\": \"Enforces deterministic constraint checks and run reproducibility by normalizing environment inputs, seeding, hashing configs, and validating invariants preflight.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/cli_tool/schemas.py\",\n    \"description\": \"Defines Pydantic models (or lightweight dataclasses) for run manifest, decision trace events, and risk threshold configuration to ensure structured outputs.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/cli_tool/risk.py\",\n    \"description\": \"Implements risk-threshold evaluation and reporting utilities used by goal_10/goal_12 sweeps and recorded into the decision trace and manifest.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/cli_tool/decomposition.py\",\n    \"description\": \"Implements optional claim decomposition logic with a CLI toggle and emits decomposition steps into the decision trace for sweep comparability.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"tests/test_cli_end_to_end.py\",\n    \"description\": \"End-to-end tests that invoke the CLI to ensure a single build directory is created and that logs, manifest, and decision traces are written deterministically to runtime/_build/ with the new flags.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \"tests/test_determinism_checks.py\",\n    \"description\": \"Unit tests for deterministic constraint checks including stable run_id generation, config hashing, and invariant validation failure modes.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \"README.md\",\n    \"description\": \"Documents the canonical runner usage, artifact layout under runtime/_build/, deterministic guarantees, and CLI flags for risk thresholds and claim decomposition to support goal_10/goal_12 sweeps.\",\n    \"category\": \"documentation\"\n  },\n  {\n    \"path\": \"pyproject.toml\",\n    \"description\": \"Defines the build metadata and console script entrypoint wiring the single canonical runner CLI, plus dependencies for Typer and structured output modeling.\",\n    \"category\": \"config\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_0ae02931e9f78ba000694e49ef364c8190b27a338dcdd07e47",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 592,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 682,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 1274
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "msg_0ae02931e9f78ba000694e49ef75588190b27ade32a8b16790",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"src/cli_tool/__init__.py\",\n    \"description\": \"Defines the cli_tool package version and exports the canonical public entrypoints used by the runner and CLI.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/cli_tool/cli.py\",\n    \"description\": \"Implements the single canonical Typer-based CLI entrypoint with flags for risk thresholds and claim decomposition toggling and dispatches runs to the unified runner.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/cli_tool/runner.py\",\n    \"description\": \"Implements the single canonical runner that creates one deterministic build directory under runtime/_build/, executes the pipeline, and coordinates structured artifact emission.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/cli_tool/artifacts.py\",\n    \"description\": \"Provides structured artifact writers for logs, run manifest, and decision traces with stable schemas and deterministic file naming in runtime/_build/.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/cli_tool/determinism.py\",\n    \"description\": \"Enforces deterministic constraint checks and run reproducibility by normalizing environment inputs, seeding, hashing configs, and validating invariants preflight.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/cli_tool/schemas.py\",\n    \"description\": \"Defines Pydantic models (or lightweight dataclasses) for run manifest, decision trace events, and risk threshold configuration to ensure structured outputs.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/cli_tool/risk.py\",\n    \"description\": \"Implements risk-threshold evaluation and reporting utilities used by goal_10/goal_12 sweeps and recorded into the decision trace and manifest.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"src/cli_tool/decomposition.py\",\n    \"description\": \"Implements optional claim decomposition logic with a CLI toggle and emits decomposition steps into the decision trace for sweep comparability.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"tests/test_cli_end_to_end.py\",\n    \"description\": \"End-to-end tests that invoke the CLI to ensure a single build directory is created and that logs, manifest, and decision traces are written deterministically to runtime/_build/ with the new flags.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \"tests/test_determinism_checks.py\",\n    \"description\": \"Unit tests for deterministic constraint checks including stable run_id generation, config hashing, and invariant validation failure modes.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \"README.md\",\n    \"description\": \"Documents the canonical runner usage, artifact layout under runtime/_build/, deterministic guarantees, and CLI flags for risk thresholds and claim decomposition to support goal_10/goal_12 sweeps.\",\n    \"category\": \"documentation\"\n  },\n  {\n    \"path\": \"pyproject.toml\",\n    \"description\": \"Defines the build metadata and console script entrypoint wiring the single canonical runner CLI, plus dependencies for Typer and structured output modeling.\",\n    \"category\": \"config\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

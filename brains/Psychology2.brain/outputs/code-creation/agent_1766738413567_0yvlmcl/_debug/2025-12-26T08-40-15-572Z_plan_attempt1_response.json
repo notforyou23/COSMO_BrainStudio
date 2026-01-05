@@ -1,0 +1,37 @@
+{
+  "content": "[\n  {\n    \"path\": \"scripts/preflight_repro.py\",\n    \"description\": \"Standalone smallest-repro preflight runner that executes a containerized smoke pipeline with maximal diagnostics (timestamps, resource usage, container logs, exit codes) and fails fast with a deterministic signature while saving artifacts to runtime/_build/incident_reports/.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/incident_harness.py\",\n    \"description\": \"Deterministic repro harness library used by preflight_repro.py to manage incident report directories, collect artifacts (env, versions, docker state, logs), compute signatures, and enforce fast-fail semantics.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/record_versions.py\",\n    \"description\": \"Utility to capture Python/OS/tooling versions and write them as structured JSON for inclusion in incident reports.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"scripts/docker_diagnostics.py\",\n    \"description\": \"Docker-focused diagnostics helpers to capture docker info/ps/images/inspect output, container stats sampling, and log extraction in a consistent, timestamped format.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"docker/preflight/Dockerfile\",\n    \"description\": \"Minimal Docker image that intentionally exercises the suspected failure path in a reproducible way and emits clear stdout/stderr signals for the preflight script to capture.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"docker/preflight/entrypoint.py\",\n    \"description\": \"Container entrypoint that runs a deterministic workload (configurable to trigger failure) while emitting periodic timestamps and resource hints so the host can correlate logs and exit behavior.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"docker/preflight/docker-compose.yml\",\n    \"description\": \"Compose definition for the smallest-repro pipeline with fixed image build context, explicit resource limits, and stable container names for deterministic log and artifact capture.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \".github/workflows/preflight-repro.yml\",\n    \"description\": \"CI workflow that installs Python, ensures Docker availability, runs scripts/preflight_repro.py with verbose diagnostics, uploads runtime/_build/incident_reports/ as artifacts, and fails on signature-matched incidents.\",\n    \"category\": \"config\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_051f2e795a60106200694e49ef9e688194803a7788e285d4d4",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 605,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 502,
+    "output_tokens_details": {
+      "reasoning_tokens": 0
+    },
+    "total_tokens": 1107
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "msg_051f2e795a60106200694e49efdb2c8194903ff021a62f4594",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"scripts/preflight_repro.py\",\n    \"description\": \"Standalone smallest-repro preflight runner that executes a containerized smoke pipeline with maximal diagnostics (timestamps, resource usage, container logs, exit codes) and fails fast with a deterministic signature while saving artifacts to runtime/_build/incident_reports/.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/incident_harness.py\",\n    \"description\": \"Deterministic repro harness library used by preflight_repro.py to manage incident report directories, collect artifacts (env, versions, docker state, logs), compute signatures, and enforce fast-fail semantics.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/record_versions.py\",\n    \"description\": \"Utility to capture Python/OS/tooling versions and write them as structured JSON for inclusion in incident reports.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"scripts/docker_diagnostics.py\",\n    \"description\": \"Docker-focused diagnostics helpers to capture docker info/ps/images/inspect output, container stats sampling, and log extraction in a consistent, timestamped format.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"docker/preflight/Dockerfile\",\n    \"description\": \"Minimal Docker image that intentionally exercises the suspected failure path in a reproducible way and emits clear stdout/stderr signals for the preflight script to capture.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"docker/preflight/entrypoint.py\",\n    \"description\": \"Container entrypoint that runs a deterministic workload (configurable to trigger failure) while emitting periodic timestamps and resource hints so the host can correlate logs and exit behavior.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"docker/preflight/docker-compose.yml\",\n    \"description\": \"Compose definition for the smallest-repro pipeline with fixed image build context, explicit resource limits, and stable container names for deterministic log and artifact capture.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \".github/workflows/preflight-repro.yml\",\n    \"description\": \"CI workflow that installs Python, ensures Docker availability, runs scripts/preflight_repro.py with verbose diagnostics, uploads runtime/_build/incident_reports/ as artifacts, and fails on signature-matched incidents.\",\n    \"category\": \"config\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

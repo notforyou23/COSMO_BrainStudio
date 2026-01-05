@@ -1,0 +1,111 @@
+"""Sample inputs for provenance/page-variant/repository-citation detection demos & tests.
+
+This file is intentionally small and dependency-free; fixtures are plain Python
+objects to simplify downstream loading in unit tests and CLI demos.
+"""
+SAMPLE_CITATION_STRINGS = [
+    # Edition + translation provenance (classic psych primary sources)
+    "Freud, S. (1900/1953). The Interpretation of Dreams (J. Strachey, Trans.). In The Standard Edition of the Complete Psychological Works of Sigmund Freud (Vol. 4–5). London: Hogarth Press.",
+    "Freud, Sigmund. Die Traumdeutung. Leipzig & Wien: Franz Deuticke, 1900.",
+    "James, William. The Principles of Psychology. Vol. I. New York: Henry Holt and Company, 1890.",
+    "James, W. (1890). The Principles of Psychology (Vol. 1, pp. 1–29). New York: Henry Holt.",
+    "Wundt, W. (1874). Grundzüge der physiologischen Psychologie. Leipzig: Wilhelm Engelmann.",
+    "Wundt, Wilhelm. Outlines of Psychology (C. H. Judd, Trans.). Leipzig: Wilhelm Engelmann; New York: G. E. Stechert, 1897.",
+    "Skinner, B. F. (1938). The Behavior of Organisms: An Experimental Analysis. New York: Appleton-Century.",
+    "Ebbinghaus, H. (1885/1913). Memory: A Contribution to Experimental Psychology (H. A. Ruger & C. E. Bussenius, Trans.). New York: Teachers College, Columbia University.",
+
+    # Variant page/paragraph numbering; roman numerals; section anchors
+    "Locke, J. (1690/1975). An Essay Concerning Human Understanding (Book II, Ch. 1, §2). Oxford: Clarendon Press.",
+    "Descartes, R. (1641/1996). Meditations on First Philosophy (J. Cottingham, Trans.), Meditation II, AT VII 25–27.",
+    "Kant, I. (1781/1787). Critique of Pure Reason (A51/B75).",
+
+    # Repository citations (public-domain scans)
+    "Freud, S. (1900). Die Traumdeutung. Leipzig & Wien: Deuticke. https://archive.org/details/dietraumdeutung00freu (accessed 2025-12-01).",
+    "James, William. Principles of Psychology. New York: Henry Holt, 1890. HathiTrust Digital Library, https://hdl.handle.net/2027/uc2.ark:/13960/t0ks6j73v .",
+    "Wundt, W. Grundzüge der physiologischen Psychologie. Leipzig, 1874. Gallica (BnF) ark:/12148/bpt6k1234567x (consulted 2025-11-15).",
+    "Ebbinghaus, H. Memory (1913 trans.). Internet Archive: https://archive.org/details/memorycontributi00ebbiuoft .",
+    "Darwin, C. (1872). The Expression of the Emotions in Man and Animals. Project Gutenberg eBook #1227.",
+    "Wikisource: Plato, Republic. https://en.wikisource.org/wiki/Republic (retrieved 2025-10-10).",
+]
+OCR_SNIPPETS = [
+    # Common OCR confusions useful for heuristics: rn/m, l/I/1, broken hyphenation, ligatures.
+    "FREUD\nDie Traurncleutung\nLeipzig u. Wien\nFranz Deuticke\n1900",
+    "WILLIAM JAMES\nTHE PRINCIPLES OF PSYCHOLOGY\nVOL. I\nNEW YORK\nHENRY HOLT AND COMPANY\n189O",
+    "In the Standard Edition (Strachey, Trans.) vol. 4–5, p. 23 (or 24 in some printings).\n",
+    "Book II, Chap. I, \u00a72.\nPage xvi\n\n1ntroduction\n",
+    "A51/B75\nWe have already seen that...\n",
+    "Meditation II (AT VIl 25)\nI am, I exist...\n",
+    "pp. 113-114\n\nmem-\nory is a\n\ncontribu-\ntion to\n",
+    "HathiTrust\nhttps://hdl.handle.net/2027/uc2.ark:/13960/t0ks6j73v\nRights: Public Domain",
+    "Internet Archive Identifier: dietrraumdeutung00freu\nPossible: dietrAUmdeutung00freu\n",
+]
+REPOSITORY_METADATA_FIXTURES = [
+    {
+        "source": "internet_archive",
+        "item_url": "https://archive.org/details/dietraumdeutung00freu",
+        "identifier": "dietraumdeutung00freu",
+        "title": "Die Traumdeutung",
+        "creator": ["Freud, Sigmund"],
+        "date": "1900",
+        "publisher": "Franz Deuticke",
+        "language": "de",
+        "rights": "Public Domain",
+        "scan_provider": "Internet Archive",
+        "files": [{"name": "dietraumdeutung00freu_text.pdf", "format": "Text PDF"}],
+    },
+    {
+        "source": "hathitrust",
+        "item_url": "https://hdl.handle.net/2027/uc2.ark:/13960/t0ks6j73v",
+        "identifier": "uc2.ark:/13960/t0ks6j73v",
+        "title": "The principles of psychology",
+        "creator": ["James, William"],
+        "date": "1890",
+        "publisher": "Henry Holt and Company",
+        "language": "en",
+        "rights": "Public Domain",
+        "ht_bib_key": "001234567",
+        "volume": "1",
+        "pages": {"reported": "Vol. I", "scan_page_count": 716},
+    },
+    {
+        "source": "gallica_bnf",
+        "item_url": "https://gallica.bnf.fr/ark:/12148/bpt6k1234567x",
+        "identifier": "ark:/12148/bpt6k1234567x",
+        "title": "Grundzuge der physiologischen Psychologie",
+        "creator": ["Wundt, Wilhelm"],
+        "date": "1874",
+        "publisher": "Wilhelm Engelmann",
+        "language": "de",
+        "rights": "Domaine public",
+        "manifest": "https://gallica.bnf.fr/iiif/ark:/12148/bpt6k1234567x/manifest.json",
+    },
+    {
+        "source": "project_gutenberg",
+        "item_url": "https://www.gutenberg.org/ebooks/1227",
+        "identifier": "gutenberg:1227",
+        "title": "The Expression of the Emotions in Man and Animals",
+        "creator": ["Darwin, Charles"],
+        "date": "1872",
+        "language": "en",
+        "rights": "Public Domain in the USA",
+        "formats": ["text/plain", "application/epub+zip"],
+    },
+]
+EDGE_CASES = {
+    "page_variants": [
+        # Same passage referenced in different editions or numbering systems
+        {"cite": "Freud SE Vol. 4, p. 23", "alternate": "p. 24", "note": "reprint pagination shift"},
+        {"cite": "p. xvi", "alternate": "p. 16", "note": "roman numeral to arabic conversion"},
+        {"cite": "A51/B75", "alternate": "A52/B76", "note": "nearby in different printings"},
+        {"cite": "§2", "alternate": "para. 2", "note": "section symbol normalization"},
+    ],
+    "translation_signals": [
+        "Trans.", "Translated by", "Translator", "Übertragen von", "trad.", "tr.", "(Judd, Trans.)"
+    ],
+    "edition_signals": [
+        "2nd ed.", "Second edition", "Auflage", "revised", "rev.", "Standard Edition", "Vol."
+    ],
+    "repository_signals": [
+        "archive.org", "hdl.handle.net", "gallica.bnf.fr/ark:", "gutenberg.org/ebooks", "wikisource.org"
+    ],
+}

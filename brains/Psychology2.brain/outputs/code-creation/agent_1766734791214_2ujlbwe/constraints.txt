@@ -1,0 +1,53 @@
+# constraints.txt
+# Fully pinned dependency constraint set for deterministic installs.
+# Usage:
+#   python -m pip install -r requirements.txt -c constraints.txt
+#
+# Notes:
+# - Pins pip tooling to reduce resolver variability.
+# - Pins common scientific/build deps to prebuilt wheels where possible.
+# - Keep in sync with requirements.txt; prefer adding packages to requirements
+#   and pinning exact versions here.
+# ---- Packaging / installer toolchain ----
+pip==25.0.1
+setuptools==75.8.0
+wheel==0.45.1
+build==1.2.2.post1
+packaging==24.2
+pyproject-hooks==1.2.0
+tomli==2.2.1
+virtualenv==20.28.1
+# ---- Core runtime utilities ----
+certifi==2024.12.14
+charset-normalizer==3.4.1
+idna==3.10
+urllib3==2.3.0
+requests==2.32.3
+PyYAML==6.0.2
+python-dotenv==1.0.1
+click==8.1.8
+tqdm==4.67.1
+rich==13.9.4
+# ---- Date/time, parsing, validation ----
+python-dateutil==2.9.0.post0
+pytz==2024.2
+tzdata==2024.2
+pydantic==2.10.5
+pydantic-core==2.27.2
+annotated-types==0.7.0
+typing-extensions==4.12.2
+# ---- I/O and data formats ----
+orjson==3.10.14
+ujson==5.10.0
+# ---- Scientific stack (pin to stable wheel builds) ----
+numpy==2.2.1
+pandas==2.2.3
+# ---- Testing / diagnostics ----
+pytest==8.3.4
+pluggy==1.5.0
+iniconfig==2.0.0
+exceptiongroup==1.2.2
+coverage==7.6.10
+# ---- CLI / logging helpers ----
+colorama==0.4.6
+loguru==0.7.3

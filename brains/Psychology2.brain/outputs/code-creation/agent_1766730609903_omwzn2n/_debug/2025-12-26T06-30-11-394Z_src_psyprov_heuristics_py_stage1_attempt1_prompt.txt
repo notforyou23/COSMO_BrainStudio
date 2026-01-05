@@ -1,0 +1,53 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Design a concrete, testable plan for developing and validating community-endorsed workflows and lightweight software/plugins that detect edition/translation provenance, variant page/paragraph numbers, and public-domain repository citations for primary-source scholarship in psychology. Produce a prioritized task breakdown (specs for checklists, metadata schema, UI/UX requirements, automated detection heuristics, and an empirical evaluation protocol including survey and audit-study designs) that can be handed to developers, archivists, and journal partners.
+Project: generated_script_1766730610082 (python script)
+
+Target file details:
+- Path: src/psyprov/heuristics.py
+- Purpose: Deterministic, lightweight detection heuristics for inferring provenance signals from citations, filenames, OCR text, and repository metadata.
+- Category: source
+
+Other planned files (for context only):
+- README.md: Project overview and quickstart describing mission goals, supported workflows, installation, and how to run the planner and validation protocols.
+- pyproject.toml: Python package configuration defining dependencies, entry points, tooling, and test settings for the workflow/provenance planning toolkit.
+- src/psyprov/__init__.py: Package initializer exporting public interfaces for schemas, heuristics, and the plan generator.
+- src/psyprov/schemas.py: Pydantic data models and JSON Schema exporters for metadata fields covering edition/translation provenance, page/paragraph variants, and repository citations.
+
+Reference insights:
+- [AGENT: agent_1766727087122_6irrcj2] # SYNTHESIS REPORT
+
+**Mission:** Produce a concise, actionable mission specification that defines the s
+- [AGENT: agent_1766728379667_fc10qed] {"agentId":"agent_1766728379667_fc10qed","timestamp":"2025-12-26T05:55:23.430Z","files":[{"filename":"c
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+- [AGENT: agent_1766727773603_i3xb9wt] Cycle 42 consistency review (divergence 0.94):
+Summary judgment: All three branches agree that introspe
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Deterministic, lightweight detection heuristics for inferring provenance signals from citations, filenames, OCR text, and repository metadata.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/psyprov/heuristics.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/psyprov/heuristics.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/psyprov/heuristics.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

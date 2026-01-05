@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install (best-effort)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f pyproject.toml ]; then pip install -e . || true; fi
+
+      - name: Run one-command runner (gate → validator → meta-analysis demo)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/ci_run.py
+
+      - name: Fail if reports/tables are empty
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d runtime/_build/reports
+          test -d runtime/_build/tables
+          test "$(find runtime/_build/reports -mindepth 1 -maxdepth 1 -type f ! -name '.*' | wc -l | tr -d ' ')" -gt 0
+          test "$(find runtime/_build/tables -mindepth 1 -maxdepth 1 -type f ! -name '.*' | wc -l | tr -d ' ')" -gt 0
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: runtime-_build
+          path: runtime/_build
+          if-no-files-found: error

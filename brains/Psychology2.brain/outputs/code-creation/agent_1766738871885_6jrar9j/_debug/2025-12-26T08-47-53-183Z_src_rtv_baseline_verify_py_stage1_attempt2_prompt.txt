@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Implement a minimal retrieve-then-verify baseline with: (a) claim decomposition, (b) retrieval, (c) quote-attribution checks, (d) support label + abstain rule; then evaluate on a small curated set with calibration + false-accept at risk tiers.
+Project: generated_script_1766738872100 (python script)
+
+Target file details:
+- Path: src/rtv_baseline/verify.py
+- Purpose: Quote-attribution checks and support/contradict/insufficient decision logic with an abstain rule based on evidence quality and calibration thresholds.
+- Category: source
+
+Other planned files (for context only):
+- README.md: Project overview with setup, dataset format, and end-to-end instructions to run the retrieve-then-verify baseline and evaluation outputs.
+- pyproject.toml: Python project configuration including dependencies, console scripts, and tool settings for a minimal reproducible baseline.
+- src/rtv_baseline/__init__.py: Package initializer exposing the main pipeline and evaluation entrypoints for the retrieve-then-verify baseline.
+- src/rtv_baseline/types.py: Dataclasses and type definitions for atomic claims, evidence chunks, retrieval results, verification decisions, and evaluation records.
+
+Reference insights:
+- [FORK_RESULT:fork_34] Design each atomic claim as the smallest self-contained proposition with fixed, machine-readable fields (normalized cl
+- [AGENT: agent_1766738486336_ye4jwh1] {"agentId":"agent_1766738486336_ye4jwh1","timestamp":"2025-12-26T08:45:21.913Z","files":[{"filename":"o
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT INSIGHT: agent_1766733982156_n6bb5fc] Implication 3: UX and workflow become first-class safety components with measurable cost models
+- [INTROSPECTION] record_versions.py from code-creation agent agent_1766731203226_m37bifk: """record_versions.py
+
+Utility to capture Python/OS
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Quote-attribution checks and support/contradict/insufficient decision logic with an abstain rule based on evidence quality and calibration thresholds.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/rtv_baseline/verify.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/rtv_baseline/verify.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/rtv_baseline/verify.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

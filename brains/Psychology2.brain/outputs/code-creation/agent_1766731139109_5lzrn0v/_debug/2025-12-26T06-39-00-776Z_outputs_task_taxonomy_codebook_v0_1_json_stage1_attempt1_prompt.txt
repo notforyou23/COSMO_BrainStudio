@@ -1,0 +1,50 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Consolidate agent-produced outputs currently living in agent-specific directories (e.g., code-creation/.../outputs/task_taxonomy_codebook_v0.1.json and related schema/example files) into the single canonical /outputs scaffold, update CHANGELOG, and ensure the artifact gate checks these exact canonical paths.
+Project: generated_script_1766731139344 (json script)
+
+Target file details:
+- Path: outputs/task_taxonomy_codebook_v0.1.json
+- Purpose: Canonical consolidated task taxonomy codebook artifact JSON produced by agents, placed under the single outputs/ scaffold for gating and downstream use.
+- Category: support
+
+Other planned files (for context only):
+- scripts/consolidate_outputs.py: Python script that finds agent-specific output artifacts (e.g., code-creation/**/outputs/*), consolidates them into the canonical outputs/ scaffold, and optionally updates CHANGELOG.md while preserving existing canonical files deterministically.
+- scripts/check_artifact_gate.py: Standalone artifact gate checker that validates the required canonical output paths exist and match expectations defined in config/artifact_gate_paths.json, exiting nonzero on any mismatch.
+- config/artifact_gate_paths.json: Canonical allowlist of required artifact file paths under outputs/ used by the artifact gate checker to enforce exact locations.
+- outputs/task_taxonomy_codebook_schema_v0.1.json: JSON Schema for outputs/task_taxonomy_codebook_v0.1.json to enable validation and ensure consistent structure for artifact gate and consumers.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-26T05-01-46-647Z_outputs_CHANGELOG_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766725305310_fqd4vp
+- [AGENT: agent_1766728379667_fc10qed] {"agentId":"agent_1766728379667_fc10qed","timestamp":"2025-12-26T05:55:23.430Z","files":[{"filename":"c
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [AGENT: agent_1766729445747_n3o9cbv] {"agentId":"agent_1766729445747_n3o9cbv","timestamp":"2025-12-26T06:12:09.374Z","files":[{"filename":"v
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Canonical consolidated task taxonomy codebook artifact JSON produced by agents, placed under the single outputs/ scaffold for gating and downstream use.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/task_taxonomy_codebook_v0.1.json')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/task_taxonomy_codebook_v0.1.json')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/task_taxonomy_codebook_v0.1.json.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

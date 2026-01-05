@@ -1,0 +1,40 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add a lightweight artifact verifier that asserts existence + non-emptiness (file size > 0) for runtime/_build/logs/run.log, runtime/_build/manifest.json, runtime/_build/validation/taxonomy_report.json, and runtime/_build/meta_analysis/summary_table.csv and forest_plot.png, and write runtime/_build/verification_report.json. This addresses the audit gap of 0 test/execution results by turning outputs into a pass/fail contract.
+Project: generated_script_1766736348008 (json script)
+
+Target file details:
+- Path: scripts/verify_artifacts.py
+- Purpose: Standalone verifier script that checks required runtime/_build artifacts exist and are non-empty, then writes runtime/_build/verification_report.json with pass/fail status and per-artifact details.
+- Category: source
+
+Reference insights:
+- [CONSOLIDATED] Standardize build verification by running the required validation tools against the current artifacts and persist both raw co
+- [AGENT: agent_1766731203226_m37bifk] {"agentId":"agent_1766731203226_m37bifk","timestamp":"2025-12-26T06:49:35.087Z","files":[{"filename":".
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT INSIGHT: agent_1766733982156_n6bb5fc] Implication 3: UX and workflow become first-class safety components with measurable cost models
+- [AGENT: agent_1766727087123_i8o4pex] {"agentId":"agent_1766727087123_i8o4pex","timestamp":"2025-12-26T05:38:24.080Z","files":[{"filename":"_
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Standalone verifier script that checks required runtime/_build artifacts exist and are non-empty, then writes runtime/_build/verification_report.json with pass/fail status and per-artifact details.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/verify_artifacts.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/verify_artifacts.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/verify_artifacts.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

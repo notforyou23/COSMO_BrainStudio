@@ -1,0 +1,54 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create an automated 'one-command' build runner that sequentially executes: artifact gate, taxonomy validation, and the toy meta-analysis demo; ensure it writes all logs/outputs into _build/ and fails fast on errors.
+Project: an automated 'one-command' build runner that sequentially executes: artifact gate, taxonomy validation, and the toy meta-analysis demo; ensure it writes all logs/outputs into _build/ and fails fast on errors. (python script)
+
+Target file details:
+- Path: scripts/logging_utils.py
+- Purpose: Structured logging and output-capture utilities that tee subprocess stdout/stderr to both console and _build/ log files with timestamps and step prefixes.
+- Category: support
+
+Other planned files (for context only):
+- scripts/build_runner.py: One-command build runner CLI that sequentially executes artifact gate, taxonomy validation, and the toy meta-analysis demo, writing all logs/outputs into _build/ and failing fast on any error.
+- scripts/build_steps.py: Step implementations and helpers for invoking the artifact gate, taxonomy validation, and meta-analysis demo as subprocesses with consistent logging, output capture, and _build/ directory management.
+- scripts/path_utils.py: Path and filesystem utilities to create, clean, and resolve project-relative build output locations under _build/ in a cross-platform manner.
+- scripts/README_build_runner.md: Documentation for running the one-command build runner, including expected prerequisites, command examples, outputs in _build/, and troubleshooting.
+
+Reference insights:
+- [CONSOLIDATED] Standardize build verification by running the required validation tools against the current artifacts and persist both raw co
+- [CONSOLIDATED] Build a reproducible meta-analysis “starter kit” that standardizes inputs (templates/schemas), runs an automated end-to-end p
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+- [AGENT: agent_1766727773603_i3xb9wt] Cycle 42 consistency review (divergence 0.94):
+Summary judgment: All three branches agree that introspe
+
+Key requirements:
+- examples
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Structured logging and output-capture utilities that tee subprocess stdout/stderr to both console and _build/ log files with timestamps and step prefixes.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/logging_utils.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/logging_utils.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/logging_utils.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/schemas/meta_analysis_input.schema.json",
+  "title": "Meta-analysis input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "studies"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Version string for this input format (e.g., '1.0').",
+      "minLength": 1
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Optional descriptive metadata for the dataset.",
+      "additionalProperties": true,
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "created_utc": { "type": "string", "format": "date-time" },
+        "source": { "type": "string" },
+        "doi": { "type": "string" }
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "description": "Optional analysis settings; the pipeline may ignore some fields.",
+      "additionalProperties": false,
+      "properties": {
+        "model": {
+          "type": "string",
+          "enum": ["fixed", "random"],
+          "description": "Meta-analytic model type."
+        },
+        "effect_measure": {
+          "type": "string",
+          "description": "Name of the effect size metric (e.g., 'SMD', 'logOR', 'r')."
+        },
+        "method": {
+          "type": "string",
+          "description": "Estimator / method name (e.g., 'DL', 'REML')."
+        },
+        "tau2": {
+          "type": "number",
+          "description": "Optional pre-specified between-study variance for random-effects."
+        }
+      }
+    },
+    "studies": {
+      "type": "array",
+      "description": "List of study-level effect sizes to meta-analyze.",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/study" }
+    }
+  },
+  "$defs": {
+    "study": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["study_id", "effect"],
+      "properties": {
+        "study_id": {
+          "type": "string",
+          "description": "Unique study identifier within this dataset.",
+          "minLength": 1
+        },
+        "label": {
+          "type": "string",
+          "description": "Human-readable label or citation."
+        },
+        "year": {
+          "type": "integer",
+          "minimum": 1500,
+          "maximum": 3000
+        },
+        "effect": {
+          "description": "Effect size summary and its uncertainty; provide standard_error or variance.",
+          "oneOf": [
+            { "$ref": "#/$defs/effect_with_se" },
+            { "$ref": "#/$defs/effect_with_var" }
+          ]
+        },
+        "sample_size": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Optional total sample size for the study/effect."
+        },
+        "moderators": {
+          "type": "object",
+          "description": "Optional moderator variables (values may be string/number/boolean/null).",
+          "additionalProperties": {
+            "anyOf": [
+              { "type": "string" },
+              { "type": "number" },
+              { "type": "boolean" },
+              { "type": "null" }
+            ]
+          }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "effect_base": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["effect_size"],
+      "properties": {
+        "effect_size": {
+          "type": "number",
+          "description": "Study-level effect size (e.g., SMD, logOR, Fisher-z)."
+        },
+        "ci_lower": {
+          "type": "number",
+          "description": "Optional lower confidence interval bound on the same scale as effect_size."
+        },
+        "ci_upper": {
+          "type": "number",
+          "description": "Optional upper confidence interval bound on the same scale as effect_size."
+        },
+        "weight": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Optional user-supplied weight (non-negative)."
+        }
+      }
+    },
+    "effect_with_se": {
+      "allOf": [
+        { "$ref": "#/$defs/effect_base" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["standard_error"],
+          "properties": {
+            "effect_size": { "type": "number" },
+            "ci_lower": { "type": "number" },
+            "ci_upper": { "type": "number" },
+            "weight": { "type": "number", "minimum": 0 },
+            "standard_error": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Standard error of effect_size."
+            }
+          }
+        }
+      ]
+    },
+    "effect_with_var": {
+      "allOf": [
+        { "$ref": "#/$defs/effect_base" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["variance"],
+          "properties": {
+            "effect_size": { "type": "number" },
+            "ci_lower": { "type": "number" },
+            "ci_upper": { "type": "number" },
+            "weight": { "type": "number", "minimum": 0 },
+            "variance": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Sampling variance of effect_size (SE^2)."
+            }
+          }
+        }
+      ]
+    }
+  }
+}

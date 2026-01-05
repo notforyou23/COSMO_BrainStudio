@@ -531,7 +531,28 @@ class ToolExecutor {
   }
 
   resolvePath(inputPath) {
-    if (path.isAbsolute(inputPath)) return inputPath;
+    if (!inputPath) return this.cwd;
+    
+    // Normalize path to prevent traversal
+    const normalizedInput = path.normalize(inputPath);
+    
+    // Prevent common path traversal patterns even if normalized
+    if (normalizedInput.includes('..') || normalizedInput.startsWith('/') || normalizedInput.startsWith('~')) {
+      // In standalone mode, we strictly limit to the current brain directory
+      // We strip the dangerous parts and join with cwd
+      const safePath = normalizedInput.replace(/^(\.\.[\/\\])+/, '').replace(/^[\/\\]+/, '');
+      return path.join(this.cwd, safePath);
+    }
+
+    if (path.isAbsolute(inputPath)) {
+      // Even absolute paths must be children of this.cwd
+      if (!inputPath.startsWith(this.cwd)) {
+        const safePath = path.basename(inputPath);
+        return path.join(this.cwd, safePath);
+      }
+      return inputPath;
+    }
+    
     if (inputPath === '.') return this.cwd;
     return path.join(this.cwd, inputPath);
   }

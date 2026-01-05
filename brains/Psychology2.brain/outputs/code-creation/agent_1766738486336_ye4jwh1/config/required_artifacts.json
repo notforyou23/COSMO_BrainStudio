@@ -1,0 +1,26 @@
+{
+  "defaults": {
+    "allow_directories": false,
+    "min_size_bytes": 1
+  },
+  "description": "Required build artifacts verified by scripts/verify_artifacts.py. Patterns are evaluated relative to repo root.",
+  "optional": [
+    {
+      "description": "Build logs (optional).",
+      "min_size_bytes": 1,
+      "name": "build_logs",
+      "pattern": "runtime/_build/*.log",
+      "type": "file"
+    }
+  ],
+  "required": [
+    {
+      "description": "Environment/version capture emitted during build.",
+      "min_size_bytes": 20,
+      "name": "build_versions",
+      "pattern": "runtime/_build/versions.json",
+      "type": "file"
+    }
+  ],
+  "schema_version": 1
+}

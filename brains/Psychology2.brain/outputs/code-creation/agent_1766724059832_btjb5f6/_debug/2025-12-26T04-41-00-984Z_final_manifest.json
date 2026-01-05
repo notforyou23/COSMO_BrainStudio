@@ -1,0 +1,386 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766724059832_btjb5f6",
+  "agentType": "code-creation",
+  "goalId": "goal_6",
+  "missionId": "urgent_goal_6_1766724059831",
+  "spawnCycle": 3,
+  "coordinatorReview": null,
+  "spawnedBy": "meta_coordinator_urgent",
+  "triggerSource": "urgent_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T04:41:09.294Z",
+  "completedAt": "2025-12-26T04:51:22.988Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "outputs/task_taxonomy_codebook_v0.1.json",
+      "description": "Versioned task taxonomy codebook defining categories, labels, descriptions, constraints, and allowed values for annotation.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/task_taxonomy_codebook_v0.1.json\nDIR_STATE:[\"outputs/task_taxonomy_codebook_v0.1.json\"]\nSummary: Wrote task_taxonomy_codebook_v0.1 JSON codebook defining task taxonomy, label sets, and annotation field constraints for v0.1.\n",
+          "timestamp": "2025-12-26T04:41:54.162Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/task_taxonomy_codebook_v0.1.json\nDIR_STATE:[\"outputs/task_taxonomy_codebook_v0.1.json\"]\nSummary: Wrote v0.1 task taxonomy codebook JSON defining annotation fields, validation rules, and allowed task categories.\n",
+          "timestamp": "2025-12-26T04:42:28.836Z"
+        }
+      ],
+      "createdAt": "2025-12-26T04:41:09.293Z",
+      "failedAt": "2025-12-26T04:42:28.836Z"
+    },
+    {
+      "path": "outputs/annotation_schema_v0.1.json",
+      "description": "JSON Schema specifying the required fields, types, and category constraints for the simple annotation format.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/annotation_schema_v0.1.json\nDIR_STATE:[\"outputs/annotation_schema_v0.1.json\", \"outputs/task_taxonomy_codebook_v0.1.json\"]\nWrote a JSON Schema v0.1 defining required annotation fields and constrained category enums for task taxonomy labeling.\n",
+          "timestamp": "2025-12-26T04:42:57.569Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/annotation_schema_v0.1.json\nDIR_STATE:[\"outputs/annotation_schema_v0.1.json\", \"outputs/task_taxonomy_codebook_v0.1.json\"]\nSummary: Wrote a JSON Schema v0.1 defining required annotation fields and structural/category key constraints for task taxonomy labeling.\n",
+          "timestamp": "2025-12-26T04:43:24.667Z"
+        }
+      ],
+      "createdAt": "2025-12-26T04:41:09.293Z",
+      "failedAt": "2025-12-26T04:43:24.667Z"
+    },
+    {
+      "path": "outputs/annotation_example_v0.1.jsonl",
+      "description": "Small JSONL file containing example annotation records that conform to the schema and codebook.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/annotation_example_v0.1.jsonl\nDIR_STATE:[\"outputs/annotation_example_v0.1.jsonl\", \"outputs/annotation_schema_v0.1.json\", \"outputs/task_taxonomy_codebook_v0.1.json\"]\nSUMMARY:Wrote a small JSONL example annotation file with multiple task categories and required metadata fields for v0.1.\n",
+          "timestamp": "2025-12-26T04:43:50.473Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:outputs/annotation_example_v0.1.jsonl\nDIR_STATE:[\"outputs/annotation_example_v0.1.jsonl\", \"outputs/annotation_schema_v0.1.json\", \"outputs/task_taxonomy_codebook_v0.1.json\"]\nSummary: Wrote a compact JSONL file of diverse example annotation records aligned to a simple task taxonomy format for v0.1.\n",
+          "timestamp": "2025-12-26T04:44:18.438Z"
+        }
+      ],
+      "createdAt": "2025-12-26T04:41:09.293Z",
+      "failedAt": "2025-12-26T04:44:18.438Z"
+    },
+    {
+      "path": "src/validator.py",
+      "description": "Command-line validator that loads the schema and codebook, validates annotation JSON/JSONL/CSV inputs, and reports required-field and constraint violations.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/validator.py\nDIR_STATE:[\"src/api_server.py\", \"src/discovery.py\", \"src/validator.py\"]\nSummary: Wrote a CLI validator that reads JSON/JSONL/CSV annotations and checks required fields, basic types/enums, and codebook allowed-value constraints.\n",
+          "timestamp": "2025-12-26T04:44:49.686Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/validator.py\nDIR_STATE:[\"src/api_server.py\", \"src/discovery.py\", \"src/models.py\", \"src/validator.py\"]\nSummary: Implemented a CLI validator that reads JSON/JSONL/CSV annotations and checks required fields, basic types/enums, and taxonomy allowed-value constraints from schema+codebook.\n",
+          "timestamp": "2025-12-26T04:45:23.123Z"
+        }
+      ],
+      "createdAt": "2025-12-26T04:41:09.293Z",
+      "failedAt": "2025-12-26T04:45:23.123Z"
+    },
+    {
+      "path": "src/io_utils.py",
+      "description": "Input/output helpers for reading JSON, JSONL, and CSV annotations and normalizing records for validation.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T04:45:25.170Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/io_utils.py\nDIR_STATE:[\"src/api_server.py\", \"src/discovery.py\", \"src/io_utils.py\", \"src/models.py\", \"src/storage.py\", \"src/validator.py\"]\nSUMMARY: Implemented io_utils helpers to read/normalize JSON, JSONL, and CSV annotation records for downstream validation.\n",
+          "timestamp": "2025-12-26T04:45:45.252Z"
+        }
+      ],
+      "createdAt": "2025-12-26T04:41:09.293Z",
+      "failedAt": "2025-12-26T04:45:45.252Z"
+    },
+    {
+      "path": "src/codebook.py",
+      "description": "Codebook loader and constraint engine that enforces taxonomy category membership, cross-field rules, and version compatibility checks.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/codebook.py\nDIR_STATE:[\"src/api_server.py\", \"src/codebook.py\", \"src/discovery.py\", \"src/io_utils.py\", \"src/models.py\", \"src/storage.py\", \"src/validator.py\"]\nSUMMARY: Implemented a compact codebook loader and constraint engine with category membership, cross-field rules, and version compatibility checks.\n",
+          "timestamp": "2025-12-26T04:46:19.487Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/codebook.py\nDIR_STATE:[\"src/api_server.py\", \"src/codebook.py\", \"src/discovery.py\", \"src/io_utils.py\", \"src/logging_utils.py\", \"src/models.py\", \"src/storage.py\", \"src/validator.py\"]\nSummary: Implemented a compact Codebook loader with version compatibility checks and per-record constraint validation including categories and cross-field rules.\n",
+          "timestamp": "2025-12-26T04:46:51.370Z"
+        }
+      ],
+      "createdAt": "2025-12-26T04:41:09.293Z",
+      "failedAt": "2025-12-26T04:46:51.370Z"
+    },
+    {
+      "path": "src/schema_utils.py",
+      "description": "JSON Schema loader and validation utilities with friendly error formatting and support for local schema references.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/schema_utils.py\nDIR_STATE:[\"src/api_server.py\", \"src/codebook.py\", \"src/config.py\", \"src/discovery.py\", \"src/io_utils.py\", \"src/logging_utils.py\", \"src/models.py\", \"src/schema_utils.py\", \"src/storage.py\", \"src/validator.py\"]\nSUMMARY: Added JSON Schema loading and validation utilities with local $ref resolution and friendly error formatting.\n",
+          "timestamp": "2025-12-26T04:47:14.833Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T04:47:35.159Z"
+        }
+      ],
+      "createdAt": "2025-12-26T04:41:09.293Z",
+      "failedAt": "2025-12-26T04:47:35.159Z"
+    },
+    {
+      "path": "tests/test_validator_smoke.py",
+      "description": "Smoke tests that run the validator on valid and invalid fixtures to ensure required fields and category constraints are enforced.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T04:48:12.403Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/test_validator_smoke.py\nDIR_STATE:[\"tests/test_validator_smoke.py\"]\nSummary: Added pytest smoke tests that invoke the validator on a valid example and two invalid cases to enforce required fields and enum/category constraints.\n",
+          "timestamp": "2025-12-26T04:48:43.277Z"
+        }
+      ],
+      "createdAt": "2025-12-26T04:41:09.293Z",
+      "failedAt": "2025-12-26T04:48:43.277Z"
+    },
+    {
+      "path": "tests/fixtures/valid_annotations.jsonl",
+      "description": "Test fixture containing valid JSONL annotations covering multiple taxonomy categories and edge cases.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/fixtures/valid_annotations.jsonl\nDIR_STATE:[\"tests/fixtures/valid_annotations.jsonl\"]\nSUMMARY:Wrote a valid JSONL test fixture with diverse task annotations spanning multiple taxonomy categories and edge cases.\n",
+          "timestamp": "2025-12-26T04:49:12.555Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/fixtures/valid_annotations.jsonl\nDIR_STATE:[\"tests/fixtures/valid_annotations.jsonl\"]\nSummary: Wrote a valid JSONL annotation fixture spanning multiple task taxonomy categories and edge-case content.\n",
+          "timestamp": "2025-12-26T04:49:41.166Z"
+        }
+      ],
+      "createdAt": "2025-12-26T04:41:09.293Z",
+      "failedAt": "2025-12-26T04:49:41.166Z"
+    },
+    {
+      "path": "tests/fixtures/invalid_annotations.jsonl",
+      "description": "Test fixture containing invalid JSONL annotations designed to trigger missing required fields and category constraint errors.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/fixtures/invalid_annotations.jsonl\nDIR_STATE:[\"tests/fixtures/invalid_annotations.jsonl\", \"tests/fixtures/valid_annotations.jsonl\"]\nSUMMARY: Wrote an invalid JSONL annotation fixture containing missing required fields and category/constraint violations for validator tests.\n",
+          "timestamp": "2025-12-26T04:50:00.173Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:tests/fixtures/invalid_annotations.jsonl\nDIR_STATE:[\"tests/fixtures/invalid_annotations.jsonl\", \"tests/fixtures/valid_annotations.jsonl\"]\nSUMMARY:Wrote an invalid-annotations JSONL fixture with missing required fields and category/constraint violations for validator testing.\n",
+          "timestamp": "2025-12-26T04:50:16.809Z"
+        }
+      ],
+      "createdAt": "2025-12-26T04:41:09.293Z",
+      "failedAt": "2025-12-26T04:50:16.809Z"
+    },
+    {
+      "path": "README.md",
+      "description": "Project documentation explaining the taxonomy/codebook, annotation format, and how to run the validator with examples.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T04:50:39.841Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T04:51:03.351Z"
+        }
+      ],
+      "createdAt": "2025-12-26T04:41:09.293Z",
+      "failedAt": "2025-12-26T04:51:03.351Z"
+    },
+    {
+      "path": "pyproject.toml",
+      "description": "Python project configuration declaring dependencies and entry points for running the validator script.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T04:51:13.099Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T04:51:22.988Z"
+        }
+      ],
+      "createdAt": "2025-12-26T04:41:09.293Z",
+      "failedAt": "2025-12-26T04:51:22.988Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Create a task taxonomy codebook v0.1 artifact in /outputs plus a simple annotation format (e.g., JSON/CSV schema) and validator script that checks required fields and category constraints.",
+  "missionSuccessCriteria": [
+    "Complete the urgent task identified by Meta-Coordinator",
+    "goal_2 depends on a taxonomy, but no documents or schemas exist; a code-enforced schema prevents drift and enables multi-annotator consistency checks."
+  ],
+  "projectName": "task taxonomy codebook v0.1 artifact in /outputs plus a simple annotation format (e.g., JSON/CSV schema) and validator",
+  "language": "json",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-26T04:51:22.989Z",
+  "summary": {
+    "completed": 0,
+    "failed": 12,
+    "total": 12
+  }
+}

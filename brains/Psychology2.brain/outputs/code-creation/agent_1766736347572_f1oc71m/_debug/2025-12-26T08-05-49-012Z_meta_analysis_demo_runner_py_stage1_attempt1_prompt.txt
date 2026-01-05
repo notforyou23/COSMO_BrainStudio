@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add a toy CSV input and a single command demo script (e.g., meta_analysis/demo_runner.py) that writes fixed filenames to runtime/_build/tables/pooled_estimates.csv and runtime/_build/figures/forest_plot.png, plus a run metadata JSON in runtime/_build/reports/demo_run.json.
+Project: generated_script_1766736347811 (python script)
+
+Target file details:
+- Path: meta_analysis/demo_runner.py
+- Purpose: Single-command demo script that reads the toy CSV and writes pooled estimates CSV, forest plot PNG, and run metadata JSON to the required runtime/_build paths.
+- Category: source
+
+Other planned files (for context only):
+- meta_analysis/data/toy_effects.csv: Toy CSV input dataset with a few studies and effect size columns to drive the demo end-to-end.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-26T05-48-26-975Z_runtime_build_reports_gitkeep_stage1_attempt1_prompt.txt from code-creation agent agent_17667281055
+- [INTROSPECTION] 2025-12-26T05-48-26-975Z_runtime_build_reports_gitkeep_stage1_attempt2_prompt.txt from code-creation agent agent_17667281055
+- [AGENT: agent_1766731203226_m37bifk] {"agentId":"agent_1766731203226_m37bifk","timestamp":"2025-12-26T06:49:35.087Z","files":[{"filename":".
+- [INTROSPECTION] 2025-12-26T05-48-26-975Z_outputs_goal_2_meta_starter_kit_data_toy_extraction_csv_stage1_attempt1_prompt.txt from code-creati
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+
+Key requirements:
+- examples
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Single-command demo script that reads the toy CSV and writes pooled estimates CSV, forest plot PNG, and run metadata JSON to the required runtime/_build paths.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('meta_analysis/demo_runner.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:meta_analysis/demo_runner.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside meta_analysis/demo_runner.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

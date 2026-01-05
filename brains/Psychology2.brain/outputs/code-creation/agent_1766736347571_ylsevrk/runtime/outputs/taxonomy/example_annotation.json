@@ -1,0 +1,156 @@
+{
+  "schema": {
+    "name": "runtime/outputs/taxonomy/annotation.schema.json",
+    "version": "1.0.0"
+  },
+  "taxonomy": {
+    "path": "runtime/outputs/taxonomy/taxonomy.json",
+    "version": "1.0.0"
+  },
+  "annotation_id": "ann_2025-12-26_example_0001",
+  "created_at": "2025-12-26T00:00:00Z",
+  "created_by": {
+    "agent_id": "agent_example",
+    "tool": "manual_example",
+    "source": "runtime/outputs scaffold canonical example"
+  },
+  "document": {
+    "doc_id": "doc_example_0001",
+    "title": "Behavioral intervention vignette (example)",
+    "source_type": "synthetic",
+    "language": "en",
+    "text": "We ran an experiment to increase timely bill payment. Customers were randomly assigned to receive either (A) a reminder letter that framed paying on time as the default option and highlighted that most neighbors pay on time, or (B) a standard reminder. The intervention reduced late payments by 6% without changing fees. We collected outcomes from billing records and surveyed satisfaction one week later."
+  },
+  "unit_of_annotation": "span",
+  "annotations": [
+    {
+      "annotation_type": "intervention",
+      "id": "a1",
+      "label_path": [
+        "intervention",
+        "choice_architecture",
+        "defaults"
+      ],
+      "text_span": {
+        "start_char": 112,
+        "end_char": 165,
+        "exact_text": "framed paying on time as the default option"
+      },
+      "attributes": {
+        "mechanism": "default effect / inertia",
+        "delivery_channel": "letter",
+        "population_unit": "customer"
+      },
+      "evidence": {
+        "quote": "framed paying on time as the default option",
+        "rationale": "The letter explicitly frames the desired action as the default, which is a standard default nudge."
+      },
+      "confidence": 0.93
+    },
+    {
+      "annotation_type": "intervention",
+      "id": "a2",
+      "label_path": [
+        "intervention",
+        "social_influence",
+        "social_norms"
+      ],
+      "text_span": {
+        "start_char": 180,
+        "end_char": 220,
+        "exact_text": "highlighted that most neighbors pay on time"
+      },
+      "attributes": {
+        "norm_type": "descriptive",
+        "reference_group": "neighbors",
+        "delivery_channel": "letter"
+      },
+      "evidence": {
+        "quote": "most neighbors pay on time",
+        "rationale": "This is a descriptive norm message indicating typical behavior in a peer group."
+      },
+      "confidence": 0.9
+    },
+    {
+      "annotation_type": "design",
+      "id": "a3",
+      "label_path": [
+        "study_design",
+        "randomized_controlled_trial"
+      ],
+      "text_span": {
+        "start_char": 63,
+        "end_char": 99,
+        "exact_text": "Customers were randomly assigned"
+      },
+      "attributes": {
+        "assignment_unit": "customer",
+        "arms": [
+          "treatment_letter_nudge",
+          "control_standard_reminder"
+        ]
+      },
+      "evidence": {
+        "quote": "randomly assigned",
+        "rationale": "Random assignment indicates an RCT-style experimental design."
+      },
+      "confidence": 0.88
+    },
+    {
+      "annotation_type": "outcome",
+      "id": "a4",
+      "label_path": [
+        "outcome",
+        "behavioral",
+        "timely_payment"
+      ],
+      "text_span": {
+        "start_char": 269,
+        "end_char": 305,
+        "exact_text": "reduced late payments by 6%"
+      },
+      "attributes": {
+        "direction": "improved",
+        "effect_size": {
+          "type": "relative_change",
+          "value": 0.06,
+          "unit": "proportion"
+        },
+        "measurement_source": "administrative_records"
+      },
+      "evidence": {
+        "quote": "reduced late payments by 6%",
+        "rationale": "This phrase reports the main behavioral outcome and its magnitude."
+      },
+      "confidence": 0.92
+    },
+    {
+      "annotation_type": "outcome",
+      "id": "a5",
+      "label_path": [
+        "outcome",
+        "attitudinal",
+        "satisfaction"
+      ],
+      "text_span": {
+        "start_char": 356,
+        "end_char": 396,
+        "exact_text": "surveyed satisfaction one week later"
+      },
+      "attributes": {
+        "measurement_source": "survey",
+        "time_horizon": "1_week_post_intervention"
+      },
+      "evidence": {
+        "quote": "surveyed satisfaction one week later",
+        "rationale": "The vignette explicitly describes a satisfaction survey and timing."
+      },
+      "confidence": 0.85
+    }
+  ],
+  "checks": {
+    "span_indices_in_range": true,
+    "non_overlapping_required": false,
+    "label_paths_nonempty": true
+  }
+}

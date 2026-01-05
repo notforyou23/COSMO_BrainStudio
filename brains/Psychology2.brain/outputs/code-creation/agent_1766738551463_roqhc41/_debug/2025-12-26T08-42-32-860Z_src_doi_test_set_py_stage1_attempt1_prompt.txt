@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a small fixed DOI test set, run api_server.py end-to-end to resolve sources/metadata, and save results to runtime/_build/tables/doi_results.csv and runtime/_build/reports/doi_run_report.json with explicit success/failure reasons per DOI.
+Project: small fixed DOI test set, run api_server.py end-to-end to resolve sources/metadata, and save results to runtime/_build/tables/doi_results.csv and runtime/_build/reports/doi_run_report.json with explicit success/failure reasons per DOI. (python api_server)
+
+Target file details:
+- Path: src/doi_test_set.py
+- Purpose: Stores the small fixed DOI test set (as a Python constant with per-DOI provenance/notes and expected resolvability flags) used by api_server.py for the end-to-end run.
+- Category: source
+
+Other planned files (for context only):
+- src/api_server.py: Implements a runnable Python API server with an end-to-end DOI run endpoint that loads a fixed DOI test set, resolves sources/metadata per DOI, and writes runtime/_build/tables/doi_results.csv and runtime/_build/reports/doi_run_report.json with explicit per-DOI success/failure reasons.
+- src/doi_pipeline.py: Provides the DOI resolution orchestration pipeline that validates/normalizes DOIs, queries provider resolvers in order, aggregates metadata, and returns structured per-DOI results with explicit failure categories and reasons.
+- src/doi_providers.py: Defines provider client implementations (e.g., Crossref and DataCite) with robust HTTP handling, timeouts, rate-limit/backoff behavior, and consistent error mapping for the pipeline.
+- src/exporters.py: Contains exporters that take pipeline results and deterministically write doi_results.csv and doi_run_report.json into runtime/_build with schema/versioning and explicit success/failure summaries.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-26T07-51-06-259Z_src_doi_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766735464664_uxqtqp3
+- [INTROSPECTION] 2025-12-26T07-51-06-259Z_docs_doi_test_set_and_provenance_md_stage1_attempt1_prompt.txt from code-creation agent agent_17667
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT INSIGHT: agent_1766733982156_n6bb5fc] Implication 3: UX and workflow become first-class safety components with measurable cost models
+- [INTROSPECTION] 2025-12-26T07-51-06-259Z_src_doi_pipeline_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766735464664_uxqtqp3
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Stores the small fixed DOI test set (as a Python constant with per-DOI provenance/notes and expected resolvability flags) used by api_server.py for the end-to-end run.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/doi_test_set.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/doi_test_set.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/doi_test_set.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

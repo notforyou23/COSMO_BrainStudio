@@ -1,0 +1,51 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Produce a detailed, mechanism-oriented plan for multi-wave randomized intervention trials that links within-child cognitive growth (executive function and processing speed) to reasoning and real-world decisions via fine-grained social support operationalizations (ZPD: type, timing, fading). The plan should specify experimental arms (nudge/choice-architecture, targeted debiasing, sleep-restoration), measurement schedules for proximal mediators and distal outcomes, causal-chain tests (mediation/moderation), and logistics needed to compare transfer and durability within the same cohorts.
+Project: generated_script_1766728379916 (python script)
+
+Target file details:
+- Path: tests/test_end_to_end_plan.py
+- Purpose: End-to-end tests that build a full multi-wave plan and assert required components exist (arms, ZPD factors, schedules, mediators/outcomes, causal-chain tests, and logistics).
+- Category: test
+
+Other planned files (for context only):
+- README.md: Project overview and quickstart explaining how to generate multi-wave randomized intervention trial plans linking cognitive growth, ZPD social support operationalizations, and decision outcomes.
+- pyproject.toml: Python package configuration with pinned dependencies and entry points for running the trial-plan generator CLI.
+- src/trialplanner/__init__.py: Package initializer exporting the public API for building, validating, and rendering multi-wave trial plans.
+- src/trialplanner/schema.py: Pydantic data models defining experimental arms, ZPD support parameters (type/timing/fading), measurement schedules, mediators/outcomes, and causal tests for transfer and durability.
+
+Reference insights:
+- [AGENT: agent_1766725061841_k9ooek5] Cycle 15 consistency review (divergence 0.92):
+High-level summary: all three branches investigate how c
+- [AGENT: agent_1766727087123_i8o4pex] {"agentId":"agent_1766727087123_i8o4pex","timestamp":"2025-12-26T05:38:24.080Z","files":[{"filename":"_
+- [AGENT: agent_1766725784489_nuun9cd] {"agentId":"agent_1766725784489_nuun9cd","timestamp":"2025-12-26T05:17:13.398Z","files":[{"filename":"_
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: End-to-end tests that build a full multi-wave plan and assert required components exist (arms, ZPD factors, schedules, mediators/outcomes, causal-chain tests, and logistics).
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('tests/test_end_to_end_plan.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:tests/test_end_to_end_plan.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside tests/test_end_to_end_plan.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

@@ -1,0 +1,50 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a tiny annotation JSONL fixture (valid + intentionally invalid rows), run the validator, and save a pass/fail summary plus per-record errors into runtime/_build/reports/taxonomy_validation.json; wire into the runner and CI.
+Project: tiny annotation JSONL fixture (valid + intentionally invalid rows), run the validator, and save a pass/fail summary plus per-record errors into runtime/_build/reports/taxonomy_validation.json; wire into the runner and CI. (json script)
+
+Target file details:
+- Path: .github/workflows/ci.yml
+- Purpose: Updates CI to run the taxonomy validation script and upload runtime/_build/reports/taxonomy_validation.json as an artifact on every build.
+- Category: config
+
+Other planned files (for context only):
+- tests/fixtures/taxonomy/annotations_fixture.jsonl: Tiny JSONL annotation fixture containing a mix of valid rows and intentionally invalid rows to exercise taxonomy validation paths.
+- src/taxonomy/validate_annotations.js: Implements a JSONL annotation validator that checks each record against the taxonomy/schema rules and returns per-record errors plus a pass/fail summary.
+- scripts/run_taxonomy_validation.js: CLI runner that loads the JSONL fixture, invokes the validator, and writes the summary and per-record errors to runtime/_build/reports/taxonomy_validation.json with a nonzero exit code on failure.
+- runtime/_build/reports/.gitkeep: Keeps the reports output directory in version control so CI and local runs can reliably write taxonomy_validation.json.
+
+Reference insights:
+- [AGENT: agent_1766732701904_a37p7p8] Document Created: Generated report
+
+# Generated report
+
+*Auto-compiled from COSMO memory (GPT-5.2 unava
+- [INTROSPECTION] 2025-12-26T04-41-00-984Z_tests_fixtures_invalid_annotations_jsonl_stage1_attempt2_prompt.txt from code-creation agent agent_
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT INSIGHT: agent_1766733982156_n6bb5fc] Implication 3: UX and workflow become first-class safety components with measurable cost models
+- [INTROSPECTION] 2025-12-26T04-41-00-984Z_tests_fixtures_invalid_annotations_jsonl_stage1_attempt1_prompt.txt from code-creation agent agent_
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Updates CI to run the taxonomy validation script and upload runtime/_build/reports/taxonomy_validation.json as an artifact on every build.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('.github/workflows/ci.yml')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:.github/workflows/ci.yml')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside .github/workflows/ci.yml.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

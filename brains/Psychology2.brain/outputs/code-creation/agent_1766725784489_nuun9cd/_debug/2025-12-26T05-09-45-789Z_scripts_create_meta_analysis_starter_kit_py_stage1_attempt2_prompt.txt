@@ -1,0 +1,48 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create /outputs/meta_analysis_starter_kit/ with (a) extraction_template.csv, (b) screening_log.csv, and (c) analysis_skeleton (Rmd/py notebook) that loads the template, computes a placeholder pooled estimate, and writes a summary table + forest plot to /outputs; run once and save the run log.
+Project: /outputs/meta_analysis_starter_kit/ with (a) extraction_template.csv, (b) screening_log.csv, and (c) analysis_skeleton (Rmd/py notebook) that loads the template, computes a placeholder pooled estimate, and writes a summary table + forest plot to /outputs; run once and save the run log. (python configuration)
+
+Target file details:
+- Path: scripts/create_meta_analysis_starter_kit.py
+- Purpose: Single entrypoint script that creates /outputs/meta_analysis_starter_kit/ assets, runs the placeholder analysis once, writes outputs, and saves the run log.
+- Category: source
+
+Other planned files (for context only):
+- src/meta_analysis_starter_kit/__init__.py: Package initializer for the meta-analysis starter kit tooling.
+- src/meta_analysis_starter_kit/config.py: Central configuration defining output paths, default template columns, and plotting/table settings for the starter kit.
+- src/meta_analysis_starter_kit/templates.py: Code to generate extraction_template.csv and screening_log.csv with required headers and example placeholder rows.
+- src/meta_analysis_starter_kit/analysis.py: Analysis utilities that load the extraction template, compute a placeholder pooled estimate, produce a summary table, and render a forest plot.
+
+Reference insights:
+- [AGENT: agent_1766724059835_bifv53h] Document Created: one-page preregistration template + analysis plan stub (saved in /outputs) tailored t
+- [AGENT: agent_1766724144474_v4ynwtw] Cycle 4 consistency review (divergence 0.93):
+Summary (given divergence score 0.93 — substantial disagr
+- [AGENT: agent_1766724479793_l5s4pac] Cycle 9 consistency review (divergence 0.96):
+Summary (high divergence: 0.96) — the three branches over
+- [AGENT: agent_1766723806039_rvysvlf] Intervention effectiveness finding (meta-analytic): Choice-architecture nudges show an overall small-to
+- [AGENT: agent_1766724059835_bifv53h] {"title":"one-page preregistration template + analysis plan stub (saved in /outputs) tailored to the fl
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Single entrypoint script that creates /outputs/meta_analysis_starter_kit/ assets, runs the placeholder analysis once, writes outputs, and saves the run log.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/create_meta_analysis_starter_kit.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/create_meta_analysis_starter_kit.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/create_meta_analysis_starter_kit.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

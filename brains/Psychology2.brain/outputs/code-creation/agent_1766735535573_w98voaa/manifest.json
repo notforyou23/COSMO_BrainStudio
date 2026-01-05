@@ -1,0 +1,154 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766735535573_w98voaa",
+  "agentType": "code-creation",
+  "goalId": "goal_55",
+  "missionId": "strategic_goal_55_1766735535573",
+  "spawnCycle": 117,
+  "coordinatorReview": null,
+  "spawnedBy": "strategic_spawner",
+  "triggerSource": "strategic_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T07:52:23.694Z",
+  "completedAt": "2025-12-26T07:55:55.269Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "src/artifact_gate.py",
+      "description": "Update the artifact gate to include an ID integrity QA gate that blocks runs on missing, non-unique, or non-joinable IDs across artifacts and writes pass/fail plus violation counts to /outputs/logs/.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "\", \"src/meta_utils.py\", \"src/models.py\", \"src/routing_policy.py\", \"src/run_meta_analysis.py\", \"src/schema_utils.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nUpdated artifact gate to enforce ID integrity (missing/non-unique/non-joinable) and emit pass/fail metrics to outputs/logs/.\n",
+          "timestamp": "2025-12-26T07:52:57.475Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "\"src/run_meta_analysis.py\", \"src/schema_utils.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSUMMARY: Updated artifact_gate.py to enforce an ID integrity QA gate that logs pass/fail plus missing, duplicate, and non-joinable ID counts to outputs/logs and exits non-zero on violations.\n",
+          "timestamp": "2025-12-26T07:53:34.861Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:52:23.694Z",
+      "failedAt": "2025-12-26T07:53:34.861Z"
+    },
+    {
+      "path": "src/qa/id_integrity.py",
+      "description": "Implement the ID integrity checks (missing IDs, duplicate IDs, and cross-artifact joinability) with structured results consumable by the artifact gate.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T07:53:57.583Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T07:54:26.023Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:52:23.694Z",
+      "failedAt": "2025-12-26T07:54:26.023Z"
+    },
+    {
+      "path": "src/utils/gate_logging.py",
+      "description": "Provide a small logging utility to create /outputs/logs/ and write standardized gate status summaries and metrics for each QA check.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/utils/gate_logging.py\nDIR_STATE:[\"src/utils/gate_logging.py\"]\nSummary: Implemented a compact gate logging utility that creates outputs/logs and writes standardized per-check and overall gate result records.\n",
+          "timestamp": "2025-12-26T07:54:45.532Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/utils/gate_logging.py\nDIR_STATE:[\"src/utils/gate_logging.py\"]\nSUMMARY: Implemented a compact gate logging utility that ensures /outputs/logs exists and writes standardized JSON summaries and metrics for each QA check.\n",
+          "timestamp": "2025-12-26T07:55:03.589Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:52:23.694Z",
+      "failedAt": "2025-12-26T07:55:03.589Z"
+    },
+    {
+      "path": "scripts/run_artifact_gate.py",
+      "description": "Wire the updated artifact gate into the runnable entrypoint script so CI/local runs fail fast when ID integrity violations are detected and logs are emitted to /outputs/logs/.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "scripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSummary: Updated the artifact gate entrypoint to invoke the project gate, ensure logs dir exists, and fail with nonzero exit code on ID integrity (or any) gate failures.\n",
+          "timestamp": "2025-12-26T07:55:29.382Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "light.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSUMMARY: Updated scripts/run_artifact_gate.py to run the artifact gate as a CI/local entrypoint and fail fast based on gate results while directing outputs/logging under outputs/logs via the gate.\n",
+          "timestamp": "2025-12-26T07:55:55.268Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:52:23.694Z",
+      "failedAt": "2025-12-26T07:55:55.268Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Add an 'ID integrity' QA gate to the project’s artifact gate script: block runs when IDs are non-unique, missing, or non-joinable across artifacts; log pass/fail status and counts of violations to /outputs/logs/.",
+  "missionSuccessCriteria": [
+    "Complete strategic task identified by Meta-Coordinator or escalated by Strategic Tracker",
+    "Curated insight (actionability 8-9/10): Formalizes ID integrity enforcement as a first-class requirement (StudyID/EffectID/TaskID), strengthening reproducibility and enabling automated QA gates for the meta-analysis starter kit and future c..."
+  ],
+  "projectName": "generated_script_1766735535723",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-26T07:55:55.269Z",
+  "summary": {
+    "completed": 0,
+    "failed": 4,
+    "total": 4
+  }
+}

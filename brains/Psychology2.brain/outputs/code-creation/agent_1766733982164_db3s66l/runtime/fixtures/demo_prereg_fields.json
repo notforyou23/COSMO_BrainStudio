@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "fixture_name": "demo_prereg_fields",
+  "description": "Example preregistration fields fixture mapping prereg field IDs to extraction-row IDs; includes an intentional mismatch for cross-source linking validation demos.",
+  "prereg_fields": [
+    {
+      "prereg_field_id": "PF-001",
+      "label": "Primary outcome name",
+      "extraction_row_id": "EXROW:DEMO:001",
+      "expected_extraction_row_key": {
+        "row_key": "1"
+      }
+    },
+    {
+      "prereg_field_id": "PF-002",
+      "label": "Primary outcome timepoint",
+      "extraction_row_id": "EXROW:DEMO:002",
+      "expected_extraction_row_key": {
+        "row_key": "2"
+      }
+    },
+    {
+      "prereg_field_id": "PF-003",
+      "label": "Secondary outcome name",
+      "extraction_row_id": "EXROW:DEMO:003",
+      "expected_extraction_row_key": {
+        "row_key": "3"
+      }
+    },
+    {
+      "prereg_field_id": "PF-004",
+      "label": "Secondary outcome timepoint (intentional mismatch)",
+      "extraction_row_id": "EXROW:DEMO:999",
+      "expected_extraction_row_key": {
+        "row_key": "999"
+      },
+      "note": "Intentional mismatch: EXROW:DEMO:999 should not exist in the extraction fixture."
+    }
+  ]
+}

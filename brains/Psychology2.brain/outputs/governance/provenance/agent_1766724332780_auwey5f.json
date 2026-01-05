@@ -1,0 +1,124 @@
+{
+  "agentId": "agent_1766724332780_auwey5f",
+  "timestamp": "2025-12-26T04:46:55.308Z",
+  "mode": "observe",
+  "stats": {
+    "eventsLogged": 145,
+    "actionsClassified": 0,
+    "actionsBlocked": 0,
+    "actionsWarned": 0,
+    "errors": 0
+  },
+  "inventoryHash": "no_inventory",
+  "agentData": {
+    "mission": "QA found borderline confidence - research agent should verify claims",
+    "status": "completed",
+    "results": {
+      "success": true,
+      "queriesExecuted": 3,
+      "findingsAdded": 5,
+      "sourcesFound": 53,
+      "sources": [
+        "https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence",
+        "https://arxiv.org/abs/2405.21028",
+        "https://arxiv.org/abs/2503.02863",
+        "https://arxiv.org/abs/2402.15631",
+        "https://arxiv.org/abs/2410.15667",
+        "https://airc.nist.gov/airmf-resources/airmf/3-sec-characteristics/",
+        "https://airc.nist.gov/",
+        "https://www.nist.gov/itl/ai-risk-management-framework/ai-risk-management-framework-faqs",
+        "https://www.nist.gov/ai-test-evaluation-validation-and-verification-tevv",
+        "https://www.nist.gov/speech-testimony/balancing-knowledge-and-governance-foundations-effective-risk-management-artificial",
+        "https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-generative-artificial-intelligence?utm_source=openai",
+        "https://arxiv.org/abs/2410.15667?utm_source=openai",
+        "https://arxiv.org/abs/2405.21028?utm_source=openai",
+        "https://developers.google.com/fact-check/tools/api/",
+        "https://reporterslab.org/2024/12/03/reporters-lab-discontinues-factstream-app/",
+        "https://developers.google.com/fact-check/tools/api/reference/rpc/google.factchecking.factchecktools.v1alpha1",
+        "https://chromewebstore.google.com/detail/factcheck%2B-ai-powered-cla/mpclaodmeokneaaajfhdlkdfnipdkogh",
+        "https://developers.google.com/fact-check/tools/api/reference/rpc",
+        "https://developers.google.com/fact-check/tools/api/reference/rest/",
+        "https://developers.google.com/search/docs/appearance/structured-data/factcheck",
+        "https://emplibot.com/how-to-handle-fact-checks-after-claimreview-snippets-changed",
+        "https://arxiv.org/abs/2412.10510",
+        "https://fullfact.org/toolkit/",
+        "https://logically.ai/announcements/logically-facts-launched-to-build-safer-spaces-for-online-users",
+        "https://factchecktool.com/",
+        "https://fullfact.ai/",
+        "https://www.thetimes.co.uk/article/britains-biggest-fact-checking-firm-logically-administration-zpdgw8qnt",
+        "https://logically.ai/announcements/logically-accelerates-fact-checking-with-launch-of-new-product",
+        "https://arxiv.org/abs/2510.01226",
+        "https://arxiv.org/abs/2511.03217",
+        "https://github.com/meedan/check-api",
+        "https://meedan.org/check",
+        "https://idir.uta.edu/claimbuster/api/",
+        "https://github.com/meedan/check",
+        "https://developers.google.com/fact-check/tools/api/?utm_source=openai",
+        "https://reporterslab.org/2024/12/03/reporters-lab-discontinues-factstream-app/?utm_source=openai",
+        "https://idir.uta.edu/claimbuster/api/?utm_source=openai",
+        "https://github.com/meedan/check-api?utm_source=openai",
+        "https://arxiv.org/abs/2412.10510?utm_source=openai",
+        "https://guides.lib.uchicago.edu/primarysources/data",
+        "https://guides.library.stanford.edu/govdata/intro",
+        "https://guides.boisestate.edu/statsources",
+        "https://www.census.gov/about/history/galleries-archives/usage-guidelines.html",
+        "https://utopia.ut.edu/introductiontoresearch/primary",
+        "https://www.census.gov/newsroom/blogs/research-matters/2024/12/guidance-how-to-cite-census-bureau.html",
+        "https://guides.franklin.edu/library_search/stats",
+        "https://arxiv.org/abs/2112.09813",
+        "https://guides.lib.uw.edu/research/polisci/primarysources",
+        "https://cnu.libguides.com/primaryhome/statistics",
+        "https://www.census.gov/topics/research/guidance/restricted-use-microdata/citations-for-restricted-use-data.html",
+        "https://guides.library.stanford.edu/govdata/intro?utm_source=openai",
+        "https://www.census.gov/newsroom/blogs/research-matters/2024/12/guidance-how-to-cite-census-bureau.html?utm_source=openai",
+        "https://guides.franklin.edu/library_search/stats?utm_source=openai"
+      ],
+      "followUpDirections": 3,
+      "metadata": {
+        "findings": [
+          {
+            "type": "finding",
+            "content": "Borderline-confidence QA is best treated as a selective prediction workflow: require strong, verifiable evidence for acceptance; otherwise abstain/defer (human review or a verification pipeline), with risk-tiered thresholds and calibrated confidence aligned to observed accuracy (NIST AI RMF / TEVV framing).",
+            "nodeId": 41,
+            "timestamp": "2025-12-26T04:46:45.747Z"
+          },
+          {
+            "type": "finding",
+            "content": "Evidence-first verification outperforms “self-confidence prompting”: implement retrieve-then-verify with strict source requirements (quote/attribution checks) and reject answers lacking strong retrieval support; optionally decompose answers into atomic claims and verify/correct each against retrieved sources.",
+            "nodeId": 42,
+            "timestamp": "2025-12-26T04:46:46.480Z"
+          },
+          {
+            "type": "finding",
+            "content": "Robustness in the borderline band can be improved with multi-sample consistency (independent generations compared for stability) and/or separate verifier models plus deterministic checks (constraints, units, entity resolution) to catch common failure modes.",
+            "nodeId": 43,
+            "timestamp": "2025-12-26T04:46:46.814Z"
+          },
+          {
+            "type": "finding",
+            "content": "Most practical ‘fact-checking APIs’ in 2024–2025 are not end-to-end truth engines: Google Fact Check Tools API mainly retrieves existing ClaimReview-tagged fact-checks; ClaimBuster supports claim spotting/triage and KB querying; Meedan’s Check supports collaborative verification workflows rather than automated adjudication.",
+            "nodeId": 44,
+            "timestamp": "2025-12-26T04:46:47.218Z"
+          },
+          {
+            "type": "finding",
+            "content": "For statistical claim verification, the reliable path is to find primary producing agencies/datasets using targeted search (e.g., `site:.gov`/`site:.edu` plus methodology/documentation terms), then cite dataset landing pages/tables with identifiers, release/vintage dates, geography, and methodology notes (e.g., data.census.gov’s built-in citation tools and Census citation guidance).",
+            "nodeId": 45,
+            "timestamp": "2025-12-26T04:46:47.711Z"
+          },
+          {
+            "type": "finding",
+            "content": "{\"agentId\":\"agent_1766724332780_auwey5f\",\"goalId\":\"goal_acceptance_qa_1766724281438\",\"timestamp\":\"2025-12-26T04:46:54.940Z\",\"files\":[{\"filename\":\"research_findings.json\",\"relativePath\":\"runtime/outputs/research/agent_1766724332780_auwey5f/research_findings.json\",\"size\":4383},{\"filename\":\"bibliography.bib\",\"relativePath\":\"runtime/outputs/research/agent_1766724332780_auwey5f/bibliography.bib\",\"size\":12276},{\"filename\":\"research_summary.md\",\"relativePath\":\"runtime/outputs/research/agent_1766724332780_auwey5f/research_summary.md\",\"size\":3457},{\"filename\":\"sources.json\",\"relativePath\":\"runtime/outputs/research/agent_1766724332780_auwey5f/sources.json\",\"size\":8440}]}",
+            "nodeId": 46,
+            "timestamp": "2025-12-26T04:46:55.304Z"
+          }
+        ],
+        "sourcesFound": 53,
+        "urlsValid": 53,
+        "artifactsCreated": 4,
+        "filesCreated": 4,
+        "status": "complete"
+      }
+    }
+  }
+}

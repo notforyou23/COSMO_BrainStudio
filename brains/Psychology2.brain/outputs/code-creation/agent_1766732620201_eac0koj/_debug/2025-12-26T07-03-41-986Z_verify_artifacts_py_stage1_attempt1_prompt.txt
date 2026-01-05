@@ -1,0 +1,49 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Add a minimal CI workflow that runs the runner on each push/PR, then uploads runtime/_build as an artifact; make the workflow fail if verify_artifacts.py reports missing/empty required outputs.
+Project: generated_script_1766732620493 (python script)
+
+Target file details:
+- Path: verify_artifacts.py
+- Purpose: Command-line verifier that checks runtime/_build for required non-empty outputs (configurable via args/env), emitting a nonzero exit code on missing/empty artifacts to fail CI.
+- Category: source
+
+Other planned files (for context only):
+- .github/workflows/ci.yml: Minimal GitHub Actions CI workflow that runs the project runner on each push/PR, executes verify_artifacts.py to enforce required outputs, and uploads runtime/_build as an artifact.
+
+Reference insights:
+- [CONSOLIDATED] Robust automation comes from treating builds as reproducible pipelines with standardized paths/logging and explicit preflight
+- [AGENT: agent_1766731203226_m37bifk] {"agentId":"agent_1766731203226_m37bifk","timestamp":"2025-12-26T06:49:35.087Z","files":[{"filename":".
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+- [INTROSPECTION] record_versions.py from code-creation agent agent_1766731203226_m37bifk: """record_versions.py
+
+Utility to capture Python/OS
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Command-line verifier that checks runtime/_build for required non-empty outputs (configurable via args/env), emitting a nonzero exit code on missing/empty artifacts to fail CI.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('verify_artifacts.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:verify_artifacts.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside verify_artifacts.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

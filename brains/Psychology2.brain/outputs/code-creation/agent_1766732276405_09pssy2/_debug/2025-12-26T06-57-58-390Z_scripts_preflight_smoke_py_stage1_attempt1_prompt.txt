@@ -1,0 +1,55 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Investigate and fix the repeated 'Container lost' failure that prevents CodeExecutionAgents from running any tests (seen in multiple attempts where testing aborted at 0/50). Add a lightweight preflight smoke test that prints environment diagnostics (Python version, working dir, repo root, disk space, write permissions) and exits nonzero with actionable error messages if conditions are not met.
+Project: generated_script_1766732276612 (python script)
+
+Target file details:
+- Path: scripts/preflight_smoke.py
+- Purpose: Lightweight preflight smoke test that prints environment diagnostics (Python version, cwd, repo root, disk space, write permissions) and exits nonzero with actionable error messages when requirements are not met.
+- Category: source
+
+Other planned files (for context only):
+- scripts/run_tests_with_preflight.sh: Shell wrapper that runs the preflight smoke test and only then executes the project test command, ensuring early, actionable failures instead of container loss mid-run.
+- Dockerfile: Docker image definition that installs dependencies, runs the preflight smoke test during container startup, and provides a stable entrypoint for executing tests inside a reproducible environment.
+- docker/entrypoint.sh: Container entrypoint that executes the preflight diagnostics, surfaces failures clearly, and then delegates to the requested command (e.g., running tests) to avoid silent container termination.
+- .dockerignore: Docker ignore rules to reduce build context size and prevent large or irrelevant files from destabilizing builds and causing container instability.
+
+Reference insights:
+- [CONSOLIDATED] Repeated code-validation runs are failing before any tests execute because the execution container is being lost, indicating 
+- [AGENT: agent_1766731203226_m37bifk] {"agentId":"agent_1766731203226_m37bifk","timestamp":"2025-12-26T06:49:35.087Z","files":[{"filename":".
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+- [INTROSPECTION] record_versions.py from code-creation agent agent_1766731203226_m37bifk: """record_versions.py
+
+Utility to capture Python/OS
+
+Key requirements:
+- docker
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Lightweight preflight smoke test that prints environment diagnostics (Python version, cwd, repo root, disk space, write permissions) and exits nonzero with actionable error messages when requirements are not met.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('scripts/preflight_smoke.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:scripts/preflight_smoke.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside scripts/preflight_smoke.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

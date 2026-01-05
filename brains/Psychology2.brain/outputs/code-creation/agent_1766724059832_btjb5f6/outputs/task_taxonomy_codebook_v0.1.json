@@ -1,0 +1,286 @@
+{
+  "schema": "task_taxonomy_codebook",
+  "version": "0.1",
+  "status": "draft",
+  "released": "2025-12-26",
+  "purpose": "Defines a compact, versioned task taxonomy for annotating user requests, model work, and evaluation targets.",
+  "record_id_rule": "record_id must be unique within a dataset and stable across re-exports.",
+  "fields": {
+    "record_id": {
+      "type": "string",
+      "required": true,
+      "description": "Unique identifier for the annotation record (dataset-unique)."
+    },
+    "text": {
+      "type": "string",
+      "required": true,
+      "description": "The user request or unit of text being annotated."
+    },
+    "task": {
+      "type": "object",
+      "required": true,
+      "description": "Primary task taxonomy label and optional qualifiers.",
+      "required_fields": [
+        "primary"
+      ],
+      "properties": {
+        "primary": {
+          "type": "string",
+          "required": true,
+          "allowed_values_ref": "#/taxonomy/primary_tasks",
+          "description": "Primary task category label."
+        },
+        "secondary": {
+          "type": "array",
+          "required": false,
+          "items": {
+            "type": "string",
+            "allowed_values_ref": "#/taxonomy/secondary_tasks"
+          },
+          "description": "Optional secondary task labels (0..N)."
+        },
+        "modality": {
+          "type": "string",
+          "required": false,
+          "allowed_values": [
+            "text",
+            "image",
+            "audio",
+            "video",
+            "multimodal"
+          ],
+          "description": "Main input/output modality implied by the task."
+        },
+        "domain": {
+          "type": "string",
+          "required": false,
+          "allowed_values": [
+            "general",
+            "software",
+            "data_science",
+            "math",
+            "science",
+            "health",
+            "finance",
+            "legal",
+            "education",
+            "creative",
+            "operations"
+          ],
+          "description": "Optional domain/context label (coarse)."
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "required": false,
+      "description": "Optional constraint flags for downstream validation and filtering.",
+      "properties": {
+        "safety_sensitive": {
+          "type": "boolean",
+          "required": false,
+          "description": "True if the request is likely to involve safety policy concerns."
+        },
+        "pii_present": {
+          "type": "boolean",
+          "required": false,
+          "description": "True if the text contains personal data (names, emails, IDs, etc.)."
+        },
+        "requires_citations": {
+          "type": "boolean",
+          "required": false,
+          "description": "True if the task should include sources/citations."
+        }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "required": false,
+      "description": "Optional metadata for dataset management.",
+      "properties": {
+        "created_at": {
+          "type": "string",
+          "required": false,
+          "format": "date-time",
+          "description": "ISO-8601 timestamp."
+        },
+        "annotator_id": {
+          "type": "string",
+          "required": false,
+          "description": "Annotator identifier (pseudonymous recommended)."
+        },
+        "notes": {
+          "type": "string",
+          "required": false,
+          "description": "Free-form notes."
+        }
+      }
+    }
+  },
+  "validation_rules": [
+    {
+      "id": "R1_required_fields",
+      "severity": "error",
+      "description": "record_id, text, task.primary are required."
+    },
+    {
+      "id": "R2_primary_allowed",
+      "severity": "error",
+      "description": "task.primary must be one of taxonomy.primary_tasks[*].id."
+    },
+    {
+      "id": "R3_secondary_allowed",
+      "severity": "error",
+      "description": "Each task.secondary value must be one of taxonomy.secondary_tasks[*].id."
+    },
+    {
+      "id": "R4_secondary_not_duplicate_primary",
+      "severity": "warning",
+      "description": "task.secondary should not contain the same label as task.primary."
+    },
+    {
+      "id": "R5_modality_allowed",
+      "severity": "error",
+      "description": "If present, task.modality must be in the modality allowed_values."
+    }
+  ],
+  "taxonomy": {
+    "primary_tasks": [
+      {
+        "id": "information_extraction",
+        "label": "Information extraction",
+        "description": "Extract structured fields, entities, attributes, or relations from unstructured input.",
+        "examples": [
+          "Extract all company names and dates from this email.",
+          "Convert this paragraph into a JSON with fields X, Y, Z."
+        ]
+      },
+      {
+        "id": "classification_tagging",
+        "label": "Classification / tagging",
+        "description": "Assign one or more labels to an input (topic, sentiment, intent, risk, etc.).",
+        "examples": [
+          "Label each review as positive/negative.",
+          "Tag this ticket with a category."
+        ]
+      },
+      {
+        "id": "question_answering",
+        "label": "Question answering",
+        "description": "Answer questions using provided context or general knowledge (non-tool, non-code).",
+        "examples": [
+          "What is the capital of Canada?",
+          "Based on this passage, who is the narrator?"
+        ]
+      },
+      {
+        "id": "summarization",
+        "label": "Summarization",
+        "description": "Produce a shorter representation of input while preserving key information (abstract or extractive).",
+        "examples": [
+          "Summarize this report in 5 bullet points.",
+          "Give an executive summary of the meeting notes."
+        ]
+      },
+      {
+        "id": "rewrite_editing",
+        "label": "Rewrite / editing",
+        "description": "Transform text for clarity, tone, grammar, style, length, or audience without changing meaning materially.",
+        "examples": [
+          "Rewrite this email to be more professional.",
+          "Fix grammar and improve clarity."
+        ]
+      },
+      {
+        "id": "translation",
+        "label": "Translation",
+        "description": "Translate text between languages, optionally preserving formatting and terminology.",
+        "examples": [
+          "Translate this paragraph into Spanish.",
+          "Translate while keeping medical terms unchanged."
+        ]
+      },
+      {
+        "id": "content_generation",
+        "label": "Content generation",
+        "description": "Create new content from a prompt (stories, marketing copy, plans) not primarily constrained to edit existing text.",
+        "examples": [
+          "Write a product description for a new coffee grinder.",
+          "Draft a lesson plan on photosynthesis."
+        ]
+      },
+      {
+        "id": "reasoning_problem_solving",
+        "label": "Reasoning / problem solving",
+        "description": "Multi-step reasoning, logic puzzles, math word problems, decision support, or strategy formulation (non-coding).",
+        "examples": [
+          "Solve this probability problem.",
+          "Help me decide between two job offers given constraints."
+        ]
+      },
+      {
+        "id": "coding_software",
+        "label": "Coding / software development",
+        "description": "Write, modify, explain, or debug code; design APIs; implement algorithms; create scripts.",
+        "examples": [
+          "Write Python code to parse a CSV and compute metrics.",
+          "Debug this stack trace and propose a fix."
+        ]
+      },
+      {
+        "id": "data_analysis",
+        "label": "Data analysis",
+        "description": "Analyze data, compute statistics, interpret results; may include code but emphasis is analytical outcome.",
+        "examples": [
+          "Analyze these survey results and report key trends.",
+          "Compute correlation and interpret significance."
+        ]
+      },
+      {
+        "id": "planning_task_management",
+        "label": "Planning / task management",
+        "description": "Create plans, schedules, checklists, SOPs, project breakdowns, or operational playbooks.",
+        "examples": [
+          "Create a 30-day study plan for the exam.",
+          "Draft a rollout checklist for a new feature."
+        ]
+      },
+      {
+        "id": "instruction_howto",
+        "label": "Instruction / how-to guidance",
+        "description": "Explain procedures and steps for accomplishing a task (tutorial-like), not necessarily a plan over time.",
+        "examples": [
+          "How do I change a bike tire?",
+          "Explain how to configure OAuth for an app."
+        ]
+      }
+    ],
+    "secondary_tasks": [
+      {
+        "id": "formatting_structuring",
+        "label": "Formatting / structuring",
+        "description": "Change representation/format (tables, JSON, markdown), or impose structure without major semantic changes."
+      },
+      {
+        "id": "fact_checking",
+        "label": "Fact checking / verification",
+        "description": "Validate claims, identify inaccuracies, or request sources; may include uncertainty reporting."
+      },
+      {
+        "id": "recommendation",
+        "label": "Recommendation",
+        "description": "Suggest options (products, actions, resources) tailored to stated preferences or constraints."
+      },
+      {
+        "id": "creative_ideation",
+        "label": "Creative ideation",
+        "description": "Brainstorm names, themes, plots, slogans, or alternatives; divergent thinking emphasis."
+      },
+      {
+        "id": "evaluation_critique",
+        "label": "Evaluation / critique",
+        "description": "Assess quality, compare alternatives, review writing/code, or provide feedback with criteria."
+      }
+    ]
+  }
+}

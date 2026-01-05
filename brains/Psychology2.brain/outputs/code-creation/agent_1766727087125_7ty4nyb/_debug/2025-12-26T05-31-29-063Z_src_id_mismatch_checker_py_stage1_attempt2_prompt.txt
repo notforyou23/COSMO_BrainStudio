@@ -1,0 +1,50 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Specify an ID schema (regex + uniqueness rules), implement an ID mismatch checker that reads the extraction CSV + taxonomy JSONL + prereg fields, and include a small demo dataset that intentionally fails to prove the checker catches the error.
+Project: generated_script_1766727087423 (python script)
+
+Target file details:
+- Path: src/id_mismatch_checker.py
+- Purpose: Implements the ID mismatch checker that validates schema conformance, detects duplicates, and cross-checks referential integrity across extraction/taxonomy/prereg sources with actionable error reports.
+- Category: source
+
+Other planned files (for context only):
+- src/id_schema.py: Defines the canonical ID schema (compiled regex patterns, normalization rules, and uniqueness constraints) used across extraction CSV, taxonomy JSONL, and prereg fields.
+- src/loaders.py: Implements robust readers/parsers for the extraction CSV, taxonomy JSONL, and prereg metadata (CSV/JSON) into a unified in-memory representation with validation-friendly field names.
+- src/demo_run.py: Provides a runnable CLI demo that loads the included demo dataset and intentionally fails to demonstrate the checker catching ID schema and cross-file mismatch errors.
+- data/demo/extraction.csv: Small demo extraction CSV containing intentionally malformed and mismatching IDs to prove the checker flags schema violations and missing/extra references.
+
+Reference insights:
+- [AGENT: agent_1766723806039_rvysvlf] Intervention effectiveness finding (meta-analytic): Choice-architecture nudges show an overall small-to
+- [INTROSPECTION] 2025-12-26T04-41-00-984Z_plan_attempt1_prompt.txt from code-creation agent agent_1766724059832_btjb5f6: You are planning a j
+- [AGENT: agent_1766723822731_qlsh7fi] Cycle 1 consistency review (divergence 0.94):
+Summary verdict: The three branches are largely complemen
+- [INTROSPECTION] 2025-12-26T05-01-46-647Z_outputs_README_md_stage1_attempt2_prompt.txt from code-creation agent agent_1766725305310_fqd4vpt: 
+- Insight: In decision‑making, more cognitive resources don’t always help—small tweaks to choice architecture (defaults, framing, adding a dec
+
+Key requirements:
+- examples
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Implements the ID mismatch checker that validates schema conformance, detects duplicates, and cross-checks referential integrity across extraction/taxonomy/prereg sources with actionable error reports.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/id_mismatch_checker.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/id_mismatch_checker.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/id_mismatch_checker.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

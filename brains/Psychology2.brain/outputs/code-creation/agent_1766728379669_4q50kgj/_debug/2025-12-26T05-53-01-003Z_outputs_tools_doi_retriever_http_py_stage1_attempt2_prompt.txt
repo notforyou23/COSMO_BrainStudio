@@ -1,0 +1,50 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Build a script in /outputs/tools that takes a DOI list, queries a small set of sources (e.g., Unpaywall/Crossref + repository heuristics), records retrieval attempts, and outputs structured logs (JSON/CSV) including source, URL, license/PD status when available, and failure reasons.
+Project: generated_cli_tool_1766728379944 (json cli_tool)
+
+Target file details:
+- Path: outputs/tools/doi_retriever_http.py
+- Purpose: HTTP client utilities for rate-limited requests, retries, timeouts, user-agent/email handling, and consistent error normalization for external APIs.
+- Category: source
+
+Other planned files (for context only):
+- outputs/tools/doi_retriever.py: CLI script that reads a DOI list, queries Unpaywall and Crossref plus repository URL heuristics, records each retrieval attempt with outcomes, and writes structured JSONL/CSV logs including source, URL, license/PD status when available, and failure reasons.
+- outputs/tools/doi_retriever_sources.py: Source adapters implementing Unpaywall and Crossref querying plus repository/landing-page heuristics and normalization into a common attempt/result schema.
+- outputs/tools/doi_retriever_schema.py: Shared dataclasses and serialization helpers defining the structured log schema for attempts, results, license fields, and failure codes.
+- outputs/tools/doi_retriever_utils.py: Utility functions for DOI parsing/normalization, CSV/JSONL writing, safe filename handling, and lightweight URL/host heuristics.
+
+Reference insights:
+- [INTROSPECTION] README.md from code-creation agent agent_1766724059834_ostilln: # generated_api_server_1766724060001 — Citation / Primary-So
+- [INTROSPECTION] 2025-12-26T05-24-51-891Z_README_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766726690398_unoowq2: You are 
+- [INTROSPECTION] 2025-12-26T05-24-51-891Z_src_json_cli_tool_main_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766726690398_u
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: HTTP client utilities for rate-limited requests, retries, timeouts, user-agent/email handling, and consistent error normalization for external APIs.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('outputs/tools/doi_retriever_http.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:outputs/tools/doi_retriever_http.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside outputs/tools/doi_retriever_http.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

@@ -1,0 +1,330 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766736347540_9e0mq6r",
+  "agentType": "code-creation",
+  "goalId": "goal_195",
+  "missionId": "urgent_goal_195_1766736347540",
+  "spawnCycle": 126,
+  "coordinatorReview": null,
+  "spawnedBy": "meta_coordinator_urgent",
+  "triggerSource": "urgent_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T08:05:56.895Z",
+  "completedAt": "2025-12-26T08:13:34.599Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "src/runner/__init__.py",
+      "description": "Package initializer for the canonical runner implementation used by the single entrypoint.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/runner/__init__.py\nDIR_STATE:[\"src/runner/__init__.py\"]\nSummary: Implemented the runner package initializer with a minimal public API, lazy entrypoint loading, and soft re-exports for typed models.\n",
+          "timestamp": "2025-12-26T08:06:10.076Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/runner/__init__.py\nDIR_STATE:[\"src/runner/__init__.py\"]\nSUMMARY: Created a lightweight canonical runner package initializer with stable lazy-import entrypoints.\n",
+          "timestamp": "2025-12-26T08:06:22.964Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:05:56.895Z",
+      "failedAt": "2025-12-26T08:06:22.964Z"
+    },
+    {
+      "path": "src/runner/entrypoint.py",
+      "description": "Canonical runner entrypoint that executes the configured command in Docker, writes runtime/_build/logs artifacts (full log, env snapshot, config), explicitly detects and records container-lost events with timestamps, and emits a stable run summary JSON for downstream evaluation.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/runner/entrypoint.py\nDIR_STATE:[\"src/runner/__init__.py\", \"src/runner/entrypoint.py\"]\nSummary: Implemented a canonical Docker runner entrypoint that writes stable log/env/config artifacts, detects container-lost events with timestamps, and emits a run_summary.json for downstream evaluation.\n",
+          "timestamp": "2025-12-26T08:07:08.054Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/runner/entrypoint.py\nDIR_STATE:[\"src/runner/__init__.py\", \"src/runner/entrypoint.py\"]\nSUMMARY: Implemented a canonical Docker runner entrypoint that writes stable log/config/env artifacts, detects container-loss, and emits a run_summary.json for downstream evaluation.\n",
+          "timestamp": "2025-12-26T08:07:48.404Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:05:56.895Z",
+      "failedAt": "2025-12-26T08:07:48.404Z"
+    },
+    {
+      "path": "src/runner/docker_runner.py",
+      "description": "Docker execution backend that creates/starts containers, streams logs to file, captures exit status and metadata, and provides robust detection hooks for container disappearance or loss.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/runner/docker_runner.py\nDIR_STATE:[\"src/runner/__init__.py\", \"src/runner/docker_runner.py\", \"src/runner/entrypoint.py\"]\nImplemented a DockerRunner backend that creates/starts containers, streams logs to a file, captures exit/inspect metadata, and explicitly detects container-lost events with timestamps.\n",
+          "timestamp": "2025-12-26T08:08:26.440Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/runner/docker_runner.py\nDIR_STATE:[\"src/runner/__init__.py\", \"src/runner/docker_runner.py\", \"src/runner/entrypoint.py\"]\nSUMMARY: Added a docker CLI-based DockerRunner that streams logs, captures exit status/metadata, and explicitly detects container-lost events with timestamps.\n",
+          "timestamp": "2025-12-26T08:08:57.119Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:05:56.895Z",
+      "failedAt": "2025-12-26T08:08:57.119Z"
+    },
+    {
+      "path": "src/runner/artifacts.py",
+      "description": "Artifact management utilities to create runtime/_build/logs directories and atomically write log, env snapshot, config, and run summary files in stable locations.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/runner/artifacts.py\nDIR_STATE:[\"src/runner/__init__.py\", \"src/runner/artifacts.py\", \"src/runner/docker_runner.py\", \"src/runner/entrypoint.py\"]\nSummary: Implemented artifact utilities to create runtime/_build/logs and atomically write run log, env snapshot, config, run summary, and container-lost marker.\n",
+          "timestamp": "2025-12-26T08:09:17.071Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/runner/artifacts.py\nDIR_STATE:[\"src/runner/__init__.py\", \"src/runner/artifacts.py\", \"src/runner/docker_runner.py\", \"src/runner/entrypoint.py\"]\nWrote artifact utilities to create runtime/_build/logs and atomically persist run log, env snapshot, config, and stable run summary with container-lost fields.\n",
+          "timestamp": "2025-12-26T08:09:41.925Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:05:56.895Z",
+      "failedAt": "2025-12-26T08:09:41.925Z"
+    },
+    {
+      "path": "src/runner/models.py",
+      "description": "Typed data models for runner configuration and the stable run summary schema including explicit container-lost fields.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T08:10:02.055Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/runner/models.py\nDIR_STATE:[\"src/runner/__init__.py\", \"src/runner/artifacts.py\", \"src/runner/docker_runner.py\", \"src/runner/entrypoint.py\", \"src/runner/models.py\"]\nSUMMARY: Added typed runner configuration and stable run summary dataclasses with explicit container-lost fields and JSON serialization helpers.\n",
+          "timestamp": "2025-12-26T08:10:22.652Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:05:56.895Z",
+      "failedAt": "2025-12-26T08:10:22.652Z"
+    },
+    {
+      "path": "src/runner/env_snapshot.py",
+      "description": "Environment snapshot collector that records host and relevant Docker/environment metadata into a deterministic file for reproducibility and debugging.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/runner/env_snapshot.py\nDIR_STATE:[\"src/runner/__init__.py\", \"src/runner/artifacts.py\", \"src/runner/docker_runner.py\", \"src/runner/entrypoint.py\", \"src/runner/env_snapshot.py\", \"src/runner/models.py\"]\nSUMMARY: Implemented a deterministic environment snapshot collector that captures host, key env vars, and Docker metadata and can atomically write it as stable JSON.\n",
+          "timestamp": "2025-12-26T08:10:48.672Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:src/runner/env_snapshot.py\nDIR_STATE:[\"src/runner/__init__.py\", \"src/runner/artifacts.py\", \"src/runner/docker_runner.py\", \"src/runner/entrypoint.py\", \"src/runner/env_snapshot.py\", \"src/runner/models.py\"]\nSummary: Implemented a deterministic JSON environment snapshot collector capturing host, Python, Docker, and selected environment metadata with atomic writes.\n",
+          "timestamp": "2025-12-26T08:11:19.792Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:05:56.895Z",
+      "failedAt": "2025-12-26T08:11:19.792Z"
+    },
+    {
+      "path": "src/runner/config_loader.py",
+      "description": "Configuration loader that reads runner settings from a YAML/JSON config file and CLI overrides and persists the resolved canonical config to artifacts.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "g_loader.py\nDIR_STATE:[\"src/runner/__init__.py\", \"src/runner/artifacts.py\", \"src/runner/config_loader.py\", \"src/runner/docker_runner.py\", \"src/runner/entrypoint.py\", \"src/runner/env_snapshot.py\", \"src/runner/models.py\"]\nSUMMARY: Implemented a config loader that reads YAML/JSON, applies CLI/dict overrides with deep-merge semantics, and atomically persists a canonical resolved_config.json artifact.\n",
+          "timestamp": "2025-12-26T08:11:45.057Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "TTEN:src/runner/config_loader.py\nDIR_STATE:[\"src/runner/__init__.py\", \"src/runner/artifacts.py\", \"src/runner/config_loader.py\", \"src/runner/docker_runner.py\", \"src/runner/entrypoint.py\", \"src/runner/env_snapshot.py\", \"src/runner/models.py\"]\nSUMMARY: Implemented config loader to read YAML/JSON, apply dotted CLI overrides, and atomically persist the resolved canonical config to runtime/_build/logs.\n",
+          "timestamp": "2025-12-26T08:12:06.969Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:05:56.895Z",
+      "failedAt": "2025-12-26T08:12:06.969Z"
+    },
+    {
+      "path": "src/runner/logging_utils.py",
+      "description": "Logging helpers to tee console output to a complete run log file and ensure consistent timestamps and flush behavior.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "unner/logging_utils.py\nDIR_STATE:[\"src/runner/__init__.py\", \"src/runner/artifacts.py\", \"src/runner/config_loader.py\", \"src/runner/docker_runner.py\", \"src/runner/entrypoint.py\", \"src/runner/env_snapshot.py\", \"src/runner/logging_utils.py\", \"src/runner/models.py\"]\nImplemented tee-based console logging utilities with UTC timestamps, flush/fsync behavior, and structured log events for stable run logs.\n",
+          "timestamp": "2025-12-26T08:12:30.598Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "gging_utils.py\nDIR_STATE:[\"src/runner/__init__.py\", \"src/runner/artifacts.py\", \"src/runner/config_loader.py\", \"src/runner/docker_runner.py\", \"src/runner/entrypoint.py\", \"src/runner/env_snapshot.py\", \"src/runner/logging_utils.py\", \"src/runner/models.py\"]\nSummary: Added robust tee-based stdout/stderr logging utilities with UTC timestamps, event logging, and best-effort flushing for stable run logs.\n",
+          "timestamp": "2025-12-26T08:12:53.331Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:05:56.895Z",
+      "failedAt": "2025-12-26T08:12:53.331Z"
+    },
+    {
+      "path": "pyproject.toml",
+      "description": "Project packaging and dependency configuration including Docker SDK and CLI entrypoint for the canonical runner.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T08:13:00.829Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "tifacts.md\", \"constraints.txt\", \"environment.manifest.json\", \"exec_1766736790275_ha0gy8f.py\", \"package.json\", \"protocol_plan.md\", \"pyproject.toml\", \"pytest.ini\", \"requirements.lock.txt\", \"requirements.txt\", \"run_all.py\", \"run_pipeline.py\", \"verify_artifacts.py\", \"verify_build_artifacts.py\"]\nSUMMARY: Wrote packaging configuration with Docker dependency and a single canonical-runner CLI entrypoint.\n",
+          "timestamp": "2025-12-26T08:13:10.332Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:05:56.895Z",
+      "failedAt": "2025-12-26T08:13:10.332Z"
+    },
+    {
+      "path": "runner.yaml",
+      "description": "Default runner configuration template defining the Docker image, command, mounts, environment, timeouts, and artifact output policy for the canonical entrypoint.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "ol_plan.md\", \"pyproject.toml\", \"pytest.ini\", \"requirements.lock.txt\", \"requirements.txt\", \"run_all.py\", \"run_pipeline.py\", \"runner.yaml\", \"verify_artifacts.py\", \"verify_build_artifacts.py\"]\nSummary: Wrote a default canonical Docker runner template that standardizes command, mounts, timeouts, and runtime/_build/logs artifact outputs including container-lost recording and a stable run_summary.json.\n",
+          "timestamp": "2025-12-26T08:13:21.939Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "exec_1766736814541_jbhxits.py\", \"package.json\", \"protocol_plan.md\", \"pyproject.toml\", \"pytest.ini\", \"requirements.lock.txt\", \"requirements.txt\", \"run_all.py\", \"run_pipeline.py\", \"runner.yaml\", \"verify_artifacts.py\", \"verify_build_artifacts.py\"]\nSUMMARY: Wrote the default canonical Docker runner configuration template with stable runtime/_build/logs artifacts and container-lost recording settings.\n",
+          "timestamp": "2025-12-26T08:13:34.598Z"
+        }
+      ],
+      "createdAt": "2025-12-26T08:05:56.895Z",
+      "failedAt": "2025-12-26T08:13:34.598Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Implement a single canonical runner entrypoint that always writes `runtime/_build/logs/` artifacts (complete run log + env snapshot + config), explicitly records whether/when “Container lost” occurs, and publishes a stable “run summary” file for downstream evaluation scripts.",
+  "missionSuccessCriteria": [
+    "Complete the urgent task identified by Meta-Coordinator",
+    "Curated insight (actionability 8-9/10): Creates an auditable, end-to-end execution trace (run log + environment snapshot) needed to compare pipeline variants, reproduce failures, and compute latency/cost metrics reliably across deployments ..."
+  ],
+  "projectName": "generated_configuration_1766736347766",
+  "language": "python",
+  "type": "configuration",
+  "status": "failed",
+  "requirements": [
+    "include_docker"
+  ],
+  "lastSavedAt": "2025-12-26T08:13:34.599Z",
+  "summary": {
+    "completed": 0,
+    "failed": 10,
+    "total": 10
+  }
+}

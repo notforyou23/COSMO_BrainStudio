@@ -1,0 +1,46 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create a minimal integration test that runs api_server.py (or the CLI) on a fixed DOI fixture list, saves results to /outputs/tools or runtime/_build (JSON/CSV), and documents expected success/failure cases; wire the run into CI once stable.
+Project: minimal integration test that runs api_server.py (or the CLI) on a fixed DOI fixture list, saves results to /outputs/tools or runtime/_build (JSON/CSV), and documents expected success/failure cases; wire the run into CI once stable. (python api_server)
+
+Target file details:
+- Path: .github/workflows/doi-fixture-integration.yml
+- Purpose: Adds a CI workflow that executes the DOI fixture integration test and uploads the generated JSON/CSV artifacts, initially as non-blocking until marked stable.
+- Category: config
+
+Other planned files (for context only):
+- tests/fixtures/doi_fixture_list.json: Defines a small, fixed list of DOI test fixtures with metadata (expected success/failure and notes) used by the integration test.
+- tests/integration/test_doi_fixture_integration.py: Runs api_server.py (or the CLI) against the fixed DOI fixture list, writes JSON/CSV outputs to runtime/_build or outputs/tools, and asserts expected success/failure behavior per fixture.
+- tests/support/run_api_server_fixture.py: Provides a reusable subprocess-based runner that starts api_server.py (or calls the CLI), feeds the DOI fixtures, collects results, and persists artifacts deterministically for CI.
+- tests/support/artifact_paths.py: Centralizes output directory selection and naming (preferring outputs/tools else runtime/_build) to keep artifact paths consistent across local runs and CI.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-26T07-51-06-259Z_src_doi_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766735464664_uxqtqp3
+- [INTROSPECTION] 2025-12-26T07-51-06-259Z_src_doi_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766735464664_uxqtqp3
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT INSIGHT: agent_1766733982156_n6bb5fc] Implication 3: UX and workflow become first-class safety components with measurable cost models
+- [INTROSPECTION] 2025-12-26T07-51-06-259Z_src_doi_pipeline_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766735464664_uxqtqp3
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Adds a CI workflow that executes the DOI fixture integration test and uploads the generated JSON/CSV artifacts, initially as non-blocking until marked stable.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('.github/workflows/doi-fixture-integration.yml')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:.github/workflows/doi-fixture-integration.yml')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside .github/workflows/doi-fixture-integration.yml.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

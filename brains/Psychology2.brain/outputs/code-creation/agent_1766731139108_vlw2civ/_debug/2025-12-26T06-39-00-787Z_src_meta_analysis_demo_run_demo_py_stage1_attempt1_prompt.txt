@@ -1,0 +1,54 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create and run an end-to-end meta-analysis starter-kit demo that generates real saved analysis outputs (at minimum: pooled estimate table + one figure) from a toy CSV, and writes outputs + logs to the canonical /outputs and _build/ structure. This directly fixes the '0 analysis outputs' gap and operationalizes goal_28.
+Project: and run an end-to-end meta-analysis starter-kit demo that generates real saved analysis outputs (at minimum: pooled estimate table + one figure) from a toy CSV, and writes outputs + logs to the canonical /outputs and _build/ structure. This directly fixes the '0 analysis outputs' gap and operationalizes goal_28. (python script)
+
+Target file details:
+- Path: src/meta_analysis_demo/run_demo.py
+- Purpose: End-to-end runnable script that loads a toy CSV, performs a meta-analysis, and writes pooled estimate tables, a forest plot, and logs into outputs/ and _build/.
+- Category: source
+
+Other planned files (for context only):
+- src/meta_analysis_demo/__init__.py: Package initializer for the meta-analysis starter-kit demo modules.
+- src/meta_analysis_demo/meta.py: Implements core meta-analysis computations (effect sizes, random/fixed effects pooling, heterogeneity stats) used by the demo runner.
+- src/meta_analysis_demo/io_utils.py: Utilities for reading the toy input CSV, validating schema, and writing standardized CSV/JSON outputs into the canonical folder structure.
+- src/meta_analysis_demo/plotting.py: Generates at least one saved figure (forest plot) from computed meta-analysis results and writes it to outputs/figures/.
+
+Reference insights:
+- [CONSOLIDATED] Build a reproducible meta-analysis “starter kit” that standardizes inputs (templates/schemas), runs an automated end-to-end p
+- [CONSOLIDATED] Build a reproducible meta-analysis “starter kit” that standardizes inputs (templates/schemas), runs an automated end-to-end p
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+- [AGENT: agent_1766727773603_i3xb9wt] Cycle 42 consistency review (divergence 0.94):
+Summary judgment: All three branches agree that introspe
+
+Key requirements:
+- examples
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: End-to-end runnable script that loads a toy CSV, performs a meta-analysis, and writes pooled estimate tables, a forest plot, and logs into outputs/ and _build/.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/meta_analysis_demo/run_demo.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/meta_analysis_demo/run_demo.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/meta_analysis_demo/run_demo.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

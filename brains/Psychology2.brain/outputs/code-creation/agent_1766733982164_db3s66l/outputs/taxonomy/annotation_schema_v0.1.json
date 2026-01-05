@@ -1,0 +1,288 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "task_taxonomy_annotation_record",
+  "description": "Record-level schema for JSONL/CSV annotations for task_taxonomy_codebook_v0.1.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "annotation_id",
+    "source_id",
+    "text",
+    "task_category",
+    "input_modality",
+    "output_modality",
+    "domain",
+    "outcome_type",
+    "confidence",
+    "annotator_id",
+    "created_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "0.1",
+      "description": "Schema version for validator compatibility."
+    },
+    "annotation_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier for this annotation record (UUID recommended)."
+    },
+    "source_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identifier for the source item being annotated (document id, dataset row id, etc.)."
+    },
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The user request / prompt / task text being annotated."
+    },
+    "task_category": {
+      "type": "string",
+      "enum": [
+        "information_retrieval",
+        "summarization",
+        "extraction_structuring",
+        "classification_judgment",
+        "generation_writing",
+        "translation_localization",
+        "planning_decision_support",
+        "coding_debugging",
+        "math_quantitative_reasoning",
+        "data_analysis_visualization",
+        "creative_ideation",
+        "conversation_assistance",
+        "other"
+      ],
+      "description": "Primary taxonomy category; choose the best single label that governs success criteria."
+    },
+    "task_subcategory": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1,
+      "description": "Optional finer-grained label as defined in the codebook; null/empty if not applicable."
+    },
+    "input_modality": {
+      "type": "string",
+      "enum": [
+        "text",
+        "image",
+        "audio",
+        "video",
+        "multimodal"
+      ],
+      "description": "Modality of inputs required to perform the task."
+    },
+    "output_modality": {
+      "type": "string",
+      "enum": [
+        "text",
+        "image",
+        "audio",
+        "video",
+        "multimodal",
+        "structured"
+      ],
+      "description": "Expected output modality (e.g., structured for JSON/table)."
+    },
+    "domain": {
+      "type": "string",
+      "enum": [
+        "general",
+        "business",
+        "finance",
+        "health",
+        "legal",
+        "education",
+        "science",
+        "engineering",
+        "software",
+        "policy",
+        "personal",
+        "other"
+      ],
+      "description": "Topical domain; choose 'other' if none fit."
+    },
+    "outcome_type": {
+      "type": "string",
+      "enum": [
+        "intangible",
+        "tangible",
+        "mixed",
+        "unknown"
+      ],
+      "description": "Whether the task outcome has real-world stakes (tangible) vs primarily informational (intangible)."
+    },
+    "stake_magnitude": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        null
+      ],
+      "description": "Required when outcome_type is tangible or mixed; reflects potential impact magnitude."
+    },
+    "stake_domain": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "financial",
+        "health_safety",
+        "legal_regulatory",
+        "reputation",
+        "privacy_security",
+        "operational",
+        "other",
+        null
+      ],
+      "description": "Optional: what kind of stakes are involved; recommended when outcome_type is tangible/mixed."
+    },
+    "safety_critical": {
+      "type": [
+        "boolean",
+        "null"
+      ],
+      "description": "Optional: true if errors could materially harm people, violate law, or cause major loss."
+    },
+    "safety_risk_level": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        null
+      ],
+      "description": "Optional: overall safety risk; required when safety_critical is true."
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Annotator confidence in the labels (0-1)."
+    },
+    "evidence": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Optional: brief rationale citing key phrases or cues (keep short)."
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Optional freeform notes for adjudication."
+    },
+    "annotator_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Annotator identifier."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Record creation timestamp (ISO 8601)."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "outcome_type": {
+            "enum": [
+              "tangible",
+              "mixed"
+            ]
+          }
+        },
+        "required": [
+          "outcome_type"
+        ]
+      },
+      "then": {
+        "required": [
+          "stake_magnitude"
+        ],
+        "properties": {
+          "stake_magnitude": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "safety_critical": {
+            "const": true
+          }
+        },
+        "required": [
+          "safety_critical"
+        ]
+      },
+      "then": {
+        "required": [
+          "safety_risk_level"
+        ],
+        "properties": {
+          "safety_risk_level": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "x_io_formats": {
+    "jsonl": {
+      "record_shape": "one JSON object per line",
+      "encoding": "utf-8"
+    },
+    "csv": {
+      "one_record_per_row": true,
+      "required_columns": [
+        "schema_version",
+        "annotation_id",
+        "source_id",
+        "text",
+        "task_category",
+        "input_modality",
+        "output_modality",
+        "domain",
+        "outcome_type",
+        "confidence",
+        "annotator_id",
+        "created_at"
+      ],
+      "null_values": [
+        "",
+        "null",
+        "None"
+      ]
+    }
+  }
+}

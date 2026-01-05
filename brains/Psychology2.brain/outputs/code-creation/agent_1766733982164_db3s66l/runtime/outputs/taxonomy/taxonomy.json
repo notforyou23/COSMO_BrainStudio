@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0.0",
+  "taxonomy_version": "1.0.0",
+  "taxonomy_id": "canonical-taxonomy",
+  "name": "Canonical Intervention & Evidence Taxonomy",
+  "purpose": "Standardize labels and structure used by agent-created deliverables across runtime/outputs.",
+  "provenance": {
+    "maintained_in": "runtime/outputs/taxonomy/taxonomy.json",
+    "updated_utc": "2025-12-26",
+    "license": "CC-BY-4.0"
+  },
+  "conventions": {
+    "id_format": "lower_snake_case",
+    "unknown_token": "unknown",
+    "multi_label_fields": [
+      "mechanisms",
+      "design_features",
+      "outcomes"
+    ]
+  },
+  "axes": [
+    {
+      "id": "intervention_type",
+      "name": "Intervention type",
+      "description": "High-level class of intervention being evaluated.",
+      "categories": [
+        { "id": "choice_architecture_nudge", "name": "Choice architecture (nudge)", "description": "Alters how options are presented without changing economic incentives or restricting choice." },
+        { "id": "information_communication", "name": "Information/communication", "description": "Provides information, reminders, warnings, or education without changing the option set." },
+        { "id": "incentives", "name": "Incentives", "description": "Changes monetary or non-monetary payoffs or rewards." },
+        { "id": "rules_restrictions", "name": "Rules/restrictions", "description": "Mandates, bans, eligibility rules, or friction that limits or conditions choices." },
+        { "id": "service_delivery", "name": "Service delivery/process", "description": "Changes operational process, staffing, workflows, channels, or access." },
+        { "id": "technology_product", "name": "Technology/product", "description": "Uses or modifies tools, software, interfaces, or products affecting behavior." },
+        { "id": "multi_component", "name": "Multi-component", "description": "Bundles two or more distinct intervention types." },
+        { "id": "other", "name": "Other", "description": "Does not fit predefined categories." },
+        { "id": "unknown", "name": "Unknown", "description": "Insufficient information to classify." }
+      ]
+    },
+    {
+      "id": "nudge_mechanism",
+      "name": "Nudge mechanism",
+      "description": "Mechanism(s) for choice-architecture interventions; can be used as a general behavioral mechanism tag set.",
+      "categories": [
+        { "id": "defaults", "name": "Defaults", "description": "Pre-selects an option unless the decision-maker opts out." },
+        { "id": "friction", "name": "Friction/effort", "description": "Increases or decreases effort required to choose an option (e.g., one-click vs multi-step)." },
+        { "id": "salience", "name": "Salience/attention", "description": "Changes prominence or visibility of information/options." },
+        { "id": "framing", "name": "Framing", "description": "Changes wording/presentation to alter interpretation without changing facts." },
+        { "id": "ordering", "name": "Ordering/placement", "description": "Reorders or repositions options (e.g., menu placement)." },
+        { "id": "simplification", "name": "Simplification", "description": "Reduces complexity, cognitive load, or required calculations." },
+        { "id": "commitment", "name": "Commitment devices", "description": "Enables pre-commitment, pledges, or constraints chosen by the participant." },
+        { "id": "social_norms", "name": "Social norms", "description": "Communicates what others do/approve to influence behavior." },
+        { "id": "feedback", "name": "Feedback", "description": "Provides performance/outcome feedback (often personalized)." },
+        { "id": "timing", "name": "Timing/prompts", "description": "Delivers prompts at decision-relevant moments (e.g., reminders)." },
+        { "id": "personalization", "name": "Personalization", "description": "Tailors content or options to user attributes or context." },
+        { "id": "other", "name": "Other", "description": "Does not fit predefined mechanisms." },
+        { "id": "unknown", "name": "Unknown", "description": "Insufficient information to classify." }
+      ]
+    },
+    {
+      "id": "study_design",
+      "name": "Study design",
+      "description": "Primary evaluation design used to estimate impact.",
+      "categories": [
+        { "id": "rct_individual", "name": "Randomized controlled trial (individual)", "description": "Randomization at the individual/household level." },
+        { "id": "rct_cluster", "name": "Randomized controlled trial (cluster)", "description": "Randomization at group/site level (e.g., schools, clinics)." },
+        { "id": "quasi_diff_in_diff", "name": "Difference-in-differences", "description": "Uses pre/post with a comparison group and parallel trends assumption." },
+        { "id": "quasi_rdd", "name": "Regression discontinuity", "description": "Uses assignment cutoff to estimate local causal effect." },
+        { "id": "quasi_iv", "name": "Instrumental variables", "description": "Uses instrument to identify causal effect under exclusion restrictions." },
+        { "id": "matching_synthetic_control", "name": "Matching/synthetic control", "description": "Constructs counterfactual by matching or weighted combination." },
+        { "id": "before_after_no_control", "name": "Before-after (no control)", "description": "Pre/post without a control group (descriptive/weak causal)." },
+        { "id": "cross_sectional", "name": "Cross-sectional", "description": "Single-time observational association." },
+        { "id": "qualitative", "name": "Qualitative", "description": "Interviews, focus groups, ethnography, or thematic analysis." },
+        { "id": "simulation_model", "name": "Simulation/model", "description": "Analytic or computational model rather than empirical evaluation." },
+        { "id": "other", "name": "Other", "description": "Does not fit predefined designs." },
+        { "id": "unknown", "name": "Unknown", "description": "Insufficient information to classify." }
+      ]
+    },
+    {
+      "id": "population",
+      "name": "Population",
+      "description": "Primary participant group targeted or studied.",
+      "categories": [
+        { "id": "general_public", "name": "General public", "description": "Broad population without specific occupational role." },
+        { "id": "consumers", "name": "Consumers/users", "description": "People making consumption or product/service choices." },
+        { "id": "employees", "name": "Employees/workers", "description": "Workplace populations." },
+        { "id": "students", "name": "Students", "description": "K-12 or higher education students." },
+        { "id": "patients", "name": "Patients", "description": "Healthcare recipients." },
+        { "id": "providers", "name": "Providers", "description": "Clinicians, teachers, caseworkers, or other service providers." },
+        { "id": "organizations", "name": "Organizations", "description": "Firms, schools, hospitals, agencies as units." },
+        { "id": "policy_administrators", "name": "Policy administrators", "description": "Officials implementing/operating programs." },
+        { "id": "other", "name": "Other", "description": "Does not fit predefined populations." },
+        { "id": "unknown", "name": "Unknown", "description": "Insufficient information to classify." }
+      ]
+    },
+    {
+      "id": "outcome_domain",
+      "name": "Outcome domain",
+      "description": "Primary outcome domain(s) measured.",
+      "categories": [
+        { "id": "health", "name": "Health", "description": "Clinical outcomes, adherence, prevention, wellbeing." },
+        { "id": "finance", "name": "Finance", "description": "Savings, debt, payments, financial choices." },
+        { "id": "education", "name": "Education", "description": "Enrollment, attendance, learning, completion." },
+        { "id": "environment", "name": "Environment/energy", "description": "Conservation, emissions, recycling, energy use." },
+        { "id": "civic", "name": "Civic/public sector", "description": "Voting, compliance, service uptake, tax behavior." },
+        { "id": "workplace", "name": "Workplace/productivity", "description": "Performance, safety, hiring, retention." },
+        { "id": "consumer_behavior", "name": "Consumer behavior", "description": "Purchasing, browsing, conversion, churn." },
+        { "id": "social", "name": "Social outcomes", "description": "Prosocial behavior, discrimination, cooperation." },
+        { "id": "other", "name": "Other", "description": "Does not fit predefined domains." },
+        { "id": "unknown", "name": "Unknown", "description": "Insufficient information to classify." }
+      ]
+    },
+    {
+      "id": "effect_direction",
+      "name": "Effect direction",
+      "description": "Direction of the main reported effect for the primary outcome (as stated by authors/analysts).",
+      "categories": [
+        { "id": "positive", "name": "Positive", "description": "Moves outcome in intended beneficial direction." },
+        { "id": "null", "name": "Null", "description": "No meaningful/statistically supported effect." },
+        { "id": "negative", "name": "Negative", "description": "Moves outcome in unintended harmful direction." },
+        { "id": "mixed", "name": "Mixed", "description": "Heterogeneous effects across outcomes/subgroups/time." },
+        { "id": "inconclusive", "name": "Inconclusive", "description": "Evidence insufficient or analysis underpowered/ambiguous." },
+        { "id": "unknown", "name": "Unknown", "description": "Not reported or cannot be determined." }
+      ]
+    }
+  ]
+}

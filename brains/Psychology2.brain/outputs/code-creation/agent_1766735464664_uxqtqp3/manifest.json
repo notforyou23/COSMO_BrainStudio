@@ -1,0 +1,327 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766735464664_uxqtqp3",
+  "agentType": "code-creation",
+  "goalId": "goal_186",
+  "missionId": "urgent_goal_186_1766735464664",
+  "spawnCycle": 116,
+  "coordinatorReview": null,
+  "spawnedBy": "meta_coordinator_urgent",
+  "triggerSource": "urgent_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T07:51:16.604Z",
+  "completedAt": "2025-12-26T08:02:51.770Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "src/api_server.py",
+      "description": "Implements the HTTP API server with end-to-end DOI resolution, normalization, and explicit provenance fields (landing_url, accessed_at, parsing_method, failure_reason_code) plus structured logging.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": ".py\", \"src/meta_utils.py\", \"src/models.py\", \"src/routing_policy.py\", \"src/run_meta_analysis.py\", \"src/schema_utils.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSUMMARY: Implemented a minimal stdlib HTTP DOI resolution API with provenance fields and JSON structured logging to disk.\n",
+          "timestamp": "2025-12-26T07:51:56.742Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "lysis.py\", \"src/schema_utils.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSummary: Implemented a minimal HTTP DOI resolution API with end-to-end redirect resolution, metadata fetching, normalization, provenance fields, and JSONL structured logging to a per-run artifacts directory.\n",
+          "timestamp": "2025-12-26T07:52:40.887Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:51:16.604Z",
+      "failedAt": "2025-12-26T07:52:40.887Z"
+    },
+    {
+      "path": "src/doi_pipeline.py",
+      "description": "Provides the core DOI processing pipeline (resolve redirects/paywalls, fetch/parse metadata, normalize fields, emit JSON records) with deterministic failure reason codes.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "ta_analysis.py\", \"src/schema_utils.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSummary: Implemented a compact DOI processing pipeline with redirect resolution, paywall detection, multi-source metadata parsing, normalization, and deterministic failure codes with provenance fields.\n",
+          "timestamp": "2025-12-26T07:53:24.428Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "execution_error",
+          "timestamp": "2025-12-26T07:54:04.748Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:51:16.604Z",
+      "failedAt": "2025-12-26T07:54:04.748Z"
+    },
+    {
+      "path": "src/provenance.py",
+      "description": "Defines provenance and failure code schemas/enums and helpers to consistently populate accessed timestamps, landing URLs, parsing methods, and error categorization.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "ker.py\", \"src/models.py\", \"src/provenance.py\", \"src/routing_policy.py\", \"src/run_meta_analysis.py\", \"src/schema_utils.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSUMMARY: Added provenance schemas and helpers for timestamps, parsing methods, and deterministic failure reason codes.\n",
+          "timestamp": "2025-12-26T07:54:25.939Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "y\", \"src/run_meta_analysis.py\", \"src/schema_utils.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSUMMARY: Added provenance schemas, parsing/failure enums, and helpers to consistently populate accessed timestamps, landing URLs, parsing methods, and deterministic failure reason codes.\n",
+          "timestamp": "2025-12-26T07:54:47.197Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:51:16.604Z",
+      "failedAt": "2025-12-26T07:54:47.197Z"
+    },
+    {
+      "path": "src/exporters.py",
+      "description": "Writes normalized outputs to JSONL/JSON and CSV with stable column order and embeds provenance fields while also saving per-run logs to disk.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "src/models.py\", \"src/provenance.py\", \"src/routing_policy.py\", \"src/run_meta_analysis.py\", \"src/schema_utils.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSummary: Implemented JSON/JSONL/CSV exporters with stable columns, provenance flattening, and per-run artifact/log path helpers.\n",
+          "timestamp": "2025-12-26T07:55:09.802Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "nance.py\", \"src/routing_policy.py\", \"src/run_meta_analysis.py\", \"src/schema_utils.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSummary: Implemented exporters to persist normalized DOI records (JSONL/JSON/CSV) with stable columns, provenance fields, and optional per-run JSONL logs.\n",
+          "timestamp": "2025-12-26T07:55:30.842Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:51:16.604Z",
+      "failedAt": "2025-12-26T07:55:30.842Z"
+    },
+    {
+      "path": "src/logging_setup.py",
+      "description": "Sets up JSON structured logging with run_id correlation, request/response timing, and file handlers for saving logs under an artifacts directory.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "venance.py\", \"src/routing_policy.py\", \"src/run_meta_analysis.py\", \"src/schema_utils.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSummary: Added JSON structured logging with run_id/request context correlation, per-run file logs under artifacts, and a request timing context manager.\n",
+          "timestamp": "2025-12-26T07:55:55.926Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": ", \"src/routing_policy.py\", \"src/run_meta_analysis.py\", \"src/schema_utils.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSummary: Implemented JSON structured logging setup with run_id/request_id correlation, per-run file handlers under artifacts, and a request timing context manager.\n",
+          "timestamp": "2025-12-26T07:56:16.339Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:51:16.604Z",
+      "failedAt": "2025-12-26T07:56:16.339Z"
+    },
+    {
+      "path": "scripts/run_end_to_end.py",
+      "description": "Runs api_server.py end-to-end against the curated DOI test set, captures responses, and saves normalized outputs (JSON + CSV + logs) with a reproducible run manifest.",
+      "category": "support",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "Forbidden command pattern detected: /shutdown/",
+          "timestamp": "2025-12-26T07:57:10.329Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "ripts/run_tests_with_preflight.sh\", \"scripts/smoke_test.py\", \"scripts/toy_meta_analysis.py\", \"scripts/validate_json.py\", \"scripts/verify_artifacts.py\", \"scripts/verify_build_artifacts.json\", \"scripts/verify_build_artifacts.py\"]\nSummary: Added an end-to-end runner that starts api_server.py, exercises a curated DOI edge-case set, and writes JSONL/CSV/logs plus a run manifest with provenance fields.\n",
+          "timestamp": "2025-12-26T07:58:03.497Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:51:16.604Z",
+      "failedAt": "2025-12-26T07:58:03.497Z"
+    },
+    {
+      "path": "data/doi_test_set.json",
+      "description": "Curated DOI test set containing representative edge cases (redirects, paywalls, multiple editions, invalid/retired DOIs) with human-readable labels and expected behaviors.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:data/doi_test_set.json\nDIR_STATE:[\"data/doi_test_set.json\", \"data/example_meta_analysis_input.json\", \"data/reference_corpus.jsonl\", \"data/toy_extraction.csv\", \"data/toy_meta_input.csv\"]\nSummary: Wrote a curated DOI edge-case JSON test set with labeled items and expected behaviors for end-to-end DOI resolution/provenance testing.\n",
+          "timestamp": "2025-12-26T07:58:34.905Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:data/doi_test_set.json\nDIR_STATE:[\"data/doi_test_set.json\", \"data/example_meta_analysis_input.json\", \"data/reference_corpus.jsonl\", \"data/toy_extraction.csv\", \"data/toy_meta_input.csv\"]\nSummary: Wrote a curated DOI edge-case test set JSON including redirects, paywalls/dynamic pages, book vs chapter, DataCite (arXiv/Zenodo), and invalid DOIs with expected outcomes/failure codes.\n",
+          "timestamp": "2025-12-26T07:59:07.527Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:51:16.604Z",
+      "failedAt": "2025-12-26T07:59:07.527Z"
+    },
+    {
+      "path": "tests/test_cli_end_to_end.py",
+      "description": "End-to-end test that spins up the API server, executes the runner over the DOI test set, and asserts outputs include required provenance fields and valid failure codes.",
+      "category": "test",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "File not found after execution",
+          "timestamp": "2025-12-26T08:00:01.270Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": " \"tests/test_pipeline_vs_self_confidence_far.py\", \"tests/test_plan_outputs.py\", \"tests/test_roadmap_outputs.py\", \"tests/test_schema_and_provenance.py\", \"tests/test_validator_smoke.py\"]\nSummary: Added an end-to-end pytest that starts the API server, runs a curated DOI set through likely resolve endpoints, writes JSONL/CSV/log outputs, and asserts required provenance fields and valid failure codes.\n",
+          "timestamp": "2025-12-26T08:00:41.671Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:51:16.604Z",
+      "failedAt": "2025-12-26T08:00:41.671Z"
+    },
+    {
+      "path": "docs/doi_test_set_and_provenance.md",
+      "description": "Documents the curated DOI test set rationale, edge-case coverage, failure reason code taxonomy, and the exact output schemas for JSON/CSV/logs.",
+      "category": "documentation",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docs/doi_test_set_and_provenance.md\nDIR_STATE:[\"docs/build_script_consolidation.md\", \"docs/demo_expected_failures.md\", \"docs/doi_test_set_and_provenance.md\"]\nSummary: Wrote the curated DOI test set documentation with provenance requirements, failure codes, and exact JSON/CSV/log schemas.\n",
+          "timestamp": "2025-12-26T08:01:19.539Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:docs/doi_test_set_and_provenance.md\nDIR_STATE:[\"docs/build_script_consolidation.md\", \"docs/demo_expected_failures.md\", \"docs/doi_test_set_and_provenance.md\"]\nSummary: Wrote curated DOI test-set documentation defining edge-case coverage, provenance requirements, failure codes, and JSON/CSV/log schemas.\n",
+          "timestamp": "2025-12-26T08:02:06.667Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:51:16.604Z",
+      "failedAt": "2025-12-26T08:02:06.667Z"
+    },
+    {
+      "path": "src/schemas.py",
+      "description": "Defines the normalized citation record schema (pydantic/dataclasses) shared by the API, pipeline, and exporters to ensure consistent JSON/CSV field names and types.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": ", \"src/run_meta_analysis.py\", \"src/run_pipeline.py\", \"src/schema_utils.py\", \"src/schemas.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSUMMARY: Added a shared normalized citation schema (with provenance and stable CSV flattening) for consistent JSON/CSV outputs across the pipeline.\n",
+          "timestamp": "2025-12-26T08:02:28.769Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "\", \"src/run_meta_analysis.py\", \"src/run_pipeline.py\", \"src/schema_utils.py\", \"src/schemas.py\", \"src/storage.py\", \"src/threshold_sweep.py\", \"src/uncertainty_signals.py\", \"src/validate_annotations.py\", \"src/validator.py\", \"src/verify_build_artifacts.py\"]\nSUMMARY: Added shared Pydantic schemas for normalized citation records with explicit provenance and failure codes for consistent JSON/CSV outputs.\n",
+          "timestamp": "2025-12-26T08:02:51.770Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:51:16.604Z",
+      "failedAt": "2025-12-26T08:02:51.770Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Create a small curated DOI test set (covering edge cases like redirects/paywalls/multiple editions), run api_server.py end-to-end, and save normalized outputs (JSON + CSV + logs) with explicit provenance fields (landing URL, accessed timestamp, parsing method, failure reason codes).",
+  "missionSuccessCriteria": [
+    "Complete the urgent task identified by Meta-Coordinator",
+    "Curated insight (actionability 8-9/10): Validates the primary-source/citation access MVP via real end-to-end execution (DOI list → retrieval → structured outputs), turning the tooling into an empirically testable component and producing art..."
+  ],
+  "projectName": "small curated DOI test set (covering edge cases like redirects/paywalls/multiple editions), run api_server.py end-to-end, and save normalized outputs (JSON + CSV + logs) with explicit provenance fields (landing URL, accessed timestamp, parsing method, failure reason codes).",
+  "language": "python",
+  "type": "api_server",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-26T08:02:51.770Z",
+  "summary": {
+    "completed": 0,
+    "failed": 10,
+    "total": 10
+  }
+}

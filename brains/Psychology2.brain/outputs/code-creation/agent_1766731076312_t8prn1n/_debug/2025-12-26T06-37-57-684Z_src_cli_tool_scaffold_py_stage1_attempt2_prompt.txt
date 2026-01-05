@@ -1,0 +1,53 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create /outputs/README.md (artifact rules), /outputs/CHANGELOG.md (versioned entries per cycle), and core folders (e.g., /outputs/meta_analysis/, /outputs/taxonomy/, /outputs/tooling/) and commit/update changelog immediately.
+Project: /outputs/README.md (artifact rules), /outputs/CHANGELOG.md (versioned entries per cycle), and core folders (e.g., /outputs/meta_analysis/, /outputs/taxonomy/, /outputs/tooling/) and commit/update changelog immediately. (python cli_tool)
+
+Target file details:
+- Path: src/cli_tool/scaffold.py
+- Purpose: Contains filesystem scaffolding logic to create required /outputs directories and README files idempotently while respecting artifact rules.
+- Category: source
+
+Other planned files (for context only):
+- outputs/README.md: Documents the /outputs artifact contract including folder purpose, naming conventions, artifact rules, and how the CLI tool should write and update outputs safely.
+- outputs/CHANGELOG.md: Maintains versioned, cycle-based changelog entries for the /outputs artifacts and structure, updated immediately when outputs are created or modified.
+- outputs/meta_analysis/README.md: Defines what belongs in /outputs/meta_analysis, expected file formats, and minimal metadata requirements for generated analyses.
+- outputs/taxonomy/README.md: Defines what belongs in /outputs/taxonomy, expected taxonomy schema conventions, and how updates should be recorded in the changelog.
+
+Reference insights:
+- [INTROSPECTION] 2025-12-26T05-01-46-647Z_outputs_CHANGELOG_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766725305310_fqd4vp
+- [INTROSPECTION] 2025-12-26T05-01-46-647Z_outputs_CHANGELOG_md_stage1_attempt1_prompt.txt from code-creation agent agent_1766725305310_fqd4vp
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [INTROSPECTION] cli.py from code-creation agent agent_1766725784487_bkavju7: """psyprim CLI: standardized primary-source workflows + lightwe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+
+Key requirements:
+- documentation
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Contains filesystem scaffolding logic to create required /outputs directories and README files idempotently while respecting artifact rules.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/cli_tool/scaffold.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/cli_tool/scaffold.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/cli_tool/scaffold.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

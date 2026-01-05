@@ -1,0 +1,110 @@
+{
+  "schema_version": "v0.1",
+  "codebook_version": "v0.1",
+  "example_id": "ex_001",
+  "generated_at": "2025-12-26T00:00:00Z",
+  "task": {
+    "task_id": "task_summarize_policy_text_001",
+    "title": "Summarize a policy memo for a general audience",
+    "problem_statement": "Create a concise plain-language summary of a provided policy memo while preserving key constraints, stakeholders, and actions.",
+    "inputs": [
+      {
+        "name": "source_text",
+        "modality": "text",
+        "required": true,
+        "format": "utf-8",
+        "notes": "Full memo text as a single string."
+      }
+    ],
+    "outputs": [
+      {
+        "name": "summary",
+        "modality": "text",
+        "required": true,
+        "format": "markdown",
+        "notes": "Short summary with headings and bullet points."
+      }
+    ]
+  },
+  "taxonomy": {
+    "primary_intent": "summarization",
+    "secondary_intents": [
+      "simplification",
+      "information_extraction"
+    ],
+    "domain": [
+      "public_policy"
+    ],
+    "granularity": "document_level",
+    "interaction_pattern": "single_turn",
+    "input_characteristics": {
+      "input_modalities": [
+        "text"
+      ],
+      "expected_length": "medium",
+      "languages": [
+        "en"
+      ]
+    },
+    "output_characteristics": {
+      "output_modalities": [
+        "text"
+      ],
+      "expected_length": "short",
+      "style_constraints": [
+        "plain_language",
+        "non_technical"
+      ]
+    },
+    "constraints_and_risks": {
+      "safety_risk_level": "low",
+      "privacy_sensitivity": "low",
+      "allowed_assistance": [
+        "summarize",
+        "rephrase",
+        "quote_brief_excerpts"
+      ],
+      "disallowed_assistance": [
+        "fabricate_facts",
+        "attribute_uncited_sources"
+      ]
+    }
+  },
+  "labels": {
+    "difficulty": "moderate",
+    "time_estimate_minutes": 10,
+    "required_knowledge": [
+      "general_reading_comprehension"
+    ]
+  },
+  "evaluation": {
+    "success_criteria": [
+      "Covers the memo's purpose, key actors, and main actions",
+      "No invented details beyond the provided text",
+      "Uses clear plain language and is easy to scan"
+    ],
+    "common_failure_modes": [
+      "Hallucinated statistics or claims",
+      "Omitting key constraints or stakeholders",
+      "Overly long or too technical"
+    ],
+    "suggested_metrics": [
+      "factual_consistency_manual_check",
+      "coverage_checklist",
+      "readability_grade_level"
+    ]
+  },
+  "example_instance": {
+    "input": {
+      "source_text": "The agency proposes a new default enrollment option for retirement savings to increase participation among new hires. Employees may opt out at any time. The change applies starting Q3 and requires HR to update onboarding materials and payroll deductions."
+    },
+    "output": {
+      "summary": "## Summary\n\n- The agency wants to increase retirement saving by **automatically enrolling new hires by default**.\n- Employees can **opt out at any time** if they do not want to participate.\n- The policy would start in **Q3**.\n- **HR** must update onboarding documents, and payroll must update **deduction settings** to support the change."
+    }
+  },
+  "provenance": {
+    "created_by": "example_generator",
+    "source": "documentation_example",
+    "notes": "Minimal example instance demonstrating expected fields and formats."
+  }
+}

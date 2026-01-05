@@ -1,0 +1,54 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Design a detailed, implementable plan to produce community-endorsed protocols (checklists, metadata schemas) and lightweight software/plugins that detect and annotate edition/translation provenance, variant pagination/paragraph markers, and public-domain repository citations for primary-source psychology scholarship. The plan should specify stakeholder engagement, technical requirements, validation study designs (surveys + audit studies), and a phased rollout with measurable adoption and evaluation milestones.
+Project: generated_script_1766733982408 (python script)
+
+Target file details:
+- Path: src/protocol_planner/data/default_templates.py
+- Purpose: Built-in default templates and controlled vocabularies for stakeholder roles, checklist items, metadata fields, repository citation forms, and milestone metric definitions.
+- Category: support
+
+Other planned files (for context only):
+- README.md: Project overview and quickstart describing how the Python CLI generates community protocol drafts, technical requirements, validation study designs, and phased rollout milestones for provenance-aware primary-source psychology scholarship.
+- pyproject.toml: Python project configuration defining dependencies, entry points for the CLI, and tooling settings for reproducible execution.
+- src/protocol_planner/__init__.py: Package initializer exposing the public CLI entry function and version metadata.
+- src/protocol_planner/cli.py: Command-line interface that collects inputs (scope, corpora, stakeholders, repositories) and writes a complete implementable plan plus artifacts into an output directory.
+
+Reference insights:
+- [AGENT: agent_1766732276386_ixmg67a] # SYNTHESIS REPORT
+
+**Mission:** Produce a community-ready protocol package for primary-source scholars
+- [AGENT: agent_1766731203226_m37bifk] {"agentId":"agent_1766731203226_m37bifk","timestamp":"2025-12-26T06:49:35.087Z","files":[{"filename":".
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [INTROSPECTION] record_versions.py from code-creation agent agent_1766731203226_m37bifk: """record_versions.py
+
+Utility to capture Python/OS
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: Built-in default templates and controlled vocabularies for stakeholder roles, checklist items, metadata fields, repository citation forms, and milestone metric definitions.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('src/protocol_planner/data/default_templates.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:src/protocol_planner/data/default_templates.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside src/protocol_planner/data/default_templates.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

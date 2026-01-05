@@ -1,0 +1,44 @@
+You are planning a python script implementation for the following mission:
+Create a minimal CI workflow that runs the one-command runner (gate → validator → meta-analysis demo) and uploads runtime/_build/ as CI artifacts; ensure CI fails if runtime/_build/reports or runtime/_build/tables are empty.
+
+Relevant context:
+- [INTROSPECTION] 2025-12-26T05-48-26-975Z_runtime_build_reports_gitkeep_stage1_attempt1_prompt.txt from code-creation agent agent_17667281055
+- [INTROSPECTION] 2025-12-26T05-48-26-975Z_runtime_build_reports_gitkeep_stage1_attempt2_prompt.txt from code-creation agent agent_17667281055
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+- [INTROSPECTION] record_versions.py from code-creation agent agent_1766731203226_m37bifk: """record_versions.py
+
+Utility to capture Python/OS
+- [AGENT: agent_1766727773603_i3xb9wt] Cycle 42 consistency review (divergence 0.94):
+Summary judgment: All three branches agree that introspe
+- [AGENT: agent_1766723822731_qlsh7fi] Cycle 1 consistency review (divergence 0.94):
+Summary verdict: The three branches are largely complemen
+- [AGENT: agent_1766724479793_l5s4pac] Cycle 9 consistency review (divergence 0.96):
+Summary (high divergence: 0.96) — the three branches over
+
+Explicit requirements:
+- examples
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.

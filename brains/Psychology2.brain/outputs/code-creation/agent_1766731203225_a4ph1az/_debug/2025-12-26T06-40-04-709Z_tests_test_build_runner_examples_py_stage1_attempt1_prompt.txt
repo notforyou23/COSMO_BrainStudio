@@ -1,0 +1,54 @@
+You are inside the OpenAI code interpreter environment with filesystem access to /mnt/data.
+
+Mission summary: Create or repair a single one-command build runner that sequentially triggers: artifact gate → taxonomy validation → meta-analysis demo, and fails fast with clear error messages. The runner must standardize output locations under runtime/_build/ and emit a final summary status.
+Project: or repair a single one-command build runner that sequentially triggers: artifact gate → taxonomy validation → meta-analysis demo, and fails fast with clear error messages. The runner must standardize output locations under runtime/_build/ and emit a final summary status. (python script)
+
+Target file details:
+- Path: tests/test_build_runner_examples.py
+- Purpose: End-to-end tests demonstrating example invocations and verifying fail-fast behavior, output standardization under runtime/_build/, and final summary emission.
+- Category: test
+
+Other planned files (for context only):
+- src/build_runner.py: Single-command build runner CLI that sequentially executes artifact gate, taxonomy validation, and meta-analysis demo with standardized runtime/_build/ outputs, fail-fast behavior, clear errors, and a final summary status.
+- src/build_steps.py: Implementation of the three build steps (artifact gate, taxonomy validation, meta-analysis demo) with consistent subprocess execution, logging, and output capture into runtime/_build/.
+- src/build_logging.py: Logging and reporting utilities to write step-specific raw logs, structured summaries, and final status artifacts under runtime/_build/.
+- src/build_paths.py: Path and directory management helpers that create and normalize the runtime/_build/ layout and provide stable locations for each step’s outputs.
+
+Reference insights:
+- [CONSOLIDATED] Standardize build verification by running the required validation tools against the current artifacts and persist both raw co
+- [CONSOLIDATED] Standardize build verification by running the required validation tools against the current artifacts and persist both raw co
+- [AGENT: agent_1766727472302_lzscpmx] Cycle 39 consistency review (divergence 0.92):
+Summary assessment (concise)
+
+1) Areas of agreement
+- Pe
+- [FORK_RESULT:fork_11] Small, low-cost tweaks to choice architecture—like setting defaults, reordering options, adjusting framing, salience, 
+- [AGENT: agent_1766727773603_i3xb9wt] Cycle 42 consistency review (divergence 0.94):
+Summary judgment: All three branches agree that introspe
+
+Key requirements:
+- examples
+
+Stage details:
+- Stage: Stage 1
+- Mode: create
+- Goal: End-to-end tests demonstrating example invocations and verifying fail-fast behavior, output standardization under runtime/_build/, and final summary emission.
+- Line budget for this stage: <= 150 new/changed lines.
+
+Implementation tasks (execute using Python in this environment):
+1. from pathlib import Path
+2. import json
+3. target_path = Path('/mnt/data').joinpath('tests/test_build_runner_examples.py')
+4. target_path.parent.mkdir(parents=True, exist_ok=True)
+5. Build the entire stage deliverable (<= 150 lines) as a list named chunks where each item is a multiline string representing a contiguous block of code without leading or trailing blank lines.
+6. final_text = '\n'.join(block.strip('\n') for block in chunks).strip() + '\n'
+7. target_path.write_text(final_text, encoding='utf-8')
+8. print('FILE_WRITTEN:tests/test_build_runner_examples.py')
+9. print('DIR_STATE:' + json.dumps(sorted(str(p.relative_to(Path("/mnt/data"))) for p in target_path.parent.glob('*') if p.is_file())))
+
+Constraints:
+- Ensure the new file fully satisfies the stage goal with no placeholders or TODO markers.
+- Keep the newly written code within the stated line/character budget.
+- Keep console output short (only FILE_WRITTEN / DIR_STATE plus essential status).
+- Do not touch files outside tests/test_build_runner_examples.py.
+- After writing the file, provide a one-sentence summary. Do not list the file contents in the final message.

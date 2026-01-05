@@ -1,0 +1,42 @@
+{
+  "content": "[\n  {\n    \"path\": \"tests/fixtures/taxonomy/annotations_fixture.jsonl\",\n    \"description\": \"Tiny JSONL annotation fixture containing a mix of valid rows and intentionally invalid rows to exercise taxonomy validation paths.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \"src/taxonomy/validate_annotations.js\",\n    \"description\": \"Implements a JSONL annotation validator that checks each record against the taxonomy/schema rules and returns per-record errors plus a pass/fail summary.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/run_taxonomy_validation.js\",\n    \"description\": \"CLI runner that loads the JSONL fixture, invokes the validator, and writes the summary and per-record errors to runtime/_build/reports/taxonomy_validation.json with a nonzero exit code on failure.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"runtime/_build/reports/.gitkeep\",\n    \"description\": \"Keeps the reports output directory in version control so CI and local runs can reliably write taxonomy_validation.json.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"package.json\",\n    \"description\": \"Adds a runnable script entry (e.g., taxonomy:validate) that executes scripts/run_taxonomy_validation.js and can be invoked by the test runner and CI.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \".github/workflows/ci.yml\",\n    \"description\": \"Updates CI to run the taxonomy validation script and upload runtime/_build/reports/taxonomy_validation.json as an artifact on every build.\",\n    \"category\": \"config\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_0a9882e8b5b10a2c00694e3f31f840819791a098ae45f829aa",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 647,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 469,
+    "output_tokens_details": {
+      "reasoning_tokens": 118
+    },
+    "total_tokens": 1116
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0a9882e8b5b10a2c00694e3f324dcc8197a6d6fbcdcd464491",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0a9882e8b5b10a2c00694e3f3469288197a2e6d1ef30b24004",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"tests/fixtures/taxonomy/annotations_fixture.jsonl\",\n    \"description\": \"Tiny JSONL annotation fixture containing a mix of valid rows and intentionally invalid rows to exercise taxonomy validation paths.\",\n    \"category\": \"test\"\n  },\n  {\n    \"path\": \"src/taxonomy/validate_annotations.js\",\n    \"description\": \"Implements a JSONL annotation validator that checks each record against the taxonomy/schema rules and returns per-record errors plus a pass/fail summary.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/run_taxonomy_validation.js\",\n    \"description\": \"CLI runner that loads the JSONL fixture, invokes the validator, and writes the summary and per-record errors to runtime/_build/reports/taxonomy_validation.json with a nonzero exit code on failure.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"runtime/_build/reports/.gitkeep\",\n    \"description\": \"Keeps the reports output directory in version control so CI and local runs can reliably write taxonomy_validation.json.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"package.json\",\n    \"description\": \"Adds a runnable script entry (e.g., taxonomy:validate) that executes scripts/run_taxonomy_validation.js and can be invoked by the test runner and CI.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \".github/workflows/ci.yml\",\n    \"description\": \"Updates CI to run the taxonomy validation script and upload runtime/_build/reports/taxonomy_validation.json as an artifact on every build.\",\n    \"category\": \"config\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

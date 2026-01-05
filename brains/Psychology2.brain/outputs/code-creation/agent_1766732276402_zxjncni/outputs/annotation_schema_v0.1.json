@@ -1,0 +1,170 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "task_annotation_schema_v0.1",
+  "title": "Task Annotation Schema v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "annotation_id", "created_at", "task", "labels"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "0.1" },
+    "annotation_id": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"
+    },
+    "created_at": { "type": "string", "format": "date-time" },
+    "annotator": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "type": { "type": "string", "enum": ["human", "model", "hybrid"] }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "dataset": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "item_id": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "split": { "type": "string", "enum": ["train", "dev", "test", "unspecified"] }
+      }
+    },
+    "task": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["taxonomy_version", "domain", "category", "intent"],
+      "properties": {
+        "taxonomy_version": { "type": "string", "const": "0.1" },
+        "domain": {
+          "type": "string",
+          "enum": ["information", "creation", "analysis", "coding", "math", "planning", "support", "meta"]
+        },
+        "category": {
+          "type": "string",
+          "enum": ["qa", "summarization", "extraction", "classification", "generation", "translation", "reasoning", "debugging", "refactoring", "recommendation", "customer_support", "policy", "other"]
+        },
+        "intent": { "type": "string", "minLength": 1, "maxLength": 2048 },
+        "subtasks": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1, "maxLength": 128 },
+          "minItems": 0,
+          "maxItems": 32,
+          "uniqueItems": true
+        }
+      }
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "modality": { "type": "string", "enum": ["text", "image", "audio", "video", "multimodal"] },
+        "language": { "type": "string", "minLength": 2, "maxLength": 32 },
+        "content": { "type": "string", "minLength": 1, "maxLength": 200000 },
+        "context": { "type": "string", "maxLength": 200000 }
+      }
+    },
+    "output": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "content": { "type": "string", "maxLength": 400000 },
+        "language": { "type": "string", "minLength": 2, "maxLength": 32 }
+      }
+    },
+    "labels": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["quality", "safety", "complexity", "tool_use", "pii"],
+      "properties": {
+        "quality": { "type": "string", "enum": ["excellent", "good", "fair", "poor", "unknown"] },
+        "complexity": { "type": "string", "enum": ["low", "medium", "high"] },
+        "tool_use": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["used"],
+          "properties": {
+            "used": { "type": "boolean" },
+            "tools": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1, "maxLength": 128 },
+              "minItems": 1,
+              "maxItems": 16,
+              "uniqueItems": true
+            }
+          }
+        },
+        "pii": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["contains_pii"],
+          "properties": {
+            "contains_pii": { "type": "boolean" },
+            "types": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["name", "email", "phone", "address", "id_number", "financial", "health", "other"] },
+              "minItems": 1,
+              "maxItems": 16,
+              "uniqueItems": true
+            }
+          }
+        },
+        "safety": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["risk_level"],
+          "properties": {
+            "risk_level": { "type": "string", "enum": ["none", "low", "medium", "high"] },
+            "topics": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["self_harm", "violence", "hate", "sexual", "illicit", "medical", "legal", "financial", "privacy", "other"] },
+              "minItems": 1,
+              "maxItems": 16,
+              "uniqueItems": true
+            }
+          }
+        },
+        "notes": { "type": "string", "maxLength": 20000 }
+      }
+    },
+    "spans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field", "start", "end", "label"],
+        "properties": {
+          "field": { "type": "string", "enum": ["input.content", "input.context", "output.content"] },
+          "start": { "type": "integer", "minimum": 0 },
+          "end": { "type": "integer", "minimum": 0 },
+          "label": { "type": "string", "minLength": 1, "maxLength": 64 }
+        }
+      },
+      "minItems": 0,
+      "maxItems": 1024
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "labels": { "properties": { "tool_use": { "properties": { "used": { "const": true } }, "required": ["used"] } }, "required": ["tool_use"] } }, "required": ["labels"] },
+      "then": { "properties": { "labels": { "properties": { "tool_use": { "required": ["tools"] } } } } }
+    },
+    {
+      "if": { "properties": { "labels": { "properties": { "tool_use": { "properties": { "used": { "const": false } }, "required": ["used"] } }, "required": ["tool_use"] } }, "required": ["labels"] },
+      "then": { "properties": { "labels": { "properties": { "tool_use": { "properties": { "tools": false } } } } } }
+    },
+    {
+      "if": { "properties": { "labels": { "properties": { "pii": { "properties": { "contains_pii": { "const": true } }, "required": ["contains_pii"] } }, "required": ["pii"] } }, "required": ["labels"] },
+      "then": { "properties": { "labels": { "properties": { "pii": { "required": ["types"] } } } } }
+    },
+    {
+      "if": { "properties": { "labels": { "properties": { "pii": { "properties": { "contains_pii": { "const": false } }, "required": ["contains_pii"] } }, "required": ["pii"] } }, "required": ["labels"] },
+      "then": { "properties": { "labels": { "properties": { "pii": { "properties": { "types": false } } } } } }
+    },
+    {
+      "if": { "properties": { "labels": { "properties": { "safety": { "properties": { "risk_level": { "enum": ["low", "medium", "high"] } }, "required": ["risk_level"] } }, "required": ["safety"] } }, "required": ["labels"] },
+      "then": { "properties": { "labels": { "properties": { "safety": { "required": ["topics"] } } } } }
+    }
+  ]
+}

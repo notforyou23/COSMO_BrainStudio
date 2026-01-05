@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/task_taxonomy/schema_task_taxonomy_v0_1.json",
+  "title": "Task Taxonomy Record Schema v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "record_id",
+    "task_name",
+    "task_description",
+    "domain",
+    "task_type",
+    "input_modality",
+    "output_modality",
+    "complexity",
+    "safety_level",
+    "requires_tools",
+    "split",
+    "created_at"
+  ],
+  "properties": {
+    "record_id": {
+      "description": "Stable unique identifier for the taxonomy record.",
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{2,63}$"
+    },
+    "task_name": {
+      "description": "Short human-readable name for the task.",
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 120
+    },
+    "task_description": {
+      "description": "Concise description including what success looks like.",
+      "type": "string",
+      "minLength": 20,
+      "maxLength": 4000
+    },
+    "domain": {
+      "description": "Primary subject domain for the task.",
+      "type": "string",
+      "enum": [
+        "general",
+        "software_engineering",
+        "data_science",
+        "mathematics",
+        "finance",
+        "legal",
+        "medicine",
+        "education",
+        "science",
+        "humanities",
+        "customer_support",
+        "security",
+        "creative_writing"
+      ]
+    },
+    "task_type": {
+      "description": "Primary task archetype.",
+      "type": "string",
+      "enum": [
+        "generation",
+        "summarization",
+        "classification",
+        "extraction",
+        "translation",
+        "reasoning",
+        "planning",
+        "question_answering",
+        "coding",
+        "critique_review",
+        "instruction_following"
+      ]
+    },
+    "input_modality": {
+      "description": "Allowed input modalities for the task.",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/modality" }
+    },
+    "output_modality": {
+      "description": "Allowed output modalities for the task.",
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/modality" }
+    },
+    "complexity": {
+      "description": "Estimated complexity for an average instance.",
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "safety_level": {
+      "description": "Safety sensitivity of the task content and actions.",
+      "type": "string",
+      "enum": ["benign", "caution", "restricted"]
+    },
+    "requires_tools": {
+      "description": "Whether the task requires tool use (e.g., web, code execution, DB).",
+      "type": "boolean"
+    },
+    "tool_types": {
+      "description": "Tool categories required/allowed when requires_tools is true.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/tool_type" },
+      "default": []
+    },
+    "language": {
+      "description": "Natural language of the task content (BCP-47 tag) when applicable.",
+      "type": "string",
+      "pattern": "^[A-Za-z]{2,3}(-[A-Za-z0-9]{2,8})*$"
+    },
+    "programming_language": {
+      "description": "Programming language when output includes code or task_type is coding.",
+      "type": "string",
+      "enum": ["python", "javascript", "typescript", "java", "c", "cpp", "csharp", "go", "rust", "sql", "bash", "r", "php", "other"]
+    },
+    "label_space": {
+      "description": "For classification tasks: exhaustive set of allowed labels.",
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 64 }
+    },
+    "split": {
+      "description": "Dataset split designation for this record (if used in a dataset).",
+      "type": "string",
+      "enum": ["train", "validation", "test", "unspecified"]
+    },
+    "source": {
+      "description": "Origin of the taxonomy record.",
+      "type": "string",
+      "maxLength": 500
+    },
+    "created_at": {
+      "description": "Record creation timestamp (ISO 8601).",
+      "type": "string",
+      "format": "date-time"
+    },
+    "tags": {
+      "description": "Optional freeform tags.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1, "maxLength": 64 }
+    },
+    "notes": {
+      "description": "Optional annotator notes.",
+      "type": "string",
+      "maxLength": 4000
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "requires_tools": { "const": true } }, "required": ["requires_tools"] },
+      "then": { "required": ["tool_types"], "properties": { "tool_types": { "minItems": 1 } } }
+    },
+    {
+      "if": { "properties": { "requires_tools": { "const": false } }, "required": ["requires_tools"] },
+      "then": { "properties": { "tool_types": { "maxItems": 0 } } }
+    },
+    {
+      "if": {
+        "anyOf": [
+          { "properties": { "task_type": { "const": "classification" } }, "required": ["task_type"] }
+        ]
+      },
+      "then": { "required": ["label_space"] }
+    },
+    {
+      "if": {
+        "anyOf": [
+          { "properties": { "task_type": { "const": "coding" } }, "required": ["task_type"] },
+          { "properties": { "output_modality": { "contains": { "const": "code" } } }, "required": ["output_modality"] }
+        ]
+      },
+      "then": { "required": ["programming_language"] }
+    },
+    {
+      "if": {
+        "properties": { "input_modality": { "contains": { "const": "text" } } },
+        "required": ["input_modality"]
+      },
+      "then": {
+        "required": ["language"]
+      }
+    }
+  ],
+  "$defs": {
+    "modality": {
+      "type": "string",
+      "enum": ["text", "image", "audio", "video", "code", "tabular", "multimodal"]
+    },
+    "tool_type": {
+      "type": "string",
+      "enum": ["web_browsing", "code_execution", "database", "file_io", "calendar_email", "api_call", "search", "other"]
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766733668659_myohz28",
+  "agentType": "code-creation",
+  "goalId": "goal_168",
+  "missionId": "urgent_goal_168_1766733668659",
+  "spawnCycle": 96,
+  "coordinatorReview": null,
+  "spawnedBy": "meta_coordinator_urgent",
+  "triggerSource": "urgent_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T07:21:20.755Z",
+  "completedAt": "2025-12-26T07:22:37.980Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "verify_build_artifacts.py",
+      "description": "Command-line verifier that asserts required build artifact files exist under runtime/_build (reports JSON, tables CSV, figures) and are non-empty, failing with a clear error report when expectations are not met.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": ".reproducibility.md\", \"README_build_runner.md\", \"environment.manifest.json\", \"exec_1766733705678_d31hi36.py\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\", \"run_all.py\", \"verify_artifacts.py\", \"verify_build_artifacts.py\"]\nSUMMARY: Implemented verify_build_artifacts.py CLI to validate required runtime/_build reports/tables/figures exist and are non-empty with clear failure output.\n",
+          "timestamp": "2025-12-26T07:21:45.741Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "\"README.reproducibility.md\", \"README_build_runner.md\", \"environment.manifest.json\", \"exec_1766733727276_r864mmg.py\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\", \"run_all.py\", \"verify_artifacts.py\", \"verify_build_artifacts.py\"]\nSUMMARY: Implemented a CLI verifier that checks runtime/_build reports/tables/figures artifacts exist and are non-empty (with optional JSON/CSV parsing).\n",
+          "timestamp": "2025-12-26T07:22:07.350Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:21:20.755Z",
+      "failedAt": "2025-12-26T07:22:07.350Z"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "description": "CI workflow updated to run verify_build_artifacts.py after the build step so the pipeline fails loudly if auditable artifacts are missing or empty.",
+      "category": "config",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/verify-build-artifacts.yml\"]\nUpdated CI workflow to run verify_build_artifacts.py after the build step so runs fail loudly when auditable artifacts are missing or empty.\n",
+          "timestamp": "2025-12-26T07:22:13.819Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "FILE_WRITTEN:.github/workflows/ci.yml\nDIR_STATE:[\".github/workflows/ci.yml\", \".github/workflows/verify-build-artifacts.yml\"]\nSummary: CI workflow now runs verify_build_artifacts.py after the build step to fail when auditable artifacts are missing or empty.\n",
+          "timestamp": "2025-12-26T07:22:37.979Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:21:20.755Z",
+      "failedAt": "2025-12-26T07:22:37.979Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Implement/finish `verify_build_artifacts.py` to assert required files exist and are non-empty (e.g., `runtime/_build/reports/*.json`, `runtime/_build/tables/*.csv`, `runtime/_build/figures/*`), then wire it into the default runner/CI so every run produces auditable artifacts or fails loudly.",
+  "missionSuccessCriteria": [
+    "Complete the urgent task identified by Meta-Coordinator",
+    "Curated insight (actionability 8-9/10): Adds a deterministic artifact-gating/verification layer (required non-empty reports/tables/figures) that supports continuous TEVV-style evaluation runs, reduces 'silent failure' risk, and enables auto..."
+  ],
+  "projectName": "generated_script_1766733668864",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [],
+  "lastSavedAt": "2025-12-26T07:22:37.980Z",
+  "summary": {
+    "completed": 0,
+    "failed": 2,
+    "total": 2
+  }
+}

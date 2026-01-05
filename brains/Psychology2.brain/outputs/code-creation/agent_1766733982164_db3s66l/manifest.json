@@ -1,0 +1,69 @@
+{
+  "manifestVersion": "2.0.0-plan",
+  "agentId": "agent_1766733982164_db3s66l",
+  "agentType": "code-creation",
+  "goalId": "goal_177",
+  "missionId": "urgent_goal_177_1766733982164",
+  "spawnCycle": 98,
+  "coordinatorReview": null,
+  "spawnedBy": "meta_coordinator_urgent",
+  "triggerSource": "urgent_goal",
+  "spawningReason": "high",
+  "createdAt": "2025-12-26T07:26:25.400Z",
+  "completedAt": "2025-12-26T07:27:07.292Z",
+  "canonical": false,
+  "supersedes": [],
+  "supersededBy": null,
+  "deliverableType": "code",
+  "files": [
+    {
+      "path": "run_all.py",
+      "description": "Task runner script that executes (1) taxonomy smoke-test, (2) toy demo run, (3) artifact gate in a fixed order, streams output to console, writes per-step logs under runtime/_build/logs/, and exits non-zero on the first failure.",
+      "category": "source",
+      "stage": 1,
+      "stageLabel": "Stage 1",
+      "stageGoal": null,
+      "mode": "create",
+      "maxLines": 150,
+      "maxChars": null,
+      "status": "failed",
+      "attempts": 2,
+      "errors": [
+        {
+          "attempt": 1,
+          "message": "File not found after execution",
+          "detail": "\", \"README.md\", \"README.reproducibility.md\", \"README_build_runner.md\", \"environment.manifest.json\", \"exec_1766734007019_sb2gcd6.py\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\", \"run_all.py\", \"verify_artifacts.py\", \"verify_build_artifacts.py\"]\nSummary: Created run_all.py to run taxonomy smoke-test, toy demo, and artifact gate in order with per-step logs and fail-fast exit codes.\n",
+          "timestamp": "2025-12-26T07:26:47.078Z"
+        },
+        {
+          "attempt": 2,
+          "message": "File not found after execution",
+          "detail": "README_build_runner.md\", \"environment.manifest.json\", \"exec_1766734027233_hfnij7s.py\", \"pyproject.toml\", \"requirements.lock.txt\", \"requirements.txt\", \"run_all.py\", \"verify_artifacts.py\", \"verify_build_artifacts.py\"]\nSummary: Wrote run_all.py task runner that executes three ordered steps, tees output to console and per-step logs under runtime/_build/logs/, and fails fast with a non-zero exit code.\n",
+          "timestamp": "2025-12-26T07:27:07.292Z"
+        }
+      ],
+      "createdAt": "2025-12-26T07:26:25.400Z",
+      "failedAt": "2025-12-26T07:27:07.292Z"
+    }
+  ],
+  "integrationStatus": "pending",
+  "reviewNotes": null,
+  "missionDescription": "Build a `run_all.py` (or Makefile/task runner) that executes in a fixed order: (1) taxonomy smoke-test, (2) toy demo run, (3) artifact gate; ensure it writes logs to `runtime/_build/logs/` and exits non-zero on any failure.",
+  "missionSuccessCriteria": [
+    "Complete the urgent task identified by Meta-Coordinator",
+    "Curated insight (actionability 8-9/10): Creates a single, repeatable orchestration entrypoint that sequences validation + demo execution + artifact checks, which is directly useful for running head-to-head pipeline evaluations and continuou..."
+  ],
+  "projectName": "generated_script_1766733982373",
+  "language": "python",
+  "type": "script",
+  "status": "failed",
+  "requirements": [
+    "include_examples"
+  ],
+  "lastSavedAt": "2025-12-26T07:27:07.292Z",
+  "summary": {
+    "completed": 0,
+    "failed": 1,
+    "total": 1
+  }
+}

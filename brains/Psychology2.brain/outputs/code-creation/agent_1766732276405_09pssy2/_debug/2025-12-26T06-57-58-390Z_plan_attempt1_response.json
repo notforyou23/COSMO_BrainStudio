@@ -1,0 +1,42 @@
+{
+  "content": "[\n  {\n    \"path\": \"scripts/preflight_smoke.py\",\n    \"description\": \"Lightweight preflight smoke test that prints environment diagnostics (Python version, cwd, repo root, disk space, write permissions) and exits nonzero with actionable error messages when requirements are not met.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/run_tests_with_preflight.sh\",\n    \"description\": \"Shell wrapper that runs the preflight smoke test and only then executes the project test command, ensuring early, actionable failures instead of container loss mid-run.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"Dockerfile\",\n    \"description\": \"Docker image definition that installs dependencies, runs the preflight smoke test during container startup, and provides a stable entrypoint for executing tests inside a reproducible environment.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"docker/entrypoint.sh\",\n    \"description\": \"Container entrypoint that executes the preflight diagnostics, surfaces failures clearly, and then delegates to the requested command (e.g., running tests) to avoid silent container termination.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \".dockerignore\",\n    \"description\": \"Docker ignore rules to reduce build context size and prevent large or irrelevant files from destabilizing builds and causing container instability.\",\n    \"category\": \"config\"\n  }\n]",
+  "reasoning": "",
+  "responseId": "resp_0bda8988de921f3500694e31f6a41c8194b3be9294d6614661",
+  "model": "gpt-5.2-2025-12-11",
+  "usage": {
+    "input_tokens": 674,
+    "input_tokens_details": {
+      "cached_tokens": 0
+    },
+    "output_tokens": 574,
+    "output_tokens_details": {
+      "reasoning_tokens": 276
+    },
+    "total_tokens": 1248
+  },
+  "hadError": false,
+  "errorType": null,
+  "webSearchSources": [],
+  "citations": [],
+  "output": [
+    {
+      "id": "rs_0bda8988de921f3500694e31f6ebd48194a4c6e2ba2d3b6848",
+      "type": "reasoning",
+      "summary": []
+    },
+    {
+      "id": "msg_0bda8988de921f3500694e31fc149c81948f355604ae526e7b",
+      "type": "message",
+      "status": "completed",
+      "content": [
+        {
+          "type": "output_text",
+          "annotations": [],
+          "logprobs": [],
+          "text": "[\n  {\n    \"path\": \"scripts/preflight_smoke.py\",\n    \"description\": \"Lightweight preflight smoke test that prints environment diagnostics (Python version, cwd, repo root, disk space, write permissions) and exits nonzero with actionable error messages when requirements are not met.\",\n    \"category\": \"source\"\n  },\n  {\n    \"path\": \"scripts/run_tests_with_preflight.sh\",\n    \"description\": \"Shell wrapper that runs the preflight smoke test and only then executes the project test command, ensuring early, actionable failures instead of container loss mid-run.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \"Dockerfile\",\n    \"description\": \"Docker image definition that installs dependencies, runs the preflight smoke test during container startup, and provides a stable entrypoint for executing tests inside a reproducible environment.\",\n    \"category\": \"config\"\n  },\n  {\n    \"path\": \"docker/entrypoint.sh\",\n    \"description\": \"Container entrypoint that executes the preflight diagnostics, surfaces failures clearly, and then delegates to the requested command (e.g., running tests) to avoid silent container termination.\",\n    \"category\": \"support\"\n  },\n  {\n    \"path\": \".dockerignore\",\n    \"description\": \"Docker ignore rules to reduce build context size and prevent large or irrelevant files from destabilizing builds and causing container instability.\",\n    \"category\": \"config\"\n  }\n]"
+        }
+      ],
+      "role": "assistant"
+    }
+  ]
+}

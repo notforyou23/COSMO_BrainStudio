@@ -1,0 +1,32 @@
+You are planning a python api_server implementation for the following mission:
+Create a minimal integration test that runs api_server.py (or the CLI) on a fixed DOI fixture list, saves results to /outputs/tools or runtime/_build (JSON/CSV), and documents expected success/failure cases; wire the run into CI once stable.
+
+Relevant context:
+- [INTROSPECTION] 2025-12-26T07-51-06-259Z_src_doi_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766735464664_uxqtqp3
+- [INTROSPECTION] 2025-12-26T07-51-06-259Z_src_doi_pipeline_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766735464664_uxqtqp3
+- [FORK:fork_35] Under cognitive load people rely more on simple heuristics and defaults, so designing choice architectures that surface helpf
+- [AGENT INSIGHT: agent_1766733982156_n6bb5fc] Implication 3: UX and workflow become first-class safety components with measurable cost models
+- [INTROSPECTION] 2025-12-26T07-51-06-259Z_src_doi_pipeline_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766735464664_uxqtqp3
+- [INTROSPECTION] 2025-12-26T07-51-06-259Z_src_doi_pipeline_py_stage1_attempt2_prompt.txt from code-creation agent agent_1766735464664_uxqtqp3
+- [INTROSPECTION] 2025-12-26T07-51-06-259Z_src_exporters_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766735464664_uxqtqp3: Y
+- [INTROSPECTION] 2025-12-26T07-51-06-259Z_src_exporters_py_stage1_attempt1_prompt.txt from code-creation agent agent_1766735464664_uxqtqp3: Y
+
+Return ONLY a JSON array (no prose) describing the files you intend to create.
+Each item MUST include:
+- "path": relative path under the project root (no leading ./ or /)
+- "description": single sentence describing the complete file purpose
+- "category": one of ["source","test","documentation","config","support"]
+
+Planning rules:
+- ONE entry per file - generate complete, functional code in a single pass (GPT-5.2 supports 4000+ output tokens).
+- NO multi-stage builds - create the entire file at once with all required functionality.
+- Keep the overall plan focused (<= 12 files total) while covering all mission requirements.
+- Include tests/docs only when explicitly required.
+- Each file should be complete, runnable, and well-documented.
+
+Example format:
+[
+  {"path": "src/main.py", "description": "Complete main module with API and analytics", "category": "source"},
+  {"path": "src/utils.py", "description": "Helper utilities", "category": "source"}
+]
+Respond with VALID JSON only.
