@@ -15,10 +15,13 @@ export async function initializeEditor() {
         require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs' } });
         
         require(['vs/editor/editor.main'], () => {
+            // Use theme from URL param or default to vs-dark
+            const editorTheme = window.IDE_THEME || 'vs-dark';
+
             editor = monaco.editor.create(document.getElementById('editor-container'), {
                 value: '// Select a file or pick a folder to start coding\n',
                 language: 'javascript',
-                theme: 'vs-dark',
+                theme: editorTheme,
                 automaticLayout: true,
                 fontSize: 14,
                 minimap: { enabled: true },

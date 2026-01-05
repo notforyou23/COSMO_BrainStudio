@@ -567,7 +567,7 @@ async function startServer() {
           stdio: 'inherit',
           env: { ...process.env, PORT: STUDIO_PORT }
         });
-        
+
         proc.unref();
         res.setHeader('Content-Type', 'application/json');
         res.end(JSON.stringify({ success: true, port: STUDIO_PORT }));

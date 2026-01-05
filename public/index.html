@@ -36,6 +36,41 @@
             --warning-color: #f0883e;
         }
 
+        /* Embedded mode - hide redundant tabs when in Unified iframe */
+        body.embedded .tab-btn[data-tab="readme"],
+        body.embedded .tab-btn[data-tab="query"],
+        body.embedded .tab-btn[data-tab="explore"] {
+            display: none !important;
+        }
+
+        /* In embedded mode, make Agent IDE tab not look like a tab (it's the only one) */
+        body.embedded .tab-btn[data-tab="files"] {
+            background: transparent;
+            border: none;
+            cursor: default;
+            font-weight: 600;
+        }
+
+        body.embedded .tab-btn[data-tab="files"]:hover {
+            background: transparent;
+        }
+
+        /* Light theme - activated via ?theme=light URL param */
+        body.light-theme {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #f1f3f5;
+            --border-color: #dee2e6;
+            --text-primary: #212529;
+            --text-secondary: #495057;
+            --text-active: #000000;
+            --accent-primary: #228be6;
+            --accent-hover: #1971c2;
+            --success-color: #40c057;
+            --error-color: #fa5252;
+            --warning-color: #fab005;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
             margin: 0;
@@ -2539,6 +2574,22 @@
     </style>
 </head>
 <body>
+    <script>
+        // Apply theme and embedded mode immediately based on URL params
+        const _params = new URLSearchParams(window.location.search);
+        if (_params.get('theme') === 'light') {
+            document.body.classList.add('light-theme');
+        }
+        if (_params.get('embedded') === 'true') {
+            document.body.classList.add('embedded');
+            // In embedded mode, ensure files/Agent IDE tab is active after DOM loads
+            document.addEventListener('DOMContentLoaded', () => {
+                if (typeof switchBrainTab === 'function') {
+                    switchBrainTab('files');
+                }
+            });
+        }
+    </script>
     <div class="ide-container">
         <!-- Header -->
         <div class="ide-header">
@@ -3099,7 +3150,20 @@
         const params = new URLSearchParams(window.location.search);
         let folderPath = params.get('path');
         let initialFileName = params.get('file');
-        
+
+        // Theme detection - supports ?theme=light or defaults based on preference
+        const themeParam = params.get('theme');
+        const isLightTheme = themeParam === 'light' ||
+                            (!themeParam && window.matchMedia('(prefers-color-scheme: light)').matches);
+
+        if (isLightTheme) {
+            document.body.classList.add('light-theme');
+            document.body.setAttribute('data-theme', 'light');
+        }
+
+        // Export theme for Monaco editor
+        window.IDE_THEME = isLightTheme ? 'vs' : 'vs-dark';
+
         // Standalone mode - filesystem only
         const IDE_MODE = 'filesystem';
         const runName = null;
